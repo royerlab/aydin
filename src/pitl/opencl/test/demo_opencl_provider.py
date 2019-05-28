@@ -1,4 +1,4 @@
-from src.fitl.opencl.opencl_provider import OpenCLProvider
+from src.pitl.opencl.opencl_provider import OpenCLProvider
 
 
 def demo_opencl_manager():

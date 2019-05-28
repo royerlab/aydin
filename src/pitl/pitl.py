@@ -1,13 +1,13 @@
 from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 
-from fitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
-from fitl.regression.lgbm import LightGBMRegressor
+from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
+from src.pitl.regression.lgbm import LightGBMRegressor
 
 
 class ImageTranslator:
     """
-        Image translator
+        Portable Image Translation Learning (PITL)
 
     """
 
@@ -97,7 +97,6 @@ class ImageTranslator:
 
         if self.debug_log:
             print("[RCF] Number of entries: %d features: %d" % (nb_entries, nb_features))
-
 
         # TODO: we need to fix how the test set is chosen, the first 10% voxels might not be representative (all black?)
         x_test = x[0:nb_entries // 10]

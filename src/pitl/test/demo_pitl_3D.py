@@ -5,12 +5,12 @@ from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from tifffile import imread
 
-from fitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
-from fitl.regression.lgbm import LightGBMRegressor
-from src.fitl.fitl import ImageTranslator
+from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
+from src.pitl.pitl import ImageTranslator
+from src.pitl.regression.lgbm import LightGBMRegressor
 
 
-def demo_rcf_3D():
+def demo_pitl_3D():
     """
         Demo for supervised denoising using CARE example.
         TODO: investigate why this is not working well right now. We might need more features... or use separable features, or have scales growing faster
@@ -34,7 +34,6 @@ def demo_rcf_3D():
 
     from napari import ViewerApp
     with app_context():
-
         viewer = ViewerApp()
         viewer.add_image(image, name='image')
         viewer.add_image(noisy, name='noisy')
@@ -62,4 +61,4 @@ def demo_rcf_3D():
         print("denoised test", psnr(image_test_denoised, image_test), ssim(image_test_denoised, image_test))
 
 
-demo_rcf_3D()
+demo_pitl_3D()

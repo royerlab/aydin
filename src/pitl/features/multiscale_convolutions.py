@@ -4,7 +4,7 @@ import numpy as np
 import pyopencl as cl
 from pyopencl.array import to_device, Array
 
-from fitl.opencl.opencl_provider import OpenCLProvider
+from src.pitl.opencl.opencl_provider import OpenCLProvider
 
 
 class MultiscaleConvolutionalFeatures:

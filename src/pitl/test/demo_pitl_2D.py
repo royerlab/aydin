@@ -7,12 +7,12 @@ from skimage.measure import compare_ssim as ssim
 from skimage.util import random_noise
 from tifffile import imread
 
-from fitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
-from fitl.regression.lgbm import LightGBMRegressor
-from src.fitl.fitl import ImageTranslator
+from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
+from src.pitl.pitl import ImageTranslator
+from src.pitl.regression.lgbm import LightGBMRegressor
 
 
-def demo_rcf_2D():
+def demo_pitl_2D():
     """
         Demo for self-supervised denoising using camera image with synthetic noise
     """
@@ -34,7 +34,7 @@ def demo_rcf_2D():
         scales = [1, 3, 5, 9, 11, 17, 21, 27, 37, 57]
         widths = [7, 7, 7, 5, 5, 5, 3, 3, 3, 3]
 
-        for param in range(9, len(scales), 1):
+        for param in range(1, len(scales), 1):
             generator = MultiscaleConvolutionalFeatures(kernel_widths=widths[0:param],
                                                         kernel_scales=scales[0:param],
                                                         exclude_center=True
@@ -46,17 +46,17 @@ def demo_rcf_2D():
             it = ImageTranslator(feature_generator=generator, regressor=regressor)
 
             denoised = it.train(noisy, noisy)
-            # denoised_predict = fitl.predict(noisy)
+            # denoised_predict = pitl.predict(noisy)
 
             print("noisy", psnr(noisy, image), ssim(noisy, image))
             print("denoised", psnr(denoised, image), ssim(denoised, image))
             # print("denoised_predict", psnr(denoised_predict, image), ssim(denoised_predict, image))
 
-            viewer.translate(rescale_intensity(denoised, in_range='image', out_range=(0, 1)), name='denoised%d' % param)
+            viewer.add_image(rescale_intensity(denoised, in_range='image', out_range=(0, 1)), name='denoised%d' % param)
             # viewer.add_image(rescale_intensity(denoised_predict, in_range='image', out_range=(0, 1)), name='denoised_predict%d' % param)
 
 
-def demo_rcf_2D_CARE_example():
+def demo_pitl_2D_CARE_example():
     """
         Demo for supervised denoising using CARE example as a large 'montage'
 
@@ -87,7 +87,6 @@ def demo_rcf_2D_CARE_example():
         scales = [1, 3, 5, 9, 11, 17, 21, 27, 37, 57]
         widths = [7, 7, 7, 5, 5, 5, 3, 3, 3, 3]
 
-
         generator = MultiscaleConvolutionalFeatures(kernel_widths=widths,
                                                     kernel_scales=scales,
                                                     exclude_center=False
@@ -105,15 +104,13 @@ def demo_rcf_2D_CARE_example():
         print("denoised", psnr(denoised, image), ssim(denoised, image))
         viewer.add_image(rescale_intensity(denoised, in_range='image', out_range=(0, 1)), name='denoised')
 
-
         print("denoised_test", psnr(denoised_test, image_test), ssim(denoised_test, image_test))
         viewer.add_image(rescale_intensity(image_test, in_range='image', out_range=(0, 1)), name='image_test')
         viewer.add_image(rescale_intensity(noisy_test, in_range='image', out_range=(0, 1)), name='noisy_test')
         viewer.add_image(rescale_intensity(denoised_test, in_range='image', out_range=(0, 1)), name='denoised_test')
 
 
-
 # Choose what to run here:
 
-demo_rcf_2D()
-#demo_rcf_2D_CARE_example()
+demo_pitl_2D()
+# demo_pitl_2D_CARE_example()

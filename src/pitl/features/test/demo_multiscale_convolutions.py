@@ -3,7 +3,7 @@ from fitl.old.multiscale_convolutions import MultiscaleConvolutionalFeatures
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
 
-from src.fitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
+from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
 
 
 def demo_multiscale_convolutions_2d():
