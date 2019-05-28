@@ -115,5 +115,5 @@ def demo_rcf_2D_CARE_example():
 
 # Choose what to run here:
 
-#demo_rcf_2D()
-demo_rcf_2D_CARE_example()
+demo_rcf_2D()
+#demo_rcf_2D_CARE_example()
