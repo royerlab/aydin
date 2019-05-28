@@ -201,7 +201,7 @@ class MultiscaleConvolutionalFeatures:
         :param exclude_center:
         :type exclude_center:
         """
-        image_width = image_gpu.shape[0]
+        image_width  = image_gpu.shape[0]
         image_height = image_gpu.shape[1]
 
         rx = w // 2

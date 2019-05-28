@@ -16,7 +16,7 @@ def demo_pitl_2D():
     """
         Demo for self-supervised denoising using camera image with synthetic noise
     """
-    image = camera().astype(np.float32)
+    image = camera().astype(np.float32)[:,50:450]
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
     intensity = 5
@@ -84,8 +84,8 @@ def demo_pitl_2D_CARE_example():
         viewer.add_image(rescale_intensity(image, in_range='image', out_range=(0, 1)), name='image')
         viewer.add_image(rescale_intensity(noisy, in_range='image', out_range=(0, 1)), name='noisy')
 
-        scales = [1, 3, 5, 9, 11, 17, 21, 27, 37, 57]
-        widths = [7, 7, 7, 5, 5, 5, 3, 3, 3, 3]
+        scales = [1, 3, 5, 7]
+        widths = [3, 3, 3, 3]
 
         generator = MultiscaleConvolutionalFeatures(kernel_widths=widths,
                                                     kernel_scales=scales,
@@ -113,4 +113,4 @@ def demo_pitl_2D_CARE_example():
 # Choose what to run here:
 
 demo_pitl_2D()
-# demo_pitl_2D_CARE_example()
+#demo_pitl_2D_CARE_example()
