@@ -35,6 +35,7 @@ def demo_pitl_2D():
         widths = [7, 7, 7, 5, 5, 5, 3, 3, 3, 3]
 
         for param in range(1, len(scales), 1):
+
             generator = MultiscaleConvolutionalFeatures(kernel_widths=widths[0:param],
                                                         kernel_scales=scales[0:param],
                                                         exclude_center=True
@@ -112,5 +113,5 @@ def demo_pitl_2D_CARE_example():
 
 # Choose what to run here:
 
-demo_pitl_2D()
-#demo_pitl_2D_CARE_example()
+#demo_pitl_2D()
+demo_pitl_2D_CARE_example()

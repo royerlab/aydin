@@ -9,8 +9,8 @@ from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFea
 
 def demo_multiscale_convolutions_2d():
     image = camera().astype(np.float32)  # [0:3,0:3]
-    image = np.zeros((9,7))
-    image[4, 3] = 1
+    image = np.zeros((7,9))
+    image[3, 4] = 1
     #image[1, 1] = 1
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
@@ -28,7 +28,8 @@ def demo_multiscale_convolutions_2d():
     from napari import ViewerApp
     with app_context():
         viewer = ViewerApp()
-        viewer.add_image(rescale_intensity(features, in_range='image', out_range=(0, 1)), name='image')
+        layer = viewer.add_image(rescale_intensity(features, in_range='image', out_range=(0, 1)), name='image')
+        #layer.colormap('divergent')
 
 
 def demo_multiscale_convolutions_3d():

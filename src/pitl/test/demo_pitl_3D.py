@@ -13,8 +13,6 @@ from src.pitl.regression.lgbm import LightGBMRegressor
 def demo_pitl_3D():
     """
         Demo for supervised denoising using CARE example.
-        TODO: investigate why this is not working well right now. We might need more features... or use separable features, or have scales growing faster
-
 
         Get the data from here: https://drive.google.com/drive/folders/1-2QfKhWXSR-ulZrdhMPz_grjX4kT4d5_?usp=sharing
         put it in a folder 'data' at the root of the project (see below:)

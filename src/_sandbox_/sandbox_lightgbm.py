@@ -99,22 +99,22 @@ noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
 # image = np.random.random((128, 128)).astype(np.float32)
 # image = rescale_intensity(image, in_range='image', out_range=(0, 1))[0:128,0:128]
 
-from napari import ViewerApp
-
-with app_context():
-    viewer = ViewerApp()
-    viewer.add_image(autocorr2d(image[0:128, 0:128]), name='image_auto')
-    viewer.add_image(autocorr2d(noisy[0:128, 0:128]), name='noisy_auto')
-
-    image = camera().astype(np.float32)
-    image = rescale_intensity(image, in_range='image', out_range=(0, 1))
-    intensity = 5
-    noisy = np.random.poisson(image * intensity) / intensity
-    noisy = random_noise(noisy, mode='gaussian', var=0.01)
-    noisy = noisy.astype(np.float32)
-
-    viewer.add_image(autocorr2d(image[0:128, 0:128]), name='cam_image_auto')
-    viewer.add_image(autocorr2d(noisy[0:128, 0:128]), name='cam_noisy_auto')
+# from napari import ViewerApp
+#
+# with app_context():
+#     viewer = ViewerApp()
+#     viewer.add_image(autocorr2d(image[0:128, 0:128]), name='image_auto')
+#     viewer.add_image(autocorr2d(noisy[0:128, 0:128]), name='noisy_auto')
+#
+#     image = camera().astype(np.float32)
+#     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
+#     intensity = 5
+#     noisy = np.random.poisson(image * intensity) / intensity
+#     noisy = random_noise(noisy, mode='gaussian', var=0.01)
+#     noisy = noisy.astype(np.float32)
+#
+#     viewer.add_image(autocorr2d(image[0:128, 0:128]), name='cam_image_auto')
+#     viewer.add_image(autocorr2d(noisy[0:128, 0:128]), name='cam_noisy_auto')
 
 from numpy import linalg as la
 

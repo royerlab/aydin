@@ -201,8 +201,8 @@ class MultiscaleConvolutionalFeatures:
         :param exclude_center:
         :type exclude_center:
         """
-        image_width  = image_gpu.shape[0]
-        image_height = image_gpu.shape[1]
+        image_width = image_gpu.shape[1]
+        image_height = image_gpu.shape[0]
 
         rx = w // 2
         ry = h // 2
@@ -210,8 +210,8 @@ class MultiscaleConvolutionalFeatures:
         program_code = f"""
         __kernel void feature_kernel(__global float *image, __global float *feature)
         {{
-            int fx = get_global_id(0);
-            int fy = get_global_id(1);
+            int fx = get_global_id(1);
+            int fy = get_global_id(0);
 
             float sum  =0.0f;
             int   count=0;
@@ -258,9 +258,9 @@ class MultiscaleConvolutionalFeatures:
 
     def compute_feature_3d_avg(self, image_gpu, feature_gpu, dx, dy, dz, w, h, d, exclude_center=True):
 
-        image_width = image_gpu.shape[0]
+        image_width = image_gpu.shape[2]
         image_height = image_gpu.shape[1]
-        image_depth = image_gpu.shape[2]
+        image_depth = image_gpu.shape[0]
 
         rx = w // 2
         ry = h // 2
@@ -269,9 +269,9 @@ class MultiscaleConvolutionalFeatures:
         program_code = f"""
         __kernel void feature_kernel(__global float *image, __global float *feature)
         {{
-            int fx = get_global_id(0);
+            int fx = get_global_id(2);
             int fy = get_global_id(1);
-            int fz = get_global_id(2);
+            int fz = get_global_id(0);
 
             float sum  =0.0f;
             int   count=0;
