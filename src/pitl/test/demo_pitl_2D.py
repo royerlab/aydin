@@ -8,7 +8,7 @@ from skimage.util import random_noise
 from tifffile import imread
 
 from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
-from src.pitl.pitl import ImageTranslator
+from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.lgbm import LightGBMRegressor
 
 
@@ -43,9 +43,10 @@ def demo_pitl_2D():
                                                         )
 
             regressor = LightGBMRegressor(  learning_rate=0.01,
-                                            num_leaves=63,
-                                            max_depth=7,
-                                            n_estimators=512)
+                                            num_leaves=256,
+                                            max_depth=8,
+                                            n_estimators=1024,
+                                            early_stopping_rounds=20)
 
             it = ImageTranslator(feature_generator=generator, regressor=regressor)
 
@@ -116,5 +117,5 @@ def demo_pitl_2D_CARE_example():
 
 # Choose what to run here:
 
-#demo_pitl_2D()
-demo_pitl_2D_CARE_example()
+demo_pitl_2D()
+#demo_pitl_2D_CARE_example()

@@ -6,7 +6,7 @@ from skimage.measure import compare_ssim as ssim
 from tifffile import imread
 
 from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
-from src.pitl.pitl import ImageTranslator
+from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.lgbm import LightGBMRegressor
 
 

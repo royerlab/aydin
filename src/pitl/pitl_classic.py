@@ -9,6 +9,8 @@ class ImageTranslator:
     """
         Portable Image Translation Learning (PITL)
 
+        Using classic ML (feature generation + regression)
+
     """
 
     def __init__(self,
