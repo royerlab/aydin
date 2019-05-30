@@ -16,7 +16,7 @@ def demo_pitl_2D():
     """
         Demo for self-supervised denoising using camera image with synthetic noise
     """
-    image = camera().astype(np.float32)[:,50:450]
+    image = camera().astype(np.float32) #[:,50:450]
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
     intensity = 5
@@ -31,18 +31,21 @@ def demo_pitl_2D():
         viewer.add_image(rescale_intensity(image, in_range='image', out_range=(0, 1)), name='image')
         viewer.add_image(rescale_intensity(noisy, in_range='image', out_range=(0, 1)), name='noisy')
 
-        scales = [1, 3, 5, 9, 11, 17, 21, 27, 37, 57]
-        widths = [7, 7, 7, 5, 5, 5, 3, 3, 3, 3]
+        scales = [1, 3, 5, 11, 21, 23, 47, 95]
+        widths = [3, 3, 3,  3,  3,  3,  3,  3]
 
-        for param in range(1, len(scales), 1):
+        for param in range(7, len(scales), 1):
 
             generator = MultiscaleConvolutionalFeatures(kernel_widths=widths[0:param],
                                                         kernel_scales=scales[0:param],
-                                                        exclude_center=True
+                                                        kernel_shapes=['l1']*len(scales[0:param]),
+                                                        exclude_center=True,
                                                         )
 
-            regressor = LightGBMRegressor(num_leaves=31,
-                                          n_estimators=512)
+            regressor = LightGBMRegressor(  learning_rate=0.01,
+                                            num_leaves=63,
+                                            max_depth=7,
+                                            n_estimators=512)
 
             it = ImageTranslator(feature_generator=generator, regressor=regressor)
 
@@ -85,8 +88,8 @@ def demo_pitl_2D_CARE_example():
         viewer.add_image(rescale_intensity(image, in_range='image', out_range=(0, 1)), name='image')
         viewer.add_image(rescale_intensity(noisy, in_range='image', out_range=(0, 1)), name='noisy')
 
-        scales = [1, 3, 5, 7]
-        widths = [3, 3, 3, 3]
+        scales = [1, 3, 5, 11, 21, 23, 47, 95]
+        widths = [3, 3, 3,  3,  3,  3,  3,  3]
 
         generator = MultiscaleConvolutionalFeatures(kernel_widths=widths,
                                                     kernel_scales=scales,

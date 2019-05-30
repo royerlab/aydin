@@ -16,6 +16,8 @@ class OpenCLProvider:
         self.context = cl.Context([self.devices[0]])
         self.queue = cl.CommandQueue(self.context)
 
+        self.program_cache = {}
+
     def get_filtered_device_list(self, includes=[], excludes=[], sort_by_mem_size=True):
         valid_devices = []
         platforms = get_platforms()
@@ -39,3 +41,15 @@ class OpenCLProvider:
         print([device.global_mem_size for device in devices])
 
         return list(devices)
+
+    def build(self, program_code):
+
+        if program_code in self.program_cache:
+            return self.program_cache[program_code]
+        else:
+            program = cl.Program(self.context, program_code).build()
+            self.program_cache[program_code] = program
+            return program
+
+
+

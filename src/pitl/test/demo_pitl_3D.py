@@ -38,13 +38,20 @@ def demo_pitl_3D():
         viewer.add_image(image_test, name='image_test')
         viewer.add_image(noisy_test, name='noisy_test')
 
-        generator = MultiscaleConvolutionalFeatures(kernel_widths=[3, 3, 3, 3],
-                                                    kernel_scales=[1, 3, 5, 7],
+        scales = [1, 3, 5, 11, 21, 23, 47, 95]
+        widths = [3, 3, 3,  3,  3,  3,  3,  3]
+
+        generator = MultiscaleConvolutionalFeatures(kernel_widths=widths,
+                                                    kernel_scales=scales,
                                                     exclude_center=False
                                                     )
 
-        regressor = LightGBMRegressor(num_leaves=31,
-                                      n_estimators=512)
+        regressor = LightGBMRegressor(num_leaves=64,
+                                      max_depth=7,
+                                      n_estimators=1024,
+                                      learning_rate=0.01,
+                                      eval_metric='l1',
+                                      early_stopping_rounds=None)
 
         it = ImageTranslator(generator, regressor)
 
