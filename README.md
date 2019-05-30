@@ -27,6 +27,7 @@ Extra:
 ## TODO:
   
 - More tests
+- Download data for examples (as in CSBDeep)
 - batch training for regression
 - off-core feature storage 
 - 1D version
