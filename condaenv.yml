@@ -1,304 +1,86 @@
 name: pitl
 channels:
-- conda-forge
-- defaults
+  - conda-forge
+  - defaults
 dependencies:
-- _ipyw_jlab_nb_ext_conf=0.1.0=py37_0
-- alabaster=0.7.11=py37_0
-- anaconda=custom=py37_0
-- anaconda-client=1.7.2=py37_0
-- anaconda-navigator=1.9.7=py37_0
-- anaconda-project=0.8.2=py37_0
-- appdirs=1.4.3=py37h28b3542_0
-- appnope=0.1.0=py37_0
-- appscript=1.0.1=py37h1de35cc_1
-- asn1crypto=0.24.0=py37_0
-- astroid=2.0.4=py37_0
-- astropy=3.0.4=py37h1de35cc_0
-- atomicwrites=1.2.1=py37_0
-- attrs=18.2.0=py37h28b3542_0
-- automat=0.7.0=py37_0
-- babel=2.6.0=py37_0
-- backcall=0.1.0=py37_0
-- backports=1.0=py37_1
-- backports.shutil_get_terminal_size=1.0.0=py37_2
-- beautifulsoup4=4.6.3=py37_0
-- bitarray=0.8.3=py37h1de35cc_0
-- bkcharts=0.2=py37_0
-- blas=1.0=mkl
-- blaze=0.11.3=py37_0
-- bleach=2.1.4=py37_0
-- blosc=1.14.4=hd9629dc_0
-- bokeh=0.13.0=py37_0
-- boto=2.49.0=py37_0
-- bottleneck=1.2.1=py37h1d22016_1
-- bzip2=1.0.6=h1de35cc_5
-- ca-certificates=2019.3.9=hecc5488_0
-- certifi=2019.3.9=py37_0
-- cffi=1.11.5=py37h6174b99_1
-- chardet=3.0.4=py37_1
-- clangdev=4.0.0=default_0
-- click=6.7=py37_0
-- cloudpickle=0.5.5=py37_0
-- clyent=1.2.2=py37_1
-- colorama=0.3.9=py37_0
-- conda=4.6.14=py37_0
-- conda-build=3.15.1=py37_0
-- conda-env=2.6.0=1
-- constantly=15.1.0=py37h28b3542_0
-- contextlib2=0.5.5=py37_0
-- cryptography=2.5=py37ha12b0ac_0
-- curl=7.63.0=ha441bb4_1000
-- cycler=0.10.0=py37_0
-- cython=0.28.5=py37h0a44026_0
-- cytoolz=0.9.0.1=py37h1de35cc_1
-- dask=0.19.1=py37_0
-- dask-core=0.19.1=py37_0
-- datashape=0.5.4=py37_1
-- dbus=1.13.2=h760590f_1
-- decorator=4.3.0=py37_0
-- defusedxml=0.5.0=py37_1
-- distributed=1.23.1=py37_0
-- docutils=0.14=py37_0
-- entrypoints=0.2.3=py37_2
-- et_xmlfile=1.0.1=py37_0
-- expat=2.2.6=h0a44026_0
-- fastcache=1.0.2=py37h1de35cc_2
-- filelock=3.0.8=py37_0
-- flask=1.0.2=py37_1
-- flask-cors=3.0.6=py37_0
-- freetype=2.9.1=hb4e5f40_0
-- get_terminal_size=1.0.0=h7520d66_0
-- gettext=0.19.8.1=h15daf44_3
-- gevent=1.3.6=py37h1de35cc_0
-- glib=2.56.2=hd9629dc_0
-- glob2=0.6=py37_0
-- gmp=6.1.2=hb37e062_1
-- gmpy2=2.0.8=py37h6ef4df4_2
-- greenlet=0.4.15=py37h1de35cc_0
-- h5py=2.8.0=py37h878fce3_3
-- hdf5=1.10.2=hfa1e0ec_1
-- heapdict=1.0.0=py37_2
-- html5lib=1.0.1=py37_0
-- hyperlink=18.0.0=py37_0
-- icu=58.2=h4b95b61_1
-- idna=2.7=py37_0
-- imageio=2.4.1=py37_0
-- imagesize=1.1.0=py37_0
-- incremental=17.5.0=py37_0
-- intel-openmp=2019.0=118
-- ipykernel=4.9.0=py37_1
-- ipython=6.5.0=py37_0
-- ipython_genutils=0.2.0=py37_0
-- ipywidgets=7.4.1=py37_0
-- isort=4.3.4=py37_0
-- itsdangerous=0.24=py37_1
-- jbig=2.1=h4d881f8_0
-- jdcal=1.4=py37_0
-- jedi=0.12.1=py37_0
-- jinja2=2.10=py37_0
-- jpeg=9b=he5867d9_2
-- jsonschema=2.6.0=py37_0
-- jupyter=1.0.0=py37_7
-- jupyter_client=5.2.3=py37_0
-- jupyter_console=5.2.0=py37_1
-- jupyter_core=4.4.0=py37_0
-- jupyterlab=0.34.9=py37_0
-- jupyterlab_launcher=0.13.1=py37_0
-- keyring=13.2.1=py37_0
-- khronos-opencl-icd-loader=2019.02.20=h1de35cc_0
-- kiwisolver=1.0.1=py37h0a44026_0
-- krb5=1.16.1=hddcf347_7
-- lazy-object-proxy=1.3.1=py37h1de35cc_2
-- libcurl=7.63.0=h051b688_1000
-- libcxx=4.0.1=h579ed51_0
-- libcxxabi=4.0.1=hebd6815_0
-- libedit=3.1.20170329=hb402a30_2
-- libffi=3.2.1=h475c297_4
-- libgfortran=3.0.1=h93005f0_2
-- libhwloc=2.0.2=hba662a8_1000
-- libiconv=1.15=hdd342a3_7
-- libpng=1.6.37=h2573ce8_0
-- libsodium=1.0.16=h3efe00b_0
-- libssh2=1.8.0=ha12b0ac_4
-- libtiff=4.0.9=hcb84e12_2
-- libtool=2.4.6=h1de35cc_1002
-- libxml2=2.9.8=hab757c2_1
-- libxslt=1.1.32=hb819dd2_0
-- lightgbm=2.2.3=py37h0a44026_0
-- llvm-meta=6.0.1=0
-- llvmdev=4.0.0=default_0
-- llvmlite=0.28.0=py37hf292337_0
-- locket=0.2.0=py37_1
-- lxml=4.2.5=py37hef8c89e_0
-- lzo=2.10=h362108e_2
-- mako=1.0.7=py_1
-- markupsafe=1.0=py37h1de35cc_1
-- matplotlib=2.2.3=py37h54f8f79_0
-- matplotlib-base=3.0.3=py37habd5b94_1
-- mccabe=0.6.1=py37_1
-- mistune=0.8.3=py37h1de35cc_1
-- mkl=2019.1=144
-- mkl-service=1.1.2=py37hfbe908c_5
-- mkl_fft=1.0.10=py37h1de35cc_1
-- mkl_random=1.0.2=py37h1702cab_2
-- more-itertools=4.3.0=py37_0
-- mpc=1.1.0=h6ef4df4_1
-- mpfr=4.0.1=h3018a27_3
-- mpmath=1.0.0=py37_2
-- msgpack-python=0.5.6=py37h04f5b5a_1
-- multipledispatch=0.6.0=py37_0
-- navigator-updater=0.2.1=py37_0
-- nbconvert=5.4.0=py37_1
-- nbformat=4.4.0=py37_0
-- ncurses=6.1=h0a44026_0
-- networkx=2.1=py37_0
-- nltk=3.3.0=py37_0
-- nose=1.3.7=py37_2
-- notebook=5.6.0=py37_0
-- numba=0.43.1=py37h051e8ed_0
-- numexpr=2.6.9=py37h1702cab_1000
-- numpy=1.16.2=py37hacdab7b_0
-- numpy-base=1.16.2=py37h6575580_0
-- numpydoc=0.8.0=py37_0
-- ocl_icd_wrapper_apple=1.0.0=h1de35cc_0
-- odo=0.5.1=py37_0
-- olefile=0.46=py37_0
-- openmp=4.0.0=1
-- openpyxl=2.5.6=py37_0
-- openssl=1.1.1b=h01d97ff_2
-- packaging=17.1=py37_0
-- pandas=0.23.4=py37h6440ff4_0
-- pandoc=1.19.2.1=ha5e8f32_1
-- pandocfilters=1.4.2=py37_1
-- parso=0.3.1=py37_0
-- partd=0.3.8=py37_0
-- path.py=11.1.0=py37_0
-- pathlib2=2.3.2=py37_0
-- patsy=0.5.0=py37_0
-- pcre=8.42=h378b8a2_0
-- pep8=1.7.1=py37_0
-- pexpect=4.6.0=py37_0
-- pickleshare=0.7.4=py37_0
-- pillow=5.2.0=py37hb68e598_0
-- pkginfo=1.4.2=py37_1
-- pluggy=0.7.1=py37h28b3542_0
-- ply=3.11=py37_0
-- prometheus_client=0.3.1=py37h28b3542_0
-- prompt_toolkit=1.0.15=py37_0
-- psutil=5.4.7=py37h1de35cc_0
-- ptyprocess=0.6.0=py37_0
-- py=1.6.0=py37_0
-- pyasn1=0.4.4=py37h28b3542_0
-- pyasn1-modules=0.2.2=py37_0
-- pycodestyle=2.4.0=py37_0
-- pycosat=0.6.3=py37h1de35cc_0
-- pycparser=2.18=py37_1
-- pycrypto=2.6.1=py37h1de35cc_9
-- pycurl=7.43.0.2=py37ha12b0ac_0
-- pyflakes=2.0.0=py37_0
-- pygments=2.2.0=py37_0
-- pyhamcrest=1.9.0=py_2
-- pylint=2.1.1=py37_0
-- pyodbc=4.0.24=py37h0a44026_0
-- pyopencl=2018.2.5=py37h9888f84_0
-- pyopenssl=18.0.0=py37_0
-- pyparsing=2.2.0=py37_1
-- pyqt=5.9.2=py37h655552a_2
-- pysocks=1.6.8=py37_0
-- pytables=3.4.4=py37h13cba08_0
-- pytest=3.8.0=py37_0
-- pytest-arraydiff=0.2=py37h39e3cac_0
-- pytest-astropy=0.4.0=py37_0
-- pytest-doctestplus=0.1.3=py37_0
-- pytest-openfiles=0.3.0=py37_0
-- pytest-remotedata=0.3.0=py37_0
-- python=3.7.2=haf84260_0
-- python-dateutil=2.7.3=py37_0
-- python.app=2=py37_8
-- pytools=2019.1=py_0
-- pytz=2018.5=py37_0
-- pywavelets=1.0.0=py37h1d22016_0
-- pyyaml=3.13=py37h1de35cc_0
-- pyzmq=17.1.2=py37h1de35cc_0
-- qt=5.9.6=h45cd832_2
-- qtawesome=0.4.4=py37_0
-- qtconsole=4.4.1=py37_0
-- readline=7.0=h1de35cc_5
-- requests=2.19.1=py37_0
-- rope=0.11.0=py37_0
-- ruamel_yaml=0.15.46=py37h1de35cc_0
-- scikit-image=0.15.0=py37h6de7cb9_0
-- scikit-learn=0.20.3=py37h27c97d8_0
-- scipy=1.2.1=py37h1410ff5_0
-- seaborn=0.9.0=py37_0
-- send2trash=1.5.0=py37_0
-- service_identity=17.0.0=py37h28b3542_0
-- setuptools=40.2.0=py37_0
-- simplegeneric=0.8.1=py37_2
-- singledispatch=3.4.0.3=py37_0
-- six=1.11.0=py37_1
-- snappy=1.1.7=he62c110_3
-- snowballstemmer=1.2.1=py37_0
-- sortedcollections=1.0.1=py37_0
-- sortedcontainers=2.0.5=py37_0
-- sphinx=1.7.9=py37_0
-- sphinxcontrib=1.0=py37_1
-- sphinxcontrib-websupport=1.1.0=py37_1
-- spyder=3.3.1=py37_1
-- spyder-kernels=0.2.6=py37_0
-- sqlalchemy=1.2.11=py37h1de35cc_0
-- sqlite=3.26.0=ha441bb4_0
-- statsmodels=0.9.0=py37h1d22016_0
-- sympy=1.2=py37_0
-- tblib=1.3.2=py37_0
-- terminado=0.8.1=py37_1
-- testpath=0.3.1=py37_0
-- tk=8.6.8=ha441bb4_0
-- toolz=0.9.0=py37_0
-- tornado=5.1=py37h1de35cc_0
-- tqdm=4.26.0=py37h28b3542_0
-- traitlets=4.3.2=py37_0
-- twisted=18.9.0=py37h1de35cc_1000
-- unicodecsv=0.14.1=py37_0
-- unixodbc=2.3.7=h1de35cc_0
-- urllib3=1.23=py37_0
-- wcwidth=0.1.7=py37_0
-- webencodings=0.5.1=py37_1
-- werkzeug=0.14.1=py37_0
-- wheel=0.31.1=py37_0
-- widgetsnbextension=3.4.1=py37_0
-- wrapt=1.10.11=py37h1de35cc_2
-- xlrd=1.1.0=py37_1
-- xlsxwriter=1.1.0=py37_0
-- xlwings=0.11.8=py37_0
-- xlwt=1.3.0=py37_0
-- xz=5.2.4=h1de35cc_4
-- yaml=0.1.7=hc338f04_2
-- zeromq=4.2.5=h0a44026_1
-- zict=0.1.3=py37_0
-- zlib=1.2.11=hf3cbc9b_2
-- zope=1.0=py37_1
-- zope.interface=4.5.0=py37h1de35cc_0
-- pip:
-  - altgraph==0.16.1
-  - configparser==3.7.4
-  - funcsigs==1.0.2
-  - future==0.17.1
-  - gputools==0.2.8.1
-  - macholib==1.11
-  - napari==0.0.8
-  - pefile==2018.8.8
-  - pip==19.0.3
-  - pyinstaller==3.4
-  - pyopengl==3.1.0
-  - pyqt5==5.12.1
-  - pyqt5-sip==4.19.15
-  - qtpy==1.7.1
-  - reikna==0.7.2
-  - sip==4.19.8
-  - spimagine==0.2.6
-  - tifffile==2019.5.22
-  - vispy==0.5.3
+  - _py-xgboost-mutex=2.0=cpu_0
+  - appdirs=1.4.3=py_1
+  - bzip2=1.0.6=h1de35cc_1002
+  - ca-certificates=2019.3.9=hecc5488_0
+  - certifi=2019.3.9=py37_0
+  - clangdev=4.0.0=default_0
+  - cloudpickle=1.0.0=py_0
+  - cycler=0.10.0=py_1
+  - cytoolz=0.9.0.1=py37h470a237_1
+  - dask-core=1.2.2=py_0
+  - decorator=4.4.0=py_0
+  - freetype=2.10.0=h24853df_0
+  - icu=58.2=h0a44026_1000
+  - imageio=2.5.0=py37_0
+  - jpeg=9c=h1de35cc_1001
+  - khronos-opencl-icd-loader=2019.02.20=h01d97ff_1
+  - kiwisolver=1.1.0=py37h770b8ee_0
+  - libblas=3.8.0=7_openblas
+  - libcblas=3.8.0=7_openblas
+  - libcxx=4.0.1=hcfea43d_1
+  - libcxxabi=4.0.1=hcfea43d_1
+  - libffi=3.2.1=h6de7cb9_1006
+  - libgfortran=3.0.1=0
+  - libiconv=1.15=h01d97ff_1005
+  - liblapack=3.8.0=7_openblas
+  - libpng=1.6.37=h2573ce8_0
+  - libtiff=4.0.10=hd08fb8f_1003
+  - libxgboost=0.82=h6de7cb9_0
+  - libxml2=2.9.9=hd80cff7_0
+  - lightgbm=2.2.3=py37h0a44026_0
+  - llvm-openmp=4.0.1=hcfea43d_1
+  - llvmdev=4.0.0=default_0
+  - lz4-c=1.8.3=h6de7cb9_1001
+  - mako=1.0.10=py_0
+  - markupsafe=1.1.1=py37h1de35cc_0
+  - matplotlib=3.1.0=py37_1
+  - matplotlib-base=3.1.0=py37h3a684a6_1
+  - ncurses=6.1=h0a44026_1002
+  - networkx=2.3=py_0
+  - numpy=1.16.4=py37h6b0580a_0
+  - ocl_icd_wrapper_apple=1.0.0=h1de35cc_0
+  - olefile=0.46=py_0
+  - openblas=0.3.5=h436c29b_1001
+  - openmp=4.0.0=1
+  - openssl=1.1.1b=h01d97ff_2
+  - pillow=6.0.0=py37h7095ceb_0
+  - pip=19.1=py37_0
+  - py-xgboost=0.82=py37h6de7cb9_0
+  - pyopencl=2018.2.5=py37h9888f84_0
+  - pyparsing=2.4.0=py_0
+  - python=3.7.3=h0d93f26_0
+  - python-dateutil=2.8.0=py_0
+  - pytools=2019.1.1=py_0
+  - pywavelets=1.0.3=py37h1e5eb4f_1
+  - readline=7.0=hcfe32e1_1001
+  - scikit-image=0.15.0=py37h6de7cb9_0
+  - scikit-learn=0.20.3=py37hca23c92_1
+  - scipy=1.3.0=py37hab3da7d_0
+  - setuptools=41.0.1=py37_0
+  - six=1.12.0=py37_1000
+  - sqlite=3.28.0=h9721f7c_0
+  - tk=8.6.9=ha441bb4_1001
+  - toolz=0.9.0=py_1
+  - tornado=6.0.2=py37h01d97ff_0
+  - wheel=0.33.4=py37_0
+  - xgboost=0.82=py37h6de7cb9_0
+  - xz=5.2.4=h1de35cc_1001
+  - zlib=1.2.11=h1de35cc_1004
+  - zstd=1.4.0=ha9f0a20_0
+  - pip:
+    - napari==0.0.8
+    - pyopengl==3.1.0
+    - pyqt5==5.12.2
+    - pyqt5-sip==4.19.17
+    - qtpy==1.7.1
+    - sip==4.19.8
+    - tifffile==2019.5.22
+    - tiffile==2018.10.18
+    - vispy==0.5.3
 prefix: /Users/royer/anaconda3
 
