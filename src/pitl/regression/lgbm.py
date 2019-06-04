@@ -18,6 +18,7 @@ class LightGBMRegressor:
 
     def __init__(self,
                  num_leaves=63,
+                 max_depth=-1,
                  n_estimators=128,
                  learning_rate=0.05,
                  eval_metric='l1',
@@ -40,6 +41,7 @@ class LightGBMRegressor:
         self.eval_metric = eval_metric
         self.early_stopping_rounds = early_stopping_rounds
         self.lgbmr = LGBMRegressor(num_leaves=num_leaves,
+                                   max_depth=max_depth,
                                    learning_rate=learning_rate,
                                    n_estimators=n_estimators,
                                    boosting_type='gbdt')

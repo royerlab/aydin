@@ -20,39 +20,47 @@ class MultiscaleConvolutionalFeatures:
                  opencl_provider=OpenCLProvider(),
                  kernel_widths=[5, 3, 3, 3],
                  kernel_scales=[1, 3, 5, 7],
-                 exclude_center=False
-                 ):
+                 kernel_shapes=None,
+                 kernel_reductions=None,
+                 exclude_center=False,
+                                 ):
         """
         Constructs a multiscale convolutional feature generator that uses OpenCL.
 
-        :param opencl_provider: 
-        :type opencl_provider: 
-        :param kernel_widths: 
-        :type kernel_widths: 
-        :param kernel_scales: 
-        :type kernel_scales: 
-        :param exclude_center: 
-        :type exclude_center: 
+
+        :param opencl_provider:
+        :type opencl_provider:
+        :param kernel_widths:
+        :type kernel_widths:
+        :param kernel_scales:
+        :type kernel_scales:
+        :param kernel_shapes:
+        :type kernel_shapes:
+        :param exclude_center:
+        :type exclude_center:
+
         """
+
         self.check_nans = False
         self.debug_log = False
 
         self.opencl_provider = opencl_provider
-        self.queue = opencl_provider.queue
-        self.context = opencl_provider.context
 
         self.kernel_widths = kernel_widths
         self.kernel_scales = kernel_scales
+        self.kernel_shapes = ['l2']* len(kernel_scales) if kernel_shapes is None else kernel_shapes
+        self.kernel_reductions = ['sum']*len(kernel_scales) if kernel_reductions is None else kernel_reductions
         self.exclude_center = exclude_center
+
 
     def compute(self, image, features=None):
         """
         Computes the features given an image. If the input image is of shape (d,h,w),
         resulting features are of shape (d,h,w,n) where n is the number of features.
-        :param image: 
-        :type image: 
-        :return: 
-        :rtype: 
+        :param image:
+        :type image:
+        :return:
+        :rtype:
         """
         image = image.astype(np.float32)
 
@@ -63,11 +71,11 @@ class MultiscaleConvolutionalFeatures:
         image_dimension = len(image.shape)
 
         # We move the image to the GPU. Needs to fit entirely, could be a problem for very very large images.
-        image_gpu = to_device(self.queue, image)
+        image_gpu = to_device(self.opencl_provider.queue, image)
 
         # This array on the GPU will host a single feature.
         # We will use that as temp destination for each feature generated on the GPU.
-        feature_gpu = Array(self.queue, image_gpu.shape, np.float32)
+        feature_gpu = Array(self.opencl_provider.queue, image_gpu.shape, np.float32)
 
         # Switching for different number of dimensions,
         # then we first compute the nb of features, allocate the corrected sized numpy array,
@@ -111,7 +119,7 @@ class MultiscaleConvolutionalFeatures:
                 print(f"Computing features...")
 
         feature_index = 0
-        for width, scale in zip(self.kernel_widths, self.kernel_scales):
+        for width, scale, shape, reduction in zip(self.kernel_widths, self.kernel_scales, self.kernel_shapes, self.kernel_reductions):
             radius = width // 2
             for i in range(-radius, +radius + 1):
                 for j in range(-radius, +radius + 1):
@@ -119,12 +127,19 @@ class MultiscaleConvolutionalFeatures:
                     if self.exclude_center and scale == 1 and i == 0 and j == 0:
                         continue
 
+                    if shape=='l1' and abs(i) + abs(j) > radius:
+                        continue
+                    elif shape=='l2' and i*i + j*j > radius*radius:
+                        continue
+                    elif  shape == 'li':
+                        pass
+
                     if features is not None:
                         if self.debug_log:
-                            print(f"(width={width}, scale={scale}, i={i}, j={j})")
-                        self.compute_feature_2d_avg(image_gpu, feature_gpu, i * scale, j * scale, scale, scale, self.exclude_center)
+                            print(f"(width={width}, scale={scale}, i={i}, j={j}, shape={shape}, reduction={reduction})")
+                        self.compute_feature_2d_avg(image_gpu, feature_gpu, i * scale, j * scale, scale, scale, self.exclude_center, reduction=reduction)
                         # features[feature_index] = feature_gpu.get()
-                        cl.enqueue_copy(self.queue, features[feature_index], feature_gpu.data)
+                        cl.enqueue_copy(self.opencl_provider.queue, features[feature_index], feature_gpu.data)
 
                         if self.check_nans and np.isnan(np.sum(features[feature_index])):
                             print(features[feature_index])
@@ -157,20 +172,28 @@ class MultiscaleConvolutionalFeatures:
 
         feature_index = 0
 
-        for width, scale in zip(self.kernel_widths, self.kernel_scales):
+        for width, scale, shape, reduction in zip(self.kernel_widths, self.kernel_scales, self.kernel_shapes, self.kernel_reductions):
             radius = width // 2
             for i in range(-radius, +radius + 1):
                 for j in range(-radius, +radius + 1):
                     for k in range(-radius, +radius + 1):
+
                         if self.exclude_center and scale == 1 and i == 0 and j == 0 and k == 0:
                             continue
 
+                        if shape == 'l1' and abs(i)+abs(j)+abs(k)>radius:
+                            continue
+                        elif shape == 'l2' and i * i + j * j + k*k > radius * radius:
+                            continue
+                        elif  shape == 'li':
+                            pass
+
                         if features is not None:
                             if self.debug_log:
-                                print(f"(width={width}, scale={scale}, i={i}, j={j}, k={k})")
-                            self.compute_feature_3d_avg(image_gpu, feature_gpu, i * scale, j * scale, k * scale, scale, scale, scale, self.exclude_center)
+                                print(f"(width={width}, scale={scale}, i={i}, j={j}, k={k}, shape={shape}, reduction={reduction})")
+                            self.compute_feature_3d_avg(image_gpu, feature_gpu, i * scale, j * scale, k * scale, scale, scale, scale, self.exclude_center, reduction=reduction)
                             # features[feature_index] = feature_gpu.get()
-                            cl.enqueue_copy(self.queue, features[feature_index], feature_gpu.data)
+                            cl.enqueue_copy(self.opencl_provider.queue, features[feature_index], feature_gpu.data)
 
                             if self.check_nans and np.isnan(np.sum(features[feature_index])):
                                 raise Exception(f'NaN values occur in features!')
@@ -182,7 +205,7 @@ class MultiscaleConvolutionalFeatures:
         else:
             return feature_index
 
-    def compute_feature_2d_avg(self, image_gpu, feature_gpu, dx, dy, w, h, exclude_center=True):
+    def compute_feature_2d_avg(self, image_gpu, feature_gpu, dx, dy, w, h, exclude_center=True, reduction='sum'):
         """
         Compute a given feature for a displacement (dx,dy) relative to teh center pixel, and a patch size (w,h)
 
@@ -208,12 +231,30 @@ class MultiscaleConvolutionalFeatures:
         ry = h // 2
 
         program_code = f"""
+        
+        inline float sum_reduction(float acc, float value)
+        {{
+            return acc + value;
+        }}
+        
+        inline float max_reduction(float acc, float value)
+        {{
+            return max(acc , value);
+        }}
+        
+        inline float min_reduction(float acc, float value)
+        {{
+            return min(acc , value);
+        }}
+        
         __kernel void feature_kernel(__global float *image, __global float *feature)
         {{
             int fx = get_global_id(1);
             int fy = get_global_id(0);
 
-            float sum  =0.0f;
+            //__local float b[{w*h}];
+
+            float acc  =0.0f;
             int   count=0;
 
             for(int j={dy-ry}; j<={dy+ry}; j++)
@@ -238,42 +279,61 @@ class MultiscaleConvolutionalFeatures:
                     //printf("%d\\n", image_index);
                     //printf("%f\\n", value);
                     
-                    sum+=value; 
+                    acc = {reduction}_reduction(acc,value);  
                     count++;
                 }}
             }}
             
             int feature_index = fx + fy * {image_width};
-            float value = sum/count;
+            float value = acc/count;
             feature[feature_index] = isnan(value) ? 0 : value;
         }}
         """
-        # print(program_code)
+        #print(program_code)
 
-        program = cl.Program(self.context, program_code).build()
+        program = self.opencl_provider.build(program_code)
 
         feature_kernel = program.feature_kernel
 
-        feature_kernel(self.queue, image_gpu.shape, None, image_gpu.data, feature_gpu.data)
+        feature_kernel(self.opencl_provider.queue, image_gpu.shape, None, image_gpu.data, feature_gpu.data)
 
-    def compute_feature_3d_avg(self, image_gpu, feature_gpu, dx, dy, dz, w, h, d, exclude_center=True):
 
-        image_width = image_gpu.shape[2]
+
+
+    def compute_feature_3d_avg(self, image_gpu, feature_gpu, dx, dy, dz, w, h, d, exclude_center=True, reduction='sum'):
+
+        image_width  = image_gpu.shape[2]
         image_height = image_gpu.shape[1]
-        image_depth = image_gpu.shape[0]
+        image_depth  = image_gpu.shape[0]
 
         rx = w // 2
         ry = h // 2
         rz = d // 2
 
         program_code = f"""
+        
+        inline float sum_reduction(float acc, float value)
+        {{
+            return acc + value;
+        }}
+        
+        inline float max_reduction(float acc, float value)
+        {{
+            return max(acc , value);
+        }}
+        
+        inline float min_reduction(float acc, float value)
+        {{
+            return min(acc , value);
+        }}
+        
         __kernel void feature_kernel(__global float *image, __global float *feature)
         {{
             int fx = get_global_id(2);
             int fy = get_global_id(1);
             int fz = get_global_id(0);
 
-            float sum  =0.0f;
+            float acc  =0.0f;
             int   count=0;
 
             for(int k={dz-rz}; k<={dz+rz}; k++)
@@ -304,21 +364,21 @@ class MultiscaleConvolutionalFeatures:
                         //printf("%d\\n", image_index);
                         //printf("%f\\n", value);
     
-                        sum+=value; 
+                        acc = {reduction}_reduction(acc,value); 
                         count++;
                     }}
                 }}
             }}
 
             int feature_index = fx + fy * {image_width} + fz * {image_width*image_height};
-            float value = sum/count;
+            float value = acc/count;
             feature[feature_index] = isnan(value) ? 0 : value;
         }}
         """
         # print(program_code)
 
-        program = cl.Program(self.context, program_code).build()
+        program = self.opencl_provider.build(program_code)
 
         feature_kernel = program.feature_kernel
 
-        feature_kernel(self.queue, image_gpu.shape, None, image_gpu.data, feature_gpu.data)
+        feature_kernel(self.opencl_provider.queue, image_gpu.shape, None, image_gpu.data, feature_gpu.data)
