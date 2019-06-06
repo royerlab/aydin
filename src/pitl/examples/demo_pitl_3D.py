@@ -18,16 +18,16 @@ def demo_pitl_3D():
         put it in a folder 'data' at the root of the project (see below:)
     """
 
-    image = imread('../../../data/tribolium/train/GT/stack.tif').astype(np.float32)
+    image = imread('../../../data/tribolium/train/GT/nGFP_0.1_0.2_0.5_20_13_late.tif').astype(np.float32)
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
-    noisy = imread('../../../data/tribolium/train/low/stack.tif').astype(np.float32)
+    noisy = imread('../../../data/tribolium/train/low/nGFP_0.1_0.2_0.5_20_13_late.tif').astype(np.float32)
     noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
 
-    image_test = imread('../../../data/tribolium/test/GT/stack.tif').astype(np.float32)
+    image_test = imread('../../../data/tribolium/test/GT/nGFP_0.1_0.2_0.5_20_14_late.tif').astype(np.float32)
     image_test = rescale_intensity(image_test, in_range='image', out_range=(0, 1))
 
-    noisy_test = imread('../../../data/tribolium/test/low/stack.tif').astype(np.float32)
+    noisy_test = imread('../../../data/tribolium/test/low/nGFP_0.1_0.2_0.5_20_14_late.tif').astype(np.float32)
     noisy_test = rescale_intensity(noisy_test, in_range='image', out_range=(0, 1))
 
     from napari import ViewerApp
