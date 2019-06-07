@@ -10,6 +10,15 @@ conda env create -f condaenv.yml
 
 https://github.com/royerlab/pitl/blob/master/src/fitl/test/demo_fitl_2D.py
 
+## How to run same example with CLI
+
+For now CLI can be only run as a module:
+
+```bash
+python -m src.pitl.cli.cli demo 2D
+
+```
+
 ## Minimal Viable Product (MVP) statement:
 
 - Python API that encapslates the internals
