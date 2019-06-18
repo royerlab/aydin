@@ -16,7 +16,7 @@ class FilePathPicker(QWidget):
         self.load_button = QPushButton("Load file path")
         self.load_button.clicked.connect(self.load_file_button)
 
-        # Image viewing region
+        # Path viewing region
         self.lbl = QLabel(self)
 
         # A horizontal layout to include the button on the left
