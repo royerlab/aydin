@@ -34,7 +34,7 @@ def demo_multiscale_convolutions_2d():
 
 def demo_multiscale_convolutions_3d():
     # image = np.random.rand(48, 773, 665)*0;
-    image = np.ones((48, 773, 665), dtype=np.float32);
+    image = np.ones((48, 773, 665), dtype=np.float32)
 
     msf = MultiscaleConvolutionalFeatures(exclude_center=True)
 

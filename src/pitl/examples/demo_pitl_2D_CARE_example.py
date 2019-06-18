@@ -12,6 +12,8 @@ from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.lgbm import LightGBMRegressor
 
 
+<<<<<<< HEAD:src/pitl/examples/demo_pitl_2D_CARE_example.py
+=======
 def demo_pitl_2D():
     """
         Demo for self-supervised denoising using camera image with synthetic noise
@@ -61,6 +63,7 @@ def demo_pitl_2D():
             # viewer.add_image(rescale_intensity(denoised_predict, in_range='image', out_range=(0, 1)), name='denoised_predict%d' % param)
 
 
+>>>>>>> master:src/pitl/test/demo_pitl_2D.py
 def demo_pitl_2D_CARE_example():
     """
         Demo for supervised denoising using CARE example as a large 'montage'
@@ -71,16 +74,16 @@ def demo_pitl_2D_CARE_example():
         TODO: performance is not great in terms of image quality, does not performa as well as the original CPU version. Needs fixing.
               compare to results in 'sandbox_lightgbm_original.py'
     """
-    image = imread('../../../data/tribolium/train/GT/montage.tif').astype(np.float32)
+    image = imread('../../../data/tribolium/train/GT/nGFP_0.1_0.2_0.5_20_13_late.tif').astype(np.float32)
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
-    noisy = imread('../../../data/tribolium/train/low/montage.tif').astype(np.float32)
+    noisy = imread('../../../data/tribolium/train/low/nGFP_0.1_0.2_0.5_20_13_late.tif').astype(np.float32)
     noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
 
-    image_test = imread('../../../data/tribolium/test/GT/montage.tif').astype(np.float32)
+    image_test = imread('../../../data/tribolium/test/GT/nGFP_0.1_0.2_0.5_20_14_late.tif').astype(np.float32)
     image_test = rescale_intensity(image_test, in_range='image', out_range=(0, 1))
 
-    noisy_test = imread('../../../data/tribolium/test/low/montage.tif').astype(np.float32)
+    noisy_test = imread('../../../data/tribolium/test/low/nGFP_0.1_0.2_0.5_20_14_late.tif').astype(np.float32)
     noisy_test = rescale_intensity(noisy_test, in_range='image', out_range=(0, 1))
 
     from napari import ViewerApp
@@ -115,7 +118,11 @@ def demo_pitl_2D_CARE_example():
         viewer.add_image(rescale_intensity(denoised_test, in_range='image', out_range=(0, 1)), name='denoised_test')
 
 
+<<<<<<< HEAD:src/pitl/examples/demo_pitl_2D_CARE_example.py
+demo_pitl_2D_CARE_example()
+=======
 # Choose what to run here:
 
 demo_pitl_2D()
 #demo_pitl_2D_CARE_example()
+>>>>>>> master:src/pitl/test/demo_pitl_2D.py
