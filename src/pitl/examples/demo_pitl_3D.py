@@ -7,7 +7,7 @@ from tifffile import imread
 
 from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
-from src.pitl.regression.lgbm import LightGBMRegressor
+from src.pitl.regression.gbm import GBMRegressor
 
 
 def demo_pitl_3D():
@@ -46,12 +46,12 @@ def demo_pitl_3D():
                                                     exclude_center=False
                                                     )
 
-        regressor = LightGBMRegressor(num_leaves=64,
-                                      max_depth=7,
-                                      n_estimators=1024,
-                                      learning_rate=0.01,
-                                      eval_metric='l1',
-                                      early_stopping_rounds=None)
+        regressor = GBMRegressor(num_leaves=64,
+                                 max_depth=7,
+                                 n_estimators=1024,
+                                 learning_rate=0.01,
+                                 eval_metric='l1',
+                                 early_stopping_rounds=None)
 
         it = ImageTranslator(generator, regressor)
 

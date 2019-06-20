@@ -3,16 +3,11 @@ from __future__ import absolute_import, print_function
 from lightgbm import LGBMRegressor
 
 
-class LightGBMRegressor:
+class CNNRegressor:
     """
-    Regressor that uses the LightGBM library.
+    Regressor that uses the CNN.
 
-    TODO:   (i)   use directly the native lgbm API instead of the skilearn facade.
-    TODO:   (ii)  Expose key tuning parameters described here: https://lightgbm.readthedocs.io/en/latest/Parameters-Tuning.html
-    TODO:   (iii) implement increnental learning using technique described here: https://towardsdatascience.com/how-to-learn-from-bigdata-files-on-low-memory-incremental-learning-d377282d38ff
-    TODO:   (iv)  for that purpose (point iii) we will need to dump the x_train and y_train to disk and load it incrementally for learning...
-    TODO:   (v)   try the GPU acceleration: https://lightgbm.readthedocs.io/en/latest/GPU-Performance.html
-    """
+      """
 
     lgbmr: LGBMRegressor
 

@@ -1,6 +1,10 @@
 from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
+<<<<<<< HEAD
 from src.pitl.regression.lgbm import LightGBMRegressor
+=======
+from src.pitl.regression.gbm import GBMRegressor
+>>>>>>> upstream/master
 
 
 class Noise2Truth:
@@ -29,8 +33,13 @@ class Noise2Truth:
                                                     kernel_scales=Noise2Truth.scales,
                                                     exclude_center=False)
 
+<<<<<<< HEAD
         regressor = LightGBMRegressor(num_leaves=63,
                                       n_estimators=512)
+=======
+        regressor = GBMRegressor(num_leaves=63,
+                                 n_estimators=512)
+>>>>>>> upstream/master
 
         it = ImageTranslator(feature_generator=generator, regressor=regressor)
 
