@@ -1,5 +1,6 @@
 from PyQt5.Qt import *
 import sys
+import os
 
 
 class FilePathPicker(QWidget):
@@ -17,15 +18,16 @@ class FilePathPicker(QWidget):
         self.load_button.clicked.connect(self.load_file_button)
 
         # Path viewing region
+        self.lbl_text = QLineEdit(self)
         self.lbl = QLabel(self)
 
         # A horizontal layout to include the button on the left
         layout_button = QHBoxLayout()
         layout_button.addWidget(self.load_button)
-        layout_button.addStretch()
+        layout_button.addWidget(self.lbl_text)
 
         # A Vertical layout to include the button layout and then the image
-        layout = QHBoxLayout()
+        layout = QVBoxLayout()
         layout.addLayout(layout_button)
         layout.addWidget(self.lbl)
 
@@ -55,7 +57,13 @@ class FilePathPicker(QWidget):
 
         :return:
         """
-        self.lbl.setText(self.filename)
+        if os.path.isfile(self.filename):
+            self.lbl_text.setText(self.filename)
+            pixmap = QPixmap(self.filename)
+            pixmap = pixmap.scaled(200, 200, Qt.KeepAspectRatio)
+            self.lbl.setPixmap(pixmap)
+        else:
+            raise Exception("Selected item is not a file...")
 
     # The following three methods set up dragging and dropping for the app
     def dragEnterEvent(self, e):
