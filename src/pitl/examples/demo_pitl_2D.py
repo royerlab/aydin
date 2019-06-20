@@ -60,6 +60,7 @@ def demo_pitl_2D():
                                      early_stopping_rounds=20)
 >>>>>>> upstream/master
 
+
             it = ImageTranslator(feature_generator=generator, regressor=regressor)
 
             denoised = it.train(noisy, noisy)

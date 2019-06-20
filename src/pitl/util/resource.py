@@ -2,12 +2,10 @@ from urllib.request import urlretrieve
 from pathlib import Path
 import os
 import zipfile
-<<<<<<< HEAD
+
 from skimage.exposure import rescale_intensity
 from skimage.io import imread
 import numpy as np
-=======
->>>>>>> upstream/master
 
 
 def download_and_extract_zipresource(url, targetdir='.'):
@@ -32,11 +30,8 @@ def download_and_extract_zipresource(url, targetdir='.'):
 
         # Delete zip file
         Path.unlink(Path(relative_path_to_zip))
-<<<<<<< HEAD
-
 
 def read_image_from_path(path):
     image = imread(path).astype(np.float32)
     return rescale_intensity(image, in_range='image', out_range=(0, 1))
-=======
->>>>>>> upstream/master
+
