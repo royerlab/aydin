@@ -34,4 +34,3 @@ def download_and_extract_zipresource(url, targetdir='.'):
 def read_image_from_path(path):
     image = imread(path).astype(np.float32)
     return rescale_intensity(image, in_range='image', out_range=(0, 1))
-
