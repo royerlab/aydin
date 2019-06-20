@@ -8,7 +8,11 @@ conda env create -f condaenv.yml
 
 ## example:
 
-https://github.com/royerlab/pitl/blob/master/src/fitl/test/demo_fitl_2D.py
+https://github.com/royerlab/pitl/blob/master/src/pitl/test/demo_fitl_2D.py
+
+## gui:
+
+https://github.com/royerlab/pitl/blob/master/src/pitl/gui/gui.py
 
 ## How to run same example with CLI
 
