@@ -1,6 +1,7 @@
 # PITL
 Portable Image Translation Learning
 
+<img width="591" alt="Screen Shot 2019-06-20 at 3 51 54 PM" src="https://user-images.githubusercontent.com/15677695/59886526-22274880-9374-11e9-93ec-6d661b32e29d.png">
 
 ## setup anaconda:
 
