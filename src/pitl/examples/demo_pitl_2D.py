@@ -48,7 +48,6 @@ def demo_pitl_2D():
                                      n_estimators=1024,
                                      early_stopping_rounds=20)
 
-
             it = ImageTranslator(feature_generator=generator, regressor=regressor)
 
             denoised = it.train(noisy, noisy)

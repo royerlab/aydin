@@ -1,6 +1,7 @@
 # PITL
 Portable Image Translation Learning
 
+<img width="591" alt="Screen Shot 2019-06-20 at 3 51 54 PM" src="https://user-images.githubusercontent.com/15677695/59886526-22274880-9374-11e9-93ec-6d661b32e29d.png">
 
 ## setup anaconda:
 
@@ -8,7 +9,11 @@ conda env create -f condaenv.yml
 
 ## example:
 
-https://github.com/royerlab/pitl/blob/master/src/fitl/test/demo_fitl_2D.py
+https://github.com/royerlab/pitl/blob/master/src/pitl/test/demo_fitl_2D.py
+
+## gui:
+
+https://github.com/royerlab/pitl/blob/master/src/pitl/gui/gui.py
 
 ## How to run same example with CLI
 
