@@ -1,22 +1,29 @@
-from __future__ import absolute_import, print_function
-
-from lightgbm import LGBMRegressor
+# from __future__ import absolute_import, print_function
+import os
+os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+import keras
+from keras.models import Model
+from keras.layers import Input, Dense, Conv1D, BatchNormalization, Activation
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+import numpy as np
 
 
 class CNNRegressor:
     """
     Regressor that uses the CNN.
 
-      """
+    """
 
-    lgbmr: LGBMRegressor
+#    cnnreg: CNNRegressor
 
     def __init__(self,
-                 num_leaves=63,
-                 max_depth=-1,
+#                 feature_dim=9,
+#                 max_depth=-1,
+#                 num_layers,
                  n_estimators=128,
-                 learning_rate=0.05,
-                 eval_metric='l1',
+                 kernel_size = 16,
+                 learning_rate=0.01,
+#                 eval_metric='l1',
                  early_stopping_rounds=5
                  ):
         """
@@ -33,17 +40,19 @@ class CNNRegressor:
         :param early_stopping_rounds:
         :type early_stopping_rounds:
         """
-        self.eval_metric = eval_metric
-        self.early_stopping_rounds = early_stopping_rounds
-        self.lgbmr = LGBMRegressor(num_leaves=num_leaves,
-                                   max_depth=max_depth,
-                                   learning_rate=learning_rate,
-                                   n_estimators=n_estimators,
-                                   boosting_type='gbdt')
+
+        self.n_estimators = n_estimators
+        
+
+        self.EStop = EarlyStopping(monitor='val_loss', min_delta=0,
+                              patience=early_stopping_rounds, verbose=1, mode='auto')
+        self.ReduceLR = ReduceLROnPlateau(monitor='val_loss', factor=0.1,
+                                     verbose=1, patience=3, mode='auto', min_lr=1e-8)
+        
 
     def fit(self, x_train, y_train, x_test, y_test):
         """
-        Fits function y=f(x) goiven training pairs (x_train, y_train).
+        Fits function y=f(x) given training pairs (x_train, y_train).
         Stops when performance stops improving on the test dataset: (x_test, y_test).
 
         :param x_train:
@@ -55,10 +64,37 @@ class CNNRegressor:
         :param y_test:
         :type y_test:
         """
-        self.lgbmr = self.lgbmr.fit(x_train, y_train,
-                                    eval_metric=self.eval_metric,
-                                    eval_set=[(x_test, y_test)],
-                                    early_stopping_rounds=self.early_stopping_rounds)
+        
+        def fc_bn(x, unit=1, act='relu', lyrname = None):
+            x = Dense(unit, name = lyrname + 'fc')(x)
+            x = BatchNormalization(name = lyrname + 'bn')(x)
+            return Activation(act, name = lyrname + 'act')(x)
+        
+        def conv1d_bn(x, unit, k_size, act='relu', lyrname = None):
+            x = Conv1D(unit, k_size, padding='same', name = lyrname + 'fc')(x)
+            x = BatchNormalization(name = lyrname + 'bn')(x)
+            return Activation(act, name = lyrname + 'act')(x)
+
+        feature_dim = x_train.shape[-1]
+        self.feature_dim = feature_dim
+        input_feature = Input(shape=(1, feature_dim), name='input')
+        x = fc_bn(input_feature, unit=self.n_estimators, lyrname = 'fc1')
+        x = fc_bn(x, unit=self.n_estimators*2, lyrname = 'fc2')
+        x = fc_bn(x, unit=self.n_estimators*2, lyrname = 'fc3')
+        x = fc_bn(x, act='linear', lyrname='fc_last')
+        model = Model(input_feature, x)
+        model.compile(optimizer = 'Adam', loss='mse')
+        self.cnnreg = model
+        
+        x_train = x_train.reshape(-1,1,feature_dim)
+        y_train = y_train.reshape(-1,1,1)
+        x_test = x_test.reshape(-1,1,feature_dim)
+        y_test = y_test.reshape(-1,1,1)
+        
+        self.cnnreg.fit(x_train, y_train,
+                          validation_data=(x_test, y_test),
+                          epochs=100, batch_size=128,
+                          callbacks=[self.EStop, self.ReduceLR])
 
     def predict(self, x):
         """
@@ -68,4 +104,5 @@ class CNNRegressor:
         :return:
         :rtype:
         """
-        return self.lgbmr.predict(x, num_iteration=self.lgbmr.best_iteration_)
+        x = x.reshape(-1,1,x.shape[-1])
+        return self.cnnreg.predict(x)
