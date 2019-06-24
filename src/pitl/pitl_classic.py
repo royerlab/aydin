@@ -1,3 +1,4 @@
+import numpy
 from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 
@@ -73,6 +74,7 @@ class ImageTranslator:
     def train(self,
               input_image,
               target_image,
+              train_test_ratio = 0.1,
               clip=(0, 1)):
         """
             Train to translate a given input image to a given output image
@@ -100,12 +102,21 @@ class ImageTranslator:
         if self.debug_log:
             print("[RCF] Number of entries: %d features: %d" % (nb_entries, nb_features))
 
-        # TODO: we need to fix how the test set is chosen, the first 10% voxels might not be representative (all black?)
-        x_test = x[0:nb_entries // 10]
-        x_train = x[nb_entries // 10:]
+        # creates random complementary indices for selecting train and test entries:
+        # TODO: select test samples uniformly across intensity.
+        test_size = int(train_test_ratio*nb_entries)
+        train_indices = numpy.full(nb_entries, False)
+        train_indices[test_size:] = True
+        numpy.random.shuffle(train_indices)
+        test_indices= numpy.logical_not(train_indices)
 
-        y_test = y[0:nb_entries // 10]
-        y_train = y[nb_entries // 10:]
+        # train data
+        x_train = x[train_indices]
+        y_train = y[train_indices]
+
+        # test data:
+        x_test = x[test_indices]
+        y_test = y[test_indices]
 
         if self.debug_log:
             print("[RCF] Training...")
