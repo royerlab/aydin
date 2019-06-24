@@ -1,8 +1,9 @@
 import random
 import numpy
+import scipy
 
 
-def correlation(image, nb_samples=256, max_length=128):
+def correlation(image, nb_samples=1024, max_length=256, smooth=True):
 
 
     shape = image.shape
@@ -14,12 +15,8 @@ def correlation(image, nb_samples=256, max_length=128):
 
         max_length_dim = min(shape[dim],max_length)
 
-        corr_avg = None
+        corr_samples_list = []
         counter = 0
-
-        if shape[dim]==0:
-            corr_list = numpy.asarray([0])
-            break
 
         for sample in range(nb_samples):
             slice_list = list( random.randrange(0, shape[i]) for i in range(nb_dim) )
@@ -41,16 +38,26 @@ def correlation(image, nb_samples=256, max_length=128):
 
             #corr = numpy.abs(corr)
 
-            if corr_avg is None:
-                corr_avg = corr
-            else:
-                corr_avg += corr
-
+            corr_samples_list.append(corr)
 
             counter+=1
 
-        corr_avg = corr_avg / counter
+        corr_samples_stack = numpy.stack(corr_samples_list)
+        corr_avg           = numpy.median(corr_samples_stack, axis=0)
+
+
         #corr_avg = corr_avg / numpy.sum(corr_avg)
+
+        if smooth:
+            corr_avg[1:] = numpy.convolve(corr_avg, numpy.ones(3) / 3.0, mode='same')[1:]
+            corr_avg[1:] = numpy.convolve(corr_avg, numpy.ones(3) / 3.0, mode='same')[1:]
+            corr_avg[1:] = scipy.signal.medfilt(corr_avg, kernel_size=3)[1:]
+            corr_avg[1:] = scipy.signal.medfilt(corr_avg, kernel_size=5)[1:]
+            corr_avg[1:] = scipy.signal.medfilt(corr_avg, kernel_size=7)[1:]
+            #corr_avg[1:] = numpy.convolve(corr_avg, numpy.ones(3) / 3.0, mode='same')[1:]
+            #corr_avg[1:] = numpy.convolve(corr_avg, numpy.ones(3) / 3.0, mode='same')[1:]
+            #corr_avg = numpy.convolve(corr_avg, numpy.ones(3) / 3.0, mode='same')
+
         corr_avg = corr_avg / corr_avg[0]
 
         corr_list.append(corr_avg)
@@ -60,8 +67,8 @@ def correlation(image, nb_samples=256, max_length=128):
 
 
 
-def correlation_distance(image, percentile = 0.1, nb_samples=100):
-    correlation_curves_list = correlation(image, nb_samples=100)
+def correlation_distance(image, method='firstmin'):
+    correlation_curves_list = correlation(image)
 
     correlation_distances_list = []
 
@@ -69,12 +76,29 @@ def correlation_distance(image, percentile = 0.1, nb_samples=100):
 
         length = correlation_curve.shape[0]
 
-        cum_sum = 0
-        for distance in range(length):
-            cum_sum += correlation_curve[distance]
-            if cum_sum>percentile:
-                correlation_distances_list.append(distance)
-                break
+        if method == 'zerocross':
+            for distance in range(length):
+                value = correlation_curve[distance]
+                if value<0:
+                    correlation_distances_list.append(distance)
+                    break
+        elif method=='firstmin':
+            last_value = 1
+            for distance in range(length):
+                value = correlation_curve[distance]
+                if value>last_value and value<0:
+                    correlation_distances_list.append(distance-1)
+                    break
+                last_value = value
+        elif method=='min':
+            min_value = 1
+            min_distance = 0
+            for distance in range(length):
+                value = correlation_curve[distance]
+                if value<min_value and value<0:
+                    min_value = value
+                    min_distance = distance
+            correlation_distances_list.append(min_distance)
 
     return tuple(correlation_distances_list)
 
