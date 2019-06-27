@@ -32,10 +32,10 @@ def demo_pitl_2D():
         viewer.add_image(rescale_intensity(image, in_range='image', out_range=(0, 1)), name='image')
         viewer.add_image(rescale_intensity(noisy, in_range='image', out_range=(0, 1)), name='noisy')
 
-        scales = [1, 3, 5, 11, 21, 23, 47, 95]
-        widths = [7, 3, 3, 3, 3, 3, 3, 3]
+        scales = [1, 3, 7, 15, 31, 63, 127, 255]
+        widths = [3, 3, 3,  3,  3,  3,   3,   3]
 
-        for param in range(7, len(scales), 1):
+        for param in range(1, len(scales), 1):
             generator = MultiscaleConvolutionalFeatures(kernel_widths=widths[0:param],
                                                         kernel_scales=scales[0:param],
                                                         kernel_shapes=['l1'] * len(scales[0:param]),
@@ -45,7 +45,7 @@ def demo_pitl_2D():
             regressor = GBMRegressor(learning_rate=0.01,
                                      num_leaves=256,
                                      max_depth=8,
-                                     n_estimators=2024,
+                                     n_estimators=2048,
                                      early_stopping_rounds=20)
 
             it = ImageTranslator(feature_generator=generator, regressor=regressor)
