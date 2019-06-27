@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 from napari.util import app_context
 from skimage.data import camera
@@ -5,11 +7,7 @@ from skimage.exposure import rescale_intensity
 from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from skimage.util import random_noise
-from tifffile import imread
 
-from pitl.regression.linear import LinearRegressor
-from pitl.regression.rf import RandomForrestRegressor
-from pitl.regression.svr import SupportVectorRegressor
 from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.gbm import GBMRegressor
@@ -19,7 +17,7 @@ def demo_pitl_2D():
     """
         Demo for self-supervised denoising using camera image with synthetic noise
     """
-    image = camera().astype(np.float32) #[:,50:450]
+    image = camera().astype(np.float32)  # [:,50:450]
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
     intensity = 5
@@ -35,13 +33,12 @@ def demo_pitl_2D():
         viewer.add_image(rescale_intensity(noisy, in_range='image', out_range=(0, 1)), name='noisy')
 
         scales = [1, 3, 5, 11, 21, 23, 47, 95]
-        widths = [3, 3, 3,  3,  3,  3,  3,  3]
+        widths = [7, 3, 3, 3, 3, 3, 3, 3]
 
         for param in range(7, len(scales), 1):
-
             generator = MultiscaleConvolutionalFeatures(kernel_widths=widths[0:param],
                                                         kernel_scales=scales[0:param],
-                                                        kernel_shapes=['l1']*len(scales[0:param]),
+                                                        kernel_shapes=['l1'] * len(scales[0:param]),
                                                         exclude_center=True,
                                                         )
 
@@ -51,10 +48,12 @@ def demo_pitl_2D():
                                      n_estimators=2024,
                                      early_stopping_rounds=20)
 
-
             it = ImageTranslator(feature_generator=generator, regressor=regressor)
 
+            start = time.time()
             denoised = it.train(noisy, noisy)
+            stop = time.time()
+            print(f"Training: elapsed time:  {stop-start} ")
             # denoised_predict = pitl.predict(noisy)
 
             print("noisy", psnr(noisy, image), ssim(noisy, image))

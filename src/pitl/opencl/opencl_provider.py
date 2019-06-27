@@ -11,9 +11,12 @@ class OpenCLProvider:
         os.environ['PYOPENCL_NO_CACHE'] = '1'
 
         self.devices = self.get_filtered_device_list(includes, excludes)
-        print(f"selected devices: {self.devices}")
+        print(f"filtered devices: {self.devices}")
 
-        self.context = cl.Context([self.devices[0]])
+        selected_device = self.devices[1]
+        print(f"selected device: {selected_device}")
+
+        self.context = cl.Context([selected_device])
         self.queue = cl.CommandQueue(self.context)
 
         self.program_cache = {}
