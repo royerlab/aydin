@@ -1,16 +1,16 @@
 from os.path import join, exists
 import gdown
 
-# examples:
+# example_datasets:
 
 # destination path:
 datadir = '../../../../data/examples'
 
-class examples():
+class example_datasets():
 
     @staticmethod
     def get_list():
-        return [ example for (key,example) in examples.__dict__.items() if not '__' in key and not 'get_' in key]
+        return [example for (key,example) in example_datasets.__dict__.items() if not '__' in key and not 'get_' in key]
 
     @staticmethod
     def get_path(id, name):
@@ -30,9 +30,12 @@ class examples():
     # XYZ
     keller_dmel = ('12DCAlDRSiTyGDSD7p06nk17GO3ztHg-Q', 'SPC0_TM0132_CM0_CM1_CHN00_CHN01.fusedStack.tif')
 
+    janelia_flybrain= ('12Z6W_f3TqCsl_okKmaLcVUBgS6xEvdjj','Flybrain_3ch_mediumSize.tif')
+
     # XYZT
     hyman_hela = ('12qOGxfBrnzrufgbizyTkhHipgRwjSIz-', 'Hyman_HeLa.tif')
     pourquie_elec = ('12VMZ6nphV9D40xiKYK6GpH9VghZM3IJC','20190203_p4_electroporated.tif')
+    pourquie_quail= ('12SEwGxgFuCd9Oz6c8TbwOcXjOCXUx-aB','20181228_p1_quail.tif')
     gardner_org = ('12MiulopOAa18o2haKZPfyA2piK7x9l3N','405Col4Lm_488EpCAM_INS568_647GCGold_ImmSol_63x___-08.czi')
 
     # XYZCT 1344 × 1024 × 1 × 1 × 93
@@ -40,6 +43,8 @@ class examples():
 
     # XYZCT 160 × 220 × 8 × 2 × 12
     ome_spim = ( '1BG6jCZGLEs1LDxKXjMqF0aV-iiqlushk', 'SPIM-ModuloAlongZ.ome.tiff')
+
+
 
 
 
@@ -59,7 +64,7 @@ def download_from_gdrive(id, name, dest_folder=datadir, overwrite=False):
 
 def download_all_examples():
 
-    for example in examples.get_list():
+    for example in example_datasets.get_list():
         print(download_from_gdrive(*example))
 
 

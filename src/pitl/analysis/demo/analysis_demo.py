@@ -168,7 +168,7 @@ def lines_example():
 
 
 def cells_example():
-    cells = imread("../../../../data/examples/HV115_P0500510002.png")
+    cells = imread("../../../../data/example_datasets/HV115_P0500510002.png")
     plt.imshow(cells)
     plt.show()
 
@@ -181,7 +181,7 @@ def cells_example():
 
 
 def dmel_example():
-    cells = imread("../../../../data/examples/SPC0_TM0132_CM0_CM1_CHN00_CHN01.fusedStack.tif")
+    cells = imread("../../../../data/example_datasets/SPC0_TM0132_CM0_CM1_CHN00_CHN01.fusedStack.tif")
 
     plt.imshow(cells[50, :, :])
     plt.show()
@@ -196,7 +196,7 @@ def dmel_example():
 
 
 def singlecell_example():
-    singlecell = imread("../../../../data/examples/Example-noisy1.png")
+    singlecell = imread("../../../../data/example_datasets/Example-noisy1.png")
 
     plt.imshow(singlecell[50, :, :])
     plt.show()
