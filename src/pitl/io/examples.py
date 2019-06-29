@@ -1,10 +1,18 @@
+import os
+import zipfile
 from os.path import join, exists
+
 import gdown
 
-# example_datasets:
+from pitl.io.folders import get_cache_folder
 
-# destination path:
-datadir = '../../../../data/examples'
+datadir = join(get_cache_folder(), 'data')
+
+try:
+    os.makedirs(datadir)
+except:
+    pass
+
 
 class example_datasets():
 
@@ -45,17 +53,41 @@ class example_datasets():
     ome_spim = ( '1BG6jCZGLEs1LDxKXjMqF0aV-iiqlushk', 'SPIM-ModuloAlongZ.ome.tiff')
 
 
+class zipped_datasets():
+
+    @staticmethod
+    def get_list():
+        return [example for (key,example) in zipped_datasets.__dict__.items() if not '__' in key and not 'get_' in key]
+
+    @staticmethod
+    def get_path(id, name):
+        return join(datadir, os.path.splitext(name)[0])
+
+    care_tribolium =  ('1BVNU-y9NJdNzkmsZcH8-2nhdhlRd4Mcw', 'tribolium.zip')
 
 
 
 
-def download_from_gdrive(id, name, dest_folder=datadir, overwrite=False):
+def download_from_gdrive(id, name, dest_folder=datadir, overwrite=False, unzip=False):
+
+    try:
+        os.makedirs(dest_folder)
+    except:
+        pass
 
     url = f'https://drive.google.com/uc?id={id}'
     output_path = join(dest_folder, name)
     if overwrite or not exists(output_path):
         print(f"Downloading file {output_path} as it does not exist yet.")
         gdown.download(url, output_path, quiet=False)
+
+        if unzip:
+            print(f"Unzipping file {output_path}...")
+            zip_ref = zipfile.ZipFile(output_path, 'r')
+            zip_ref.extractall(dest_folder)
+            zip_ref.close()
+            #os.remove(output_path)
+
         return output_path
     else:
         print(f"Not downloading file {output_path} as it already exists.")
@@ -67,4 +99,18 @@ def download_all_examples():
     for example in example_datasets.get_list():
         print(download_from_gdrive(*example))
 
+    for example in zipped_datasets.get_list():
+        download_from_gdrive(*example, dest_folder=join(datadir,os.path.splitext(example[1])[0]), unzip=True)
+
+
+def downloaded_example(substring):
+    for example in example_datasets.get_list():
+        if substring in example[1]:
+            print(download_from_gdrive(*example))
+
+
+def downloaded_zipped_example(substring):
+    for example in zipped_datasets.get_list():
+        if substring in example[1]:
+            download_from_gdrive(*example, dest_folder=join(datadir,os.path.splitext(example[1])[0]), unzip=True)
 

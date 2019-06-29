@@ -1,3 +1,4 @@
+import traceback
 from pathlib import Path
 
 import imageio
@@ -37,10 +38,14 @@ def imread(path):
                 print(f"Reading file {path} using skimage imread")
                 array = skimage.imread(path)
 
-        except:
+        except Exception as error:
+            print(error)
+            print(traceback.format_exc())
             print(f"Reading file {path} using pims")
             array = pims.open(path)
-    except:
+    except Exception as error:
+        print(error)
+        print(traceback.format_exc())
         print(f"Could not read file {path} !")
         array = None
 
