@@ -44,7 +44,7 @@ def demo_pitl_3D_batched_hela(image):
         viewer.add_image(rescale_intensity(image_denoised, in_range='image', out_range=(0, 1)), name='denoised_inference')
 
 
-image_path = examples_single.get_path(*examples_single.hyman_hela)
+image_path = examples_single.hyman_hela.get_path()
 array, metadata = io.imread(image_path)
 image = array.astype(np.float32)
 image = rescale_intensity(image, in_range='image', out_range=(0, 1))

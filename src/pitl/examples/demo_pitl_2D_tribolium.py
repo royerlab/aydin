@@ -21,16 +21,16 @@ def demo_pitl_2D_CARE_example():
 
     downloaded_zipped_example('tribolium')
 
-    image = imread(join(examples_zipped.get_path(*examples_zipped.care_tribolium), 'tribolium_train_GT_montage.tif')).astype(np.float32)
+    image = imread(join(examples_zipped.care_tribolium.get_path(), 'tribolium_train_GT_montage.tif')).astype(np.float32)
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
-    noisy = imread(join(examples_zipped.get_path(*examples_zipped.care_tribolium), 'tribolium_train_low_montage.tif')).astype(np.float32)
+    noisy = imread(join(examples_zipped.care_tribolium.get_path(), 'tribolium_train_low_montage.tif')).astype(np.float32)
     noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
 
-    image_test = imread(join(examples_zipped.get_path(*examples_zipped.care_tribolium), 'tribolium_test_GT_montage.tif')).astype(np.float32)
+    image_test = imread(join(examples_zipped.care_tribolium.get_path(), 'tribolium_test_GT_montage.tif')).astype(np.float32)
     image_test = rescale_intensity(image_test, in_range='image', out_range=(0, 1))
 
-    noisy_test = imread(join(examples_zipped.get_path(*examples_zipped.care_tribolium), 'tribolium_test_low_montage.tif')).astype(np.float32)
+    noisy_test = imread(join(examples_zipped.care_tribolium.get_path(), 'tribolium_test_low_montage.tif')).astype(np.float32)
     noisy_test = rescale_intensity(noisy_test, in_range='image', out_range=(0, 1))
 
     from napari import Viewer

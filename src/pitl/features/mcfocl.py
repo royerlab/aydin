@@ -174,7 +174,7 @@ class MultiscaleConvolutionalFeatures:
         size_in_bytes = nb_features * image.size * image.itemsize
         free_mem_in_bytes = psutil.virtual_memory().free
         print(f'There is {int(free_mem_in_bytes/1E6)} MB of free memory')
-        print(f'Image array is {(size_in_bytes/1E6)} MB.')
+        print(f'Feature array is {(size_in_bytes/1E6)} MB.')
 
         # We take the heuristic that we need twice the amount of memory available to be confortable:
         is_enough_memory = 2*size_in_bytes < free_mem_in_bytes
