@@ -9,6 +9,8 @@ from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from skimage.util import random_noise
 
+from pitl import io
+from pitl.io.datasets import examples_single
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.gbm import GBMRegressor
@@ -52,7 +54,7 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
             it = ImageTranslator(feature_generator=generator, regressor=regressor)
 
             start = time.time()
-            denoised = it.train(noisy, noisy)
+            denoised = it.train(noisy, noisy, batch_dims=(False, True))
             stop = time.time()
             print(f"Training: elapsed time:  {stop-start} ")
             # denoised_predict = pitl.predict(noisy)

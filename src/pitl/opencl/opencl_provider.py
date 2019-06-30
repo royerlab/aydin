@@ -1,3 +1,4 @@
+import itertools
 import os
 
 import pyopencl as cl
@@ -10,29 +11,35 @@ class OpenCLProvider:
 
         os.environ['PYOPENCL_NO_CACHE'] = '1'
 
-        self.devices = self.get_filtered_device_list(includes, excludes)
-        print(f"selected devices: {self.devices}")
+        for device in self.get_all_devices():
+            print(f'device: {device} with mem: {device.global_mem_size}')
 
-        self.context = cl.Context([self.devices[0]])
+        self.devices = self.get_filtered_device_list(includes, excludes)
+        print(f"filtered devices: {self.devices}")
+
+        selected_device = self.devices[0]
+        print(f"selected device: {selected_device}")
+
+        self.context = cl.Context([selected_device])
         self.queue = cl.CommandQueue(self.context)
 
         self.program_cache = {}
 
+
+    def get_all_devices(self):
+        return list(itertools.chain.from_iterable([platform.get_devices() for platform in get_platforms()]))
+
     def get_filtered_device_list(self, includes=[], excludes=[], sort_by_mem_size=True):
         valid_devices = []
-        platforms = get_platforms()
+
+        devices = self.get_all_devices()
         # print(platforms)
-        for platform in platforms:
-            devices = platform.get_devices()
-            # print(devices)
 
-            for exclude in excludes:
-                devices = [device for device in devices if not exclude in device.name]
+        for exclude in excludes:
+            devices = [device for device in devices if not exclude in device.name]
 
-            for include in includes:
-                devices = [device for device in devices if include in device.name]
-
-            valid_devices += devices
+        for include in includes:
+            devices = [device for device in devices if include in device.name]
 
         if sort_by_mem_size:
             devices = sorted(devices, key=lambda x: x.global_mem_size, reverse=True)

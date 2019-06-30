@@ -1,10 +1,9 @@
 import numpy as np
 from napari.util import app_context
-
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
 
-from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
+from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 
 
 def demo_multiscale_convolutions_2d():
