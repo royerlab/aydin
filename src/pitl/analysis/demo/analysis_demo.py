@@ -1,15 +1,11 @@
 import random
 from math import pi, cos, sin
 
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.backends.backend_template import FigureCanvas
-from matplotlib.figure import Figure
-from matplotlib.ticker import NullLocator
-from skimage.color import rgb2gray
 from skimage import data
-from skimage.draw import circle, circle_perimeter_aa, circle_perimeter, line_aa
+from skimage.color import rgb2gray
+from skimage.draw import circle, circle_perimeter, line_aa
 from skimage.io import imread
 
 from pitl.analysis.analysis import correlation, correlation_distance
@@ -168,7 +164,7 @@ def lines_example():
 
 
 def cells_example():
-    cells = imread("../../../../data/example_datasets/HV115_P0500510002.png")
+    cells = imread("../../../../data/examples_single/HV115_P0500510002.png")
     plt.imshow(cells)
     plt.show()
 
@@ -181,7 +177,7 @@ def cells_example():
 
 
 def dmel_example():
-    cells = imread("../../../../data/example_datasets/SPC0_TM0132_CM0_CM1_CHN00_CHN01.fusedStack.tif")
+    cells = imread("../../../../data/examples_single/SPC0_TM0132_CM0_CM1_CHN00_CHN01.fusedStack.tif")
 
     plt.imshow(cells[50, :, :])
     plt.show()
@@ -196,7 +192,7 @@ def dmel_example():
 
 
 def singlecell_example():
-    singlecell = imread("../../../../data/example_datasets/Example-noisy1.png")
+    singlecell = imread("../../../../data/examples_single/Example-noisy1.png")
 
     plt.imshow(singlecell[50, :, :])
     plt.show()

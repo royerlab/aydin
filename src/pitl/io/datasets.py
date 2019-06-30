@@ -6,29 +6,29 @@ import gdown
 
 from pitl.io.folders import get_cache_folder
 
-datadir = join(get_cache_folder(), 'data')
+datasets_folder = join(get_cache_folder(), 'data')
 
 try:
-    os.makedirs(datadir)
+    os.makedirs(datasets_folder)
 except:
     pass
 
 
-class example_datasets():
+class examples_single():
 
     @staticmethod
     def get_list():
-        return [example for (key,example) in example_datasets.__dict__.items() if not '__' in key and not 'get_' in key]
+        return [example for (key,example) in examples_single.__dict__.items() if not '__' in key and not 'get_' in key]
 
     @staticmethod
     def get_path(id, name):
-        return join(datadir, name)
+        return join(datasets_folder, name)
 
     # XY natural images:
     generic_crowd = ('13UHK8MjhBviv31mAW2isdG4G-aGaNJIj','crowd.tif')
     generic_mandrill = ('1B33ELiFuCV0OJ6IHh7Ix9lvImwI_QkR-','mandrill.tif')
 
-    # XYC 3C (RGB)
+    # XYC (RGB)
     celldiv =  ('120w8j2XgJgwD0w0nqX-Gd0C4Qi_gJ8oO', 'Example-noisy1.png')
 
     # XY
@@ -53,22 +53,22 @@ class example_datasets():
     ome_spim = ( '1BG6jCZGLEs1LDxKXjMqF0aV-iiqlushk', 'SPIM-ModuloAlongZ.ome.tiff')
 
 
-class zipped_datasets():
+class examples_zipped():
 
     @staticmethod
     def get_list():
-        return [example for (key,example) in zipped_datasets.__dict__.items() if not '__' in key and not 'get_' in key]
+        return [example for (key,example) in examples_zipped.__dict__.items() if not '__' in key and not 'get_' in key]
 
     @staticmethod
     def get_path(id, name):
-        return join(datadir, os.path.splitext(name)[0])
+        return join(datasets_folder, os.path.splitext(name)[0])
 
     care_tribolium =  ('1BVNU-y9NJdNzkmsZcH8-2nhdhlRd4Mcw', 'tribolium.zip')
 
 
 
 
-def download_from_gdrive(id, name, dest_folder=datadir, overwrite=False, unzip=False):
+def download_from_gdrive(id, name, dest_folder=datasets_folder, overwrite=False, unzip=False):
 
     try:
         os.makedirs(dest_folder)
@@ -96,21 +96,21 @@ def download_from_gdrive(id, name, dest_folder=datadir, overwrite=False, unzip=F
 
 def download_all_examples():
 
-    for example in example_datasets.get_list():
+    for example in examples_single.get_list():
         print(download_from_gdrive(*example))
 
-    for example in zipped_datasets.get_list():
-        download_from_gdrive(*example, dest_folder=join(datadir,os.path.splitext(example[1])[0]), unzip=True)
+    for example in examples_zipped.get_list():
+        download_from_gdrive(*example, dest_folder=join(datasets_folder, os.path.splitext(example[1])[0]), unzip=True)
 
 
 def downloaded_example(substring):
-    for example in example_datasets.get_list():
+    for example in examples_single.get_list():
         if substring in example[1]:
             print(download_from_gdrive(*example))
 
 
 def downloaded_zipped_example(substring):
-    for example in zipped_datasets.get_list():
+    for example in examples_zipped.get_list():
         if substring in example[1]:
-            download_from_gdrive(*example, dest_folder=join(datadir,os.path.splitext(example[1])[0]), unzip=True)
+            download_from_gdrive(*example, dest_folder=join(datasets_folder, os.path.splitext(example[1])[0]), unzip=True)
 

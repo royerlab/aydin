@@ -1,13 +1,13 @@
-from pitl.io.examples import download_from_gdrive, example_datasets, download_all_examples, datadir
+from pitl.io.datasets import download_from_gdrive, examples_single, download_all_examples, datasets_folder
 
 
 def test_download():
 
-    print(download_from_gdrive(*example_datasets.generic_mandrill, datadir))
+    print(download_from_gdrive(*examples_single.generic_mandrill, datasets_folder))
 
 
 def test_all_download():
 
-    print(example_datasets.__dict__)
+    print(examples_single.__dict__)
 
     download_all_examples()

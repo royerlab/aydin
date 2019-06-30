@@ -1,12 +1,12 @@
 from pitl.io import io
-from pitl.io.examples import example_datasets
+from pitl.io.datasets import examples_single
 
 
 def test_all_download():
 
-    for example in example_datasets.get_list():
+    for example in examples_single.get_list():
 
-        example_file_path = example_datasets.get_path(*example)
+        example_file_path = examples_single.get_path(*example)
 
         #print(f"Trying to open and make sense of file {example_file_path}")
 

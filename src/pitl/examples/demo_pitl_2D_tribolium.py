@@ -7,31 +7,35 @@ from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from tifffile import imread
 
-from pitl.io.examples import downloaded_zipped_example, zipped_datasets
-from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
+from pitl.io.datasets import downloaded_zipped_example, examples_zipped
+from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.gbm import GBMRegressor
 
 
 def demo_pitl_2D_CARE_example():
+    """
+        Demo for supervised denoising using CARE's tribolium example as a montage.
+
+    """
 
     downloaded_zipped_example('tribolium')
 
-    image = imread(join(zipped_datasets.get_path(*zipped_datasets.care_tribolium), 'tribolium_train_GT_montage.tif')).astype(np.float32)
+    image = imread(join(examples_zipped.get_path(*examples_zipped.care_tribolium), 'tribolium_train_GT_montage.tif')).astype(np.float32)
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
-    noisy = imread(join(zipped_datasets.get_path(*zipped_datasets.care_tribolium), 'tribolium_train_low_montage.tif')).astype(np.float32)
+    noisy = imread(join(examples_zipped.get_path(*examples_zipped.care_tribolium), 'tribolium_train_low_montage.tif')).astype(np.float32)
     noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
 
-    image_test = imread(join(zipped_datasets.get_path(*zipped_datasets.care_tribolium), 'tribolium_test_GT_montage.tif')).astype(np.float32)
+    image_test = imread(join(examples_zipped.get_path(*examples_zipped.care_tribolium), 'tribolium_test_GT_montage.tif')).astype(np.float32)
     image_test = rescale_intensity(image_test, in_range='image', out_range=(0, 1))
 
-    noisy_test = imread(join(zipped_datasets.get_path(*zipped_datasets.care_tribolium), 'tribolium_test_low_montage.tif')).astype(np.float32)
+    noisy_test = imread(join(examples_zipped.get_path(*examples_zipped.care_tribolium), 'tribolium_test_low_montage.tif')).astype(np.float32)
     noisy_test = rescale_intensity(noisy_test, in_range='image', out_range=(0, 1))
 
-    from napari import ViewerApp
+    from napari import Viewer
     with app_context():
-        viewer = ViewerApp()
+        viewer = Viewer()
         viewer.add_image(rescale_intensity(image, in_range='image', out_range=(0, 1)), name='image')
         viewer.add_image(rescale_intensity(noisy, in_range='image', out_range=(0, 1)), name='noisy')
 
