@@ -1,3 +1,5 @@
+from os.path import join
+
 import numpy as np
 from napari.util import app_context
 from skimage.exposure import rescale_intensity
@@ -5,44 +7,46 @@ from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from tifffile import imread
 
-from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
+from pitl.io.datasets import downloaded_zipped_example, examples_zipped
+from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.gbm import GBMRegressor
 
 
 def demo_pitl_3D():
     """
-        Demo for supervised denoising using CARE example.
+        Demo for supervised denoising using CARE's tribolium example -- full 3D.
 
-        Get the data from here: https://drive.google.com/drive/folders/1-2QfKhWXSR-ulZrdhMPz_grjX4kT4d5_?usp=sharing
-        put it in a folder 'data' at the root of the project (see below:)
     """
 
-    image = imread('../../../data/tribolium/train/GT/nGFP_0.1_0.2_0.5_20_13_late.tif').astype(np.float32)
-    image = rescale_intensity(image, in_range='image', out_range=(0, 1))
+    downloaded_zipped_example('tribolium')
 
-    noisy = imread('../../../data/tribolium/train/low/nGFP_0.1_0.2_0.5_20_13_late.tif').astype(np.float32)
-    noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
+    image = imread(join(examples_zipped.care_tribolium.get_path(), 'tribolium_train_GT_stack.tif')).astype(np.float32)
+    image = rescale_intensity(image, in_range='image', out_range=(0, 1)).astype(np.float32)[:, 200:600, 200:400]
 
-    image_test = imread('../../../data/tribolium/test/GT/nGFP_0.1_0.2_0.5_20_14_late.tif').astype(np.float32)
-    image_test = rescale_intensity(image_test, in_range='image', out_range=(0, 1))
+    noisy = imread(join(examples_zipped.care_tribolium.get_path(), 'tribolium_train_low_stack.tif')).astype(np.float32)
+    noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1)).astype(np.float32)[:, 200:600, 200:400]
 
-    noisy_test = imread('../../../data/tribolium/test/low/nGFP_0.1_0.2_0.5_20_14_late.tif').astype(np.float32)
-    noisy_test = rescale_intensity(noisy_test, in_range='image', out_range=(0, 1))
+    image_test = imread(join(examples_zipped.care_tribolium.get_path(), 'tribolium_test_GT_stack.tif')).astype(np.float32)
+    image_test = rescale_intensity(image_test, in_range='image', out_range=(0, 1)).astype(np.float32)
 
-    from napari import ViewerApp
+    noisy_test = imread(join(examples_zipped.care_tribolium.get_path(), 'tribolium_test_low_stack.tif')).astype(np.float32)
+    noisy_test = rescale_intensity(noisy_test, in_range='image', out_range=(0, 1)).astype(np.float32)
+
+    from napari import Viewer
     with app_context():
-        viewer = ViewerApp()
+        viewer = Viewer()
         viewer.add_image(image, name='image')
         viewer.add_image(noisy, name='noisy')
         viewer.add_image(image_test, name='image_test')
         viewer.add_image(noisy_test, name='noisy_test')
 
-        scales = [1, 3, 5, 11, 21, 23, 47, 95]
+        level = 6
+        scales = [1, 3, 7, 15, 31, 63, 127, 255]
         widths = [3, 3, 3,  3,  3,  3,  3,  3]
 
-        generator = MultiscaleConvolutionalFeatures(kernel_widths=widths,
-                                                    kernel_scales=scales,
+        generator = MultiscaleConvolutionalFeatures(kernel_widths=widths[:level],
+                                                    kernel_scales=scales[:level],
                                                     exclude_center=False
                                                     )
 

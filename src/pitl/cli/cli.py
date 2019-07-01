@@ -1,6 +1,6 @@
 import click
 
-from ..examples.demo_pitl_2D import demo_pitl_2D
+from ..examples.demo_pitl_2D_camera import demo_pitl_2D
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
