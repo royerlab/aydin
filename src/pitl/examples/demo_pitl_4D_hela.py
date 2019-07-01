@@ -1,19 +1,15 @@
 import numpy as np
 from napari.util import app_context
 from skimage.exposure import rescale_intensity
-from skimage.measure import compare_psnr as psnr
-from skimage.measure import compare_ssim as ssim
-from tifffile import imread
 
-from pitl.io import io
-from pitl.io.datasets import examples_single
+from src.pitl.io import io
+from src.pitl.io.datasets import examples_single
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.gbm import GBMRegressor
 
 
 def demo_pitl_4D_hela(image):
-
 
     from napari import Viewer
     with app_context():

@@ -7,7 +7,7 @@ from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from tifffile import imread
 
-from pitl.io.datasets import downloaded_zipped_example, examples_zipped
+from src.pitl.io.datasets import downloaded_zipped_example, examples_zipped
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.gbm import GBMRegressor

@@ -9,8 +9,6 @@ from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from skimage.util import random_noise
 
-from pitl import io
-from pitl.io.datasets import examples_single
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.gbm import GBMRegressor
@@ -28,7 +26,6 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
     noisy = np.random.poisson(image * intensity) / intensity
     noisy = random_noise(noisy, mode='gaussian', var=0.01, seed=0)
     noisy = noisy.astype(np.float32)
-
 
     with app_context():
         viewer = Viewer()
@@ -65,9 +62,6 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
 
             viewer.add_image(rescale_intensity(denoised, in_range='image', out_range=(0, 1)), name='denoised%d' % param)
             # viewer.add_image(rescale_intensity(denoised_predict, in_range='image', out_range=(0, 1)), name='denoised_predict%d' % param)
-
-
-
 
 
 demo_pitl_2D(camera().astype(np.float32), min_level=7)

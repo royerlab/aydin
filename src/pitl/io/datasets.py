@@ -5,7 +5,7 @@ from os.path import join, exists
 
 import gdown
 
-from pitl.io.folders import get_cache_folder
+from src.pitl.io.folders import get_cache_folder
 
 datasets_folder = join(get_cache_folder(), 'data')
 

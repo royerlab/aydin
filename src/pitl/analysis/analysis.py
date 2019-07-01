@@ -5,7 +5,6 @@ import scipy
 
 def correlation(image, nb_samples=1024, max_length=256, smooth=True):
 
-
     shape = image.shape
     nb_dim = len(shape)
 
@@ -45,7 +44,6 @@ def correlation(image, nb_samples=1024, max_length=256, smooth=True):
         corr_samples_stack = numpy.stack(corr_samples_list)
         corr_avg           = numpy.median(corr_samples_stack, axis=0)
 
-
         #corr_avg = corr_avg / numpy.sum(corr_avg)
 
         if smooth:
@@ -62,9 +60,7 @@ def correlation(image, nb_samples=1024, max_length=256, smooth=True):
 
         corr_list.append(corr_avg)
 
-
     return tuple(corr_list)
-
 
 
 def correlation_distance(image, method='firstmin'):
@@ -101,25 +97,3 @@ def correlation_distance(image, method='firstmin'):
             correlation_distances_list.append(min_distance)
 
     return tuple(correlation_distances_list)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
