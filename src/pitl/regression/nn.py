@@ -109,8 +109,8 @@ class CNNRegressor:
         else:
             input_feature = Input(shape=(1, feature_dim), name='input')
             x = fc_bn(input_feature, unit=self.n_estimators, lyrname='fc1')
-            x = fc_bn(x, unit=self.n_estimators * 2, lyrname='fc2')
-            x = fc_bn(x, unit=self.n_estimators * 2, lyrname='fc3')
+            x = fc_bn(x, unit=self.n_estimators, lyrname='fc2')
+            x = fc_bn(x, unit=self.n_estimators, lyrname='fc3')
             x = fc_bn(x, act='linear', lyrname='fc_last')
 
         model = Model(input_feature, x)
