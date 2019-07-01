@@ -1,9 +1,6 @@
 from __future__ import absolute_import, print_function
 
-from lightgbm import LGBMRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression, HuberRegressor, Lasso
-from sklearn.svm import SVR, LinearSVR
 
 
 class RandomForrestRegressor:
@@ -27,7 +24,6 @@ class RandomForrestRegressor:
 
         self.rf = RandomForestRegressor(max_depth=None,
                                         n_estimators=128)
-
 
     def fit(self, x_train, y_train, x_test=None, y_test=None):
         """

@@ -8,11 +8,11 @@ import psutil
 import pyopencl as cl
 from pyopencl.array import to_device, Array
 
-from pitl.features.features_avg_1d import compute_feature_1d
-from pitl.features.features_avg_2d import compute_feature_2d
-from pitl.features.features_avg_3d import compute_feature_3d
-from pitl.features.features_avg_4d import compute_feature_4d
-from pitl.util.nd import nd_range
+from src.pitl.features.features_avg_1d import compute_feature_1d
+from src.pitl.features.features_avg_2d import compute_feature_2d
+from src.pitl.features.features_avg_3d import compute_feature_3d
+from src.pitl.features.features_avg_4d import compute_feature_4d
+from src.pitl.util.nd import nd_range
 from src.pitl.opencl.opencl_provider import OpenCLProvider
 
 

@@ -1,6 +1,5 @@
 from __future__ import absolute_import, print_function
 
-from lightgbm import LGBMRegressor
 from sklearn.linear_model import LinearRegression, HuberRegressor, Lasso
 
 

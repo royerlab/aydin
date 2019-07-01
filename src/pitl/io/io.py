@@ -1,7 +1,6 @@
 import traceback
 from pathlib import Path
 
-import imageio
 import numpy
 import pims
 import skimage
@@ -58,7 +57,3 @@ def imread(path):
     array = numpy.squeeze(array)
 
     return (array, metadata)
-
-
-
-

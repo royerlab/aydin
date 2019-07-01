@@ -27,7 +27,6 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
     noisy = random_noise(noisy, mode='gaussian', var=0.01, seed=0)
     noisy = noisy.astype(np.float32)
 
-
     with app_context():
         viewer = Viewer()
         viewer.add_image(rescale_intensity(image, in_range='image', out_range=(0, 1)), name='image')

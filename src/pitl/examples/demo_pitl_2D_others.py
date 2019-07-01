@@ -3,14 +3,13 @@ import time
 import numpy as np
 from napari import Viewer
 from napari.util import app_context
-from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from skimage.util import random_noise
 
-from pitl.io import io
-from pitl.io.datasets import examples_single
+from src.pitl.io import io
+from src.pitl.io.datasets import examples_single
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 from src.pitl.pitl_classic import ImageTranslator
 from src.pitl.regression.gbm import GBMRegressor
@@ -28,7 +27,6 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
     noisy = np.random.poisson(image * intensity) / intensity
     noisy = random_noise(noisy, mode='gaussian', var=0.01, seed=0)
     noisy = noisy.astype(np.float32)
-
 
     with app_context():
         viewer = Viewer()
