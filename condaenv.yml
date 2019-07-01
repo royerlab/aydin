@@ -80,7 +80,6 @@ dependencies:
     - qtpy==1.7.1
     - sip==4.19.8
     - tifffile==2019.5.22
-    - tiffile==2018.10.18
     - vispy==0.5.3
 prefix: /Users/royer/anaconda3
 

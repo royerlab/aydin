@@ -1,7 +1,10 @@
+import tempfile
+
+import numpy
 from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 
-from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
+from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 from src.pitl.regression.gbm import GBMRegressor
 
 
@@ -32,7 +35,7 @@ class ImageTranslator:
 
         self.self_supervised = None
 
-    def _compute_features(self, image, exclude_center):
+    def _compute_features(self, image, exclude_center, batch_dims):
         """
 
         :param image:
@@ -46,7 +49,7 @@ class ImageTranslator:
             print("[RCF] computing features ")
 
         self.feature_generator.exclude_center = exclude_center
-        features = self.feature_generator.compute(image)
+        features = self.feature_generator.compute(image, batch_dims)
         x = features.reshape(-1, features.shape[-1])
 
         return x
@@ -73,6 +76,8 @@ class ImageTranslator:
     def train(self,
               input_image,
               target_image,
+              batch_dims       = None,
+              train_test_ratio = 0.1,
               clip=(0, 1)):
         """
             Train to translate a given input image to a given output image
@@ -86,11 +91,11 @@ class ImageTranslator:
         :rtype:
         """
         if self.debug_log:
-            print("[RCF] training on images of dimension %s " % str(input_image.shape))
+            print("[RCF] training on images of dimension %s ." % str(input_image.shape))
 
         self.self_supervised = input_image is target_image
 
-        x = self._compute_features(input_image, self.self_supervised)
+        x = self._compute_features(input_image, self.self_supervised, batch_dims)
 
         y = target_image.reshape(-1)
 
@@ -98,14 +103,41 @@ class ImageTranslator:
         nb_entries = y.shape[0]
 
         if self.debug_log:
-            print("[RCF] Number of entries: %d features: %d" % (nb_entries, nb_features))
+            print("[RCF] Number of entries: %d features: %d ." % (nb_entries, nb_features))
 
-        # TODO: we need to fix how the test set is chosen, the first 10% voxels might not be representative (all black?)
-        x_test = x[0:nb_entries // 10]
-        x_train = x[nb_entries // 10:]
+        if self.debug_log:
+            print("[RCF] splitting train and test sets.")
+        # creates random complementary indices for selecting train and test entries:
+        test_size = int(train_test_ratio*nb_entries)
+        train_indices = numpy.full(nb_entries, False)
+        train_indices[test_size:] = True
+        numpy.random.shuffle(train_indices)
+        test_indices= numpy.logical_not(train_indices)
 
-        y_test = y[0:nb_entries // 10]
-        y_train = y[nb_entries // 10:]
+        # we allocate memory for the new arrays taking into account that we might need to use memory mapped files
+        # in the splitting of train and test sets. The features are the heavy part, so that's what we map:
+        x_train, y_train, x_test, y_test = (None,)*4
+        if isinstance(x, numpy.memmap):
+            temp_file = tempfile.TemporaryFile()
+            x_train = numpy.memmap(temp_file,
+                              dtype=numpy.float32,
+                              mode='w+',
+                              shape=((nb_entries-test_size),nb_features))
+        else:
+            x_train = numpy.zeros(((nb_entries-test_size),nb_features), dtype=numpy.float)
+
+        y_train = numpy.zeros((nb_entries-test_size,), dtype=numpy.float)
+        x_test = numpy.zeros((test_size,nb_features), dtype=numpy.float)
+        y_test = numpy.zeros((test_size,), dtype=numpy.float)
+
+
+        # train data
+        numpy.copyto(x_train, x[train_indices])
+        numpy.copyto(y_train, y[train_indices])
+
+        # test data:
+        numpy.copyto(x_test, x[test_indices])
+        numpy.copyto(y_test, y[test_indices])
 
         if self.debug_log:
             print("[RCF] Training...")
@@ -118,7 +150,7 @@ class ImageTranslator:
 
         return inferred_image
 
-    def translate(self, input_image, clip=(0, 1)):
+    def translate(self, input_image, batch_dims=None, clip=(0, 1)):
         """
             Translates an input image into an output image according to the learned function
         :param input_image:
@@ -129,9 +161,9 @@ class ImageTranslator:
         :rtype:
         """
         if self.debug_log:
-            print("[RCF] predicting output image from input image of dimension %s " % str(input_image.shape))
+            print("[RCF] predicting output image from input image of dimension %s ." % str(input_image.shape))
 
-        features = self._compute_features(input_image, self.self_supervised)
+        features = self._compute_features(input_image, self.self_supervised, batch_dims)
 
         inferred_image = self._predict_from_features(features,
                                                      input_image_shape=input_image.shape,
