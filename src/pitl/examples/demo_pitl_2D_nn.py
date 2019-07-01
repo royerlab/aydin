@@ -89,7 +89,7 @@ plt.title('Noisy \nPSNR={:.2f}, SSMI={:.2f}'.format(results_cnn[0][0], results_c
 plt.subplot(224)
 plt.imshow(denoised_cnn, cmap='gray')
 plt.axis('off')
-plt.title('CNN {:.2f}sec \nPSNR={:.2f}, SSMI={:.2f}'.format(results_cnn[2], results_cnn[1][0], results_cnn[1][1]))
+plt.title('NN {:.2f}sec \nPSNR={:.2f}, SSMI={:.2f}'.format(results_cnn[2], results_cnn[1][0], results_cnn[1][1]))
 plt.subplots_adjust(left=0.11, right=0.9, top=0.91, bottom=0.02, hspace=0.25, wspace=0.2)
 plt.savefig(os.path.join(savepath, 'NN_2D.png'), dpi=300)
 plt.show()
