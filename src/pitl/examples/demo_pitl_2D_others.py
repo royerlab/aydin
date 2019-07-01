@@ -3,7 +3,6 @@ import time
 import numpy as np
 from napari import Viewer
 from napari.util import app_context
-from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
@@ -11,9 +10,9 @@ from skimage.util import random_noise
 
 from pitl.io import io
 from pitl.io.datasets import examples_single
+from pitl.regression.gbm import GBMRegressor
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from src.pitl.pitl_classic import ImageTranslator
-from src.pitl.regression.gbm import GBMRegressor
+from pitl.it.it_classic import ImageTranslatorClassic
 
 
 def demo_pitl_2D(image, min_level=7, max_level=100):
@@ -51,7 +50,7 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
                                      n_estimators=2048,
                                      early_stopping_rounds=20)
 
-            it = ImageTranslator(feature_generator=generator, regressor=regressor)
+            it = ImageTranslatorClassic(feature_generator=generator, regressor=regressor)
 
             start = time.time()
             denoised = it.train(noisy, noisy)

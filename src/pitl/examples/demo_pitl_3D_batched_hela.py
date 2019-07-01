@@ -1,15 +1,12 @@
 import numpy as np
 from napari.util import app_context
 from skimage.exposure import rescale_intensity
-from skimage.measure import compare_psnr as psnr
-from skimage.measure import compare_ssim as ssim
-from tifffile import imread
 
 from pitl.io import io
 from pitl.io.datasets import examples_single
+from pitl.regression.gbm import GBMRegressor
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from src.pitl.pitl_classic import ImageTranslator
-from src.pitl.regression.gbm import GBMRegressor
+from pitl.it.it_classic import ImageTranslatorClassic
 
 
 def demo_pitl_3D_batched_hela(image):
@@ -35,7 +32,7 @@ def demo_pitl_3D_batched_hela(image):
                                  eval_metric='l1',
                                  early_stopping_rounds=None)
 
-        it = ImageTranslator(generator, regressor)
+        it = ImageTranslatorClassic(generator, regressor)
 
         denoised = it.train(image, image, batch_dims=(True, True, False, False))
         viewer.add_image(rescale_intensity(denoised, in_range='image', out_range=(0, 1)), name='denoised')

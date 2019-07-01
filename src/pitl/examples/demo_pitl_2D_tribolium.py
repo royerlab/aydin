@@ -8,9 +8,9 @@ from skimage.measure import compare_ssim as ssim
 from tifffile import imread
 
 from pitl.io.datasets import downloaded_zipped_example, examples_zipped
+from pitl.regression.gbm import GBMRegressor
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from src.pitl.pitl_classic import ImageTranslator
-from src.pitl.regression.gbm import GBMRegressor
+from pitl.it.it_classic import ImageTranslatorClassic
 
 
 def demo_pitl_2D_CARE_example():
@@ -50,7 +50,7 @@ def demo_pitl_2D_CARE_example():
         regressor = GBMRegressor(num_leaves=63,
                                  n_estimators=512)
 
-        it = ImageTranslator(feature_generator=generator, regressor=regressor)
+        it = ImageTranslatorClassic(feature_generator=generator, regressor=regressor)
 
         denoised = it.train(noisy, image)
         denoised_test = it.translate(noisy_test)

@@ -4,11 +4,12 @@ import numpy
 from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 
+from pitl.it.it_base import ImageTranslatorBase
+from pitl.regression.gbm import GBMRegressor
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from src.pitl.regression.gbm import GBMRegressor
 
 
-class ImageTranslator:
+class ImageTranslatorClassic(ImageTranslatorBase):
     """
         Portable Image Translation Learning (PITL)
 
@@ -56,8 +57,7 @@ class ImageTranslator:
 
     def _predict_from_features(self,
                                x,
-                               input_image_shape,
-                               clip=(0, 1)):
+                               input_image_shape):
         """
             internal function that predicts y from the features x
         :param x:
@@ -70,15 +70,14 @@ class ImageTranslator:
         :rtype:
         """
         yp = self.regressor.predict(x)
-        inferred_image = yp.reshape(input_image_shape).clip(*clip)
+        inferred_image = yp.reshape(input_image_shape)
         return inferred_image
 
     def train(self,
               input_image,
               target_image,
               batch_dims       = None,
-              train_test_ratio = 0.1,
-              clip=(0, 1)):
+              train_test_ratio = 0.1):
         """
             Train to translate a given input image to a given output image
         :param input_image:
@@ -141,16 +140,16 @@ class ImageTranslator:
 
         if self.debug_log:
             print("[RCF] Training...")
-        self.regressor.fit(x_train, y_train, x_test=x_test, y_test=y_test)
+        self.regressor.fit(x_train, y_train, x_valid=x_test, y_valid=y_test)
 
-        inferred_image = self._predict_from_features(x, input_image.shape, clip)
+        inferred_image = self._predict_from_features(x, input_image.shape)
 
         if self.debug_log:
             print("[RCF] result: psnr=%f, ssim=%f " % (psnr(inferred_image, target_image), ssim(inferred_image, target_image)))
 
         return inferred_image
 
-    def translate(self, input_image, batch_dims=None, clip=(0, 1)):
+    def translate(self, input_image, batch_dims=None):
         """
             Translates an input image into an output image according to the learned function
         :param input_image:
@@ -166,6 +165,5 @@ class ImageTranslator:
         features = self._compute_features(input_image, self.self_supervised, batch_dims)
 
         inferred_image = self._predict_from_features(features,
-                                                     input_image_shape=input_image.shape,
-                                                     clip=clip)
+                                                     input_image_shape=input_image.shape)
         return inferred_image

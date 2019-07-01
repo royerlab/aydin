@@ -8,10 +8,10 @@ import psutil
 import pyopencl as cl
 from pyopencl.array import to_device, Array
 
-from pitl.features.features_avg_1d import compute_feature_1d
-from pitl.features.features_avg_2d import compute_feature_2d
-from pitl.features.features_avg_3d import compute_feature_3d
-from pitl.features.features_avg_4d import compute_feature_4d
+from pitl.features.features_1d import compute_feature_1d
+from pitl.features.features_2d import compute_feature_2d
+from pitl.features.features_3d import compute_feature_3d
+from pitl.features.features_4d import compute_feature_4d
 from pitl.util.nd import nd_range
 from src.pitl.opencl.opencl_provider import OpenCLProvider
 
@@ -25,8 +25,8 @@ class MultiscaleConvolutionalFeatures:
 
     def __init__(self,
                  opencl_provider=OpenCLProvider(),
-                 kernel_widths=[5, 3, 3, 3],
-                 kernel_scales=[1, 3, 5, 7],
+                 kernel_widths=[3, 3, 3, 3,   3,  3,   3,   3],
+                 kernel_scales=[1, 3, 7, 15, 31, 63, 127, 255],
                  kernel_shapes=None,
                  kernel_reductions=None,
                  exclude_center=False,

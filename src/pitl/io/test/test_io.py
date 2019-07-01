@@ -3,7 +3,6 @@ from pitl.io.datasets import examples_single
 
 
 def test_all_download():
-
     for example in examples_single:
 
         example_file_path = example.get_path()

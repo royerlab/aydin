@@ -86,7 +86,6 @@ def download_from_gdrive(id, name, dest_folder=datasets_folder, overwrite=False,
 
 
 def download_all_examples():
-
     for example in examples_single:
         print(download_from_gdrive(*example.value))
 
@@ -104,4 +103,3 @@ def downloaded_zipped_example(substring):
     for example in examples_zipped:
         if substring in example.value[1]:
             download_from_gdrive(*example.value, dest_folder=join(datasets_folder, os.path.splitext(example.value[1])[0]), unzip=True)
-

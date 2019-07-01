@@ -9,9 +9,9 @@ from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from skimage.util import random_noise
 
+from pitl.it.it_classic import ImageTranslatorClassic
+from pitl.regression.gbm import GBMRegressor
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from src.pitl.pitl_classic import ImageTranslator
-from src.pitl.regression.gbm import GBMRegressor
 
 
 def demo_pitl_2D(image, min_level=7, max_level=100):
@@ -44,12 +44,12 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
                                                         )
 
             regressor = GBMRegressor(learning_rate=0.01,
-                                     num_leaves=256,
-                                     max_depth=8,
+                                     num_leaves=127,
+                                     max_bin=512,
                                      n_estimators=2048,
                                      early_stopping_rounds=20)
 
-            it = ImageTranslator(feature_generator=generator, regressor=regressor)
+            it = ImageTranslatorClassic(feature_generator=generator, regressor=regressor)
 
             start = time.time()
             denoised = it.train(noisy, noisy)
