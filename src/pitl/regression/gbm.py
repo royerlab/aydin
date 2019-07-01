@@ -48,7 +48,7 @@ class GBMRegressor:
 
     def fit(self, x_train, y_train, x_test, y_test):
         """
-        Fits function y=f(x) goiven training pairs (x_train, y_train).
+        Fits function y=f(x) given training pairs (x_train, y_train).
         Stops when performance stops improving on the test dataset: (x_test, y_test).
 
         :param x_train:

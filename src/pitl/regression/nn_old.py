@@ -6,15 +6,15 @@ from keras.models import Model
 from keras.layers import Input, Dense, Conv1D, BatchNormalization, Activation
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 import numpy as np
+from keras import optimizers
 
-
-class CNNRegressor:
+class NNRegressor:
     """
     Regressor that uses the CNN.
 
     """
 
-#    cnnreg: CNNRegressor
+#    nnreg: NNRegressor
 
     def __init__(self,
 #                 feature_dim=9,
@@ -22,7 +22,7 @@ class CNNRegressor:
 #                 num_layers,
                  n_estimators=128,
                  kernel_size = 16,
-                 learning_rate=0.01,
+                 learning_rate=0.001,
 #                 eval_metric='l1',
                  early_stopping_rounds=5
                  ):
@@ -42,7 +42,7 @@ class CNNRegressor:
         """
 
         self.n_estimators = n_estimators
-        
+        self.learning_rate = learning_rate
 
         self.EStop = EarlyStopping(monitor='val_loss', min_delta=0,
                               patience=early_stopping_rounds, verbose=1, mode='auto')
@@ -83,18 +83,19 @@ class CNNRegressor:
         x = fc_bn(x, unit=self.n_estimators*2, lyrname = 'fc3')
         x = fc_bn(x, act='linear', lyrname='fc_last')
         model = Model(input_feature, x)
-        model.compile(optimizer = 'Adam', loss='mse')
-        self.cnnreg = model
+        opt = optimizers.Adam(lr=self.learning_rate)
+        model.compile(optimizer = opt, loss='mse')
+        self.nnreg = model
         
         x_train = x_train.reshape(-1,1,feature_dim)
         y_train = y_train.reshape(-1,1,1)
         x_test = x_test.reshape(-1,1,feature_dim)
         y_test = y_test.reshape(-1,1,1)
         
-        self.cnnreg.fit(x_train, y_train,
-                          validation_data=(x_test, y_test),
-                          epochs=100, batch_size=128,
-                          callbacks=[self.EStop, self.ReduceLR])
+        self.nnreg.fit(x_train, y_train,
+                       validation_data=(x_test, y_test),
+                       epochs=100, batch_size=512,
+                       callbacks=[self.EStop, self.ReduceLR])
 
     def predict(self, x):
         """
@@ -105,4 +106,4 @@ class CNNRegressor:
         :rtype:
         """
         x = x.reshape(-1,1,x.shape[-1])
-        return self.cnnreg.predict(x)
+        return self.nnreg.predict(x)
