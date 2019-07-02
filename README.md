@@ -19,6 +19,13 @@ https://github.com/royerlab/pitl/blob/master/src/pitl/gui/gui.py
 
 For now CLI can be only run as a module:
 
+To run a Noise2Self:
+```bash
+python -m src.pitl.cli.cli noise2self 'relative/path/to/image'
+
+```
+
+To run a demo:
 ```bash
 python -m src.pitl.cli.cli demo 2D
 
