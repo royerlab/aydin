@@ -2,6 +2,7 @@ import numpy as np
 from napari.util import app_context
 from scipy import ndimage as ndi
 from scipy.signal import correlate2d
+from skimage import img_as_float
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.measure import compare_psnr as psnr
@@ -85,13 +86,14 @@ def autocorr2d(x):
 
 
 # image_stack = imread('../../data/tribolium/train/low/stack.tif')
-image = imread('../../data/tribolium/train/GT/montage.tif').astype(np.float32)
-image = rescale_intensity(image, in_range='image', out_range=(0, 1))
+#image = imread('../../data/tribolium/train/GT/montage.tif').astype(np.float32)
+#image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 # viewer.add_image(image, name='image')
 
-noisy = imread('../../data/tribolium/train/low/montage.tif').astype(np.float32)
-noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
-# image = img_as_float(rgb2gray(camera()))
+#noisy = imread('../../data/tribolium/train/low/montage.tif').astype(np.float32)
+#noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
+
+image = img_as_float(camera())
 
 # image = imread('../../data/tribolium/train/low/montage.tif').astype(np.float32)
 # image = camera().astype(np.float32)

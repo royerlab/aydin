@@ -3,9 +3,10 @@ from __future__ import absolute_import, print_function
 import gc
 import math
 import multiprocessing
+from typing import List, Union
 
 import lightgbm
-from lightgbm import LGBMRegressor, Booster
+from lightgbm import Booster
 
 from pitl.regression.regressor_base import RegressorBase
 
@@ -21,7 +22,7 @@ class GBMRegressor(RegressorBase):
     TODO:   (v)   try the GPU acceleration: https://lightgbm.readthedocs.io/en/latest/GPU-Performance.html
     """
 
-    lgbmr: Booster
+    lgbmr: Union[Booster, List[Booster]]
 
     def __init__(self,
                  num_leaves=63,
@@ -29,7 +30,8 @@ class GBMRegressor(RegressorBase):
                  max_bin=512,
                  learning_rate=0.05,
                  eval_metric='l1',
-                 early_stopping_rounds=5
+                 early_stopping_rounds=5,
+                 verbosity=100
                  ):
         """
         Constructs a LightGBM regressor.
@@ -52,6 +54,7 @@ class GBMRegressor(RegressorBase):
         self.learning_rate = learning_rate
         self.eval_metric = eval_metric
         self.early_stopping_rounds = early_stopping_rounds
+        self.verbosity = verbosity
         self.lgbmr = None
 
         # LGBMRegressor(num_leaves=num_leaves,
@@ -62,72 +65,55 @@ class GBMRegressor(RegressorBase):
 
     def reset(self):
         del self.lgbmr
-        self.lgbmr = None
+        self.lgbmr = []
         gc.collect()
 
 
     def _get_params(self, num_samples, batch=False):
-        return {'keep_training_booster': batch,
-                'objective': 'regression',
+        min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
+        # print(f'min_data_in_leaf: {min_data_in_leaf}')
+        return {'objective': 'regression_l2',
                 "boosting_type": "gbdt",
                 "learning_rate": self.learning_rate,
                 "num_leaves": self.num_leaves,
                 "max_depth": max(3, int(math.log2(self.num_leaves)) - 1),
                 "max_bin": self.max_bin,
-                "min_data_in_leaf": int(0.1 * min(50, num_samples / self.num_leaves)),
+                #"min_data_in_leaf": min_data_in_leaf,
                 "subsample_for_bin": 200000,
-                "num_threads": multiprocessing.cpu_count() // 2
+                "num_threads": multiprocessing.cpu_count() // 2,
+                "metric": ["l2", "l1"],
+                'verbosity': -1  #self.verbosity
                 }
 
-    def fit(self, x_train, y_train, x_valid, y_valid, batch_training=False):
-        """
-        Fits function y=f(x) goiven training pairs (x_train, y_train).
-        Stops when performance stops improving on the test dataset: (x_test, y_test).
+    def fit_batch(self, x_train, y_train, x_valid=None, y_valid=None):
+        self._fit(x_train, y_train, x_valid, y_valid, is_batch=True)
 
-        :param x_train:
-        :type x_train:
-        :param y_train:
-        :type y_train:
-        :param x_valid:
-        :type x_valid:
-        :param y_valid:
-        :type y_valid:
-        """
+    def fit(self, x_train, y_train, x_valid=None, y_valid=None):
+        self._fit(x_train, y_train, x_valid, y_valid, is_batch=False)
 
-        if batch_training:
-            self._batch_split_fit(x_train, y_train, x_valid, y_valid)
-        else:
-            self._fit(x_train, y_train, x_valid, y_valid, is_batch=False)
-
-
-
-    def _fit(self, x_train, y_train, x_valid, y_valid, is_batch=False):
-        """
-        Fits function y=f(x) goiven training pairs (x_train, y_train).
-        Stops when performance stops improving on the test dataset: (x_test, y_test).
-
-        :param x_train:
-        :type x_train:
-        :param y_train:
-        :type y_train:
-        :param x_valid:
-        :type x_valid:
-        :param y_valid:
-        :type y_valid:
-        """
+    def _fit(self, x_train, y_train, x_valid=None, y_valid=None, is_batch=False):
 
         num_samples = y_train.shape[0]
+        has_valid_dataset = x_valid is not None and y_valid is not None
 
         train_dataset = lightgbm.Dataset(x_train, y_train)
-        valid_dataset = lightgbm.Dataset(x_valid, y_valid)
+        valid_dataset = lightgbm.Dataset(x_valid, y_valid) if has_valid_dataset else None
 
-        self.lgbmr = lightgbm.train(params=self._get_params(num_samples, batch=is_batch),
-                                    init_model=self.lgbmr if is_batch else None,
+        model = lightgbm.train(params=self._get_params(num_samples, batch=is_batch),
+                               init_model=None,  # self.lgbmr if is_batch else None, <-- not working...
                                     train_set=train_dataset,
                                     valid_sets=valid_dataset,
-                                    early_stopping_rounds=self.early_stopping_rounds,
+                               early_stopping_rounds=self.early_stopping_rounds if has_valid_dataset else None,
                                     num_boost_round=self.n_estimators,
+                               # keep_training_booster= is_batch, <-- not working...
                                     )
+
+        if is_batch:
+            if isinstance(self.lgbmr, (list,)) or self.lgbmr is None:
+                self.lgbmr = []
+            self.lgbmr.append(model)
+        else:
+            self.lgbmr = model
 
         del train_dataset
         del valid_dataset
@@ -142,5 +128,23 @@ class GBMRegressor(RegressorBase):
         :return:
         :rtype:
         """
+        if isinstance(self.lgbmr, (list,)):
+            yp = None
+            counter = 0
+            for model in self.lgbmr:
+                yp_batch = model.predict(x, num_iteration=model.best_iteration)
 
-        return self.lgbmr.predict(x, num_iteration=self.lgbmr.best_iteration)
+                if yp is None:
+                    yp = yp_batch
+                else:
+                    yp += yp_batch
+
+                counter = counter + 1
+
+            yp /= counter
+
+            return yp
+
+
+        else:
+            return self.lgbmr.predict(x, num_iteration=self.lgbmr.best_iteration)

@@ -28,8 +28,8 @@ class RegressorBase(ABC):
         """
         raise NotImplementedError()
 
-
-    def _batch_split_fit(self, x_train, y_train, x_valid, y_valid):
+    @abstractmethod
+    def fit_batch(self, x_train, y_train, x_valid=None, y_valid=None):
         """
         Fits function y=f(x) given training pairs (x_train, y_train).
         Stops when performance stops improving on the validation dataset: (x_valid, y_valid).
@@ -46,7 +46,7 @@ class RegressorBase(ABC):
         :param y_valid:  y validation values
         :type y_valid:
         """
-        #TODO: we split the train data into batches automatically here
+        raise NotImplementedError()
 
     @abstractmethod
     def fit(self, x_train, y_train, x_valid, y_valid):
