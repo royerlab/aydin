@@ -17,28 +17,20 @@ from src.pitl.regression.nn import CNNRegressor, Modeltype
     Demo for self-supervised denoising using camera image with synthetic noise
 """
 
-
 def demo_pitl_2D(noisy):
-
-
     scales = [1, 3, 7, 15, 31, 63, 127]
     widths = [3, 3, 3,  3,  3,  3,   3]
 
     start_time = time.time()
-
     regressor = CNNRegressor(mode=Modeltype.Convolutional,
                              learning_rate=0.001,
                              early_stopping_rounds=5)
-
-
     generator = MultiscaleConvolutionalFeatures(kernel_widths=widths,
                                                 kernel_scales=scales,
                                                 kernel_shapes=['l1'] * len(scales),
                                                 exclude_center=True,
                                                 )
-
     it = ImageTranslator(feature_generator=generator, regressor=regressor)
-
     denoised = it.train(noisy, noisy)
 
     results = [[psnr(noisy, image), ssim(noisy, image)]]
@@ -48,20 +40,9 @@ def demo_pitl_2D(noisy):
     print("noisy ", results[0])
     print("denoised ", results[1])
     print("time elapsed: ", results[2])
-
-    #    from napari import ViewerApp
-    #    with app_context():
-    #        viewer = ViewerApp()
-    #        viewer.add_image(rescale_intensity(image, in_range='image', out_range=(0, 1)), name='image')
-    #        viewer.add_image(rescale_intensity(noisy, in_range='image', out_range=(0, 1)), name='noisy')
-
-    #            viewer.add_image(rescale_intensity(denoised, in_range='image', out_range=(0, 1)), name='denoised%d' % param)
-    # viewer.add_image(rescale_intensity(denoised_predict, in_range='image', out_range=(0, 1)), name='denoised_predict%d' % param)
-
     return denoised, results
 
-
-image = camera().astype(np.float32)  # [:,50:450]
+image = camera().astype(np.float32)
 image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
 intensity = 5
@@ -72,7 +53,10 @@ noisy = noisy.astype(np.float32)
 
 denoised_cnn, results_cnn = demo_pitl_2D(noisy)
 
-savepath = '/Users/hirofumi.kobayashi/Github_repositories/pitl/output_data'
+base_path = os.path.dirname(__file__)
+savepath = os.path.join(base_path, 'output_data')
+if not os.path.exists(savepath):
+    os.mkdirs(savepath)
 plt.figure()
 plt.subplot(221)
 plt.imshow(image, cmap='gray')
@@ -82,10 +66,6 @@ plt.subplot(222)
 plt.imshow(noisy, cmap='gray')
 plt.axis('off')
 plt.title('Noisy \nPSNR={:.2f}, SSMI={:.2f}'.format(results_cnn[0][0], results_cnn[0][1]))
-# plt.subplot(223)
-# plt.imshow(denoised_lgbm, cmap='gray')
-# plt.axis('off')
-# plt.title('LGBM {:.2f}sec \nPSNR={:.2f}, SSMI={:.2f}'.format(results_lgbm[2], results_lgbm[1][0], results_lgbm[1][1]))
 plt.subplot(224)
 plt.imshow(denoised_cnn, cmap='gray')
 plt.axis('off')
