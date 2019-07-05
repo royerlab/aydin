@@ -44,7 +44,12 @@ class App(QMainWindow):
         fileMenu.addAction(exitButton)
 
 
-app = QApplication(sys.argv)
-ex = App()
-ex.show()
-sys.exit(app.exec())
+def run():
+    app = QApplication(sys.argv)
+    ex = App()
+    ex.show()
+    sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+    run()
