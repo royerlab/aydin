@@ -8,11 +8,11 @@ import psutil
 import pyopencl as cl
 from pyopencl.array import to_device, Array
 
-from src.pitl.features.features_avg_1d import compute_feature_1d
-from src.pitl.features.features_avg_2d import compute_feature_2d
-from src.pitl.features.features_avg_3d import compute_feature_3d
-from src.pitl.features.features_avg_4d import compute_feature_4d
-from src.pitl.util.nd import nd_range
+from pitl.features.features_1d import compute_feature_1d
+from pitl.features.features_2d import compute_feature_2d
+from pitl.features.features_3d import compute_feature_3d
+from pitl.features.features_4d import compute_feature_4d
+from pitl.util.nd import nd_range
 from src.pitl.opencl.opencl_provider import OpenCLProvider
 
 
@@ -25,8 +25,8 @@ class MultiscaleConvolutionalFeatures:
 
     def __init__(self,
                  opencl_provider=OpenCLProvider(),
-                 kernel_widths=[5, 3, 3, 3],
-                 kernel_scales=[1, 3, 5, 7],
+                 kernel_widths=[3, 3, 3, 3,   3,  3,   3,   3],
+                 kernel_scales=[1, 3, 7, 15, 31, 63, 127, 255],
                  kernel_shapes=None,
                  kernel_reductions=None,
                  exclude_center=False,
@@ -49,7 +49,7 @@ class MultiscaleConvolutionalFeatures:
         """
 
         self.check_nans = False
-        self.debug_log = False
+        self.debug_log = True
         self.debug_force_memmap = False
 
         self.opencl_provider = opencl_provider
@@ -60,6 +60,21 @@ class MultiscaleConvolutionalFeatures:
         self.kernel_reductions = ['sum']*len(kernel_scales) if kernel_reductions is None else kernel_reductions
         self.exclude_center = exclude_center
 
+    def get_free_mem(self):
+        return self.opencl_provider.device.global_mem_size
+
+    def get_needed_mem(self, num_elements):
+        # We keep a 20% buffer to be confortable...
+        return int(1.2*4*num_elements)
+
+    def is_enough_memory(self, num_elements):
+        return self.get_needed_mem(num_elements)<self.opencl_provider.device.global_mem_size
+
+
+    def get_receptive_field_radius(self):
+
+        radii = max([ width*scale//2 for width,scale in zip(self.kernel_widths,self.kernel_scales)])
+        return radii
 
     def compute(self, image, batch_dims=None, features=None):
         """
@@ -70,7 +85,7 @@ class MultiscaleConvolutionalFeatures:
         :return: feature array
         :rtype:
         """
-        image = image.astype(np.float32)
+
 
         # Checking NaNs just in case:
         if self.check_nans and np.isnan(np.sum(image)):
@@ -110,15 +125,16 @@ class MultiscaleConvolutionalFeatures:
             else:
                 # Copy because image[image_batch_slice] is not necessarily contiguous and pyOpenCL does not like discontiguous arrays:
                 if image_batch is None:
-                    image_batch = np.array(image[image_batch_slice], copy=True)
+                    image_batch = np.array(image[image_batch_slice], copy=True, dtype=numpy.float32)
                 else:
                     # Here we need to explicitly transfer values without creating an instance!
-                    numpy.copyto(image_batch,image[image_batch_slice])
+                    numpy.copyto(image_batch,image[image_batch_slice], casting='unsafe')
 
 
             # We move the image to the GPU. Needs to fit entirely, could be a problem for very very large images.
             if image_batch_gpu is None:
-                image_batch_gpu = to_device(self.opencl_provider.queue, image_batch)
+                #TODO: avoid GC trashing with .copy
+                image_batch_gpu = to_device(self.opencl_provider.queue, image_batch.copy())
             else:
                 image_batch_gpu.set(image_batch, self.opencl_provider.queue)
 
@@ -132,16 +148,19 @@ class MultiscaleConvolutionalFeatures:
             # Checking that the number of dimensions is within the bounds of what we can do:
             if nb_non_batch_dim <= 4:
                 nb_features = self.collect_features_nD(image_batch_gpu, nb_non_batch_dim)
-                print(f'Number of features:  {nb_features}')
+                if self.debug_log:
+                    print(f'Number of features:  {nb_features}')
 
                 # At this point we know how big is the whole feature array, so we create it (encompasses all batches)
                 # This happens only once, the first time:
                 if features is None:
                     features = self.create_feature_array(image, nb_features)
                     #features_batch = np.zeros((nb_features,)+feature_gpu.shape, dtype=np.float32)
+                    #features_temp = np.zeros(image.shape[-1], dtype=np.float32)
 
                 # we compute one batch of features:
                 self.collect_features_nD(image_batch_gpu, nb_non_batch_dim, feature_gpu, features[feature_batch_slice])
+
 
             else: # We only support 1D, 2D, 3D, and 4D.
                 raise Exception(f'dimension above {image_dimension} for non nbatch dimensions not yet implemented!')
@@ -169,12 +188,14 @@ class MultiscaleConvolutionalFeatures:
         :return: feature array
         :rtype:
         """
-        print(f'Creating feature array...')
+        if self.debug_log:
+            print(f'Creating feature array...')
 
         size_in_bytes = nb_features * image.size * image.itemsize
         free_mem_in_bytes = psutil.virtual_memory().free
-        print(f'There is {int(free_mem_in_bytes/1E6)} MB of free memory')
-        print(f'Feature array is {(size_in_bytes/1E6)} MB.')
+        if self.debug_log:
+            print(f'There is {int(free_mem_in_bytes/1E6)} MB of free memory')
+            print(f'Feature array is {(size_in_bytes/1E6)} MB.')
 
         # We take the heuristic that we need twice the amount of memory available to be confortable:
         is_enough_memory = 2*size_in_bytes < free_mem_in_bytes
@@ -183,11 +204,13 @@ class MultiscaleConvolutionalFeatures:
         shape = (nb_features,) + image.shape
 
         if not self.debug_force_memmap and is_enough_memory:
-            print(f'There is enough memory -- we do not need to use a mem mapped array.')
+            if self.debug_log:
+                print(f'There is enough memory -- we do not need to use a mem mapped array.')
             array = np.zeros(shape, dtype=np.float32)
 
         else:
-            print(f'There is not enough memory -- we will use a mem mapped array.')
+            if self.debug_log:
+                print(f'There is not enough memory -- we will use a mem mapped array.')
             temp_file = tempfile.TemporaryFile()
             array = np.memmap(temp_file,
                               dtype=np.float32,
@@ -214,6 +237,8 @@ class MultiscaleConvolutionalFeatures:
                 print(f"Counting the number of features...")
             else:
                 print(f"Computing features...")
+
+        feature = None
 
         feature_index = 0
         for width, scale, shape, reduction in zip(self.kernel_widths, self.kernel_scales, self.kernel_shapes, self.kernel_reductions):
@@ -249,11 +274,15 @@ class MultiscaleConvolutionalFeatures:
                         elif ndim == 4:
                             compute_feature_4d(*params)
 
-                        cl.enqueue_copy(self.opencl_provider.queue, features[feature_index], feature_gpu.data)
+                        if feature is None:
+                            feature = numpy.zeros(features.shape[1:], dtype=numpy.float32)
+
+                        cl.enqueue_copy(self.opencl_provider.queue, feature, feature_gpu.data)
+
+                        features[feature_index] = feature
 
 
                         if self.check_nans and np.isnan(np.sum(features[feature_index])):
-                            print(features[feature_index])
                             raise Exception(f'NaN values occur in features!')
 
                     feature_index += 1
@@ -262,5 +291,12 @@ class MultiscaleConvolutionalFeatures:
             return features
         else:
             return feature_index
+
+
+
+
+
+
+
 
 

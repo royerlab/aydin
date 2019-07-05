@@ -84,10 +84,10 @@ def autocorr2d(x):
     return result  # [result.shape[0] // 2:, result.shape[1] // 2:]
 
 
-from napari import ViewerApp
+from napari import Viewer
 
 with app_context():
-    viewer = ViewerApp()
+    viewer = Viewer()
 
     image = imread('../../data/tribolium/train/GT/montage.tif').astype(np.float32)
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))

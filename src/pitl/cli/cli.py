@@ -5,7 +5,7 @@ import logging
 from src.pitl.gui import gui
 from src.pitl.services.Noise2Self import Noise2Self
 from src.pitl.util.resource import read_image_from_path
-from ..examples.demo_pitl_2D_cli import demo_pitl_2D
+from ..examples.demo_it_2D_cli import demo_pitl_2D
 
 
 logger = logging.getLogger(__name__)

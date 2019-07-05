@@ -1,29 +1,25 @@
-class ImageTranslator:
-    """
-        Portable Image Translation Learning (PITL)
+from abc import ABC, abstractmethod
 
-        Using CNN (Unet and Co)
+
+class ImageTranslatorBase(ABC):
+    """
+        Image Translator base class
 
     """
 
     def __init__(self):
         """
 
-        :param feature_generator:
-        :type feature_generator:
-        :param regressor:
-        :type regressor:
         """
-        self.debug_log = True
-
-
+        self.debug = True
         self.self_supervised = None
 
-
+    @abstractmethod
     def train(self,
               input_image,
               target_image,
-              clip=(0, 1)):
+              batch_dims       = None,
+              train_test_ratio = 0.1):
         """
             Train to translate a given input image to a given output image
         :param input_image:
@@ -35,12 +31,10 @@ class ImageTranslator:
         :return:
         :rtype:
         """
+        pass
 
-        # TODO: do something...
-
-        return None
-
-    def translate(self, input_image, clip=(0, 1)):
+    @abstractmethod
+    def translate(self, input_image, batch_dims=None):
         """
             Translates an input image into an output image according to the learned function
         :param input_image:
@@ -50,7 +44,4 @@ class ImageTranslator:
         :return:
         :rtype:
         """
-
-        # TODO: do something...
-
-        return None
+        pass

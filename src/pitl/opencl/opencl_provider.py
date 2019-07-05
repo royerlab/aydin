@@ -17,10 +17,10 @@ class OpenCLProvider:
         self.devices = self.get_filtered_device_list(includes, excludes)
         print(f"filtered devices: {self.devices}")
 
-        selected_device = self.devices[0]
-        print(f"selected device: {selected_device}")
+        self.device = self.devices[0]
+        print(f"selected device: {self.device}")
 
-        self.context = cl.Context([selected_device])
+        self.context = cl.Context([self.device])
         self.queue = cl.CommandQueue(self.context)
 
         self.program_cache = {}
