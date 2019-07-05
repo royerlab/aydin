@@ -11,7 +11,7 @@ class ImageTranslatorBase(ABC):
         """
 
         """
-        self.debug_log = True
+        self.debug = True
         self.self_supervised = None
 
     @abstractmethod

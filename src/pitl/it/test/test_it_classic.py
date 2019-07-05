@@ -36,12 +36,12 @@ def test_it_classic():
     it = ImageTranslatorClassic(feature_generator=generator, regressor=regressor)
 
     start = time.time()
-    denoised = it.train(noisy, noisy)
+    it.train(noisy, noisy)
     stop = time.time()
     print(f"####### Training: elapsed time:  {stop-start} sec")
 
     start = time.time()
-    denoised_predict = it.translate(noisy)
+    denoised = it.translate(noisy)
     stop = time.time()
     print(f"####### Inference: elapsed time:  {stop-start} sec")
 
@@ -53,13 +53,8 @@ def test_it_classic():
     ssim_denoised = ssim(denoised, image)
     print("denoised", psnr_denoised, ssim_denoised)
 
-    psnr_denoised_inf = psnr(denoised_predict, image)
-    ssim_denoised_inf = ssim(denoised_predict, image)
-    print("denoised_predict", psnr_denoised_inf, ssim_denoised_inf)
-
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
-    assert abs(psnr_denoised - psnr_denoised_inf) < 0.1 and abs(ssim_denoised - ssim_denoised_inf) < 0.01
 
     # if the line below fails, then the parameters of the image the lgbm regressohave   been broken.
     # do not change the number below, but instead, fix the problem -- most likely a parameter.

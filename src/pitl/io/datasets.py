@@ -18,6 +18,7 @@ except:
 class examples_single(Enum):
 
     def get_path(self):
+        download_from_gdrive(*self.value, datasets_folder)
         return join(datasets_folder, self.value[1])
 
     # XY natural images:
@@ -52,6 +53,7 @@ class examples_single(Enum):
 class examples_zipped(Enum):
 
     def get_path(self):
+        download_from_gdrive(*self.value, dest_folder=join(datasets_folder, os.path.splitext(self.value[1])[0]), unzip=True)
         return join(datasets_folder, os.path.splitext(self.value[1])[0])
 
     care_tribolium =  ('1BVNU-y9NJdNzkmsZcH8-2nhdhlRd4Mcw', 'tribolium.zip')

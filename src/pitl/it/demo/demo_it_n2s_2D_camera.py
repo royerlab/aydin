@@ -14,7 +14,7 @@ from pitl.regression.gbm import GBMRegressor
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 
 
-def demo_pitl_2D(image, min_level=7, max_level=100):
+def demo(image, min_level=7, max_level=100):
     """
         Demo for self-supervised denoising using camera image with synthetic noise
     """
@@ -27,16 +27,15 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
     noisy = random_noise(noisy, mode='gaussian', var=0.01, seed=0)
     noisy = noisy.astype(np.float32)
 
-
     with app_context():
         viewer = Viewer()
         viewer.add_image(rescale_intensity(image, in_range='image', out_range=(0, 1)), name='image')
         viewer.add_image(rescale_intensity(noisy, in_range='image', out_range=(0, 1)), name='noisy')
 
         scales = [1, 3, 7, 15, 31, 63, 127, 255]
-        widths = [3, 3, 3,  3,  3,  3,   3,   3]
+        widths = [3, 3, 3, 3, 3, 3, 3, 3]
 
-        for param in range(min_level, min(max_level,len(scales)), 1):
+        for param in range(min_level, min(max_level, len(scales)), 1):
             generator = MultiscaleConvolutionalFeatures(kernel_widths=widths[0:param],
                                                         kernel_scales=scales[0:param],
                                                         kernel_shapes=['l1'] * len(scales[0:param]),
@@ -55,7 +54,13 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
             denoised = it.train(noisy, noisy)
             stop = time.time()
             print(f"Training: elapsed time:  {stop-start} ")
-            # denoised_predict = pitl.predict(noisy)
+
+            if denoised is None:
+                # in case of batching we have to do this:
+                start = time.time()
+                denoised = it.translate(noisy)
+                stop = time.time()
+                print(f"inference: elapsed time:  {stop-start} ")
 
             print("noisy", psnr(noisy, image), ssim(noisy, image))
             print("denoised", psnr(denoised, image), ssim(denoised, image))
@@ -65,11 +70,7 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
             # viewer.add_image(rescale_intensity(denoised_predict, in_range='image', out_range=(0, 1)), name='denoised_predict%d' % param)
 
 
-
-
-
-demo_pitl_2D(camera().astype(np.float32), min_level=7)
-
+demo(camera().astype(np.float32), min_level=7)
 # for example in examples_single.get_list():
 #     example_file_path = examples_single.get_path(*example)
 #     array, metadata = io.imread(example_file_path)

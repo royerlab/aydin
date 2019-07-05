@@ -3,9 +3,11 @@ from __future__ import absolute_import, print_function
 import gc
 import math
 import multiprocessing
+import psutil
 from typing import List, Union
 
 import lightgbm
+import numpy
 from lightgbm import Booster
 
 from pitl.regression.regressor_base import RegressorBase
@@ -29,7 +31,7 @@ class GBMRegressor(RegressorBase):
                  n_estimators=128,
                  max_bin=512,
                  learning_rate=0.05,
-                 eval_metric='l1',
+                 metric='l1',
                  early_stopping_rounds=5,
                  verbosity=100
                  ):
@@ -52,7 +54,7 @@ class GBMRegressor(RegressorBase):
         self.n_estimators = n_estimators
         self.max_bin = max_bin
         self.learning_rate = learning_rate
-        self.eval_metric = eval_metric
+        self.metric = metric
         self.early_stopping_rounds = early_stopping_rounds
         self.verbosity = verbosity
         self.lgbmr = None
@@ -72,18 +74,37 @@ class GBMRegressor(RegressorBase):
     def _get_params(self, num_samples, batch=False):
         min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
         # print(f'min_data_in_leaf: {min_data_in_leaf}')
-        return {'objective': 'regression_l2',
-                "boosting_type": "gbdt",
-                "learning_rate": self.learning_rate,
-                "num_leaves": self.num_leaves,
-                "max_depth": max(3, int(math.log2(self.num_leaves)) - 1),
-                "max_bin": self.max_bin,
-                #"min_data_in_leaf": min_data_in_leaf,
-                "subsample_for_bin": 200000,
-                "num_threads": multiprocessing.cpu_count() // 2,
-                "metric": ["l2", "l1"],
-                'verbosity': -1  #self.verbosity
-                }
+
+        objective = self.metric
+        if objective == 'l1':
+            objective = 'regression_l1'
+        elif objective == 'l2':
+            objective = 'regression_l2'
+
+        params = {"boosting_type": "gbdt",
+         'objective': objective,
+         "learning_rate": self.learning_rate,
+         "num_leaves": self.num_leaves,
+         "max_depth": max(3, int(math.log2(self.num_leaves)) - 1),
+         "max_bin": self.max_bin,
+         # "min_data_in_leaf": min_data_in_leaf,
+         "subsample_for_bin": 200000,
+         "num_threads": multiprocessing.cpu_count() // 2,
+         "metric": self.metric,
+         'verbosity': -1,  # self.verbosity
+         "bagging_freq": 1,
+         "bagging_fraction": 0.8,
+         # "device_type" : 'gpu'
+         }
+
+        if self.metric=='l1':
+            params["lambda_l1"] = 0.01
+        elif self.metric=='l2':
+            params["lambda_l2"] = 0.01
+        else:
+            params["lambda_l1"] = 0.01
+
+        return params
 
     def fit_batch(self, x_train, y_train, x_valid=None, y_valid=None):
         self._fit(x_train, y_train, x_valid, y_valid, is_batch=True)
@@ -109,7 +130,7 @@ class GBMRegressor(RegressorBase):
                                     )
 
         if is_batch:
-            if isinstance(self.lgbmr, (list,)) or self.lgbmr is None:
+            if (not isinstance(self.lgbmr, (list,))) or self.lgbmr is None:
                 self.lgbmr = []
             self.lgbmr.append(model)
         else:
@@ -120,7 +141,7 @@ class GBMRegressor(RegressorBase):
 
         gc.collect()
 
-    def predict(self, x):
+    def predict(self, x, batch_mode='median'):
         """
         Predicts y given x by applying the learned function f: y=f(x)
         :param x:
@@ -130,20 +151,41 @@ class GBMRegressor(RegressorBase):
         """
         if isinstance(self.lgbmr, (list,)):
             yp = None
-            counter = 0
-            for model in self.lgbmr:
-                yp_batch = model.predict(x, num_iteration=model.best_iteration)
 
-                if yp is None:
-                    yp = yp_batch
-                else:
-                    yp += yp_batch
+            nb_models = len(self.lgbmr)
 
-                counter = counter + 1
+            size_in_bytes = nb_models*x.size*x.itemsize
+            free_mem_in_bytes = psutil.virtual_memory().free
 
-            yp /= counter
+            # we check if there is enough memory to compute the median:
+            is_enough_memory =  1.2*size_in_bytes < free_mem_in_bytes
 
-            return yp
+            if batch_mode=='median' and is_enough_memory:
+
+                yp_batch_list = []
+
+                for model in self.lgbmr:
+                    yp_batch = model.predict(x, num_iteration=model.best_iteration)
+                    yp_batch_list.append(yp_batch)
+
+                yp = numpy.median(yp_batch_list, axis=0)
+                return yp
+
+            else:  # or we compute the mean:
+                counter = 0
+                for model in self.lgbmr:
+                    yp_batch = model.predict(x, num_iteration=model.best_iteration)
+
+                    if yp is None:
+                        yp = yp_batch
+                    else:
+                        yp += yp_batch
+
+                    counter = counter + 1
+
+                yp /= counter
+
+                return yp
 
 
         else:
