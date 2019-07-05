@@ -1,7 +1,5 @@
 from __future__ import absolute_import, print_function
 
-from lightgbm import LGBMRegressor
-from sklearn.linear_model import LinearRegression, HuberRegressor, Lasso
 from sklearn.svm import SVR, LinearSVR
 
 
@@ -26,7 +24,6 @@ class SupportVectorRegressor:
             self.svr = LinearSVR() #gamma='scale')
         else:
             self.svr = SVR(gamma='scale')
-
 
     def fit(self, x_train, y_train, x_test=None, y_test=None):
         """

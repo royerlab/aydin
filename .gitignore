@@ -11,7 +11,6 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
 develop-eggs/
 dist/
 downloads/
@@ -111,3 +110,5 @@ data/
 
 # OS specific
 .DS_Store
+
+build/osx/build/
