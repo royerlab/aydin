@@ -2,10 +2,10 @@ from PyQt5.QtCore import QThreadPool, pyqtSignal, QRunnable, QObject, pyqtSlot, 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QProgressBar, QSplitter, \
     QPlainTextEdit, QApplication
 
-from src.pitl.gui.components.filepath_picker import FilePathPicker
-from src.pitl.gui.components.worker import Worker
-from src.pitl.services.Noise2Self import Noise2Self
-from src.pitl.util.resource import read_image_from_path
+from pitl.gui.components.filepath_picker import FilePathPicker
+from pitl.gui.components.worker import Worker
+from pitl.services.Noise2Self import Noise2Self
+from pitl.util.resource import read_image_from_path
 from skimage.io import imsave
 
 

@@ -11,7 +11,7 @@ from pitl.it.it_base import ImageTranslatorBase
 from pitl.regression.gbm import GBMRegressor
 from pitl.util.combinatorics import closest_product
 from pitl.util.nd import nd_split_slices, remove_margin_slice
-from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
+from pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 
 
 class ImageTranslatorClassic(ImageTranslatorBase):

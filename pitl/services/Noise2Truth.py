@@ -1,6 +1,6 @@
-from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from pitl.it.it_classic import ImageTranslator
-from _sandbox_.gbm import GBMRegressor
+from pitl.features.mcfocl import MultiscaleConvolutionalFeatures
+from pitl.it.it_classic import ImageTranslatorClassic
+from pitl.regression.gbm import GBMRegressor
 
 
 class Noise2Truth:
@@ -32,7 +32,7 @@ class Noise2Truth:
         regressor = GBMRegressor(num_leaves=63,
                                  n_estimators=512)
 
-        it = ImageTranslator(feature_generator=generator, regressor=regressor)
+        it = ImageTranslatorClassic(feature_generator=generator, regressor=regressor)
 
         denoised = it.train(noisy_image, image) # TODO: figure out what is going on with return
         return it.translate(noisy_test)

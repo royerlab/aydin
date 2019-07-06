@@ -11,7 +11,7 @@ from tifffile import imread
 from pitl.io.datasets import examples_zipped
 from pitl.it.it_classic import ImageTranslatorClassic
 from pitl.regression.gbm import GBMRegressor
-from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
+from pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 
 
 def demo():

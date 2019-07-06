@@ -13,7 +13,7 @@ from pitl.features.features_2d import compute_feature_2d
 from pitl.features.features_3d import compute_feature_3d
 from pitl.features.features_4d import compute_feature_4d
 from pitl.util.nd import nd_range
-from src.pitl.opencl.opencl_provider import OpenCLProvider
+from pitl.opencl.opencl_provider import OpenCLProvider
 
 
 class MultiscaleConvolutionalFeatures:

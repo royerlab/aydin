@@ -11,7 +11,7 @@ from skimage.util import random_noise
 
 from pitl.it.it_classic import ImageTranslatorClassic
 from pitl.regression.rf import RandomForrestRegressor
-from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
+from pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 
 
 def demo(image, min_level=7, max_level=100):

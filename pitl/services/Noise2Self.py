@@ -1,6 +1,6 @@
-from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from pitl.it.it_classic import ImageTranslator
-from _sandbox_.gbm import GBMRegressor
+from pitl.features.mcfocl import MultiscaleConvolutionalFeatures
+from pitl.it.it_classic import ImageTranslatorClassic
+from pitl.regression.gbm import GBMRegressor
 
 
 class Noise2Self:
@@ -33,5 +33,5 @@ class Noise2Self:
                                  n_estimators=1024,
                                  early_stopping_rounds=20)
 
-        it = ImageTranslator(feature_generator=generator, regressor=regressor)
+        it = ImageTranslatorClassic(feature_generator=generator, regressor=regressor)
         return it.train(noisy_image, noisy_image)
