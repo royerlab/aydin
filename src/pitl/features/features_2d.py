@@ -74,3 +74,4 @@ def compute_feature_2d(generator, image_gpu, feature_gpu, dx, dy, lx, ly, exclud
     feature_kernel = program.feature_kernel
 
     feature_kernel(generator.opencl_provider.queue, image_gpu.shape, None, image_gpu.data, feature_gpu.data)
+

@@ -65,3 +65,4 @@ def compute_feature_1d(generator, image_gpu, feature_gpu, dx, lx, exclude_center
     feature_kernel = program.feature_kernel
 
     feature_kernel(generator.opencl_provider.queue, image_gpu.shape, None, image_gpu.data, feature_gpu.data)
+

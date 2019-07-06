@@ -1,3 +1,4 @@
+import time
 from os.path import join
 
 import numpy as np
@@ -7,13 +8,13 @@ from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from tifffile import imread
 
-from src.pitl.io.datasets import downloaded_zipped_example, examples_zipped
+from pitl.io.datasets import downloaded_zipped_example, examples_zipped
+from pitl.it.it_classic import ImageTranslatorClassic
+from pitl.regression.gbm import GBMRegressor
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from src.pitl.pitl_classic import ImageTranslator
-from src.pitl.regression.gbm import GBMRegressor
 
 
-def demo_pitl_3D():
+def demo():
     """
         Demo for supervised denoising using CARE's tribolium example -- full 3D.
 
@@ -41,9 +42,9 @@ def demo_pitl_3D():
         viewer.add_image(image_test, name='image_test')
         viewer.add_image(noisy_test, name='noisy_test')
 
-        level = 6
+        level = 4
         scales = [1, 3, 7, 15, 31, 63, 127, 255]
-        widths = [3, 3, 3,  3,  3,  3,  3,  3]
+        widths = [3, 3, 3, 3, 3, 3, 3, 3]
 
         generator = MultiscaleConvolutionalFeatures(kernel_widths=widths[:level],
                                                     kernel_scales=scales[:level],
@@ -51,23 +52,34 @@ def demo_pitl_3D():
                                                     )
 
         regressor = GBMRegressor(num_leaves=64,
-                                 max_depth=7,
                                  n_estimators=1024,
                                  learning_rate=0.01,
                                  eval_metric='l1',
                                  early_stopping_rounds=None)
 
-        it = ImageTranslator(generator, regressor)
+        it = ImageTranslatorClassic(generator, regressor)
 
-        denoised = it.train(noisy, image)
-        viewer.add_image(rescale_intensity(denoised, in_range='image', out_range=(0, 1)), name='denoised')
+        start = time.time()
+        it.train(noisy, image)
+        stop = time.time()
+        print(f"Training: elapsed time:  {stop-start} ")
 
-        image_test_denoised = it.translate(noisy_test)
-        viewer.add_image(rescale_intensity(image_test_denoised, in_range='image', out_range=(0, 1)), name='test_denoised')
+        start = time.time()
+        denoised = it.translate(noisy)
+        stop = time.time()
+        print(f"inference train: elapsed time:  {stop-start} ")
+
+        start = time.time()
+        denoised_test = it.translate(noisy_test)
+        stop = time.time()
+        print(f"inference test: elapsed time:  {stop-start} ")
 
         print("noisy", psnr(noisy, image), ssim(noisy, image))
         print("denoised", psnr(denoised, image), ssim(denoised, image))
-        print("denoised test", psnr(image_test_denoised, image_test), ssim(image_test_denoised, image_test))
+        print("denoised test", psnr(denoised_test, image_test), ssim(denoised_test, image_test))
+
+        viewer.add_image(rescale_intensity(denoised, in_range='image', out_range=(0, 1)), name='denoised')
+        viewer.add_image(rescale_intensity(denoised_test, in_range='image', out_range=(0, 1)), name='test_denoised')
 
 
-demo_pitl_3D()
+demo()

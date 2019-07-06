@@ -1,6 +1,6 @@
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from src.pitl.pitl_classic import ImageTranslator
-from src.pitl.regression.gbm import GBMRegressor
+from pitl.it.it_classic import ImageTranslator
+from _sandbox_.gbm import GBMRegressor
 
 
 class Noise2Self:

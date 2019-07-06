@@ -3,19 +3,18 @@ import time
 import numpy as np
 from napari import Viewer
 from napari.util import app_context
+from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from skimage.util import random_noise
 
-from src.pitl.io import io
-from src.pitl.io.datasets import examples_single
+from pitl.it.it_classic import ImageTranslatorClassic
+from pitl.regression.gbm import GBMRegressor
 from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
-from src.pitl.pitl_classic import ImageTranslator
-from src.pitl.regression.gbm import GBMRegressor
 
 
-def demo_pitl_2D(image, min_level=7, max_level=100):
+def demo(image, min_level=7, max_level=100):
     """
         Demo for self-supervised denoising using camera image with synthetic noise
     """
@@ -34,9 +33,9 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
         viewer.add_image(rescale_intensity(noisy, in_range='image', out_range=(0, 1)), name='noisy')
 
         scales = [1, 3, 7, 15, 31, 63, 127, 255]
-        widths = [3, 3, 3,  3,  3,  3,   3,   3]
+        widths = [3, 3, 3, 3, 3, 3, 3, 3]
 
-        for param in range(min_level, min(max_level,len(scales)), 1):
+        for param in range(min_level, min(max_level, len(scales)), 1):
             generator = MultiscaleConvolutionalFeatures(kernel_widths=widths[0:param],
                                                         kernel_scales=scales[0:param],
                                                         kernel_shapes=['l1'] * len(scales[0:param]),
@@ -44,18 +43,24 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
                                                         )
 
             regressor = GBMRegressor(learning_rate=0.01,
-                                     num_leaves=256,
-                                     max_depth=8,
+                                     num_leaves=127,
+                                     max_bin=512,
                                      n_estimators=2048,
                                      early_stopping_rounds=20)
 
-            it = ImageTranslator(feature_generator=generator, regressor=regressor)
+            it = ImageTranslatorClassic(feature_generator=generator, regressor=regressor)
 
             start = time.time()
             denoised = it.train(noisy, noisy)
             stop = time.time()
             print(f"Training: elapsed time:  {stop-start} ")
-            # denoised_predict = pitl.predict(noisy)
+
+            if denoised is None:
+                # in case of batching we have to do this:
+                start = time.time()
+                denoised = it.translate(noisy)
+                stop = time.time()
+                print(f"inference: elapsed time:  {stop-start} ")
 
             print("noisy", psnr(noisy, image), ssim(noisy, image))
             print("denoised", psnr(denoised, image), ssim(denoised, image))
@@ -65,10 +70,8 @@ def demo_pitl_2D(image, min_level=7, max_level=100):
             # viewer.add_image(rescale_intensity(denoised_predict, in_range='image', out_range=(0, 1)), name='denoised_predict%d' % param)
 
 
-
-
-array, metadata = io.imread(examples_single.generic_crowd.get_path())
-demo_pitl_2D(array.astype(np.float32), min_level=5, max_level=6)
-
-array, metadata = io.imread(examples_single.generic_mandrill.get_path())
-demo_pitl_2D(array.astype(np.float32), min_level=5, max_level=6)
+demo(camera().astype(np.float32), min_level=7)
+# for example in examples_single.get_list():
+#     example_file_path = examples_single.get_path(*example)
+#     array, metadata = io.imread(example_file_path)
+#     demo_pitl_2D(array.astype(np.float32), min_level=5, max_level=6)

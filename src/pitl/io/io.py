@@ -1,6 +1,7 @@
 import traceback
 from pathlib import Path
 
+import imageio
 import numpy
 import pims
 import skimage
@@ -26,7 +27,7 @@ def imread(path):
         try:
             if is_tiff:
                 print(f"Reading file {path} as TIFF file")
-                array = tifffile.imread(path)
+                array = pims.open(path)
             elif is_czi:
                 print(f"Reading file {path} as CZI file")
                 array = czifile.imread(path)
@@ -57,3 +58,7 @@ def imread(path):
     array = numpy.squeeze(array)
 
     return (array, metadata)
+
+
+
+
