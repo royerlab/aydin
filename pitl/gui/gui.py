@@ -4,8 +4,8 @@ from PyQt5.QtCore import Qt, QThreadPool
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QSplitter
 
-from src.pitl.gui.components.log_console import LogConsole
-from src.pitl.gui.tabs.tabs import Tabs
+from pitl.gui.components.log_console import LogConsole
+from pitl.gui.tabs.tabs import Tabs
 
 
 class App(QMainWindow):

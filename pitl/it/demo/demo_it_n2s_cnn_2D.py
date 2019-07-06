@@ -9,9 +9,9 @@ from skimage.measure import compare_psnr as psnr
 from skimage.measure import compare_ssim as ssim
 from skimage.util import random_noise
 
-from src.pitl.features.multiscale_convolutions import MultiscaleConvolutionalFeatures
-from src.pitl.pitl_classic import ImageTranslator
-from src.pitl.regression.nn import CNNRegressor, Modeltype
+from pitl.features.mcfocl import MultiscaleConvolutionalFeatures
+from pitl.it.it_classic import ImageTranslatorClassic
+from pitl.regression.nn import CNNRegressor, Modeltype
 
 """
     Demo for self-supervised denoising using camera image with synthetic noise
@@ -30,7 +30,7 @@ def demo_pitl_2D(noisy):
                                                 kernel_shapes=['l1'] * len(scales),
                                                 exclude_center=True,
                                                 )
-    it = ImageTranslator(feature_generator=generator, regressor=regressor)
+    it = ImageTranslatorClassic(feature_generator=generator, regressor=regressor)
     denoised = it.train(noisy, noisy)
 
     results = [[psnr(noisy, image), ssim(noisy, image)]]

@@ -1,1 +1,1 @@
-from src.pitl.io.io import imread
+from pitl.io.io import imread

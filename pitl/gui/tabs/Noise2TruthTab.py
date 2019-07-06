@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QProgressBar, QPlainTextEdit, \
     QSplitter
 
-from src.pitl.gui.components.filepath_picker import FilePathPicker
+from pitl.gui.components.filepath_picker import FilePathPicker
 
 
 class Noise2TruthTab(QWidget):

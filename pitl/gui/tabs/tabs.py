@@ -1,9 +1,9 @@
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QWidget, QTabWidget
 
-from src.pitl.gui.tabs.AboutTab import AboutTab
-from src.pitl.gui.tabs.Noise2SelfTab import Noise2SelfTab
-from src.pitl.gui.tabs.Noise2TruthTab import Noise2TruthTab
+from pitl.gui.tabs.AboutTab import AboutTab
+from pitl.gui.tabs.Noise2SelfTab import Noise2SelfTab
+from pitl.gui.tabs.Noise2TruthTab import Noise2TruthTab
 
 
 class Tabs(QTabWidget):

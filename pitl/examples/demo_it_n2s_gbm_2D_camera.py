@@ -11,7 +11,7 @@ from skimage.util import random_noise
 
 from pitl.it.it_classic import ImageTranslatorClassic
 from pitl.regression.gbm import GBMRegressor
-from src.pitl.features.mcfocl import MultiscaleConvolutionalFeatures
+from pitl.features.mcfocl import MultiscaleConvolutionalFeatures
 
 
 def demo(image, min_level=7, max_level=100):
@@ -70,7 +70,7 @@ def demo(image, min_level=7, max_level=100):
             # viewer.add_image(rescale_intensity(denoised_predict, in_range='image', out_range=(0, 1)), name='denoised_predict%d' % param)
 
 
-demo(camera().astype(np.float32), min_level=7)
+# demo(camera().astype(np.float32), min_level=7)
 # for example in examples_single.get_list():
 #     example_file_path = examples_single.get_path(*example)
 #     array, metadata = io.imread(example_file_path)
