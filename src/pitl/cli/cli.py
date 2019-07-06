@@ -6,6 +6,7 @@ from src.pitl.gui import gui
 from src.pitl.services.Noise2Self import Noise2Self
 from src.pitl.util.resource import read_image_from_path
 from ..examples.demo_pitl_2D_cli import demo_pitl_2D
+import sentry_sdk
 
 
 logger = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.pass_context
 @click.version_option(version='0.0.1')
 def pitl(ctx):
+    sentry_sdk.init("https://d9d7db5f152546c490995a409023c60a@sentry.io/1498298")
     if ctx.invoked_subcommand is None:
         gui.run()
     else:
