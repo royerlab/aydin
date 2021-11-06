@@ -26,6 +26,7 @@ REQUIRES = []
 
 setup(
     name='aydin',
+    packages=['aydin'],
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     install_requires=INSTALL_REQUIRES,
@@ -34,4 +35,9 @@ setup(
             [console_scripts]
             aydin=aydin.cli.cli:aydin
         ''',
+    download_url='https://github.com/royerlab/aydin/archive/refs/tags/v0.1.6.tar.gz',
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Programming Language :: Python :: 3.9',
+      ],
 )
