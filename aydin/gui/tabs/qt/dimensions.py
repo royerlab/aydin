@@ -14,14 +14,14 @@ from aydin.io.io import FileMetadata
 class DimensionsTab(QWidget):
     """
     Interpreting image dimensions
-
+    <br><br>
     Images can have many dimensions: 2D, 3D, 4D, 3D+t... Some dimensions are 'spatio-temporal' and
     the signal is expected to have a degree of continuity and correlation across these dimensions.
     Other dimensions are 'batch' dimensions, they just state that we have multiple images of the same
-    kind and shape. <b>Read more...<b>
+    kind and shape. <b>Read more...</b>
 
     <moreless>
-
+    <br><br>
     Finally, some dimensions are 'channel' dimensions and carry vectorial information
     for each voxel of the image. In this tab, you can help aydin better denoise your images by telling it
     how to interpret the dimensions of your images. The choices made here will impact denoising speed

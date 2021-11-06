@@ -11,7 +11,7 @@ class TrainingCroppingTab(BaseCroppingTab):
 
     Use the sliders to select a region of the image
     to define the cropping region for training or auto-tuning. Aydin automatically
-    suggests a crop based on the image content. <b>Read more...<b>
+    suggests a crop based on the image content. <b>Read more...</b>
 
     <moreless>
 
