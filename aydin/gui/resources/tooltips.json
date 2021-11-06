@@ -1,0 +1,29 @@
+{
+  "main_page": {
+    "open_file_button": "Open or add new file(s)",
+    "napari_button": "View images in napari",
+    "activity_button": "Activity logs"
+  },
+  "summary": {},
+  "files": {},
+  "images": {},
+  "dimensions": {},
+  "cropping": {},
+  "training": {},
+  "denoise": {
+    "backend_options": [
+      "This regressor might take longer time but can bring better image quality with results.",
+      "This regressor will use CPU resources strictly.",
+      "Fast but overall poor performance -- as expected.",
+      "Uses standard perceptron-like neural networks. Uses TensorFlow to implement neural networks.",
+      "Uses the LGBM library.",
+      "Way too slow when non-linear. When using linear much faster, but does not perform better than straight linear regression.",
+      "UNet model",
+      "J-Invariant Network"
+    ]
+  },
+  "deconvolve": {
+    "method_label_combobox": "Choose the deconvolution method you want to use",
+    "backend_combobox": "Choose the computational backend you want to run on"
+  }
+}
