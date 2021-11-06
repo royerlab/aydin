@@ -28,7 +28,6 @@ class FilesTab(QWidget):
     If all the images added have the same shape and data type you have the option to 'hyperstack'
     all listed images together along a new dimension. Hyperstacking is selected by default if the image
     shapes and data types are compatible.
-
     """
 
     def __init__(self, parent):
