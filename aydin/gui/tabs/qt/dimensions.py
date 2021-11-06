@@ -29,19 +29,18 @@ class DimensionsTab(QWidget):
 
     <split>
 
-    In general, we don't recommend denoising multi-channel images unless the correlation between the channels<br>
-    is strong and expected. Denoising each channel separately reduces the chance of channel 'bleed-through'.<br>
-    If you expect continuity along certain dimensions do not select them as 'batch' dimensions. Denoising<br>
-    in general leverages signal continuity and correlation and thus would benefit from as many 'spatio-temporal'<br>
-    dimensions as possible. However, the more spatio-temporal dimensions, the more intense the computation,<br>
-    and the longer the denoising. This can lead to better results but also can lead to 'blurring' effects if<br>
-    there is not enough continuity over these dimensions. For example, if the time interval between time<br>
-    steps is too long and consecutive images are too different from each other, it is often better to<br>
-    interpret that dimension as a batch dimension. In our experience, it is often better to trade speed for<br>
-    signal: if you can speed up imaging and augment signal continuity, even if the signal-to-noise ratio per<br>
-    image is worse, the fact that there are more images with different noise patterns but a highly continuous<br>
-    signal, will help achieve better denoising performance. <b>Read less...</b><br>
-
+    In general, we don't recommend denoising multi-channel images unless the correlation between the channels
+    is strong and expected. Denoising each channel separately reduces the chance of channel 'bleed-through'.
+    If you expect continuity along certain dimensions do not select them as 'batch' dimensions. Denoising
+    in general leverages signal continuity and correlation and thus would benefit from as many 'spatio-temporal'
+    dimensions as possible. However, the more spatio-temporal dimensions, the more intense the computation,
+    and the longer the denoising. This can lead to better results but also can lead to 'blurring' effects if
+    there is not enough continuity over these dimensions. For example, if the time interval between time
+    steps is too long and consecutive images are too different from each other, it is often better to
+    interpret that dimension as a batch dimension. In our experience, it is often better to trade speed for
+    signal: if you can speed up imaging and augment signal continuity, even if the signal-to-noise ratio per
+    image is worse, the fact that there are more images with different noise patterns but a highly continuous
+    signal, will help achieve better denoising performance. <b>Read less...</b>
     """
 
     def __init__(self, parent):
