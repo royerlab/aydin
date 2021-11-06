@@ -28,11 +28,11 @@ setup(
     name='aydin',
     # packages=['aydin'],
     # use_scm_version=True,
-    version="0.0.5",
+    version="0.0.6",
     # setup_requires=['setuptools_scm'],
     url='https://github.com/royerlab/aydin',
     install_requires=INSTALL_REQUIRES,
-    # py_modules=['aydin'],
+    py_modules=['aydin'],
     entry_points={
         'console_scripts': ['aydin=aydin.cli.cli:cli']
         },
