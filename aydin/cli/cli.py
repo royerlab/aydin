@@ -16,16 +16,12 @@ from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_inst
 from aydin.util.misc.json import load_any_json
 from aydin.util.log.log import lprint, Log
 from aydin.util.misc.slicing_helper import apply_slicing
-
+from aydin import __version__
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-VERSION = None
+VERSION = __version__
 
-try:
-    VERSION = version("aydin")
-except PackageNotFoundError:
-    lprint("Aydin installation has problems, please re-install")
 
 
 @click.group(invoke_without_command=True, context_settings=CONTEXT_SETTINGS)
