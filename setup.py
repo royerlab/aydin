@@ -26,7 +26,7 @@ REQUIRES = []
 
 setup(
     name='aydin',
-    packages=['aydin'],
+    # packages=['aydin'],
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     url='https://github.com/royerlab/aydin',
