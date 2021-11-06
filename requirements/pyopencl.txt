@@ -1,0 +1,2 @@
+pyopencl==2019.1.1; sys_platform == "darwin" or sys_platform == "linux"
+https://gitlab.com/AhmetCanSolak/windows-whls/raw/master/pyopencl-2019.1.2-cp37-cp37m-win_amd64.whl; sys_platform == "win32" and python_version == '3.7'

@@ -6,6 +6,9 @@ __pycache__/
 # Jetbrains
 .idea/
 
+# Docs
+docs/build
+
 # C extensions
 *.so
 
@@ -31,13 +34,13 @@ MANIFEST
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-*.spec
+# *.spec
 
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
+# Unit demo / coverage reports
 htmlcov/
 .tox/
 .coverage
@@ -112,3 +115,9 @@ data/
 .DS_Store
 
 build/osx/build/
+build/linux/build/
+build/win/build
+
+.zgroup
+*.png
+

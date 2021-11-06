@@ -44,20 +44,20 @@ def _my_collect_data_files(modname, flatten_dirs = False, **kwargs):
 
     return files
 
-
-if __name__ == '__main__':
-
-    print(_module_path("pyopencl"))
-    print(_module_path("PyQt5"))
-    # print(_module_path("lightgbm"))
-
-
-    # print _get_toc_objects(os.path.join(_module_path("pyopencl"), "cl"),
-    #                    dir_prefix = "pyopencl/cl")
-
-    print(collect_dynamic_libs("PyQt5"))
-    print(collect_dynamic_libs("pyopencl"))
-    # print(collect_dynamic_libs("lightgbm"))
-
-    # print _my_collect_data_files("pyopencl", include_py_files = True)
+# 
+# if __name__ == '__main__':
+# 
+#     print(_module_path("pyopencl"))
+#     print(_module_path("PyQt5"))
+#     # print(_module_path("lightgbm"))
+# 
+# 
+#     # print _get_toc_objects(os.path.join(_module_path("pyopencl"), "cl"),
+#     #                    dir_prefix = "pyopencl/cl")
+# 
+#     print(collect_dynamic_libs("PyQt5"))
+#     print(collect_dynamic_libs("pyopencl"))
+#     # print(collect_dynamic_libs("lightgbm"))
+# 
+#     # print _my_collect_data_files("pyopencl", include_py_files = True)
 
