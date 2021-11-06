@@ -1,1 +1,0 @@
-.\aydin\aydin.exe

@@ -1,8 +1,0 @@
-[tool.black]
-target-version = ['py36', 'py37']
-skip-string-normalization = true
-
-[build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.0"]
-
-[tool.setuptools_scm]

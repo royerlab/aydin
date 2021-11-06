@@ -1,2 +1,0 @@
-class ArrayShapeDoesNotMatchError(Exception):
-    pass
