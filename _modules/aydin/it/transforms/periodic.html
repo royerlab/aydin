@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.transforms.periodic &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.transforms.periodic</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.transforms.periodic</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+
+<span class="c1"># from numpy.typing import ArrayLike</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">minimum_filter</span>
+<span class="kn">from</span> <span class="nn">skimage.feature</span> <span class="kn">import</span> <span class="n">peak_local_max</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.gaussian</span> <span class="kn">import</span> <span class="n">calibrate_denoise_gaussian</span>
+<span class="kn">from</span> <span class="nn">aydin.it.transforms.base</span> <span class="kn">import</span> <span class="n">ImageTransformBase</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span><span class="p">,</span> <span class="n">lprint</span>
+
+
+<div class="viewcode-block" id="PeriodicNoiseSuppressionTransform"><a class="viewcode-back" href="../../../../api/transforms.html#aydin.it.transforms.periodic.PeriodicNoiseSuppressionTransform">[docs]</a><span class="k">class</span> <span class="nc">PeriodicNoiseSuppressionTransform</span><span class="p">(</span><span class="n">ImageTransformBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Periodic Noise Suppression</span>
+
+<span class="sd">    Some images have a form of periodic noise that can be seen as strong</span>
+<span class="sd">    peaks in their power spectral density. Suppressing these peaks before and</span>
+<span class="sd">    after denoising is often a good idea. This is tricky to use, use with</span>
+<span class="sd">    care. Works with non-axis aligned periodic patterns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">preprocess_description</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Periodic noise suppression&quot;</span> <span class="o">+</span> <span class="n">ImageTransformBase</span><span class="o">.</span><span class="n">preprocess_description</span>
+    <span class="p">)</span>
+    <span class="n">postprocess_description</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Reaply periodic noise&quot;</span> <span class="o">+</span> <span class="n">ImageTransformBase</span><span class="o">.</span><span class="n">postprocess_description</span>
+    <span class="p">)</span>
+    <span class="n">postprocess_supported</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">postprocess_recommended</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mask_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">max_num_peaks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">post_processing_is_inverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">priority</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.30</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a Periodic Noise Suppression Transform</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mask_radius : float</span>
+<span class="sd">            Radius for masking peaks in Fourier spectrum. Expressed in units</span>
+<span class="sd">            relative to the size of the image, i.e. must be within [0,1].</span>
+<span class="sd">            Will always be at least a single pixel wide.</span>
+<span class="sd">        threshold : float</span>
+<span class="sd">            Threshold for FFT peak detection.</span>
+<span class="sd">        max_num_peaks : int</span>
+<span class="sd">            Maximum number of peaks in the Fourier spectra to correct for.</span>
+<span class="sd">        post_processing_is_inverse : bool</span>
+<span class="sd">            If False, we reapply the periodic suppression to eliminate any</span>
+<span class="sd">            remaining periodic noise after denoising.</span>
+<span class="sd">        priority : float</span>
+<span class="sd">            The priority is a value within [0,1] used to determine the order in</span>
+<span class="sd">            which to apply the pre- and post-processing transforms. Transforms</span>
+<span class="sd">            are sorted and applied in ascending order during preprocesing and in</span>
+<span class="sd">            the reverse, descending, order during post-processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_radius</span> <span class="o">=</span> <span class="n">mask_radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_num_peaks</span> <span class="o">=</span> <span class="n">max_num_peaks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_processing_is_inverse</span> <span class="o">=</span> <span class="n">post_processing_is_inverse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instanciating: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># We exclude certain fields from saving:</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_original_dtype&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_coordinates&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; (mask_radius=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_radius</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; threshold=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; post_processing_is_inverse=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">post_processing_is_inverse</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Applies periodic noise suppression to array of shape: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and dtype: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">):</span>
+            <span class="n">new_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_suppress_periodic_patterns</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new_array</span>
+
+    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_postprocess</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Reapplies periodic noise to array of shape: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and dtype: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">):</span>
+            <span class="c1"># turns out it is better to suppress the periodic patterns before and after:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">post_processing_is_inverse</span><span class="p">:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reapply_periodic_patterns</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_suppress_periodic_patterns</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new_array</span>
+
+    <span class="k">def</span> <span class="nf">_suppress_periodic_patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Compute Fourier intensity:</span>
+        <span class="n">ft</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">workers</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ft</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">ft</span><span class="p">)</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ft</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+        <span class="c1"># Mask radius in pixels:</span>
+        <span class="n">mask_radius_pix</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_radius</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span>
+
+        <span class="c1"># Denoise density:</span>
+        <span class="n">function</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">calibrate_denoise_gaussian</span><span class="p">(</span>
+            <span class="n">spectrum</span><span class="p">,</span> <span class="n">max_num_truncate</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">filtered_spectrum</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="c1"># Minimum filtering:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">mask_radius_pix</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">filtered_spectrum</span> <span class="o">=</span> <span class="n">minimum_filter</span><span class="p">(</span><span class="n">filtered_spectrum</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="c1"># Compute correction:</span>
+        <span class="n">correction</span> <span class="o">=</span> <span class="n">filtered_spectrum</span> <span class="o">/</span> <span class="n">spectrum</span>
+
+        <span class="c1"># Coordinates of peaks to correct:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Locate peaks:</span>
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">peak_local_max</span><span class="p">(</span>
+            <span class="n">numpy</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">spectrum</span><span class="p">),</span>
+            <span class="n">min_distance</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">mask_radius_pix</span><span class="p">,</span>
+            <span class="n">threshold_rel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">num_peaks</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_num_peaks</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># center peak:</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="c1"># For each peak:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">coordinate</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coordinates</span><span class="p">):</span>
+            <span class="n">coordinate</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">coordinate</span> <span class="o">!=</span> <span class="n">center</span><span class="p">:</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Suppressing peak at location: </span><span class="si">{</span><span class="n">coordinate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># We compute a mask:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">_sphere</span><span class="p">(</span>
+                    <span class="n">correction</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">mask_radius_pix</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">coordinate</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Apply the mask:</span>
+                <span class="n">factor</span> <span class="o">=</span> <span class="n">correction</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+                <span class="n">ft</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*=</span> <span class="n">factor</span>
+
+                <span class="c1"># keep coordinates:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">factor</span><span class="p">)</span>
+
+        <span class="c1"># Transform back:</span>
+        <span class="n">ft</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">ft</span><span class="p">)</span>
+        <span class="n">new_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="n">ft</span><span class="p">,</span> <span class="n">workers</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">new_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">new_array</span><span class="p">)</span>
+
+        <span class="c1"># import napari</span>
+        <span class="c1"># with napari.gui_qt():</span>
+        <span class="c1">#     viewer = napari.Viewer()</span>
+        <span class="c1">#     viewer.add_image(array, name=&#39;array&#39;)</span>
+        <span class="c1">#     viewer.add_image(numpy.log1p(spectrum), name=&#39;spectrum&#39;)</span>
+        <span class="c1">#     viewer.add_image(numpy.log1p(filtered_spectrum), name=&#39;filtered_spectrum&#39;)</span>
+        <span class="c1">#     viewer.add_image(numpy.log1p(correction), name=&#39;correction&#39;)</span>
+        <span class="c1">#     ft = scipy.fft.fftshift(ft)</span>
+        <span class="c1">#     viewer.add_image(numpy.log1p(numpy.abs(ft).astype(numpy.float32)), name=&#39;spectrum_after&#39;)</span>
+        <span class="c1">#     viewer.add_image(new_array, name=&#39;new_array&#39;)</span>
+
+        <span class="k">return</span> <span class="n">new_array</span>
+
+    <span class="k">def</span> <span class="nf">_reapply_periodic_patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ft</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">workers</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ft</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">ft</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">mask</span><span class="p">,</span> <span class="n">factor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinates</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">ft</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">/=</span> <span class="n">factor</span>
+        <span class="n">ft</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">ft</span><span class="p">)</span>
+        <span class="n">new_array</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="n">ft</span><span class="p">,</span> <span class="n">workers</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">new_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">new_array</span><span class="p">)</span>
+        <span class="c1"># cast back to original dtype:</span>
+        <span class="n">new_array</span> <span class="o">=</span> <span class="n">new_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_array</span></div>
+
+
+<span class="k">def</span> <span class="nf">_sphere</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+    <span class="c1"># From : https://stackoverflow.com/questions/46626267/how-to-generate-a-sphere-in-3d-numpy-array/46626448</span>
+
+    <span class="c1"># assume shape and position are both a 3-tuple of int or float</span>
+    <span class="c1"># the units are pixels / voxels (px for short)</span>
+    <span class="c1"># radius is a int or float in px</span>
+    <span class="n">semisizes</span> <span class="o">=</span> <span class="p">(</span><span class="n">radius</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="c1"># generate the grid for the support points</span>
+    <span class="c1"># centered at the position indicated by position</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="n">x0</span><span class="p">,</span> <span class="n">dim</span> <span class="o">-</span> <span class="n">x0</span><span class="p">)</span> <span class="k">for</span> <span class="n">x0</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">shape</span><span class="p">)]</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ogrid</span><span class="p">[</span><span class="n">grid</span><span class="p">]</span>
+    <span class="c1"># calculate the distance of all points from `position` center</span>
+    <span class="c1"># scaled by the radius</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">x_i</span><span class="p">,</span> <span class="n">semisize</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">semisizes</span><span class="p">):</span>
+        <span class="c1"># this can be generalized for exponent != 2</span>
+        <span class="c1"># in which case `(x_i / semisize)`</span>
+        <span class="c1"># would become `np.abs(x_i / semisize)`</span>
+        <span class="n">arr</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x_i</span> <span class="o">/</span> <span class="n">semisize</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="c1"># the inner part of the sphere will have distance below 1</span>
+    <span class="k">return</span> <span class="n">arr</span> <span class="o">&lt;=</span> <span class="mf">1.0</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

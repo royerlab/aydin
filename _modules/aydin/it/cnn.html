@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.cnn &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/github.html">On Github</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.cnn</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.cnn</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+<span class="kn">import</span> <span class="nn">keras.models</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.eager.context</span> <span class="kn">import</span> <span class="n">device</span>
+
+<span class="kn">from</span> <span class="nn">aydin.io.folders</span> <span class="kn">import</span> <span class="n">get_temp_folder</span>
+<span class="kn">from</span> <span class="nn">aydin.it.base</span> <span class="kn">import</span> <span class="n">ImageTranslatorBase</span>
+<span class="kn">from</span> <span class="nn">aydin.nn.models.jinet</span> <span class="kn">import</span> <span class="n">JINetModel</span>
+<span class="kn">from</span> <span class="nn">aydin.nn.models.unet</span> <span class="kn">import</span> <span class="n">UNetModel</span>
+<span class="kn">from</span> <span class="nn">aydin.nn.util.callbacks</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EarlyStopping</span><span class="p">,</span>
+    <span class="n">ReduceLROnPlateau</span><span class="p">,</span>
+    <span class="n">StopCenterGradient2D</span><span class="p">,</span>
+    <span class="n">StopCenterGradient3D</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aydin.nn.util.data_util</span> <span class="kn">import</span> <span class="n">random_sample_patches</span>
+<span class="kn">from</span> <span class="nn">aydin.nn.util.validation_generator</span> <span class="kn">import</span> <span class="n">train_image_generator</span>
+<span class="kn">from</span> <span class="nn">aydin.regression.nn_utils.callbacks</span> <span class="kn">import</span> <span class="n">ModelCheckpoint</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span><span class="p">,</span> <span class="n">lprint</span>
+<span class="kn">from</span> <span class="nn">aydin.util.tf.device</span> <span class="kn">import</span> <span class="n">get_best_device_name</span><span class="p">,</span> <span class="n">available_device_memory</span>
+
+
+<div class="viewcode-block" id="ImageTranslatorCNN"><a class="viewcode-back" href="../../../api/image_translators/cnn.html#aydin.it.cnn.ImageTranslatorCNN">[docs]</a><span class="k">class</span> <span class="nc">ImageTranslatorCNN</span><span class="p">(</span><span class="n">ImageTranslatorBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convolutional Neural Network (CNN) based Image Translator&lt;br&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">training_architecture</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;random&#39;</span><span class="p">,</span>
+        <span class="n">model_architecture</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;jinet&#39;</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">nb_unet_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">batch_norm</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;instance&quot;</span><span class="p">,</span>
+        <span class="n">activation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ReLU&#39;</span><span class="p">,</span>
+        <span class="n">patch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="n">total_num_patches</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">adoption_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">mask_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">random_mask_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">max_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">learn_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        training_architecture : str</span>
+<span class="sd">            &#39;shiftconv&#39; or &#39;checkerbox&#39; or &#39;random&#39; or &#39;checkran&#39; architecture</span>
+<span class="sd">        model_architecture : str</span>
+<span class="sd">            &#39;unet&#39; or &#39;jinet&#39;</span>
+<span class="sd">        batch_size : int</span>
+<span class="sd">            Batch size for training</span>
+<span class="sd">        nb_unet_levels : int</span>
+<span class="sd">            Number of layers</span>
+<span class="sd">        batch_norm</span>
+<span class="sd">            Type of batch normalization (e.g. batch, instance)</span>
+<span class="sd">        activation</span>
+<span class="sd">        patch_size : int</span>
+<span class="sd">            Size for patch sample e.g. 64 for (64, 64) or (64, 64, 64)</span>
+<span class="sd">        total_num_patches</span>
+<span class="sd">            Total number of patches for training</span>
+<span class="sd">        adoption_rate</span>
+<span class="sd">            % of random patches will be used for training, the rest will be discarded</span>
+<span class="sd">        mask_size</span>
+<span class="sd">            Mask shape for masking architecture; int of the same size as the spatial dimension</span>
+<span class="sd">        random_mask_ratio</span>
+<span class="sd">            Probability of masked pixels in random masking approach</span>
+<span class="sd">        max_epochs : int</span>
+<span class="sd">            Maximum number of epochs allowed</span>
+<span class="sd">        patience : int</span>
+<span class="sd">            Patience for EarlyStop or ReducedLR to be triggered</span>
+<span class="sd">        learn_rate : float</span>
+<span class="sd">            Initial learn rate</span>
+<span class="sd">        kwargs</span>
+<span class="sd">            Meant to have only keyword arguments for super class constructor. Do NOT abuse.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span> <span class="o">=</span> <span class="n">model_architecture</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_norm</span> <span class="o">=</span> <span class="n">batch_norm</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation_fun</span> <span class="o">=</span> <span class="n">activation</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">=</span> <span class="n">patch_size</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span> <span class="o">=</span> <span class="n">total_num_patches</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adoption_rate</span> <span class="o">=</span> <span class="n">adoption_rate</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_epochs</span> <span class="o">=</span> <span class="n">max_epochs</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">patience</span> <span class="o">=</span> <span class="n">patience</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learn_rate</span> <span class="o">=</span> <span class="n">learn_rate</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># a CNN model  # both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infmodel</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># inference model  # both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">EStop_patience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience</span> <span class="o">*</span> <span class="mi">2</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ReduceLR_patience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patience</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_fitting</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_images</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validation_markers</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># both</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_patches_for_validation</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">False</span>  <span class="c1"># if false use pixels for validation  # both</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_size</span> <span class="o">=</span> <span class="n">mask_size</span>  <span class="c1"># unet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_mask_ratio</span> <span class="o">=</span> <span class="n">random_mask_ratio</span>  <span class="c1"># unet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span> <span class="o">=</span> <span class="n">nb_unet_levels</span>  <span class="c1"># unet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span> <span class="o">=</span> <span class="n">training_architecture</span>  <span class="c1"># unet</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;CNN image translator&quot;</span><span class="p">):</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;training architecture: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;number of layers: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;batch norm: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;mask size: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_size</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;max_epochs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_epochs</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;verbose: &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span> <span class="o">==</span> <span class="s2">&quot;jinet&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">JINetModel</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span> <span class="o">==</span> <span class="s2">&quot;unet&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">UNetModel</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown model architecture&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ImageTranslatorCNN.save"><a class="viewcode-back" href="../../../api/image_translators/cnn.html#aydin.it.cnn.ImageTranslatorCNN.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Saves a &#39;all-batteries-included&#39; image translation model at a given path (folder).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : str</span>
+<span class="sd">            path to save to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving &#39;CNN&#39; image translator to </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+            <span class="n">frozen</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_cnn</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">frozen</span></div>
+
+    <span class="k">def</span> <span class="nf">save_cnn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># serialize model to JSON:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;tf_model&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infmodel</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;tf_inf_model&quot;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;There is no model to save yet.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># exclude fields below that should/cannot be saved properly:</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;early_stopping&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;reduce_learning_rate&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;checkpoint&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;loss_history&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;infmodel&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;validation_images&#39;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">_load_internals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading &#39;cnn&#39; image translator from </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+            <span class="c1"># load JSON and create model:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;tf_model&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infmodel</span> <span class="o">=</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">load_model</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;tf_inf_model&quot;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">get_receptive_field_radius</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nb_unet_levels</span><span class="p">,</span> <span class="n">shiftconv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">shiftconv</span><span class="p">:</span>
+            <span class="n">rf</span> <span class="o">=</span> <span class="mi">7</span> <span class="k">if</span> <span class="n">nb_unet_levels</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">36</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">nb_unet_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">6</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rf</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">nb_unet_levels</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">18</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="n">nb_unet_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">4</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rf</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ImageTranslatorCNN.stop_training"><a class="viewcode-back" href="../../../api/image_translators/cnn.html#aydin.it.cnn.ImageTranslatorCNN.stop_training">[docs]</a>    <span class="k">def</span> <span class="nf">stop_training</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stops currently running training within the instance by turning the flag</span>
+<span class="sd">        true for early stop callback.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_fitting</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="nf">retrain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="n">target_image</span><span class="p">,</span> <span class="n">training_architecture</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span> <span class="o">=</span> <span class="n">training_architecture</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">target_image</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_train</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_image</span><span class="p">,</span>
+        <span class="n">target_image</span><span class="p">,</span>
+        <span class="n">train_valid_ratio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">callback_period</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">jinv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">with</span> <span class="n">device</span><span class="p">(</span><span class="n">get_best_device_name</span><span class="p">()):</span>
+            <span class="c1"># Reshape the input image</span>
+            <span class="n">input_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">input_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span><span class="p">:</span>
+                <span class="n">target_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">target_image</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">=</span> <span class="n">input_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Number of spacetime dimensions have to be either 2 or 3.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span> <span class="o">=</span> <span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="c1"># Compute patch size from batch size</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">get_receptive_field_radius</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">,</span>
+                        <span class="n">shiftconv</span><span class="o">=</span><span class="s1">&#39;shiftconv&#39;</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="mi">2</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;Number of layers is too large for given patch size.&#39;</span>
+                    <span class="p">)</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Patch size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="c1"># TODO: Do we need to have one if statement to automatically convert self.batch_size = 1 for shiftconv?</span>
+            <span class="k">if</span> <span class="s1">&#39;shiftconv&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span> <span class="o">==</span> <span class="s2">&quot;jinet&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">3</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">lprint</span><span class="p">(</span>
+                    <span class="s1">&#39;When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.&#39;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Adjust patch_size for given input shape</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span>
+
+            <span class="c1"># Check patch_size for unet models</span>
+            <span class="k">if</span> <span class="s1">&#39;unet&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span><span class="p">:</span>
+                <span class="n">patch_size</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">patch_size</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Tile size is too small. The largest dimension of tile size has to be &gt;= </span><span class="si">{</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="si">}</span><span class="s1">.&#39;</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">patch_size</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Tile sizes on XY plane have to be multiple of 2^</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="p">)</span>
+
+            <span class="c1"># Check if the smallest dimension of input data &gt;= patch_size</span>
+            <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">smallest_dim</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_dim</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">smallest_dim</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Determine total number of patches</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                    <span class="n">input_image</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">),</span> <span class="mi">10240</span>
+                <span class="p">)</span>  <span class="c1"># upper limit of num of patches</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span>
+                    <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;total_num_patches has to be larger than batch_size.&#39;</span>
+                    <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span>
+                    <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span>
+                <span class="p">)</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Available mem: &quot;</span><span class="p">,</span> <span class="n">available_device_memory</span><span class="p">())</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Batch size for training: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Decide whether to use validation pixels or patches</span>
+            <span class="k">if</span> <span class="mi">1024</span> <span class="o">&gt;</span> <span class="n">input_image</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Validation data will be created by monitoring </span><span class="si">{</span><span class="n">train_valid_ratio</span><span class="si">}</span><span class="s1"> of the pixels in the input data.&#39;</span>
+                <span class="p">):</span>
+                    <span class="n">img_train</span><span class="p">,</span> <span class="n">img_val</span><span class="p">,</span> <span class="n">val_marker</span> <span class="o">=</span> <span class="n">train_image_generator</span><span class="p">(</span>
+                        <span class="n">input_image</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">train_valid_ratio</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Validation data will be created by monitoring </span><span class="si">{</span><span class="n">train_valid_ratio</span><span class="si">}</span><span class="s1"> of the patches/images in the input data.&#39;</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_create_patches_for_validation</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="c1"># Tile input and target image</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s1">&#39;Random patch sampling...&#39;</span><span class="p">):</span>
+                    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Total number of patches: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">input_patch_idx</span> <span class="o">=</span> <span class="n">random_sample_patches</span><span class="p">(</span>
+                        <span class="n">input_image</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">adoption_rate</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_patch_idx</span><span class="p">)</span>
+
+                    <span class="n">img_train_patch</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_patches_for_validation</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">input_patch_idx</span><span class="p">:</span>
+                            <span class="n">img_train_patch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">input_image</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                        <span class="n">img_train</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">img_train_patch</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">img_val_patch</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">marker_patch</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">input_patch_idx</span><span class="p">:</span>
+                            <span class="n">img_train_patch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img_train</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                            <span class="n">img_val_patch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img_val</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                            <span class="n">marker_patch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val_marker</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                        <span class="n">img_train</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">img_train_patch</span><span class="p">)</span>
+                        <span class="n">img_val</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">img_val_patch</span><span class="p">)</span>
+                        <span class="n">val_marker</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">marker_patch</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">validation_images</span> <span class="o">=</span> <span class="n">img_val</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">validation_markers</span> <span class="o">=</span> <span class="n">val_marker</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span><span class="p">:</span>
+                        <span class="n">target_patch</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">input_patch_idx</span><span class="p">:</span>
+                            <span class="n">target_patch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target_image</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                        <span class="n">target_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">target_patch</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">target_image</span> <span class="o">=</span> <span class="n">img_train</span>
+
+            <span class="c1"># Last check of input size espetially for shiftconv</span>
+            <span class="k">if</span> <span class="s1">&#39;shiftconv&#39;</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span><span class="p">:</span>
+                <span class="c1"># TODO: Hirofumi what is going on the conditional below :D  &lt;-- check input dim is compatible w/ shiftconv</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">numpy</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span>
+                        <span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:][:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">numpy</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+                            <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                    <span class="o">!=</span> <span class="mi">0</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;Each dimension of the input image has to be a multiple of 2^nb_unet_levels for shiftconv.&#39;</span>
+                    <span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span>
+                    <span class="s1">&#39;Model will be generated for self-supervised learning with shift convolution scheme.&#39;</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:][:</span><span class="mi">2</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;Make sure the input image shape is cubic as shiftconv mode involves rotation.&#39;</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">numpy</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span>
+                        <span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:][:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">numpy</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
+                            <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                    <span class="o">!=</span> <span class="mi">0</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;Each dimension of the input image has to be a multiple of &#39;</span>
+                        <span class="s1">&#39;2^(nb_unet_levels-1) as shiftconv mode involvs pixel shift. &#39;</span>
+                    <span class="p">)</span>
+
+            <span class="n">shiftconv</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;shiftconv&#39;</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">(</span>
+                <span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                <span class="n">spacetime_ndim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span><span class="p">,</span>
+                <span class="n">mini_batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+                <span class="n">nb_unet_levels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">,</span>
+                <span class="n">normalization</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">,</span>
+                <span class="n">activation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">activation_fun</span><span class="p">,</span>
+                <span class="n">supervised</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span><span class="p">,</span>
+                <span class="n">shiftconv</span><span class="o">=</span><span class="n">shiftconv</span><span class="p">,</span>
+                <span class="n">learning_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learn_rate</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s1">&#39;CNN model summary:&#39;</span><span class="p">):</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Model architecture: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Train scheme: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span> <span class="o">==</span> <span class="s1">&#39;unet&#39;</span><span class="p">:</span>
+                    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of layers: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Number of parameters in the model: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">count_params</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Batch normalization: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_norm</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Training input size: </span><span class="si">{</span><span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># End of train function and beginning of _train from legacy implmentation</span>
+            <span class="n">input_image</span> <span class="o">=</span> <span class="n">img_train</span>
+
+            <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Training image translator from image of shape </span><span class="si">{</span><span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> to image of shape </span><span class="si">{</span><span class="n">target_image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">:&quot;</span>
+            <span class="p">):</span>
+
+                <span class="k">if</span> <span class="s1">&#39;jinet&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">EStop_patience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">EStop_patience</span> <span class="o">+</span> <span class="mi">10</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ReduceLR_patience</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReduceLR_patience</span> <span class="o">+</span> <span class="mi">20</span>
+
+                <span class="c1"># Early stopping patience:</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Early stopping patience: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">EStop_patience</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Effective LR patience:</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Effective LR patience: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ReduceLR_patience</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Batch size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="c1"># Here is the list of callbacks:</span>
+                <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="c1"># Early stopping callback:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">EStop_patience</span><span class="p">,</span> <span class="n">restore_best_weights</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Reduce LR on plateau:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reduce_learning_rate</span> <span class="o">=</span> <span class="n">ReduceLROnPlateau</span><span class="p">(</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ReduceLR_patience</span><span class="p">,</span> <span class="n">min_lr</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">,</span> <span class="n">min_delta</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reduce_learning_rate1</span> <span class="o">=</span> <span class="n">ReduceLROnPlateau</span><span class="p">(</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">patience</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ReduceLR_patience</span><span class="p">,</span>
+                    <span class="n">min_lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learn_rate</span> <span class="o">*</span> <span class="mf">0.01</span><span class="p">,</span>
+                    <span class="n">min_delta</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model_file_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span>
+                        <span class="n">get_temp_folder</span><span class="p">(),</span>
+                        <span class="sa">f</span><span class="s2">&quot;aydin_cnn_keras_model_file_</span><span class="si">{</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1e16</span><span class="p">)</span><span class="si">}</span><span class="s2">.hdf5&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model will be saved at: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_file_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model_file_path</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">save_best_only</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="p">)</span>
+                    <span class="c1"># Add callbacks to the list:</span>
+                    <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">)</span>
+                    <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">early_stopping</span><span class="p">)</span>
+                    <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reduce_learning_rate</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="s1">&#39;checkran&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span><span class="p">:</span>
+                        <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reduce_learning_rate1</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="o">.</span><span class="n">remove</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">stop_center_gradient</span> <span class="o">=</span> <span class="n">StopCenterGradient2D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">stop_center_gradient</span> <span class="o">=</span> <span class="n">StopCenterGradient3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">)</span>
+
+                    <span class="n">callbacks</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">callbacks</span> <span class="o">+</span> <span class="p">[</span><span class="n">stop_center_gradient</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="s1">&#39;jinet&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span>
+                        <span class="k">else</span> <span class="n">callbacks</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Convert mask_size to tuple</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mask_size</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_size</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">input_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+
+                <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Training now...&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;jinet&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                        <span class="n">input_image</span><span class="o">=</span><span class="n">input_image</span><span class="p">,</span>
+                        <span class="n">target_image</span><span class="o">=</span><span class="n">target_image</span><span class="p">,</span>
+                        <span class="n">max_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_epochs</span><span class="p">,</span>
+                        <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+                        <span class="n">total_num_patches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span><span class="p">,</span>
+                        <span class="n">img_val</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_images</span><span class="p">,</span>
+                        <span class="n">create_patches_for_validation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_patches_for_validation</span><span class="p">,</span>
+                        <span class="n">train_valid_ratio</span><span class="o">=</span><span class="n">train_valid_ratio</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                        <span class="n">input_image</span><span class="o">=</span><span class="n">input_image</span><span class="p">,</span>
+                        <span class="n">target_image</span><span class="o">=</span><span class="n">target_image</span><span class="p">,</span>
+                        <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
+                        <span class="n">train_valid_ratio</span><span class="o">=</span><span class="n">train_valid_ratio</span><span class="p">,</span>
+                        <span class="n">img_val</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_images</span><span class="p">,</span>
+                        <span class="n">val_marker</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_markers</span><span class="p">,</span>
+                        <span class="n">training_architecture</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span><span class="p">,</span>
+                        <span class="n">create_patches_for_validation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_patches_for_validation</span><span class="p">,</span>
+                        <span class="n">total_num_patches</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">total_num_patches</span><span class="p">,</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span>
+                        <span class="n">random_mask_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_mask_ratio</span><span class="p">,</span>
+                        <span class="n">patch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">,</span>
+                        <span class="n">mask_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_size</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                        <span class="n">max_epochs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_epochs</span><span class="p">,</span>
+                        <span class="n">ReduceLR_patience</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ReduceLR_patience</span><span class="p">,</span>
+                        <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="n">image_slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">whole_image_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">device</span><span class="p">(</span><span class="n">get_best_device_name</span><span class="p">()):</span>
+            <span class="c1"># Change dimensions to (B, space, C)</span>
+            <span class="n">input_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">input_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Check if padding is needed to have dim size of multiple of 2 in all dimension</span>
+            <span class="n">reshaped_for_cube</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">reshaped_for_model</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">spatial_shape</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">spatial_shape</span><span class="p">))</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">reshaped_for_cube</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">input_shape_max</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">spatial_shape</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">spatial_shape</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                <span class="n">pad_square</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_shape_max</span> <span class="o">-</span> <span class="n">spatial_shape</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+                <span class="n">pad_width1</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+                    <span class="o">+</span> <span class="p">[</span>
+                        <span class="p">[</span>
+                            <span class="n">numpy</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">pad_square</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+                            <span class="n">numpy</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">pad_square</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+                        <span class="p">]</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pad_square</span><span class="p">))</span>
+                    <span class="p">]</span>
+                    <span class="o">+</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+                <span class="p">)</span>
+                <span class="n">input_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">pad_width1</span><span class="p">,</span> <span class="s1">&#39;edge&#39;</span><span class="p">)</span>
+                <span class="n">spatial_shape</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">spatial_shape</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="n">reshaped_for_model</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">pad_width0</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span>
+                    <span class="o">-</span> <span class="p">(</span><span class="n">spatial_shape</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">)</span>
+                    <span class="c1"># + pad_square</span>
+                <span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+                <span class="n">pad_width2</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+                    <span class="o">+</span> <span class="p">[</span>
+                        <span class="p">[</span>
+                            <span class="n">numpy</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">pad_width0</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+                            <span class="n">numpy</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">pad_width0</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+                        <span class="p">]</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pad_width0</span><span class="p">))</span>
+                    <span class="p">]</span>
+                    <span class="o">+</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]</span>
+                <span class="p">)</span>
+                <span class="n">input_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">pad_width2</span><span class="p">,</span> <span class="s1">&#39;edge&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Change the batch_size in split layer or input dimensions accordingly</span>
+            <span class="n">kwargs_for_infmodel</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;mini_batch_size&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s1">&#39;nb_unet_levels&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">,</span>
+                <span class="s1">&#39;normalization&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_norm</span><span class="p">,</span>
+                <span class="s1">&#39;activation&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation_fun</span><span class="p">,</span>
+                <span class="s1">&#39;shiftconv&#39;</span><span class="p">:</span> <span class="s1">&#39;shiftconv&#39;</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span><span class="p">,</span>
+                <span class="s1">&#39;spacetime_ndim&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span><span class="p">,</span>
+            <span class="p">}</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">kwargs_for_infmodel</span><span class="p">[</span><span class="s1">&#39;input_layer_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">kwargs_for_infmodel</span><span class="p">[</span><span class="s1">&#39;input_layer_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="p">]</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span> <span class="o">==</span> <span class="s2">&quot;unet&quot;</span><span class="p">:</span>
+                    <span class="n">kwargs_for_infmodel</span><span class="p">[</span><span class="s1">&#39;original_zdim&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="s1">&#39;random&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span>
+                <span class="ow">or</span> <span class="s1">&#39;check&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span>
+            <span class="p">):</span>
+                <span class="n">kwargs_for_infmodel</span><span class="p">[</span><span class="s1">&#39;supervised&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">kwargs_for_infmodel</span><span class="p">[</span><span class="s1">&#39;supervised&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">infmodel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">infmodel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_class</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs_for_infmodel</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infmodel</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_weights</span><span class="p">())</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">output_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infmodel</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                <span class="n">input_image</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">output_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">infmodel</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                <span class="n">input_image</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span>
+            <span class="p">)</span>
+
+        <span class="c1"># TODO: AhmetCan refactor</span>
+        <span class="k">if</span> <span class="n">reshaped_for_model</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spatial_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">output_image</span> <span class="o">=</span> <span class="n">output_image</span><span class="p">[</span>
+                    <span class="p">:,</span>
+                    <span class="n">pad_width2</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width2</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pad_width2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="p">:,</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_image</span> <span class="o">=</span> <span class="n">output_image</span><span class="p">[</span>
+                    <span class="p">:,</span>
+                    <span class="n">pad_width2</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width2</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pad_width2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width2</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pad_width2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width2</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="p">:,</span>
+                <span class="p">]</span>
+        <span class="k">if</span> <span class="n">reshaped_for_cube</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spatial_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">output_image</span> <span class="o">=</span> <span class="n">output_image</span><span class="p">[</span>
+                    <span class="p">:,</span>
+                    <span class="n">pad_width1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pad_width1</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width1</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="p">:,</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_image</span> <span class="o">=</span> <span class="n">output_image</span><span class="p">[</span>
+                    <span class="p">:,</span>
+                    <span class="n">pad_width1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pad_width1</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width1</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">pad_width1</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="o">-</span><span class="n">pad_width1</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="p">:,</span>
+                <span class="p">]</span>
+
+        <span class="n">output_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">output_image</span><span class="p">,</span> <span class="n">output_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output_image</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImageDenoiserClassic - Classic Image Denoiser &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="ImageTranslatorFGR - Feature Generation&amp;Regression" href="fgr.html" />
+    <link rel="prev" title="ImageTranslatorBase" href="base.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html">
+            <img src="../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../restoration.html">Restoration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../image_translator.html">Image Translator</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="base.html">ImageTranslatorBase</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ImageDenoiserClassic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fgr.html">ImageTranslatorFGR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cnn.html">ImageTranslatorCNN</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contact_us/github.html">On Github</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../image_translator.html">Image Translator</a> &raquo;</li>
+      <li>ImageDenoiserClassic - Classic Image Denoiser</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/image_translators/classic.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="imagedenoiserclassic-classic-image-denoiser">
+<h1>ImageDenoiserClassic - Classic Image Denoiser<a class="headerlink" href="#imagedenoiserclassic-classic-image-denoiser" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.classic.</span></span><span class="sig-name descname"><span class="pre">ImageDenoiserClassic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'butterworth'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_voxels_for_training</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/it/classic.html#ImageDenoiserClassic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic" title="Permalink to this definition"></a></dt>
+<dd><p>Classic Image Denoiser</p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.it.classic.ImageDenoiserClassic.add_transform" title="aydin.it.classic.ImageDenoiserClassic.add_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_transform</span></code></a>(transform[, sort])</p></td>
+<td><p>Adds the given transform to the self.transforms_list</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.it.classic.ImageDenoiserClassic.clear_transforms" title="aydin.it.classic.ImageDenoiserClassic.clear_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_transforms</span></code></a>()</p></td>
+<td><p>Clears the transforms list</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.it.classic.ImageDenoiserClassic.load" title="aydin.it.classic.ImageDenoiserClassic.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
+<td><p>Returns an 'all-batteries-included' image translation model at a given path (folder).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.it.classic.ImageDenoiserClassic.parse_axes_args" title="aydin.it.classic.ImageDenoiserClassic.parse_axes_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_axes_args</span></code></a>(batch_axes, chan_axes, ndim)</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.it.classic.ImageDenoiserClassic.save" title="aydin.it.classic.ImageDenoiserClassic.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
+<td><p>Saves a 'all-batteries-included' image translation model at a given path (folder).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.it.classic.ImageDenoiserClassic.train" title="aydin.it.classic.ImageDenoiserClassic.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(input_image[, target_image, ...])</p></td>
+<td><p>Train to translate a given input image to a given output image.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 63%" />
+<col style="width: 37%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>stop_training</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>translate</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.add_transform">
+<span class="sig-name descname"><span class="pre">add_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aydin.it.transforms.base.ImageTransformBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.add_transform" title="Permalink to this definition"></a></dt>
+<dd><p>Adds the given transform to the self.transforms_list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>transform</strong><span class="classifier">ImageTransformBase</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.clear_transforms">
+<span class="sig-name descname"><span class="pre">clear_transforms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.clear_transforms" title="Permalink to this definition"></a></dt>
+<dd><p>Clears the transforms list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.load">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.load" title="Permalink to this definition"></a></dt>
+<dd><p>Returns an ‘all-batteries-included’ image translation model at a given path (folder).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>path to load from.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.parse_axes_args">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">parse_axes_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_axes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chan_axes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.parse_axes_args" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>batch_axes</strong><span class="classifier">Union[List[int], List[bool]]</span></dt><dd></dd>
+<dt><strong>chan_axes</strong><span class="classifier">Union[List[int], List[bool]]</span></dt><dd></dd>
+<dt><strong>ndim</strong><span class="classifier">int</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/it/classic.html#ImageDenoiserClassic.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.save" title="Permalink to this definition"></a></dt>
+<dd><p>Saves a ‘all-batteries-included’ image translation model at a given path (folder).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>path to save to</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>frozen</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_valid_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.train" title="Permalink to this definition"></a></dt>
+<dd><p>Train to translate a given input image to a given output image.
+This has a lot of the machinery for batching and more…</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="base.html" class="btn btn-neutral float-left" title="ImageTranslatorBase" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="fgr.html" class="btn btn-neutral float-right" title="ImageTranslatorFGR - Feature Generation&amp;Regression" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

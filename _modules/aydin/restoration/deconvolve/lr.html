@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.restoration.deconvolve.lr &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.restoration.deconvolve.lr</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.restoration.deconvolve.lr</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">aydin.it.deconvolution.lr_deconv_scipy</span> <span class="kn">import</span> <span class="n">ImageTranslatorLRDeconvScipy</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span>
+<span class="kn">from</span> <span class="nn">aydin.util.misc.progress_bar</span> <span class="kn">import</span> <span class="n">ProgressBar</span>
+
+
+<div class="viewcode-block" id="LucyRichardson"><a class="viewcode-back" href="../../../../api/restorations/deconvolve_restoration.html#aydin.LucyRichardson">[docs]</a><span class="k">class</span> <span class="nc">LucyRichardson</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;LucyRichardson Service.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    backend : str</span>
+<span class="sd">        Opacity of the layer visual, between 0.0 and 1.0.</span>
+<span class="sd">    psf_kernel : array_like</span>
+<span class="sd">        2D or 3D kernel, dimensions should be odd numbers and numbers sum to 1</span>
+<span class="sd">    max_num_iterations : int</span>
+<span class="sd">    backend : str</span>
+<span class="sd">        Computation backend selection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">psf_kernel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_num_iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;scipy&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+
+        <span class="c1"># default:</span>
+        <span class="n">deconvolution_class</span> <span class="o">=</span> <span class="n">ImageTranslatorLRDeconvScipy</span>
+        <span class="k">if</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;scipy&#39;</span><span class="p">:</span>
+            <span class="n">deconvolution_class</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;ImageTranslatorLRDeconvScipy&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;cupy&#39;</span><span class="p">:</span>
+            <span class="n">deconvolution_class</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;ImageTranslatorLRDeconvCupy&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">backend</span> <span class="o">==</span> <span class="s1">&#39;gputools&#39;</span><span class="p">:</span>
+            <span class="n">deconvolution_class</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;ImageTranslatorLRDeconvGputools&#39;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">it</span> <span class="o">=</span> <span class="n">deconvolution_class</span><span class="p">(</span>
+            <span class="n">psf_kernel</span><span class="o">=</span><span class="n">psf_kernel</span><span class="p">,</span> <span class="n">max_num_iterations</span><span class="o">=</span><span class="n">max_num_iterations</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="LucyRichardson.train"><a class="viewcode-back" href="../../../../api/restorations/deconvolve_restoration.html#aydin.LucyRichardson.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="n">target_image</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to prepare ImageTranslatorLRDeconv instance.</span>
+<span class="sd">        For now there is no actual training going on in lower level calls.</span>
+<span class="sd">        However, calling this method needed to keep normal it compute flow.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_image : numpy.ndarray</span>
+<span class="sd">        target_image : numpy.ndarray</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;LucyRichardson training is starting...&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">it</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+                <span class="n">input_image</span><span class="p">,</span>
+                <span class="n">target_image</span><span class="p">,</span>
+                <span class="n">train_valid_ratio</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;train_valid_ratio&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s1">&#39;train_valid_ratio&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+                <span class="k">else</span> <span class="mf">0.1</span><span class="p">,</span>
+                <span class="n">callback_period</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;callback_period&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s1">&#39;callback_period&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+                <span class="k">else</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="n">jinv</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;jinv&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;jinv&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="LucyRichardson.deconvolve"><a class="viewcode-back" href="../../../../api/restorations/deconvolve_restoration.html#aydin.LucyRichardson.deconvolve">[docs]</a>    <span class="k">def</span> <span class="nf">deconvolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to deconvolve an image by LucyRichardson technique.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_image : numpy.ndarray</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        response : numpy.ndarray</span>
+<span class="sd">            deconvolved image.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;LucyRichardson translation is starting...&quot;</span><span class="p">):</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">it</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span>
+                <span class="n">input_image</span><span class="p">,</span>
+                <span class="n">tile_size</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;tile_size&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;tile_size&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">input_image</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">response</span></div></div>
+
+
+<div class="viewcode-block" id="lucyrichardson"><a class="viewcode-back" href="../../../../api/restorations/deconvolve_restoration.html#aydin.lucyrichardson">[docs]</a><span class="k">def</span> <span class="nf">lucyrichardson</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">batch_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chan_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Method to denoise an image with trained Noise2Self.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_image : numpy.ndarray</span>
+<span class="sd">        Input image to deconvolve.</span>
+<span class="sd">    batch_axes : array_like, optional</span>
+<span class="sd">        Indices of batch axes.</span>
+<span class="sd">    chan_axes : array_like, optional</span>
+<span class="sd">        Indices of channel axes.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    response : numpy.ndarray</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pbar</span> <span class="o">=</span> <span class="n">ProgressBar</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">lr</span> <span class="o">=</span> <span class="n">LucyRichardson</span><span class="p">(</span><span class="n">pbar</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+
+    <span class="c1"># Train</span>
+    <span class="n">lr</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">input_image</span><span class="p">)</span>
+
+    <span class="c1"># Denoise</span>
+    <span class="n">deconvolved</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">deconvolve</span><span class="p">(</span><span class="n">input_image</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">deconvolved</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

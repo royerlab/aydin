@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.regression.lgbm &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/github.html">On Github</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.regression.lgbm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.regression.lgbm</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+
+<span class="kn">import</span> <span class="nn">lightgbm</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">Booster</span>
+
+<span class="kn">from</span> <span class="nn">aydin.regression.base</span> <span class="kn">import</span> <span class="n">RegressorBase</span>
+<span class="kn">from</span> <span class="nn">aydin.regression.gbm_utils.callbacks</span> <span class="kn">import</span> <span class="n">early_stopping</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span><span class="p">,</span> <span class="n">lprint</span>
+
+
+<div class="viewcode-block" id="LGBMRegressor"><a class="viewcode-back" href="../../../api/regressors/lgbm.html#aydin.regression.lgbm.LGBMRegressor">[docs]</a><span class="k">class</span> <span class="nc">LGBMRegressor</span><span class="p">(</span><span class="n">RegressorBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Regressor that uses the LightGBM library.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">num_leaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">127</span><span class="p">,</span>
+        <span class="n">max_num_estimators</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span>
+        <span class="n">max_bin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">loss</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;l1&#39;</span><span class="p">,</span>
+        <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">verbosity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">compute_load</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
+        <span class="n">gpu_prediction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">compute_training_loss</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructs a LightGBM regressor.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        num_leaves</span>
+<span class="sd">            Number of leaves</span>
+<span class="sd">        max_num_estimators</span>
+<span class="sd">            Maximum number of estimators</span>
+<span class="sd">        max_bin</span>
+<span class="sd">            Maximum number of allowed bins</span>
+<span class="sd">        learning_rate</span>
+<span class="sd">            Learning rate for the LightGBM model</span>
+<span class="sd">        loss</span>
+<span class="sd">            Type of loss to be used</span>
+<span class="sd">        patience</span>
+<span class="sd">            Number of rounds required for early stopping</span>
+<span class="sd">        verbosity</span>
+<span class="sd">        compute_load</span>
+<span class="sd">            Allowed load on computational resources in percentage</span>
+<span class="sd">        gpu_prediction : bool</span>
+<span class="sd">        compute_training_loss : bool</span>
+<span class="sd">            Flag to tell LightGBM whether to compute training loss or not</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_verbose_eval</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span> <span class="o">=</span> <span class="n">num_leaves</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_num_estimators</span> <span class="o">=</span> <span class="n">max_num_estimators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_bin</span> <span class="o">=</span> <span class="n">max_bin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">loss</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_rounds</span> <span class="o">=</span> <span class="n">patience</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="n">verbosity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compute_load</span> <span class="o">=</span> <span class="n">compute_load</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gpu_prediction</span> <span class="o">=</span> <span class="n">gpu_prediction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compute_training_loss</span> <span class="o">=</span> <span class="n">compute_training_loss</span>  <span class="c1"># This can be expensive</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;LGBM Regressor&quot;</span><span class="p">):</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;learning rate: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;number of leaves: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max bin: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_bin</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;n_estimators: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_num_estimators</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;patience: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_rounds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+        <span class="c1"># min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))</span>
+        <span class="n">max_depth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span><span class="p">)))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">max_bin</span> <span class="o">=</span> <span class="mi">256</span> <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_bin</span>
+
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;learning_rate:  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;max_depth:  </span><span class="si">{</span><span class="n">max_depth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;num_leaves: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;max_bin:    </span><span class="si">{</span><span class="n">max_bin</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span>
+        <span class="k">if</span> <span class="n">objective</span> <span class="o">==</span> <span class="s1">&#39;l1&#39;</span><span class="p">:</span>
+            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;regression_l1&#39;</span>
+        <span class="k">elif</span> <span class="n">objective</span> <span class="o">==</span> <span class="s1">&#39;l2&#39;</span><span class="p">:</span>
+            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;regression_l2&#39;</span>
+
+        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;boosting_type&quot;</span><span class="p">:</span> <span class="s2">&quot;gbdt&quot;</span><span class="p">,</span>
+            <span class="s1">&#39;objective&#39;</span><span class="p">:</span> <span class="n">objective</span><span class="p">,</span>
+            <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+            <span class="s2">&quot;num_leaves&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span><span class="p">,</span>
+            <span class="s2">&quot;max_depth&quot;</span><span class="p">:</span> <span class="n">max_depth</span><span class="p">,</span>
+            <span class="s2">&quot;max_bin&quot;</span><span class="p">:</span> <span class="n">max_bin</span><span class="p">,</span>
+            <span class="s2">&quot;subsample_for_bin&quot;</span><span class="p">:</span> <span class="mi">200000</span><span class="p">,</span>
+            <span class="s2">&quot;num_threads&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_load</span> <span class="o">*</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">())),</span>
+            <span class="s2">&quot;metric&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+            <span class="s1">&#39;verbosity&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;bagging_freq&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;bagging_fraction&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+            <span class="s2">&quot;lambda_l1&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+            <span class="s2">&quot;lambda_l2&quot;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">params</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_valid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_valid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">regressor_callback</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;GBM regressor fitting:&quot;</span><span class="p">):</span>
+
+            <span class="n">nb_data_points</span> <span class="o">=</span> <span class="n">y_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span> <span class="o">=</span> <span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">has_valid_dataset</span> <span class="o">=</span> <span class="n">x_valid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y_valid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of data points: </span><span class="si">{</span><span class="n">nb_data_points</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">has_valid_dataset</span><span class="p">:</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of validation data points: </span><span class="si">{</span><span class="n">y_valid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of features per data point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">valid_dataset</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">has_valid_dataset</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__epoch_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># We translate the it fgr callback into a lightGBM callback:</span>
+            <span class="c1"># This avoids propagating annoying &#39;evaluation_result_list[0][2]&#39;</span>
+            <span class="c1"># throughout the codebase...</span>
+            <span class="k">def</span> <span class="nf">lgbm_callback</span><span class="p">(</span><span class="n">env</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">val_loss</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">evaluation_result_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">val_loss</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Problem with getting loss from LightGBM &#39;env&#39; in callback&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">regressor_callback</span><span class="p">:</span>
+                    <span class="n">regressor_callback</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Epoch </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__epoch_counter</span><span class="si">}</span><span class="s2">: Validation loss: </span><span class="si">{</span><span class="n">val_loss</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__epoch_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">evals_result</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="n">verbose_eval</span> <span class="o">=</span> <span class="p">(</span><span class="n">lgbm_callback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">force_verbose_eval</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_callback</span> <span class="o">=</span> <span class="n">early_stopping</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_rounds</span>
+            <span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;GBM regressor fitting now:&quot;</span><span class="p">):</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+                    <span class="n">params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_params</span><span class="p">(</span><span class="n">nb_data_points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">x_train</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span>
+                    <span class="n">init_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">train_set</span><span class="o">=</span><span class="n">train_dataset</span><span class="p">,</span>
+                    <span class="n">valid_sets</span><span class="o">=</span><span class="p">[</span><span class="n">valid_dataset</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_training_loss</span>
+                    <span class="k">else</span> <span class="n">valid_dataset</span><span class="p">,</span>
+                    <span class="n">early_stopping_rounds</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">has_valid_dataset</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">num_boost_round</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_num_estimators</span><span class="p">,</span>
+                    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">lgbm_callback</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_callback</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">has_valid_dataset</span>
+                    <span class="k">else</span> <span class="p">[</span><span class="n">lgbm_callback</span><span class="p">],</span>
+                    <span class="n">verbose_eval</span><span class="o">=</span><span class="n">verbose_eval</span><span class="p">,</span>
+                    <span class="n">evals_result</span><span class="o">=</span><span class="n">evals_result</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;GBM fitting done.&quot;</span><span class="p">)</span>
+
+            <span class="k">del</span> <span class="n">train_dataset</span>
+            <span class="k">del</span> <span class="n">valid_dataset</span>
+
+            <span class="k">if</span> <span class="n">has_valid_dataset</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">last_valid_loss</span> <span class="o">=</span> <span class="n">evals_result</span><span class="p">[</span><span class="s1">&#39;valid_0&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_training_loss</span><span class="p">:</span>
+                <span class="n">loss_history</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;training&#39;</span><span class="p">:</span> <span class="n">evals_result</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">],</span>
+                    <span class="s1">&#39;validation&#39;</span><span class="p">:</span> <span class="n">evals_result</span><span class="p">[</span><span class="s1">&#39;valid_0&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">],</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">loss_history</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;validation&#39;</span><span class="p">:</span> <span class="n">evals_result</span><span class="p">[</span><span class="s1">&#39;valid_0&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">]}</span>
+
+            <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">_LGBMModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpu_prediction</span><span class="p">,</span> <span class="n">loss_history</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_LGBMModel</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">gpu_prediction</span><span class="p">,</span> <span class="n">loss_history</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gpu_prediction</span> <span class="o">=</span> <span class="n">gpu_prediction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span> <span class="o">=</span> <span class="n">loss_history</span>
+
+    <span class="k">def</span> <span class="nf">_save_internals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lgbm_model_file</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;lgbm_model.txt&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span><span class="n">lgbm_model_file</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_load_internals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">lgbm_model_file</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;lgbm_model.txt&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Booster</span><span class="p">(</span><span class="n">model_file</span><span class="o">=</span><span class="n">lgbm_model_file</span><span class="p">)</span>
+
+    <span class="c1"># We exclude certain fields from saving:</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;GBM regressor prediction:&quot;</span><span class="p">):</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of data points             : </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of features per data points: </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;GBM regressor predicting now...&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpu_prediction</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Attempting OpenCL-based regression.&quot;</span><span class="p">)</span>
+                    <span class="kn">from</span> <span class="nn">aydin.regression.gbm_utils.opencl_prediction</span> <span class="kn">import</span> <span class="p">(</span>
+                        <span class="n">GBMOpenCLPrediction</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="o">=</span> <span class="n">GBMOpenCLPrediction</span><span class="p">()</span>
+
+                    <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">num_iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">best_iteration</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># We clear the OpenCL ressources:</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="o">=</span> <span class="kc">None</span>
+
+                    <span class="k">return</span> <span class="n">prediction</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="n">lprint</span><span class="p">(</span>
+                        <span class="s2">&quot;Failed OpenCL-based regression, doing CPU based prediction.&quot;</span>
+                    <span class="p">)</span>
+
+            <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">num_iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">best_iteration</span><span class="p">)</span>
+            <span class="c1"># LGBM is annoying, it spits out float64s</span>
+            <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;GBM regressor predicting done!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">prediction</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>
