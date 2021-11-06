@@ -27,14 +27,14 @@ REQUIRES = []
 setup(
     name='aydin',
     # packages=['aydin'],
-    use_scm_version=True,
-    setup_requires=['setuptools_scm'],
+    # use_scm_version=True,
+    version="0.0.5",
+    # setup_requires=['setuptools_scm'],
     url='https://github.com/royerlab/aydin',
     install_requires=INSTALL_REQUIRES,
     # py_modules=['aydin'],
     entry_points={
-        'console_scripts': ['dexp=dexp.cli.dexp_main:cli',
-                            'aydin=aydin.cli.cli:cli',]
+        'console_scripts': ['aydin=aydin.cli.cli:cli']
         },
     license='BSD 3-Clause',
     license_file='LICENSE.txt',
