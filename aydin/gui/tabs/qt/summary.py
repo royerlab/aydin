@@ -15,7 +15,7 @@ class SummaryTab(QWidget):
     a number of self-supervised, auto-tuned, and unsupervised image denoising algorithms.
     Aydin handles from the get-go n-dimensional array-structured images with an arbitrary number
     of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal dimensions.
-
+    <br><br>
     You can drag and drop an image anywhere on the window to start or click `Add File(s)`
     button on top left part of the window. You can also load any of the example images.
     Once one or several image files have been loaded, you can adjust your desired settings
@@ -24,7 +24,7 @@ class SummaryTab(QWidget):
     before and after denoising.
 
     <moreless>
-
+    <br><br>
     To learn how to use Aydin Studio -- this user-friendly interface, check our
     <a href='https://royerlab.github.io/aydin/tutorials/tutorials_home.html'>tutorials</a>.
     To see examples of how to tune Aydin for a particular image, check our

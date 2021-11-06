@@ -20,7 +20,7 @@ from aydin.restoration.denoise.util.denoise_utils import (
 class DenoiseTab(QWidget):
     """
     Now it is time to denoise the previously selected and cropped images.
-
+    <br><br>
     Aydin comes with a growing variety of self-supervised, auto-tuned, and unsupervised denoising algorithms,
     each with their own strengths and weaknesses in terms of speed, denoising performance, artifacts, and propensity
     to hallucinate unsubstantiated details. We recommend you check our
