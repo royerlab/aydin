@@ -15,7 +15,9 @@ Older graphics cards could work but may cause trouble or be too slow. Aydin Stud
 gives an overview of the strengths and weaknesses of your machine, highlighting in red and orange
 items that might be problematic.
 
-[PUT SCREENSHOT OF HARDWARE SUMMARY HERE]
+
+.. image:: ../resources/system_summary_ss.png
+
 
 Having said that, some algorithms in Aydin such as the 'Butterworth' denoiser  can be quite fast,
 can run on modest machines, and may be sufficient for your needs.
