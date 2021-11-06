@@ -5,7 +5,6 @@ from glob import glob
 import click
 import numpy
 import napari
-from importlib_metadata import version, PackageNotFoundError
 
 from aydin.gui.gui import run
 from aydin.it.base import ImageTranslatorBase
@@ -21,7 +20,6 @@ from aydin import __version__
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 VERSION = __version__
-
 
 
 @click.group(invoke_without_command=True, context_settings=CONTEXT_SETTINGS)

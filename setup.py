@@ -1,5 +1,4 @@
 import sys
-import os
 from setuptools import setup
 
 
@@ -13,13 +12,13 @@ if sys.version_info < (3, 9):
     )
     sys.exit(1)
 
-with open(os.path.join('requirements', 'default.txt')) as f:
-    default_requirements = [
-        line.strip() for line in f if line and not line.startswith('#')
-    ]
-
-INSTALL_REQUIRES = default_requirements
-REQUIRES = []
+# with open(os.path.join('requirements', 'default.txt')) as f:
+#     default_requirements = [
+#         line.strip() for line in f if line and not line.startswith('#')
+#     ]
+#
+# INSTALL_REQUIRES = default_requirements
+# REQUIRES = []
 
 # Handle pyopencl
 # os.system("pip install -r " + os.path.join('requirements', 'pyopencl.txt'))
@@ -27,7 +26,6 @@ REQUIRES = []
 setup(
     use_scm_version={"write_to": "aydin/_version.py"},
     setup_requires=['setuptools_scm'],
-    install_requires=INSTALL_REQUIRES,
     entry_points={
         'console_scripts': ['aydin=aydin.cli.cli:cli']
         },
