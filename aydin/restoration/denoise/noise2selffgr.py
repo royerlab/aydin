@@ -26,7 +26,7 @@ if os.getenv("BUNDLED_AYDIN") == "1":
 
 class Noise2SelfFGR(DenoiseRestorationBase):
     """
-    Noise2Self image denoising using "Feature Generation & Regression" (FGR)
+    Noise2Self image denoising "Feature Generation & Regression" (FGR)
     """
 
     def __init__(
@@ -157,9 +157,9 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             elem_class = response.__getattribute__(elem)
             descriptions.append(
                 fgr_description
-                + "<br><br>"
+                + ", uses "
                 + feature_generator_description
-                + "<br><br>"
+                + " and uses "
                 + elem_class.__doc__.replace("\n\n", "<br><br>")
             )
 

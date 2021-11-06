@@ -21,7 +21,7 @@ from aydin.util.tf.device import get_best_device_name
 
 
 class NNRegressor(RegressorBase):
-    """Regressor that uses standard perceptron-like neural networks."""
+    """standard perceptron-like neural network regressor."""
 
     device_max_mem = psutil.virtual_memory().total
 

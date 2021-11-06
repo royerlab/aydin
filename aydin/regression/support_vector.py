@@ -9,7 +9,7 @@ class SupportVectorRegressor(RegressorBase):
     \n\n
     Note: Way too slow when non-linear, nearly useless...
     When using linear much faster, but does not perform better
-    than straight linear regression...
+    than straight linear regression.
     """
 
     def __init__(self, linear: bool = True):
