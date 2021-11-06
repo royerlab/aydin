@@ -3,13 +3,13 @@ import os
 from setuptools import setup
 
 
-if sys.version_info < (3, 7):
+if sys.version_info < (3, 9):
     sys.stderr.write(
         f'You are using Python '
         + "{'.'.join(str(v) for v in sys.version_info[:3])}.\n\n"
-        + 'aydin only supports Python 3.7 and above.\n\n'
-        + 'Please install Python 3.7 using:\n'
-        + '  $ pip install python==3.7\n\n'
+        + 'aydin only supports Python 3.9 and above.\n\n'
+        + 'Please install Python 3.9 using:\n'
+        + '  $ pip install python==3.9\n\n'
     )
     sys.exit(1)
 
@@ -32,10 +32,10 @@ setup(
     url='https://github.com/royerlab/aydin',
     install_requires=INSTALL_REQUIRES,
     # py_modules=['aydin'],
-    entry_points='''
-            [console_scripts]
-            aydin=aydin.cli.cli:cli
-        ''',
+    entry_points={
+        'console_scripts': ['dexp=dexp.cli.dexp_main:cli',
+                            'aydin=aydin.cli.cli:cli',]
+        },
     license='BSD 3-Clause',
     license_file='LICENSE.txt',
     classifiers=[
