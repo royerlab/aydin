@@ -14,7 +14,7 @@ from aydin.util.log.log import lsection, lprint
 
 
 class CBRegressor(RegressorBase):
-    """Regressor that uses the CatBoost library."""
+    """CatBoost Regressor."""
 
     model: CatBoostRegressor
 

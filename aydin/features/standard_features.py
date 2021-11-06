@@ -10,7 +10,7 @@ from aydin.util.log.log import lprint
 
 
 class StandardFeatureGenerator(ExtensibleFeatureGenerator):
-    """Standard Feature Generator class"""
+    """Standard Feature Generator"""
 
     def __init__(
         self,

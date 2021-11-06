@@ -13,7 +13,7 @@ from aydin.util.log.log import lsection, lprint
 
 
 class LGBMRegressor(RegressorBase):
-    """Regressor that uses the LightGBM library."""
+    """LightGBM Regressor."""
 
     def __init__(
         self,
