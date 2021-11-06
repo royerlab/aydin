@@ -15,6 +15,7 @@ docs/build
 # Distribution / packaging
 .Python
 develop-eggs/
+build/
 dist/
 downloads/
 eggs/
@@ -121,3 +122,4 @@ build/win/build
 .zgroup
 *.png
 
+aydin/_version.py

@@ -19,5 +19,4 @@ qtpy==1.11.2
 scikit-image==0.18.3
 tensorflow==2.6.0
 keras==2.6.0
-zarr==2.4.0; sys_platform == "darwin"
-zarr==2.10.2; sys_platform == "win32" or sys_platform == "linux"
+zarr==2.4.0

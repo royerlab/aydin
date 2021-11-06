@@ -5,7 +5,6 @@ from glob import glob
 import click
 import numpy
 import napari
-from importlib_metadata import version, PackageNotFoundError
 
 from aydin.gui.gui import run
 from aydin.it.base import ImageTranslatorBase
@@ -16,22 +15,17 @@ from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_inst
 from aydin.util.misc.json import load_any_json
 from aydin.util.log.log import lprint, Log
 from aydin.util.misc.slicing_helper import apply_slicing
-
+from aydin import __version__
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-VERSION = None
-
-try:
-    VERSION = version("aydin")
-except PackageNotFoundError:
-    lprint("Aydin installation has problems, please re-install")
+VERSION = __version__
 
 
 @click.group(invoke_without_command=True, context_settings=CONTEXT_SETTINGS)
 @click.pass_context
 @click.version_option(version=VERSION)
-def aydin(ctx):
+def cli(ctx):
     """aydin cli
 
     Parameters
@@ -56,7 +50,7 @@ def aydin(ctx):
         pass
 
 
-@aydin.command()
+@cli.command()
 @click.argument('files', nargs=-1)
 @click.option('-ts', '--training-slicing', default='', type=str)
 @click.option('-is', '--inference-slicing', default='', type=str)
@@ -150,7 +144,7 @@ def denoise(files, **kwargs):
         lprint("DONE")
 
 
-@aydin.command()
+@cli.command()
 @click.argument('files', nargs=-1)
 @click.argument('psf_path', nargs=1)
 @click.option('-s', '--slicing', default='', type=str)
@@ -184,7 +178,7 @@ def lucyrichardson(files, psf_path, **kwargs):
         imwrite(deconvolved, path)
 
 
-@aydin.command()
+@cli.command()
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 def info(files, **kwargs):
@@ -201,7 +195,7 @@ def info(files, **kwargs):
     )  # we are not printing anything here as aydin.io.imread prints logs
 
 
-@aydin.command()
+@cli.command()
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 def view(files, **kwargs):
@@ -225,7 +219,7 @@ def view(files, **kwargs):
             viewer.add_image(image, name=filenames[idx])
 
 
-@aydin.command()
+@cli.command()
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 def hyperstack(files, **kwargs):
@@ -282,4 +276,4 @@ def handle_files(files, slicing):
 
 
 if __name__ == '__main__':
-    aydin()
+    cli()
