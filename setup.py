@@ -34,7 +34,7 @@ setup(
     # py_modules=['aydin'],
     entry_points='''
             [console_scripts]
-            aydin=aydin.cli.cli:aydin
+            aydin=aydin.cli.cli:cli
         ''',
     license='BSD 3-Clause',
     license_file='LICENSE.txt',
