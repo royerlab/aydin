@@ -25,10 +25,13 @@ class SummaryTab(QWidget):
 
     <moreless>
 
-    To learn how to use Aydin Studio -- this user-friendly interface, check our <a href='www.google.com'>tutorials</a>.
-    To see examples of how to tune Aydin for a particular image, check our <a href='www.google.com'>use cases</a>.
+    To learn how to use Aydin Studio -- this user-friendly interface, check our
+    <a href='https://royerlab.github.io/aydin/tutorials/tutorials_home.html'>tutorials</a>.
+    To see examples of how to tune Aydin for a particular image, check our
+    <a href='https://royerlab.github.io/aydin/use_cases/introduction.html'>use cases</a>.
     Finally, once you have trained an Aydin model using any of the algorithms provided, you can process a large
-    number of files in a 'headless' fashion using our <a href='www.google.com'>command line interface</a>.
+    number of files in a 'headless' fashion using our
+    <a href='https://royerlab.github.io/aydin/tutorials/cli_tutorials.html'> command line interface</a>.
     """
 
     def __init__(self, parent):

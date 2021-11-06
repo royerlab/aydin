@@ -23,7 +23,8 @@ class DenoiseTab(QWidget):
 
     Aydin comes with a growing variety of self-supervised, auto-tuned, and unsupervised denoising algorithms,
     each with their own strengths and weaknesses in terms of speed, denoising performance, artifacts, and propensity
-    to hallucinate unsubstantiated details. We recommend you check our <a href=''>use cases</a> to learn how to
+    to hallucinate unsubstantiated details. We recommend you check our
+    <a href='https://royerlab.github.io/aydin/use_cases/introduction.html'>use cases</a> to learn how to
     choose the best algorithm and parameters for your image(s).
 
     <b>Read more...<b>
