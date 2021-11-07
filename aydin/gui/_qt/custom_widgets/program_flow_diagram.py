@@ -43,8 +43,8 @@ class QProgramFlowDiagramWidget(QWidget):
             "Gauss": examples_single.gauss_noisy,
             "Periodic": examples_single.periodic_noise,
             "Chessboard": examples_single.brown_chessboard_gray,
-            "RoyerLab HCR": examples_single.royerlab_hcr,
-            "Blastocyst Fracking": examples_single.maitre_mouse,
+            "HCR (Royer)": examples_single.royerlab_hcr,
+            "Blastocyst Fracking (Maitre)": examples_single.maitre_mouse,
         }
         for item in menu_items.keys():
             action = menu.addAction(item)
