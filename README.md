@@ -90,6 +90,15 @@ Install *Aydin* in the environment:
 pip install aydin
 ```
 
+### CUDA dependencies:
+
+If you have a NVIDIA CUDA Graphics card, you should install the CUDA toolkit:
+```bash
+conda install cudatoolkit
+```
+
+### Mac specific dependencies:
+
 For Macs (OSX) you first need to do:
 ```bash
 brew install libomp
