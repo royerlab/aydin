@@ -3,8 +3,8 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![codecov](https://codecov.io/gl/aydinorg/aydin/branch/master/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gl/aydinorg/aydin)
 
-*Aydin* is a user-friendly, feature-rich, and fast image denoising tool that provides
-a number of self-supervised, auto-tuned, and unsupervised image denoising algorithms.
+*Aydin* is a user-friendly, feature-rich, and fast **image denoising tool** that provides
+a number of **self-supervised, auto-tuned, and unsupervised** image denoising algorithms.
 *Aydin* handles from the get-go n-dimensional array-structured images with an arbitrary number
 of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal dimensions.
 
