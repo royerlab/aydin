@@ -14,8 +14,8 @@ from aydin.regression.cb import CBRegressor
 from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.linear import LinearRegressor
 from aydin.regression.nn import NNRegressor
-from aydin.regression.random_forest import RandomForestRegressor
-from aydin.regression.support_vector import SupportVectorRegressor
+from aydin.regression.rf import RFRegressor
+from aydin.regression.sv import SVRegressor
 
 
 def test_linear_saveload():
@@ -23,11 +23,11 @@ def test_linear_saveload():
 
 
 def test_rf_saveload():
-    saveload(RandomForestRegressor(), min_ssim=0.70)
+    saveload(RFRegressor(), min_ssim=0.70)
 
 
 def test_svr_saveload():
-    saveload(SupportVectorRegressor(), min_ssim=0.70)
+    saveload(SVRegressor(), min_ssim=0.70)
 
 
 def test_gbm_saveload():

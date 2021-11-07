@@ -32,15 +32,9 @@ from aydin.util.log.log import lprint
 
 
 class UNetModel(Model):
-    """Create a UNet model. Extends `tensorflow.python.keras.models.Model`.
-
-    3 training modes are available:
-
-    supervised: noisy and clean images are required
-
-    shiftconv: self-supervised learning with shift and conv scheme
-
-    non-shiftconv: self-supervised learning by masking pixels at each iteration
+    """UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:
+    self-supervised learning with shift and conv scheme non-shiftconv: self-supervised learning by masking pixels at
+    each iteration
     """
 
     def __init__(

@@ -9,20 +9,16 @@ class TrainingCroppingTab(BaseCroppingTab):
     """
     Cropping Image for training & auto-tuning
 
-    Use the sliders to select a region of the image
-    to define the cropping region for training or auto-tuning. Aydin automatically
-    suggests a crop based on the image content. <b>Read more...</b>
+    Use the sliders to select a region of the image to define the cropping region for training or auto-tuning. Aydin
+    automatically suggests a crop based on the image content.
 
     <moreless>
 
-
-    It is often not advised to use the entire image for training or auto-tuning.
-    You may want to focus the attention of the algorithm to a specific region,
-    exclude excessive dark background. or simply reduce the time required for training
-    or auto-tuning. In the case of neural networks (CNN, NN) and dictionary based methods
-    more data does help, methods using gradient boosting less so (N2S-FGR-cb/lgbm), and
-    simpler methods such as low-pass filtering (Butterworth, Gaussian, ...) need very data
-    (but ideally highly contrasted and detail rich regions) to work.
+    It is often not advised to use the entire image for training or auto-tuning. You may want to focus the attention
+    of the algorithm to a specific region, exclude excessive dark background. or simply reduce the time required for
+    training or auto-tuning. In the case of neural networks (CNN, NN) and dictionary based methods more data does
+    help, methods using gradient boosting less so (N2S-FGR-cb/lgbm), and simpler methods such as low-pass filtering (
+    Butterworth, Gaussian, ...) need very data (but ideally highly contrasted and detail rich regions) to work.
 
     <split>
     """
@@ -36,7 +32,7 @@ class TrainingCroppingTab(BaseCroppingTab):
         )
 
         self.explanation_layout.addStretch()
-        self.explanation_layout.addWidget(self.use_same_crop_checkbox)
+        self.explanation_layout.addWidget(self.use_same_crop_checkbox, 10)
 
     @property
     def images(self):

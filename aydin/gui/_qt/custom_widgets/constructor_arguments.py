@@ -59,7 +59,11 @@ class ConstructorArgumentsWidget(QWidget):
                     description = param.description
 
             if description is not None:
+                # Handle None to auto replacement:
                 description = description.replace("None", "'auto'")
+                # Replace new lines with spaces to avoid wrapping conflicts:
+                description = description.replace('\n', ' ')
+
             param_description = QLabel(description)
             param_description.setWordWrap(True)
             param_description.setTextInteractionFlags(Qt.TextSelectableByMouse)

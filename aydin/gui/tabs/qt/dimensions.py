@@ -13,34 +13,29 @@ from aydin.io.io import FileMetadata
 
 class DimensionsTab(QWidget):
     """
-    Interpreting image dimensions
-    <br><br>
-    Images can have many dimensions: 2D, 3D, 4D, 3D+t... Some dimensions are 'spatio-temporal' and
-    the signal is expected to have a degree of continuity and correlation across these dimensions.
-    Other dimensions are 'batch' dimensions, they just state that we have multiple images of the same
-    kind and shape. <b>Read more...</b>
+    Interpreting image dimensions <br><br> Images can have many dimensions: 2D, 3D, 4D, 3D+t... Some dimensions are
+    'spatio-temporal' and the signal is expected to have a degree of continuity and correlation across these
+    dimensions. Other dimensions are 'batch' dimensions, they just state that we have multiple images of the same
+    kind and shape.
 
-    <moreless>
-    <br><br>
-    Finally, some dimensions are 'channel' dimensions and carry vectorial information
-    for each voxel of the image. In this tab, you can help aydin better denoise your images by telling it
-    how to interpret the dimensions of your images. The choices made here will impact denoising speed
-    and quality.
+    <moreless> <br><br> Finally, some dimensions are 'channel' dimensions and carry vectorial information for each
+    voxel of the image. In this tab, you can help aydin better denoise your images by telling it how to interpret the
+    dimensions of your images. The choices made here will impact denoising speed and quality.
+
+    In general, we don't recommend denoising multi-channel images unless the correlation between the channels is
+    strong and expected. Denoising each channel separately reduces the chance of channel 'bleed-through'. If you
+    expect continuity along certain dimensions do not select them as 'batch' dimensions.
 
     <split>
-
-    In general, we don't recommend denoising multi-channel images unless the correlation between the channels
-    is strong and expected. Denoising each channel separately reduces the chance of channel 'bleed-through'.
-    If you expect continuity along certain dimensions do not select them as 'batch' dimensions. Denoising
-    in general leverages signal continuity and correlation and thus would benefit from as many 'spatio-temporal'
+    In general, denoising leverages signal continuity and correlation and thus would benefit from as many 'spatio-temporal'
     dimensions as possible. However, the more spatio-temporal dimensions, the more intense the computation,
-    and the longer the denoising. This can lead to better results but also can lead to 'blurring' effects if
-    there is not enough continuity over these dimensions. For example, if the time interval between time
-    steps is too long and consecutive images are too different from each other, it is often better to
-    interpret that dimension as a batch dimension. In our experience, it is often better to trade speed for
-    signal: if you can speed up imaging and augment signal continuity, even if the signal-to-noise ratio per
-    image is worse, the fact that there are more images with different noise patterns but a highly continuous
-    signal, will help achieve better denoising performance. <b>Read less...</b>
+    and the longer the denoising. This can lead to better results but also can lead to 'blurring' effects if there is
+    not enough continuity over these dimensions. For example, if the time interval between time steps is too long and
+    consecutive images are too different from each other, it is often better to interpret that dimension as a batch
+    dimension. In our experience, it is often better to trade speed for signal: if you can speed up imaging and
+    augment signal continuity, even if the signal-to-noise ratio per image is worse, the fact that there are more
+    images with different noise patterns but a highly continuous signal, will help achieve better denoising
+    performance.
     """
 
     def __init__(self, parent):

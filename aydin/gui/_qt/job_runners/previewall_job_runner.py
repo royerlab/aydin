@@ -20,7 +20,7 @@ class PreviewAllJobRunner(QWidget):
         self.start_button = QPushButton(
             "Preview all", icon=QApplication.style().standardIcon(QStyle.SP_MediaPlay)
         )
-        self.start_button.setFixedWidth(140)
+        self.start_button.setFixedWidth(180)
         self.start_button.clicked.connect(self.prep_and_run)
         self.widget_layout.addWidget(self.start_button)
 

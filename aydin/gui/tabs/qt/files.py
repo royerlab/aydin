@@ -22,12 +22,11 @@ class FilesTab(QWidget):
     """
     The first step is to load image files into Aydin.
 
-    Drag and drop files or select them with the 'Add Files' button. You can see the files added,
-    and remove files if needed. If a single file consists of multiple channels, you can split the
-    image into separate images, one per channel, by ticking the corresponding box.
-    If all the images added have the same shape and data type you have the option to 'hyperstack'
-    all listed images together along a new dimension. Hyperstacking is selected by default if the image
-    shapes and data types are compatible.
+    Drag and drop files or select them with the 'Add Files' button. You can see the files added, and remove files if
+    needed. If a single file consists of multiple channels, you can split the image into separate images,
+    one per channel, by ticking the corresponding box. If all the images added have the same shape and data type you
+    have the option to 'hyperstack' all listed images together along a new dimension. Hyperstacking is selected by
+    default if the image shapes and data types are compatible.
     """
 
     def __init__(self, parent):

@@ -16,8 +16,8 @@ from aydin.regression.cb import CBRegressor
 from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.linear import LinearRegressor
 from aydin.regression.nn import NNRegressor
-from aydin.regression.random_forest import RandomForestRegressor
-from aydin.regression.support_vector import SupportVectorRegressor
+from aydin.regression.rf import RFRegressor
+from aydin.regression.sv import SVRegressor
 
 
 @pytest.mark.heavy
@@ -28,13 +28,13 @@ def test_saveload_Linear():
 
 @pytest.mark.heavy
 def test_saveload_RF():
-    regressor = RandomForestRegressor()
+    regressor = RFRegressor()
     saveload(StandardFeatureGenerator(), regressor, min_ssim=0.75)
 
 
 @pytest.mark.heavy
 def test_saveload_SVR():
-    regressor = SupportVectorRegressor()
+    regressor = SVRegressor()
     saveload(StandardFeatureGenerator(), regressor, min_psnr=22, min_ssim=0.71)
 
 

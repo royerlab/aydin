@@ -130,8 +130,9 @@ class SystemSummaryWidget(QWidget):
         else:
             self.cuda_gpu_label.setStyleSheet("QLabel {color: red;}")
 
+        cuda_toolkit = numba.cuda.cudadrv.nvvm.is_available()
         self.cudatoolkit_label = QLabel(
-            f"CUDA Toolkit: \t\t{numba.cuda.cudadrv.nvvm.is_available()}", self
+            f"CUDA Toolkit: \t\t{'present' if cuda_toolkit else 'absent'}", self
         )
         self.gpu_group_box_layout.addWidget(self.cudatoolkit_label)
 
