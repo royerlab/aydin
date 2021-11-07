@@ -70,13 +70,25 @@ We recommend that users that are not familiar with python start with our user-fr
 [<img src="https://user-images.githubusercontent.com/1870994/140653999-5f6368d9-3e82-4d10-9283-2359aa1464fa.png" width="200" >
 ](https://github.com/royerlab/aydin/releases/download/v0.1.8/aydin_0.1.8_osx.pkg)
 
+The latest releases and standalone executables can be found [here](https://github.com/royerlab/aydin/releases) 
+
 ## Installation of *Aydin* in Conda:
 
 First download and install [miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://www.anaconda.com/products/individual). 
 
-Then create a conda environment
-You can get the suitable aydin executable from [here](https://royerlab.github.io/aydin/) or you 
-can do `pip install aydin`, for mac first need to do `brew install libomp`.
+Then create a conda environment to host aydin:
+`conda create -n aydin_env python=3.9`
+
+Activate the environment:
+`conda activate aydin_env`
+
+Install *Aydin* in the environment: 
+`pip install aydin`
+
+For Macs (OSX) you first need to do:
+`brew install libomp`
+
+You can install brew by following the instructions [here](https://brew.sh/)
 
 
 ## How to run?
@@ -116,7 +128,7 @@ items that might be problematic.
 ## Known Pressing Issues:
 Here are some issues that are being actively addressed and will be addressed asap:
 
-  - Stop button for all algorithms. For technical reasons having to do with the diversity of libraries we use, we currently cannot stop training. We are planning to solve this using subprocess spawning.
+  - Stop button for all algorithms. For technical reasons having to do with the diversity of libraries we use, we currently cannot stop training. We are planning to solve this using subprocess spawning. For now, to stop Aydin, just close the window and/or terminate the process.
 
 ## Road Map:
 
