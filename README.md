@@ -20,28 +20,28 @@ Notebooks for running on Collab are also planned.
 
 Currently *Aydin* supports two main families of denoisers: the first family consists of 'classical' denoising algorithms that leverage among other: frequency domain filtering, smoothness priors, low-rank representations, self-similarity. The second family consists of algorithms that leverage machine learning approaches such as convolutional neural networks (CNN) or gradient boosting (GB). In the [Noise2Self paper](https://deepai.org/publication/noise2self-blind-denoising-by-self-supervision) we show that it is possible to calibrate any parameterised denoising algorithm, from the few parameters of a classical algorithm to the millions of weights of a deep neural network. We leverage and extend these ideas in *Aydin* to provide a variety of auto-tuned and trained high-quality image denoisers. Here is the list of currently available methods: 
 
-- Low-pass filtering based algorithms:
+- **Low-pass filtering based algorithms:**
   - Butterworth denoiser (*butterworth*).
   - Gaussian blur denoiser (*gaussian*).
   - Gaussian-Median mixed denoiser (*gm*).
  
-- Optimisation-based with smoothness priors:
+- **Optimisation-based with smoothness priors:**
   - Total-Variation denoising (*tv*)
   - Harmonic prior (*harmonic*)
 
-- Low-rank representations: 
+- **Low-rank representations: **
   - Denoising via sparse decomposition (e.g. OMP) over a fixed dictionary (DCT, DST, ...)
   - Denoising via sparse decomposition (e.g. OMP) over a learned dictionary (Kmeans, PCA, ICA, SDL, ...)
 
-- Patch similarity:
+- **Patch similarity:**
   - Non-Local Means denoising (*nlm*)
   - BMnD (not available just yet but partly implemented!) 
 
-- Machine learning based:
+- **Machine learning based:**
   - Noise2Self-FGR: Noise2Self denoising via Feature Generation and Regression (FGR). We use specially crafted integral features. We have several variants that leverage different regressors: CatBoost(cb), lightGBM, linear, perceptron, random-forrest, support vector regression) 
   - Noise2Self-CNN: Noise2Self denoising via Convolutional Neural Networks (CNN). This is the original approach of Noise2Self. In our experience this is typically slower to train, and more prone to hallucination and residual noise than FGR.  
  
-- Other:
+- **Other:**
   - Lipschitz continuity denoising   
 
 Some methods actually do combine multiple ideas and so the classification above is not crisp.
