@@ -29,7 +29,7 @@ Currently *Aydin* supports two main families of denoisers: the first family cons
   - Total-Variation denoising (*tv*)
   - Harmonic prior (*harmonic*)
 
-- **Low-rank representations: **
+- **Low-rank representations:**
   - Denoising via sparse decomposition (e.g. OMP) over a fixed dictionary (DCT, DST, ...)
   - Denoising via sparse decomposition (e.g. OMP) over a learned dictionary (Kmeans, PCA, ICA, SDL, ...)
 
