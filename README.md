@@ -90,7 +90,6 @@ For Macs (OSX) you first need to do:
 
 You can install brew by following the instructions [here](https://brew.sh/)
 
-
 ## How to run?
 
 To run CLI for denoising:
