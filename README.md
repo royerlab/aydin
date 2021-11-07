@@ -77,27 +77,42 @@ The latest releases and standalone executables can be found [here](https://githu
 First download and install [miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://www.anaconda.com/products/individual). 
 
 Then create a conda environment to host aydin:
-`conda create -n aydin_env python=3.9`
+```bash
+conda create -n aydin_env python=3.9
+```
 
 Activate the environment:
-`conda activate aydin_env`
+```bash
+conda activate aydin_env
+```
 
 Install *Aydin* in the environment: 
-`pip install aydin`
+```bash
+pip install aydin
+```
 
 For Macs (OSX) you first need to do:
-`brew install libomp`
+```bash
+brew install libomp
+```
 
-You can install brew by following the instructions [here](https://brew.sh/)
+You can install *Brew* by following the instructions [here](https://brew.sh/).
 
-## How to run?
+## How to run ?
 
-To run CLI for denoising:
+Assuming that you have installed *Aydin* in an environment, you can:
+
+Start *Aydin Studio* from the command line with:
+```bash
+aydin
+```
+
+Run the Command Line Interface (CLI) for denoising:
 ```bash
 aydin denoise path/to/noisyimage
 ```
 
-To get help  on CLI usage:
+Get help on command line usage:
 ```bash
 aydin -h
 ```
