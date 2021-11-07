@@ -11,12 +11,12 @@ and a GUI.
 
 ## Documentation
 
-Aydin documentation can be found [here]().
+Aydin documentation can be found [here](https://royerlab.github.io/aydin/).
 
 ## Installation
 
-You can get the suitable aydin executable from PUT DOC DOWNLOAD PAGE HERE [here]() or you 
-can do `pip install -e .`, for mac first need to do `brew install libomp`.
+You can get the suitable aydin executable from [here](https://royerlab.github.io/aydin/) or you 
+can do `pip install aydin`, for mac first need to do `brew install libomp`.
 
 ## How to run?
 
