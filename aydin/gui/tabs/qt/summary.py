@@ -42,7 +42,7 @@ class SummaryTab(QWidget):
 
         # Explanation text
         description_text = self.__doc__.replace("\n\n", "<br><br>")
-        description_text = description_text.replace("\n"," ")
+        description_text = description_text.replace("\n", " ")
         self.explanation_text = QLabel(description_text, self)
         self.explanation_text.setWordWrap(True)
         self.explanation_text.setTextFormat(Qt.RichText)

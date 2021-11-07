@@ -1,3 +1,4 @@
+# flake8: noqa
 from aydin.util.string.break_text import break_text
 
 _test_line_breaks_text = """    Suppresses fixed, axis aligned, offset patterns along any combination of
@@ -29,6 +30,7 @@ _test_line_breaks_text = """    Suppresses fixed, axis aligned, offset patterns 
     advantageous. To recover the original denoised image the filtering is undone during post-processing. Note: this
     is ideal for treating <a href='https://en.wikipedia.org/wiki/Colors_of_noise'>'blue' noise</a> that is
     characterised by a high-frequency support."""
+
 
 def test_line_breaks():
 

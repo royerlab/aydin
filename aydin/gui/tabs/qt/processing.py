@@ -1,4 +1,4 @@
-from qtpy.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
+from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
 
 from aydin.gui._qt.custom_widgets.readmoreless_label import QReadMoreLessLabel
 from aydin.gui._qt.job_runners.previewall_job_runner import PreviewAllJobRunner

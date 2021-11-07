@@ -22,8 +22,12 @@ class QReadMoreLessLabel(QWidget):
         if "<moreless>" in text:
             self.readless_text, self.readmore_text = text.split("<moreless>")
             self.readmore_text = text
-            self.readmore_left, self.readmore_right = self.readmore_text.split("<split>")
-            text_left= self.readless_text+("" if self.readmore_right.strip() == "" else "<b>Read more...</b>")
+            self.readmore_left, self.readmore_right = self.readmore_text.split(
+                "<split>"
+            )
+            text_left = self.readless_text + (
+                "" if self.readmore_right.strip() == "" else "<b>Read more...</b>"
+            )
             text_right = ""
         else:
             text_left, text_right = text.split("<split>")
@@ -54,7 +58,11 @@ class QReadMoreLessLabel(QWidget):
             self.readmore = not self.readmore
             if self.readmore:
                 self.explanation_text_left.setText(self.readmore_left)
-                self.explanation_text_right.setText(self.readmore_right+"<b>Read less...</b>")
+                self.explanation_text_right.setText(
+                    self.readmore_right + "<b>Read less...</b>"
+                )
             else:
-                self.explanation_text_left.setText(self.readless_text+"<b>Read more...</b>")
+                self.explanation_text_left.setText(
+                    self.readless_text + "<b>Read more...</b>"
+                )
                 self.explanation_text_right.setText("")

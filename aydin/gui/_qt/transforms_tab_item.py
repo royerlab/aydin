@@ -43,11 +43,11 @@ class TransformsTabItem(QWidget):
 
         explanation_text_string = self.transform_class.__doc__
         explanation_text_string = break_text(explanation_text_string)
-        explanation_text_string = explanation_text_string.replace('\n','<br>')
+        explanation_text_string = explanation_text_string.replace('\n', '<br>')
         self.explanation_text = QLabel(explanation_text_string, self)
         self.explanation_text.setTextFormat(Qt.RichText)
         self.explanation_text.setOpenExternalLinks(True)
-        #self.explanation_text.setWordWrap(True)
+        # self.explanation_text.setWordWrap(True)
         self.explanation_text.setAlignment(Qt.AlignTop)
         self.layout.addWidget(self.explanation_text, 45)
 
