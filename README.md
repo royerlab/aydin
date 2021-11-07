@@ -18,8 +18,7 @@ Notebooks for running on Collab are also planned.
 
 ## Supported algorithms:
 
-Currently Aydin support two main families of denoisers: the first family consists of 'classical' denoising algorithms that leverage among other: frequency domain filtering, smoothness priors, low-rank representations, self-similarity. The second family consists of algorithms that leverage machine learning approaches such as convolutional neural networks (CNN) or gradient boosting (GB). In the [Noise2Self paper](https://deepai.org/publication/noise2self-blind-denoising-by-self-supervision) we show that it is possible to calibrate any parameterised denoising algorithm, from the few parameters of a classical algorithm to the millions of weights of a deep neural network. We leverage this in Aydin to provide 
-Here is the list of currently available algorithms: 
+Currently Aydin support two main families of denoisers: the first family consists of 'classical' denoising algorithms that leverage among other: frequency domain filtering, smoothness priors, low-rank representations, self-similarity. The second family consists of algorithms that leverage machine learning approaches such as convolutional neural networks (CNN) or gradient boosting (GB). In the [Noise2Self paper](https://deepai.org/publication/noise2self-blind-denoising-by-self-supervision) we show that it is possible to calibrate any parameterised denoising algorithm, from the few parameters of a classical algorithm to the millions of weights of a deep neural network. We leverage and extend these ideas in Aydin to provide a variety of auto-tuned and trained high-quality image denoisers. Here is the list of currently available methods: 
 
 - Low-pass filtering based algorithms:
   - Butterworth denoiser (*butterworth*).
