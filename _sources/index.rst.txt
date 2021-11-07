@@ -11,9 +11,11 @@ a number of self-supervised, auto-tuned, and unsupervised image denoising algori
 Aydin handles from the get-go n-dimensional array-structured images with an arbitrary number
 of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal dimensions.
 
-It comes with `Aydin Studio` a [graphical user interface]
+It comes with `Aydin Studio` a `graphical user interface <https://royerlab.github.io/aydin/tutorials/gui_tutorials.html>`_
 to easily experiment with all the different algorithms and parameters available,
-a [command line interface] to run large jobs offline, and an [API] for
+a `command line interface <https://royerlab.github.io/aydin/tutorials/cli_tutorials.html>`_
+to run large jobs offline, and an
+`API <https://royerlab.github.io/aydin/api/introduction.html>`_ for
 custom coding and integration into other packages.
 
 Getting started, with bundles:
@@ -51,10 +53,12 @@ profiles, some of our best algorithms can easily run on modest machines.
 
 Documentation
 ~~~~~~~~~~~~~~
-Tutorials can be found [here] for an exhaustive tour of features and parameters for both
+Tutorials can be found `here <https://royerlab.github.io/aydin/tutorials/tutorials_home.html>`_
+for an exhaustive tour of features and parameters for both
 the graphical interface (Aydin Studio), command line interface (CLI), and
 Python programming interface (API). To better understand how to tune parameters
-for a given image, please check our [use cases] where we go through.
+for a given image, please check our `use cases <https://royerlab.github.io/aydin/use_cases/introduction.html>`_
+where we go through.
 
 How to cite?
 ~~~~~~~~~~~~~
