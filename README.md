@@ -69,7 +69,7 @@ We recommend that users that are not familiar with python start with our user-fr
 [<img src="https://user-images.githubusercontent.com/1870994/140653999-5f6368d9-3e82-4d10-9283-2359aa1464fa.png" width="200" >
 ](https://github.com/royerlab/aydin/releases/download/v0.1.8/aydin_0.1.8_osx.pkg)
 
-The latest releases and standalone executables can be found [here](https://github.com/royerlab/aydin/releases) 
+The latest releases and standalone executables can be found [here](https://github.com/royerlab/aydin/releases) and detailed installation instructions of *Aydin Studio* for all three oerating systems can be found [here](https://royerlab.github.io/aydin/getting_started/install.html)
 
 ## Installation of *Aydin* in Conda:
 
