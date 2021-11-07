@@ -59,15 +59,24 @@ This is broken right noew:
 
 Aydin documentation can be found [here](https://royerlab.github.io/aydin/).
 
-## Installation
+## Installation of *Aydin Studio*
 
+We recommend that users that are not familiar with python start with our user-friendly UI. Just download the version for your operating system:
+
+[<img src="https://user-images.githubusercontent.com/1870994/140653991-fb570f5a-bc6f-4afd-95b6-e36d05d1382d.png" width="200" >
+](https://github.com/royerlab/aydin/releases/download/v0.1.8/aydin_0.1.8_linux.zip)   
+[<img src="https://user-images.githubusercontent.com/1870994/140653995-5055e607-5226-4b76-8cc4-04de17d2811f.png" width="200" >
+](https://github.com/royerlab/aydin/releases/download/v0.1.8/aydin_0.1.8_win.zip)   
+[<img src="https://user-images.githubusercontent.com/1870994/140653999-5f6368d9-3e82-4d10-9283-2359aa1464fa.png" width="200" >
+](https://github.com/royerlab/aydin/releases/download/v0.1.8/aydin_0.1.8_osx.pkg)
+
+## Installation of *Aydin* in Conda:
+
+First download and install [miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://www.anaconda.com/products/individual). 
+
+Then create a conda environment
 You can get the suitable aydin executable from [here](https://royerlab.github.io/aydin/) or you 
 can do `pip install aydin`, for mac first need to do `brew install libomp`.
-
-![<img width="128" src="https://user-images.githubusercontent.com/1870994/140653991-fb570f5a-bc6f-4afd-95b6-e36d05d1382d.png">](https://github.com/royerlab/aydin/releases/download/v0.1.8/aydin_0.1.8_linux.zip)
-![image](https://user-images.githubusercontent.com/1870994/140653995-5055e607-5226-4b76-8cc4-04de17d2811f.png)
-![image](https://user-images.githubusercontent.com/1870994/140653999-5f6368d9-3e82-4d10-9283-2359aa1464fa.png)
-
 
 
 ## How to run?
