@@ -14,7 +14,7 @@ from aydin.nn.models.utils.training_architectures import get_jinet_fit_args
 
 
 class JINetModel(Model):
-    """Create a JINet model for 2D and 3D images. Extends `tensorflow.python.keras.models.Model`."""
+    """JINet model for 2D and 3D images."""
 
     def __init__(
         self,

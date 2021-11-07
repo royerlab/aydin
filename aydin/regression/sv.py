@@ -4,12 +4,12 @@ from aydin.regression.base import RegressorBase
 from aydin.util.log.log import lprint, lsection
 
 
-class SupportVectorRegressor(RegressorBase):
+class SVRegressor(RegressorBase):
     """Support Vector Regressor.
     \n\n
     Note: Way too slow when non-linear, nearly useless...
     When using linear much faster, but does not perform better
-    than straight linear regression.
+    than linear regression.
     """
 
     def __init__(self, linear: bool = True):

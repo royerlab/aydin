@@ -13,12 +13,10 @@ class ImagesTab(QWidget):
     """
     Next, we inspect the images contained in the added files.
 
-    You can see basic image information such as name, axis label,
-    array shapes, data types, volume in voxels, and size in bytes.
-
-    When several images are loaded, each images is denoised independently
-    which means that training and denoising are done per image. For bulk
-    denoising of series of images please use the command line interface (CLI).
+    You can see basic image information such as name, axis label, array shapes, data types, volume in voxels,
+    and size in bytes. When several images are loaded, each images is denoised independently which means that
+    training and denoising are done per image. For bulk denoising of series of images please use the command line
+    interface (CLI).
     """
 
     def __init__(self, parent):

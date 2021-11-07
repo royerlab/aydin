@@ -27,23 +27,20 @@ class DenoiseTab(QWidget):
     <a href='https://royerlab.github.io/aydin/use_cases/introduction.html'>use cases</a> to learn how to
     choose the best algorithm and parameters for your image(s).
 
-    <b>Read more...<b>
-
     <moreless>
-    <split>
-
     Quick guide: The first algorithm to try is 'Butterworth' which is remarkably simple, fast, and sometimes
     embarrassingly effective compared to more sophisticated methods. Next you can try the Gaussian-Median mixed
     denoiser (gm) which is in some cases quite effective. 'Spectral' can give extremely good results too but can take
-    longer, as do in general patch and dictionary based methods. Our own favourite is a novel variant on the
-    Noise2Self theme which relies on carefully crafted features and gradient boosting (N2S-FGR-cb or -lgbm).
-    CNN-based Noise2Self denoising is also available but is currently on of our least favourites because of its
-    propensity to hallucinate detail, slowness, and overall worse performance. In fine, there is no silver bullet,
-    there is not a single denoising algorithm that can tackle all denoising challenges, instead you need to choose
-    and play with a variety of algorithms to find the one that will fit you needs both in terms of processing speed,
-    visual appearance, and downstream analysis constraints. Denoising is a form of image analysis that consists in
-    separating signal from noise, with the definition of signal and noise being to some extent, subjective and
-    context dependent.
+    longer, as do in general patch and dictionary based methods.
+    <split>
+    Our own favourite is a novel variant on the Noise2Self theme which relies on carefully crafted features and
+    gradient boosting (N2S-FGR-cb or -lgbm). CNN-based Noise2Self denoising is also available but is currently on of
+    our least favourites because of its propensity to hallucinate detail, slowness, and overall worse performance. In
+    fine, there is no silver bullet, there is not a single denoising algorithm that can tackle all denoising
+    challenges, instead you need to choose and play with a variety of algorithms to find the one that will fit you
+    needs both in terms of processing speed, visual appearance, and downstream analysis constraints. Denoising is a
+    form of image analysis that consists in separating signal from noise, with the definition of signal and noise
+    being to some extent, subjective and context dependent.
     """
 
     def __init__(self, parent):

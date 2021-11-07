@@ -28,7 +28,7 @@ class BaseCroppingTab(QWidget):
 
         self.explanation_layout = QHBoxLayout()
         self.explanation_text = QReadMoreLessLabel(self, self.__doc__)
-        self.explanation_layout.addWidget(self.explanation_text)
+        self.explanation_layout.addWidget(self.explanation_text, 90)
         self.tab_layout.addLayout(self.explanation_layout)
 
         # Horizontal Line Break

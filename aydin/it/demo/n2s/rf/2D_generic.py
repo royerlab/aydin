@@ -18,7 +18,7 @@ from aydin.io.datasets import (
     fibsem,
 )
 from aydin.it.fgr import ImageTranslatorFGR
-from aydin.regression.random_forest import RandomForestRegressor
+from aydin.regression.rf import RFRegressor
 from aydin.util.log.log import Log
 
 
@@ -34,7 +34,7 @@ def demo(image, name):
 
     generator = StandardFeatureGenerator()
 
-    regressor = RandomForestRegressor(patience=32)
+    regressor = RFRegressor(patience=32)
 
     it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)
 
