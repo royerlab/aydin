@@ -128,15 +128,9 @@
 
 
 <div class="viewcode-block" id="UNetModel"><a class="viewcode-back" href="../../../../api/nn/unet.html#aydin.nn.models.unet.UNetModel">[docs]</a><span class="k">class</span> <span class="nc">UNetModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create a UNet model. Extends `tensorflow.python.keras.models.Model`.</span>
-
-<span class="sd">    3 training modes are available:</span>
-
-<span class="sd">    supervised: noisy and clean images are required</span>
-
-<span class="sd">    shiftconv: self-supervised learning with shift and conv scheme</span>
-
-<span class="sd">    non-shiftconv: self-supervised learning by masking pixels at each iteration</span>
+    <span class="sd">&quot;&quot;&quot;UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:</span>
+<span class="sd">    self-supervised learning with shift and conv scheme non-shiftconv: self-supervised learning by masking pixels at</span>
+<span class="sd">    each iteration</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
