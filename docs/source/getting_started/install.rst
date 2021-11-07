@@ -20,7 +20,7 @@ Aydin on your computer.
 Install Aydin bundle on Mac OSX
 ---------------------------------------
 
-Download the `OSX bundle <http://www.google.com/>`_ to start. Then right-click and open the Aydin installer as shown
+Download the `OSX bundle <https://royerlab.github.io/aydin/>`_ to start. Then right-click and open the Aydin installer as shown
 below:
 
 .. image:: ../resources/install/osx/right_click_open.png
@@ -61,7 +61,7 @@ folder as shown below:
 Install Aydin bundle on Windows
 ---------------------------------------
 
-Download the `Windows bundle <http://www.google.com/>`_ to start. Then extract the compressed
+Download the `Windows bundle <https://royerlab.github.io/aydin/>`_ to start. Then extract the compressed
 Aydin bundle, you should be able to see the see extracted folder as shown
 below:
 
@@ -77,7 +77,7 @@ You can open the folder and double-click on the ``run-aydin`` file to start Aydi
 Install Aydin bundle on Linux
 ---------------------------------------
 
-Download the `Linux bundle <http://www.google.com/>`_  to start. Then extract the Aydin bundle
+Download the `Linux bundle <https://royerlab.github.io/aydin/>`_  to start. Then extract the Aydin bundle
 from the compressed file. You should be able to see the see extracted folder as shown below:
 
 .. image:: ../resources/install/linux/unzip_bundle.png
