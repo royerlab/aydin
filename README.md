@@ -8,10 +8,10 @@ a number of **self-supervised, auto-tuned, and unsupervised** image denoising al
 *Aydin* handles from the get-go n-dimensional array-structured images with an arbitrary number
 of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal dimensions.
 
-It comes with *Aydin Studio* a [graphical user interface]
+It comes with *Aydin Studio* a [graphical user interface](https://royerlab.github.io/aydin/tutorials/gui_tutorials.html)
 to easily experiment with all the different algorithms and parameters available,
-a [command line interface] to run large jobs on the terminal possibly on powerfull remote machines, 
-and an [API] for custom coding and integration into your scripts and applications.
+a [command line interface](https://royerlab.github.io/aydin/tutorials/cli_tutorials.html) to run large jobs on the terminal possibly on powerfull remote machines, 
+and an [API](https://royerlab.github.io/aydin/tutorials/api_tutorials.html) for custom coding and integration into your scripts and applications.
 
 And, of course, a simplified [napari](napari.org) plugin is in the works! 
 Notebooks for running on Collab are also planned.
