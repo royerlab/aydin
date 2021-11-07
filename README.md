@@ -47,7 +47,7 @@ Currently Aydin support two main families of denoisers: the first family consist
 Some methods above actually do combine
 We recomend to try first some of the classical algorithms such as 'Butterworth' or ''
 
-We are regularly adding new algorithms so stay tuned!
+We have a long todo list of existing, variants, as well as original algorithms that we plan onn adding in the next weeks and months. Stay tuned!
 
 <!--
 This is broken right noew:
