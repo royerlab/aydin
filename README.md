@@ -44,13 +44,13 @@ Currently *Aydin* supports two main families of denoisers: the first family cons
 - Other:
   - Lipschitz continuity denoising   
 
-Some methods above actually do combine
-We recomend to try first some of the classical algorithms such as 'Butterworth' or ''
+Some methods actually do combine multiple ideas and so the classification above is not crisp.
+We recomend to try first a good baseline denoiser such as the *Butterworth denoiser*. If unsatisfied with the result and you have a powerfull computer with a recent NVIDIA graphics card then try the Noise2Self-FGR-cb denoiser. For detailed use-cases check [here](https://royerlab.github.io/aydin/use_cases/introduction.html#).  
 
-We have a long todo list of existing, variants, as well as original algorithms that we plan onn adding in the next weeks and months. Stay tuned!
+We have a long todo list of existing, modified, as well as original algorithms that we plan to add to *Aydin* in the next weeks and months. We will do so progressively as time allows. Stay tuned!
 
 <!--
-This is broken right noew:
+This is broken right now:
 [![pipeline status](https://gitlab.com/aydinorg/aydin/badges/master/pipeline.svg)](https://gitlab.com/aydinorg/aydin/commits/master)
 -->
 
