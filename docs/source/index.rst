@@ -64,7 +64,8 @@ How to cite?
 ~~~~~~~~~~~~~
 If you find Aydin useful and use it in your work, please kindly consider to cite us:
 
---- citation here + DOI ---
+.. image:: https://zenodo.org/badge/188953977.svg
+   :target: https://zenodo.org/badge/latestdoi/188953977
 
 
 
