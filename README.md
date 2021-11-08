@@ -2,6 +2,7 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![codecov](https://codecov.io/gl/aydinorg/aydin/branch/master/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gl/aydinorg/aydin)
+[![DOI](https://zenodo.org/badge/188953977.svg)](https://zenodo.org/badge/latestdoi/188953977)
 
 *Aydin* is a user-friendly, feature-rich, and fast **image denoising tool** that provides
 a number of **self-supervised, auto-tuned, and unsupervised** image denoising algorithms.
@@ -63,11 +64,11 @@ This is broken right now:
 We recommend that users that are not familiar with python start with our user-friendly UI. Just download the version for your operating system:
 
 [<img src="https://user-images.githubusercontent.com/1870994/140653991-fb570f5a-bc6f-4afd-95b6-e36d05d1382d.png" width="200" >
-](https://github.com/royerlab/aydin/releases/download/v0.1.8/aydin_0.1.8_linux.zip) 
+](https://github.com/royerlab/aydin/releases/download/v0.1.9/aydin_0.1.9_linux.zip) 
 [<img src="https://user-images.githubusercontent.com/1870994/140653995-5055e607-5226-4b76-8cc4-04de17d2811f.png" width="200" >
-](https://github.com/royerlab/aydin/releases/download/v0.1.8/aydin_0.1.8_win.zip) 
+](https://github.com/royerlab/aydin/releases/download/v0.1.9/aydin_0.1.9_win.zip) 
 [<img src="https://user-images.githubusercontent.com/1870994/140653999-5f6368d9-3e82-4d10-9283-2359aa1464fa.png" width="200" >
-](https://github.com/royerlab/aydin/releases/download/v0.1.8/aydin_0.1.8_osx.pkg)
+](https://github.com/royerlab/aydin/releases/download/v0.1.9/aydin_0.1.9_osx.pkg)
 
 The latest releases and standalone executables can be found [here](https://github.com/royerlab/aydin/releases) and detailed installation instructions of *Aydin Studio* for all three oerating systems can be found [here](https://royerlab.github.io/aydin/getting_started/install.html)
 
