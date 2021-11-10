@@ -15,7 +15,8 @@ a [command line interface](https://royerlab.github.io/aydin/tutorials/cli_tutori
 and an [API](https://royerlab.github.io/aydin/tutorials/api_tutorials.html) for custom coding and integration into your scripts and applications.
 
 And, of course, a simplified [napari](napari.org) plugin is in the works! 
-Notebooks for running on Collab are also planned.
+Notebooks for running on Collab are also planned. 
+The project is commercial-friendly if you specify pyside as your GUI backend.
 
 ## Supported algorithms:
 
