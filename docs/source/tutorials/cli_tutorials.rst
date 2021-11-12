@@ -47,7 +47,7 @@ options.
 
 .. code-block:: bash
 
-   $ aydin noise2self image.tif
+   $ aydin denoise image.tif
 
 
 Denoising a single image with customized options
@@ -61,7 +61,7 @@ to Aydin CLI. One can achieve this as shown below:
 
 .. code-block:: bash
 
-   $ aydin noise2self image.tif --lower-level-args=image_options.json
+   $ aydin denoise image.tif --lower-level-args=image_options.json
 
 
 
@@ -74,7 +74,7 @@ and train a model to pass here to the Aydin CLI.
 
 .. code-block:: bash
 
-   $ aydin noise2self image.tif --model-path=image_model.zip --use-model
+   $ aydin denoise image.tif --model-path=image_model.zip --use-model
 
 
 
