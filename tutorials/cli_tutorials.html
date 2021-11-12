@@ -140,7 +140,7 @@ screen access.</p>
 <h2>Denoising a single image<a class="headerlink" href="#denoising-a-single-image" title="Permalink to this headline"></a></h2>
 <p>You can use the following line to denoise a single image with default
 options.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ aydin noise2self image.tif
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ aydin denoise image.tif
 </pre></div>
 </div>
 </section>
@@ -150,7 +150,7 @@ options.</p>
 related to the denoising approach they have chosen and save their specific set
 of parameters into a JSON file. We also made it possible to pass such JSON file
 to Aydin CLI. One can achieve this as shown below:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ aydin noise2self image.tif --lower-level-args<span class="o">=</span>image_options.json
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ aydin denoise image.tif --lower-level-args<span class="o">=</span>image_options.json
 </pre></div>
 </div>
 </section>
@@ -159,7 +159,7 @@ to Aydin CLI. One can achieve this as shown below:</p>
 <p>You can use the following line to denoise a single image with a pre-trained
 Aydin model. You can use the Aydin Studio GUI to play with different parameters
 and train a model to pass here to the Aydin CLI.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ aydin noise2self image.tif --model-path<span class="o">=</span>image_model.zip --use-model
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ aydin denoise image.tif --model-path<span class="o">=</span>image_model.zip --use-model
 </pre></div>
 </div>
 </section>
