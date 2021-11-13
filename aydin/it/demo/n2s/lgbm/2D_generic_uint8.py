@@ -16,7 +16,6 @@ from aydin.io.datasets import (
     newyork,
     lizard,
     characters,
-    fibsem,
 )
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.lgbm import LGBMRegressor

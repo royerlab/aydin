@@ -1,13 +1,12 @@
 # flake8: noqa
 
 import numpy
-import numpy as np
-from aydin.features.fast.fast_features import FastFeatureGenerator
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
 from aydin.analysis.find_kernel import compute_relative_blur_kernel
+from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import newyork, pollen, normalise, add_noise, lizard, dots
 from aydin.it.deconvolution.lr_deconv import ImageTranslatorLRDeconv
 from aydin.it.fgr import ImageTranslatorFGR
@@ -21,10 +20,10 @@ def demo(image, name):
 
     # Log.set_log_max_depth(5)
 
-    image = normalise(image.astype(np.float32))
+    image = normalise(image.astype(numpy.float32))
     noisy = add_noise(image)
 
-    generator = FastFeatureGenerator(
+    generator = StandardFeatureGenerator(
         include_corner_features=True,
         include_scale_one=False,
         include_fine_features=True,

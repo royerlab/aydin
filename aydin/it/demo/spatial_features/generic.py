@@ -1,7 +1,6 @@
 # flake8: noqa
 import napari
 import numpy as np
-from aydin.features.fast.fast_features import FastFeatureGenerator
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
@@ -29,7 +28,7 @@ def demo(image, max_level=3):
     denoised_wsf_flipped = np.flipud(it.translate(flipped_img))
 
     # run:
-    generator = FastFeatureGenerator(max_level=max_level)
+    generator = StandardFeatureGenerator(max_level=max_level)
     regressor = CBRegressor(patience=30)
     it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)
     it.train(noisy, noisy)

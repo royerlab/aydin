@@ -453,7 +453,9 @@ class UniformFeatures(FeatureGroupBase):
                 # No point of using CUDA for very small images!
                 # Let's try CUDA first:
                 # Note: this is not optimal as the image is pushed to GPU every time...
-                from aydin.util.fast_uniform_filter import numba_gpu_uniform_filter
+                from aydin.util.fast_uniform_filter.numba_gpu_uf import (
+                    numba_gpu_uniform_filter,
+                )
 
                 if self.cuda_stream is None:
                     self.cuda_stream = cuda.stream()

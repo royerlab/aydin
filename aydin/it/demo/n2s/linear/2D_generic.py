@@ -17,7 +17,6 @@ from aydin.io.datasets import (
     add_noise,
     lizard,
     characters,
-    fibsem,
 )
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.linear import LinearRegressor

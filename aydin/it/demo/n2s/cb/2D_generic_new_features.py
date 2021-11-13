@@ -28,10 +28,10 @@ def demo(image, name, do_add_noise=True):
         include_scale_one=True,
         include_fine_features=True,
         include_spatial_features=True,
-        # include_median_features=True,
-        # include_dct_features=True,
-        # num_sinusoidal_features=4,
-        # include_random_conv_features=True,
+        include_median_features=True,
+        include_dct_features=True,
+        num_sinusoidal_features=4,
+        include_random_conv_features=True,
     )
 
     regressor = CBRegressor(patience=256, gpu=True, min_num_estimators=1024)

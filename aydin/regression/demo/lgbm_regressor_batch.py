@@ -8,7 +8,7 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 from skimage.util import random_noise
 
-from aydin.features.fast.fast_features import FastFeatureGenerator
+from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.regression.lgbm import LGBMRegressor
 
 
@@ -25,7 +25,7 @@ def demo_lgbm_regressor(batch, num_batches=10, num_used_batches=math.inf, displa
     scales = [1, 3, 7, 15]
     widths = [3, 3, 3, 3]
 
-    generator = FastFeatureGenerator(
+    generator = StandardFeatureGenerator(
         kernel_widths=widths, kernel_scales=scales, kernel_shapes=['l1'] * len(scales)
     )
 

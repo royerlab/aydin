@@ -19,7 +19,17 @@ Notebooks for running on Collab are also planned.
 
 ## Supported algorithms:
 
-Currently *Aydin* supports two main families of denoisers: the first family consists of 'classical' denoising algorithms that leverage among other: frequency domain filtering, smoothness priors, low-rank representations, self-similarity. The second family consists of algorithms that leverage machine learning approaches such as convolutional neural networks (CNN) or gradient boosting (GB). In the [Noise2Self paper](https://deepai.org/publication/noise2self-blind-denoising-by-self-supervision) we show that it is possible to calibrate any parameterised denoising algorithm, from the few parameters of a classical algorithm to the millions of weights of a deep neural network. We leverage and extend these ideas in *Aydin* to provide a variety of auto-tuned and trained high-quality image denoisers. Here is the list of currently available methods: 
+Currently *Aydin* supports two main families of denoisers: the first family consists 
+of 'classical' denoising algorithms that leverage among other: frequency domain filtering, 
+smoothness priors, low-rank representations, self-similarity, and more. 
+The second family consists of algorithms that leverage machine learning approaches 
+such as convolutional neural networks (CNN) or gradient boosting (GB). 
+In the [Noise2Self paper](https://deepai.org/publication/noise2self-blind-denoising-by-self-supervision) 
+we show that it is possible to calibrate any parameterised denoising algorithm, 
+from the few parameters of a classical algorithm to the millions of weights of a deep neural 
+network. We leverage and extend these ideas in *Aydin* to provide a variety of auto-tuned 
+and trained high-quality image denoisers. 
+Here is the list of currently available methods: 
 
 - **Low-pass filtering based algorithms:**
   - Butterworth denoiser (*butterworth*).
@@ -45,23 +55,22 @@ Currently *Aydin* supports two main families of denoisers: the first family cons
 - **Other:**
   - Lipschitz continuity denoising   
 
-Some methods actually do combine multiple ideas and so the classification above is not crisp.
-We recomend to try first a good baseline denoiser such as the *Butterworth denoiser*. If unsatisfied with the result and you have a powerfull computer with a recent NVIDIA graphics card then try the Noise2Self-FGR-cb denoiser. For detailed use-cases check [here](https://royerlab.github.io/aydin/use_cases/introduction.html#).  
+Some methods actually do combine multiple ideas and so the classification above is not strict.
+We recommend trying first a good baseline denoiser such as the *Butterworth denoiser*. 
+If unsatisfied with the result, and you have a powerful computer with a recent NVIDIA
+graphics card, then we recommend you try the Noise2Self-FGR-cb denoiser. 
+For detailed use-cases check [here](https://royerlab.github.io/aydin/use_cases/introduction.html#).  
 
 We have a long todo list of existing, modified, as well as original algorithms that we plan to add to *Aydin* in the next weeks and months. We will do so progressively as time allows. Stay tuned!
 
-<!--
-This is broken right now:
-[![pipeline status](https://gitlab.com/aydinorg/aydin/badges/master/pipeline.svg)](https://gitlab.com/aydinorg/aydin/commits/master)
--->
-
 ## Documentation
 
-*Aydin* documentation can be found [here](https://royerlab.github.io/aydin/).
+*Aydin*'s documentation can be found [here](https://royerlab.github.io/aydin/).
 
 ## Installation of *Aydin Studio*
 
-We recommend that users that are not familiar with python start with our user-friendly UI. Just download the version for your operating system:
+We recommend that users that are not familiar with python start with our user-friendly UI. 
+Download it for your operating system here:
 
 [<img src="https://user-images.githubusercontent.com/1870994/140653991-fb570f5a-bc6f-4afd-95b6-e36d05d1382d.png" width="200" >
 ](https://github.com/royerlab/aydin/releases/download/v0.1.9/aydin_0.1.9_linux.zip) 
@@ -70,7 +79,10 @@ We recommend that users that are not familiar with python start with our user-fr
 [<img src="https://user-images.githubusercontent.com/1870994/140653999-5f6368d9-3e82-4d10-9283-2359aa1464fa.png" width="200" >
 ](https://github.com/royerlab/aydin/releases/download/v0.1.9/aydin_0.1.9_osx.pkg)
 
-The latest releases and standalone executables can be found [here](https://github.com/royerlab/aydin/releases) and detailed installation instructions of *Aydin Studio* for all three oerating systems can be found [here](https://royerlab.github.io/aydin/getting_started/install.html)
+The latest releases and standalone executables can be found [here](https://github.com/royerlab/aydin/releases) 
+and detailed installation instructions of *Aydin Studio* for all three oerating systems can be found 
+[here](https://royerlab.github.io/aydin/getting_started/install.html).
+
 
 ## Installation of *Aydin* in Conda:
 
@@ -126,19 +138,11 @@ Get help on command line usage:
 aydin -h
 ```
 
-## Recommended Environment
+## Recommended Operating System Versions
 
-#### Linux
-
-- Ubuntu 18.04+
-
-#### Windows
-
-- Windows 10
-
-#### OSX
-
-- Mojave 10.14.6+
+#### Linux: Ubuntu 18.04+
+#### Windows: Windows 10
+#### OSX: Mojave 10.14.6+
 
 ## Recommended Hardware:
 

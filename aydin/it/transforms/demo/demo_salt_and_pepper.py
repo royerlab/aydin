@@ -1,6 +1,5 @@
 # flake8: noqa
 from scipy.ndimage import median_filter
-from skimage.util import random_noise
 
 from aydin.io.datasets import (
     normalise,

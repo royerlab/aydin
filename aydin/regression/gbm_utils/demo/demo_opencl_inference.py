@@ -7,7 +7,7 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 from skimage.util import random_noise
 
-from aydin.features.fast.fast_features import FastFeatureGenerator
+from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import newyork
 from aydin.regression.lgbm import LGBMRegressor
 from aydin.util.log.log import lprint, lsection
@@ -40,7 +40,7 @@ def demo_opencl_inference():
     noisy = random_noise(noisy, mode='gaussian', var=0.01, seed=0)
     noisy = noisy.astype(numpy.float32)
 
-    generator = FastFeatureGenerator()
+    generator = StandardFeatureGenerator()
     regressor = LGBMRegressor(max_num_estimators=300)
 
     def callback(iteration, val_loss, model):
