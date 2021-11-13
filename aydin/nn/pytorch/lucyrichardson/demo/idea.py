@@ -3,8 +3,8 @@ import numpy
 from aydin.it.pytorch.lucyrichardson.demo.regularised_lr import richardson_lucy_reg
 from scipy.signal import convolve2d
 from skimage.exposure import rescale_intensity
-from skimage.measure import compare_psnr as psnr
-from skimage.measure import compare_ssim as ssim
+from skimage.metrics import peak_signal_noise_ratio as psnr
+from skimage.metrics import structural_similarity as ssim
 from skimage.restoration import richardson_lucy
 
 from aydin.features.fast.fast_features import FastMultiscaleConvolutionalFeatures
