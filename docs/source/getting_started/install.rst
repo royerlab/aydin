@@ -4,17 +4,15 @@ Install Aydin
 
 You can install Aydin in two different ways.
 
-First one is downloading the operating system specific bundles we have prepared.
-This approach requires zero command-line interactions. It is as simple as downloading
-Aydin bundle, installing/unzipping the bundle and double-clicking on Aydin icon
-to start it.
+The first approach is to download the operating system specific 'app bundles' that we have prepared.
+This approach requires zero command-line interactions. It is as simple as downloading the bundle,
+then installing/unzipping the bundle, and finally double-clicking on the Aydin app to start it.
 
-Second approach is installing Aydin via ``pip``. With this approach, you will have
-more flexible installation. It can be easier to set certain GPU-using dependencies in
-this approach.
+The second approach is to install Aydin via ``pip``. With this approach, you will have a more
+more flexible installation. This can help to set certain GPU-using dependencies, but als requires
+more familiarity with Python package managers.
 
-Below, we are giving detailed, step-by-step installation guides to help you installing
-Aydin on your computer.
+Below, we provide detailed, step-by-step installation guides, to help you install Aydin on your computer.
 
 
 Install Aydin bundle on Mac OSX

@@ -2,8 +2,8 @@
 import time
 
 import numpy
-from skimage.measure import compare_psnr as psnr
-from skimage.measure import compare_ssim as ssim
+from skimage.metrics import peak_signal_noise_ratio as psnr
+from skimage.metrics import structural_similarity as ssim
 
 from aydin.analysis.image_metrics import mutual_information, spectral_mutual_information
 from aydin.io.datasets import normalise, add_noise, add_blur_2d, dots

@@ -159,12 +159,12 @@ def denoise_spectral(
     """Denoises the given image by first applying the patch
     transform, and then zeroing Fourier/DCT/DST coefficients
     below a given threshold. In addition, we apply Butterworth
-    filter to suppress freuencies above the band-pass and a
+    filter to suppress frequencies above the band-pass and a
     configurable frequency bias before applying the thresholding
     to favour suppressing high versus low frequencies.
     \n\n
     Note: This seems like a lot of parameters, but thanks to our
-    auto-tunning approach these paramneters are all automatically
+    auto-tuning approach these parameters are all automatically
      determined 😊.
 
     Parameters

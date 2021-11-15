@@ -48,7 +48,8 @@ While aydin works even on tiny laptops, it will run faster and better if you hav
 a Nvidia graphics card. We also recommend at least 16GB of RAM but more is better
 especially for very large gigabyte-sized images. In the absence of a GPU,
 the more CPU cores the better, obviously. Different algorithms have different performance
-profiles, some of our best algorithms can easily run on modest machines.
+profiles, some of our best algorithms can easily run on modest machines, but you will need
+patience.
 
 
 Documentation

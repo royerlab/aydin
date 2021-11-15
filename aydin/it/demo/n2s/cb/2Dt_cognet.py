@@ -22,7 +22,7 @@ def demo():
     image_path = examples_single.cognet_nanotube_400fps.get_path()
     array, metadata = io.imread(image_path)
 
-    # Reemove some metadat in the first pixels:
+    # Remove some metadata in the first pixels:
     array[:, 0, 0:4] = array[:, 1, 0:4]
 
     # crop:

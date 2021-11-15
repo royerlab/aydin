@@ -1,26 +1,13 @@
 # flake8: noqa
-import os
 import time
-import numpy
+
 import numpy as np
-from skimage.data import camera
-from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
 
 from aydin.analysis.camera_simulation import simulate_camera_image
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import (
-    normalise,
-    add_noise,
-    dots,
-    newyork,
-    lizard,
-    characters,
-    pollen,
-)
+from aydin.io.datasets import newyork, characters, pollen
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.it.transforms.highpass import HighpassTransform
-from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.regression.cb import CBRegressor

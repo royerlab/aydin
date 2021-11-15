@@ -144,14 +144,6 @@ class examples_single(Enum):
         '1gnqwhZ7HrRaScj6QF_P2Pl_6WAcLzCgR',
         'Brown_SIDD_chessboard_gray.png',
     )
-    royerlab_hcr = (
-        '1nkgqs8VkmPKBtBHqUXKrVgIvOqD8B84h',
-        'Royer_confocal_dragonfly_hcr_drerio_30somite_crop.tif',
-    )
-    maitre_mouse = (
-        '13b0-6PUo2YEWG8Z3M1pVfBQBWE0PtILK',
-        'Maitre_mouse blastocyst_fracking_180124_e3_crop.tif',
-    )
 
     # XY natural images (2D monochrome):
     generic_crowd = ('13UHK8MjhBviv31mAW2isdG4G-aGaNJIj', 'crowd.tif')
@@ -202,6 +194,11 @@ class examples_single(Enum):
         'Myers_Tribolium_nGFP_0.1_0.2_0.5_20_13_late.tif',
     )
 
+    royerlab_hcr = (
+        '1nkgqs8VkmPKBtBHqUXKrVgIvOqD8B84h',
+        'Royer_confocal_dragonfly_hcr_drerio_30somite_crop.tif',
+    )
+
     # 2D+t
 
     cognet_nanotube1 = (
@@ -219,6 +216,12 @@ class examples_single(Enum):
     cognet_nanotube_100fps = (
         '1T4UvbF3MRgT4jO4ExIHprvTqUXLiMjyA',
         'Cognet_1-100fps.tif',
+    )
+
+    # 3D+t
+    maitre_mouse = (
+        '13b0-6PUo2YEWG8Z3M1pVfBQBWE0PtILK',
+        'Maitre_mouse blastocyst_fracking_180124_e3_crop.tif',
     )
 
     # XYZT

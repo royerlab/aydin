@@ -7,8 +7,8 @@ from scipy import ndimage
 from scipy.fft import dct
 from scipy.signal import convolve2d
 from skimage.exposure import rescale_intensity
-from skimage.measure import compare_psnr as psnr
-from skimage.measure import compare_ssim as ssim
+from skimage.metrics import peak_signal_noise_ratio as psnr
+from skimage.metrics import structural_similarity as ssim
 
 from aydin.analysis.resolution_estimate import signal_to_noise_ratio, spectrum_2d
 from aydin.features.fast.fast_features import FastMultiscaleConvolutionalFeatures
