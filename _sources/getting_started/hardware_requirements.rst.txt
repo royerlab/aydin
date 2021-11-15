@@ -10,7 +10,7 @@ to be able to make use of CUDA GPUs. Aside from the CUDA GPU support, having a f
 and a bigger memory can help with Aydin's runtime performance.
 
 Recommended specifications are: at least 16 Gb of RAM, ideally 32 Gb, and more for very large
-images, a CPU with at least 4 cores, and a recent NVIDIA graphics card such as a RTX series card.
+images, a CPU with at least 4 cores, preferably 16 or more, and a recent NVIDIA graphics card such as a RTX series card.
 Older graphics cards could work but may cause trouble or be too slow. Aydin Studio's summary page
 gives an overview of the strengths and weaknesses of your machine, highlighting in red and orange
 items that might be problematic.

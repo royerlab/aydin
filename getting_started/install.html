@@ -105,15 +105,13 @@
   <section id="install-aydin">
 <h1>Install Aydin<a class="headerlink" href="#install-aydin" title="Permalink to this headline"></a></h1>
 <p>You can install Aydin in two different ways.</p>
-<p>First one is downloading the operating system specific bundles we have prepared.
-This approach requires zero command-line interactions. It is as simple as downloading
-Aydin bundle, installing/unzipping the bundle and double-clicking on Aydin icon
-to start it.</p>
-<p>Second approach is installing Aydin via <code class="docutils literal notranslate"><span class="pre">pip</span></code>. With this approach, you will have
-more flexible installation. It can be easier to set certain GPU-using dependencies in
-this approach.</p>
-<p>Below, we are giving detailed, step-by-step installation guides to help you installing
-Aydin on your computer.</p>
+<p>The first approach is to download the operating system specific ‘app bundles’ that we have prepared.
+This approach requires zero command-line interactions. It is as simple as downloading the bundle,
+then installing/unzipping the bundle, and finally double-clicking on the Aydin app to start it.</p>
+<p>The second approach is to install Aydin via <code class="docutils literal notranslate"><span class="pre">pip</span></code>. With this approach, you will have a more
+more flexible installation. This can help to set certain GPU-using dependencies, but als requires
+more familiarity with Python package managers.</p>
+<p>Below, we provide detailed, step-by-step installation guides, to help you install Aydin on your computer.</p>
 <section id="install-aydin-bundle-on-mac-osx">
 <h2>Install Aydin bundle on Mac OSX<a class="headerlink" href="#install-aydin-bundle-on-mac-osx" title="Permalink to this headline"></a></h2>
 <p>Download the <a class="reference external" href="https://royerlab.github.io/aydin/">OSX bundle</a> to start. Then right-click and open the Aydin installer as shown
@@ -156,6 +154,11 @@ from the compressed file. You should be able to see the see extracted folder as 
 </section>
 <section id="install-aydin-in-a-conda-environment-with-cuda-support">
 <h2>Install Aydin in a Conda environment with CUDA support<a class="headerlink" href="#install-aydin-in-a-conda-environment-with-cuda-support" title="Permalink to this headline"></a></h2>
+<p>If you are an OSX user please first make sure to install <code class="docutils literal notranslate"><span class="pre">libomp</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ brew install libomp
+</pre></div>
+</div>
+<p>Then you can install Aydin with CUDA support:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ conda create -y -n aydin_env <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9
 $ conda activate aydin_env
 $ pip install aydin
