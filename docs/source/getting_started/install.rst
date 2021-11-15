@@ -94,6 +94,15 @@ or you can get into ``aydin`` folder and double-click on the executable named ``
 Install Aydin in a Conda environment with CUDA support
 ---------------------------------------------------------------------
 
+If you are an OSX user please first make sure to install ``libomp``:
+
+.. code-block:: bash
+
+    $ brew install libomp
+
+
+Then you can install Aydin with CUDA support:
+
 .. code-block:: bash
 
     $ conda create -y -n aydin_env python=3.9
