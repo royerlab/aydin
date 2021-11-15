@@ -5,11 +5,7 @@ import numpy as np
 
 from aydin.analysis.camera_simulation import simulate_camera_image
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import (
-    newyork,
-    characters,
-    pollen,
-)
+from aydin.io.datasets import newyork, characters, pollen
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.it.transforms.highpass import HighpassTransform
 from aydin.it.transforms.range import RangeTransform

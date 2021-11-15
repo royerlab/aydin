@@ -10,14 +10,7 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import (
-    pollen,
-    newyork,
-    normalise,
-    add_noise,
-    lizard,
-    characters,
-)
+from aydin.io.datasets import pollen, newyork, normalise, add_noise, lizard, characters
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.linear import LinearRegressor
 
