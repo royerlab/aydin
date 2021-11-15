@@ -16,7 +16,7 @@ and an [API](https://royerlab.github.io/aydin/tutorials/api_tutorials.html) for 
 
 And, of course, a simplified [napari](napari.org) plugin is in the works! 
 Notebooks for running on Collab are also planned. 
-The project is commercial-friendly if you specify pyside as your GUI backend.
+The project is commercial-use-friendly if you specify pyside as your GUI backend.
 
 ## Supported algorithms:
 
