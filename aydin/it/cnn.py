@@ -291,7 +291,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     + self.batch_size
                 )
 
-            lprint("Available mem: ", available_device_memory())
+            lprint(f"Available mem: {available_device_memory()}")
             lprint(f"Batch size for training: {self.batch_size}")
 
             # Decide whether to use validation pixels or patches
@@ -350,7 +350,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Last check of input size espetially for shiftconv
             if 'shiftconv' == self.training_architecture and self.self_supervised:
-                # TODO: Hirofumi what is going on the conditional below :D  <-- check input dim is compatible w/ shiftconv
+                # TODO: Hirofumi what is going on the conditional below <-- check input dim is compatible w/ shiftconv
                 if (
                     numpy.mod(
                         img_train.shape[1:][:-1],
