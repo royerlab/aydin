@@ -591,3 +591,38 @@ class UNetModel(Model):
             loss_history = -1
 
         return loss_history
+
+    def predict(
+        self,
+        x,
+        batch_size=None,
+        verbose=0,
+        steps=None,
+        callbacks=None,
+        max_queue_size=10,
+        workers=1,
+        use_multiprocessing=False,
+    ):
+        """Overwritten model predict method.
+
+        Parameters
+        ----------
+        x
+        batch_size
+        verbose
+        steps
+        callbacks
+        max_queue_size
+        workers
+        use_multiprocessing
+
+        Returns
+        -------
+
+        """
+        # TODO: move as much as you can from it cnn _translate
+        return super().predict(
+            x,
+            batch_size=batch_size,
+            verbose=verbose,
+        )
