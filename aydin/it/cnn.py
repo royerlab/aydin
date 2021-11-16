@@ -185,10 +185,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         """
         self.stop_fitting = True
 
-    def retrain(self, input_image, target_image, training_architecture=None):
-        self.training_architecture = training_architecture
-        self.train(input_image, target_image)
-
     def _train(
         self,
         input_image,
