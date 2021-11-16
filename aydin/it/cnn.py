@@ -172,6 +172,18 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             self.infmodel = keras.models.load_model(join(path, "tf_inf_model"))
 
     def get_receptive_field_radius(self, nb_unet_levels, shiftconv=False):
+        """TODO: add proper docstrings here
+
+        Parameters
+        ----------
+        nb_unet_levels : int
+        shiftconv : bool
+
+        Returns
+        -------
+        int
+
+        """
         if shiftconv:
             rf = 7 if nb_unet_levels == 0 else 36 * 2 ** (nb_unet_levels - 1) - 6
         else:
@@ -488,21 +500,20 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     self.loss_history = self.model.fit(
                         input_image=input_image,
                         target_image=target_image,
+                        max_epochs=self.max_epochs,
                         callbacks=callbacks,
-                        train_valid_ratio=train_valid_ratio,
+                        verbose=self.verbose,
+                        batch_size=self.batch_size,
+                        total_num_patches=self.total_num_patches,
                         img_val=self.validation_images,
+                        create_patches_for_validation=self._create_patches_for_validation,
+                        train_valid_ratio=train_valid_ratio,
                         val_marker=self.validation_markers,
                         training_architecture=self.training_architecture,
-                        create_patches_for_validation=self._create_patches_for_validation,
-                        total_num_patches=self.total_num_patches,
-                        batch_size=self.batch_size,
                         random_mask_ratio=self.random_mask_ratio,
                         patch_size=self.patch_size,
                         mask_size=self.mask_size,
-                        verbose=self.verbose,
-                        max_epochs=self.max_epochs,
                         ReduceLR_patience=self.ReduceLR_patience,
-                        parent=self,
                     )
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):

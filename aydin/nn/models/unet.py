@@ -424,7 +424,6 @@ class UNetModel(Model):
         max_epochs=None,
         ReduceLR_patience=None,
         reduce_lr_factor=0.3,
-        parent=None,
     ):
         """
 
@@ -448,7 +447,6 @@ class UNetModel(Model):
         max_epochs
         ReduceLR_patience
         reduce_lr_factor
-        parent
 
         Returns
         -------
