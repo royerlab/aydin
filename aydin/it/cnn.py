@@ -412,7 +412,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 lprint(f'Batch normalization: {self.batch_norm}')
                 lprint(f'Training input size: {img_train.shape[1:]}')
 
-            # End of train function and beginning of _train from legacy implmentation
+            # End of train function and beginning of _train from legacy implementation
             input_image = img_train
 
             with lsection(
