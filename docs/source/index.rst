@@ -118,3 +118,4 @@ If you find Aydin useful and use it in your work, please kindly consider to cite
    :caption: Contact Us
 
    On Github <contact_us/github>
+   On image.sc <contact_us/imagesc>
