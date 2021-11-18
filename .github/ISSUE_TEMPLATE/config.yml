@@ -1,0 +1,6 @@
+blank_issues_enabled: true  # default
+contact_links:
+- name: Aydin forum
+  url: https://forum.image.sc/tag/aydin
+  about: |
+    Please ask general Aydin questions over at image.sc
