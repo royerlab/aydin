@@ -83,9 +83,9 @@ class SummaryTab(QWidget):
         cite_and_support_layout.addWidget(cite_label)
 
         support_label = QLabel(
-            "If you have any bug report/feature request, please reach us on "
-            "<a href='https://github.com/royerlab/aydin'>our repo</a>."
-            "If you have any general question, please reach us on "
+            "If you have any bug reports or feature requests, please reach us at "
+            "<a href='https://github.com/royerlab/aydin'>our GitHub repository</a>. "
+            "If you have any general question, please reach us at "
             "<a href='https://forum.image.sc/tag/aydin'>image.sc</a>."
         )
         support_label.setTextFormat(Qt.RichText)
