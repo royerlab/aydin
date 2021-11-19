@@ -275,5 +275,14 @@ def handle_files(files, slicing):
     return filepaths, image_arrays, metadatas
 
 
+@cli.command()
+def cite(**kwargs):
+    """aydin cite command"""
+    print(
+        "\nIf you find Aydin useful in your work, please kindly cite Aydin by using our DOI: "
+    )
+    print("https://doi.org/10.5281/zenodo.5654826 \n")
+
+
 if __name__ == '__main__':
     cli()
