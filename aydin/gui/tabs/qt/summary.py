@@ -71,16 +71,28 @@ class SummaryTab(QWidget):
         # Horizontal Line Break
         self.tab_layout.addWidget(QHorizontalLineBreakWidget(self))
 
-        cite_layout = QHBoxLayout()
-        cite_layout.setAlignment(Qt.AlignCenter)
+        cite_and_support_layout = QVBoxLayout()
+        cite_and_support_layout.setAlignment(Qt.AlignCenter)
+
         cite_label = QLabel(
             "If you find Aydin useful in your work, please kindly cite Aydin by using our DOI: "
             "<a href='https://doi.org/10.5281/zenodo.5654826'> 10.5281/zenodo.5654826 </a>"
         )
         cite_label.setTextFormat(Qt.RichText)
         cite_label.setOpenExternalLinks(True)
-        cite_layout.addWidget(cite_label)
-        self.tab_layout.addLayout(cite_layout)
+        cite_and_support_layout.addWidget(cite_label)
+
+        support_label = QLabel(
+            "If you have any bug reports or feature requests, please reach us at "
+            "<a href='https://github.com/royerlab/aydin'>our GitHub repository</a>. "
+            "If you have any general question, please reach us at "
+            "<a href='https://forum.image.sc/tag/aydin'>image.sc</a>."
+        )
+        support_label.setTextFormat(Qt.RichText)
+        support_label.setOpenExternalLinks(True)
+        cite_and_support_layout.addWidget(support_label)
+
+        self.tab_layout.addLayout(cite_and_support_layout)
 
         self.tab_layout.setAlignment(Qt.AlignTop)
         self.setLayout(self.tab_layout)
