@@ -565,12 +565,12 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Change the batch_size in split layer or input dimensions accordingly
             kwargs_for_infmodel = {
+                'spacetime_ndim': self.spacetime_ndim,
                 'mini_batch_size': 1,
                 'nb_unet_levels': self.nb_unet_levels,
                 'normalization': self.batch_norm,
                 'activation': self.activation_fun,
                 'shiftconv': 'shiftconv' == self.training_architecture,
-                'spacetime_ndim': self.spacetime_ndim,
             }
 
             if len(input_image.shape[1:-1]) == 2:

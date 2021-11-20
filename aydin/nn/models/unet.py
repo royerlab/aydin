@@ -41,6 +41,7 @@ class UNetModel(Model):
         self,
         input_layer_size,
         spacetime_ndim,
+        training_architecture: str = 'random',
         mini_batch_size: int = 1,
         nb_unet_levels: int = 4,
         normalization: str = 'batch',  # None,  # 'instance',
@@ -86,6 +87,7 @@ class UNetModel(Model):
         """
         self.compiled = False
 
+        self.training_architecture = training_architecture
         self.rot_batch_size = mini_batch_size
         self.num_lyr = nb_unet_levels
         self.normalization = normalization
