@@ -6,7 +6,7 @@ options using our Object-Oriented denoising API.
 
 .. code-block:: python
 
-   from aydin.restoration.denoise.noise2self_fgr import Noise2SelfFGR
+   from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
 
    n2s = Noise2SelfFGR()
    n2s.train(noisy_image)
@@ -18,7 +18,7 @@ denoising. One can do the the following:
 
 .. code-block:: python
 
-   from aydin.restoration.denoise.noise2self_fgr import Noise2SelfFGR
+   from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
 
    transforms = [
         {"class": RangeTransform, "kwargs": {}},
@@ -33,7 +33,7 @@ options using our procedural denoising endpoint.
 
 .. code-block:: python
 
-   from aydin.restoration.denoise.noise2self_fgr import noise2self_fgr
+   from aydin.restoration.denoise.noise2selffgr import noise2self_fgr
 
    denoised_image = noise2self_fgr(noisy_image)
 
