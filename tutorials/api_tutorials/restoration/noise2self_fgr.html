@@ -124,7 +124,7 @@
 <h1>Denoising an image using Noise2SelfFGR restoration API<a class="headerlink" href="#denoising-an-image-using-noise2selffgr-restoration-api" title="Permalink to this headline"></a></h1>
 <p>One can use the following lines to denoise a single image with default
 options using our Object-Oriented denoising API.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aydin.restoration.denoise.noise2self_fgr</span> <span class="kn">import</span> <span class="n">Noise2SelfFGR</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aydin.restoration.denoise.noise2selffgr</span> <span class="kn">import</span> <span class="n">Noise2SelfFGR</span>
 
 <span class="n">n2s</span> <span class="o">=</span> <span class="n">Noise2SelfFGR</span><span class="p">()</span>
 <span class="n">n2s</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">noisy_image</span><span class="p">)</span>
@@ -133,7 +133,7 @@ options using our Object-Oriented denoising API.</p>
 </div>
 <p>It is also easy to pass specific transforms to use before and/or after
 denoising. One can do the the following:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aydin.restoration.denoise.noise2self_fgr</span> <span class="kn">import</span> <span class="n">Noise2SelfFGR</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aydin.restoration.denoise.noise2selffgr</span> <span class="kn">import</span> <span class="n">Noise2SelfFGR</span>
 
 <span class="n">transforms</span> <span class="o">=</span> <span class="p">[</span>
      <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">RangeTransform</span><span class="p">,</span> <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{}},</span>
@@ -146,7 +146,7 @@ denoising. One can do the the following:</p>
 </div>
 <p>One can also use the following lines to denoise a single image with default
 options using our procedural denoising endpoint.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aydin.restoration.denoise.noise2self_fgr</span> <span class="kn">import</span> <span class="n">noise2self_fgr</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aydin.restoration.denoise.noise2selffgr</span> <span class="kn">import</span> <span class="n">noise2self_fgr</span>
 
 <span class="n">denoised_image</span> <span class="o">=</span> <span class="n">noise2self_fgr</span><span class="p">(</span><span class="n">noisy_image</span><span class="p">)</span>
 </pre></div>
