@@ -42,6 +42,8 @@ To get started with Aydin, please download and install Aydin on your machine.
 Getting started, with pip:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Aydin is support only on Python 3.9 currently. You can install Aydin with the following line:
+
 .. code-block:: bash
 
     pip install aydin
