@@ -78,7 +78,7 @@ pyz = PYZ(a.pure)
 # we actually dont need (e.g. wxPython)
 
 import re
-reg = re.compile(".*(PyQt4|k_means|mpl-data|tcl|zmq|QtWebKit|QtQuick|wxPython).*")
+reg = re.compile(".*(PyQt4|k_means|mpl-data|zmq|QtWebKit|QtQuick|wxPython).*")
 
 # from pprint import pprint
 # pprint(a.binaries)
