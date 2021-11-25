@@ -8,16 +8,19 @@ matplotlib.rcParams['toolbar'] = 'None'
 
 from PIL import Image
 
+try:
+    img = Image.open(absPath("biohub_logo.png"))
+    fig = plt.figure()
+    man = plt.get_current_fig_manager()
+    man.canvas.set_window_title("Aydin Studio - image denoising, but chill...")
+    imgplot = plt.imshow(img)
 
-img = Image.open(absPath("biohub_logo.png"))
-fig = plt.figure()
-man = plt.get_current_fig_manager()
-man.canvas.set_window_title("Aydin Studio - image denoising, but chill...")
-imgplot = plt.imshow(img)
-
-plt.axis('off')
+    plt.axis('off')
 
 
-plt.show(block=False)
-plt.pause(4)
-plt.close()
+    plt.show(block=False)
+    plt.pause(4)
+    plt.close()
+
+except Exception as ex:
+    print("no splash screen")
