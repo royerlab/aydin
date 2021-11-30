@@ -6,10 +6,10 @@ date +"%Y-%m-%d-%H%M" > /last_update
 
 cat <<EOF>/run-aydin.sh
 #!/bin/bash
-eval "$(conda shell.bash hook)"
+eval "\$(conda shell.bash hook)"
 conda activate aydin_env
 export LD_LIBRARY_PATH=/.singularity.d/libs:/opt/conda/envs/aydin_env/lib
-eval "$@"
+eval "\$@"
 EOF
 
 chmod 755 /run-aydin.sh
