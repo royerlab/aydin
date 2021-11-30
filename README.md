@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gl/aydinorg/aydin/branch/master/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gl/aydinorg/aydin)
 [![DOI](https://zenodo.org/badge/188953977.svg)](https://zenodo.org/badge/latestdoi/188953977)
 
-Singularity container based:
+Singularity container based: [![Docker and Singularity build](https://github.com/truatpasteurdotfr/aydin/actions/workflows/dot-docker-singularity-publish.yml/badge.svg)](https://github.com/truatpasteurdotfr/aydin/actions/workflows/dot-docker-singularity-publish.yml)
 ```
 singularity build aydin-gpu.sif oras://ghcr.io/truatpasteurdotfr/aydin:latest
 singularity run --nv aydin-gpu.sif 
