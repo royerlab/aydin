@@ -8,7 +8,7 @@
 Singularity container based: [![Docker and Singularity build](https://github.com/truatpasteurdotfr/aydin/actions/workflows/dot-docker-singularity-publish.yml/badge.svg)](https://github.com/truatpasteurdotfr/aydin/actions/workflows/dot-docker-singularity-publish.yml)
 ```
 singularity build aydin-gpu.sif oras://ghcr.io/truatpasteurdotfr/aydin:latest
-singularity run --nv aydin-gpu.sif 
+singularity run --nv aydin-gpu.sif aydin -h
 ```
 
 *Aydin* is a user-friendly, feature-rich, and fast **image denoising tool** that provides
