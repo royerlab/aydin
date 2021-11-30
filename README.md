@@ -5,6 +5,12 @@
 [![codecov](https://codecov.io/gl/aydinorg/aydin/branch/master/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gl/aydinorg/aydin)
 [![DOI](https://zenodo.org/badge/188953977.svg)](https://zenodo.org/badge/latestdoi/188953977)
 
+Singularity container based:
+```
+singularity build aydin-gpu.sif oras://ghcr.io/truatpasteurdotfr/aydin:latest
+singularity run --nv aydin-gpu.sif 
+```
+
 *Aydin* is a user-friendly, feature-rich, and fast **image denoising tool** that provides
 a number of **self-supervised, auto-tuned, and unsupervised** image denoising algorithms.
 *Aydin* handles from the get-go n-dimensional array-structured images with an arbitrary number
