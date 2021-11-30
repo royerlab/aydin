@@ -22,6 +22,6 @@ RUN eval "$(/opt/conda/bin/conda shell.bash hook)" && \
     conda create --name aydin_env python=3.9 && \
     conda activate aydin_env && \
     python -m pip install aydin && \
-    conda install cudatoolkit
+    conda install cudatoolkit<=11.2
 
 RUN date +"%Y-%m-%d-%H%M" > /last_update
