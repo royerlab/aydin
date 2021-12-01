@@ -14,4 +14,4 @@ EOF
 
 chmod 755 /run-aydin.sh
 %runscript 
-/run-aydin.sh
+bash /run-aydin.sh
