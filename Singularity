@@ -9,7 +9,7 @@ cat <<EOF>/run-aydin.sh
 eval "\$(conda shell.bash hook)"
 conda activate aydin_env
 export LD_LIBRARY_PATH=/.singularity.d/libs:/opt/conda/envs/aydin_env/lib
-eval "\$@"
+exec "\$@"
 EOF
 
 chmod 755 /run-aydin.sh
