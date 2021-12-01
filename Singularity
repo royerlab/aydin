@@ -14,4 +14,4 @@ EOF
 
 chmod 755 /run-aydin.sh
 %runscript 
-bash /run-aydin.sh
+/run-aydin.sh "$@"
