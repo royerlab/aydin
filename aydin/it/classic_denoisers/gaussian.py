@@ -31,6 +31,7 @@ def calibrate_denoise_gaussian(
 
     max_num_truncate: int
         Maximum number of Gaussian filter truncations to try.
+        If None, the default (4) is fixed and no search is done for that parameter.
         (advanced)
 
     crop_size_in_voxels: int or None for default
@@ -65,7 +66,13 @@ def calibrate_denoise_gaussian(
     sigma_range = (0.0, max(0.0, max_sigma) + 1e-9)  # numpy.arange(0.2, 2, 0.1) ** 1.5
 
     # Truncate range (order matters: we want 4 -- the default -- first):
-    truncate_range = [4, 8, 2, 1][: min(max_num_truncate, 4)]
+    truncate_range = (
+        [
+            4,
+        ]
+        if max_num_truncate is None
+        else [4, 8, 2, 1][: min(max_num_truncate, 4)]
+    )
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {'sigma': sigma_range, 'truncate': truncate_range}

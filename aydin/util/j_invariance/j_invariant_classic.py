@@ -159,7 +159,7 @@ def _generate_mask(image, stride: int = 4, max_range: int = 4):
     extended_blind_spot = len(blind_spots) > 1
 
     if extended_blind_spot:
-        # If yes, we need to chnage the way we store the mask:
+        # If yes, we need to change the way we store the mask:
         mask_full = zeros_like(image, dtype=numpy.bool_)
         mask_full[mask] = True
         mask = mask_full
