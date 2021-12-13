@@ -118,6 +118,7 @@ If you find Aydin useful and use it in your work, please kindly consider to cite
    Regressors <api/regressors>
    IO <api/io>
    NN <api/nn>
+   Options JSON <api/options_json>
 
 .. toctree::
    :maxdepth: 1
