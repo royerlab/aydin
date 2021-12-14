@@ -3,8 +3,13 @@ Options JSON
 ==============
 
 Options JSON files can be saved with help of Aydin Studio(GUI). They can be
-passed to Aydin CLI.
+passed to Aydin CLI to run on many more images with same options easily.
 
+We basically have a python `dict` to store chosen options in the background.
+When save options JSON functionality is triggered, we basically encode the
+`dict` with help of `jsonpickle` package and we dump it into a new `.json`
+file. To understand the format of options JSON, you can inspect the example
+shared below:
 
 .. code-block:: json
 
