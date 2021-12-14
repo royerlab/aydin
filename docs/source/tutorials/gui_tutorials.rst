@@ -141,7 +141,7 @@ Saving denoising options and trained model
 
 You can save your option selections for the selected variant with the help of ``Save Options JSON``
 button in ``Run`` menubar located on the top part of ``Aydin Studio`` window. You can pass the
-saved JSON file to ``Aydin CLI``(TODO: link aydin cli page) to train new models for new images
+saved JSON file to :doc:`Aydin CLI <cli_tutorials>`  to train new models for new images
 and denoise them. Worth to mention that ``Aydin Studio``  saves the options JSON next to the resulting
 image by default on each run.
 
