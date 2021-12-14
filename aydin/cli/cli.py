@@ -1,3 +1,5 @@
+import ast
+import json
 import os
 import shutil
 import sys
@@ -54,6 +56,8 @@ def cli(ctx):
 @click.argument('files', nargs=-1)
 @click.option('-ts', '--training-slicing', default='', type=str)
 @click.option('-is', '--inference-slicing', default='', type=str)
+@click.option('-ba', '--batch-axes', type=str)
+@click.option('-ca', '--channel-axes', type=str)
 @click.option('-v', '--variant', default="noise2selffgr-cb")
 @click.option('--use-model/--save-model', default=False)
 @click.option('--model-path', default=None)
@@ -95,6 +99,14 @@ def denoise(files, **kwargs):
 
         noisy2train = apply_slicing(noisy, kwargs['training_slicing'])
         noisy2infer = apply_slicing(noisy, kwargs['inference_slicing'])
+
+        if kwargs["batch_axes"]:
+            noisy_metadata.batch_axes = ast.literal_eval(kwargs["batch_axes"])
+            kwargs.pop("batch_axes")
+
+        if kwargs["channel_axes"]:
+            noisy_metadata.channel_axes = ast.literal_eval(kwargs["channel_axes"])
+            kwargs.pop("channel_axes")
 
         if kwargs['use_model']:
             shutil.unpack_archive(
