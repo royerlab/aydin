@@ -13,7 +13,7 @@ def dimension_analysis_on_image(
     epsilon: float = 1e-3,
     max_channels_per_axis: int = 0,
     max_sigma: float = 16.0,
-    crop_size_in_voxels: int = 1000000,
+    crop_size_in_voxels: int = 200000,
     max_num_evaluations: int = 16,
     backend: Optional[str] = None,
 ):
