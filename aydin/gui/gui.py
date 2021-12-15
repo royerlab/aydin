@@ -57,6 +57,7 @@ class App(QMainWindow):
         mainMenu.setNativeMenuBar(False)
         fileMenu = mainMenu.addMenu(' &File')
         runMenu = mainMenu.addMenu(' &Run')
+        preferencesMenu = mainMenu.addMenu(' &Preferences')
         helpMenu = mainMenu.addMenu(' &Help')
 
         # File Menu
@@ -103,6 +104,16 @@ class App(QMainWindow):
         # #     self.main_widget.tabs["File(s)"].openFileNamesDialog
         # # )
         # runMenu.addAction(saveModelJSONButton)
+
+        # Preferences Menu
+        basicModeButton = QAction('Basic mode', self)
+        basicModeButton.setStatusTip('Switch to basic mode')
+        preferencesMenu.addAction(basicModeButton)
+
+        advancedModeButton = QAction('Advanced mode', self)
+        advancedModeButton.setEnabled(False)
+        advancedModeButton.setStatusTip('Switch to advanced mode')
+        preferencesMenu.addAction(advancedModeButton)
 
         # Help Menu
         versionButton = QAction("ver" + self.version, self)
