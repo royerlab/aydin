@@ -44,11 +44,11 @@ def demo_nlm(image, display=True):
     if display:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(image, name='image')
-            viewer.add_image(noisy, name='noisy')
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(image, name='image')
+        viewer.add_image(noisy, name='noisy')
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
     return ssim_denoised
 

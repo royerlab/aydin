@@ -172,7 +172,9 @@ def representative_crop(
                 best_crop = image[best_slice]
 
             if time.time() > start_time + max_time_in_seconds:
-                lprint("Interrupting crop search because of timeout!")
+                lprint(
+                    f"Interrupting crop search because of timeout after {index} crops examined!"
+                )
                 break
 
     else:
@@ -206,7 +208,9 @@ def representative_crop(
                 best_crop = image[best_slice]
 
             if time.time() > start_time + max_time_in_seconds:
-                lprint("Interrupting crop search because of timeout!")
+                lprint(
+                    f"Interrupting crop search because of timeout after {index} crops examined!"
+                )
                 break
 
     if display_crop:

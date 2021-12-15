@@ -31,6 +31,7 @@ def demo_butterworth(image, display=True):
     image = normalise(image.astype(np.float32))
 
     noisy = add_noise(image)
+
     # noisy = add_noise(
     #     image,
     #     intensity=1024,
@@ -55,11 +56,11 @@ def demo_butterworth(image, display=True):
     if display:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(image, name='image')
-            viewer.add_image(noisy, name='noisy')
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(image, name='image')
+        viewer.add_image(noisy, name='noisy')
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
     return ssim_denoised
 

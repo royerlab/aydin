@@ -7,6 +7,7 @@ from numpy.fft import fftshift, ifftshift
 from scipy.fft import fftn, ifftn
 
 from aydin.util.crop.rep_crop import representative_crop
+from aydin.util.j_invariance.j_invariant_classic import calibrate_denoiser_classic
 from aydin.util.j_invariance.j_invariant_smart import calibrate_denoiser_smart
 
 __fastmath = {'contract', 'afn', 'reassoc'}
@@ -98,6 +99,10 @@ def calibrate_denoise_butterworth(
     # obtain representative crop, to speed things up...
     crop = representative_crop(image, crop_size=crop_size_in_voxels)
 
+    # Default axes:
+    if axes is None:
+        axes = tuple(range(image.ndim))
+
     # ranges:
     freq_cutoff_range = (min_freq, max_freq)
     order_range = (min_order, max_order)
@@ -108,6 +113,9 @@ def calibrate_denoise_butterworth(
         'axes': axes,
     }
 
+    # If there is only one dimension, we are trivially isotropic:
+    isotropic = isotropic or len(axes) == 1
+
     if isotropic:
         # Partial function:
         _denoise_butterworth = partial(
@@ -115,7 +123,7 @@ def calibrate_denoise_butterworth(
         )
 
         # Parameters to test when calibrating the denoising algorithm
-        parameter_ranges = {'freq_cutoff': freq_cutoff_range, 'order': order_range}
+        parameter_ranges = {'freq_cutoff': freq_cutoff_range}
     else:
         # Partial function with parameter impedance match:
         def _denoise_butterworth(*args, **kwargs):
@@ -131,19 +139,42 @@ def calibrate_denoise_butterworth(
         # Parameters to test when calibrating the denoising algorithm
         parameter_ranges = {
             f'freq_cutoff_{i}': freq_cutoff_range for i in range(image.ndim)
-        } | {'order': order_range}
+        }
 
-    # Calibrate denoiser
-    best_parameters = (
-        calibrate_denoiser_smart(
-            crop,
-            _denoise_butterworth,
-            denoise_parameters=parameter_ranges,
-            max_num_evaluations=max_num_evaluations,
-            display_images=display_images,
+    if max_order > min_order:
+        parameter_ranges |= {'order': order_range}
+    elif max_order == min_order:
+        other_fixed_parameters |= {'order': min_order}
+    else:
+        raise ValueError(f"Invalid order range: {min_order} > {max_order}")
+
+    # If we only have a single parameter to optimise, we can go for a brute-force approach:
+    if len(parameter_ranges) == 1:
+        step = (max_freq - min_freq) / max_num_evaluations
+        parameter_ranges = {'freq_cutoff': numpy.arange(min_freq, max_freq, step)}
+        # Calibrate denoiser using classic calibrator:
+        best_parameters = (
+            calibrate_denoiser_classic(
+                crop,
+                _denoise_butterworth,
+                denoise_parameters=parameter_ranges,
+                display_images=display_images,
+            )
+            | other_fixed_parameters
         )
-        | other_fixed_parameters
-    )
+
+    else:
+        # Calibrate denoiser using smart approach:
+        best_parameters = (
+            calibrate_denoiser_smart(
+                crop,
+                _denoise_butterworth,
+                denoise_parameters=parameter_ranges,
+                max_num_evaluations=max_num_evaluations,
+                display_images=display_images,
+            )
+            | other_fixed_parameters
+        )
 
     if not isotropic:
         # We need to adjust a bit the type of parameters passed to the denoising function:

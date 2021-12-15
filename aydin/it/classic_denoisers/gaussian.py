@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy
 from scipy.ndimage import gaussian_filter
@@ -10,7 +10,9 @@ from aydin.util.j_invariance.j_invariant_smart import calibrate_denoiser_smart
 
 def calibrate_denoise_gaussian(
     image,
-    max_sigma: float = 2,
+    axes: Optional[Tuple[int, ...]] = None,
+    min_sigma: float = 0.0,
+    max_sigma: float = 2.0,
     max_num_truncate: int = 4,
     crop_size_in_voxels: Optional[int] = 128000,
     max_num_evaluations: int = 256,
@@ -25,6 +27,14 @@ def calibrate_denoise_gaussian(
     ----------
     image: ArrayLike
         Image to calibrate denoiser for.
+
+    axes: Optional[Tuple[int,...]]
+        Axes over which to apply low-pass filtering.
+        (advanced)
+
+    min_sigma: float
+        Minimum sigma for Gaussian filter.
+        (advanced)
 
     max_sigma: float
         Maximum sigma for Gaussian filter.
@@ -62,8 +72,15 @@ def calibrate_denoise_gaussian(
     # obtain representative crop, to speed things up...
     crop = representative_crop(image, crop_size=crop_size_in_voxels)
 
+    # Default axes:
+    if axes is None:
+        axes = tuple(range(image.ndim))
+
     # Size range:
-    sigma_range = (0.0, max(0.0, max_sigma) + 1e-9)  # numpy.arange(0.2, 2, 0.1) ** 1.5
+    sigma_range = (
+        min_sigma,
+        max(min_sigma, max_sigma) + 1e-9,
+    )  # numpy.arange(0.2, 2, 0.1) ** 1.5
 
     # Truncate range (order matters: we want 4 -- the default -- first):
     truncate_range = (
@@ -73,6 +90,11 @@ def calibrate_denoise_gaussian(
         if max_num_truncate is None
         else [4, 8, 2, 1][: min(max_num_truncate, 4)]
     )
+
+    # Combine fixed parameters:
+    other_fixed_parameters = other_fixed_parameters | {
+        'axes': axes,
+    }
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {'sigma': sigma_range, 'truncate': truncate_range}
@@ -98,7 +120,13 @@ def calibrate_denoise_gaussian(
     return denoise_gaussian, best_parameters, memory_needed
 
 
-def denoise_gaussian(image, sigma: float = 1, truncate: float = 4, **kwargs):
+def denoise_gaussian(
+    image,
+    axes: Optional[Tuple[int, ...]] = None,
+    sigma: float = 1,
+    truncate: float = 4,
+    **kwargs,
+):
     """
     Denoises the given image using a simple Gaussian filter.
     Difficult to beat in terms of speed and often provides
@@ -110,7 +138,7 @@ def denoise_gaussian(image, sigma: float = 1, truncate: float = 4, **kwargs):
     affects all frequencies. In contrast, the auto-tuned Butterworth
     denoiser will not blur within the estimated band-pass of
     the signal. Thus we recommend you use the Butterworth denoiser
-    instead unless you have a good reason this use this one.
+    instead unless you have a good reason to use this one.
     \n\n
     Note: We recommend applying a variance stabilisation transform
     to improve results for images with non-Gaussian noise.
@@ -119,6 +147,10 @@ def denoise_gaussian(image, sigma: float = 1, truncate: float = 4, **kwargs):
     ----------
     image: ArrayLike
         nD image to denoise
+
+    axes: Optional[Tuple[int,...]]
+        Axes over which to apply low-pass filtering.
+        (advanced)
 
     sigma: float
         Standard deviation for Gaussian kernel.
@@ -134,4 +166,10 @@ def denoise_gaussian(image, sigma: float = 1, truncate: float = 4, **kwargs):
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
 
+    # Default axes:
+    if axes is not None:
+        # populate sigma tuple according to axes:
+        sigma = tuple((sigma if (i in axes) else 0) for i in range(image.ndim))
+
+    # Gaussian filtering:
     return gaussian_filter(image, sigma=sigma, truncate=truncate)

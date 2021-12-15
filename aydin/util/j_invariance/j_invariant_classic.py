@@ -4,6 +4,7 @@ from functools import partial
 
 import numpy
 import numpy as np
+from joblib import Parallel, delayed
 from numpy import zeros_like
 from scipy import ndimage as ndi
 from scipy.ndimage import convolve
@@ -22,6 +23,7 @@ def calibrate_denoiser_classic(
     loss_function=mean_squared_error,
     # _structural_loss, mean_squared_error, mean_absolute_error #
     display_images=False,
+    backend: str = 'loky',
     **other_fixed_parameters,
 ):
     """
@@ -77,6 +79,7 @@ def calibrate_denoiser_classic(
         stride=stride,
         loss_function=loss_function,
         display_images=display_images,
+        backend=backend,
     )
 
     idx = np.argmin(losses)
@@ -217,9 +220,10 @@ def _calibrate_denoiser_search(
     denoise_function,
     denoise_parameters,
     *,
-    stride=4,
+    stride: int = 4,
     loss_function=mean_squared_error,  # _structural_loss, #
     display_images: bool = False,
+    backend: str = 'loky',
 ):
     """Return a parameter search history with losses for a denoise function.
 
@@ -227,13 +231,29 @@ def _calibrate_denoiser_search(
     ----------
     image : ndarray
         Input data to be denoised (converted using `img_as_float`).
+
     denoise_function : function
         Denoising function to be calibrated.
+
     denoise_parameters : dict of list
         Ranges of parameters for `denoise_function` to be calibrated over.
+
     stride : int, optional
         Stride used in masking procedure that converts `denoise_function`
         to J-invariance.
+
+    loss_function:
+        Loss function to use.
+
+    display_images: bool
+        Set to true to display images obtained during optimisation.
+
+    backend: str
+        Joblib backend to use, can be: "loky" used by default,
+        can induce some communication and memory overhead when exchanging input
+        and output data with the worker Python processes, "multiprocessing"
+        previous process-based backend based on `multiprocessing.Pool` -- less
+        robust than `loky`, "threading"
 
 
     Returns
@@ -256,7 +276,7 @@ def _calibrate_denoiser_search(
         # Generate mask:
         mask = _generate_mask(image, stride)
 
-        for denoiser_kwargs in parameters_tested:
+        def try_parameters(denoiser_kwargs):
             with lsection(f"computing J-inv loss for: {denoiser_kwargs}"):
 
                 # denoised = _invariant_denoise(
@@ -276,17 +296,29 @@ def _calibrate_denoiser_search(
                 if math.isnan(loss) or math.isinf(loss):
                     loss = math.inf
                 lprint(f"J-inv loss is: {loss}")
-                losses.append(loss)
+                # losses.append(loss)
                 if display_images and not (math.isnan(loss) or math.isinf(loss)):
                     denoised = denoise_function(image, **denoiser_kwargs)
-                    denoised_images.append(denoised)
+                    # denoised_images.append(denoised)
+                else:
+                    denoised = None
 
-    if display_images:
-        import napari
+                return loss, denoised
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(image, name='image')
-            viewer.add_image(numpy.stack(denoised_images), name='denoised')
+        # Start search in parallel:
+        result = Parallel(backend=backend, n_jobs=-1)(
+            delayed(try_parameters)(denoiser_kwargs)
+            for denoiser_kwargs in parameters_tested
+        )
+
+        losses = [loss for loss, denoised in result]
+
+        if display_images:
+            import napari
+
+            with napari.gui_qt():
+                viewer = napari.Viewer()
+                viewer.add_image(image, name='image')
+                viewer.add_image(numpy.stack(denoised_images), name='denoised')
 
     return parameters_tested, losses
