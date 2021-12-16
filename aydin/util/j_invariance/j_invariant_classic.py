@@ -22,6 +22,7 @@ def calibrate_denoiser_classic(
     stride=4,
     loss_function=mean_squared_error,
     # _structural_loss, mean_squared_error, mean_absolute_error #
+    enable_extended_blind_spot: bool = True,
     display_images=False,
     backend: str = 'loky',
     **other_fixed_parameters,
@@ -40,21 +41,30 @@ def calibrate_denoiser_classic(
     ----------
     image: ArrayLike
         Image to calibate denoiser with.
+
     denoise_function: Callable
         Denosing function to calibrate. Should take an image as first parameter,
         all other parameters should have defaults
+
     denoise_parameters:
         Dictionary with keys corresponding to parameters of the denoising function.
         Values are either: (i) a list of possible values (categorical parameter),
         or (ii) a tuple of floats defining the bounds of that numerical parameter.
+
     stride: int
         Stride to compute self-supervised loss.
+
     loss_function: Callable
         Loss/Error function: takes two arrays and returns a distance-like function.
         Can be:  structural_error, mean_squared_error, _mean_absolute_error
+
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
+
     display_images: bool
         If True the denoised images for each parameter tested are displayed.
         this _will_ be slow.
+
     other_fixed_parameters: dict
         Other fixed parameters to pass to the denoiser function.
 
@@ -78,6 +88,7 @@ def calibrate_denoiser_classic(
         denoise_parameters=denoise_parameters,
         stride=stride,
         loss_function=loss_function,
+        enable_extended_blind_spot=enable_extended_blind_spot,
         display_images=display_images,
         backend=backend,
     )
@@ -148,7 +159,9 @@ def _interpolate_image(image, mask, num_iterations: int = 1):
     return interpolation
 
 
-def _generate_mask(image, stride: int = 4, max_range: int = 4):
+def _generate_mask(
+    image, stride: int = 4, max_range: int = 4, enable_extended_blind_spot: bool = True
+):
 
     # Generate slice for mask:
     spatialdims = image.ndim
@@ -157,26 +170,27 @@ def _generate_mask(image, stride: int = 4, max_range: int = 4):
         image.shape[:spatialdims], offset=n_masks // 2, stride=stride
     )
 
-    # Do we have to extend these spots?
-    blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
-    extended_blind_spot = len(blind_spots) > 1
+    if enable_extended_blind_spot:
+        # Do we have to extend these spots?
+        blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
+        extended_blind_spot = len(blind_spots) > 1
 
-    if extended_blind_spot:
-        # If yes, we need to change the way we store the mask:
-        mask_full = zeros_like(image, dtype=numpy.bool_)
-        mask_full[mask] = True
-        mask = mask_full
+        if extended_blind_spot:
+            # If yes, we need to change the way we store the mask:
+            mask_full = zeros_like(image, dtype=numpy.bool_)
+            mask_full[mask] = True
+            mask = mask_full
 
-        spot_kernel = zeros_like(noise_auto, dtype=numpy.bool_)
-        for blind_spot in blind_spots:
-            blind_spot = tuple(
-                slice(s // 2 + x, s // 2 + x + 1)
-                for s, x in zip(spot_kernel.shape, blind_spot)
-            )
-            spot_kernel[blind_spot] = True
+            spot_kernel = zeros_like(noise_auto, dtype=numpy.bool_)
+            for blind_spot in blind_spots:
+                blind_spot = tuple(
+                    slice(s // 2 + x, s // 2 + x + 1)
+                    for s, x in zip(spot_kernel.shape, blind_spot)
+                )
+                spot_kernel[blind_spot] = True
 
-        # We extend the spots:
-        mask = convolve(mask, spot_kernel)
+            # We extend the spots:
+            mask = convolve(mask, spot_kernel)
 
     return mask
 
@@ -222,6 +236,7 @@ def _calibrate_denoiser_search(
     *,
     stride: int = 4,
     loss_function=mean_squared_error,  # _structural_loss, #
+    enable_extended_blind_spot: bool = True,
     display_images: bool = False,
     backend: str = 'loky',
 ):
@@ -244,6 +259,9 @@ def _calibrate_denoiser_search(
 
     loss_function:
         Loss function to use.
+
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
 
     display_images: bool
         Set to true to display images obtained during optimisation.
@@ -274,7 +292,9 @@ def _calibrate_denoiser_search(
     ):
 
         # Generate mask:
-        mask = _generate_mask(image, stride)
+        mask = _generate_mask(
+            image, stride, enable_extended_blind_spot=enable_extended_blind_spot
+        )
 
         def try_parameters(denoiser_kwargs):
             with lsection(f"computing J-inv loss for: {denoiser_kwargs}"):

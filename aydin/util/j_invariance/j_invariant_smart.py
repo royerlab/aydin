@@ -21,6 +21,7 @@ def calibrate_denoiser_smart(
     patience: int = 64,
     stride: int = 4,
     loss_function: Callable = mean_squared_error,
+    enable_extended_blind_spot: bool = True,
     display_images: bool = False,
     **other_fixed_parameters,
 ):
@@ -38,26 +39,37 @@ def calibrate_denoiser_smart(
     ----------
     image: ArrayLike
         Image to calibate denoiser with.
+
     denoise_function: Callable
         Denosing function to calibrate. Should take an image as first parameter,
         all other parameters should have defaults
+
     denoise_parameters:
         Dictionary with keys corresponding to parameters of the denoising function.
         Values are either: (i) a list of possible values (categorical parameter),
         or (ii) a tuple of floats defining the bounds of that numerical parameter.
+
     max_num_evaluations: int
         Max number of function evaluations. This is per the size of the cartesian
         product of categorical parameters.
+
     patience : int
         After 'patience' evaluations we stop the optimiser
+
     stride: int
         Stride to compute self-supervised loss.
+
     loss_function: Callable
         Loss/Error function: takes two arrays and returns a distance-like function.
         Can be:  structural_error, mean_squared_error, _mean_absolute_error
+
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
+
     display_images: bool
         If True the denoised images for each parameter tested are displayed.
         this _will_ be slow.
+
     other_fixed_parameters: dict
         Other fixed parameters to pass to the denoiser function.
 
@@ -77,7 +89,9 @@ def calibrate_denoiser_smart(
     with lsection("Calibrating denoiser:"):
 
         # Generate mask:
-        mask = _generate_mask(image, stride)
+        mask = _generate_mask(
+            image, stride, enable_extended_blind_spot=enable_extended_blind_spot
+        )
 
         # first we separate the categorical from numerical parameters;
         categorical_parameters = {}

@@ -26,6 +26,7 @@ class Optimizer:
         max_num_evaluations: int = 128,
         num_interpolated_evaluations: int = 128,
         workers: int = -1,
+        backend: str = 'loky',
     ):
         """
         Optimizes (maximizes) a given function by alternating between optimisation
@@ -54,6 +55,9 @@ class Optimizer:
 
         workers: int
             Number of workers, if -1 the maximum is used.
+
+        backend: str
+            Backend to use for joblib parallelism.
 
 
         Returns
@@ -90,7 +94,9 @@ class Optimizer:
                     init_grid = copy(bounds)
 
                 point_list = list(itertools.product(*init_grid))
-                self._add_points(point_list, workers=workers, display_points=True)
+                self._add_points(
+                    point_list, workers=workers, backend=backend, display_points=True
+                )
 
         # First we initialise with some random points:
         if 'random' in init_strategies:
@@ -152,7 +158,13 @@ class Optimizer:
 
         return self.best_point, self.best_value
 
-    def _add_points(self, point_list: List, workers=-1, display_points=False):
+    def _add_points(
+        self,
+        point_list: List,
+        workers: int = -1,
+        backend: str = 'loky',
+        display_points=False,
+    ):
 
         # Normalise points:
         point_list = list(
@@ -166,7 +178,7 @@ class Optimizer:
             return _value
 
         # Evaluate function in parallel:
-        values = Parallel(n_jobs=workers, backend='threading')(
+        values = Parallel(n_jobs=workers, backend=backend)(
             delayed(_function)(*point) for point in point_list
         )
 

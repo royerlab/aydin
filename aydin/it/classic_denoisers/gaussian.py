@@ -16,6 +16,7 @@ def calibrate_denoise_gaussian(
     max_num_truncate: int = 4,
     crop_size_in_voxels: Optional[int] = 128000,
     max_num_evaluations: int = 256,
+    enable_extended_blind_spot: bool = True,
     display_images: bool = False,
     **other_fixed_parameters,
 ):
@@ -53,6 +54,9 @@ def calibrate_denoise_gaussian(
         Maximum number of evaluations for finding
         the optimal parameters.
         (advanced)
+
+    enable_extended_blind_spot: bool
+        Automatically determines extended blind-spot extent.
 
     display_images: bool
         When True the denoised images encountered
@@ -108,6 +112,7 @@ def calibrate_denoise_gaussian(
             crop,
             _denoise_gaussian,
             denoise_parameters=parameter_ranges,
+            enable_extended_blind_spot=enable_extended_blind_spot,
             display_images=display_images,
             max_num_evaluations=max_num_evaluations,
         )

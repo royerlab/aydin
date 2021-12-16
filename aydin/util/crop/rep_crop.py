@@ -20,7 +20,7 @@ def representative_crop(
     favour_odd_lengths: bool = False,
     fast_mode: bool = False,
     fast_mode_num_crops: int = 1500,
-    max_time_in_seconds: float = 1,
+    timeout_in_seconds: float = 1,
     return_slice: bool = False,
     display_crop: bool = False,
 ):
@@ -61,7 +61,7 @@ def representative_crop(
     fast_mode_num_crops: int
         Number of crops to check in fast mode.
 
-    max_time_in_seconds: float
+    timeout_in_seconds: float
         Maximum amount of time in seconds that this function should run for.
         This avoids excessive computation for very large images.
 
@@ -171,14 +171,14 @@ def representative_crop(
                 # We make sure to have the full and original crop!
                 best_crop = image[best_slice]
 
-            if time.time() > start_time + max_time_in_seconds:
+            if time.time() > start_time + timeout_in_seconds:
                 lprint(
                     f"Interrupting crop search because of timeout after {index} crops examined!"
                 )
                 break
 
     else:
-        for index in numpy.ndindex(translation_indices):
+        for i, index in enumerate(numpy.ndindex(translation_indices)):
 
             # translation:
             translation = tuple(int(i * cs / 2) for i, cs in zip(index, cropped_shape))
@@ -207,9 +207,9 @@ def representative_crop(
                 # We make sure to have the full and original crop!
                 best_crop = image[best_slice]
 
-            if time.time() > start_time + max_time_in_seconds:
+            if time.time() > start_time + timeout_in_seconds:
                 lprint(
-                    f"Interrupting crop search because of timeout after {index} crops examined!"
+                    f"Interrupting crop search because of timeout after {i} crops examined!"
                 )
                 break
 

@@ -64,12 +64,12 @@ def calibrate_denoise_butterworth(
         typically close to one.
         (advanced)
 
-    max_order: float
-        Maximal order for the Butterworth filter to use for calibration.
+    min_order: float
+        Minimal order for the Butterworth filter to use for calibration.
         (advanced)
 
     max_order: float
-        Minimal order for the Butterworth filter to use for calibration.
+        Maximal order for the Butterworth filter to use for calibration.
         (advanced)
 
     crop_size_in_voxels: int or None for default
