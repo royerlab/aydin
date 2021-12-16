@@ -34,16 +34,16 @@ class App(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.top, self.left, self.width, self.height)
 
-        self.main_widget = MainPage(self, self.threadpool)
-        self.setCentralWidget(self.main_widget)
-
-        # Menu bar
-        self.setupMenubar()
-
         # Status bar
         self.statusBar = QStatusBar(self)
         self.statusBar.showMessage(f"aydin, version: {ver}")
         self.setStatusBar(self.statusBar)
+
+        self.main_widget = MainPage(self, self.threadpool, self.statusBar)
+        self.setCentralWidget(self.main_widget)
+
+        # Menu bar
+        self.setupMenubar()
 
     def closeEvent(self, event):
         lprint("closeEvent of mainwindow is called")
