@@ -64,6 +64,16 @@ to Aydin CLI. One can achieve this as shown below:
    $ aydin denoise image.tif --lower-level-args=image_options.json
 
 
+Also we provide the dimensions tab on Aydin Studio where user can select how
+Aydin should be treating dimensions of the loaded image.  This is also possible
+with Aydin CLI denoise command. An example on how to tell Aydin to treat first
+two dimensions of a four-dimensional image as batch dimensions shown below:
+
+
+.. code-block:: bash
+
+   $ aydin denoise image.tif --batch-axis "[True, True, False, False]"
+
 
 Denoising a single image with a pre-trained Aydin model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
