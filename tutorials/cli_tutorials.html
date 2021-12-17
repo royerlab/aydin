@@ -155,6 +155,13 @@ to Aydin CLI. One can achieve this as shown below:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ aydin denoise image.tif --lower-level-args<span class="o">=</span>image_options.json
 </pre></div>
 </div>
+<p>Also we provide the dimensions tab on Aydin Studio where user can select how
+Aydin should be treating dimensions of the loaded image.  This is also possible
+with Aydin CLI denoise command. An example on how to tell Aydin to treat first
+two dimensions of a four-dimensional image as batch dimensions shown below:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ aydin denoise image.tif --batch-axis <span class="s2">&quot;[True, True, False, False]&quot;</span>
+</pre></div>
+</div>
 </section>
 <section id="denoising-a-single-image-with-a-pre-trained-aydin-model">
 <h2>Denoising a single image with a pre-trained Aydin model<a class="headerlink" href="#denoising-a-single-image-with-a-pre-trained-aydin-model" title="Permalink to this headline"></a></h2>
