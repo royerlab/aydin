@@ -5,6 +5,7 @@ from qtpy.QtWidgets import QMainWindow, QAction, QApplication, QStatusBar
 import qdarkstyle
 
 from aydin.gui.main_page import MainPage
+from aydin.gui.resources.json_resource_loader import absPath
 from aydin.util.log.log import lprint
 
 
@@ -16,7 +17,7 @@ class App(QMainWindow):
 
         self.version = ver
 
-        self.setWindowIcon(QIcon("resources/aydin_logo_grad_black.png"))
+        self.setAydinWindowIcon()
 
         self.threadpool = QThreadPool(self)
 
@@ -107,6 +108,9 @@ class App(QMainWindow):
         # Help Menu
         versionButton = QAction("ver" + self.version, self)
         helpMenu.addAction(versionButton)
+
+    def setAydinWindowIcon(self):
+        self.setWindowIcon(QIcon(absPath("aydin_icon.png")))
 
 
 def run(ver):
