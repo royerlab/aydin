@@ -15,7 +15,6 @@ docs/build
 # Distribution / packaging
 .Python
 develop-eggs/
-build/
 dist/
 downloads/
 eggs/
@@ -117,7 +116,7 @@ data/
 
 build/osx/build/
 build/linux/build/
-build/win/build
+build/win/build/
 
 .zgroup
 *.png
