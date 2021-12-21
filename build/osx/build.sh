@@ -15,7 +15,7 @@ pyinstaller -D -y --clean aydin.spec # -D -y --clean
 mkdir -p dist/aydin_0.1.5rc12.app/Contents/MacOS
 mkdir -p dist/aydin_0.1.5rc12.app/Contents/Resources
 
-cp /opt/anaconda3/envs/ay39build/lib/python3.9/site-packages/sklearn/cluster/*.so dist/aydin/sklearn/cluster/.
+cp /PATH/TO/sklearn/cluster/*.so dist/aydin/sklearn/cluster/.
 cp Info.plist dist/aydin_0.1.5rc12.app/Contents/.
 cp icon-windowed.icns dist/aydin_0.1.5rc12.app/Contents/Resources/.
 cp -rf -p dist/aydin/* dist/aydin_0.1.5rc12.app/Contents/MacOS/.
