@@ -80,6 +80,7 @@ a = Analysis(['../../aydin/cli/cli.py'],
                              "imageio.plugins.freeimagemulti",
                              "napari._qt",
                              "psygnal._signal",
+                             "sklearn.utils._typedefs",
                             "numba.core.typing.cffi_utils", "gdown.download", "vispy.app.backends._pyqt5","vispy.glsl"
                                                                      "sklearn.utils._cython_blas"],
              hookspath=["hooks"],
