@@ -123,9 +123,15 @@ class DenoiseJobRunner(QWidget):
         self.batch_axes = self.parent.tabs["Dimensions"].batch_axes
         self.channel_axes = self.parent.tabs["Dimensions"].channel_axes
         self.denoise_backend = self.parent.tabs["Denoise"].selected_backend
-        self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
 
-        self.lower_level_args = self.parent.tabs["Denoise"].lower_level_args
+        try:
+            self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
+            self.lower_level_args = self.parent.tabs["Denoise"].lower_level_args
+        except Exception:
+            self.parent.status_bar.showMessage(
+                "There is a mistake with given parameter values..."
+            )
+            return
 
         self.save_options_json = self.parent.tabs[
             "Denoise"

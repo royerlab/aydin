@@ -40,10 +40,11 @@ class MainPage(QWidget):
 
     """
 
-    def __init__(self, parent, threadpool):
+    def __init__(self, parent, threadpool, status_bar):
         super(QWidget, self).__init__(parent)
         self.parent = parent
         self.threadpool = threadpool
+        self.status_bar = status_bar
 
         self.setAcceptDrops(True)
 
