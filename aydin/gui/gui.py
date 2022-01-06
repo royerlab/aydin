@@ -90,22 +90,6 @@ class App(QMainWindow):
         )
         runMenu.addAction(saveOptionsJSONButton)
 
-        # loadOptionsJSONButton = QAction('Load Options JSON', self)
-        # loadOptionsJSONButton.setStatusTip('Load options JSON')
-        # # loadOptionsJSONButton.triggered.connect(
-        # #     self.main_widget.tabs["File(s)"].openFileNamesDialog
-        # # )
-        # loadOptionsJSONButton.setEnabled(False)
-        # runMenu.addAction(loadOptionsJSONButton)
-        #
-        # saveModelJSONButton = QAction('Save Model', self)
-        # saveModelJSONButton.setStatusTip('Save the most-recent trained model')
-        # saveModelJSONButton.setEnabled(False)
-        # # saveModelJSONButton.triggered.connect(
-        # #     self.main_widget.tabs["File(s)"].openFileNamesDialog
-        # # )
-        # runMenu.addAction(saveModelJSONButton)
-
         # Preferences Menu
         basicModeButton = QAction('Basic mode', self)
         basicModeButton.setEnabled(False)
