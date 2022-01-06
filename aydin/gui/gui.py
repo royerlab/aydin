@@ -108,11 +108,11 @@ class App(QMainWindow):
 
         # Preferences Menu
         basicModeButton = QAction('Basic mode', self)
+        basicModeButton.setEnabled(False)
         basicModeButton.setStatusTip('Switch to basic mode')
         preferencesMenu.addAction(basicModeButton)
 
         advancedModeButton = QAction('Advanced mode', self)
-        advancedModeButton.setEnabled(False)
         advancedModeButton.setStatusTip('Switch to advanced mode')
         preferencesMenu.addAction(advancedModeButton)
 
