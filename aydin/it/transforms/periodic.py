@@ -1,7 +1,7 @@
 import numpy
 import scipy
 
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 from scipy.ndimage import minimum_filter
 from skimage.feature import peak_local_max
 
@@ -88,7 +88,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
     def __repr__(self):
         return self.__str__()
 
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
 
         with lsection(
             f"Applies periodic noise suppression to array of shape: {array.shape} and dtype: {array.dtype}"
@@ -96,7 +96,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
             new_array = self._suppress_periodic_patterns(array)
             return new_array
 
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
 
         if not self.do_postprocess:
             return array
@@ -111,7 +111,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
                 new_array = self._suppress_periodic_patterns(array)
             return new_array
 
-    def _suppress_periodic_patterns(self, array):
+    def _suppress_periodic_patterns(self, array: ArrayLike):
         self._original_dtype = array.dtype
         array = array.astype(numpy.float32, copy=False)
 
@@ -186,7 +186,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
 
         return new_array
 
-    def _reapply_periodic_patterns(self, array):
+    def _reapply_periodic_patterns(self, array: ArrayLike):
         array = array.astype(numpy.float32, copy=False)
         ft = scipy.fft.fftn(array, workers=-1)
         ft = scipy.fft.fftshift(ft)

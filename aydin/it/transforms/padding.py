@@ -1,6 +1,6 @@
 import numpy
 
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 
 from aydin.it.transforms.base import ImageTransformBase
 from aydin.util.log.log import lsection, lprint
@@ -82,7 +82,7 @@ class PaddingTransform(ImageTransformBase):
     def __repr__(self):
         return self.__str__()
 
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
         with lsection(
             f"Padding array of shape: {array.shape} with {self.pad_width} voxels and mode: {self.mode}:"
         ):
@@ -91,7 +91,7 @@ class PaddingTransform(ImageTransformBase):
             )
             return padded_array
 
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
         if not self.do_postprocess:
             return array
 
@@ -102,7 +102,7 @@ class PaddingTransform(ImageTransformBase):
             return new_array
 
 
-def _pad(array, mode: str, pad_width: int, min_length_to_pad: int):
+def _pad(array: ArrayLike, mode: str, pad_width: int, min_length_to_pad: int):
 
     # Compute pad width:
     if isinstance(pad_width, int):
@@ -122,7 +122,7 @@ def _pad(array, mode: str, pad_width: int, min_length_to_pad: int):
     return padded_array, pad_width
 
 
-def _unpad(array, pad_width):
+def _unpad(array: ArrayLike, pad_width):
 
     # Compute slice:
     slices = []
