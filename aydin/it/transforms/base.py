@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 
 
 class ImageTransformBase(ABC):
@@ -38,11 +38,11 @@ class ImageTransformBase(ABC):
         self.do_postprocess = do_postprocess
 
     @abstractmethod
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
         """ """
         raise NotImplementedError()
 
     @abstractmethod
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
         """ """
         raise NotImplementedError()
