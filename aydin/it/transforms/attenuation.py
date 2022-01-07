@@ -42,7 +42,7 @@ class AttenuationTransform(ImageTransformBase):
         ----------
         axes : Union[None, int, Sequence[int]]
             Axis or list of axes over which to correct attenuation.
-            If None the axes are automatically determined. (advanced)
+            If None the axes are automatically determined.
 
         mode : str
             Attenuation fitting mode, only currently supported: 'linear'

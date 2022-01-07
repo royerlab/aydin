@@ -113,6 +113,8 @@ class DenoiseTab(QWidget):
 
         self.setLayout(self.tab_layout)
 
+        self.set_advanced_enabled(enable=False)  # to init the tab correctly
+
     def change_current_method(self, new_index):
         self.stacked_widget.setCurrentIndex(new_index)
 
