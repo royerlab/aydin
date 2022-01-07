@@ -111,3 +111,6 @@ class DenoiseTab(QWidget):
     @property
     def lower_level_args(self):
         return self.stacked_widget.currentWidget().lower_level_args()
+
+    def set_advanced_enabled(self):
+        raise NotImplementedError

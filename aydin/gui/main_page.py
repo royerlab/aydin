@@ -246,8 +246,9 @@ class MainPage(QWidget):
 
     def toggle_basic_advanced_mode(self):
         # make calls to toggle the GUI at lower levels
+        self.tabs["Denoise"].set_advanced_enabled()
 
-        # swap certain features of basic and advanced menu items
+        # swap the enabled state of  `basic` and `advanced` menu items
         self.parent.basicModeButton.setEnabled(
             not self.parent.basicModeButton.isEnabled()
         )

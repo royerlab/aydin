@@ -57,3 +57,6 @@ class ProcessingTab(QWidget):
                 transforms.append(item.params_dict)
 
         return transforms
+
+    def set_advanced_enabled(self):
+        raise NotImplementedError
