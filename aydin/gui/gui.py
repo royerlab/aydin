@@ -91,14 +91,20 @@ class App(QMainWindow):
         runMenu.addAction(saveOptionsJSONButton)
 
         # Preferences Menu
-        basicModeButton = QAction('Basic mode', self)
-        basicModeButton.setEnabled(False)
-        basicModeButton.setStatusTip('Switch to basic mode')
-        preferencesMenu.addAction(basicModeButton)
+        self.basicModeButton = QAction('Basic mode', self)
+        self.basicModeButton.setEnabled(False)
+        self.basicModeButton.setStatusTip('Switch to basic mode')
+        self.basicModeButton.triggered.connect(
+            lambda: self.main_widget.toggle_basic_advanced_mode()
+        )
+        preferencesMenu.addAction(self.basicModeButton)
 
-        advancedModeButton = QAction('Advanced mode', self)
-        advancedModeButton.setStatusTip('Switch to advanced mode')
-        preferencesMenu.addAction(advancedModeButton)
+        self.advancedModeButton = QAction('Advanced mode', self)
+        self.advancedModeButton.setStatusTip('Switch to advanced mode')
+        self.advancedModeButton.triggered.connect(
+            lambda: self.main_widget.toggle_basic_advanced_mode()
+        )
+        preferencesMenu.addAction(self.advancedModeButton)
 
         # Help Menu
         versionButton = QAction("ver" + self.version, self)
