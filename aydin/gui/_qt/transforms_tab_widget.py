@@ -31,7 +31,6 @@ class TransformsTabWidget(QTabWidget):
 
             class_itself = response.__getattribute__(elem)
             fullargspec = inspect.getfullargspec(class_itself.__init__)
-            # print(fullargspec)
 
             widget = TransformsTabItem(
                 self,
@@ -52,4 +51,6 @@ class TransformsTabWidget(QTabWidget):
         self.clear()
 
     def set_advanced_enabled(self, enable: bool = False):
-        raise NotImplementedError
+        for item_widget in self.list_of_item_widgets:
+            if "(advanced)" in item_widget.transform_class.__doc__:
+                item_widget.setEnabled(enable)
