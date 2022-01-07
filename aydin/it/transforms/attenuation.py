@@ -15,7 +15,7 @@ class AttenuationTransform(ImageTransformBase):
     Corrects intensity attenuation of an image along a given list of axis.
     This is usefull to correct for signal attenuation over time or along
     space. Currently only linear attenuation is supported. More modes on the
-    way.(advanced)
+    way.
     """
 
     preprocess_description = (

@@ -25,7 +25,7 @@ class MotionStabilisationTransform(ImageTransformBase):
     we assume that all frames can be registered to a common reference frame,
     and thus that all images have a common background that can be used for
     registration. For completeness, multiple axis can be specified and the
-    correction is applied along each in sequence.
+    correction is applied along each in sequence.(advanced)
     """
 
     preprocess_description = (
