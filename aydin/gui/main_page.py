@@ -249,9 +249,9 @@ class MainPage(QWidget):
         self.tabs["Pre/Post-Processing"].set_advanced_enabled(
             self.parent.advancedModeButton.isEnabled()
         )
-        # self.tabs["Denoise"].set_advanced_enabled(
-        #     self.parent.advancedModeButton.isEnabled()
-        # )
+        self.tabs["Denoise"].set_advanced_enabled(
+            self.parent.advancedModeButton.isEnabled()
+        )
 
         # swap the enabled state of  `basic` and `advanced` menu items
         self.parent.basicModeButton.setEnabled(

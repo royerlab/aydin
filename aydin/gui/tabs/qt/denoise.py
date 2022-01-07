@@ -62,28 +62,44 @@ class DenoiseTab(QWidget):
             backend_options_descriptions,
         ) = get_list_of_denoiser_implementations()
 
-        backend_options, backend_options_descriptions = (
+        self.backend_options, self.backend_options_descriptions = (
             list(t)
             for t in zip(*sorted(zip(backend_options, backend_options_descriptions)))
         )
+
+        self.basic_backend_options = [
+            'Classic-butterworth',
+            'Classic-gaussian',
+            'Classic-gm',
+            'Classic-nlm',
+            'Classic-tv',
+            'Noise2SelfCNN-jinet',
+            'Noise2SelfFGR-cb',
+            'Noise2SelfFGR-lgbm',
+            'Noise2SelfFGR-rf',
+        ]
+
+        self.basic_backend_options_descriptions = []
 
         self.stacked_widget = QStackedWidget(self)
 
         default_option_index = 0
         for idx, (backend_option, description) in enumerate(
-            zip(backend_options, backend_options_descriptions)
+            zip(self.backend_options, self.backend_options_descriptions)
         ):
-            self.leftlist.insertItem(idx, backend_option)
-            # self.leftlist.item(idx).setToolTip(tooltip)
+            if backend_option in self.basic_backend_options:
+                self.basic_backend_options_descriptions.append(description)
 
-            self.stacked_widget.addWidget(
-                DenoiseTabMethodWidget(
-                    self, name=backend_option, description=description
+                self.leftlist.insertItem(idx, backend_option)
+
+                self.stacked_widget.addWidget(
+                    DenoiseTabMethodWidget(
+                        self, name=backend_option, description=description
+                    )
                 )
-            )
 
-            if backend_option == "Classic-butterworth":
-                default_option_index = idx
+                if backend_option == "Classic-butterworth":
+                    default_option_index = idx
 
         self.leftlist.item(default_option_index).setSelected(True)
         self.change_current_method(default_option_index)
@@ -113,4 +129,24 @@ class DenoiseTab(QWidget):
         return self.stacked_widget.currentWidget().lower_level_args()
 
     def set_advanced_enabled(self, enable: bool = False):
-        raise NotImplementedError
+        self.leftlist.clear()
+
+        while self.stacked_widget.count():
+            self.stacked_widget.removeWidget(self.stacked_widget.widget(0))
+
+        for index, backend_option in enumerate(
+            self.backend_options if enable else self.basic_backend_options
+        ):
+            self.leftlist.insertItem(index, backend_option)
+
+            description_list = (
+                self.backend_options_descriptions
+                if enable
+                else self.basic_backend_options_descriptions
+            )
+
+            self.stacked_widget.addWidget(
+                DenoiseTabMethodWidget(
+                    self, name=backend_option, description=description_list[index]
+                )
+            )
