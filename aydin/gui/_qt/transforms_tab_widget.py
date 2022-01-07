@@ -50,3 +50,6 @@ class TransformsTabWidget(QTabWidget):
 
     def clear_the_list(self):
         self.clear()
+
+    def set_advanced_enabled(self, enable: bool = False):
+        raise NotImplementedError

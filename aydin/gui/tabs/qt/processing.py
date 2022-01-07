@@ -58,5 +58,5 @@ class ProcessingTab(QWidget):
 
         return transforms
 
-    def set_advanced_enabled(self):
-        raise NotImplementedError
+    def set_advanced_enabled(self, enable: bool = False):
+        self.panes_widget.set_advanced_enabled(enable=enable)
