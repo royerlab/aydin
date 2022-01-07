@@ -45,6 +45,8 @@ class ProcessingTab(QWidget):
 
         self.setLayout(self.tab_layout)
 
+        self.set_advanced_enabled(enable=False)  # to init the tab correctly
+
     @property
     def transforms(self):
         if len(self.panes_widget.list_of_item_widgets) < 1:
@@ -57,3 +59,6 @@ class ProcessingTab(QWidget):
                 transforms.append(item.params_dict)
 
         return transforms
+
+    def set_advanced_enabled(self, enable: bool = False):
+        self.panes_widget.set_advanced_enabled(enable=enable)

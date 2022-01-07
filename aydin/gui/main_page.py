@@ -244,6 +244,23 @@ class MainPage(QWidget):
             not self.tabs["Training Crop"].use_same_crop_checkbox.isChecked(),
         )
 
+    def toggle_basic_advanced_mode(self):
+        # make calls to toggle the GUI at lower levels
+        self.tabs["Pre/Post-Processing"].set_advanced_enabled(
+            self.parent.advancedModeButton.isEnabled()
+        )
+        self.tabs["Denoise"].set_advanced_enabled(
+            self.parent.advancedModeButton.isEnabled()
+        )
+
+        # swap the enabled state of  `basic` and `advanced` menu items
+        self.parent.basicModeButton.setEnabled(
+            not self.parent.basicModeButton.isEnabled()
+        )
+        self.parent.advancedModeButton.setEnabled(
+            not self.parent.advancedModeButton.isEnabled()
+        )
+
     def add_activity_dockable(self):
         self.activity_dock.setHidden(True)
         self.parent.addDockWidget(Qt.BottomDockWidgetArea, self.activity_dock)

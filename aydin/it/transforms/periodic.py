@@ -16,7 +16,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
     Some images have a form of periodic noise that can be seen as strong
     peaks in their power spectral density. Suppressing these peaks before and
     after denoising is often a good idea. This is tricky to use, use with
-    care. Works with non-axis aligned periodic patterns.
+    care. Works with non-axis aligned periodic patterns.(advanced)
     """
 
     preprocess_description = (

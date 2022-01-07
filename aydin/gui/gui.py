@@ -58,6 +58,7 @@ class App(QMainWindow):
         mainMenu.setNativeMenuBar(False)
         fileMenu = mainMenu.addMenu(' &File')
         runMenu = mainMenu.addMenu(' &Run')
+        preferencesMenu = mainMenu.addMenu(' &Preferences')
         helpMenu = mainMenu.addMenu(' &Help')
 
         # File Menu
@@ -89,21 +90,21 @@ class App(QMainWindow):
         )
         runMenu.addAction(saveOptionsJSONButton)
 
-        # loadOptionsJSONButton = QAction('Load Options JSON', self)
-        # loadOptionsJSONButton.setStatusTip('Load options JSON')
-        # # loadOptionsJSONButton.triggered.connect(
-        # #     self.main_widget.tabs["File(s)"].openFileNamesDialog
-        # # )
-        # loadOptionsJSONButton.setEnabled(False)
-        # runMenu.addAction(loadOptionsJSONButton)
-        #
-        # saveModelJSONButton = QAction('Save Model', self)
-        # saveModelJSONButton.setStatusTip('Save the most-recent trained model')
-        # saveModelJSONButton.setEnabled(False)
-        # # saveModelJSONButton.triggered.connect(
-        # #     self.main_widget.tabs["File(s)"].openFileNamesDialog
-        # # )
-        # runMenu.addAction(saveModelJSONButton)
+        # Preferences Menu
+        self.basicModeButton = QAction('Basic mode', self)
+        self.basicModeButton.setEnabled(False)
+        self.basicModeButton.setStatusTip('Switch to basic mode')
+        self.basicModeButton.triggered.connect(
+            lambda: self.main_widget.toggle_basic_advanced_mode()
+        )
+        preferencesMenu.addAction(self.basicModeButton)
+
+        self.advancedModeButton = QAction('Advanced mode', self)
+        self.advancedModeButton.setStatusTip('Switch to advanced mode')
+        self.advancedModeButton.triggered.connect(
+            lambda: self.main_widget.toggle_basic_advanced_mode()
+        )
+        preferencesMenu.addAction(self.advancedModeButton)
 
         # Help Menu
         versionButton = QAction("ver" + self.version, self)

@@ -18,7 +18,7 @@ class DeskewTransform(ImageTransformBase):
     per plane - must be an integer. We automatically snap the delta value to the closest integer. Padding is supported.
 
     Note: this only works for images with at least 3 dimensions. Does nothing
-    on images with less than 3 dimensions.
+    on images with less than 3 dimensions.(advanced)
     """
 
     preprocess_description = "Deskew image" + ImageTransformBase.preprocess_description

@@ -129,3 +129,14 @@ class ConstructorArgumentsWidget(QWidget):
             params_dict["kwargs"][name] = value
 
         return params_dict
+
+    def set_advanced_enabled(self, enable: bool = False):
+        for _ in range(self.arguments_layout.rowCount()):
+            if (
+                "(advanced)"
+                in self.arguments_layout.itemAtPosition(_, 2).widget().text()
+            ):
+                for column_index in range(3):
+                    self.arguments_layout.itemAtPosition(
+                        _, column_index
+                    ).widget().setHidden(not enable)
