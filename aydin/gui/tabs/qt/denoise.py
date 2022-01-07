@@ -150,3 +150,9 @@ class DenoiseTab(QWidget):
                     self, name=backend_option, description=description_list[index]
                 )
             )
+
+        for widget_index in range(self.stacked_widget.count()):
+            for key, constructor_arguments_widget in self.stacked_widget.widget(
+                widget_index
+            ).constructor_arguments_widget_dict.items():
+                constructor_arguments_widget.set_advanced_enabled(enable=enable)
