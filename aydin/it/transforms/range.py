@@ -1,8 +1,7 @@
 from typing import Optional
 
 import numpy
-
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 
 from aydin.it.normalisers.base import NormaliserBase
 from aydin.it.normalisers.minmax import MinMaxNormaliser
@@ -106,7 +105,7 @@ class RangeTransform(ImageTransformBase):
     def __repr__(self):
         return self.__str__()
 
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
 
         with lsection(
             f"Normalizing value range ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
@@ -127,7 +126,7 @@ class RangeTransform(ImageTransformBase):
             self._normaliser = normaliser
             return new_array
 
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
 
         if not self.do_postprocess:
             return array
