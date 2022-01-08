@@ -53,6 +53,6 @@ class TransformsTabWidget(QTabWidget):
     def set_advanced_enabled(self, enable: bool = False):
         for index, item_widget in enumerate(self.list_of_item_widgets):
             if "(advanced)" in item_widget.transform_class.__doc__:
-                self.setTabEnabled(index, enable)
+                self.setTabVisible(index, enable)
 
             item_widget.constructor_arguments_widget.set_advanced_enabled(enable=enable)
