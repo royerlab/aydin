@@ -14,6 +14,7 @@ from aydin.util.log.log import Log, lprint
 
 class ActivityWidget(QWidget):
     """Qt dialog window for displaying 'About napari' information.
+
     Attributes
     ----------
     citationCopyButton : napari._qt.qt_about.QtCopyToClipboardButton
@@ -45,7 +46,7 @@ class ActivityWidget(QWidget):
 
         # We are using an empty press event otherwise cursor jumps to the point clicked
         self.infoTextBox.mousePressEvent = self.qtextedit_mousepressevent
-        self.set_auto_scrool()
+        self.set_auto_scroll()
 
         Log.gui_print = self.activity_print
 
@@ -88,11 +89,11 @@ class ActivityWidget(QWidget):
 
     def handle_autoscroll_checkbox_state_changed(self):
         if self.autoscrool_checkbox.isChecked():
-            self.set_auto_scrool()
+            self.set_auto_scroll()
         else:
             self.infoTextBox.verticalScrollBar().rangeChanged.disconnect()
 
-    def set_auto_scrool(self):
+    def set_auto_scroll(self):
         self.infoTextBox.verticalScrollBar().rangeChanged.connect(
             lambda min, max: self.infoTextBox.verticalScrollBar().setSliderPosition(max)
         )
