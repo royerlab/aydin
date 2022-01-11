@@ -30,13 +30,6 @@ class DenoiseJobRunner(QWidget):
         self.widget_layout = QHBoxLayout()
 
         self.start_button.clicked.connect(self.prep_and_run)
-        # self.widget_layout.addWidget(self.start_button)
-
-        # self.stop_button = QPushButton(
-        #     "Stop", icon=QApplication.style().standardIcon(QStyle.SP_MediaStop)
-        # )
-        # self.stop_button.clicked.connect(self.stop_func)
-        # self.widget_layout.addWidget(self.stop_button)
 
         self.setLayout(self.widget_layout)
 

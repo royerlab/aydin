@@ -5,7 +5,7 @@ from qtpy.QtCore import QRunnable, Signal, QObject, Slot
 
 
 class WorkerSignals(QObject):
-    '''
+    """
     Defines the signals available from a running worker thread.
 
     Supported signals are:
@@ -13,16 +13,16 @@ class WorkerSignals(QObject):
     finished
         No data
 
-    error
-        `tuple` (exctype, value, traceback.format_exc() )
+    error : tuple
+        (exctype, value, traceback.format_exc() )
 
-    result
-        `object` data returned from processing, anything
+    result : object
+        data returned from processing, anything
 
-    progress
-        `int` indicating % progress
+    progress : int
+        indicating % progress
 
-    '''
+    """
 
     finished = Signal()
     error = Signal(tuple)
@@ -31,18 +31,11 @@ class WorkerSignals(QObject):
 
 
 class Worker(QRunnable):
-    '''
+    """
     Worker thread
 
-    Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
-
-    :param callback: The function callback to run on this worker thread. Supplied args and
-                     kwargs will be passed through to the runner.
-    :type callback: function
-    :param args: Arguments to pass to the callback function
-    :param kwargs: Keywords to pass to the callback function
-
-    '''
+    Inherits from QRunnable to handle worker thread setup, signals and wrap-up.
+    """
 
     def __init__(self, fn, *args, **kwargs):
         super(Worker, self).__init__()
@@ -58,9 +51,9 @@ class Worker(QRunnable):
 
     @Slot()
     def run(self):
-        '''
+        """
         Initialise the runner function with passed args, kwargs.
-        '''
+        """
 
         # Retrieve args/kwargs here; and fire processing using them
         try:

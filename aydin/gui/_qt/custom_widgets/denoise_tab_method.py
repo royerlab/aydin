@@ -88,7 +88,7 @@ class DenoiseTabMethodWidget(QWidget):
         for component in list(args.keys()):
             sub_dict = args[component]
 
-            constructor_arguments_widget = ConstructorArgumentsWidget(  # TODO: making return of this member doesn't make sense, double check
+            constructor_arguments_widget = ConstructorArgumentsWidget(
                 self,
                 arg_names=sub_dict["arguments"],
                 arg_defaults=sub_dict["defaults"],
