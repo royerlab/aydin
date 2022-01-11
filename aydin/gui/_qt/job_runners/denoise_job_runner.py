@@ -30,13 +30,6 @@ class DenoiseJobRunner(QWidget):
         self.widget_layout = QHBoxLayout()
 
         self.start_button.clicked.connect(self.prep_and_run)
-        # self.widget_layout.addWidget(self.start_button)
-
-        # self.stop_button = QPushButton(
-        #     "Stop", icon=QApplication.style().standardIcon(QStyle.SP_MediaStop)
-        # )
-        # self.stop_button.clicked.connect(self.stop_func)
-        # self.widget_layout.addWidget(self.stop_button)
 
         self.setLayout(self.widget_layout)
 
@@ -135,11 +128,11 @@ class DenoiseJobRunner(QWidget):
 
         self.save_options_json = self.parent.tabs[
             "Denoise"
-        ].current_backend_qwidget.save_json_checkbox.isChecked()
+        ].current_backend_widget.save_json_checkbox.isChecked()
 
         self.save_model = self.parent.tabs[
             "Denoise"
-        ].current_backend_qwidget.save_model_checkbox.isChecked()
+        ].current_backend_widget.save_model_checkbox.isChecked()
 
         # Initialize required restoration instances
         self.denoiser = get_denoiser_class_instance(

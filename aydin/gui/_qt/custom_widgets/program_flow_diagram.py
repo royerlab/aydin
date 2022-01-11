@@ -144,7 +144,8 @@ class QProgramFlowDiagramWidget(QWidget):
         for button in self.highlightable_buttons:
             button.setStyleSheet("")
 
-    def forward_button(self):
+    @staticmethod
+    def forward_button():
         button = QToolButton()
         button.setEnabled(False)
         button.setIcon(button.style().standardIcon(QStyle.SP_MediaSeekForward))

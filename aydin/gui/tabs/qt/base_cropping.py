@@ -1,4 +1,3 @@
-import napari
 import numpy
 from napari._qt.qt_viewer import QtViewer
 from napari.components.viewer_model import ViewerModel
@@ -160,6 +159,7 @@ class BaseCroppingTab(QWidget):
 
         Returns
         -------
+        Single image in a list
 
         """
         image = self._image[self.crop_selection_slicing_object]

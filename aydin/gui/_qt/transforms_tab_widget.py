@@ -1,7 +1,6 @@
 import importlib
 import inspect
 import pkgutil
-
 from qtpy.QtWidgets import QTabWidget
 
 from aydin.gui._qt.transforms_tab_item import TransformsTabItem
