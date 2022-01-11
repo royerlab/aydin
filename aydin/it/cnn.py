@@ -172,6 +172,18 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             self.infmodel = keras.models.load_model(join(path, "tf_inf_model"))
 
     def get_receptive_field_radius(self, nb_unet_levels, shiftconv=False):
+        """TODO: add proper docstrings here
+
+        Parameters
+        ----------
+        nb_unet_levels : int
+        shiftconv : bool
+
+        Returns
+        -------
+        int
+
+        """
         if shiftconv:
             rf = 7 if nb_unet_levels == 0 else 36 * 2 ** (nb_unet_levels - 1) - 6
         else:
@@ -184,10 +196,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
         """
         self.stop_fitting = True
-
-    def retrain(self, input_image, target_image, training_architecture=None):
-        self.training_architecture = training_architecture
-        self.train(input_image, target_image)
 
     def _train(
         self,
@@ -283,7 +291,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     + self.batch_size
                 )
 
-            lprint("Available mem: ", available_device_memory())
+            lprint(f"Available mem: {available_device_memory()}")
             lprint(f"Batch size for training: {self.batch_size}")
 
             # Decide whether to use validation pixels or patches
@@ -342,7 +350,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Last check of input size espetially for shiftconv
             if 'shiftconv' == self.training_architecture and self.self_supervised:
-                # TODO: Hirofumi what is going on the conditional below :D  <-- check input dim is compatible w/ shiftconv
+                # TODO: Hirofumi what is going on the conditional below <-- check input dim is compatible w/ shiftconv
                 if (
                     numpy.mod(
                         img_train.shape[1:][:-1],
@@ -404,7 +412,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 lprint(f'Batch normalization: {self.batch_norm}')
                 lprint(f'Training input size: {img_train.shape[1:]}')
 
-            # End of train function and beginning of _train from legacy implmentation
+            # End of train function and beginning of _train from legacy implementation
             input_image = img_train
 
             with lsection(
@@ -492,21 +500,20 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     self.loss_history = self.model.fit(
                         input_image=input_image,
                         target_image=target_image,
+                        max_epochs=self.max_epochs,
                         callbacks=callbacks,
-                        train_valid_ratio=train_valid_ratio,
+                        verbose=self.verbose,
+                        batch_size=self.batch_size,
+                        total_num_patches=self.total_num_patches,
                         img_val=self.validation_images,
+                        create_patches_for_validation=self._create_patches_for_validation,
+                        train_valid_ratio=train_valid_ratio,
                         val_marker=self.validation_markers,
                         training_architecture=self.training_architecture,
-                        create_patches_for_validation=self._create_patches_for_validation,
-                        total_num_patches=self.total_num_patches,
-                        batch_size=self.batch_size,
                         random_mask_ratio=self.random_mask_ratio,
                         patch_size=self.patch_size,
                         mask_size=self.mask_size,
-                        verbose=self.verbose,
-                        max_epochs=self.max_epochs,
                         ReduceLR_patience=self.ReduceLR_patience,
-                        parent=self,
                     )
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
@@ -558,12 +565,12 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Change the batch_size in split layer or input dimensions accordingly
             kwargs_for_infmodel = {
+                'spacetime_ndim': self.spacetime_ndim,
                 'mini_batch_size': 1,
                 'nb_unet_levels': self.nb_unet_levels,
                 'normalization': self.batch_norm,
                 'activation': self.activation_fun,
                 'shiftconv': 'shiftconv' == self.training_architecture,
-                'spacetime_ndim': self.spacetime_ndim,
             }
 
             if len(input_image.shape[1:-1]) == 2:
