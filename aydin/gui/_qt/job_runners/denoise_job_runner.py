@@ -128,11 +128,11 @@ class DenoiseJobRunner(QWidget):
 
         self.save_options_json = self.parent.tabs[
             "Denoise"
-        ].current_backend_qwidget.save_json_checkbox.isChecked()
+        ].current_backend_widget.save_json_checkbox.isChecked()
 
         self.save_model = self.parent.tabs[
             "Denoise"
-        ].current_backend_qwidget.save_model_checkbox.isChecked()
+        ].current_backend_widget.save_model_checkbox.isChecked()
 
         # Initialize required restoration instances
         self.denoiser = get_denoiser_class_instance(

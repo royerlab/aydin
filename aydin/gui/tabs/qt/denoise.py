@@ -123,7 +123,7 @@ class DenoiseTab(QWidget):
         return self.stacked_widget.currentWidget().name
 
     @property
-    def current_backend_qwidget(self):
+    def current_backend_widget(self):
         return self.stacked_widget.currentWidget()
 
     @property
