@@ -41,9 +41,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         """
         super().__init__()
         self.lower_level_args = lower_level_args
-        self.backend_it, self.backend_or_model = (
-            variant.split("-") if variant is not None else ("cnn", "jinet")
-        )
+        self.backend_it, self.backend_or_model = ("cnn", "jinet") if variant is None else variant.split("-")
 
         self.input_model_path = input_model_path
         self.use_model_flag = use_model

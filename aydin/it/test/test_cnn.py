@@ -7,8 +7,6 @@ from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
-
-# from tensorflow_core.python.keras.backend import clear_session
 from tensorflow.python.keras.backend import clear_session
 
 from aydin.io import io
