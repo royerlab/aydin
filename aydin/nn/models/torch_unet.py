@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 
+from aydin.nn.models.utils.custom_rot_90 import CustomRot90
+
 
 class UNetModel(nn.Module):
     def __init__(
