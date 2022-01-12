@@ -29,6 +29,10 @@ class UNetModel(nn.Module):
         self.conv = torch.conv2d() if spacetime_ndim == 2 else torch.conv3d()
         self.maskout = None  # TODO: assign correct maskout module
 
+        self.zero_padding = None
+        self.cropping = None
+        self.split_and_rot90 = None
+
     def forward(self, x):
 
         if self.shiftconv:
@@ -59,8 +63,13 @@ class UNetModel(nn.Module):
             x = self.conv_with_batch_norm(x)
 
         if self.shiftconv:
-            # TODO: handle special case
-            pass
+            x = self.zero_padding(x)
+            x = self.cropping(x)
+
+            x = self.split_and_rot90(x)
+
+            x = self.conv_with_batch_norm(x)
+            x = self.conv_with_batch_norm(x)
 
         x = self.conv(x)
 
