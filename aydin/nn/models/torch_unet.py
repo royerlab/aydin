@@ -1,8 +1,9 @@
 import torch
 from torch import nn
 
-from aydin.nn.models.utils.conv_with_batch_norm import ConvWithBatchNorm
-from aydin.nn.models.utils.custom_rot_90 import CustomRot90
+from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
+from aydin.nn.layers.custom_rot_90 import CustomRot90
+from aydin.nn.layers.pooling_down import PoolingDown
 
 
 class UNetModel(nn.Module):
@@ -20,15 +21,10 @@ class UNetModel(nn.Module):
         self.shiftconv = shiftconv
         self.nb_unet_levels = nb_unet_levels
 
-        self.custom_rot90 = CustomRot90(
-            spacetime_ndim
-        )  # TODO: assign correct custom module here for both 2d and 3d
+        self.custom_rot90 = CustomRot90(spacetime_ndim)
         self.conv_with_batch_norm = ConvWithBatchNorm(spacetime_ndim)
-        self.pooling_down = (
-            PoolingDown2D(shiftconv, pooling_mode)
-            if spacetime_ndim == 2
-            else PoolingDown3D(shiftconv, pooling_mode)
-        )
+        self.pooling_down = PoolingDown(spacetime_ndim, shiftconv, pooling_mode)
+
         self.upsampling = (
             UpSampling2D(shiftconv, upsampling_mode)
             if spacetime_ndim == 2
