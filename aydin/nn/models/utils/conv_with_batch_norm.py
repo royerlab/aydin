@@ -13,9 +13,9 @@ class ConvWithBatchNorm(nn.Module):
         self.ZeroPadding = None  # TODO: assign right thing for 2d or 3d
         self.conv = None  # TODO: assign right thing for 2d or 3d
         self.Cropping = None  # TODO: assign right thing for 2d or 3d
-        self.relu = None
-        self.swish = None
-        self.leaky_relu = None
+        self.relu = nn.ReLU()
+        self.swish = nn.SiLU()
+        self.leaky_relu = nn.LeakyReLU(0.1)
 
     def forward(self, x):
         if self.shiftconv:
