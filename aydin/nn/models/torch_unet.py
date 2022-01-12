@@ -24,12 +24,8 @@ class UNetModel(nn.Module):
         self.custom_rot90 = CustomRot90(spacetime_ndim)
         self.conv_with_batch_norm = ConvWithBatchNorm(spacetime_ndim)
         self.pooling_down = PoolingDown(spacetime_ndim, shiftconv, pooling_mode)
+        self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
-        self.upsampling = (
-            UpSampling2D(shiftconv, upsampling_mode)
-            if spacetime_ndim == 2
-            else UpSampling3D(shiftconv, upsampling_mode)
-        )
         self.conv = torch.conv2d() if spacetime_ndim == 2 else torch.conv3d()
         self.maskout = None  # TODO: assign correct maskout module
 
