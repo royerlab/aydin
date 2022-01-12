@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+from aydin.nn.models.utils.conv_with_batch_norm import ConvWithBatchNorm
 from aydin.nn.models.utils.custom_rot_90 import CustomRot90
 
 
