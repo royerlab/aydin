@@ -2,13 +2,9 @@ from torch import nn
 
 
 class CustomRot90(nn.Module):
-
-    def __init__(
-            self,
-            spacetime_ndim,
-    ):
+    def __init__(self, spacetime_ndim):
         self.spacetime_ndim = spacetime_ndim
-        self.rot90_1 = None # TODO: assign rot90 here
+        self.rot90_1 = None  # TODO: assign rot90 here
         self.rot90_2 = None  # TODO: assign rot90 here
         self.rot90_3 = None  # TODO: assign rot90 here
         self.rot90_5 = None  # TODO: assign rot90 here
@@ -31,4 +27,3 @@ class CustomRot90(nn.Module):
             raise ValueError("CustomRot90 only supports 2D and 3D operations.")
 
         return x
-

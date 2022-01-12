@@ -623,8 +623,4 @@ class UNetModel(Model):
 
         """
         # TODO: move as much as you can from it cnn _translate
-        return super().predict(
-            x,
-            batch_size=batch_size,
-            verbose=verbose,
-        )
+        return super().predict(x, batch_size=batch_size, verbose=verbose)
