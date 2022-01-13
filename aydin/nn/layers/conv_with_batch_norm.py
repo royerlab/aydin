@@ -11,6 +11,8 @@ class ConvWithBatchNorm(nn.Module):
         normalization="batch",
         activation="ReLU",
     ):
+        self.in_channels = in_channels
+        self.out_channels = out_channels
         self.spacetime_ndim = spacetime_ndim
         self.kernel_size = kernel_size
         self.normalization = normalization

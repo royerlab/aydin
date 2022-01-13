@@ -20,17 +20,53 @@ class UNetModel(nn.Module):
         self.learning_rate = learning_rate
         self.supervised = supervised
 
-        self.conv_with_batch_norms = []
+        self.conv_with_batch_norms_first_half = []
         for layer_index in range(self.nb_unet_levels):
-            if layer_index == 0:
-                self.conv_with_batch_norms.append(
+            if (
+                layer_index == 0
+            ):  # Handle special case input dimensions for the first layer
+                self.conv_with_batch_norms_first_half.append(
                     ConvWithBatchNorm(1, self.nb_filters, spacetime_ndim)
                 )
             else:
-                self.conv_with_batch_norms.append(
+                self.conv_with_batch_norms_first_half.append(
                     ConvWithBatchNorm(
                         self.nb_filters * layer_index,
                         self.nb_filters * (layer_index + 1),
+                        spacetime_ndim,
+                    )
+                )
+
+        self.unet_bottom_conv_out_channels = (
+            self.nb_filters,
+        )  # TODO: check if it is a bug to use this filter size on the bottom
+
+        self.unet_bottom_conv_with_batch_norm = ConvWithBatchNorm(
+            self.conv_with_batch_norms_first_half[-1].out_channels,
+            self.unet_bottom_conv_out_channels,
+            spacetime_ndim,
+        )
+
+        self.conv_with_batch_norms_second_half = []
+        for layer_index in range(self.nb_unet_levels):
+            if (
+                layer_index == 0
+            ):  # Handle special case input dimensions for the first layer
+                self.conv_with_batch_norms_second_half.append(
+                    ConvWithBatchNorm(
+                        self.unet_bottom_conv_out_channels,
+                        self.nb_filters
+                        * max((self.nb_unet_levels - layer_index - 2), 1),
+                        spacetime_ndim,
+                    )
+                )
+            else:
+                self.conv_with_batch_norms_second_half.append(
+                    ConvWithBatchNorm(
+                        self.nb_filters
+                        * max((self.nb_unet_levels - layer_index - 1 - 2), 1),
+                        self.nb_filters
+                        * max((self.nb_unet_levels - layer_index - 2), 1),
                         spacetime_ndim,
                     )
                 )
@@ -47,28 +83,28 @@ class UNetModel(nn.Module):
 
         for layer_index in range(self.nb_unet_levels):
             if layer_index == 0:
-                x = self.conv_with_batch_norms[layer_index](x)
+                x = self.conv_with_batch_norms_first_half[layer_index](x)
 
-            x = self.conv_with_batch_norms[layer_index](x)
+            x = self.conv_with_batch_norms_first_half[layer_index](x)
 
             x = self.pooling_down(x)
 
             if layer_index != (self.nb_unet_levels - 1):
                 skip_layer.append(x)
 
-        x = self.conv_with_batch_norm(x)
+        x = self.unet_bottom_conv_with_batch_norm(x)
 
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
 
-            # if self.residual:
-            #     x = self.add(x, skip_layer.pop())
-            # else:
-            #     x = torch.cat(x, skip_layer.pop())
+            if self.residual:
+                x = torch.add(x, skip_layer.pop())
+            else:
+                x = torch.cat([x, skip_layer.pop()])
 
-            x = self.conv_with_batch_norm(x)
-
-            x = self.conv_with_batch_norm(x)
+            # x = self.conv_with_batch_norms_first_half[](x)
+            #
+            # x = self.conv_with_batch_norms_first_half[](x)
 
         x = self.conv(x)
 
