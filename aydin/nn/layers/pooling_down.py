@@ -3,6 +3,8 @@ from torch import nn
 
 class PoolingDown(nn.Module):
     def __init__(self, spacetime_ndim, pooling_mode):
+        super(PoolingDown, self).__init__()
+
         self.spacetime_ndim = spacetime_ndim
         self.pooling_mode = pooling_mode
 

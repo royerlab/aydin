@@ -15,6 +15,8 @@ class UNetModel(nn.Module):
         supervised: bool = False,
         pooling_mode: str = 'max',
     ):
+        super(UNetModel, self).__init__()
+
         self.nb_unet_levels = nb_unet_levels
         self.nb_filters = nb_filters
         self.learning_rate = learning_rate
@@ -37,9 +39,8 @@ class UNetModel(nn.Module):
                     )
                 )
 
-        self.unet_bottom_conv_out_channels = (
-            self.nb_filters,
-        )  # TODO: check if it is a bug to use this filter size on the bottom
+        # TODO: check if it is a bug to use this filter size on the bottom
+        self.unet_bottom_conv_out_channels = self.nb_filters
 
         self.unet_bottom_conv_with_batch_norm = ConvWithBatchNorm(
             self.conv_with_batch_norms_first_half[-1].out_channels,

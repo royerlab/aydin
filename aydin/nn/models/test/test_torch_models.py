@@ -4,7 +4,7 @@ from aydin.nn.models.torch_unet import UNetModel
 
 
 def test_supervised_2D():
-    input_array = numpy.zeros((1, 64, 64, 1), dtype=numpy.float32)
+    input_array = numpy.zeros((64, 64), dtype=numpy.float32)
     model2d = UNetModel(
         # (64, 64, 1),
         nb_unet_levels=2,

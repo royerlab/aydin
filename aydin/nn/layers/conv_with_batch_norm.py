@@ -11,6 +11,8 @@ class ConvWithBatchNorm(nn.Module):
         normalization="batch",
         activation="ReLU",
     ):
+        super(ConvWithBatchNorm, self).__init__()
+
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.spacetime_ndim = spacetime_ndim
@@ -19,18 +21,16 @@ class ConvWithBatchNorm(nn.Module):
         self.activation = activation
 
         self.conv = (
-            nn.Conv2d(in_channels, out_channels, (kernel_size, kernel_size))
+            nn.Conv2d(in_channels, out_channels, kernel_size)
             if spacetime_ndim == 2
-            else nn.Conv3d(
-                in_channels, out_channels, (kernel_size, kernel_size, kernel_size)
-            )
+            else nn.Conv3d(in_channels, out_channels, kernel_size)
         )
         self.relu = nn.ReLU()
         self.swish = nn.SiLU()
         self.leaky_relu = nn.LeakyReLU(0.1)
 
     def forward(self, x):
-        x = self.conv(x, kernel_size=self.kernel_size)
+        x = self.conv(x)
 
         if self.normalization == 'instance':
             x = self.instance_normalization(x)
