@@ -22,7 +22,7 @@ class UNetModel(nn.Module):
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
-        self.conv = torch.conv2d() if spacetime_ndim == 2 else torch.conv3d()
+        self.conv = torch.conv2d if spacetime_ndim == 2 else torch.conv3d
         self.maskout = None  # TODO: assign correct maskout module
 
     def forward(self, x):

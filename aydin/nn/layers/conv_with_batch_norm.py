@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 
 
@@ -7,7 +8,7 @@ class ConvWithBatchNorm(nn.Module):
         self.normalization = normalization
         self.activation = activation
 
-        self.conv = None  # TODO: assign right thing for 2d or 3d
+        self.conv = torch.conv2d if spacetime_ndim == 2 else torch.conv3d
         self.relu = nn.ReLU()
         self.swish = nn.SiLU()
         self.leaky_relu = nn.LeakyReLU(0.1)
