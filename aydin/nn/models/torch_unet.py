@@ -84,6 +84,7 @@ class UNetModel(nn.Module):
 
         for layer_index in range(self.nb_unet_levels):
             if layer_index == 0:
+                print(x.shape)
                 x = self.conv_with_batch_norms_first_half[layer_index](x)
 
             x = self.conv_with_batch_norms_first_half[layer_index](x)
