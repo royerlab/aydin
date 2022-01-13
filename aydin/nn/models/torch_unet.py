@@ -2,9 +2,7 @@ import torch
 from torch import nn
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
-from aydin.nn.layers.custom_rot import CustomRot90
 from aydin.nn.layers.pooling_down import PoolingDown
-from aydin.nn.layers.split_and_rot import SplitAndRot90
 
 
 class UNetModel(nn.Module):
@@ -20,17 +18,12 @@ class UNetModel(nn.Module):
         self.supervised = supervised
         self.nb_unet_levels = nb_unet_levels
 
-        self.custom_rot90 = CustomRot90(spacetime_ndim)
         self.conv_with_batch_norm = ConvWithBatchNorm(spacetime_ndim)
-        self.pooling_down = PoolingDown(spacetime_ndim, shiftconv, pooling_mode)
+        self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
         self.conv = torch.conv2d() if spacetime_ndim == 2 else torch.conv3d()
         self.maskout = None  # TODO: assign correct maskout module
-
-        self.zero_padding = None
-        self.cropping = None
-        self.split_and_rot90 = SplitAndRot90()
 
     def forward(self, x):
 
