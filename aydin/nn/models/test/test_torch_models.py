@@ -8,7 +8,6 @@ def test_supervised_2D():
     model2d = UNetModel(
         (64, 64, 1),
         nb_unet_levels=2,
-        shiftconv=False,
         supervised=True,
         spacetime_ndim=2,
     )
@@ -22,7 +21,6 @@ def test_supervised_3D():
     model3d = UNetModel(
         (64, 64, 64, 1),
         nb_unet_levels=2,
-        shiftconv=False,
         supervised=True,
         spacetime_ndim=3,
     )

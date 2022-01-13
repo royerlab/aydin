@@ -27,7 +27,7 @@ class UNetModel(nn.Module):
 
     def forward(self, x):
 
-        # TODO: implement the first skiplayer here
+        skip_layer = [x]
 
         for layer_index in range(self.nb_unet_levels):
             if layer_index == 0:
@@ -37,15 +37,18 @@ class UNetModel(nn.Module):
 
             x = self.pooling_down(x)
 
+            if layer_index != (self.nb_unet_levels - 1):
+                skip_layer.append(x)
+
         x = self.conv_with_batch_norm(x)
 
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
 
             # if self.residual:
-            #     x = self.add()
+            #     x = self.add(x, skip_layer.pop())
             # else:
-            #     x = torch.cat()
+            #     x = torch.cat(x, skip_layer.pop())
 
             x = self.conv_with_batch_norm(x)
 
