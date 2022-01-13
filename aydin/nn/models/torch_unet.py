@@ -14,12 +14,10 @@ class UNetModel(nn.Module):
         nb_unet_levels: int = 4,
         learning_rate=0.01,
         supervised: bool = False,
-        shiftconv: bool = True,
         pooling_mode: str = 'max',
     ):
         self.learning_rate = learning_rate
         self.supervised = supervised
-        self.shiftconv = shiftconv
         self.nb_unet_levels = nb_unet_levels
 
         self.custom_rot90 = CustomRot90(spacetime_ndim)
@@ -35,9 +33,6 @@ class UNetModel(nn.Module):
         self.split_and_rot90 = SplitAndRot90()
 
     def forward(self, x):
-
-        if self.shiftconv:
-            x = self.custom_rot90(x)
 
         # TODO: implement the first skiplayer here
 
@@ -63,18 +58,9 @@ class UNetModel(nn.Module):
 
             x = self.conv_with_batch_norm(x)
 
-        if self.shiftconv:
-            x = self.zero_padding(x)
-            x = self.cropping(x)
-
-            x = self.split_and_rot90(x)
-
-            x = self.conv_with_batch_norm(x)
-            x = self.conv_with_batch_norm(x)
-
         x = self.conv(x)
 
-        if not self.shiftconv and not self.supervised:
+        if not self.supervised:
             x = self.maskout(x)
 
         return x
