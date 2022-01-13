@@ -102,9 +102,9 @@ class UNetModel(nn.Module):
             else:
                 x = torch.cat([x, skip_layer.pop()])
 
-            # x = self.conv_with_batch_norms_first_half[](x)
-            #
-            # x = self.conv_with_batch_norms_first_half[](x)
+            x = self.conv_with_batch_norms_second_half[layer_index](x)
+
+            x = self.conv_with_batch_norms_second_half[layer_index](x)
 
         x = self.conv(x)
 
