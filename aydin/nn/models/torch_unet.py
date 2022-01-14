@@ -101,9 +101,14 @@ class UNetModel(nn.Module):
             x = self.pooling_down(x)
 
             if layer_index != self.nb_unet_levels - 1:
+                print(f"skip layer added: x -> {x.shape}")
                 skip_layer.append(x)
 
+            print("down")
+
+        print("before bottom")
         x = self.unet_bottom_conv_with_batch_norm(x)
+        print("after bottom")
 
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
@@ -111,11 +116,13 @@ class UNetModel(nn.Module):
             if self.residual:
                 x = torch.add(x, skip_layer.pop())
             else:
-                x = torch.cat([x, skip_layer.pop()])
+                x = torch.cat([x, skip_layer.pop()], dim=1)
 
             x = self.conv_with_batch_norms_second_half[layer_index](x)
 
             x = self.conv_with_batch_norms_second_half[layer_index](x)
+
+            print("up")
 
         x = self.conv(x)
 

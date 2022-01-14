@@ -34,7 +34,6 @@ class ConvWithBatchNorm(nn.Module):
         self.leaky_relu = nn.LeakyReLU(0.1)
 
     def forward(self, x):
-        print(x.shape)
         x = self.conv(x)
 
         if self.normalization == 'instance':
