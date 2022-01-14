@@ -10,12 +10,10 @@ class PoolingDown(nn.Module):
 
         if spacetime_ndim == 2:
             self.average_pooling = nn.AvgPool2d((2, 2))
+            self.max_pooling = nn.MaxPool2d((2, 2))
         else:
             self.average_pooling = nn.AvgPool3d((2, 2, 2))
-
-        self.max_pooling = (
-            nn.MaxPool2d((2, 2)) if spacetime_ndim == 2 else nn.MaxPool3d((2, 2, 2))
-        )
+            self.max_pooling = nn.MaxPool3d((2, 2, 2))
 
     def forward(self, x):
 
