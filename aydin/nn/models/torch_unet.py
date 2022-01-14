@@ -13,6 +13,7 @@ class UNetModel(nn.Module):
         nb_filters: int = 8,
         learning_rate=0.01,
         supervised: bool = False,
+        residual: bool = False,
         pooling_mode: str = 'max',
     ):
         super(UNetModel, self).__init__()
@@ -21,6 +22,7 @@ class UNetModel(nn.Module):
         self.nb_filters = nb_filters
         self.learning_rate = learning_rate
         self.supervised = supervised
+        self.residual = residual
 
         self.conv_with_batch_norms_first_half = []
         for layer_index in range(self.nb_unet_levels):
@@ -75,7 +77,9 @@ class UNetModel(nn.Module):
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
-        self.conv = torch.conv2d if spacetime_ndim == 2 else torch.conv3d
+        self.conv = (
+            torch.conv2d if spacetime_ndim == 2 else torch.conv3d
+        )  # TODO: fix this, change to correct endpoints
         self.maskout = None  # TODO: assign correct maskout module
 
     def forward(self, x):
@@ -83,9 +87,8 @@ class UNetModel(nn.Module):
         skip_layer = [x]
 
         for layer_index in range(self.nb_unet_levels):
-            if layer_index == 0:
-                print(x.shape)
-                x = self.conv_with_batch_norms_first_half[layer_index](x)
+            # if layer_index == 0:
+            #     x = self.conv_with_batch_norms_first_half[layer_index](x)
 
             x = self.conv_with_batch_norms_first_half[layer_index](x)
 
@@ -96,17 +99,17 @@ class UNetModel(nn.Module):
 
         x = self.unet_bottom_conv_with_batch_norm(x)
 
-        for layer_index in range(self.nb_unet_levels):
-            x = self.upsampling(x)
-
-            if self.residual:
-                x = torch.add(x, skip_layer.pop())
-            else:
-                x = torch.cat([x, skip_layer.pop()])
-
-            x = self.conv_with_batch_norms_second_half[layer_index](x)
-
-            x = self.conv_with_batch_norms_second_half[layer_index](x)
+        # for layer_index in range(self.nb_unet_levels):
+        #     x = self.upsampling(x)
+        #
+        #     if self.residual:
+        #         x = torch.add(x, skip_layer.pop())
+        #     else:
+        #         x = torch.cat([x, skip_layer.pop()])
+        #
+        #     x = self.conv_with_batch_norms_second_half[layer_index](x)
+        #
+        #     x = self.conv_with_batch_norms_second_half[layer_index](x)
 
         x = self.conv(x)
 
