@@ -77,9 +77,11 @@ class UNetModel(nn.Module):
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
-        self.conv = (
-            torch.conv2d if spacetime_ndim == 2 else torch.conv3d
-        )  # TODO: fix this, change to correct endpoints
+        if spacetime_ndim == 2:
+            self.conv = nn.Conv2d(8, 1, 1)
+        else:
+            self.conv = nn.Conv3d(8, 1, 1)
+
         self.maskout = None  # TODO: assign correct maskout module
 
     def forward(self, x):
@@ -113,7 +115,7 @@ class UNetModel(nn.Module):
 
         x = self.conv(x)
 
-        if not self.supervised:
-            x = self.maskout(x)
+        # if not self.supervised:
+        #     x = self.maskout(x)
 
         return x
