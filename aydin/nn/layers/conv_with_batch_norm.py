@@ -21,9 +21,13 @@ class ConvWithBatchNorm(nn.Module):
         self.activation = activation
 
         if spacetime_ndim == 2:
-            self.conv = nn.Conv2d(in_channels, out_channels, kernel_size)
+            self.conv = nn.Conv2d(
+                in_channels, out_channels, kernel_size, padding='same'
+            )
         else:
-            self.conv = nn.Conv3d(in_channels, out_channels, kernel_size)
+            self.conv = nn.Conv3d(
+                in_channels, out_channels, kernel_size, padding='same'
+            )
 
         self.relu = nn.ReLU()
         self.swish = nn.SiLU()
