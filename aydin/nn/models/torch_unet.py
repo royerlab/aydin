@@ -24,13 +24,17 @@ class UNetModel(nn.Module):
         self.supervised = supervised
         self.residual = residual
 
+        self.conv_with_batch_norms_first_conv_for_first_level = ConvWithBatchNorm(
+            1, self.nb_filters, spacetime_ndim
+        )
+
         self.conv_with_batch_norms_first_half = []
         for layer_index in range(self.nb_unet_levels):
             if (
                 layer_index == 0
             ):  # Handle special case input dimensions for the first layer
                 self.conv_with_batch_norms_first_half.append(
-                    ConvWithBatchNorm(1, self.nb_filters, spacetime_ndim)
+                    ConvWithBatchNorm(self.nb_filters, self.nb_filters, spacetime_ndim)
                 )
             else:
                 self.conv_with_batch_norms_first_half.append(
@@ -88,9 +92,9 @@ class UNetModel(nn.Module):
 
         skip_layer = [x]
 
+        x = self.conv_with_batch_norms_first_conv_for_first_level(x)
+
         for layer_index in range(self.nb_unet_levels):
-            # if layer_index == 0:
-            #     x = self.conv_with_batch_norms_first_half[layer_index](x)
 
             x = self.conv_with_batch_norms_first_half[layer_index](x)
 
