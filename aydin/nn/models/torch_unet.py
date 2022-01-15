@@ -22,7 +22,7 @@ class UNetModel(nn.Module):
         self.nb_filters = nb_filters
         self.learning_rate = learning_rate
         self.supervised = supervised
-        self.residual = residual
+        self.residual = residual  # TODO: currently not implemented completely, not in use, worth to implement and test
 
         self.conv_with_batch_norms_first_conv_for_first_level = ConvWithBatchNorm(
             1, self.nb_filters, spacetime_ndim
@@ -113,10 +113,11 @@ class UNetModel(nn.Module):
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
 
-            if self.residual:
-                x = torch.add(x, skip_layer.pop())
-            else:
-                x = torch.cat([x, skip_layer.pop()], dim=1)
+            x = torch.add(x, skip_layer.pop())
+            # if self.residual:
+            #     x = torch.add(x, skip_layer.pop())
+            # else:
+            #     x = torch.cat([x, skip_layer.pop()], dim=1)
 
             x = self.conv_with_batch_norms_second_half[layer_index](x)
 
