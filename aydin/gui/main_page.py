@@ -305,6 +305,7 @@ class MainPage(QWidget):
 
     def save_options_json(self, path=None):
         args_dict = self.tabs["Denoise"].lower_level_args
+        args_dict["processing"] = self.tabs["Pre/Post-Processing"].transforms
 
         if path is None:
             image_paths = [

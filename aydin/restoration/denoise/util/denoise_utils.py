@@ -32,6 +32,13 @@ def get_denoiser_class_instance(variant, lower_level_args=None, it_transforms=No
 
     denoiser_class = response.__getattribute__(elem)
 
+    if (
+        it_transforms is None
+        and lower_level_args is not None
+        and lower_level_args["processing"]
+    ):
+        it_transforms = lower_level_args["processing"]
+
     return denoiser_class(
         lower_level_args=lower_level_args, it_transforms=it_transforms
     )
