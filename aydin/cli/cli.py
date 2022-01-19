@@ -104,14 +104,15 @@ def denoise(files, **kwargs):
         noisy2train = apply_slicing(noisy, kwargs['training_slicing'])
         noisy2infer = apply_slicing(noisy, kwargs['inference_slicing'])
 
-        if len(filenames) == 1:
-            if kwargs["batch_axes"]:
-                noisy_metadata.batch_axes = ast.literal_eval(kwargs["batch_axes"])
-                kwargs.pop("batch_axes")
+        if kwargs["batch_axes"] is not None and len(filenames) == 1:
+            noisy_metadata.batch_axes = ast.literal_eval(kwargs["batch_axes"])
 
-            if kwargs["channel_axes"]:
-                noisy_metadata.channel_axes = ast.literal_eval(kwargs["channel_axes"])
-                kwargs.pop("channel_axes")
+        kwargs.pop("batch_axes")
+
+        if kwargs["channel_axes"] is not None and len(filenames) == 1:
+            noisy_metadata.channel_axes = ast.literal_eval(kwargs["channel_axes"])
+
+        kwargs.pop("channel_axes")
 
         if kwargs['use_model']:
             shutil.unpack_archive(
