@@ -3,6 +3,7 @@ import inspect
 import os
 import shutil
 import numpy
+import warnings
 
 from aydin import regression
 from aydin.features.standard_features import StandardFeatureGenerator
@@ -78,6 +79,10 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         self.model_folder_path = None
         # Use a pre-saved model or train a new one from scratch and save it
         if self.use_model_flag:
+            warnings.warn(
+                "It is currently not recommended to save and load restoration model weights.",
+                UserWarning,
+            )
             # Unarchive the model file and load its ImageTranslator object into self.it
             shutil.unpack_archive(
                 self.input_model_path, os.path.dirname(self.input_model_path), "zip"
@@ -280,7 +285,8 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             # Use a pre-saved model or train a new one from scratch and save it
             if not self.use_model_flag:
                 self.it = self.get_translator(
-                    feature_generator=self.get_generator(), regressor=self.get_regressor()
+                    feature_generator=self.get_generator(),
+                    regressor=self.get_regressor(),
                 )
 
                 self.add_transforms()

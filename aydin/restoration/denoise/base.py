@@ -5,6 +5,7 @@ import pkgutil
 import shutil
 from abc import abstractmethod, ABC
 from pathlib import Path
+import warnings
 
 from aydin.util.log.log import lprint
 
@@ -162,6 +163,10 @@ class DenoiseRestorationBase(ABC):
         model_path : str
             Path and name to save the model as. Needs to finish with '.zip' extension.
         """
+        warnings.warn(
+            "It is currently not recommended to save and load restoration model weights.",
+            UserWarning,
+        )
         model_path = model_path[:-4]
         # Save the model first to the destination directory
         self.it.save(model_path)
