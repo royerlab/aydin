@@ -10,7 +10,7 @@ Thank you for taking the time to contribute!
 
 We can't think of everything. If you've got a good idea for a feature, then please let us know!
 
-Feature suggestions are embraced, but will often be filed for a rainy day. If you require a feature urgently it's best to write it yourself. Don't forget to share ;)
+Feature suggestions are embraced, but will often be filed for a rainy day. If you require a feature urgently it's best to write it yourself. Don't forget to share :)
 
 When suggesting a feature, make sure to:
 
@@ -51,6 +51,7 @@ Once you're ready to share your contribution with us you should submit it as a P
 
 #### Do
 
+* Do use our own internal logging [API](https://github.com/royerlab/aydin/blob/master/aydin/util/log/log.py)
 * Do use pep8 style guidelines + our preferences with `black` formatter
 * Use NumPy style docstrings
 * Do comment your code where necessary
@@ -60,7 +61,7 @@ Once you're ready to share your contribution with us you should submit it as a P
 
 #### Don't
 
-* Don't include any license information in your examples- our repositories are GPLv3 licensed
+* Don't include any license information in your examples- our repositories are BSD-3-Clause License d
 * Don't try to do too much at once- submit one or two examples at a time, and be receptive to feedback
 * Don't submit multiple variations of the same example, demonstrate one thing concisely
 
