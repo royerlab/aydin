@@ -144,13 +144,15 @@ class DenoiseRestorationBase(ABC):
         format = "zip"
         archive_from = os.path.dirname(source)
         archive_to = os.path.basename(source.strip(os.sep))
-        shutil.make_archive(name, format, archive_from, archive_to)
+
         if os.path.exists(os.path.join(destination, f"{name}.{format}")):
             lprint(
                 "Previously existing model will be deleted before saving the new model"
             )
             os.remove(os.path.join(destination, f"{name}.{format}"))
-        shutil.move(f"{name}.{format}", destination)
+
+        shutil.make_archive(name, format, archive_from, archive_to)
+        # shutil.move(f"{name}.{format}", destination)
 
     def save_model(self, model_path):
         """Saves the latest trained model next to the input image file.
@@ -158,13 +160,15 @@ class DenoiseRestorationBase(ABC):
         Parameters
         ----------
         model_path : str
-
+            Path and name to save the model as. Needs to finish with '.zip' extension.
         """
-        # Save the model first
+        model_path = model_path[:-4]
+        # Save the model first to the destination directory
         self.it.save(model_path)
 
-        # Make archive for the model
+        # Compress and archive the model saved in the destination directory
+        # Creates a '.zip' file in the same destination directory
         self.archive_model(model_path, os.path.dirname(model_path))
 
-        # clean the model folder
+        # Clean the model folder (Delete all files except the '.zip' file)
         self.clean_model_folder(model_path)

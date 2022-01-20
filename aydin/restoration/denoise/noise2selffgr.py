@@ -33,7 +33,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         self,
         *,
         variant: str = 'fgr-cb',
-        use_model=None,
+        use_model=False,
         input_model_path=None,
         lower_level_args=None,
         it_transforms=None,
@@ -47,8 +47,8 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             Flag to choose to train a new model or infer from a
             previously trained model. By default it is None.
         input_model_path : str
-            Path to model that is desired to be used for inference.
-            By default it is None.
+            Path of the saved and compressed model to load for inference.
+            Include the '.zip' extension. By default it is None.
         lower_level_args : args
             Additional 'low-level' arguments to be passed.
         it_transforms :
@@ -62,10 +62,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             variant.split("-") if variant is not None else ("fgr", "cb")
         )
 
-        self.input_model_path = input_model_path
-        self.use_model_flag = use_model
-        self.model_folder_path = None
-
         self.it = None
         self.it_transforms = (
             [
@@ -76,6 +72,17 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             if it_transforms is None
             else it_transforms
         )
+
+        self.input_model_path = input_model_path
+        self.use_model_flag = use_model
+        self.model_folder_path = None
+        # Use a pre-saved model or train a new one from scratch and save it
+        if self.use_model_flag:
+            # Unarchive the model file and load its ImageTranslator object into self.it
+            shutil.unpack_archive(
+                self.input_model_path, os.path.dirname(self.input_model_path), "zip"
+            )
+            self.it = ImageTranslatorBase.load(self.input_model_path[:-4])
 
         self.has_less_than_one_million_voxels = False
         self.has_less_than_one_trillion_voxels = True
@@ -231,23 +238,14 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         it : ImageTranslatorBase
 
         """
-        # Use a pre-saved model or train a new one from scratch and save it
-        if self.use_model_flag:
-            # Unarchive the model file and load its ImageTranslator object into self.it
-            shutil.unpack_archive(
-                self.input_model_path, os.path.dirname(self.input_model_path), "zip"
-            )
-            it = ImageTranslatorBase.load(self.input_model_path[:-4])
-        else:
-            it = ImageTranslatorFGR(
-                feature_generator=feature_generator,
-                regressor=regressor,
-                **self.lower_level_args["it"]["kwargs"]
-                if self.lower_level_args is not None
-                else {},
-                blind_spots='auto',  # TODO: ACS: please set this as default upstream
-            )
-
+        it = ImageTranslatorFGR(
+            feature_generator=feature_generator,
+            regressor=regressor,
+            **self.lower_level_args["it"]["kwargs"]
+            if self.lower_level_args is not None
+            else {},
+            blind_spots='auto',  # TODO: ACS: please set this as default upstream
+        )
         return it
 
     def add_transforms(self):
@@ -279,11 +277,13 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         with lsection("Noise2Self train is starting..."):
             self.set_image_metrics(noisy_image.shape)
 
-            self.it = self.get_translator(
-                feature_generator=self.get_generator(), regressor=self.get_regressor()
-            )
+            # Use a pre-saved model or train a new one from scratch and save it
+            if not self.use_model_flag:
+                self.it = self.get_translator(
+                    feature_generator=self.get_generator(), regressor=self.get_regressor()
+                )
 
-            self.add_transforms()
+                self.add_transforms()
 
             # Train a new model
             self.it.train(

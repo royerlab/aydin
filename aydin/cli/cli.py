@@ -11,7 +11,7 @@ from aydin.gui.gui import run
 from aydin.it.base import ImageTranslatorBase
 from aydin.restoration.deconvolve.lr import LucyRichardson
 from aydin.io.io import imwrite, imread
-from aydin.io.utils import get_output_image_path
+from aydin.io.utils import get_output_image_path, get_save_model_path
 from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_instance
 from aydin.util.misc.json import load_any_json
 from aydin.util.log.log import lprint, Log
@@ -104,14 +104,17 @@ def denoise(files, **kwargs):
         noisy2train = apply_slicing(noisy, kwargs['training_slicing'])
         noisy2infer = apply_slicing(noisy, kwargs['inference_slicing'])
 
-        if len(filenames) == 1:
-            if kwargs["batch_axes"]:
-                noisy_metadata.batch_axes = ast.literal_eval(kwargs["batch_axes"])
-                kwargs.pop("batch_axes")
+        if kwargs["batch_axes"] is not None and len(filenames) == 1:
+            noisy_metadata.batch_axes = ast.literal_eval(kwargs["batch_axes"])
 
-            if kwargs["channel_axes"]:
-                noisy_metadata.channel_axes = ast.literal_eval(kwargs["channel_axes"])
-                kwargs.pop("channel_axes")
+        kwargs.pop("batch_axes")
+
+        if kwargs["channel_axes"] is not None and len(filenames) == 1:
+            noisy_metadata.channel_axes = ast.literal_eval(kwargs["channel_axes"])
+
+        kwargs.pop("channel_axes")
+
+        output_path, index_counter = get_output_image_path(path)
 
         if kwargs['use_model']:
             shutil.unpack_archive(
@@ -130,11 +133,11 @@ def denoise(files, **kwargs):
             denoised = response.astype(noisy2infer.dtype, copy=False)
             shutil.rmtree(input_model_path[:-4])
         else:
-            n2s = get_denoiser_class_instance(
+            denoiser = get_denoiser_class_instance(
                 lower_level_args=lower_level_args, variant=backend
             )
 
-            n2s.train(
+            denoiser.train(
                 noisy2train,
                 batch_axes=noisy_metadata.batch_axes
                 if noisy_metadata is not None
@@ -146,7 +149,7 @@ def denoise(files, **kwargs):
                 **kwargs,
             )
 
-            denoised = n2s.denoise(
+            denoised = denoiser.denoise(
                 noisy2infer,
                 batch_axes=noisy_metadata.batch_axes
                 if noisy_metadata is not None
@@ -156,8 +159,10 @@ def denoise(files, **kwargs):
                 else None,
             )
 
-        path, index_counter = get_output_image_path(path)
-        imwrite(denoised, path)
+            model_path = get_save_model_path(path, passed_counter=index_counter)
+            denoiser.save_model(model_path)
+
+        imwrite(denoised, output_path)
         lprint("DONE")
 
 

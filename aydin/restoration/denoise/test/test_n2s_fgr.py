@@ -1,5 +1,6 @@
 from pprint import pprint
 
+import os
 import numpy as np
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
@@ -42,3 +43,29 @@ def test_run_n2s_fgr():
     # Check if denoised image satisfies some checks
     assert psnr(denoised_image, image) >= 20.0
     assert ssim(denoised_image, image) >= 0.7
+
+
+def test_run_n2s_fgr_reusing_weights(tmpdir):
+    # Prepare the noisy classic_denoisers camera image
+    image = camera().astype(np.float32)
+    image = rescale_intensity(image, in_range='image', out_range=(0, 1))
+    noisy_image = add_noise(image)
+
+    # Call the Noise2Self restoration
+    transforms = [
+        {"class": RangeTransform, "kwargs": {}},
+        {"class": PaddingTransform, "kwargs": {}},
+    ]
+    n2s = Noise2SelfFGR(variant="fgr-cb", it_transforms=transforms)
+    n2s.train(noisy_image)
+    denoised_image_new = n2s.denoise(noisy_image).clip(0, 1)
+    n2s.save_model(os.path.join(tmpdir, "denoise_model.zip"))
+    n2s_loaded = Noise2SelfFGR(
+        use_model=True,
+        input_model_path=os.path.join(tmpdir, "denoise_model.zip")
+    )
+    denoised_image_loaded = n2s_loaded.denoise(noisy_image).clip(0, 1)
+
+    # Check if denoised image satisfies some checks
+    assert psnr(denoised_image_loaded, image) >= 20.0
+    assert ssim(denoised_image_loaded, image) >= 0.7
