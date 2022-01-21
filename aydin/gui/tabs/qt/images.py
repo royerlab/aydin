@@ -6,6 +6,7 @@ from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
 from aydin.gui._qt.qtreewidget_utils import iter_tree_widget
+from aydin.io.utils import get_output_image_path
 from aydin.util.misc.units import human_readable_byte_size
 
 
@@ -37,7 +38,7 @@ class ImagesTab(QWidget):
 
         self.image_list_tree_widget = QTreeWidget()
         self.image_list_tree_widget.setHeaderLabels(
-            ['file name', 'denoise', 'axes', 'shape', 'dtype', 'size']
+            ['file name', 'denoise', 'axes', 'shape', 'dtype', 'size', 'output_path']
         )
 
         self.image_list_tree_widget.header().sectionClicked.connect(
@@ -115,6 +116,7 @@ class ImagesTab(QWidget):
                     human_readable_byte_size(
                         metadata.dtype.itemsize * numpy.prod(metadata.shape)
                     ),
+                    get_output_image_path(path)[0],
                 ],
             )
             qtree_widget_item.setCheckState(1, Qt.Checked if denoise else Qt.Unchecked)
