@@ -1,4 +1,5 @@
 import numpy
+from PyQt5.QtWidgets import QAbstractItemView
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QLabel, QTreeWidgetItem, QTreeWidget
 
@@ -38,13 +39,18 @@ class ImagesTab(QWidget):
 
         self.image_list_tree_widget = QTreeWidget()
         self.image_list_tree_widget.setHeaderLabels(
-            ['file name', 'denoise', 'axes', 'shape', 'dtype', 'size', 'output_path']
+            ['file name', 'denoise', 'axes', 'shape', 'dtype', 'size', 'output path']
         )
+
+        self.image_list_tree_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        self.image_list_tree_widget.itemDoubleClicked.connect(self.onDoubleClick)
 
         self.image_list_tree_widget.header().sectionClicked.connect(
             self.onSectionClicked
         )
         self.image_list_tree_widget.header().setSectionsClickable(True)
+
         self.image_list_tree_widget.setColumnWidth(0, 400)
         self.image_list_tree_widget.setColumnWidth(3, 300)
         self.image_list_tree_widget.setColumnWidth(5, 200)
@@ -83,6 +89,12 @@ class ImagesTab(QWidget):
 
             item.setCheckState(column, state_to_be_set)
 
+    @Slot(QTreeWidgetItem, int)
+    def onDoubleClick(self, item, column):
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
+        if column == 6:
+            self.image_list_tree_widget.editItem(item, column)
+
     def onTreeItemChanged(self, item, column):
         if column == 1:
             self.parent.data_model.set_image_to_denoise(
@@ -119,5 +131,6 @@ class ImagesTab(QWidget):
                     get_output_image_path(path)[0],
                 ],
             )
+
             qtree_widget_item.setCheckState(1, Qt.Checked if denoise else Qt.Unchecked)
             qtree_widget_item.setToolTip(0, path)
