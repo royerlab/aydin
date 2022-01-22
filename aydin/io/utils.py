@@ -93,7 +93,7 @@ def get_files_with_most_frequent_extension(path) -> List[str]:
 
 
 def get_output_image_path(
-    path: str, operation_type: str = "denoised"
+    path: str, operation_type: str = "denoised", output_folder: str = None
 ) -> Tuple[str, int]:
     """Method to get correct output path for given input path and operation type.
 
@@ -102,6 +102,7 @@ def get_output_image_path(
     path : str
     operation_type : str
         Currently supported values: 'denoised', 'deconvolved', 'hyperstacked'.
+    output_folder : str
 
     Returns
     -------
@@ -109,6 +110,10 @@ def get_output_image_path(
         (Correct output path, counter).
 
     """
+
+    if output_folder:
+        pass
+        # TODO : split filename here hand adjust rest accordingly
 
     image_formats = [
         ".zarr.zip",
