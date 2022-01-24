@@ -148,7 +148,12 @@ def get_output_image_path(
     return output_path, response_counter
 
 
-def get_options_json_path(path: str, passed_counter: int = None) -> str:
+def get_options_json_path(
+    path: str, passed_counter: int = None, output_folder: str = None
+) -> str:
+    if output_folder:
+        path = os.path.join(output_folder, Path(path).name)
+
     options_path = f"{path[:path.rfind('.')]}_options.json"
 
     if passed_counter is None:
@@ -164,7 +169,12 @@ def get_options_json_path(path: str, passed_counter: int = None) -> str:
     return options_path
 
 
-def get_save_model_path(path: str, passed_counter: int = None) -> str:
+def get_save_model_path(
+    path: str, passed_counter: int = None, output_folder: str = None
+) -> str:
+    if output_folder:
+        path = os.path.join(output_folder, Path(path).name)
+
     model_path = f"{path[:path.rfind('.')]}_model"
 
     if passed_counter is None:
