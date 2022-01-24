@@ -152,7 +152,11 @@ class DenoiseRestorationBase(ABC):
             os.remove(os.path.join(destination, f"{name}.{format}"))
 
         shutil.make_archive(name, format, archive_from, archive_to)
-        # shutil.move(f"{name}.{format}", destination)
+
+        try:
+            shutil.move(f"{name}.{format}", destination)
+        except shutil.Error as e:
+            lprint(e)
 
     def save_model(self, model_path):
         """Saves the latest trained model next to the input image file.
