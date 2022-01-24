@@ -2,6 +2,7 @@ import ast
 import os
 import shutil
 import sys
+from copy import deepcopy
 from glob import glob
 import click
 import numpy
@@ -66,6 +67,7 @@ def cli(ctx):
 @click.option('--use-model/--save-model', default=False)
 @click.option('--model-path', default=None)
 @click.option('--lower-level-args', default=None)
+@click.option('--output-folder', default='')
 def denoise(files, **kwargs):
     """denoise command
 
@@ -107,14 +109,12 @@ def denoise(files, **kwargs):
         if kwargs["batch_axes"] is not None and len(filenames) == 1:
             noisy_metadata.batch_axes = ast.literal_eval(kwargs["batch_axes"])
 
-        kwargs.pop("batch_axes")
-
         if kwargs["channel_axes"] is not None and len(filenames) == 1:
             noisy_metadata.channel_axes = ast.literal_eval(kwargs["channel_axes"])
 
-        kwargs.pop("channel_axes")
-
-        output_path, index_counter = get_output_image_path(path)
+        output_path, index_counter = get_output_image_path(
+            path, output_folder=kwargs["output_folder"]
+        )
 
         if kwargs['use_model']:
             shutil.unpack_archive(
@@ -133,6 +133,10 @@ def denoise(files, **kwargs):
             denoised = response.astype(noisy2infer.dtype, copy=False)
             shutil.rmtree(input_model_path[:-4])
         else:
+            kwargs_to_pass = deepcopy(kwargs)
+            kwargs_to_pass.pop("batch_axes")
+            kwargs_to_pass.pop("channel_axes")
+
             denoiser = get_denoiser_class_instance(
                 lower_level_args=lower_level_args, variant=backend
             )
@@ -146,7 +150,7 @@ def denoise(files, **kwargs):
                 if noisy_metadata is not None
                 else None,
                 image_path=path,
-                **kwargs,
+                **kwargs_to_pass,
             )
 
             denoised = denoiser.denoise(
@@ -159,7 +163,11 @@ def denoise(files, **kwargs):
                 else None,
             )
 
-            model_path = get_save_model_path(path, passed_counter=index_counter)
+            model_path = get_save_model_path(
+                path,
+                passed_counter=index_counter,
+                output_folder=kwargs["output_folder"],
+            )
             denoiser.save_model(model_path)
 
         imwrite(denoised, output_path)
@@ -171,6 +179,7 @@ def denoise(files, **kwargs):
 @click.argument('psf_path', nargs=1)
 @click.option('-s', '--slicing', default='', type=str)
 @click.option('-b', '--backend', default=None)
+@click.option('-output-folder', default='')
 def lucyrichardson(files, psf_path, **kwargs):
     """lucyrichardson command
 
@@ -196,7 +205,9 @@ def lucyrichardson(files, psf_path, **kwargs):
         lr.train(input_image, input_image)
         deconvolved = lr.deconvolve(input_image)
 
-        path, index_counter = get_output_image_path(filepath, "deconvolved")
+        path, index_counter = get_output_image_path(
+            filepath, "deconvolved", output_folder=kwargs["output_folder"]
+        )
         imwrite(deconvolved, path)
 
 
