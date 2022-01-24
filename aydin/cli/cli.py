@@ -66,7 +66,7 @@ def cli(ctx):
 @click.option('--use-model/--save-model', default=False)
 @click.option('--model-path', default=None)
 @click.option('--lower-level-args', default=None)
-@click.option('-output-folder', default='')
+@click.option('--output-folder', default='')
 def denoise(files, **kwargs):
     """denoise command
 
