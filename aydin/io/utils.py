@@ -112,8 +112,7 @@ def get_output_image_path(
     """
 
     if output_folder:
-        pass
-        # TODO : split filename here hand adjust rest accordingly
+        path = os.path.join(output_folder, Path(path).name)
 
     image_formats = [
         ".zarr.zip",
