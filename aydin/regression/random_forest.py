@@ -4,7 +4,7 @@ from aydin.regression.lgbm import LGBMRegressor
 from aydin.util.log.log import lsection, lprint
 
 
-class RFRegressor(LGBMRegressor):
+class RandomForestRegressor(LGBMRegressor):
     """Random Forrest Regressor (uses the LGBM library)."""
 
     def __init__(
