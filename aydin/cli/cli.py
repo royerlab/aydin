@@ -179,7 +179,7 @@ def denoise(files, **kwargs):
 @click.argument('psf_path', nargs=1)
 @click.option('-s', '--slicing', default='', type=str)
 @click.option('-b', '--backend', default=None)
-@click.option('-output-folder', default='')
+@click.option('--output-folder', default='')
 def lucyrichardson(files, psf_path, **kwargs):
     """lucyrichardson command
 

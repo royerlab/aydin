@@ -116,6 +116,18 @@ options.
    $ aydin lucyrichardson image.tif
 
 
+Specifying your own output folder
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use the following lines to specify your desired output folder to
+Aydin for both denoising and deconvolution runs:
+
+.. code-block:: bash
+
+   $ aydin denoise image.tif --output-folder=/PATH/TO/YOUR/FOLDER
+   $ aydin lucyrichardson image.tif  --output-folder=/PATH/TO/YOUR/FOLDER
+
+
 Using your PSF to deconvolve your image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
