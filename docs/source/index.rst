@@ -31,9 +31,9 @@ To get started with Aydin, please download and install Aydin on your machine.
 .. raw:: html
 
     <div style="text-align: center; margin-left: 10%; margin-right: 10%">
-       <a href='https://github.com/royerlab/aydin/releases/download/v0.1.11/aydin_0.1.11_linux.zip'><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Tux.svg/249px-Tux.svg.png" style="max-height:100px; max-width:100px; overflow: hidden; float: left"></a>
-       <a href='https://github.com/royerlab/aydin/releases/download/v0.1.11/aydin_0.1.11_win.zip'><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Windows_logo_-_2012_%28dark_blue%29.svg/1280px-Windows_logo_-_2012_%28dark_blue%29.svg.png" style="max-height:100px; max-width:100px; overflow: hidden; float: center"></a>
-       <a href='https://github.com/royerlab/aydin/releases/download/v0.1.11/aydin_0.1.11_osx.pkg'><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/505px-Apple_logo_black.svg.png" style="max-height:100px; max-width:100px; overflow: hidden; float: right"></a>
+       <a href='https://github.com/royerlab/aydin/releases/download/v0.1.12/aydin_0.1.12_linux.zip'><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Tux.svg/249px-Tux.svg.png" style="max-height:100px; max-width:100px; overflow: hidden; float: left"></a>
+       <a href='https://github.com/royerlab/aydin/releases/download/v0.1.12/aydin_0.1.12_win.zip'><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Windows_logo_-_2012_%28dark_blue%29.svg/1280px-Windows_logo_-_2012_%28dark_blue%29.svg.png" style="max-height:100px; max-width:100px; overflow: hidden; float: center"></a>
+       <a href='https://github.com/royerlab/aydin/releases/download/v0.1.12/aydin_0.1.12_osx.pkg'><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/505px-Apple_logo_black.svg.png" style="max-height:100px; max-width:100px; overflow: hidden; float: right"></a>
     </div>
     <br>
     <br>
