@@ -76,7 +76,7 @@ class DenoiseTab(QWidget):
             'Noise2SelfCNN-jinet',
             'Noise2SelfFGR-cb',
             'Noise2SelfFGR-lgbm',
-            'Noise2SelfFGR-rf',
+            'Noise2SelfFGR-random_forest',
         ]
 
         self.basic_backend_options_descriptions = []
@@ -136,16 +136,15 @@ class DenoiseTab(QWidget):
         while self.stacked_widget.count():
             self.stacked_widget.removeWidget(self.stacked_widget.widget(0))
 
-        for index, backend_option in enumerate(
-            self.backend_options if enable else self.basic_backend_options
-        ):
-            self.leftlist.insertItem(index, backend_option)
+        if enable:
+            options = self.backend_options
+            description_list = self.backend_options_descriptions
+        else:
+            options = self.basic_backend_options
+            description_list = self.basic_backend_options_descriptions
 
-            description_list = (
-                self.backend_options_descriptions
-                if enable
-                else self.basic_backend_options_descriptions
-            )
+        for index, backend_option in enumerate(options):
+            self.leftlist.insertItem(index, backend_option)
 
             self.stacked_widget.addWidget(
                 DenoiseTabMethodWidget(

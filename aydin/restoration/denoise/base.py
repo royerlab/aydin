@@ -144,13 +144,19 @@ class DenoiseRestorationBase(ABC):
         format = "zip"
         archive_from = os.path.dirname(source)
         archive_to = os.path.basename(source.strip(os.sep))
-        shutil.make_archive(name, format, archive_from, archive_to)
+
         if os.path.exists(os.path.join(destination, f"{name}.{format}")):
             lprint(
                 "Previously existing model will be deleted before saving the new model"
             )
             os.remove(os.path.join(destination, f"{name}.{format}"))
-        shutil.move(f"{name}.{format}", destination)
+
+        shutil.make_archive(name, format, archive_from, archive_to)
+
+        try:
+            shutil.move(f"{name}.{format}", destination)
+        except shutil.Error as e:
+            lprint(e)
 
     def save_model(self, model_path):
         """Saves the latest trained model next to the input image file.
