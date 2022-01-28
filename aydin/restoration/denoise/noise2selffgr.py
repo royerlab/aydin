@@ -20,8 +20,8 @@ if os.getenv("BUNDLED_AYDIN") == "1":
     from aydin.regression.lgbm import LGBMRegressor  # noqa: F401
     from aydin.regression.linear import LinearRegressor  # noqa: F401
     from aydin.regression.nn import NNRegressor  # noqa: F401
-    from aydin.regression.rf import RFRegressor  # noqa: F401
-    from aydin.regression.sv import SVRegressor  # noqa: F401
+    from aydin.regression.random_forest import RandomForestRegressor  # noqa: F401
+    from aydin.regression.support_vector import SupportVectorRegressor  # noqa: F401
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):

@@ -4,7 +4,7 @@ from aydin.regression.base import RegressorBase
 from aydin.util.log.log import lprint, lsection
 
 
-class SVRegressor(RegressorBase):
+class SupportVectorRegressor(RegressorBase):
     """Support Vector Regressor.
     \n\n
     Note: Way too slow when non-linear, nearly useless...

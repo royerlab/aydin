@@ -10,7 +10,7 @@ from skimage.metrics import structural_similarity as ssim
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import normalise, add_noise, pollen, newyork, lizard, characters
 from aydin.it.fgr import ImageTranslatorFGR
-from aydin.regression.rf import RFRegressor
+from aydin.regression.random_forest import RandomForestRegressor
 from aydin.util.log.log import Log
 
 
@@ -26,7 +26,7 @@ def demo(image, name):
 
     generator = StandardFeatureGenerator()
 
-    regressor = RFRegressor(patience=32)
+    regressor = RandomForestRegressor(patience=32)
 
     it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)
 
