@@ -39,7 +39,7 @@ class ImagesTab(QWidget):
 
         self.image_list_tree_widget = QTreeWidget()
         self.image_list_tree_widget.setHeaderLabels(
-            ['file name', 'denoise', 'axes', 'shape', 'dtype', 'size', 'output path']
+            ['file name', 'denoise', 'axes', 'shape', 'dtype', 'size', 'output folder']
         )
 
         self.image_list_tree_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
