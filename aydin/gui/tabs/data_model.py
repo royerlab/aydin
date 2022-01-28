@@ -1,3 +1,4 @@
+import pathlib
 from copy import deepcopy
 from os import listdir
 from os.path import join, isfile, isdir
@@ -127,7 +128,15 @@ class DataModel:
         """
         for path, (array, metadata) in new_images.items():
             self._images.append(
-                [Path(path).name, array, metadata, train_on, denoise, path]
+                [
+                    Path(path).name,
+                    array,
+                    metadata,
+                    train_on,
+                    denoise,
+                    path,
+                    str(pathlib.Path(path).resolve().parent),
+                ]
             )
 
         self.update_images_tabview()

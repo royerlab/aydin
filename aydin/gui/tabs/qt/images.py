@@ -130,7 +130,7 @@ class ImagesTab(QWidget):
                     human_readable_byte_size(
                         metadata.dtype.itemsize * numpy.prod(metadata.shape)
                     ),
-                    str(pathlib.Path(get_output_image_path(path)[0]).resolve().parent),
+                    str(pathlib.Path(path).resolve().parent),
                 ],
             )
 
