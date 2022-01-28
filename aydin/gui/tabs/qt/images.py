@@ -50,7 +50,7 @@ class ImagesTab(QWidget):
 
         self.image_list_tree_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.image_list_tree_widget.itemDoubleClicked.connect(self.onDoubleClick)
+        self.image_list_tree_widget.itemDoubleClicked.connect(self.onItemDoubleClick)
 
         self.image_list_tree_widget.header().sectionClicked.connect(
             self.onSectionClicked
@@ -81,22 +81,30 @@ class ImagesTab(QWidget):
     def onSectionClicked(self, column):
         if column == 0:
             return
-        for idx, item in enumerate(
-            iter_tree_widget(self.image_list_tree_widget.invisibleRootItem())
-        ):
-            if idx == 0:
-                continue
-            elif idx == 1:
-                state_to_be_set = (
-                    Qt.Unchecked
-                    if item.checkState(column) == Qt.Checked
-                    else Qt.Checked
-                )
+        elif column == 1:
+            for idx, item in enumerate(
+                iter_tree_widget(self.image_list_tree_widget.invisibleRootItem())
+            ):
+                if idx == 0:
+                    continue
+                elif idx == 1:
+                    state_to_be_set = (
+                        Qt.Unchecked
+                        if item.checkState(column) == Qt.Checked
+                        else Qt.Checked
+                    )
 
-            item.setCheckState(column, state_to_be_set)
+                item.setCheckState(column, state_to_be_set)
+        elif column == 6:
+            for idx, item in enumerate(
+                iter_tree_widget(self.image_list_tree_widget.invisibleRootItem())
+            ):
+                if idx == 0:
+                    continue
+                item.setText(6, self.image_list_tree_widget.selectedItems()[0].text(6))
 
     @Slot(QTreeWidgetItem, int)
-    def onDoubleClick(self, item, column):
+    def onItemDoubleClick(self, item, column):
         item.setFlags(item.flags() | Qt.ItemIsEditable)
         if column == 6:
             self.image_list_tree_widget.editItem(item, column)
