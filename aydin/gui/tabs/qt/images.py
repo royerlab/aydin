@@ -1,15 +1,19 @@
 import pathlib
-
 import numpy
-from PyQt5.QtWidgets import QAbstractItemView
 from qtpy.QtCore import Qt, Slot
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QLabel, QTreeWidgetItem, QTreeWidget
+from qtpy.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QTreeWidgetItem,
+    QTreeWidget,
+    QAbstractItemView,
+)
 
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
 from aydin.gui._qt.qtreewidget_utils import iter_tree_widget
-from aydin.io.utils import get_output_image_path
 from aydin.util.misc.units import human_readable_byte_size
 
 
