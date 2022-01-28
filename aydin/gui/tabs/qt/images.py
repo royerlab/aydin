@@ -1,3 +1,5 @@
+import pathlib
+
 import numpy
 from PyQt5.QtWidgets import QAbstractItemView
 from qtpy.QtCore import Qt, Slot
@@ -128,7 +130,7 @@ class ImagesTab(QWidget):
                     human_readable_byte_size(
                         metadata.dtype.itemsize * numpy.prod(metadata.shape)
                     ),
-                    get_output_image_path(path)[0],
+                    str(pathlib.Path(get_output_image_path(path)[0]).resolve().parent),
                 ],
             )
 
