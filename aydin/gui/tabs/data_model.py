@@ -191,6 +191,12 @@ class DataModel:
                 self.update_dimensions_tabview()
                 self.update_cropping_tabview()
 
+    def update_image_output_folder(self, filename, new_value):
+        #  TODO: write proper docstrings here
+        for imagelist_item in self._images:
+            if imagelist_item[0] == filename:
+                imagelist_item[6] = new_value
+
     def set_split_channels(self, filename, filepath, new_value: bool):
         """Method to split/de-split channels of an image with
         corresponding filename.

@@ -106,6 +106,10 @@ class ImagesTab(QWidget):
             self.parent.data_model.set_image_to_denoise(
                 item.text(0), item.checkState(1)
             )
+        elif column == 6:
+            self.parent.data_model.update_image_output_folder(
+                item.text(0), item.text(6)
+            )
 
     def remove_items_from_tree(self):
         self.image_list_tree_widget.clear()
@@ -122,7 +126,15 @@ class ImagesTab(QWidget):
 
         self.image_list_tree_widget.clear()
 
-        for filename, array, metadata, train_on, denoise, path in imagelist:
+        for (
+            filename,
+            array,
+            metadata,
+            train_on,
+            denoise,
+            path,
+            output_folder,
+        ) in imagelist:
             qtree_widget_item = QTreeWidgetItem(
                 self.image_list_tree_widget,
                 [
@@ -134,7 +146,7 @@ class ImagesTab(QWidget):
                     human_readable_byte_size(
                         metadata.dtype.itemsize * numpy.prod(metadata.shape)
                     ),
-                    str(pathlib.Path(path).resolve().parent),
+                    output_folder,
                 ],
             )
 
