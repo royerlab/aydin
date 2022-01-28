@@ -1,3 +1,4 @@
+import pathlib
 from copy import deepcopy
 from os import listdir
 from os.path import join, isfile, isdir
@@ -127,7 +128,15 @@ class DataModel:
         """
         for path, (array, metadata) in new_images.items():
             self._images.append(
-                [Path(path).name, array, metadata, train_on, denoise, path]
+                [
+                    Path(path).name,
+                    array,
+                    metadata,
+                    train_on,
+                    denoise,
+                    path,
+                    str(pathlib.Path(path).resolve().parent),
+                ]
             )
 
         self.update_images_tabview()
@@ -181,6 +190,12 @@ class DataModel:
                 imagelist_item[4] = new_value
                 self.update_dimensions_tabview()
                 self.update_cropping_tabview()
+
+    def update_image_output_folder(self, filename, new_value):
+        #  TODO: write proper docstrings here
+        for imagelist_item in self._images:
+            if imagelist_item[0] == filename:
+                imagelist_item[6] = new_value
 
     def set_split_channels(self, filename, filepath, new_value: bool):
         """Method to split/de-split channels of an image with
