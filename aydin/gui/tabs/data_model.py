@@ -151,7 +151,7 @@ class DataModel:
         indices2remove = []
         for idx, imagelist_item in enumerate(self._images):
             if (
-                Path(image_filepath).parents[0] == Path(imagelist_item[5]).parents[0]
+                Path(image_filepath).parents[0] == Path(imagelist_item[4]).parents[0]
                 and Path(image_filepath).name in imagelist_item[0]
             ):
                 indices2remove.append(idx)
@@ -171,7 +171,7 @@ class DataModel:
         List[List[str, numpy.typing.ArrayLike, FileMetadata, bool, bool, str]]
 
         """
-        return list(filter(lambda image: image[4], self.images))
+        return list(filter(lambda image: image[3], self.images))
 
     def set_image_to_denoise(self, filename, new_value):
         """Method to mark/unmark to denoise an image the with
@@ -185,7 +185,7 @@ class DataModel:
         """
         for imagelist_item in self._images:
             if imagelist_item[0] == filename:
-                imagelist_item[4] = new_value
+                imagelist_item[3] = new_value
                 self.update_dimensions_tabview()
                 self.update_cropping_tabview()
 
@@ -193,7 +193,7 @@ class DataModel:
         #  TODO: write proper docstrings here
         for imagelist_item in self._images:
             if imagelist_item[0] == filename:
-                imagelist_item[6] = new_value
+                imagelist_item[5] = new_value
 
     def set_split_channels(self, filename, filepath, new_value: bool):
         """Method to split/de-split channels of an image with
@@ -288,7 +288,7 @@ class DataModel:
 
                 # Prepare file name and path for the hyperstacked image
                 hyperstacked_filename = f"hyperstack_{self.images[0][0]}"
-                filepath = self.images[0][5]
+                filepath = self.images[0][4]
                 hyperstacked_filepath = filepath.replace(
                     Path(filepath).name, hyperstacked_filename
                 )
