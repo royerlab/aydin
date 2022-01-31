@@ -175,8 +175,8 @@ def denoise(files, **kwargs):
 
 
 @cli.command()
-@click.argument('files', nargs=-1)
-@click.argument('psf_path', nargs=1)
+@click.argument('files', nargs=-1, required=True)
+@click.argument('psf_path', nargs=1, required=True)
 @click.option('-s', '--slicing', default='', type=str)
 @click.option('-b', '--backend', default=None)
 @click.option('--output-folder', default='')
@@ -190,11 +190,10 @@ def lucyrichardson(files, psf_path, **kwargs):
     kwargs : dict
 
     """
-    psf_kernel = None
-    if psf_path != "":
-        psf_kernel = imread(psf_path)[0]
-        psf_kernel = psf_kernel.astype(numpy.float32, copy=False)
-        psf_kernel /= psf_kernel.sum()
+
+    psf_kernel = imread(psf_path)[0]
+    psf_kernel = psf_kernel.astype(numpy.float32, copy=False)
+    psf_kernel /= psf_kernel.sum()
 
     filepaths, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
     for filepath, input_image, metadata in zip(filepaths, image_arrays, metadatas):

@@ -10,7 +10,7 @@ from aydin.it.deconvolution.lr_deconv_tf import ImageTranslatorLRDeconvTensorflo
 from aydin.util.log.log import lsection, lprint, Log
 
 
-@pytest.mark.heavy
+# @pytest.mark.heavy
 def test_lr_2d_tf():
     Log.enable_output = True
 
