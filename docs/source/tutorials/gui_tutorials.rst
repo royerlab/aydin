@@ -71,6 +71,12 @@ and process each channel separately might be cooler. At least we believe so, hen
 give our users a checkbox that lets them split each channel of a multi-channel stack into
 separate images.
 
+Images tab
+~~~~~~~~~~~~~~~
+
+
+
+
 Dimensions tab
 ~~~~~~~~~~~~~~~
 
