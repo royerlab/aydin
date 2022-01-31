@@ -192,7 +192,7 @@ def lucyrichardson(files, psf_path, **kwargs):
     """
     psf_kernel = None
     if psf_path != "":
-        psf_kernel = imread(psf_path, value_norm=False)[0]
+        psf_kernel = imread(psf_path)[0]
         psf_kernel = psf_kernel.astype(numpy.float32, copy=False)
         psf_kernel /= psf_kernel.sum()
 
