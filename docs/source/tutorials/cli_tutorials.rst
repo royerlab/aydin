@@ -109,11 +109,12 @@ Deconvolving a single image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can use the following line to deconvolve a single image with default
-options.
+options. Passed psf file assumed to be a single psf image
+in a lossless format.
 
 .. code-block:: bash
 
-   $ aydin lucyrichardson image.tif
+   $ aydin lucyrichardson image.tif psf.tif
 
 
 Specifying your own output folder
@@ -125,19 +126,7 @@ Aydin for both denoising and deconvolution runs:
 .. code-block:: bash
 
    $ aydin denoise image.tif --output-folder=/PATH/TO/YOUR/FOLDER
-   $ aydin lucyrichardson image.tif  --output-folder=/PATH/TO/YOUR/FOLDER
-
-
-Using your PSF to deconvolve your image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can use the following line to deconvolve a single image with default
-options and their own psf. Passed psf file assumed to be a single psf image
-in a lossless format.
-
-.. code-block:: bash
-
-   $ aydin lucyrichardson image.tiff psf.tif
+   $ aydin lucyrichardson image.tif  psf.tif --output-folder=/PATH/TO/YOUR/FOLDER
 
 
 
