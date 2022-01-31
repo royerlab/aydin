@@ -309,7 +309,7 @@ class MainPage(QWidget):
 
         if path is None:
             image_paths = [
-                get_options_json_path(i[5]) for i in self.data_model.images_to_denoise
+                get_options_json_path(i[4]) for i in self.data_model.images_to_denoise
             ]
         else:
             image_paths = [path]

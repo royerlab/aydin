@@ -109,8 +109,8 @@ class DenoiseJobRunner(QWidget):
 
     def prep_and_run(self):
         # Get images and their related data
-        self.image_paths = [i[5] for i in self.parent.data_model.images_to_denoise]
-        self.output_folders = [i[6] for i in self.parent.data_model.images_to_denoise]
+        self.image_paths = [i[4] for i in self.parent.data_model.images_to_denoise]
+        self.output_folders = [i[5] for i in self.parent.data_model.images_to_denoise]
         if len(self.image_paths) == 0:
             lprint("Aydin cannot be started with no image")
             return
