@@ -112,7 +112,7 @@ class DataModel:
         self._images.clear()
         self.update_images_tabview()
 
-    def add_images(self, new_images, train_on=True, denoise=True):
+    def add_images(self, new_images, denoise=True):
         """Adds images to the model. Method also triggers
         needed updates on images view.
 
@@ -122,7 +122,6 @@ class DataModel:
             Expects a particular dict format where key is
             the filepath and value is tuple of corresponding
             array and metadata.
-        train_on : bool, optional
         denoise : bool, optional
 
         """
@@ -132,7 +131,6 @@ class DataModel:
                     Path(path).name,
                     array,
                     metadata,
-                    train_on,
                     denoise,
                     path,
                     str(pathlib.Path(path).resolve().parent),
