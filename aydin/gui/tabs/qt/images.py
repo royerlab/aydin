@@ -138,7 +138,6 @@ class ImagesTab(QWidget):
             filename,
             array,
             metadata,
-            train_on,
             denoise,
             path,
             output_folder,
