@@ -86,6 +86,11 @@ Setting output folder to a specific image
 
 .. image:: ../resources/aydin_images_tab_single_file_output_folder.png
 
+By default, ``Aydin Studio`` tries to write the result image and related files to the same exact
+folder of the input image file. This comes handy, when you like to find the input/output images
+together, however, we understand that this might not be always the case for all of our users and
+let our users to specify output folder for each loaded image by double-clicking to the last column
+of each image entry on the ``Image(s)`` tab.
 
 Setting output folder to all loaded images
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
