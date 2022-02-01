@@ -78,7 +78,8 @@ Choosing images to denoise
 .. image:: ../resources/aydin_images_tab_choose_to_denoise.png
 
 We provide details on how we interpret each image loaded to ``Aydin Studio`` on the ``Image(s)`` tab.
-Also this is the last place to decide, which of the loaded images you want to denoise.
+Also this is the last place to decide, which of the loaded images you want to denoise. For each loaded
+image, you can decide to denoise or not with the help of checkbox provided on the denoise column.
 
 
 Setting output folder to a specific image
