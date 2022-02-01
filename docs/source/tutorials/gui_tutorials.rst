@@ -71,9 +71,26 @@ and process each channel separately might be cooler. At least we believe so, hen
 give our users a checkbox that lets them split each channel of a multi-channel stack into
 separate images.
 
-Images tab
-~~~~~~~~~~~~~~~
 
+Choosing images to denoise
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../resources/aydin_images_tab_choose_to_denoise.png
+
+We provide details on how we interpret each image loaded to ``Aydin Studio`` on the ``Image(s)`` tab.
+Also this is the last place to decide, which of the loaded images you want to denoise.
+
+
+Setting output folder to a specific image
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../resources/aydin_images_tab_single_file_output_folder.png
+
+
+Setting output folder to all loaded images
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../resources/aydin_images_tab_all_files_output_folder.png
 
 
 
