@@ -92,11 +92,15 @@ together, however, we understand that this might not be always the case for all 
 let our users to specify output folder for each loaded image by double-clicking to the last column
 of each image entry on the ``Image(s)`` tab.
 
+
 Setting output folder to all loaded images
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. image:: ../resources/aydin_images_tab_all_files_output_folder.png
 
+It is also possible to set output folder to all loaded images to ``Aydin Studio``. You can select the
+image row with your desired output folder for all images then click the ``output folder`` header (highlighted
+on the screenshot) to set same output folder to the all loaded images.
 
 
 Dimensions tab
