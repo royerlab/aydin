@@ -317,6 +317,9 @@ class MainPage(QWidget):
         for path in image_paths:
             save_any_json(args_dict, path)
 
+    def load_pretrained_model(self):
+        raise NotImplementedError
+
     def filestab_changed(self):
         self.tabs["File(s)"].on_data_model_update()
 
