@@ -42,8 +42,11 @@ class DenoiseJobRunner(QWidget):
 
         results = []
 
-        for training_image, inference_image, image_path in zip(
-            self.training_images, self.inference_images, self.image_paths
+        for training_image, inference_image, image_path, output_folder in zip(
+            self.training_images,
+            self.inference_images,
+            self.image_paths,
+            self.output_folders,
         ):
             self.denoiser.train(
                 training_image, batch_axes=self.batch_axes, chan_axes=self.channel_axes
@@ -57,19 +60,25 @@ class DenoiseJobRunner(QWidget):
                 )
                 results.append(denoised)
 
-                output_path, file_counter = get_output_image_path(image_path)
+                output_path, file_counter = get_output_image_path(
+                    image_path, output_folder=output_folder
+                )
 
                 imwrite(denoised, output_path)
                 if self.save_options_json:
                     json_path = get_options_json_path(
-                        image_path, passed_counter=file_counter
+                        image_path,
+                        passed_counter=file_counter,
+                        output_folder=output_folder,
                     )
                     self.parent.save_options_json(json_path)
                     lprint(f"DONE, options json written in {json_path}")
 
                 if self.save_model:
                     model_path = get_save_model_path(
-                        image_path, passed_counter=file_counter
+                        image_path,
+                        passed_counter=file_counter,
+                        output_folder=output_folder,
                     )
                     self.denoiser.save_model(model_path)
                     lprint(f"DONE, trained model written in {model_path}")
@@ -100,7 +109,8 @@ class DenoiseJobRunner(QWidget):
 
     def prep_and_run(self):
         # Get images and their related data
-        self.image_paths = [i[5] for i in self.parent.data_model.images_to_denoise]
+        self.image_paths = [i[4] for i in self.parent.data_model.images_to_denoise]
+        self.output_folders = [i[5] for i in self.parent.data_model.images_to_denoise]
         if len(self.image_paths) == 0:
             lprint("Aydin cannot be started with no image")
             return

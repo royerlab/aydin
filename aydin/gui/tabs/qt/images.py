@@ -1,6 +1,14 @@
+import pathlib
 import numpy
 from qtpy.QtCore import Qt, Slot
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QLabel, QTreeWidgetItem, QTreeWidget
+from qtpy.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QLabel,
+    QTreeWidgetItem,
+    QTreeWidget,
+    QAbstractItemView,
+)
 
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
@@ -37,13 +45,18 @@ class ImagesTab(QWidget):
 
         self.image_list_tree_widget = QTreeWidget()
         self.image_list_tree_widget.setHeaderLabels(
-            ['file name', 'denoise', 'axes', 'shape', 'dtype', 'size']
+            ['file name', 'denoise', 'axes', 'shape', 'dtype', 'size', 'output folder']
         )
+
+        self.image_list_tree_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+        self.image_list_tree_widget.itemDoubleClicked.connect(self.onItemDoubleClick)
 
         self.image_list_tree_widget.header().sectionClicked.connect(
             self.onSectionClicked
         )
         self.image_list_tree_widget.header().setSectionsClickable(True)
+
         self.image_list_tree_widget.setColumnWidth(0, 400)
         self.image_list_tree_widget.setColumnWidth(3, 300)
         self.image_list_tree_widget.setColumnWidth(5, 200)
@@ -68,24 +81,42 @@ class ImagesTab(QWidget):
     def onSectionClicked(self, column):
         if column == 0:
             return
-        for idx, item in enumerate(
-            iter_tree_widget(self.image_list_tree_widget.invisibleRootItem())
-        ):
-            if idx == 0:
-                continue
-            elif idx == 1:
-                state_to_be_set = (
-                    Qt.Unchecked
-                    if item.checkState(column) == Qt.Checked
-                    else Qt.Checked
-                )
+        elif column == 1:
+            for idx, item in enumerate(
+                iter_tree_widget(self.image_list_tree_widget.invisibleRootItem())
+            ):
+                if idx == 0:
+                    continue
+                elif idx == 1:
+                    state_to_be_set = (
+                        Qt.Unchecked
+                        if item.checkState(column) == Qt.Checked
+                        else Qt.Checked
+                    )
 
-            item.setCheckState(column, state_to_be_set)
+                item.setCheckState(column, state_to_be_set)
+        elif column == 6:
+            for idx, item in enumerate(
+                iter_tree_widget(self.image_list_tree_widget.invisibleRootItem())
+            ):
+                if idx == 0:
+                    continue
+                item.setText(6, self.image_list_tree_widget.selectedItems()[0].text(6))
+
+    @Slot(QTreeWidgetItem, int)
+    def onItemDoubleClick(self, item, column):
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
+        if column == 6:
+            self.image_list_tree_widget.editItem(item, column)
 
     def onTreeItemChanged(self, item, column):
         if column == 1:
             self.parent.data_model.set_image_to_denoise(
                 item.text(0), item.checkState(1)
+            )
+        elif column == 6:
+            self.parent.data_model.update_image_output_folder(
+                item.text(0), item.text(6)
             )
 
     def remove_items_from_tree(self):
@@ -103,7 +134,14 @@ class ImagesTab(QWidget):
 
         self.image_list_tree_widget.clear()
 
-        for filename, array, metadata, train_on, denoise, path in imagelist:
+        for (
+            filename,
+            array,
+            metadata,
+            denoise,
+            path,
+            output_folder,
+        ) in imagelist:
             qtree_widget_item = QTreeWidgetItem(
                 self.image_list_tree_widget,
                 [
@@ -115,7 +153,9 @@ class ImagesTab(QWidget):
                     human_readable_byte_size(
                         metadata.dtype.itemsize * numpy.prod(metadata.shape)
                     ),
+                    output_folder,
                 ],
             )
+
             qtree_widget_item.setCheckState(1, Qt.Checked if denoise else Qt.Unchecked)
             qtree_widget_item.setToolTip(0, path)
