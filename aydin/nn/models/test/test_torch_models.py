@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from itertools import chain
 
+import numpy
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
@@ -29,6 +30,14 @@ def test_supervised_2D():
 def test_supervised_2D_n2t():
     lizard_image = lizard()
     input_image = add_noise(lizard_image)
+    input_image = numpy.expand_dims(input_image, axis=0)
+    input_image = numpy.expand_dims(input_image, axis=0)
+
+    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+
+    input_image = torch.tensor(input_image)
+    lizard_image = torch.tensor(lizard_image)
 
     learning_rate = 0.01
     training_noise = 0.001
@@ -84,9 +93,9 @@ def test_supervised_2D_n2t():
         val_loss_value = 0
         iteration = 0
         for i, (input_images, target_images, validation_mask_images) in enumerate(
-            data_loader
+            zip([input_image], [lizard_image], [lizard_image])
         ):
-            lprint(f"index: {i}, shape:{input_images.shape}")
+            print(f"index: {i}, shape:{input_images.shape}")
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
