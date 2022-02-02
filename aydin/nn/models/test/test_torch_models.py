@@ -1,14 +1,17 @@
+import math
 from collections import OrderedDict
 from itertools import chain
 
+import napari
 import numpy
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
-from aydin.io.datasets import lizard, add_noise
+from aydin.io.datasets import lizard, add_noise, camera
 from aydin.nn.models.torch_unet import UNetModel
 from aydin.nn.models.utils.torch_dataset import TorchDataset
+from aydin.nn.pytorch.it_ptcnn import to_numpy
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -28,13 +31,11 @@ def test_supervised_2D():
 
 
 def test_supervised_2D_n2t():
-    lizard_image = lizard()
-    input_image = add_noise(lizard_image)
-    input_image = numpy.expand_dims(input_image, axis=0)
-    input_image = numpy.expand_dims(input_image, axis=0)
+    lizard_image = camera()
+    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+    lizard_image = numpy.expand_dims(lizard_image, axis=0)
 
-    lizard_image = numpy.expand_dims(lizard_image, axis=0)
-    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+    input_image = add_noise(lizard_image)
 
     input_image = torch.tensor(input_image)
     lizard_image = torch.tensor(lizard_image)
@@ -47,9 +48,9 @@ def test_supervised_2D_n2t():
     reduce_lr_factor = 0.5
     reduce_lr_patience = patience // 2
     reload_best_model_period = 1024
+    best_val_loss_value = math.inf
 
     model = UNetModel(
-        # (64, 64, 1),
         nb_unet_levels=2,
         supervised=True,
         spacetime_ndim=2,
@@ -117,9 +118,6 @@ def test_supervised_2D_n2t():
             # Updating parameters
             optimizer.step()
 
-            # post optimisation -- if needed:
-            model.post_optimisation()
-
             # update training loss_deconvolution for whole image:
             train_loss_value += translation_loss_value.item()
             iteration += 1
@@ -182,6 +180,13 @@ def test_supervised_2D_n2t():
         lprint("## Best val loss: {best_val_loss_value}")
 
     result = model(input_image)
+
+    with napari.gui_qt():
+        viewer = napari.Viewer()
+        viewer.add_image(to_numpy(input_image), name='input')
+        viewer.add_image(to_numpy(result), name='result')
+        viewer.add_image(to_numpy(lizard_image), name='lizard')
+
     assert result.shape == input_image.shape
     assert result.dtype == input_image.dtype
 
