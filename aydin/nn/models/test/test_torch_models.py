@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from itertools import chain
 
 import torch
@@ -29,6 +30,15 @@ def test_supervised_2D_n2t():
     lizard_image = lizard()
     input_image = add_noise(lizard_image)
 
+    learning_rate = 0.01
+    training_noise = 0.001
+    l2_weight_regularisation = 1e-9
+    patience = 128
+    patience_epsilon = 0.0
+    reduce_lr_factor = 0.5
+    reduce_lr_patience = patience // 2
+    reload_best_model_period = 1024
+
     model = UNetModel(
         # (64, 64, 1),
         nb_unet_levels=2,
@@ -42,7 +52,6 @@ def test_supervised_2D_n2t():
         lizard_image,
         64,
         self_supervised=False,
-        validation_voxels=val_voxels,
     )
 
     data_loader = DataLoader(
@@ -68,6 +77,8 @@ def test_supervised_2D_n2t():
         patience=reduce_lr_patience,
     )
 
+    loss_function = lambda u, v: torch.abs(u - v)
+
     for epoch in range(1024):
         train_loss_value = 0
         val_loss_value = 0
@@ -85,25 +96,11 @@ def test_supervised_2D_n2t():
 
             translated_images = model(input_images)
 
-            # apply forward model:
-            forward_model_images = _forward_model(translated_images)
-
-            # validation masking:
-            u = forward_model_images * (1 - validation_mask_images)
-            v = target_images * (1 - validation_mask_images)
-
             # translation loss (per voxel):
-            translation_loss = loss_function(u, v)
+            translation_loss = loss_function(translated_images, target_images)
 
             # loss value (for all voxels):
             translation_loss_value = translation_loss.mean()
-
-            # Additional losses:
-            additional_loss_value = _additional_losses(
-                translated_images, forward_model_images
-            )
-            if additional_loss_value is not None:
-                translation_loss_value += additional_loss_value
 
             # backpropagation:
             translation_loss_value.backward()
@@ -125,15 +122,8 @@ def test_supervised_2D_n2t():
 
                 translated_images = model(input_images)
 
-                # apply forward model:
-                forward_model_images = _forward_model(translated_images)
-
-                # validation masking:
-                u = forward_model_images * validation_mask_images
-                v = target_images * validation_mask_images
-
                 # translation loss (per voxel):
-                translation_loss = loss_function(u, v)
+                translation_loss = loss_function(translated_images, target_images)
 
                 # loss values:
                 translation_loss_value = translation_loss.mean().cpu().item()

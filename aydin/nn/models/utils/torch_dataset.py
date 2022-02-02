@@ -39,7 +39,7 @@ class TorchDataset(Dataset):
             )
 
         mask_image = numpy.zeros_like(input_image)
-        mask_image[validation_voxels] = 1
+        # mask_image[validation_voxels] = 1
 
         bc_flat_mask_image = mask_image.reshape(-1, *mask_image.shape[2:])
         bc_flat_mask_tiles = numpy.concatenate([extract(x) for x in bc_flat_mask_image])
