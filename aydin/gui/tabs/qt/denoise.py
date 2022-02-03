@@ -57,6 +57,9 @@ class DenoiseTab(QWidget):
 
         self.leftlist = QListWidget()
 
+        self.loaded_backend_options = []
+        self.loaded_backend_options_descriptions = []
+
         (
             backend_options,
             backend_options_descriptions,
