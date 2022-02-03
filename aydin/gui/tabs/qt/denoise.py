@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QWidget,
@@ -12,6 +15,7 @@ from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
 from aydin.gui._qt.custom_widgets.readmoreless_label import QReadMoreLessLabel
+from aydin.it.base import ImageTranslatorBase
 from aydin.restoration.denoise.util.denoise_utils import (
     get_list_of_denoiser_implementations,
 )
@@ -57,8 +61,7 @@ class DenoiseTab(QWidget):
 
         self.leftlist = QListWidget()
 
-        self.loaded_backend_options = []
-        self.loaded_backend_options_descriptions = []
+        self.loaded_backends = []
 
         (
             backend_options,
@@ -170,4 +173,6 @@ class DenoiseTab(QWidget):
             list of paths to the loaded pretrained model files
 
         """
-        raise NotImplementedError
+        for file in pretrained_model_files:
+            shutil.unpack_archive(file, os.path.dirname(file), "zip")
+            self.loaded_backends.append(ImageTranslatorBase.load(file[:-4]))
