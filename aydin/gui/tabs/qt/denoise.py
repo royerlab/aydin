@@ -157,3 +157,14 @@ class DenoiseTab(QWidget):
                 widget_index
             ).constructor_arguments_widget_dict.items():
                 constructor_arguments_widget.set_advanced_enabled(enable=enable)
+
+    def load_pretrained_model(self, pretrained_model_files):
+        """
+
+        Parameters
+        ----------
+        pretrained_model_files : list
+            list of paths to the loaded pretrained model files
+
+        """
+        raise NotImplementedError

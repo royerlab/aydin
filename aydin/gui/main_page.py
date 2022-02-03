@@ -5,6 +5,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
+    QFileDialog,
     QTabWidget,
     QApplication,
     QStyle,
@@ -318,7 +319,14 @@ class MainPage(QWidget):
             save_any_json(args_dict, path)
 
     def load_pretrained_model(self):
-        raise NotImplementedError
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        files, _ = QFileDialog.getOpenFileNames(
+            self, "Open File(s)", "", "All Files (*)", options=options
+        )
+
+        if files:
+            self.tabs["Denoise"].load_pretrained_model(pretrained_model_files=files)
 
     def filestab_changed(self):
         self.tabs["File(s)"].on_data_model_update()
