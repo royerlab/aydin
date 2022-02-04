@@ -2,6 +2,7 @@ import math
 from collections import OrderedDict
 from itertools import chain
 
+import napari
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -9,6 +10,7 @@ from torch.utils.data import DataLoader
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
 from aydin.nn.layers.pooling_down import PoolingDown
+from aydin.nn.pytorch.it_ptcnn import to_numpy
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -142,6 +144,8 @@ class UNetModel(nn.Module):
 
 
 def n2t_unet_train_loop(
+    input_image,
+    lizard_image,
     model: UNetModel,
     data_loader: DataLoader,
     learning_rate=0.01,
@@ -264,3 +268,12 @@ def n2t_unet_train_loop(
             patience_counter += 1
 
         lprint("## Best val loss: {best_val_loss_value}")
+
+        if epoch % 20 == 0:
+            result = model(input_image)
+
+            with napari.gui_qt():
+                viewer = napari.Viewer()
+                viewer.add_image(to_numpy(input_image), name='input')
+                viewer.add_image(to_numpy(result), name='result')
+                viewer.add_image(to_numpy(lizard_image), name='lizard')
