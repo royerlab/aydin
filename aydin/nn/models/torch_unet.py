@@ -7,6 +7,7 @@ import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
 from aydin.nn.layers.pooling_down import PoolingDown
@@ -157,6 +158,8 @@ def n2t_unet_train_loop(
     reload_best_model_period=1024,
     best_val_loss_value=None,
 ):
+    writer = SummaryWriter()
+
     reduce_lr_patience = patience // 2
 
     if best_val_loss_value is None:
@@ -235,6 +238,9 @@ def n2t_unet_train_loop(
         val_loss_value /= iteration
         lprint("Validation loss value: {val_loss_value}")
 
+        writer.add_scalar("Loss/train", train_loss_value, epoch)
+        writer.add_scalar("Loss/valid", val_loss_value, epoch)
+
         # Learning rate schedule:
         scheduler.step(val_loss_value)
 
@@ -269,11 +275,18 @@ def n2t_unet_train_loop(
 
         lprint("## Best val loss: {best_val_loss_value}")
 
-        if epoch % 20 == 0:
-            result = model(input_image)
+        # if epoch % 512 == 0:
+        #     print(epoch)
+        #     result = model(input_image)
+        #
+        #     with napari.gui_qt():
+        #         viewer = napari.Viewer()
+        #
+        #         viewer.add_image(to_numpy(lizard_image), name='groundtruth')
+        #         viewer.add_image(to_numpy(result), name=f'result-{epoch}')
+        #         viewer.add_image(to_numpy(input_image), name='input')
+        #
+        #         viewer.grid.enabled = True
 
-            with napari.gui_qt():
-                viewer = napari.Viewer()
-                viewer.add_image(to_numpy(input_image), name='input')
-                viewer.add_image(to_numpy(result), name='result')
-                viewer.add_image(to_numpy(lizard_image), name='lizard')
+    writer.flush()
+    writer.close()
