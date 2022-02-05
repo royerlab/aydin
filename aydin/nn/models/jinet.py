@@ -178,11 +178,7 @@ class JINetModel(Model):
 
         """
         # TODO: move as much as you can from it cnn _translate
-        return super().predict(
-            x,
-            batch_size=batch_size,
-            verbose=verbose,
-        )
+        return super().predict(x, batch_size=batch_size, verbose=verbose)
 
     def jinet_core(self, input_lyr):
         dilated_conv_list = []
