@@ -290,3 +290,151 @@ def n2t_unet_train_loop(
 
     writer.flush()
     writer.close()
+
+
+def n2s_unet_train_loop(
+    input_image,
+    lizard_image,
+    model: UNetModel,
+    data_loader: DataLoader,
+    learning_rate=0.01,
+    training_noise=0.001,
+    l2_weight_regularisation=1e-9,
+    patience=128,
+    patience_epsilon=0.0,
+    reduce_lr_factor=0.5,
+    reload_best_model_period=1024,
+    best_val_loss_value=None,
+):
+    writer = SummaryWriter()
+
+    reduce_lr_patience = patience // 2
+
+    if best_val_loss_value is None:
+        best_val_loss_value = math.inf
+
+    optimizer = ESAdam(
+        chain(model.parameters()),
+        lr=learning_rate,
+        start_noise_level=training_noise,
+        weight_decay=l2_weight_regularisation,
+    )
+
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        'min',
+        factor=reduce_lr_factor,
+        verbose=True,
+        patience=reduce_lr_patience,
+    )
+
+    loss_function = lambda u, v: torch.abs(u - v)
+
+    for epoch in range(1024):
+        train_loss_value = 0
+        val_loss_value = 0
+        iteration = 0
+        for i, (input_images, target_images, validation_mask_images) in enumerate(
+            zip([input_image], [lizard_image], [lizard_image])
+        ):
+            print(f"index: {i}, shape:{input_images.shape}")
+
+            # Clear gradients w.r.t. parameters
+            optimizer.zero_grad()
+
+            # Forward pass:
+            model.train()
+
+            translated_images = model(input_images)
+
+            # translation loss (per voxel):
+            translation_loss = loss_function(translated_images, target_images)
+
+            # loss value (for all voxels):
+            translation_loss_value = translation_loss.mean()
+
+            # backpropagation:
+            translation_loss_value.backward()
+
+            # Updating parameters
+            optimizer.step()
+
+            # update training loss_deconvolution for whole image:
+            train_loss_value += translation_loss_value.item()
+            iteration += 1
+
+            # Validation:
+            with torch.no_grad():
+                # Forward pass:
+                model.eval()
+
+                translated_images = model(input_images)
+
+                # translation loss (per voxel):
+                translation_loss = loss_function(translated_images, target_images)
+
+                # loss values:
+                translation_loss_value = translation_loss.mean().cpu().item()
+
+                # update validation loss_deconvolution for whole image:
+                val_loss_value += translation_loss_value
+                iteration += 1
+
+        train_loss_value /= iteration
+        lprint("Training loss value: {train_loss_value}")
+
+        val_loss_value /= iteration
+        lprint("Validation loss value: {val_loss_value}")
+
+        writer.add_scalar("Loss/train", train_loss_value, epoch)
+        writer.add_scalar("Loss/valid", val_loss_value, epoch)
+
+        # Learning rate schedule:
+        scheduler.step(val_loss_value)
+
+        if val_loss_value < best_val_loss_value:
+            lprint("## New best val loss!")
+            if val_loss_value < best_val_loss_value - patience_epsilon:
+                lprint("## Good enough to reset patience!")
+                patience_counter = 0
+
+            # Update best val loss value:
+            best_val_loss_value = val_loss_value
+
+            # Save model:
+            best_model_state_dict = OrderedDict(
+                {k: v.to('cpu') for k, v in model.state_dict().items()}
+            )
+
+        else:
+            if epoch % max(1, reload_best_model_period) == 0 and best_model_state_dict:
+                lprint("Reloading best models to date!")
+                model.load_state_dict(best_model_state_dict)
+
+            if patience_counter > patience:
+                lprint("Early stopping!")
+                break
+
+            # No improvement:
+            lprint(
+                "No improvement of validation losses, patience = {patience_counter}/{self.patience} "
+            )
+            patience_counter += 1
+
+        lprint("## Best val loss: {best_val_loss_value}")
+
+        # if epoch % 512 == 0:
+        #     print(epoch)
+        #     result = model(input_image)
+        #
+        #     with napari.gui_qt():
+        #         viewer = napari.Viewer()
+        #
+        #         viewer.add_image(to_numpy(lizard_image), name='groundtruth')
+        #         viewer.add_image(to_numpy(result), name=f'result-{epoch}')
+        #         viewer.add_image(to_numpy(input_image), name='input')
+        #
+        #         viewer.grid.enabled = True
+
+    writer.flush()
+    writer.close()

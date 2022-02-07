@@ -69,6 +69,45 @@ def test_supervised_2D_n2t():
     assert result.dtype == input_image.dtype
 
 
+def test_supervised_2D_n2s():
+    lizard_image = normalise(camera())
+    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+
+    input_image = add_noise(lizard_image)
+
+    input_image = torch.tensor(input_image)
+    lizard_image = torch.tensor(lizard_image)
+
+    dataset = TorchDataset(
+        input_image,
+        lizard_image,
+        64,
+        self_supervised=False,
+    )
+
+    data_loader = DataLoader(
+        dataset,
+        batch_size=1,
+        shuffle=True,
+        num_workers=0,
+        pin_memory=True,
+    )
+
+    model = UNetModel(
+        nb_unet_levels=2,
+        supervised=True,
+        spacetime_ndim=2,
+        residual=True,
+    )
+
+    n2s_unet_train_loop(input_image, lizard_image, model, data_loader)
+    result = model(input_image)
+
+    assert result.shape == input_image.shape
+    assert result.dtype == input_image.dtype
+
+
 def test_masking_2D():
     input_array = torch.zeros((1, 1, 64, 64))
     model2d = UNetModel(
