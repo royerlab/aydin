@@ -1,5 +1,8 @@
 from qtpy.QtWidgets import QWidget, QHBoxLayout
 
+from aydin.gui._qt.custom_widgets.denoise_tab_pretrained_method import (
+    DenoiseTabPretrainedMethodWidget,
+)
 from aydin.gui._qt.output_wrapper import OutputWrapper
 from aydin.gui._qt.job_runners.worker import Worker
 from aydin.io.io import imwrite
@@ -127,14 +130,18 @@ class DenoiseJobRunner(QWidget):
         self.channel_axes = self.parent.tabs["Dimensions"].channel_axes
         self.denoise_backend = self.parent.tabs["Denoise"].selected_backend
 
-        try:
-            self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
-            self.lower_level_args = self.parent.tabs["Denoise"].lower_level_args
-        except Exception:
-            self.parent.status_bar.showMessage(
-                "There is a mistake with given parameter values..."
-            )
-            return
+        if (
+            self.parent.tabs["Denoise"].current_backend_widget
+            is not DenoiseTabPretrainedMethodWidget
+        ):
+            try:
+                self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
+                self.lower_level_args = self.parent.tabs["Denoise"].lower_level_args
+            except Exception:
+                self.parent.status_bar.showMessage(
+                    "There is a mistake with given parameter values..."
+                )
+                return
 
         self.save_options_json = self.parent.tabs[
             "Denoise"
