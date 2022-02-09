@@ -11,6 +11,9 @@ from qtpy.QtWidgets import (
 )
 
 from aydin.gui._qt.custom_widgets.denoise_tab_method import DenoiseTabMethodWidget
+from aydin.gui._qt.custom_widgets.denoise_tab_pretrained_method import (
+    DenoiseTabPretrainedMethodWidget,
+)
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
@@ -174,7 +177,19 @@ class DenoiseTab(QWidget):
 
         """
         for file in pretrained_model_files:
-            print(file)
             shutil.unpack_archive(file, os.path.dirname(file), "zip")
             self.loaded_backends.append(ImageTranslatorBase.load(file[:-4]))
             shutil.rmtree(file[:-4])
+
+        self.refresh_pretrained_backends()
+
+    def refresh_pretrained_backends(self):
+
+        for index, option in enumerate(self.loaded_backends):
+            self.leftlist.insertItem(
+                self.leftlist.count() + index, f"pretrained-{index}"
+            )
+
+            self.stacked_widget.addWidget(
+                DenoiseTabPretrainedMethodWidget(self, option)
+            )
