@@ -51,9 +51,12 @@ class DenoiseJobRunner(QWidget):
             self.image_paths,
             self.output_folders,
         ):
-            self.denoiser.train(
-                training_image, batch_axes=self.batch_axes, chan_axes=self.channel_axes
-            )
+            if not self.pretrained:
+                self.denoiser.train(
+                    training_image,
+                    batch_axes=self.batch_axes,
+                    chan_axes=self.channel_axes,
+                )
 
             if self.denoiser.it:
                 denoised = self.denoiser.denoise(
@@ -130,12 +133,15 @@ class DenoiseJobRunner(QWidget):
         self.channel_axes = self.parent.tabs["Dimensions"].channel_axes
         self.denoise_backend = self.parent.tabs["Denoise"].selected_backend
 
-        if (
-            self.parent.tabs["Denoise"].current_backend_widget
+        self.pretrained = (
+            self.parent.tabs["Denoise"].current_backend_widget.__class__
             is not DenoiseTabPretrainedMethodWidget
-        ):
+        )
+
+        self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
+
+        if not self.pretrained:
             try:
-                self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
                 self.lower_level_args = self.parent.tabs["Denoise"].lower_level_args
             except Exception:
                 self.parent.status_bar.showMessage(
