@@ -1,4 +1,3 @@
-import pathlib
 import numpy
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
