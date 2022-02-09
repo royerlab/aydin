@@ -6,6 +6,8 @@ import shutil
 from abc import abstractmethod, ABC
 from pathlib import Path
 
+import jsonpickle
+
 from aydin.util.log.log import lprint
 
 
@@ -174,3 +176,15 @@ class DenoiseRestorationBase(ABC):
 
         # clean the model folder
         self.clean_model_folder(model_path)
+
+    def load_model(self, model_path: str):
+        """
+
+        Parameters
+        ----------
+        model_path : str
+
+        """
+
+        lprint(f"Loading image translator from: {model_path}")
+        self._load_internals(model_path)
