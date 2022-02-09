@@ -90,6 +90,13 @@ class App(QMainWindow):
         )
         runMenu.addAction(saveOptionsJSONButton)
 
+        loadPretrainedModelButton = QAction('Load Pretrained Model', self)
+        loadPretrainedModelButton.setStatusTip('Load Pretrained Model')
+        loadPretrainedModelButton.triggered.connect(
+            lambda: self.main_widget.load_pretrained_model()
+        )
+        runMenu.addAction(loadPretrainedModelButton)
+
         # Preferences Menu
         self.basicModeButton = QAction('Basic mode', self)
         self.basicModeButton.setEnabled(False)

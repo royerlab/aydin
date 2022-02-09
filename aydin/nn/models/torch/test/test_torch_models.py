@@ -50,26 +50,14 @@ def test_supervised_2D_n2t():
     reload_best_model_period = 1024
     best_val_loss_value = math.inf
 
-    dataset = TorchDataset(
-        input_image,
-        lizard_image,
-        64,
-        self_supervised=False,
-    )
+    dataset = TorchDataset(input_image, lizard_image, 64, self_supervised=False)
 
     data_loader = DataLoader(
-        dataset,
-        batch_size=1,
-        shuffle=True,
-        num_workers=0,
-        pin_memory=True,
+        dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
     )
 
     model = UNetModel(
-        nb_unet_levels=2,
-        supervised=True,
-        spacetime_ndim=2,
-        residual=True,
+        nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
     )
 
     n2t_unet_train_loop(input_image, lizard_image, model, data_loader)

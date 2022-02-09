@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QWidget,
@@ -8,10 +11,14 @@ from qtpy.QtWidgets import (
 )
 
 from aydin.gui._qt.custom_widgets.denoise_tab_method import DenoiseTabMethodWidget
+from aydin.gui._qt.custom_widgets.denoise_tab_pretrained_method import (
+    DenoiseTabPretrainedMethodWidget,
+)
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
 from aydin.gui._qt.custom_widgets.readmoreless_label import QReadMoreLessLabel
+from aydin.it.base import ImageTranslatorBase
 from aydin.restoration.denoise.util.denoise_utils import (
     get_list_of_denoiser_implementations,
 )
@@ -56,6 +63,8 @@ class DenoiseTab(QWidget):
         self.tab_layout.addWidget(QHorizontalLineBreakWidget(self))
 
         self.leftlist = QListWidget()
+
+        self.loaded_backends = []
 
         (
             backend_options,
@@ -157,3 +166,37 @@ class DenoiseTab(QWidget):
                 widget_index
             ).constructor_arguments_widget_dict.items():
                 constructor_arguments_widget.set_advanced_enabled(enable=enable)
+
+        self.refresh_pretrained_backends()
+
+    def load_pretrained_model(self, pretrained_model_files):
+        """
+
+        Parameters
+        ----------
+        pretrained_model_files : list
+            list of paths to the loaded pretrained model files
+
+        """
+        for file in pretrained_model_files:
+            shutil.unpack_archive(file, os.path.dirname(file), "zip")
+            self.loaded_backends.append(ImageTranslatorBase.load(file[:-4]))
+            shutil.rmtree(file[:-4])
+
+        self.refresh_pretrained_backends()
+
+    def refresh_pretrained_backends(self):
+
+        for index in range(self.leftlist.count() - 1, -1, -1):
+            if "pretrained" in self.leftlist.item(index).text():
+                self.leftlist.takeItem(index)
+                self.stacked_widget.removeWidget(self.stacked_widget.widget(index))
+
+        for index, option in enumerate(self.loaded_backends):
+            self.leftlist.insertItem(
+                self.leftlist.count() + index, f"pretrained-{index}"
+            )
+
+            self.stacked_widget.addWidget(
+                DenoiseTabPretrainedMethodWidget(self, option)
+            )
