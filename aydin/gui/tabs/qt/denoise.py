@@ -167,6 +167,8 @@ class DenoiseTab(QWidget):
             ).constructor_arguments_widget_dict.items():
                 constructor_arguments_widget.set_advanced_enabled(enable=enable)
 
+        self.refresh_pretrained_backends()
+
     def load_pretrained_model(self, pretrained_model_files):
         """
 
@@ -187,7 +189,6 @@ class DenoiseTab(QWidget):
 
         for index in range(self.leftlist.count() - 1, -1, -1):
             if "pretrained" in self.leftlist.item(index).text():
-                print(index)
                 self.leftlist.takeItem(index)
                 self.stacked_widget.removeWidget(self.stacked_widget.widget(index))
 
