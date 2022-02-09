@@ -185,6 +185,12 @@ class DenoiseTab(QWidget):
 
     def refresh_pretrained_backends(self):
 
+        for index in range(self.leftlist.count() - 1, -1, -1):
+            if "pretrained" in self.leftlist.item(index).text():
+                print(index)
+                self.leftlist.takeItem(index)
+                self.stacked_widget.removeWidget(self.stacked_widget.widget(index))
+
         for index, option in enumerate(self.loaded_backends):
             self.leftlist.insertItem(
                 self.leftlist.count() + index, f"pretrained-{index}"
