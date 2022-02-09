@@ -174,5 +174,7 @@ class DenoiseTab(QWidget):
 
         """
         for file in pretrained_model_files:
+            print(file)
             shutil.unpack_archive(file, os.path.dirname(file), "zip")
             self.loaded_backends.append(ImageTranslatorBase.load(file[:-4]))
+            shutil.rmtree(file[:-4])
