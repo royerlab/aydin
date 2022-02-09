@@ -1,11 +1,5 @@
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QLabel,
-    QScrollArea,
-)
+from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QScrollArea
 
 from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
     QVerticalLineBreakWidget,
