@@ -134,7 +134,7 @@ class DenoiseRestorationBase(ABC):
         shutil.rmtree(model_folder)
 
     @staticmethod
-    def archive_model(source, destination):
+    def archive(source, destination):
         """Archives the model to given destination.
 
         Parameters
@@ -161,7 +161,7 @@ class DenoiseRestorationBase(ABC):
         except shutil.Error as e:
             lprint(e)
 
-    def save_model(self, model_path):
+    def save(self, model_path):
         """Saves the latest trained model next to the input image file.
 
         Parameters
@@ -173,17 +173,18 @@ class DenoiseRestorationBase(ABC):
         self.it.save(model_path)
 
         # Make archive for the model
-        self.archive_model(model_path, os.path.dirname(model_path))
+        self.archive(model_path, os.path.dirname(model_path))
 
         # clean the model folder
         self.clean_model_folder(model_path)
 
-    def load_model(self, model_path: str):
+    def load(self, model_path: str):
         """
 
         Parameters
         ----------
         model_path : str
+            whole path to the model including the model zip name
 
         """
 
