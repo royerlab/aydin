@@ -6,25 +6,36 @@ from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
+from aydin import Classic
 from aydin.io.datasets import normalise, add_noise
 from aydin.io.folders import get_temp_folder
-from aydin.restoration.denoise.base import DenoiseRestorationBase
+from aydin.restoration.denoise.noise2selfcnn import Noise2SelfCNN
+from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
+
+
+def test_saveload_classic_gaussian():
+    saveload(Classic(variant="gaussian"), min_psnr=20, min_ssim=0.71)
+
+
+def test_saveload_noise2selffgr():
+    saveload(Noise2SelfFGR(), min_psnr=20, min_ssim=0.78)
 
 
 def saveload(denoiser, min_psnr=22, min_ssim=0.75):
     image = normalise(camera().astype(numpy.float32))
     noisy = add_noise(image)
 
-    denoiser.train(noisy, noisy)
+    denoiser.train(noisy)
 
-    temp_file = join(get_temp_folder(), "test_it_saveload" + str(time.time()))
+    temp_file = join(get_temp_folder(), "test_restoration_saveload" + str(time.time()))
     print(temp_file)
 
     denoiser.save(temp_file)
+    loaded_denoiser = denoiser.__class__()
+
     del denoiser
 
-    loaded_denoiser = DenoiseRestorationBase()
-    loaded_denoiser.load(temp_file)
+    loaded_denoiser.load(temp_file + ".zip")
 
     denoised = loaded_denoiser.denoise(noisy)
 

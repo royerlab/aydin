@@ -184,6 +184,7 @@ class DenoiseRestorationBase(ABC):
         Parameters
         ----------
         model_path : str
+            whole path to the model including the model zip name
 
         """
 
