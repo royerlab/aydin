@@ -8,6 +8,7 @@ from pathlib import Path
 
 import jsonpickle
 
+from aydin.it.base import ImageTranslatorBase
 from aydin.util.log.log import lprint
 
 
@@ -187,4 +188,5 @@ class DenoiseRestorationBase(ABC):
         """
 
         lprint(f"Loading image translator from: {model_path}")
-        self._load_internals(model_path)
+        shutil.unpack_archive(model_path, os.path.dirname(model_path), "zip")
+        self.it = ImageTranslatorBase.load(model_path[:-4])
