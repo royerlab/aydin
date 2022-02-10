@@ -80,7 +80,7 @@ class DenoiseJobRunner(QWidget):
                         passed_counter=file_counter,
                         output_folder=output_folder,
                     )
-                    self.denoiser.save_model(model_path)
+                    self.denoiser.save(model_path)
                     lprint(f"DONE, trained model written in {model_path}")
 
                 lprint(f"DONE, results written in {output_path}")
