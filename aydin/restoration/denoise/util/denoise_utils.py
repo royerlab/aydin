@@ -4,6 +4,17 @@ from aydin.restoration import denoise
 from aydin.restoration.denoise.base import DenoiseRestorationBase
 
 
+def get_pretrained_denoiser_class_instance(loaded_model_it):
+    pass
+    # if "Classic" in loaded_model_it.__name__:
+    #
+    #
+    # denoiser = denoiser_class()
+    # denoiser.load()
+    #
+    # return denoiser
+
+
 def get_denoiser_class_instance(variant, lower_level_args=None, it_transforms=None):
     """Returns instance of denoiser given a variant name, a set of arguments,
     and a list of transforms.

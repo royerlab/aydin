@@ -11,7 +11,10 @@ from aydin.io.utils import (
     get_options_json_path,
     get_save_model_path,
 )
-from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_instance
+from aydin.restoration.denoise.util.denoise_utils import (
+    get_denoiser_class_instance,
+    get_pretrained_denoiser_class_instance,
+)
 from aydin.util.log.log import Log, lprint
 
 
@@ -140,15 +143,6 @@ class DenoiseJobRunner(QWidget):
 
         self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
 
-        if not self.pretrained:
-            try:
-                self.lower_level_args = self.parent.tabs["Denoise"].lower_level_args
-            except Exception:
-                self.parent.status_bar.showMessage(
-                    "There is a mistake with given parameter values..."
-                )
-                return
-
         self.save_options_json = self.parent.tabs[
             "Denoise"
         ].current_backend_widget.save_json_checkbox.isChecked()
@@ -157,12 +151,26 @@ class DenoiseJobRunner(QWidget):
             "Denoise"
         ].current_backend_widget.save_model_checkbox.isChecked()
 
-        # Initialize required restoration instances
-        self.denoiser = get_denoiser_class_instance(
-            variant=self.denoise_backend,
-            lower_level_args=self.lower_level_args,
-            it_transforms=self.it_transforms,
-        )
+        if self.pretrained:
+            self.denoiser = get_pretrained_denoiser_class_instance(
+                self.parent.tabs["Denoise"].current_backend_widget.loaded_it
+            )
+
+        else:
+            try:
+                lower_level_args = self.parent.tabs["Denoise"].lower_level_args
+            except Exception:
+                self.parent.status_bar.showMessage(
+                    "There is a mistake with given parameter values..."
+                )
+                return
+
+            # Initialize required restoration instances
+            self.denoiser = get_denoiser_class_instance(
+                variant=self.denoise_backend,
+                lower_level_args=lower_level_args,
+                it_transforms=self.it_transforms,
+            )
 
         Log.gui_statusbar = self.parent.parent.statusBar
 
