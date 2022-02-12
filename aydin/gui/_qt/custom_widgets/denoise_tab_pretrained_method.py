@@ -1,5 +1,12 @@
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QScrollArea
+from qtpy.QtWidgets import (
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QLabel,
+    QScrollArea,
+    QCheckBox,
+)
 
 from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
     QVerticalLineBreakWidget,
@@ -12,6 +19,7 @@ class DenoiseTabPretrainedMethodWidget(QWidget):
 
         self.parent = parent
         self.loaded_it = loaded_it
+        self.name = loaded_it.__class__.__name__
         self.description = f"This is a pretrained model, namely uses the image translator: {loaded_it.__class__.__name__}, will not train anything new but will quickly infer on the images of your choice."
 
         # Widget layout
@@ -39,6 +47,21 @@ class DenoiseTabPretrainedMethodWidget(QWidget):
 
         self.right_side_vlayout = QVBoxLayout()
         self.right_side_vlayout.setAlignment(Qt.AlignTop)
+
+        # Checkboxes
+        self.save_json_and_model_layout = QHBoxLayout()
+        self.save_json_and_model_layout.setAlignment(Qt.AlignLeft)
+
+        self.save_json_checkbox = QCheckBox("Save denoising options (JSON)")
+        self.save_json_checkbox.setChecked(True)
+        self.save_json_and_model_layout.addWidget(self.save_json_checkbox)
+        self.save_json_and_model_layout.addWidget(QVerticalLineBreakWidget(self))
+
+        self.save_model_checkbox = QCheckBox("Save the trained model")
+        self.save_model_checkbox.setChecked(True)
+        self.save_json_and_model_layout.addWidget(self.save_model_checkbox)
+
+        self.right_side_vlayout.addLayout(self.save_json_and_model_layout)
 
         self.layout.addLayout(self.tab_method_layout, 35)
         self.layout.addWidget(QVerticalLineBreakWidget(self))

@@ -6,8 +6,6 @@ import shutil
 from abc import abstractmethod, ABC
 from pathlib import Path
 
-import jsonpickle
-
 from aydin.it.base import ImageTranslatorBase
 from aydin.util.log.log import lprint
 
