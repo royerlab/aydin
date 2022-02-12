@@ -9,7 +9,6 @@ from skimage.metrics import structural_similarity as ssim
 from aydin import Classic
 from aydin.io.datasets import normalise, add_noise
 from aydin.io.folders import get_temp_folder
-from aydin.restoration.denoise.noise2selfcnn import Noise2SelfCNN
 from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
 
 
