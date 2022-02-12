@@ -138,25 +138,26 @@ class DenoiseJobRunner(QWidget):
 
         self.pretrained = (
             self.parent.tabs["Denoise"].current_backend_widget.__class__
-            is not DenoiseTabPretrainedMethodWidget
+            is DenoiseTabPretrainedMethodWidget
         )
 
         self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
-
-        self.save_options_json = self.parent.tabs[
-            "Denoise"
-        ].current_backend_widget.save_json_checkbox.isChecked()
-
-        self.save_model = self.parent.tabs[
-            "Denoise"
-        ].current_backend_widget.save_model_checkbox.isChecked()
 
         if self.pretrained:
             self.denoiser = get_pretrained_denoiser_class_instance(
                 self.parent.tabs["Denoise"].current_backend_widget.loaded_it
             )
-
+            self.save_options_json = False
+            self.save_model = False
         else:
+            self.save_options_json = self.parent.tabs[
+                "Denoise"
+            ].current_backend_widget.save_json_checkbox.isChecked()
+
+            self.save_model = self.parent.tabs[
+                "Denoise"
+            ].current_backend_widget.save_model_checkbox.isChecked()
+
             try:
                 lower_level_args = self.parent.tabs["Denoise"].lower_level_args
             except Exception:
