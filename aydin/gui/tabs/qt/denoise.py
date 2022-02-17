@@ -88,27 +88,20 @@ class DenoiseTab(QWidget):
             'Noise2SelfFGR-random_forest',
         ]
 
-        self.basic_backend_options_descriptions = []
+        self.basic_backend_options_descriptions = [
+            description
+            for option, description in zip(
+                self.backend_options, self.backend_options_descriptions
+            )
+            if option in self.basic_backend_options
+        ]
 
         self.stacked_widget = QStackedWidget(self)
 
         default_option_index = 0
-        for idx, (backend_option, description) in enumerate(
-            zip(self.backend_options, self.backend_options_descriptions)
-        ):
-            if backend_option in self.basic_backend_options:
-                self.basic_backend_options_descriptions.append(description)
-
-                self.leftlist.insertItem(idx, backend_option)
-
-                self.stacked_widget.addWidget(
-                    DenoiseTabMethodWidget(
-                        self, name=backend_option, description=description
-                    )
-                )
-
-                if backend_option == "Classic-butterworth":
-                    default_option_index = idx
+        self.refresh_available_backends(
+            self.backend_options, self.backend_options_descriptions
+        )
 
         self.leftlist.item(default_option_index).setSelected(True)
         self.change_current_method(default_option_index)
