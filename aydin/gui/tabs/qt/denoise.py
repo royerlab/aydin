@@ -140,11 +140,6 @@ class DenoiseTab(QWidget):
         return self.stacked_widget.currentWidget().lower_level_args()
 
     def set_advanced_enabled(self, enable: bool = False):
-        self.leftlist.clear()
-
-        while self.stacked_widget.count():
-            self.stacked_widget.removeWidget(self.stacked_widget.widget(0))
-
         if enable:
             options = self.backend_options
             description_list = self.backend_options_descriptions
@@ -152,21 +147,9 @@ class DenoiseTab(QWidget):
             options = self.basic_backend_options
             description_list = self.basic_backend_options_descriptions
 
-        for index, backend_option in enumerate(options):
-            self.leftlist.insertItem(index, backend_option)
-
-            self.stacked_widget.addWidget(
-                DenoiseTabMethodWidget(
-                    self, name=backend_option, description=description_list[index]
-                )
-            )
-
-        for widget_index in range(self.stacked_widget.count()):
-            for key, constructor_arguments_widget in self.stacked_widget.widget(
-                widget_index
-            ).constructor_arguments_widget_dict.items():
-                constructor_arguments_widget.set_advanced_enabled(enable=enable)
-
+        self.refresh_available_backends(
+            options, description_list, advance_mode_enabled=enable
+        )
         self.refresh_pretrained_backends()
 
     def load_pretrained_model(self, pretrained_model_files):
@@ -184,6 +167,34 @@ class DenoiseTab(QWidget):
             shutil.rmtree(file[:-4])
 
         self.refresh_pretrained_backends()
+
+    def refresh_available_backends(
+        self, options, description_list, advance_mode_enabled=False
+    ):
+        # Clear existing entries
+        self.leftlist.clear()
+
+        while self.stacked_widget.count():
+            self.stacked_widget.removeWidget(self.stacked_widget.widget(0))
+
+        # Populate entries
+        for index, backend_option in enumerate(options):
+            self.leftlist.insertItem(index, backend_option)
+
+            self.stacked_widget.addWidget(
+                DenoiseTabMethodWidget(
+                    self, name=backend_option, description=description_list[index]
+                )
+            )
+
+        # Handle toggling between basic and advanced arguments
+        for widget_index in range(self.stacked_widget.count()):
+            for key, constructor_arguments_widget in self.stacked_widget.widget(
+                widget_index
+            ).constructor_arguments_widget_dict.items():
+                constructor_arguments_widget.set_advanced_enabled(
+                    enable=advance_mode_enabled
+                )
 
     def refresh_pretrained_backends(self):
 
