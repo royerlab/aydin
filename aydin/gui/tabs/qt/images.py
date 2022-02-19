@@ -1,4 +1,3 @@
-import pathlib
 import numpy
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
@@ -134,14 +133,7 @@ class ImagesTab(QWidget):
 
         self.image_list_tree_widget.clear()
 
-        for (
-            filename,
-            array,
-            metadata,
-            denoise,
-            path,
-            output_folder,
-        ) in imagelist:
+        for (filename, array, metadata, denoise, path, output_folder) in imagelist:
             qtree_widget_item = QTreeWidgetItem(
                 self.image_list_tree_widget,
                 [

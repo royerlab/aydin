@@ -168,7 +168,7 @@ def denoise(files, **kwargs):
                 passed_counter=index_counter,
                 output_folder=kwargs["output_folder"],
             )
-            denoiser.save_model(model_path)
+            denoiser.save(model_path)
 
         imwrite(denoised, output_path)
         lprint("DONE")
