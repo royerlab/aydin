@@ -48,6 +48,9 @@ Aydin is support only on Python 3.9 currently. You can install Aydin with the fo
 
     pip install aydin
 
+.. image:: https://static.pepy.tech/personalized-badge/aydin?period=total&units=international_system&left_color=black&right_color=blue&left_text=Downloads
+ :target: https://pepy.tech/project/aydin
+
 
 Requirements
 ~~~~~~~~~~~~~
