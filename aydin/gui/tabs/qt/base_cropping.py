@@ -1,5 +1,7 @@
-import napari
 import numpy
+from napari._qt.qt_viewer import QtViewer
+from napari.components.viewer_model import ViewerModel
+
 from aydin.gui._qt.custom_widgets.readmoreless_label import QReadMoreLessLabel
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
@@ -39,10 +41,11 @@ class BaseCroppingTab(QWidget):
         # Image
         self.viewer_layout = QVBoxLayout()
         self.viewer_layout.setAlignment(Qt.AlignTop)
-        self.viewer = napari.Viewer(show=False)
+        self.viewer_model = ViewerModel()
+        self.viewer_qt = QtViewer(self.viewer_model, show_welcome_screen=False)
 
-        self.viewer_layout.addWidget(self.viewer.window.qt_viewer)
-        self.viewer_layout.addWidget(self.viewer.window.qt_viewer.dims)
+        self.viewer_layout.addWidget(self.viewer_qt)
+        self.viewer_layout.addWidget(self.viewer_qt.dims)
         self.viewer_and_sliders_layout.addLayout(self.viewer_layout, 50)
 
         self.cropping_selection_layout = QVBoxLayout()
@@ -156,6 +159,7 @@ class BaseCroppingTab(QWidget):
 
         Returns
         -------
+        Single image in a list
 
         """
         image = self._image[self.crop_selection_slicing_object]
@@ -224,14 +228,14 @@ class BaseCroppingTab(QWidget):
             self.t_crop_slider.setHidden(True)
 
     def initialize_viewer(self):
-        self.viewer.layers.clear()
-        self.viewer.add_image(self._image)
+        self.viewer_model.layers.clear()
+        self.viewer_model.add_image(self._image)
 
-        self.crop_layer = self.viewer.add_image(self.selection_array)
+        self.crop_layer = self.viewer_model.add_image(self.selection_array)
         self.crop_layer.opacity = 0.4
         self.crop_layer.colormap = "cyan"
 
-        for slider_widget in self.viewer.window.qt_viewer.dims.slider_widgets:
+        for slider_widget in self.viewer_qt.dims.slider_widgets:
             slider_widget.layout().itemAt(0).widget().setMinimumWidth(75)
             slider_widget.layout().itemAt(1).widget().setMaximumWidth(75)
             slider_widget.layout().itemAt(1).widget().setText("Play")
@@ -252,7 +256,7 @@ class BaseCroppingTab(QWidget):
         )
 
     def clear_cropping_tab(self):
-        self.viewer.layers.clear()
+        self.viewer_model.layers.clear()
 
         self.summary_nbvoxels_label.setText("Total number of voxels: N/A")
         self.summary_nbytes_label.setText("Total size in bytes: N/A")

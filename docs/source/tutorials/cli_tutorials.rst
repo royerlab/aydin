@@ -64,6 +64,16 @@ to Aydin CLI. One can achieve this as shown below:
    $ aydin denoise image.tif --lower-level-args=image_options.json
 
 
+Also we provide the dimensions tab on Aydin Studio where user can select how
+Aydin should be treating dimensions of the loaded image.  This is also possible
+with Aydin CLI denoise command. An example on how to tell Aydin to treat first
+two dimensions of a four-dimensional image as batch dimensions shown below:
+
+
+.. code-block:: bash
+
+   $ aydin denoise image.tif --batch-axis "[True, True, False, False]"
+
 
 Denoising a single image with a pre-trained Aydin model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -99,23 +109,24 @@ Deconvolving a single image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can use the following line to deconvolve a single image with default
-options.
-
-.. code-block:: bash
-
-   $ aydin lucyrichardson image.tif
-
-
-Using your PSF to deconvolve your image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can use the following line to deconvolve a single image with default
-options and their own psf. Passed psf file assumed to be a single psf image
+options. Passed psf file assumed to be a single psf image
 in a lossless format.
 
 .. code-block:: bash
 
-   $ aydin lucyrichardson image.tiff psf.tif
+   $ aydin lucyrichardson image.tif psf.tif
+
+
+Specifying your own output folder
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use the following lines to specify your desired output folder to
+Aydin for both denoising and deconvolution runs:
+
+.. code-block:: bash
+
+   $ aydin denoise image.tif --output-folder=/PATH/TO/YOUR/FOLDER
+   $ aydin lucyrichardson image.tif  psf.tif --output-folder=/PATH/TO/YOUR/FOLDER
 
 
 

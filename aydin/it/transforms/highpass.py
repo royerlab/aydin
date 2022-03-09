@@ -1,8 +1,6 @@
 import numbers
-
 import numpy
-
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 from scipy.ndimage import median_filter, gaussian_filter
 
 from aydin.it.transforms.base import ImageTransformBase
@@ -85,7 +83,7 @@ class HighpassTransform(ImageTransformBase):
     def __repr__(self):
         return self.__str__()
 
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
 
         with lsection(
             f"Applies high-pass filter of sigma {self.sigma} {'and median filtering' if self.median_filtering else ''} to array of shape: {array.shape} and dtype: {array.dtype}"
@@ -108,7 +106,7 @@ class HighpassTransform(ImageTransformBase):
 
             return new_array
 
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
 
         if not self.do_postprocess:
             return array
@@ -133,7 +131,7 @@ class HighpassTransform(ImageTransformBase):
 
             return new_array
 
-    def _low_pass_filtering(self, array):
+    def _low_pass_filtering(self, array: ArrayLike):
 
         lprint(f"Sigma for high-pass filter is: {self.sigma}")
 

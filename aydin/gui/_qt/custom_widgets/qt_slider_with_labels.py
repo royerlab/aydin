@@ -1,4 +1,5 @@
 from qtpy.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
+
 from aydin.gui._qt.custom_widgets.qt_range_slider import QHRangeSlider
 
 

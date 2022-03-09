@@ -5,6 +5,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
+    QFileDialog,
     QTabWidget,
     QApplication,
     QStyle,
@@ -40,10 +41,11 @@ class MainPage(QWidget):
 
     """
 
-    def __init__(self, parent, threadpool):
+    def __init__(self, parent, threadpool, status_bar):
         super(QWidget, self).__init__(parent)
         self.parent = parent
         self.threadpool = threadpool
+        self.status_bar = status_bar
 
         self.setAcceptDrops(True)
 
@@ -243,6 +245,23 @@ class MainPage(QWidget):
             not self.tabs["Training Crop"].use_same_crop_checkbox.isChecked(),
         )
 
+    def toggle_basic_advanced_mode(self):
+        # make calls to toggle the GUI at lower levels
+        self.tabs["Pre/Post-Processing"].set_advanced_enabled(
+            self.parent.advancedModeButton.isEnabled()
+        )
+        self.tabs["Denoise"].set_advanced_enabled(
+            self.parent.advancedModeButton.isEnabled()
+        )
+
+        # swap the enabled state of  `basic` and `advanced` menu items
+        self.parent.basicModeButton.setEnabled(
+            not self.parent.basicModeButton.isEnabled()
+        )
+        self.parent.advancedModeButton.setEnabled(
+            not self.parent.advancedModeButton.isEnabled()
+        )
+
     def add_activity_dockable(self):
         self.activity_dock.setHidden(True)
         self.parent.addDockWidget(Qt.BottomDockWidgetArea, self.activity_dock)
@@ -287,16 +306,27 @@ class MainPage(QWidget):
 
     def save_options_json(self, path=None):
         args_dict = self.tabs["Denoise"].lower_level_args
+        args_dict["processing"] = self.tabs["Pre/Post-Processing"].transforms
 
         if path is None:
             image_paths = [
-                get_options_json_path(i[5]) for i in self.data_model.images_to_denoise
+                get_options_json_path(i[4]) for i in self.data_model.images_to_denoise
             ]
         else:
             image_paths = [path]
 
         for path in image_paths:
             save_any_json(args_dict, path)
+
+    def load_pretrained_model(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        files, _ = QFileDialog.getOpenFileNames(
+            self, "Open File(s)", "", "All Files (*)", options=options
+        )
+
+        if files:
+            self.tabs["Denoise"].load_pretrained_model(pretrained_model_files=files)
 
     def filestab_changed(self):
         self.tabs["File(s)"].on_data_model_update()

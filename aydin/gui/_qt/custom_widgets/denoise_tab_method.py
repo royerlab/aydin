@@ -88,7 +88,7 @@ class DenoiseTabMethodWidget(QWidget):
         for component in list(args.keys()):
             sub_dict = args[component]
 
-            self.constructor_arguments_widget = ConstructorArgumentsWidget(
+            constructor_arguments_widget = ConstructorArgumentsWidget(
                 self,
                 arg_names=sub_dict["arguments"],
                 arg_defaults=sub_dict["defaults"],
@@ -97,8 +97,8 @@ class DenoiseTabMethodWidget(QWidget):
             )
             self.constructor_arguments_widget_dict[
                 component
-            ] = self.constructor_arguments_widget
-            self.table_and_panes_layout.addWidget(self.constructor_arguments_widget)
+            ] = constructor_arguments_widget
+            self.table_and_panes_layout.addWidget(constructor_arguments_widget)
             self.table_and_panes_layout.setSpacing(0)
             self.table_and_panes_layout.setAlignment(Qt.AlignTop)
 

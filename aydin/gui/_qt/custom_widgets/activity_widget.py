@@ -13,23 +13,16 @@ from aydin.util.log.log import Log, lprint
 
 
 class ActivityWidget(QWidget):
-    """Qt dialog window for displaying 'About napari' information.
+    """Qt dialog window for displaying logs.
+
     Attributes
     ----------
-    citationCopyButton : napari._qt.qt_about.QtCopyToClipboardButton
-        Button to copy citation information to the clipboard.
-    citationTextBox : qtpy.QtWidgets.QTextEdit
-        Text box containing napari citation information.
-    citation_layout : qtpy.QtWidgets.QHBoxLayout
-        Layout widget for napari citation information.
-    infoCopyButton : napari._qt.qt_about.QtCopyToClipboardButton
-        Button to copy napari version information to the clipboard.
     info_layout : qtpy.QtWidgets.QHBoxLayout
-        Layout widget for napari version information.
+        Layout widget.
     infoTextBox : qtpy.QtWidgets.QTextEdit
-        Text box containing napari version information.
+        Text box.
     widget_layout : qtpy.QtWidgets.QVBoxLayout
-        Layout widget for the entire 'About napari' dialog.
+        Layout widget for the entire the dialog.
     """
 
     def __init__(self, parent):
@@ -38,14 +31,14 @@ class ActivityWidget(QWidget):
         self.parent = parent
 
         self.widget_layout = QVBoxLayout()
-        self.setMinimumHeight(120)  # if platform.system() == "Darwin" else 240)
+        self.setMinimumHeight(120)
 
         # Add information
         self.infoTextBox = QTextEdit(lineWrapMode=QTextEdit.NoWrap)
 
         # We are using an empty press event otherwise cursor jumps to the point clicked
         self.infoTextBox.mousePressEvent = self.qtextedit_mousepressevent
-        self.set_auto_scrool()
+        self.set_auto_scroll()
 
         Log.gui_print = self.activity_print
 
@@ -56,9 +49,9 @@ class ActivityWidget(QWidget):
         self.info_clear_button.clicked.connect(self.clear_activity)
         self.info_save_button = QPushButton("Save")
         self.info_save_button.clicked.connect(self.save_activity)
-        self.autoscrool_checkbox = QCheckBox("Auto Scroll")
-        self.autoscrool_checkbox.setChecked(True)
-        self.autoscrool_checkbox.stateChanged.connect(
+        self.autoscroll_checkbox = QCheckBox("Auto Scroll")
+        self.autoscroll_checkbox.setChecked(True)
+        self.autoscroll_checkbox.stateChanged.connect(
             self.handle_autoscroll_checkbox_state_changed
         )
 
@@ -69,7 +62,7 @@ class ActivityWidget(QWidget):
         self.info_buttons_layout.addWidget(self.info_copy_button, 0, Qt.AlignTop)
         self.info_buttons_layout.addWidget(self.info_clear_button, 0, Qt.AlignTop)
         self.info_buttons_layout.addWidget(self.info_save_button, 0, Qt.AlignTop)
-        self.info_buttons_layout.addWidget(self.autoscrool_checkbox, 0, Qt.AlignTop)
+        self.info_buttons_layout.addWidget(self.autoscroll_checkbox, 0, Qt.AlignTop)
         self.info_layout.addLayout(self.info_buttons_layout)
         self.info_layout.setAlignment(Qt.AlignTop)
         self.widget_layout.addLayout(self.info_layout)
@@ -87,12 +80,12 @@ class ActivityWidget(QWidget):
         self.infoTextBox.clear()
 
     def handle_autoscroll_checkbox_state_changed(self):
-        if self.autoscrool_checkbox.isChecked():
-            self.set_auto_scrool()
+        if self.autoscroll_checkbox.isChecked():
+            self.set_auto_scroll()
         else:
             self.infoTextBox.verticalScrollBar().rangeChanged.disconnect()
 
-    def set_auto_scrool(self):
+    def set_auto_scroll(self):
         self.infoTextBox.verticalScrollBar().rangeChanged.connect(
             lambda min, max: self.infoTextBox.verticalScrollBar().setSliderPosition(max)
         )
@@ -121,4 +114,5 @@ class ActivityWidget(QWidget):
             logfile.write(log_string)
 
     def qtextedit_mousepressevent(self, event):
+        # We are using an empty press event otherwise cursor jumps to the point clicked
         pass

@@ -1,6 +1,6 @@
 import numpy
 
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 from numpy import sort
 from scipy.ndimage import uniform_filter
 
@@ -114,7 +114,7 @@ class SaltPepperTransform(ImageTransformBase):
     def __repr__(self):
         return self.__str__()
 
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
 
         with lsection(
             f"Broken Pixels Correction for array of shape: {array.shape} and dtype: {array.dtype}:"
@@ -136,12 +136,12 @@ class SaltPepperTransform(ImageTransformBase):
 
             return array
 
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
         # undoing this transform is unpractical and unlikely to be usefull
         array = array.astype(self._original_dtype, copy=False)
         return array
 
-    def _repeated_value_method(self, array):
+    def _repeated_value_method(self, array: ArrayLike):
         with lsection(
             "Correcting for wrong pixels values using the 'repeated-value' approach:"
         ):
@@ -292,7 +292,7 @@ class SaltPepperTransform(ImageTransformBase):
         return median, error
 
 
-def _otsu_split(array):
+def _otsu_split(array: ArrayLike):
     # Flatten array:
     shape = array.shape
     array = array.reshape(-1)

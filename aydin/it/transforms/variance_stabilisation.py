@@ -1,7 +1,7 @@
 import numpy
 from numba import jit
 
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 from sklearn.base import TransformerMixin
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer
 
@@ -94,7 +94,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
     def __repr__(self):
         return self.__str__()
 
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
 
         with lsection(
             f"Stabilising variance ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
@@ -185,7 +185,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
 
             return new_array
 
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
 
         if not self.do_postprocess:
             return array

@@ -52,8 +52,6 @@ class PreviewJobRunner(QWidget):
         )
 
     def thread_complete(self):
-        # Turn the overlay off
-        # self.parent.overlay.hide()
         self.start_button.setEnabled(True)
 
         if self.preprocessed != [] and self.postprocessed != []:
@@ -92,9 +90,6 @@ class PreviewJobRunner(QWidget):
 
         # Show activity widget
         self.parent.parent.parent.parent.activity_dock.setHidden(False)
-
-        # Turn the overlay on
-        # self.parent.parent.parent.parent.overlay.show()
 
         # Pass the function to execute
         worker = Worker(

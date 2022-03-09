@@ -3,7 +3,7 @@ from typing import Union, Sequence
 import numpy
 from numba import jit
 
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 
 from aydin.it.transforms.base import ImageTransformBase
 from aydin.util.log.log import lsection, lprint
@@ -80,7 +80,7 @@ class AttenuationTransform(ImageTransformBase):
     def __repr__(self):
         return self.__str__()
 
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
 
         with lsection(
             f"Correcting attenuation for array of shape: {array.shape} and dtype: {array.dtype}:"
@@ -152,7 +152,7 @@ class AttenuationTransform(ImageTransformBase):
         else:
             raise ValueError(f"Mode '{self.mode}' for attenuation correction unknown!")
 
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
 
         if not self.do_postprocess:
             return array

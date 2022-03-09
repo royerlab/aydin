@@ -1,6 +1,6 @@
 import numpy
 
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 
 from aydin.it.transforms.base import ImageTransformBase
 from aydin.util.log.log import lsection, lprint
@@ -18,7 +18,7 @@ class DeskewTransform(ImageTransformBase):
     per plane - must be an integer. We automatically snap the delta value to the closest integer. Padding is supported.
 
     Note: this only works for images with at least 3 dimensions. Does nothing
-    on images with less than 3 dimensions.
+    on images with less than 3 dimensions.(advanced)
     """
 
     preprocess_description = "Deskew image" + ImageTransformBase.preprocess_description
@@ -82,7 +82,7 @@ class DeskewTransform(ImageTransformBase):
     def __repr__(self):
         return self.__str__()
 
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
         with lsection(
             f"Deskewing (delta={self.delta}, z_axis={self.z_axis}, skew_axis={self.skew_axis}, pad={self.pad}) array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
@@ -91,7 +91,7 @@ class DeskewTransform(ImageTransformBase):
             else:
                 return array
 
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
         if not self.do_postprocess:
             return array
         with lsection(
@@ -102,7 +102,7 @@ class DeskewTransform(ImageTransformBase):
             else:
                 return array
 
-    def deskew(self, array, pad_mode='wrap'):
+    def deskew(self, array: ArrayLike, pad_mode='wrap'):
         array = self._permutate(array)
         array = self._skew_transform(
             array, self.delta, pad=True, crop=False, pad_mode=pad_mode
@@ -110,7 +110,7 @@ class DeskewTransform(ImageTransformBase):
         array = self._depermutate(array)
         return array
 
-    def reskew(self, array):
+    def reskew(self, array: ArrayLike):
         array = self._permutate(array)
         array = self._skew_transform(
             array, -self.delta, pad=False, crop=True, pad_mode=''
@@ -118,17 +118,17 @@ class DeskewTransform(ImageTransformBase):
         array = self._depermutate(array)
         return array
 
-    def _permutate(self, array):
+    def _permutate(self, array: ArrayLike):
         permutation = self._get_permutation(array)
         array = numpy.transpose(array, axes=permutation)
         return array
 
-    def _depermutate(self, array):
+    def _depermutate(self, array: ArrayLike):
         permutation = self._get_permutation(array, inverse=True)
         array = numpy.transpose(array, axes=permutation)
         return array
 
-    def _get_permutation(self, array, inverse=False):
+    def _get_permutation(self, array: ArrayLike, inverse=False):
         permutation = (self.z_axis, self.skew_axis) + tuple(
             axis
             for axis in range(array.ndim)
@@ -139,7 +139,7 @@ class DeskewTransform(ImageTransformBase):
         return permutation
 
     @staticmethod
-    def _skew_transform(array, delta, pad, crop, pad_mode='wrap'):
+    def _skew_transform(array: ArrayLike, delta, pad, crop, pad_mode='wrap'):
         """
         This method assumes that the first dimension (index=0) is the z dimension,
         and the second dimension (index=1) is the 'skewed' dimension.
