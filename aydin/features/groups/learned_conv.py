@@ -7,6 +7,9 @@ from aydin.features.groups.extract_kernels import extract_kernels
 class LearnedConvolutionalFeatures(ConvolutionalFeatures):
     """
     Learned Convolutions Feature Group class
+
+    Generates features by learning convolutional filters on the basis of the
+    image itself.
     """
 
     def __init__(
@@ -16,12 +19,16 @@ class LearnedConvolutionalFeatures(ConvolutionalFeatures):
         num_patches: Union[int, float] = 1e5,
     ):
         """
+        Constructor that configures these features.
 
         Parameters
         ----------
-        size
-        num_kernels
-        num_patches
+        size : int
+            Filter size
+        num_kernels : Optional[int]
+            Number of kernels (filters)
+        num_patches : Union[int, float]
+            Number of patches used for learning the kernels.
         """
         super().__init__(kernels=None)
         self.size = size

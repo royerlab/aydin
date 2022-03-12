@@ -10,14 +10,18 @@ from aydin.util.log.log import lprint
 class MedianFeatures(FeatureGroupBase):
     """
     Median Feature Group class
+
+    Generates features by applying median filters of increasing sizes (radii).
     """
 
     def __init__(self, radii: Sequence[int]):
         """
+        Constructor that configures these features.
 
         Parameters
         ----------
-        radii
+        radii : Sequence[int]
+            Sequence of radii to be used for the median filters.
         """
         super().__init__()
         self.radii = tuple(radii)

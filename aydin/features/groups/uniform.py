@@ -6,6 +6,7 @@ import numexpr
 import numpy
 from numba import jit, cuda
 from numba.cuda import CudaSupportError
+from numpy.typing import ArrayLike
 
 from aydin.features.groups.base import FeatureGroupBase
 
@@ -27,41 +28,78 @@ def _remove_duplicates(seq):
 class UniformFeatures(FeatureGroupBase):
     """
     Uniform Feature Group class
+
+    Computes 'uniform' features that are obtained by summing up the
+    values of voxels over nD rectangular blocks of voxels.The blocks are
+    defined relative to each voxel. These features can have different scales
+    (size), shapes (aspect ratios), and offsets (shifts relative to the center
+    voxel).
     """
 
     def __init__(
         self,
-        kernel_widths=None,
-        kernel_scales=None,
-        kernel_shapes=None,
-        min_level=0,
-        max_level=13,
-        include_scale_one=False,
-        include_fine_features=True,
-        include_corner_features=False,
-        include_line_features=False,
-        decimate_large_scale_features=True,
-        extend_large_scale_features=False,
-        scale_one_width=3,
+        kernel_widths: ArrayLike = None,
+        kernel_scales: ArrayLike = None,
+        kernel_shapes: ArrayLike = None,
+        min_level: int = 0,
+        max_level: int = 13,
+        scale_one_width: int = 3,
+        include_scale_one: bool = False,
+        include_fine_features: bool = True,
+        include_corner_features: bool = False,
+        include_line_features: bool = False,
+        decimate_large_scale_features: bool = True,
+        extend_large_scale_features: bool = False,
         dtype=numpy.float32,
     ):
         """
+        Constructor that configures these features.
 
         Parameters
         ----------
-        kernel_widths
-        kernel_scales
-        kernel_shapes
-        min_level
-        max_level
-        include_scale_one
-        include_fine_features
-        include_corner_features
-        include_line_features
-        decimate_large_scale_features
-        extend_large_scale_features
-        scale_one_width
+
+        kernel_widths : numpy.typing.ArrayLike
+            ArrayLike of kernel widths.
+
+        kernel_scales : numpy.typing.ArrayLike
+            ArrayLike of kernel scales.
+
+        kernel_shapes : numpy.typing.ArrayLike
+            ArrayLike of kernel shapes.
+
+        min_level : int
+            Minimum scale level of features to include
+            (advanced)
+        max_level : int
+            Maximum scale level of features to include
+        scale_one_width : int
+            Width of the scale one features
+            (advanced)
+        include_scale_one : bool
+            True or False, argument to set decision
+            on inclusion of scale-one-features
+            (advanced)
+        include_fine_features : bool
+            True or False, argument to set decision
+            on inclusion of fine features
+        include_corner_features : bool
+            True or False, argument to set decision
+            on inclusion of corner features
+        include_line_features : bool
+            True or False, argument to set decision
+            on inclusion of line features
+        decimate_large_scale_features : bool
+            True or False, argument to set decision
+            on decimation of large scale features
+            (advanced)
+        extend_large_scale_features : bool
+            True or False, argument to set decision
+            on extension of large scale features.
+            (advanced)
         dtype
+            Datatype of the features
+            (advanced)
+
         """
         super().__init__()
 
