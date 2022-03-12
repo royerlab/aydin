@@ -217,14 +217,14 @@ class LGBMRegressor(RegressorBase):
 
 class _LGBMModel:
     def __init__(self, model, gpu_prediction, loss_history):
-        self.model = model
+        self.model: Booster = model
         self.gpu_prediction = gpu_prediction
         self.loss_history = loss_history
 
     def _save_internals(self, path: str):
         if self.model is not None:
             lgbm_model_file = join(path, 'lgbm_model.txt')
-            self.model.save(lgbm_model_file)
+            self.model.save_model(lgbm_model_file)
 
     def _load_internals(self, path: str):
         lgbm_model_file = join(path, 'lgbm_model.txt')

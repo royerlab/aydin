@@ -75,7 +75,7 @@ def demo_optimizer_beale():
     print(f"RESULT : x,v={x, v}")
     print(f"OPTIMUM:   x={3, 0.5}")
 
-    assert v > -1e-3
+    assert v > -1e-2
 
     # assert numpy.allclose(x, [3, 0.5], atol=1e-1)
 
