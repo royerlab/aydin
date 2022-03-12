@@ -66,12 +66,15 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
         include_fine_features : bool
             True or False, argument to set decision
             on inclusion of fine features
+            (advanced)
         include_corner_features : bool
             True or False, argument to set decision
             on inclusion of corner features
+            (advanced)
         include_line_features : bool
             True or False, argument to set decision
             on inclusion of line features
+            (advanced)
         decimate_large_scale_features : bool
             True or False, argument to set decision
             on decimation of large scale features
@@ -82,7 +85,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             (advanced)
         include_spatial_features : bool
             True or False, argument to set decision
-            on inclusion of spatial features
+            on inclusion of spatial features.
         spatial_features_coarsening : int
             Degree of coarsening to apply on spatial features
             to prevent identification of individual pixel values
@@ -93,6 +96,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
         include_median_features : bool
             True or False, argument to set decision
             on inclusion of median features
+            (advanced)
         include_dct_features : bool
             True or False, argument to set decision
             on inclusion of dct features

@@ -29,10 +29,9 @@ class ConstructorArgumentsWidget(QWidget):
         self.arguments_layout.setAlignment(Qt.AlignTop)
 
         for index, (name, default_value) in enumerate(zip(arg_names, arg_defaults)):
-            param_label = QLabel(f"{name.strip().replace('_', ' ')}: ")
-            param_label.setToolTip(
-                f"{self.annonation_prettifier(arg_annotations[name])}"
-            )
+            param_name = name.strip().replace('_', ' ')
+            param_label = QLabel(f"{param_name}: ")
+            param_label.setToolTip(f"{param_name}")
 
             if default_value is None:
                 default_value = "auto"
@@ -46,7 +45,7 @@ class ConstructorArgumentsWidget(QWidget):
                 param_linedit = QLineEdit(str(default_value), self)
 
             param_linedit.setToolTip(
-                f"{self.annonation_prettifier(arg_annotations[name])}"
+                f"{self.annotation_prettifier(arg_annotations[name])}"
             )
 
             if inspect.isclass(reference_class):
@@ -90,7 +89,7 @@ class ConstructorArgumentsWidget(QWidget):
         self.setLayout(self.arguments_layout)
 
     @staticmethod
-    def annonation_prettifier(annotation):
+    def annotation_prettifier(annotation):
         if "'int'" in str(annotation):
             return "int"
         elif "'float'" in str(annotation):
