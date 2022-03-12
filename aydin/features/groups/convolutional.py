@@ -14,6 +14,12 @@ class ConvolutionalFeatures(FeatureGroupBase):
     """
 
     def __init__(self, kernels: Optional[Sequence[ndarray]]):
+        """
+
+        Parameters
+        ----------
+        kernels
+        """
         super().__init__()
         self.kernels = kernels if kernels is None else list(kernels)
         self.image = None

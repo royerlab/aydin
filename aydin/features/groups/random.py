@@ -13,6 +13,13 @@ class RandomFeatures(ConvolutionalFeatures):
     """
 
     def __init__(self, size: int, num_features: Optional[int] = None):
+        """
+
+        Parameters
+        ----------
+        size
+        num_features
+        """
         super().__init__(kernels=None)
         self.size = size
         self._num_features = num_features

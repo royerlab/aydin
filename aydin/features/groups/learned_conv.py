@@ -15,6 +15,14 @@ class LearnedConvolutionalFeatures(ConvolutionalFeatures):
         num_kernels: Optional[int],
         num_patches: Union[int, float] = 1e5,
     ):
+        """
+
+        Parameters
+        ----------
+        size
+        num_kernels
+        num_patches
+        """
         super().__init__(kernels=None)
         self.size = size
         self.num_kernels = num_kernels

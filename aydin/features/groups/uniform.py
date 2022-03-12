@@ -45,6 +45,24 @@ class UniformFeatures(FeatureGroupBase):
         scale_one_width=3,
         dtype=numpy.float32,
     ):
+        """
+
+        Parameters
+        ----------
+        kernel_widths
+        kernel_scales
+        kernel_shapes
+        min_level
+        max_level
+        include_scale_one
+        include_fine_features
+        include_corner_features
+        include_line_features
+        decimate_large_scale_features
+        extend_large_scale_features
+        scale_one_width
+        dtype
+        """
         super().__init__()
 
         # Setting up default features:

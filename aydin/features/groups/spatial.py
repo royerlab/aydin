@@ -7,6 +7,13 @@ from aydin.util.log.log import lprint
 
 class SpatialFeatures(FeatureGroupBase):
     def __init__(self, coarsening: int = 1, period: float = 0):
+        """
+
+        Parameters
+        ----------
+        coarsening
+        period
+        """
         super().__init__()
 
         self.coarsening = coarsening

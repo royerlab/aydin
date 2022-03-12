@@ -16,7 +16,7 @@ from aydin.util.offcore.offcore import offcore_array
 
 class ImageTranslatorFGR(ImageTranslatorBase):
     """
-    Feature Generation & Regression (FGR) based Image TranslatorFGR Image Translator
+    Feature Generation & Regression (FGR) based Image TranslatorFGR Image Translator.
     """
 
     feature_generator: FeatureGeneratorBase
@@ -43,8 +43,10 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         balance_training_data : bool
             Limits number training entries per target
             value histogram bin.
+            (advanced)
         voxel_keep_ratio : float
             Ratio of the voxels to keep for training.
+            (advanced)
         max_voxels_for_training : int, optional
             Maximum number of the voxels that can be
             used for training.
@@ -55,8 +57,10 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             Keyword arguments.
         max_memory_usage_ratio : float
             Maximum allowed memory load.
+            (advanced)
         max_tiling_overhead : float
             Maximum allowed margin overhead during tiling.
+            (advanced)
         """
         super().__init__(**kwargs)
 

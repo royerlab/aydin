@@ -13,7 +13,7 @@ from aydin.regression.base import RegressorBase
 from aydin.regression.cb import CBRegressor
 from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.linear import LinearRegressor
-from aydin.regression.nn import NNRegressor
+from aydin.regression.perceptron import PerceptronRegressor
 from aydin.regression.random_forest import RandomForestRegressor
 from aydin.regression.support_vector import SupportVectorRegressor
 
@@ -39,7 +39,7 @@ def test_cb_saveload():
 
 
 def test_nn_saveload():
-    saveload(NNRegressor(max_epochs=10), min_ssim=0.71)
+    saveload(PerceptronRegressor(max_epochs=10), min_ssim=0.71)
 
 
 def saveload(regressor, min_ssim=0.80):

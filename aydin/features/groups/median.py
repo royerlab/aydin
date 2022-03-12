@@ -13,6 +13,12 @@ class MedianFeatures(FeatureGroupBase):
     """
 
     def __init__(self, radii: Sequence[int]):
+        """
+
+        Parameters
+        ----------
+        radii
+        """
         super().__init__()
         self.radii = tuple(radii)
         self.image = None

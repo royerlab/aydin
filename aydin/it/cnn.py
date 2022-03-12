@@ -52,25 +52,33 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         ----------
         training_architecture : str
             'shiftconv' or 'checkerbox' or 'random' or 'checkran' architecture
+            (advanced)
         model_architecture : str
             'unet' or 'jinet'
         batch_size : int
             Batch size for training
         nb_unet_levels : int
             Number of layers
+            (advanced)
         batch_norm
             Type of batch normalization (e.g. batch, instance)
-        activation
+            (advanced)
+        activation :
+            (advanced)
         patch_size : int
             Size for patch sample e.g. 64 for (64, 64) or (64, 64, 64)
+            (advanced)
         total_num_patches
             Total number of patches for training
+            (advanced)
         adoption_rate
-            % of random patches will be used for training, the rest will be discarded
+            Percentage of random patches will be used for training, the rest will be discarded
         mask_size
             Mask shape for masking architecture; int of the same size as the spatial dimension
+            (advanced)
         random_mask_ratio
             Probability of masked pixels in random masking approach
+            (advanced)
         max_epochs : int
             Maximum number of epochs allowed
         patience : int

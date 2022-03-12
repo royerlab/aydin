@@ -12,6 +12,12 @@ class TranslationFeatures(FeatureGroupBase):
     """
 
     def __init__(self, translations: Sequence[Tuple[int, ...]]):
+        """
+
+        Parameters
+        ----------
+        translations
+        """
         super().__init__()
         self.translations = list(translations)
         self.image = None

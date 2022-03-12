@@ -11,6 +11,14 @@ class DCTFeatures(ConvolutionalFeatures):
     """
 
     def __init__(self, size: int, max_freq: float = 0.75, power: float = 0.5):
+        """
+
+        Parameters
+        ----------
+        size
+        max_freq
+        power
+        """
         super().__init__(kernels=None)
         self.size = size
         self.max_freq = max_freq
