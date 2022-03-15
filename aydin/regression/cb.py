@@ -15,7 +15,7 @@ from aydin.util.log.log import lsection, lprint
 
 class CBRegressor(RegressorBase):
     """
-    The CatBoost Regressor uses the gradient boosting library
+    The CatBoost Regressor uses the gradient boosting library <a
     href="https://github.com/catboost">CatBoost</a> to perform regression
     from a set of feature vectors and target values. CatBoost main advantage
     is that it is very fast compared to other gradient boosting libraries --
