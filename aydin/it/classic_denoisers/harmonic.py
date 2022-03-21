@@ -24,6 +24,7 @@ def calibrate_denoise_harmonic(
     crop_size_in_voxels: Optional[int] = None,
     max_num_evaluations: int = 16,
     display_images: bool = False,
+    display_crop: bool = False,
     **other_fixed_parameters,
 ):
     """
@@ -51,6 +52,10 @@ def calibrate_denoise_harmonic(
     display_images: bool
         When True the denoised images encountered during optimisation are shown
 
+    display_crop: bool
+        Displays crop, for debugging purposes...
+        (advanced)
+
     other_fixed_parameters: dict
         Any other fixed parameters
 
@@ -64,7 +69,9 @@ def calibrate_denoise_harmonic(
     image = image.astype(dtype=numpy.float32, copy=False)
 
     # obtain representative crop, to speed things up...
-    crop = representative_crop(image, crop_size=crop_size_in_voxels)
+    crop = representative_crop(
+        image, crop_size=crop_size_in_voxels, display_crop=display_crop
+    )
 
     # alpha range:
     # alpha_range = numpy.concatenate(

@@ -13,6 +13,7 @@ def calibrate_denoise_gm(
     crop_size_in_voxels: Optional[int] = 128000,
     max_num_evaluations: int = 320,
     display_images: bool = False,
+    display_crop: bool = False,
     **other_fixed_parameters,
 ):
     """
@@ -39,6 +40,10 @@ def calibrate_denoise_gm(
     display_images: bool
         When True the denoised images encountered during optimisation are shown
 
+    display_crop: bool
+        Displays crop, for debugging purposes...
+        (advanced)
+
     other_fixed_parameters: dict
         Any other fixed parameters
 
@@ -52,7 +57,9 @@ def calibrate_denoise_gm(
     image = image.astype(dtype=numpy.float32, copy=False)
 
     # obtain representative crop, to speed things up...
-    crop = representative_crop(image, crop_size=crop_size_in_voxels)
+    crop = representative_crop(
+        image, crop_size=crop_size_in_voxels, display_crop=display_crop
+    )
 
     # Size range:
     filter_size_range = [3, 5, 7]

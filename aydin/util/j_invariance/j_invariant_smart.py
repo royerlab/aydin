@@ -18,7 +18,7 @@ def calibrate_denoiser_smart(
     image,
     denoise_function: Callable,
     denoise_parameters: Dict[str, Union[Tuple[float, float], List[Any]]],
-    mode: str = 'l-bfgs-b',
+    mode: str = 'scipy',  #'smart', #
     max_num_evaluations: int = 128,
     patience: int = 64,
     stride: int = 4,
@@ -179,7 +179,7 @@ def calibrate_denoiser_smart(
 
                             pass
 
-                    if mode == "l-bfgs-b":
+                    if mode == "scipy":
                         with lsection(
                             f"Searching by SHGO followed by L-BFGS-B the best denoising parameters among: {numerical_parameters}"
                         ):
@@ -212,6 +212,7 @@ def calibrate_denoiser_smart(
                             lprint(
                                 f"Global optimisation number of function evaluations: {result.nfev}"
                             )
+                            lprint(f"Best parameters until now: {result.x}")
 
                             # starting point for next ioptimkisation round is result of previous step:
                             x0 = result.x

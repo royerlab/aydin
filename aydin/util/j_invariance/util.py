@@ -2,7 +2,7 @@ import itertools
 
 import numpy
 from numpy import zeros_like
-from scipy.ndimage import generate_binary_structure, convolve
+from scipy.ndimage import convolve, gaussian_filter
 
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
 
@@ -47,7 +47,9 @@ def _invariant_denoise(image, denoise_function, mask, *, denoiser_kwargs=None):
 
 def _interpolate_image(image):
 
-    conv_filter = generate_binary_structure(image.ndim, 1).astype(image.dtype)
+    conv_filter = numpy.zeros(shape=(3,) * image.ndim, dtype=image.dtype)
+    conv_filter.ravel()[conv_filter.size // 2] = 1
+    conv_filter = gaussian_filter(conv_filter, sigma=0.5)
     conv_filter.ravel()[conv_filter.size // 2] = 0
     conv_filter /= conv_filter.sum()
 

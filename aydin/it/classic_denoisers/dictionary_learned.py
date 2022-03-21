@@ -34,6 +34,7 @@ def calibrate_denoise_dictionary_learned(
     crop_size_in_voxels: Optional[int] = None,
     display_dictionary: bool = False,
     display_images: bool = False,
+    display_crop: bool = False,
     **other_fixed_parameters,
 ):
     """
@@ -153,6 +154,10 @@ def calibrate_denoise_dictionary_learned(
         When True the denoised images encountered
         during optimisation are shown.
 
+    display_crop: bool
+        Displays crop, for debugging purposes...
+        (advanced)
+
     other_fixed_parameters: dict
         Any other fixed parameters
 
@@ -168,7 +173,9 @@ def calibrate_denoise_dictionary_learned(
     patch_size = default_patch_size(image, patch_size, odd=True)
 
     # obtain representative crop, to speed things up...
-    crop = representative_crop(image, crop_size=crop_size_in_voxels)
+    crop = representative_crop(
+        image, crop_size=crop_size_in_voxels, display_crop=display_crop
+    )
 
     # algorithms to try for generation of dictionaries:
     algorithms = []

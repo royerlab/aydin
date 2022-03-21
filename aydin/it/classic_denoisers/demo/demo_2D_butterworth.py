@@ -28,12 +28,7 @@ def demo_butterworth(image, display=True):
     Log.enable_output = True
     Log.set_log_max_depth(6)
 
-    #    image, _  = imread('/mnt/raid0/aydin_datasets/_example_datasets_for_use_cases/Gauss.png')
-
     image = normalise(image.astype(np.float32))
-
-    # Butterworth denoising works best when the images are band-limited, sop we simulate that:
-    # image = gaussian_filter(image, sigma=0.5)
 
     # we add noise:
     noisy = add_noise(image)
@@ -64,9 +59,9 @@ def demo_butterworth(image, display=True):
 
 
 if __name__ == "__main__":
-    demo_butterworth(camera())
     demo_butterworth(pollen())
+    demo_butterworth(dots())
     demo_butterworth(newyork())
     demo_butterworth(characters())
     demo_butterworth(lizard())
-    demo_butterworth(dots())
+    demo_butterworth(camera())

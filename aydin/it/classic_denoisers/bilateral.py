@@ -14,6 +14,7 @@ def calibrate_denoise_bilateral(
     bins: int = 10000,
     crop_size_in_voxels: Optional[int] = None,
     display_images: bool = False,
+    display_crop: bool = False,
     **other_fixed_parameters,
 ):
     """
@@ -32,14 +33,21 @@ def calibrate_denoise_bilateral(
         Number of discrete values for Gaussian weights of
         color filtering. A larger value results in improved
         accuracy.
+        (advanced)
 
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate
         denoiser.
+        (advanced)
 
     display_images: bool
         When True the denoised images encountered during
         optimisation are shown
+        (advanced)
+
+    display_crop: bool
+        Displays crop, for debugging purposes...
+        (advanced)
 
     other_fixed_parameters: dict
         Any other fixed parameters
@@ -53,7 +61,9 @@ def calibrate_denoise_bilateral(
     image = image.astype(dtype=numpy.float32, copy=False)
 
     # obtain representative crop, to speed things up...
-    crop = representative_crop(image, crop_size=crop_size_in_voxels)
+    crop = representative_crop(
+        image, crop_size=crop_size_in_voxels, display_crop=display_crop
+    )
 
     # Sigma spatial range:
     sigma_spatial_range = np.arange(0.01, 1, 0.05) ** 1.5
