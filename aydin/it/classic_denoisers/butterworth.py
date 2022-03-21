@@ -63,12 +63,12 @@ def calibrate_denoise_butterworth(
         typically close to one.
         (advanced)
 
-    max_order: float
-        Maximal order for the Butterworth filter to use for calibration.
+    min_order: float
+        Minimal order for the Butterworth filter to use for calibration.
         (advanced)
 
     max_order: float
-        Minimal order for the Butterworth filter to use for calibration.
+        Maximal order for the Butterworth filter to use for calibration.
         (advanced)
 
     crop_size_in_voxels: int or None for default
@@ -279,5 +279,5 @@ def _apw(freq_cutoff, max_padding):
 
 
 def _filter(image_f, f, order):
-    image_f *= (1 + numpy.sqrt(f) ** (2 * order)) ** (-0.5)
+    image_f *= (1 + f ** order) ** (-0.5)
     return image_f

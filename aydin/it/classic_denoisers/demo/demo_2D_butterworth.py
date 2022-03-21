@@ -1,6 +1,7 @@
 # flake8: noqa
 import numpy
 import numpy as np
+from scipy.ndimage import gaussian_filter
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
@@ -13,6 +14,7 @@ from aydin.io.datasets import (
     pollen,
     newyork,
     characters,
+    add_blur_2d,
 )
 from aydin.io.io import imwrite, imread
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
@@ -24,20 +26,17 @@ def demo_butterworth(image, display=True):
     Demo for self-supervised denoising using camera image with synthetic noise
     """
     Log.enable_output = True
-    Log.set_log_max_depth(5)
+    Log.set_log_max_depth(6)
 
     #    image, _  = imread('/mnt/raid0/aydin_datasets/_example_datasets_for_use_cases/Gauss.png')
 
     image = normalise(image.astype(np.float32))
 
+    # Butterworth denoising works best when the images are band-limited, sop we simulate that:
+    # image = gaussian_filter(image, sigma=0.5)
+
+    # we add noise:
     noisy = add_noise(image)
-    # noisy = add_noise(
-    #     image,
-    #     intensity=1024,
-    #     variance=0.005,
-    #     sap=0.0)
-    #
-    # imwrite(noisy, '/mnt/raid0/aydin_datasets/_example_datasets_for_use_cases/Gauss_noisy.png')
 
     function, parameters, memreq = calibrate_denoise_butterworth(noisy)
     denoised = function(noisy, **parameters)
@@ -65,9 +64,9 @@ def demo_butterworth(image, display=True):
 
 
 if __name__ == "__main__":
+    demo_butterworth(camera())
+    demo_butterworth(pollen())
     demo_butterworth(newyork())
     demo_butterworth(characters())
-    demo_butterworth(pollen())
     demo_butterworth(lizard())
     demo_butterworth(dots())
-    demo_butterworth(camera())

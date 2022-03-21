@@ -11,7 +11,7 @@ def calibrate_denoise_gm(
     image,
     max_filter_size: int = 3,
     crop_size_in_voxels: Optional[int] = 128000,
-    max_num_evaluations: int = 256,
+    max_num_evaluations: int = 320,
     display_images: bool = False,
     **other_fixed_parameters,
 ):

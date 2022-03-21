@@ -43,7 +43,7 @@ def demo_representative_crop(image, fast_mode: bool = False, display: bool = Tru
 
 if __name__ == "__main__":
 
-    islet = examples_single.royerlab_hcr.get_array().squeeze()[1]
+    islet = examples_single.royerlab_hcr.get_array().squeeze()[:, 0, ...]
     demo_representative_crop(islet, fast_mode=True)
 
     demo_representative_crop(newyork())

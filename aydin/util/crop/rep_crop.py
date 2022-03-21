@@ -235,10 +235,11 @@ def evaluate_crop(crop, image_min, image_max, mode, smoothing_size):
     if image_min is None or image_max is None:
         image_min = crop.min()
         image_max = crop.max()
-    else:
-        # Normalise crop values:
-        smoothed_crop -= image_min
-        smoothed_crop /= image_max
+
+    # Normalise crop values:
+    smoothed_crop -= image_min
+    smoothed_crop /= image_max
+
     # compute score:
     if mode == 'contrast':
         score = numpy.std(smoothed_crop)

@@ -90,6 +90,7 @@ def calibrate_denoise_harmonic(
             crop,
             _denoise_harmonic,
             denoise_parameters=parameter_ranges,
+            mode='smart',
             max_num_evaluations=max_num_evaluations,
             display_images=display_images,
         )
