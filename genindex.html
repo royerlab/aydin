@@ -6,6 +6,7 @@
   <title>Index &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -14,6 +15,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -139,12 +142,12 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.archive_model">archive_model() (aydin.restoration.denoise.classic.Classic static method)</a>
+      <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.archive">archive() (aydin.restoration.denoise.classic.Classic static method)</a>
 
       <ul>
-        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive_model">(aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN static method)</a>
+        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive">(aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN static method)</a>
 </li>
-        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive_model">(aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR static method)</a>
+        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive">(aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR static method)</a>
 </li>
       </ul></li>
       <li><a href="api/transforms.html#aydin.it.transforms.attenuation.AttenuationTransform">AttenuationTransform (class in aydin.it.transforms.attenuation)</a>
@@ -262,6 +265,10 @@
 </li>
         <li><a href="api/regressors/nn.html#aydin.regression.nn.NNRegressor.fit">(aydin.regression.nn.NNRegressor method)</a>
 </li>
+        <li><a href="api/regressors/random_forest.html#aydin.regression.random_forest.RandomForestRegressor.fit">(aydin.regression.random_forest.RandomForestRegressor method)</a>
+</li>
+        <li><a href="api/regressors/support_vector.html#aydin.regression.support_vector.SupportVectorRegressor.fit">(aydin.regression.support_vector.SupportVectorRegressor method)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -291,6 +298,8 @@
         <li><a href="api/feature_generator.html#aydin.features.extensible_features.ExtensibleFeatureGenerator.get_receptive_field_radius">(aydin.features.extensible_features.ExtensibleFeatureGenerator method)</a>
 </li>
         <li><a href="api/feature_generator.html#aydin.features.standard_features.StandardFeatureGenerator.get_receptive_field_radius">(aydin.features.standard_features.StandardFeatureGenerator method)</a>
+</li>
+        <li><a href="api/image_translators/cnn.html#aydin.it.cnn.ImageTranslatorCNN.get_receptive_field_radius">(aydin.it.cnn.ImageTranslatorCNN method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -392,6 +401,16 @@
 </li>
         <li><a href="api/regressors/nn.html#aydin.regression.nn.NNRegressor.load">(aydin.regression.nn.NNRegressor static method)</a>
 </li>
+        <li><a href="api/regressors/random_forest.html#aydin.regression.random_forest.RandomForestRegressor.load">(aydin.regression.random_forest.RandomForestRegressor static method)</a>
+</li>
+        <li><a href="api/regressors/support_vector.html#aydin.regression.support_vector.SupportVectorRegressor.load">(aydin.regression.support_vector.SupportVectorRegressor static method)</a>
+</li>
+        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.load">(aydin.restoration.denoise.classic.Classic method)</a>
+</li>
+        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.load">(aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN method)</a>
+</li>
+        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.load">(aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR method)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -443,18 +462,24 @@
         <li><a href="api/image_translators/fgr.html#aydin.it.fgr.ImageTranslatorFGR.parse_axes_args">(aydin.it.fgr.ImageTranslatorFGR static method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/transforms.html#aydin.it.transforms.periodic.PeriodicNoiseSuppressionTransform">PeriodicNoiseSuppressionTransform (class in aydin.it.transforms.periodic)</a>
 </li>
-      <li><a href="api/regressors/cb.html#aydin.regression.cb.CBRegressor.predict">predict() (aydin.regression.cb.CBRegressor method)</a>
+      <li><a href="api/nn/jinet.html#aydin.nn.models.jinet.JINetModel.predict">predict() (aydin.nn.models.jinet.JINetModel method)</a>
 
       <ul>
+        <li><a href="api/nn/unet.html#aydin.nn.models.unet.UNetModel.predict">(aydin.nn.models.unet.UNetModel method)</a>
+</li>
+        <li><a href="api/regressors/cb.html#aydin.regression.cb.CBRegressor.predict">(aydin.regression.cb.CBRegressor method)</a>
+</li>
         <li><a href="api/regressors/lgbm.html#aydin.regression.lgbm.LGBMRegressor.predict">(aydin.regression.lgbm.LGBMRegressor method)</a>
 </li>
         <li><a href="api/regressors/linear.html#aydin.regression.linear.LinearRegressor.predict">(aydin.regression.linear.LinearRegressor method)</a>
 </li>
         <li><a href="api/regressors/nn.html#aydin.regression.nn.NNRegressor.predict">(aydin.regression.nn.NNRegressor method)</a>
+</li>
+        <li><a href="api/regressors/random_forest.html#aydin.regression.random_forest.RandomForestRegressor.predict">(aydin.regression.random_forest.RandomForestRegressor method)</a>
+</li>
+        <li><a href="api/regressors/support_vector.html#aydin.regression.support_vector.SupportVectorRegressor.predict">(aydin.regression.support_vector.SupportVectorRegressor method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -463,6 +488,8 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/regressors/random_forest.html#aydin.regression.random_forest.RandomForestRegressor">RandomForestRegressor (class in aydin.regression.random_forest)</a>
+</li>
       <li><a href="api/transforms.html#aydin.it.transforms.range.RangeTransform">RangeTransform (class in aydin.it.transforms.range)</a>
 </li>
       <li><a href="api/regressors/cb.html#aydin.regression.cb.CBRegressor.recommended_max_num_datapoints">recommended_max_num_datapoints() (aydin.regression.cb.CBRegressor method)</a>
@@ -473,6 +500,10 @@
         <li><a href="api/regressors/linear.html#aydin.regression.linear.LinearRegressor.recommended_max_num_datapoints">(aydin.regression.linear.LinearRegressor method)</a>
 </li>
         <li><a href="api/regressors/nn.html#aydin.regression.nn.NNRegressor.recommended_max_num_datapoints">(aydin.regression.nn.NNRegressor method)</a>
+</li>
+        <li><a href="api/regressors/random_forest.html#aydin.regression.random_forest.RandomForestRegressor.recommended_max_num_datapoints">(aydin.regression.random_forest.RandomForestRegressor method)</a>
+</li>
+        <li><a href="api/regressors/support_vector.html#aydin.regression.support_vector.SupportVectorRegressor.recommended_max_num_datapoints">(aydin.regression.support_vector.SupportVectorRegressor method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -506,13 +537,15 @@
 </li>
         <li><a href="api/regressors/nn.html#aydin.regression.nn.NNRegressor.save">(aydin.regression.nn.NNRegressor method)</a>
 </li>
-      </ul></li>
-      <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.save_model">save_model() (aydin.restoration.denoise.classic.Classic method)</a>
-
-      <ul>
-        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save_model">(aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN method)</a>
+        <li><a href="api/regressors/random_forest.html#aydin.regression.random_forest.RandomForestRegressor.save">(aydin.regression.random_forest.RandomForestRegressor method)</a>
 </li>
-        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save_model">(aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR method)</a>
+        <li><a href="api/regressors/support_vector.html#aydin.regression.support_vector.SupportVectorRegressor.save">(aydin.regression.support_vector.SupportVectorRegressor method)</a>
+</li>
+        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.save">(aydin.restoration.denoise.classic.Classic method)</a>
+</li>
+        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save">(aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN method)</a>
+</li>
+        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save">(aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -540,6 +573,10 @@
 </li>
         <li><a href="api/regressors/nn.html#aydin.regression.nn.NNRegressor.stop_fit">(aydin.regression.nn.NNRegressor method)</a>
 </li>
+        <li><a href="api/regressors/random_forest.html#aydin.regression.random_forest.RandomForestRegressor.stop_fit">(aydin.regression.random_forest.RandomForestRegressor method)</a>
+</li>
+        <li><a href="api/regressors/support_vector.html#aydin.regression.support_vector.SupportVectorRegressor.stop_fit">(aydin.regression.support_vector.SupportVectorRegressor method)</a>
+</li>
       </ul></li>
       <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.stop_running">stop_running() (aydin.restoration.denoise.classic.Classic method)</a>
 
@@ -555,6 +592,8 @@
         <li><a href="api/image_translators/fgr.html#aydin.it.fgr.ImageTranslatorFGR.stop_training">(aydin.it.fgr.ImageTranslatorFGR method)</a>
 </li>
       </ul></li>
+      <li><a href="api/regressors/support_vector.html#aydin.regression.support_vector.SupportVectorRegressor">SupportVectorRegressor (class in aydin.regression.support_vector)</a>
+</li>
   </ul></td>
 </tr></table>
 

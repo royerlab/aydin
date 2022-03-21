@@ -7,6 +7,7 @@
   <title>Aydin Studio Tutorials &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -15,6 +16,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -57,6 +60,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#loading-image-files">Loading image files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#hyperstacking">Hyperstacking</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#split-channels">Split channels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#choosing-images-to-denoise">Choosing images to denoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-output-folder-to-a-specific-image">Setting output folder to a specific image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-output-folder-to-all-loaded-images">Setting output folder to all loaded images</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dimensions-tab">Dimensions tab</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#cropping-selection">Cropping selection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#pre-and-post-processing">Pre and post processing</a></li>
@@ -161,6 +167,29 @@ let’s you create a hyperstack from the images you loaded if all loaded images 
 and process each channel separately might be cooler. At least we believe so, hence we
 give our users a checkbox that lets them split each channel of a multi-channel stack into
 separate images.</p>
+</section>
+<section id="choosing-images-to-denoise">
+<h2>Choosing images to denoise<a class="headerlink" href="#choosing-images-to-denoise" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_images_tab_choose_to_denoise.png" src="../_images/aydin_images_tab_choose_to_denoise.png" />
+<p>We provide details on how we interpret each image loaded to <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> on the <code class="docutils literal notranslate"><span class="pre">Image(s)</span></code> tab.
+Also this is the last place to decide, which of the loaded images you want to denoise. For each loaded
+image, you can decide to denoise or not with the help of checkbox provided on the denoise column.</p>
+</section>
+<section id="setting-output-folder-to-a-specific-image">
+<h2>Setting output folder to a specific image<a class="headerlink" href="#setting-output-folder-to-a-specific-image" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_images_tab_single_file_output_folder.png" src="../_images/aydin_images_tab_single_file_output_folder.png" />
+<p>By default, <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> tries to write the result image and related files to the same exact
+folder of the input image file. This comes handy, when you like to find the input/output images
+together, however, we understand that this might not be always the case for all of our users and
+let our users to specify output folder for each loaded image by double-clicking to the last column
+of each image entry on the <code class="docutils literal notranslate"><span class="pre">Image(s)</span></code> tab.</p>
+</section>
+<section id="setting-output-folder-to-all-loaded-images">
+<h2>Setting output folder to all loaded images<a class="headerlink" href="#setting-output-folder-to-all-loaded-images" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_images_tab_all_files_output_folder.png" src="../_images/aydin_images_tab_all_files_output_folder.png" />
+<p>It is also possible to set output folder to all loaded images to <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code>. You can select the
+image row with your desired output folder for all images then click the <code class="docutils literal notranslate"><span class="pre">output</span> <span class="pre">folder</span></code> header (highlighted
+on the screenshot) to set same output folder to the all loaded images.</p>
 </section>
 <section id="dimensions-tab">
 <h2>Dimensions tab<a class="headerlink" href="#dimensions-tab" title="Permalink to this headline"></a></h2>

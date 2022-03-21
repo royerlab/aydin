@@ -7,6 +7,7 @@
   <title>Transforms &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -15,6 +16,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -155,7 +158,7 @@ stack deskewing consists in applying an integral shear transformation to a stack
 the ‘z’-axis and the ‘skew’-axis along which shifting happens. The delta parameter controls the amount of shift
 per plane - must be an integer. We automatically snap the delta value to the closest integer. Padding is supported.</p>
 <p>Note: this only works for images with at least 3 dimensions. Does nothing
-on images with less than 3 dimensions.</p>
+on images with less than 3 dimensions.(advanced)</p>
 <p class="rubric">Methods</p>
 <table class="docutils align-default">
 <colgroup>
@@ -298,7 +301,7 @@ denoising is recommended to improve denoising performance. Currently,
 we assume that all frames can be registered to a common reference frame,
 and thus that all images have a common background that can be used for
 registration. For completeness, multiple axis can be specified and the
-correction is applied along each in sequence.</p>
+correction is applied along each in sequence.(advanced)</p>
 <p class="rubric">Methods</p>
 <table class="docutils align-default">
 <colgroup>
@@ -363,7 +366,7 @@ minimum value of all or part of the vector along each axis.</p>
 <p>Some images have a form of periodic noise that can be seen as strong
 peaks in their power spectral density. Suppressing these peaks before and
 after denoising is often a good idea. This is tricky to use, use with
-care. Works with non-axis aligned periodic patterns.</p>
+care. Works with non-axis aligned periodic patterns.(advanced)</p>
 <p class="rubric">Methods</p>
 <table class="docutils align-default">
 <colgroup>

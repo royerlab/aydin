@@ -7,6 +7,7 @@
   <title>Denoise Restoration &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -15,6 +16,8 @@
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -173,7 +176,7 @@ By default it is None.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.archive_model" title="aydin.restoration.denoise.classic.Classic.archive_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">archive_model</span></code></a>(source, destination)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.archive" title="aydin.restoration.denoise.classic.Classic.archive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">archive</span></code></a>(source, destination)</p></td>
 <td><p>Archives the model to given destination.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.clean_model_folder" title="aydin.restoration.denoise.classic.Classic.clean_model_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clean_model_folder</span></code></a>(model_folder)</p></td>
@@ -185,16 +188,23 @@ By default it is None.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.get_translator" title="aydin.restoration.denoise.classic.Classic.get_translator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_translator</span></code></a>()</p></td>
 <td><p>Returns the corresponding translator instance for given selections.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.save_model" title="aydin.restoration.denoise.classic.Classic.save_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_model</span></code></a>(model_path)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.load" title="aydin.restoration.denoise.classic.Classic.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(model_path)</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.save" title="aydin.restoration.denoise.classic.Classic.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(model_path)</p></td>
 <td><p>Saves the latest trained model next to the input image file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.set_image_metrics" title="aydin.restoration.denoise.classic.Classic.set_image_metrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_image_metrics</span></code></a>(image_shape)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.set_image_metrics" title="aydin.restoration.denoise.classic.Classic.set_image_metrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_image_metrics</span></code></a>(image_shape)</p></td>
 <td><p>Sets several image metric parameters used internally.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.stop_running" title="aydin.restoration.denoise.classic.Classic.stop_running"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_running</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.stop_running" title="aydin.restoration.denoise.classic.Classic.stop_running"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_running</span></code></a>()</p></td>
 <td><p>Method to stop running N2S instance</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.train" title="aydin.restoration.denoise.classic.Classic.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(noisy_image, *[, batch_axes, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.classic.Classic.train" title="aydin.restoration.denoise.classic.Classic.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(noisy_image, *[, batch_axes, ...])</p></td>
 <td><p>Method to run training for Noise2Self FGR.</p></td>
 </tr>
 </tbody>
@@ -220,8 +230,8 @@ By default it is None.</p>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.archive_model">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">archive_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.archive_model" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.archive">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">archive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.archive" title="Permalink to this definition"></a></dt>
 <dd><p>Archives the model to given destination.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -294,8 +304,21 @@ on GUI and CLI.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.save_model">
-<span class="sig-name descname"><span class="pre">save_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.save_model" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.load" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model_path</strong><span class="classifier">str</span></dt><dd><p>whole path to the model including the model zip name</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.save" title="Permalink to this definition"></a></dt>
 <dd><p>Saves the latest trained model next to the input image file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -404,7 +427,7 @@ on GUI and CLI.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive_model" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">archive_model</span></code></a>(source, destination)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">archive</span></code></a>(source, destination)</p></td>
 <td><p>Archives the model to given destination.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.clean_model_folder" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.clean_model_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clean_model_folder</span></code></a>(model_folder)</p></td>
@@ -422,16 +445,23 @@ on GUI and CLI.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.get_translator" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.get_translator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_translator</span></code></a>(feature_generator, regressor)</p></td>
 <td><p>Returns the corresponding translator instance for given selections.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save_model" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_model</span></code></a>(model_path)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.load" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(model_path)</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(model_path)</p></td>
 <td><p>Saves the latest trained model next to the input image file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.set_image_metrics" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.set_image_metrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_image_metrics</span></code></a>(image_shape)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.set_image_metrics" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.set_image_metrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_image_metrics</span></code></a>(image_shape)</p></td>
 <td><p>Sets several image metric parameters used internally.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.stop_running" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.stop_running"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_running</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.stop_running" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.stop_running"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_running</span></code></a>()</p></td>
 <td><p>Method to stop running N2S instance</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.train" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(noisy_image, *[, batch_axes, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.train" title="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(noisy_image, *[, batch_axes, ...])</p></td>
 <td><p>Method to run training for Noise2Self FGR.</p></td>
 </tr>
 </tbody>
@@ -457,8 +487,8 @@ on GUI and CLI.</p>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive_model">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">archive_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive_model" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">archive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive" title="Permalink to this definition"></a></dt>
 <dd><p>Archives the model to given destination.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -557,8 +587,21 @@ on GUI and CLI.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save_model">
-<span class="sig-name descname"><span class="pre">save_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save_model" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.load" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model_path</strong><span class="classifier">str</span></dt><dd><p>whole path to the model including the model zip name</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save" title="Permalink to this definition"></a></dt>
 <dd><p>Saves the latest trained model next to the input image file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -667,7 +710,7 @@ on GUI and CLI.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive_model" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">archive_model</span></code></a>(source, destination)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">archive</span></code></a>(source, destination)</p></td>
 <td><p>Archives the model to given destination.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.clean_model_folder" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.clean_model_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clean_model_folder</span></code></a>(model_folder)</p></td>
@@ -679,13 +722,20 @@ on GUI and CLI.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.get_translator" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.get_translator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_translator</span></code></a>()</p></td>
 <td><p>Returns the corresponding translator instance for given selections.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save_model" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_model</span></code></a>(model_path)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.load" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(model_path)</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(model_path)</p></td>
 <td><p>Saves the latest trained model next to the input image file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.stop_running" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.stop_running"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_running</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.stop_running" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.stop_running"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_running</span></code></a>()</p></td>
 <td><p>Method to stop running N2S instance</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.train" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(noisy_image, *[, batch_axes, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.train" title="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(noisy_image, *[, batch_axes, ...])</p></td>
 <td><p>Method to run Noise2Self CNN training.</p></td>
 </tr>
 </tbody>
@@ -711,8 +761,8 @@ on GUI and CLI.</p>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive_model">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">archive_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive_model" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">archive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.archive" title="Permalink to this definition"></a></dt>
 <dd><p>Archives the model to given destination.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -779,8 +829,21 @@ on GUI and CLI.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save_model">
-<span class="sig-name descname"><span class="pre">save_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save_model" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.load" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model_path</strong><span class="classifier">str</span></dt><dd><p>whole path to the model including the model zip name</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selfcnn.Noise2SelfCNN.save" title="Permalink to this definition"></a></dt>
 <dd><p>Saves the latest trained model next to the input image file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

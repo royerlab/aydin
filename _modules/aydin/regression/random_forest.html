@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aydin.io.folders &mdash; Aydin  documentation</title>
+  <title>aydin.regression.random_forest &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
@@ -89,7 +89,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>aydin.io.folders</li>
+      <li>aydin.regression.random_forest</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -98,67 +98,63 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for aydin.io.folders</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">makedirs</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
-<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">platform</span>
+  <h1>Source code for aydin.regression.random_forest</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">aydin.regression.lgbm</span> <span class="kn">import</span> <span class="n">LGBMRegressor</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span><span class="p">,</span> <span class="n">lprint</span>
 
 
-<div class="viewcode-block" id="get_home_folder"><a class="viewcode-back" href="../../../api/io/folders.html#aydin.io.folders.get_home_folder">[docs]</a><span class="k">def</span> <span class="nf">get_home_folder</span><span class="p">():</span>
-    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<div class="viewcode-block" id="RandomForestRegressor"><a class="viewcode-back" href="../../../api/regressors/random_forest.html#aydin.regression.random_forest.RandomForestRegressor">[docs]</a><span class="k">class</span> <span class="nc">RandomForestRegressor</span><span class="p">(</span><span class="n">LGBMRegressor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Random Forrest Regressor (uses the LGBM library).&quot;&quot;&quot;</span>
 
-    <span class="n">home_folder</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="k">return</span> <span class="n">home_folder</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">num_leaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
+        <span class="n">max_num_estimators</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2048</span><span class="p">,</span>
+        <span class="n">max_bin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0001</span><span class="p">,</span>
+        <span class="n">loss</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;l1&#39;</span><span class="p">,</span>
+        <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+        <span class="n">verbosity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructs a Random Forest regressor</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        num_leaves</span>
+<span class="sd">            Number of leaves</span>
+<span class="sd">        max_num_estimators</span>
+<span class="sd">            Maximum number of estimators</span>
+<span class="sd">        max_bin</span>
+<span class="sd">            Maximum number of allowed bins</span>
+<span class="sd">        learning_rate</span>
+<span class="sd">            Learning rate for the LightGBM model</span>
+<span class="sd">        loss</span>
+<span class="sd">            Type of loss to be used</span>
+<span class="sd">        patience</span>
+<span class="sd">            Number of rounds required for early stopping</span>
+<span class="sd">        verbosity</span>
 
-<div class="viewcode-block" id="get_temp_folder"><a class="viewcode-back" href="../../../api/io/folders.html#aydin.io.folders.get_temp_folder">[docs]</a><span class="k">def</span> <span class="nf">get_temp_folder</span><span class="p">():</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">num_leaves</span><span class="p">,</span>
+            <span class="n">max_num_estimators</span><span class="p">,</span>
+            <span class="n">max_bin</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="p">,</span>
+            <span class="n">loss</span><span class="p">,</span>
+            <span class="n">patience</span><span class="p">,</span>
+            <span class="n">verbosity</span><span class="p">,</span>
+        <span class="p">)</span>
 
-    <span class="n">temp_folder</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Random Forest Regressor&quot;</span><span class="p">):</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;with no arguments&quot;</span><span class="p">)</span>  <span class="c1"># TODO: fix these logs</span>
 
-    <span class="k">if</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;linux&quot;</span> <span class="ow">or</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;linux2&quot;</span><span class="p">:</span>
-        <span class="n">temp_folder</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">()</span>
-
-    <span class="k">elif</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>
-        <span class="n">temp_folder</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">()</span>
-
-    <span class="k">elif</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;win32&quot;</span><span class="p">:</span>
-        <span class="n">temp_folder</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">()</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">makedirs</span><span class="p">(</span><span class="n">temp_folder</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="k">pass</span>
-
-    <span class="k">if</span> <span class="n">exists</span><span class="p">(</span><span class="n">temp_folder</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">temp_folder</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span></div>
-
-
-<div class="viewcode-block" id="get_cache_folder"><a class="viewcode-back" href="../../../api/io/folders.html#aydin.io.folders.get_cache_folder">[docs]</a><span class="k">def</span> <span class="nf">get_cache_folder</span><span class="p">():</span>
-
-    <span class="n">cache_folder</span> <span class="o">=</span> <span class="kc">None</span>
-
-    <span class="k">if</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;linux&quot;</span> <span class="ow">or</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;linux2&quot;</span><span class="p">:</span>
-        <span class="n">cache_folder</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">get_home_folder</span><span class="p">(),</span> <span class="s1">&#39;.cache&#39;</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;darwin&quot;</span><span class="p">:</span>
-        <span class="n">cache_folder</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">get_home_folder</span><span class="p">(),</span> <span class="s1">&#39;/Library/Caches&#39;</span><span class="p">)</span>
-
-    <span class="k">elif</span> <span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;win32&quot;</span><span class="p">:</span>
-        <span class="n">cache_folder</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">get_home_folder</span><span class="p">(),</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;LOCALAPPDATA&#39;</span><span class="p">))</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">makedirs</span><span class="p">(</span><span class="n">cache_folder</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="k">pass</span>
-
-    <span class="k">if</span> <span class="n">exists</span><span class="p">(</span><span class="n">cache_folder</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">cache_folder</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span></div>
+    <span class="k">def</span> <span class="nf">_get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_params</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;boosting_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;rf&quot;</span>
+        <span class="n">params</span><span class="p">[</span><span class="s2">&quot;feature_fraction&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.8</span>
+        <span class="k">return</span> <span class="n">params</span></div>
 </pre></div>
 
            </div>

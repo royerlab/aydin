@@ -7,6 +7,7 @@
   <title>ImageTranslatorCNN - Convolutional Neural Network &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -15,6 +16,8 @@
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -131,39 +134,36 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.clear_transforms" title="aydin.it.cnn.ImageTranslatorCNN.clear_transforms"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_transforms</span></code></a>()</p></td>
 <td><p>Clears the transforms list</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.load" title="aydin.it.cnn.ImageTranslatorCNN.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.get_receptive_field_radius" title="aydin.it.cnn.ImageTranslatorCNN.get_receptive_field_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_receptive_field_radius</span></code></a>(nb_unet_levels[, ...])</p></td>
+<td><p>TODO: add proper docstrings here</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.load" title="aydin.it.cnn.ImageTranslatorCNN.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
 <td><p>Returns an 'all-batteries-included' image translation model at a given path (folder).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.parse_axes_args" title="aydin.it.cnn.ImageTranslatorCNN.parse_axes_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_axes_args</span></code></a>(batch_axes, chan_axes, ndim)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.parse_axes_args" title="aydin.it.cnn.ImageTranslatorCNN.parse_axes_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_axes_args</span></code></a>(batch_axes, chan_axes, ndim)</p></td>
 <td><p><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p></p></dd>
 </dl>
 </p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.save" title="aydin.it.cnn.ImageTranslatorCNN.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.save" title="aydin.it.cnn.ImageTranslatorCNN.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
 <td><p>Saves a 'all-batteries-included' image translation model at a given path (folder).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.stop_training" title="aydin.it.cnn.ImageTranslatorCNN.stop_training"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_training</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.stop_training" title="aydin.it.cnn.ImageTranslatorCNN.stop_training"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_training</span></code></a>()</p></td>
 <td><p>Stops currently running training within the instance by turning the flag true for early stop callback.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.train" title="aydin.it.cnn.ImageTranslatorCNN.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(input_image[, target_image, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.it.cnn.ImageTranslatorCNN.train" title="aydin.it.cnn.ImageTranslatorCNN.train"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train</span></code></a>(input_image[, target_image, ...])</p></td>
 <td><p>Train to translate a given input image to a given output image.</p></td>
 </tr>
 </tbody>
 </table>
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 75%" />
-<col style="width: 25%" />
+<col style="width: 57%" />
+<col style="width: 43%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><strong>get_receptive_field_radius</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>retrain</strong></p></td>
-<td></td>
-</tr>
 <tr class="row-odd"><td><p><strong>save_cnn</strong></p></td>
 <td></td>
 </tr>
@@ -189,6 +189,25 @@
 <dt class="sig sig-object py" id="aydin.it.cnn.ImageTranslatorCNN.clear_transforms">
 <span class="sig-name descname"><span class="pre">clear_transforms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.cnn.ImageTranslatorCNN.clear_transforms" title="Permalink to this definition"></a></dt>
 <dd><p>Clears the transforms list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.it.cnn.ImageTranslatorCNN.get_receptive_field_radius">
+<span class="sig-name descname"><span class="pre">get_receptive_field_radius</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_unet_levels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shiftconv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/it/cnn.html#ImageTranslatorCNN.get_receptive_field_radius"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.cnn.ImageTranslatorCNN.get_receptive_field_radius" title="Permalink to this definition"></a></dt>
+<dd><p>TODO: add proper docstrings here</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>nb_unet_levels</strong><span class="classifier">int</span></dt><dd></dd>
+<dt><strong>shiftconv</strong><span class="classifier">bool</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>int</dt><dd></dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
