@@ -205,7 +205,7 @@ class _LGBMModel:
     def _save_internals(self, path: str):
         if self.model is not None:
             lgbm_model_file = join(path, 'lgbm_model.txt')
-            self.model.save(lgbm_model_file)
+            self.model.save_model(lgbm_model_file)
 
     def _load_internals(self, path: str):
         lgbm_model_file = join(path, 'lgbm_model.txt')
