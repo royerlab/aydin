@@ -279,5 +279,5 @@ def _apw(freq_cutoff, max_padding):
 
 
 def _filter(image_f, f, order):
-    image_f *= (1 + numpy.sqrt(f) ** (2 * order)) ** (-0.5)
+    image_f *= 1 / numpy.sqrt(1 + numpy.sqrt(f) ** (2 * order))
     return image_f
