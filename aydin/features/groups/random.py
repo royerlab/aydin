@@ -10,9 +10,24 @@ from aydin.features.groups.convolutional import ConvolutionalFeatures
 class RandomFeatures(ConvolutionalFeatures):
     """
     Random Feature Group class
+
+    Generates features by convolving the image with a random set of filters.
     """
 
     def __init__(self, size: int, num_features: Optional[int] = None):
+        """
+        Constructor that configures these features.
+
+        Parameters
+        ----------
+
+        size : int
+            Size of the kernels used.
+
+        num_features : Optional[int]
+            Number of features to generate. If None the maximum number of features
+            that may be linearly independent is used.
+        """
         super().__init__(kernels=None)
         self.size = size
         self._num_features = num_features

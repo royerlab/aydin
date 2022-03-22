@@ -6,6 +6,7 @@ import numexpr
 import numpy
 from numba import jit, cuda
 from numba.cuda import CudaSupportError
+from numpy.typing import ArrayLike
 
 from aydin.features.groups.base import FeatureGroupBase
 
@@ -27,24 +28,106 @@ def _remove_duplicates(seq):
 class UniformFeatures(FeatureGroupBase):
     """
     Uniform Feature Group class
+
+    Computes 'uniform' features that are obtained by summing up the
+    values of voxels over nD rectangular blocks of voxels.The blocks are
+    defined relative to each voxel. These features can have different scales
+    (size), shapes (aspect ratios), and offsets (shifts relative to the center
+    voxel).
     """
 
     def __init__(
         self,
-        kernel_widths=None,
-        kernel_scales=None,
-        kernel_shapes=None,
-        min_level=0,
-        max_level=13,
-        include_scale_one=False,
-        include_fine_features=True,
-        include_corner_features=False,
-        include_line_features=False,
-        decimate_large_scale_features=True,
-        extend_large_scale_features=False,
-        scale_one_width=3,
+        kernel_widths: ArrayLike = None,
+        kernel_scales: ArrayLike = None,
+        kernel_shapes: ArrayLike = None,
+        min_level: int = 0,
+        max_level: int = 13,
+        scale_one_width: int = 3,
+        include_scale_one: bool = False,
+        include_fine_features: bool = True,
+        include_corner_features: bool = False,
+        include_line_features: bool = False,
+        decimate_large_scale_features: bool = True,
+        extend_large_scale_features: bool = False,
         dtype=numpy.float32,
     ):
+        """
+        Constructor that configures these features.
+
+        Parameters
+        ----------
+
+        kernel_widths : numpy.typing.ArrayLike
+            ArrayLike of kernel widths.
+            (advanced)
+
+        kernel_scales : numpy.typing.ArrayLike
+            ArrayLike of kernel scales.
+            (advanced)
+
+        kernel_shapes : numpy.typing.ArrayLike
+            ArrayLike of kernel shapes.
+            (advanced)
+
+        min_level : int
+            Minimum scale level of features to include
+            (advanced)
+
+        max_level : int Maximum scale level of features to include.
+        Generating features with less levels speeds up computation but also
+        reduces the quality of the denoising, typically in very flat regions
+        of the image.
+
+        scale_one_width : int
+            Width of scale-one features.
+            (advanced)
+
+        include_scale_one : bool
+            When True scale-one-features are included. Uniform scale-one
+            features consist in simply passing the intensity values of pixels
+            in direct proximity to the center pixel. These features encode
+            high-frequency information that might be heavily contaminated by
+            noise, so use with caution. We recommend using this only for
+            moderate noise levels, or for images where strong high-frequency
+            signal is present and needs to be recovered. (advanced)
+
+        include_fine_features : bool
+            When True fine features are included. Uniform fine features
+            consist in summing up pixel values over small groups of 2 or 3
+            pixels surrounding the center pixel. These features encode higher
+            frequency information than other features (only scale-one feature
+            are even higher frequency).
+
+        include_corner_features : bool
+            When True corner features are included. Corner features are
+            uniform features that consists in summing the intensity values of
+            groups of pixels along the corners of the typical default
+            multi-scale features.
+
+        include_line_features : bool
+            When True line features are included. Line features are another
+            flavour of uniform features that consist in summing up the pixel
+            intensity values along one-pixel-wide lines around the center
+            pixel.
+
+        decimate_large_scale_features : bool
+            When True large scale features are decimated. To reduce the number
+            of features it can be advantageous to reduce the number of
+            large-scale (low-freq) features by decimating them. This is done
+            by removing center features that overlap with already covered
+            features at lower scales. (advanced)
+
+        extend_large_scale_features : bool
+            When True large scale features are extended. Extending large
+            scale features makes these feature cover more pixels by
+            overlapping pixels at the center of the receptive field. (advanced)
+
+        dtype
+            Datatype of the features
+            (advanced)
+
+        """
         super().__init__()
 
         # Setting up default features:

@@ -188,8 +188,8 @@ def denoise_butterworth(
     axes: Optional[Tuple[int,...]]
         Axes over which to apply lowpass filtering.
 
-    freq_cutoff: float
-        Cutoff frequency, must be within [0, 1]
+    freq_cutoff: Union[float, Sequence[float]]
+        Single or sequence cutoff frequency, must be within [0, 1]
 
     order: float
         Filter order, typically an integer above 1.
