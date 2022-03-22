@@ -1,4 +1,7 @@
+from typing import Optional, Tuple, List
+
 import numpy
+from numpy import ndarray
 
 from aydin.features.base import FeatureGeneratorBase
 from aydin.features.groups.base import FeatureGroupBase
@@ -8,6 +11,8 @@ from aydin.util.log.log import lprint, lsection
 class ExtensibleFeatureGenerator(FeatureGeneratorBase):
     """
     Extensible Feature Generator class
+
+
     """
 
     def __init__(self):
@@ -82,15 +87,15 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
     def compute(
         self,
         image,
-        exclude_center_feature=False,
-        exclude_center_value=False,
-        features=None,
-        feature_last_dim=True,
-        passthrough_channels=None,
-        num_reserved_features=0,
-        excluded_voxels=None,
-        spatial_feature_offset=None,
-        spatial_feature_scale=None,
+        exclude_center_feature: bool = False,
+        exclude_center_value: bool = False,
+        features: ndarray = None,
+        feature_last_dim: bool = True,
+        passthrough_channels: Optional[Tuple[bool]] = None,
+        num_reserved_features: int = 0,
+        excluded_voxels: Optional[List[Tuple[int]]] = None,
+        spatial_feature_offset: Optional[Tuple[float, ...]] = None,
+        spatial_feature_scale: Optional[Tuple[float, ...]] = None,
     ):
         """
         Computes the features given an image. If the input image is of shape (d,h,w),
@@ -99,16 +104,45 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
         Parameters
         ----------
         image : numpy.ndarray
-        image for which features are computed
+            image for which features are computed
+
         exclude_center_feature : bool
+            If true, features that use the image
+            patch's center pixel are entirely excluded from teh set of computed
+            features.
+
         exclude_center_value : bool
-        features
+            If true, the center pixel is never used
+            to compute any feature, different feature generation algorithms can
+            take different approaches to acheive that.
+
+        features : ndarray
+            If None the feature array is allocated internally,
+            if not None the provided array is used to store the features.
+
         feature_last_dim : bool
-        passthrough_channels
+            If True the last dimension of the feature
+            array is the feature dimension, if False then it is the first
+            dimension.
+
+        passthrough_channels : Optional[Tuple[bool]]
+            Optional tuple of booleans that specify which channels are 'pass-through'
+            channels, i.e. channels that are not featurised and directly used as features.
+
         num_reserved_features : int
-        excluded_voxels
-        spatial_feature_offset
-        spatial_feature_scale
+            Number of features to be left as blank,
+            useful when adding features separately.
+
+        excluded_voxels : Optional[List[Tuple[int]]]
+            List of pixel coordinates -- expressed as tuple of ints relative to the central pixel --
+            that will be excluded from any computed features. This is used for implementing
+            'extended blind-spot' N2S denoising approaches.
+
+        spatial_feature_offset: Optional[Tuple[float, ...]]
+            Offset vector to be applied (added) to the spatial features (if used).
+
+        spatial_feature_scale: Optional[Tuple[float, ...]]
+            Scale vector to be applied (multiplied) to the spatial features (if used).
 
         Returns
         -------

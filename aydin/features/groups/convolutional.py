@@ -2,6 +2,7 @@ from typing import Sequence, Optional, Tuple
 
 import numpy
 from numpy import ndarray
+from numpy.typing import ArrayLike
 from scipy.ndimage import convolve, gaussian_filter
 
 from aydin.features.groups.base import FeatureGroupBase
@@ -11,9 +12,19 @@ from aydin.util.log.log import lprint
 class ConvolutionalFeatures(FeatureGroupBase):
     """
     Convolutional Feature Group class
+
+    Generates convolutional features given a set of kernels.
     """
 
-    def __init__(self, kernels: Optional[Sequence[ndarray]]):
+    def __init__(self, kernels: Optional[Sequence[ArrayLike]]):
+        """
+        Constructor that configures these features.
+
+        Parameters
+        ----------
+        kernels : Optional[Sequence[ArrayLike]]
+            Sequence of kernels to use to compiute features.
+        """
         super().__init__()
         self.kernels = kernels if kernels is None else list(kernels)
         self.image = None

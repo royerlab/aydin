@@ -32,7 +32,8 @@ from aydin.util.log.log import lprint
 
 
 class UNetModel(Model):
-    """UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:
+    """
+    Standard UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:
     self-supervised learning with shift and conv scheme non-shiftconv: self-supervised learning by masking pixels at
     each iteration
     """
@@ -59,30 +60,42 @@ class UNetModel(Model):
 
         Parameters
         ----------
-        input_layer_size
-        spacetime_ndim
+        input_layer_size :
+            TODO: missing!
+        spacetime_ndim :
+            TODO: missing!
         mini_batch_size : int
             Mini-batch size
+            (advanced)
         nb_unet_levels : int
             Depth level of the UNet
+            (advanced)
         normalization : string
             normalization type, can be `batch` and `instance` for now
+            (advanced)
         activation : string
             Type of the activation function to use
+            (advanced)
         supervised : bool
             Flag that controls training approach
+            (advanced)
         shiftconv : bool
             Flag that controls use of shift convolutions
+            (advanced)
         nfilters : int
             Number of filters in first layer
+            (advanced)
         learning_rate : float
             Learning rate
         original_zdim : int
             Original Z-dimension length
+            (advanced)
         weight_decay : int
             coefficient of l1 regularizer
+            (advanced)
         residual : bool
             whether to use add or concat at merging layers
+            (advanced)
         pooling_mode : str
         """
         self.compiled = False
