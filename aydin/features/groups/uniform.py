@@ -60,42 +60,69 @@ class UniformFeatures(FeatureGroupBase):
 
         kernel_widths : numpy.typing.ArrayLike
             ArrayLike of kernel widths.
+            (advanced)
 
         kernel_scales : numpy.typing.ArrayLike
             ArrayLike of kernel scales.
+            (advanced)
 
         kernel_shapes : numpy.typing.ArrayLike
             ArrayLike of kernel shapes.
+            (advanced)
 
         min_level : int
             Minimum scale level of features to include
             (advanced)
-        max_level : int
-            Maximum scale level of features to include
+
+        max_level : int Maximum scale level of features to include.
+        Generating features with less levels speeds up computation but also
+        reduces the quality of the denoising, typically in very flat regions
+        of the image.
+
         scale_one_width : int
-            Width of the scale one features
+            Width of scale-one features.
             (advanced)
+
         include_scale_one : bool
-            True or False, argument to set decision
-            on inclusion of scale-one-features
-            (advanced)
+            When True scale-one-features are included. Uniform scale-one
+            features consist in simply passing the intensity values of pixels
+            in direct proximity to the center pixel. These features encode
+            high-frequency information that might be heavily contaminated by
+            noise, so use with caution. We recommend using this only for
+            moderate noise levels, or for images where strong high-frequency
+            signal is present and needs to be recovered. (advanced)
+
         include_fine_features : bool
-            True or False, argument to set decision
-            on inclusion of fine features
+            When True fine features are included. Uniform fine features
+            consist in summing up pixel values over small groups of 2 or 3
+            pixels surrounding the center pixel. These features encode higher
+            frequency information than other features (only scale-one feature
+            are even higher frequency).
+
         include_corner_features : bool
-            True or False, argument to set decision
-            on inclusion of corner features
+            When True corner features are included. Corner features are
+            uniform features that consists in summing the intensity values of
+            groups of pixels along the corners of the typical default
+            multi-scale features.
+
         include_line_features : bool
-            True or False, argument to set decision
-            on inclusion of line features
+            When True line features are included. Line features are another
+            flavour of uniform features that consist in summing up the pixel
+            intensity values along one-pixel-wide lines around the center
+            pixel.
+
         decimate_large_scale_features : bool
-            True or False, argument to set decision
-            on decimation of large scale features
-            (advanced)
+            When True large scale features are decimated. To reduce the number
+            of features it can be advantageous to reduce the number of
+            large-scale (low-freq) features by decimating them. This is done
+            by removing center features that overlap with already covered
+            features at lower scales. (advanced)
+
         extend_large_scale_features : bool
-            True or False, argument to set decision
-            on extension of large scale features.
-            (advanced)
+            When True large scale features are extended. Extending large
+            scale features makes these feature cover more pixels by
+            overlapping pixels at the center of the receptive field. (advanced)
+
         dtype
             Datatype of the features
             (advanced)
