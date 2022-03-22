@@ -364,7 +364,7 @@ def _compute_distance_image_for_fft(freq_cutoff, shape, selected_axes):
 
 
 def _filter(image_f, f, order):
-    factor = (1.0 + numpy.sqrt(f) ** (2 * order)) ** (-0.5)
+    factor = 1 / numpy.sqrt(1.0 + numpy.sqrt(f) ** (2 * order))
     factor = factor.astype(numpy.float32)
     n = image_f.shape[0]
     for i in prange(n):
