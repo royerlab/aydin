@@ -115,7 +115,16 @@
 
 
 <div class="viewcode-block" id="CBRegressor"><a class="viewcode-back" href="../../../api/regressors/cb.html#aydin.regression.cb.CBRegressor">[docs]</a><span class="k">class</span> <span class="nc">CBRegressor</span><span class="p">(</span><span class="n">RegressorBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;CatBoost Regressor.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The CatBoost Regressor uses the gradient boosting library &lt;a</span>
+<span class="sd">    href=&quot;https://github.com/catboost&quot;&gt;CatBoost&lt;/a&gt; to perform regression</span>
+<span class="sd">    from a set of feature vectors and target values. CatBoost main advantage</span>
+<span class="sd">    is that it is very fast compared to other gradient boosting libraries --</span>
+<span class="sd">    in particular when GPU acceleration is available. Compared to other</span>
+<span class="sd">    libraries (lightGBM, XGBoost) it is much easier to ship the GPU enabled</span>
+<span class="sd">    version because it just works. It performs comparably and sometimes</span>
+<span class="sd">    better than other libraries like LightGBM.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">model</span><span class="p">:</span> <span class="n">CatBoostRegressor</span>
 
@@ -138,24 +147,33 @@
 <span class="sd">        ----------</span>
 <span class="sd">        num_leaves : int</span>
 <span class="sd">            Number of leaves.</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        max_num_estimators : int</span>
 <span class="sd">            Maximum number of estimators</span>
 <span class="sd">        min_num_estimators : int</span>
 <span class="sd">            Minimum number of estimators</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        max_bin : int</span>
 <span class="sd">            Maximum number of allowed bins</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        learning_rate : float</span>
 <span class="sd">            Learning rate for the catboost model</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        loss : str</span>
 <span class="sd">            Type of loss to be used</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        patience : int</span>
 <span class="sd">            Number of rounds required for early stopping</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        compute_load : float</span>
 <span class="sd">            Allowed load on computational resources in percentage</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        gpu : bool</span>
-<span class="sd">            Flag to tell catboost try to use GPU or do not</span>
+<span class="sd">            True enables GPU acceleration if available</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        gpu_devices : Sequence[int]</span>
 <span class="sd">            List of GPU device indices to be used by CatBoost</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 

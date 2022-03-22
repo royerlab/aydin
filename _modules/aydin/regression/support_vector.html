@@ -106,11 +106,9 @@
 
 
 <div class="viewcode-block" id="SupportVectorRegressor"><a class="viewcode-back" href="../../../api/regressors/support_vector.html#aydin.regression.support_vector.SupportVectorRegressor">[docs]</a><span class="k">class</span> <span class="nc">SupportVectorRegressor</span><span class="p">(</span><span class="n">RegressorBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Support Vector Regressor.</span>
-<span class="sd">    \n\n</span>
-<span class="sd">    Note: Way too slow when non-linear, nearly useless...</span>
-<span class="sd">    When using linear much faster, but does not perform better</span>
-<span class="sd">    than linear regression.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Support Vector Regressor is too slow and does not in pour experience</span>
+<span class="sd">    perform better than random forests or gradient boosting.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linear</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
@@ -120,6 +118,7 @@
 <span class="sd">        ----------</span>
 <span class="sd">        linear : bool</span>
 <span class="sd">            Flag to choose between a linear or non-linear SVR</span>
+<span class="sd">            (advanced)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>

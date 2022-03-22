@@ -141,13 +141,27 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        monitor</span>
+
 <span class="sd">        blind_spots : Optional[Union[str, List[Tuple[int]]]]</span>
+<span class="sd">            List of voxel coordinates (relative to receptive field center) to</span>
+<span class="sd">            be included in the &#39;blind-spot&#39;. If &#39;auto&#39; is passed then the</span>
+<span class="sd">            blindspots are automatically determined from the image content.</span>
+
 <span class="sd">        tile_min_margin : int</span>
+<span class="sd">            Minimal width of tile margin in voxels.</span>
+<span class="sd">            (advanced)</span>
+
 <span class="sd">        tile_max_margin : Optional[int]</span>
+<span class="sd">            Maximal width of tile margin in voxels.</span>
+<span class="sd">            (advanced)</span>
+
 <span class="sd">        max_memory_usage_ratio : float</span>
-<span class="sd">            Maximum allowed memory load.</span>
+<span class="sd">            Maximum allowed memory load, value must be within [0, 1]. Default</span>
+<span class="sd">            is 90%. (advanced)</span>
+
 <span class="sd">        max_tiling_overhead : float</span>
-<span class="sd">            Maximum allowed margin overhead during tiling.</span>
+<span class="sd">            Maximum allowed margin overhead during tiling. Default is 10%.</span>
+<span class="sd">            (advanced)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span> <span class="o">=</span> <span class="kc">False</span>

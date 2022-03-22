@@ -99,7 +99,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for aydin.features.extensible_features</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span>
 
 <span class="kn">from</span> <span class="nn">aydin.features.base</span> <span class="kn">import</span> <span class="n">FeatureGeneratorBase</span>
 <span class="kn">from</span> <span class="nn">aydin.features.groups.base</span> <span class="kn">import</span> <span class="n">FeatureGroupBase</span>
@@ -109,6 +112,8 @@
 <div class="viewcode-block" id="ExtensibleFeatureGenerator"><a class="viewcode-back" href="../../../api/feature_generator.html#aydin.features.standard_features.ExtensibleFeatureGenerator">[docs]</a><span class="k">class</span> <span class="nc">ExtensibleFeatureGenerator</span><span class="p">(</span><span class="n">FeatureGeneratorBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extensible Feature Generator class</span>
+
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -183,15 +188,15 @@
 <div class="viewcode-block" id="ExtensibleFeatureGenerator.compute"><a class="viewcode-back" href="../../../api/feature_generator.html#aydin.features.standard_features.ExtensibleFeatureGenerator.compute">[docs]</a>    <span class="k">def</span> <span class="nf">compute</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">image</span><span class="p">,</span>
-        <span class="n">exclude_center_feature</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">exclude_center_value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">feature_last_dim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">passthrough_channels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">num_reserved_features</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">excluded_voxels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">spatial_feature_offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">spatial_feature_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclude_center_feature</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">exclude_center_value</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">features</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">feature_last_dim</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">passthrough_channels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_reserved_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">excluded_voxels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">spatial_feature_offset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">spatial_feature_scale</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the features given an image. If the input image is of shape (d,h,w),</span>
@@ -200,16 +205,45 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        image : numpy.ndarray</span>
-<span class="sd">        image for which features are computed</span>
+<span class="sd">            image for which features are computed</span>
+
 <span class="sd">        exclude_center_feature : bool</span>
+<span class="sd">            If true, features that use the image</span>
+<span class="sd">            patch&#39;s center pixel are entirely excluded from teh set of computed</span>
+<span class="sd">            features.</span>
+
 <span class="sd">        exclude_center_value : bool</span>
-<span class="sd">        features</span>
+<span class="sd">            If true, the center pixel is never used</span>
+<span class="sd">            to compute any feature, different feature generation algorithms can</span>
+<span class="sd">            take different approaches to acheive that.</span>
+
+<span class="sd">        features : ndarray</span>
+<span class="sd">            If None the feature array is allocated internally,</span>
+<span class="sd">            if not None the provided array is used to store the features.</span>
+
 <span class="sd">        feature_last_dim : bool</span>
-<span class="sd">        passthrough_channels</span>
+<span class="sd">            If True the last dimension of the feature</span>
+<span class="sd">            array is the feature dimension, if False then it is the first</span>
+<span class="sd">            dimension.</span>
+
+<span class="sd">        passthrough_channels : Optional[Tuple[bool]]</span>
+<span class="sd">            Optional tuple of booleans that specify which channels are &#39;pass-through&#39;</span>
+<span class="sd">            channels, i.e. channels that are not featurised and directly used as features.</span>
+
 <span class="sd">        num_reserved_features : int</span>
-<span class="sd">        excluded_voxels</span>
-<span class="sd">        spatial_feature_offset</span>
-<span class="sd">        spatial_feature_scale</span>
+<span class="sd">            Number of features to be left as blank,</span>
+<span class="sd">            useful when adding features separately.</span>
+
+<span class="sd">        excluded_voxels : Optional[List[Tuple[int]]]</span>
+<span class="sd">            List of pixel coordinates -- expressed as tuple of ints relative to the central pixel --</span>
+<span class="sd">            that will be excluded from any computed features. This is used for implementing</span>
+<span class="sd">            &#39;extended blind-spot&#39; N2S denoising approaches.</span>
+
+<span class="sd">        spatial_feature_offset: Optional[Tuple[float, ...]]</span>
+<span class="sd">            Offset vector to be applied (added) to the spatial features (if used).</span>
+
+<span class="sd">        spatial_feature_scale: Optional[Tuple[float, ...]]</span>
+<span class="sd">            Scale vector to be applied (multiplied) to the spatial features (if used).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>

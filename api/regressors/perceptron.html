@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NN Regressor &mdash; Aydin  documentation</title>
+  <title>Perceptron Regressor &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
@@ -70,7 +70,7 @@
 <li class="toctree-l2"><a class="reference internal" href="cb.html">CatBoost Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lgbm.html">LightGBM Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="linear.html">Linear Regressor</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">NN Regressor</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Perceptron Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="random_forest.html">Random Forest Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="support_vector.html">Support Vector Regressor</a></li>
 </ul>
@@ -100,9 +100,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../regressors.html">Regressors</a> &raquo;</li>
-      <li>NN Regressor</li>
+      <li>Perceptron Regressor</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/api/regressors/nn.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/api/regressors/perceptron.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -110,12 +110,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="nn-regressor">
-<h1>NN Regressor<a class="headerlink" href="#nn-regressor" title="Permalink to this headline"></a></h1>
+  <section id="perceptron-regressor">
+<h1>Perceptron Regressor<a class="headerlink" href="#perceptron-regressor" title="Permalink to this headline"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="aydin.regression.nn.NNRegressor">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.regression.nn.</span></span><span class="sig-name descname"><span class="pre">NNRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_epochs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'l1'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/regression/nn.html#NNRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.regression.nn.NNRegressor" title="Permalink to this definition"></a></dt>
-<dd><p>standard perceptron-like neural network regressor.</p>
+<dt class="sig sig-object py" id="aydin.regression.perceptron.PerceptronRegressor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.regression.perceptron.</span></span><span class="sig-name descname"><span class="pre">PerceptronRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_epochs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'l1'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/regression/perceptron.html#PerceptronRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.regression.perceptron.PerceptronRegressor" title="Permalink to this definition"></a></dt>
+<dd><p>The Perceptron Regressor uses a simple multi-layer perceptron neural
+network. The big disadvantage of neural-network regressors is that they
+are trained stochastically, which usually means that when your run them
+twice you also get two different results. In some cases there can be
+significant variance between runs which can be problematic when trying
+to compare results.</p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -123,29 +128,29 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.regression.nn.NNRegressor.fit" title="aydin.regression.nn.NNRegressor.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(x_train, y_train[, x_valid, y_valid, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.regression.perceptron.PerceptronRegressor.fit" title="aydin.regression.perceptron.PerceptronRegressor.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(x_train, y_train[, x_valid, y_valid, ...])</p></td>
 <td><p>Fits function y=f(x) given training pairs (x_train, y_train).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.regression.nn.NNRegressor.load" title="aydin.regression.nn.NNRegressor.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.regression.perceptron.PerceptronRegressor.load" title="aydin.regression.perceptron.PerceptronRegressor.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
 <td><p>Returns an 'all-batteries-included' regressor from a given path (folder).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.regression.nn.NNRegressor.predict" title="aydin.regression.nn.NNRegressor.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(x[, models_to_use])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.regression.perceptron.PerceptronRegressor.predict" title="aydin.regression.perceptron.PerceptronRegressor.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(x[, models_to_use])</p></td>
 <td><p>Predicts y given x by applying the learned function f: y=f(x) If the regressor is trained on multiple ouput channels, this will return the corresponding number of channels...</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.regression.nn.NNRegressor.recommended_max_num_datapoints" title="aydin.regression.nn.NNRegressor.recommended_max_num_datapoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommended_max_num_datapoints</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.regression.perceptron.PerceptronRegressor.recommended_max_num_datapoints" title="aydin.regression.perceptron.PerceptronRegressor.recommended_max_num_datapoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommended_max_num_datapoints</span></code></a>()</p></td>
 <td><p>Recommended maximum number of datapoints</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.regression.nn.NNRegressor.save" title="aydin.regression.nn.NNRegressor.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.regression.perceptron.PerceptronRegressor.save" title="aydin.regression.perceptron.PerceptronRegressor.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
 <td><p>Saves an 'all-batteries-included' regressor at a given path (folder).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.regression.nn.NNRegressor.stop_fit" title="aydin.regression.nn.NNRegressor.stop_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_fit</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#aydin.regression.perceptron.PerceptronRegressor.stop_fit" title="aydin.regression.perceptron.PerceptronRegressor.stop_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_fit</span></code></a>()</p></td>
 <td><p>Stops training (can be called by another thread)</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.regression.nn.NNRegressor.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_valid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_valid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regressor_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.nn.NNRegressor.fit" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.regression.perceptron.PerceptronRegressor.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_valid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_valid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regressor_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.perceptron.PerceptronRegressor.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fits function y=f(x) given training pairs (x_train, y_train).
 Stops when performance stops improving on the test dataset: (x_test, y_test).
 The target y_train can have multiple ‘channels’. This will cause multiple regressors
@@ -169,8 +174,8 @@ to be instanciated internally to be able to predict these channels from the inpu
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.regression.nn.NNRegressor.load">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.nn.NNRegressor.load" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.regression.perceptron.PerceptronRegressor.load">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.perceptron.PerceptronRegressor.load" title="Permalink to this definition"></a></dt>
 <dd><p>Returns an ‘all-batteries-included’ regressor from a given path (folder).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -188,8 +193,8 @@ to be instanciated internally to be able to predict these channels from the inpu
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.regression.nn.NNRegressor.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models_to_use</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.nn.NNRegressor.predict" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.regression.perceptron.PerceptronRegressor.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models_to_use</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.perceptron.PerceptronRegressor.predict" title="Permalink to this definition"></a></dt>
 <dd><p>Predicts y given x by applying the learned function f: y=f(x)
 If the regressor is trained on multiple ouput channels, this will
 return the corresponding number of channels…</p>
@@ -211,8 +216,8 @@ return the corresponding number of channels…</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.regression.nn.NNRegressor.recommended_max_num_datapoints">
-<span class="sig-name descname"><span class="pre">recommended_max_num_datapoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#aydin.regression.nn.NNRegressor.recommended_max_num_datapoints" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.regression.perceptron.PerceptronRegressor.recommended_max_num_datapoints">
+<span class="sig-name descname"><span class="pre">recommended_max_num_datapoints</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#aydin.regression.perceptron.PerceptronRegressor.recommended_max_num_datapoints" title="Permalink to this definition"></a></dt>
 <dd><p>Recommended maximum number of datapoints</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -224,8 +229,8 @@ return the corresponding number of channels…</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.regression.nn.NNRegressor.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.nn.NNRegressor.save" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.regression.perceptron.PerceptronRegressor.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.perceptron.PerceptronRegressor.save" title="Permalink to this definition"></a></dt>
 <dd><p>Saves an ‘all-batteries-included’ regressor at a given path (folder).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -243,8 +248,8 @@ return the corresponding number of channels…</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="aydin.regression.nn.NNRegressor.stop_fit">
-<span class="sig-name descname"><span class="pre">stop_fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.nn.NNRegressor.stop_fit" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="aydin.regression.perceptron.PerceptronRegressor.stop_fit">
+<span class="sig-name descname"><span class="pre">stop_fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aydin.regression.perceptron.PerceptronRegressor.stop_fit" title="Permalink to this definition"></a></dt>
 <dd><p>Stops training (can be called by another thread)</p>
 </dd></dl>
 

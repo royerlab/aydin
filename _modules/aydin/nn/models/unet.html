@@ -133,7 +133,8 @@
 
 
 <div class="viewcode-block" id="UNetModel"><a class="viewcode-back" href="../../../../api/nn/unet.html#aydin.nn.models.unet.UNetModel">[docs]</a><span class="k">class</span> <span class="nc">UNetModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Standard UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:</span>
 <span class="sd">    self-supervised learning with shift and conv scheme non-shiftconv: self-supervised learning by masking pixels at</span>
 <span class="sd">    each iteration</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -160,30 +161,42 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        input_layer_size</span>
-<span class="sd">        spacetime_ndim</span>
+<span class="sd">        input_layer_size :</span>
+<span class="sd">            TODO: missing!</span>
+<span class="sd">        spacetime_ndim :</span>
+<span class="sd">            TODO: missing!</span>
 <span class="sd">        mini_batch_size : int</span>
 <span class="sd">            Mini-batch size</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        nb_unet_levels : int</span>
 <span class="sd">            Depth level of the UNet</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        normalization : string</span>
 <span class="sd">            normalization type, can be `batch` and `instance` for now</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        activation : string</span>
 <span class="sd">            Type of the activation function to use</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        supervised : bool</span>
 <span class="sd">            Flag that controls training approach</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        shiftconv : bool</span>
 <span class="sd">            Flag that controls use of shift convolutions</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        nfilters : int</span>
 <span class="sd">            Number of filters in first layer</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        learning_rate : float</span>
 <span class="sd">            Learning rate</span>
 <span class="sd">        original_zdim : int</span>
 <span class="sd">            Original Z-dimension length</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        weight_decay : int</span>
 <span class="sd">            coefficient of l1 regularizer</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        residual : bool</span>
 <span class="sd">            whether to use add or concat at merging layers</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        pooling_mode : str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span> <span class="o">=</span> <span class="kc">False</span>

@@ -111,7 +111,13 @@
 
 
 <div class="viewcode-block" id="StandardFeatureGenerator"><a class="viewcode-back" href="../../../api/feature_generator.html#aydin.features.standard_features.StandardFeatureGenerator">[docs]</a><span class="k">class</span> <span class="nc">StandardFeatureGenerator</span><span class="p">(</span><span class="n">ExtensibleFeatureGenerator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Standard Feature Generator&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The standard feature generator provides the following set of features:</span>
+<span class="sd">    multiscale integral(uniform) features of different shapes, spatial</span>
+<span class="sd">    features, median features, dct features, deterministic random</span>
+<span class="sd">    convolutional features.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -147,51 +153,66 @@
 <span class="sd">        kernel_shapes : numpy.typing.ArrayLike</span>
 <span class="sd">            ArrayLike of kernel shapes.</span>
 <span class="sd">        min_level : int</span>
-<span class="sd">            Minimum level of features to include</span>
+<span class="sd">            Minimum scale level of features to include</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        max_level : int</span>
-<span class="sd">            Maximum level of features to include</span>
+<span class="sd">            Maximum scale level of features to include</span>
 <span class="sd">        scale_one_width : int</span>
 <span class="sd">            Width of the scale one features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        include_scale_one : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
 <span class="sd">            on inclusion of scale-one-features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        include_fine_features : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
 <span class="sd">            on inclusion of fine features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        include_corner_features : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
 <span class="sd">            on inclusion of corner features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        include_line_features : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
 <span class="sd">            on inclusion of line features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        decimate_large_scale_features : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
 <span class="sd">            on decimation of large scale features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        extend_large_scale_features : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
 <span class="sd">            on extension of large scale features.</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        include_spatial_features : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on inclusion of spatial features</span>
+<span class="sd">            on inclusion of spatial features.</span>
 <span class="sd">        spatial_features_coarsening : int</span>
 <span class="sd">            Degree of coarsening to apply on spatial features</span>
 <span class="sd">            to prevent identification of individual pixel values</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        num_sinusoidal_features : int</span>
 <span class="sd">            Number of sinusoidal features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        include_median_features : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
 <span class="sd">            on inclusion of median features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        include_dct_features : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
 <span class="sd">            on inclusion of dct features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        dct_max_freq : float</span>
 <span class="sd">            Maximum included frequency during</span>
 <span class="sd">            dct features computation.</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        include_random_conv_features : bool</span>
 <span class="sd">            True or False, argument to set decision</span>
 <span class="sd">            on inclusion of random convolutional features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        dtype</span>
 <span class="sd">            Datatype of the features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 

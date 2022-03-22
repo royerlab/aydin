@@ -106,7 +106,13 @@
 
 
 <div class="viewcode-block" id="RandomForestRegressor"><a class="viewcode-back" href="../../../api/regressors/random_forest.html#aydin.regression.random_forest.RandomForestRegressor">[docs]</a><span class="k">class</span> <span class="nc">RandomForestRegressor</span><span class="p">(</span><span class="n">LGBMRegressor</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Random Forrest Regressor (uses the LGBM library).&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Random Forrest Regressor uses random forrest regression as</span>
+<span class="sd">    implemented in the &lt;a href=&quot;https://github.com/microsoft/LightGBM</span>
+<span class="sd">    &quot;&gt;LightGBM&lt;/a&gt; libray. This regressor is very fast and has decent</span>
+<span class="sd">    performance, offering an attractive trade-off between speed and quality</span>
+<span class="sd">    that is advantageous for &#39;easy&#39; datasets.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -124,17 +130,24 @@
 <span class="sd">        ----------</span>
 <span class="sd">        num_leaves</span>
 <span class="sd">            Number of leaves</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        max_num_estimators</span>
 <span class="sd">            Maximum number of estimators</span>
 <span class="sd">        max_bin</span>
 <span class="sd">            Maximum number of allowed bins</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        learning_rate</span>
-<span class="sd">            Learning rate for the LightGBM model</span>
+<span class="sd">            Learning rate for the LightGBM random forrest model</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        loss</span>
 <span class="sd">            Type of loss to be used</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        patience</span>
 <span class="sd">            Number of rounds required for early stopping</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        verbosity</span>
+<span class="sd">            Verbosity setting of LightGBM.</span>
+<span class="sd">            (advanced)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>

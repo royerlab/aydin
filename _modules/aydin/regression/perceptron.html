@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aydin.regression.nn &mdash; Aydin  documentation</title>
+  <title>aydin.regression.perceptron &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
@@ -89,7 +89,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>aydin.regression.nn</li>
+      <li>aydin.regression.perceptron</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -98,7 +98,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for aydin.regression.nn</h1><div class="highlight"><pre>
+  <h1>Source code for aydin.regression.perceptron</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">gc</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
@@ -121,8 +121,15 @@
 <span class="kn">from</span> <span class="nn">aydin.util.tf.device</span> <span class="kn">import</span> <span class="n">get_best_device_name</span>
 
 
-<div class="viewcode-block" id="NNRegressor"><a class="viewcode-back" href="../../../api/regressors/nn.html#aydin.regression.nn.NNRegressor">[docs]</a><span class="k">class</span> <span class="nc">NNRegressor</span><span class="p">(</span><span class="n">RegressorBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;standard perceptron-like neural network regressor.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PerceptronRegressor"><a class="viewcode-back" href="../../../api/regressors/perceptron.html#aydin.regression.perceptron.PerceptronRegressor">[docs]</a><span class="k">class</span> <span class="nc">PerceptronRegressor</span><span class="p">(</span><span class="n">RegressorBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The Perceptron Regressor uses a simple multi-layer perceptron neural</span>
+<span class="sd">    network. The big disadvantage of neural-network regressors is that they</span>
+<span class="sd">    are trained stochastically, which usually means that when your run them</span>
+<span class="sd">    twice you also get two different results. In some cases there can be</span>
+<span class="sd">    significant variance between runs which can be problematic when trying</span>
+<span class="sd">    to compare results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">device_max_mem</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()</span><span class="o">.</span><span class="n">total</span>
 
@@ -142,12 +149,15 @@
 <span class="sd">            Maximum number of epochs allowed</span>
 <span class="sd">        learning_rate : float</span>
 <span class="sd">            Learning rate</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        patience : int</span>
 <span class="sd">            Number of epochs required for early stopping</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        depth : int</span>
 <span class="sd">            Depth of the model</span>
 <span class="sd">        loss : str</span>
 <span class="sd">            Type of loss to be used</span>
+<span class="sd">            (advanced)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -430,7 +440,7 @@
                 <span class="k">assert</span> <span class="n">num_of_features</span> <span class="o">==</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="c1"># How much memory is available in GPU:</span>
-                <span class="n">max_gpu_mem_in_bytes</span> <span class="o">=</span> <span class="n">NNRegressor</span><span class="o">.</span><span class="n">device_max_mem</span>
+                <span class="n">max_gpu_mem_in_bytes</span> <span class="o">=</span> <span class="n">PerceptronRegressor</span><span class="o">.</span><span class="n">device_max_mem</span>
 
                 <span class="c1"># We limit ourselves to using only a quarter of GPU memory:</span>
                 <span class="n">max_number_of_floats</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_gpu_mem_in_bytes</span> <span class="o">//</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span>

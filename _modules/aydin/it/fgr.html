@@ -101,7 +101,7 @@
   <h1>Source code for aydin.it.fgr</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">gc</span>
 <span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 
 <span class="kn">from</span> <span class="nn">aydin.features.base</span> <span class="kn">import</span> <span class="n">FeatureGeneratorBase</span>
@@ -117,7 +117,7 @@
 
 <div class="viewcode-block" id="ImageTranslatorFGR"><a class="viewcode-back" href="../../../api/image_translators/fgr.html#aydin.it.fgr.ImageTranslatorFGR">[docs]</a><span class="k">class</span> <span class="nc">ImageTranslatorFGR</span><span class="p">(</span><span class="n">ImageTranslatorBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Feature Generation &amp; Regression (FGR) based Image TranslatorFGR Image Translator</span>
+<span class="sd">    Feature Generation &amp; Regression (FGR) based Image TranslatorFGR Image Translator.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">feature_generator</span><span class="p">:</span> <span class="n">FeatureGeneratorBase</span>
@@ -129,41 +129,91 @@
         <span class="n">balance_training_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">voxel_keep_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">max_voxels_for_training</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">favour_bright_pixels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">favour_bright_pixels</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">blind_spots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tile_min_margin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">tile_max_margin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_memory_usage_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">max_tiling_overhead</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Constructs a FGR image translator. FGR image translators use feature generation</span>
-<span class="sd">        and regression learning to acheive image translation.</span>
+        <span class="sd">&quot;&quot;&quot;Constructs a FGR image translator. FGR image translators use</span>
+<span class="sd">        feature generation and regression learning to acheive image</span>
+<span class="sd">        translation. Typically used to denoise images using the Noise 2Self</span>
+<span class="sd">        principle.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        feature_generator : FeatureGeneratorBase</span>
 <span class="sd">            Feature generator.</span>
+<span class="sd">            (advanced)</span>
+
 <span class="sd">        regressor : RegressorBase</span>
 <span class="sd">            Regressor.</span>
+<span class="sd">            (advanced)</span>
+
 <span class="sd">        balance_training_data : bool</span>
-<span class="sd">            Limits number training entries per target</span>
-<span class="sd">            value histogram bin.</span>
+<span class="sd">            Balancing the training data improves image denoising performance</span>
+<span class="sd">            by avoiding the over-representation of certain pixel intensities</span>
+<span class="sd">            in the training data. For example, for images that are very dark</span>
+<span class="sd">            with mostly dark background and only few bright regions,</span>
+<span class="sd">            the brightness histogram will be is very skewed. In that case</span>
+<span class="sd">            you want to turn on balancing so that the training data better</span>
+<span class="sd">            represents the pixel values at all brightness levels.</span>
+
 <span class="sd">        voxel_keep_ratio : float</span>
-<span class="sd">            Ratio of the voxels to keep for training.</span>
+<span class="sd">            Ratio of the voxels to keep for training. Reduce this number to</span>
+<span class="sd">            speed up denoising or if the images are extremely large and</span>
+<span class="sd">            repetitive. (advanced)</span>
+
 <span class="sd">        max_voxels_for_training : int, optional</span>
-<span class="sd">            Maximum number of the voxels that can be</span>
-<span class="sd">            used for training.</span>
-<span class="sd">        favour_bright_pixels : bool</span>
-<span class="sd">            Marks bright pixels more favourable for</span>
-<span class="sd">            the data histogram balancer.</span>
-<span class="sd">        kwargs : dict</span>
-<span class="sd">            Keyword arguments.</span>
+<span class="sd">            Maximum number of the voxels that can be used for training. This</span>
+<span class="sd">            option limits the amount of training data and thus also limits</span>
+<span class="sd">            the time required for training. In our experience we don&#39;t</span>
+<span class="sd">            necessarily need more than several million voxels to train an</span>
+<span class="sd">            effective denoiser. Different regressors (lgbm, cb, ...) can</span>
+<span class="sd">            handle varying sizes of training data. We recommend at least a</span>
+<span class="sd">            million (1e6) and ta most 40 million if you have a powerfull</span>
+<span class="sd">            machine with GPU and if you are armed with patience. (advanced)</span>
+
+<span class="sd">        favour_bright_pixels : float</span>
+<span class="sd">            Value within [-1.0, 1.0] that controls whether to favour bright</span>
+<span class="sd">            or dark pixels during training data balancing. By default (0) all</span>
+<span class="sd">            pixel intensities are treated equally. Positive values favour</span>
+<span class="sd">            bright pixels, negative values favour dark pixels.</span>
+
+<span class="sd">        blind_spots : Optional[Union[str, List[Tuple[int]]]]</span>
+<span class="sd">            List of voxel coordinates (relative to receptive field center) to</span>
+<span class="sd">            be included in the &#39;blind-spot&#39;. If &#39;auto&#39; is passed then the</span>
+<span class="sd">            blindspots are automatically determined from the image content.</span>
+
+<span class="sd">        tile_min_margin : int</span>
+<span class="sd">            Minimal width of tile margin in voxels.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        tile_max_margin : Optional[int]</span>
+<span class="sd">            Maximal width of tile margin in voxels.</span>
+<span class="sd">            (advanced)</span>
+
 <span class="sd">        max_memory_usage_ratio : float</span>
-<span class="sd">            Maximum allowed memory load.</span>
+<span class="sd">            Maximum allowed memory load, value must be within [0, 1]. Default is 90%.</span>
+<span class="sd">            (advanced)</span>
+
 <span class="sd">        max_tiling_overhead : float</span>
-<span class="sd">            Maximum allowed margin overhead during tiling.</span>
+<span class="sd">            Maximum allowed margin overhead during tiling. Default is 10%.</span>
+<span class="sd">            (advanced)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+            <span class="n">tile_min_margin</span><span class="o">=</span><span class="n">tile_min_margin</span><span class="p">,</span>
+            <span class="n">tile_max_margin</span><span class="o">=</span><span class="n">tile_max_margin</span><span class="p">,</span>
+            <span class="n">max_memory_usage_ratio</span><span class="o">=</span><span class="n">max_memory_usage_ratio</span><span class="p">,</span>
+            <span class="n">max_tiling_overhead</span><span class="o">=</span><span class="n">max_tiling_overhead</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">voxel_keep_ratio</span> <span class="o">=</span> <span class="n">voxel_keep_ratio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">balance_training_data</span> <span class="o">=</span> <span class="n">balance_training_data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span> <span class="o">=</span> <span class="n">favour_bright_pixels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">favour_bright_pixels</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_generator</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">StandardFeatureGenerator</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">feature_generator</span> <span class="ow">is</span> <span class="kc">None</span>
@@ -572,8 +622,12 @@
         <span class="p">)</span>
         <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Effective keep-ratio is: </span><span class="si">{</span><span class="n">effective_keep_ratio</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">lprint</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Favouring bright pixels: </span><span class="si">{</span><span class="s1">&#39;yes&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span> <span class="k">else</span> <span class="s1">&#39;no&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Favouring bright pixels: </span><span class="si">{</span><span class="s1">&#39;yes&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;no&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">lprint</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Favouring bright pixels by a linear slope of: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># We decide on a &#39;batch&#39; length that will be used to shuffle, select and then copy the training data...</span>
         <span class="n">num_of_voxels_per_stack</span> <span class="o">=</span> <span class="n">input_image</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">size</span>

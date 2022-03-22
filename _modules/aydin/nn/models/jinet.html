@@ -115,7 +115,11 @@
 
 
 <div class="viewcode-block" id="JINetModel"><a class="viewcode-back" href="../../../../api/nn/jinet.html#aydin.nn.models.jinet.JINetModel">[docs]</a><span class="k">class</span> <span class="nc">JINetModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;JINet model for 2D and 3D images.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The JINet model is a hybrid CNN-perceptron model that leverages dilated</span>
+<span class="sd">    convolutions to incorporate a built-in &#39;blind-spot&#39; as required for N2S</span>
+<span class="sd">    denoising. Supports both 2D and 3D images.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -135,23 +139,34 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        input_layer_size</span>
-<span class="sd">        spacetime_ndim</span>
+<span class="sd">        input_layer_size :</span>
+<span class="sd">            TODO: missing!</span>
+<span class="sd">        spacetime_ndim :</span>
+<span class="sd">            TODO: missing!</span>
 <span class="sd">        num_output_channels : int</span>
 <span class="sd">            number of output channels</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        kernel_sizes : int</span>
 <span class="sd">            a list of kernel sizes; corresponding to num_features</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        num_features : int</span>
 <span class="sd">            a list of number of channels; corresponding to kernel_sizes</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        num_dense_layers : int</span>
 <span class="sd">            number of dense layers after feature extraction</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        num_channels : int</span>
 <span class="sd">            number of channels in the dense layer</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        final_relu : bool</span>
 <span class="sd">            whether having the final ReLU or not</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        degressive_residuals : bool</span>
 <span class="sd">            whether having weight decay in the dense layers</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        learning_rate : float</span>
+<span class="sd">            TODO: missing!</span>
+<span class="sd">            (advanced)</span>
 <span class="sd">        kwargs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">spacetime_ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">spacetime_ndim</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>

@@ -115,7 +115,11 @@
 
 
 <div class="viewcode-block" id="Noise2SelfCNN"><a class="viewcode-back" href="../../../../api/restorations/denoise_restoration.html#aydin.Noise2SelfCNN">[docs]</a><span class="k">class</span> <span class="nc">Noise2SelfCNN</span><span class="p">(</span><span class="n">DenoiseRestorationBase</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Noise2Self image denoising using &quot;Convolutional Neural Networks&quot; (CNN)&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Noise2Self image denoising using the &quot;Convolutional Neural Networks&quot; (</span>
+<span class="sd">    CNN) approach. Follows from the theory exposed in the &lt;a</span>
+<span class="sd">    href=&quot;https://arxiv.org/abs/1901.11365&quot;&gt;Noise2Self paper&lt;/a&gt;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -218,11 +222,12 @@
             <span class="p">]</span>  <span class="c1"># class name</span>
 
             <span class="n">elem_class</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-            <span class="n">descriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">cnn_description</span>
-                <span class="o">+</span> <span class="s2">&quot;&lt;br&gt;&lt;br&gt;&quot;</span>
-                <span class="o">+</span> <span class="n">elem_class</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;br&gt;&lt;br&gt;&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">model_name</span> <span class="o">=</span> <span class="n">elem_class</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">model_description</span> <span class="o">=</span> <span class="n">elem_class</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;br&gt;&lt;br&gt;&quot;</span><span class="p">)</span>
+
+            <span class="n">descriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cnn_description</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&lt;br&gt;&lt;br&gt;</span><span class="si">{</span><span class="n">model_description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">elem_class</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">descriptions</span>
 

@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Support Vector Regressor" href="support_vector.html" />
-    <link rel="prev" title="NN Regressor" href="nn.html" /> 
+    <link rel="prev" title="Perceptron Regressor" href="perceptron.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -70,7 +70,7 @@
 <li class="toctree-l2"><a class="reference internal" href="cb.html">CatBoost Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lgbm.html">LightGBM Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="linear.html">Linear Regressor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nn.html">NN Regressor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="perceptron.html">Perceptron Regressor</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Random Forest Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="support_vector.html">Support Vector Regressor</a></li>
 </ul>
@@ -115,7 +115,11 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="aydin.regression.random_forest.RandomForestRegressor">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.regression.random_forest.</span></span><span class="sig-name descname"><span class="pre">RandomForestRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_leaves</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1024</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_estimators</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">2048</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_bin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'l1'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/regression/random_forest.html#RandomForestRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.regression.random_forest.RandomForestRegressor" title="Permalink to this definition"></a></dt>
-<dd><p>Random Forrest Regressor (uses the LGBM library).</p>
+<dd><p>The Random Forrest Regressor uses random forrest regression as
+implemented in the &lt;a href=”<a class="reference external" href="https://github.com/microsoft/LightGBM">https://github.com/microsoft/LightGBM</a>
+“&gt;LightGBM&lt;/a&gt; libray. This regressor is very fast and has decent
+performance, offering an attractive trade-off between speed and quality
+that is advantageous for ‘easy’ datasets.</p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -256,7 +260,7 @@ return the corresponding number of channels…</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="nn.html" class="btn btn-neutral float-left" title="NN Regressor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="perceptron.html" class="btn btn-neutral float-left" title="Perceptron Regressor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="support_vector.html" class="btn btn-neutral float-right" title="Support Vector Regressor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

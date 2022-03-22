@@ -120,14 +120,16 @@
 <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;BUNDLED_AYDIN&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">aydin.regression.lgbm</span> <span class="kn">import</span> <span class="n">LGBMRegressor</span>  <span class="c1"># noqa: F401</span>
     <span class="kn">from</span> <span class="nn">aydin.regression.linear</span> <span class="kn">import</span> <span class="n">LinearRegressor</span>  <span class="c1"># noqa: F401</span>
-    <span class="kn">from</span> <span class="nn">aydin.regression.nn</span> <span class="kn">import</span> <span class="n">NNRegressor</span>  <span class="c1"># noqa: F401</span>
+    <span class="kn">from</span> <span class="nn">aydin.regression.perceptron</span> <span class="kn">import</span> <span class="n">PerceptronRegressor</span>  <span class="c1"># noqa: F401</span>
     <span class="kn">from</span> <span class="nn">aydin.regression.random_forest</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>  <span class="c1"># noqa: F401</span>
     <span class="kn">from</span> <span class="nn">aydin.regression.support_vector</span> <span class="kn">import</span> <span class="n">SupportVectorRegressor</span>  <span class="c1"># noqa: F401</span>
 
 
 <div class="viewcode-block" id="Noise2SelfFGR"><a class="viewcode-back" href="../../../../api/restorations/denoise_restoration.html#aydin.Noise2SelfFGR">[docs]</a><span class="k">class</span> <span class="nc">Noise2SelfFGR</span><span class="p">(</span><span class="n">DenoiseRestorationBase</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Noise2Self image denoising &quot;Feature Generation &amp; Regression&quot; (FGR)</span>
+<span class="sd">    Noise2Self image denoising using the &quot;Feature Generation &amp; Regression&quot; (</span>
+<span class="sd">    FGR) approach. Follows from the theory exposed in the &lt;a</span>
+<span class="sd">    href=&quot;https://arxiv.org/abs/1901.11365&quot;&gt;Noise2Self paper&lt;/a&gt;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -241,6 +243,10 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">implementations_description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">fgr_description</span> <span class="o">=</span> <span class="n">Noise2SelfFGR</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="n">feature_generator_name</span> <span class="o">=</span> <span class="n">StandardFeatureGenerator</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="s2">&quot;FeatureGenerator&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">)</span>
         <span class="n">feature_generator_description</span> <span class="o">=</span> <span class="n">StandardFeatureGenerator</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         <span class="n">descriptions</span> <span class="o">=</span> <span class="p">[]</span>
@@ -256,12 +262,14 @@
             <span class="p">]</span>  <span class="c1"># class name</span>
 
             <span class="n">elem_class</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="n">regressor_name</span> <span class="o">=</span> <span class="n">elem_class</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;Regressor&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">regressor_description</span> <span class="o">=</span> <span class="n">elem_class</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;br&gt;&lt;br&gt;&quot;</span><span class="p">)</span>
+
             <span class="n">descriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">fgr_description</span>
-                <span class="o">+</span> <span class="s2">&quot;, uses &quot;</span>
-                <span class="o">+</span> <span class="n">feature_generator_description</span>
-                <span class="o">+</span> <span class="s2">&quot; and uses &quot;</span>
-                <span class="o">+</span> <span class="n">elem_class</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;br&gt;&lt;br&gt;&quot;</span><span class="p">)</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; Uses the </span><span class="si">{</span><span class="n">feature_generator_name</span><span class="si">}</span><span class="s2"> feature generator and </span><span class="si">{</span><span class="n">regressor_name</span><span class="si">}</span><span class="s2"> regressor. &quot;</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&lt;br&gt;&lt;br&gt;About the feature generator: </span><span class="si">{</span><span class="n">feature_generator_description</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&lt;br&gt;&lt;br&gt;About the regressor: </span><span class="si">{</span><span class="n">regressor_description</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">descriptions</span>

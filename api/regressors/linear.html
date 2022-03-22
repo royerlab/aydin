@@ -21,7 +21,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="NN Regressor" href="nn.html" />
+    <link rel="next" title="Perceptron Regressor" href="perceptron.html" />
     <link rel="prev" title="LightGBM Regressor" href="lgbm.html" /> 
 </head>
 
@@ -70,7 +70,7 @@
 <li class="toctree-l2"><a class="reference internal" href="cb.html">CatBoost Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lgbm.html">LightGBM Regressor</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Linear Regressor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="nn.html">NN Regressor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="perceptron.html">Perceptron Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="random_forest.html">Random Forest Regressor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="support_vector.html">Support Vector Regressor</a></li>
 </ul>
@@ -115,8 +115,9 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="aydin.regression.linear.LinearRegressor">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.regression.linear.</span></span><span class="sig-name descname"><span class="pre">LinearRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'huber'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_iterations</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">512</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/regression/linear.html#LinearRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.regression.linear.LinearRegressor" title="Permalink to this definition"></a></dt>
-<dd><p>Linear Regressor.</p>
-<p>Note: Fast but overall poor performance – as expected.</p>
+<dd><p>The Linear Regressor is the simplest of all repressors, and in general
+performs poorly. However, it is also very fast and can be advantageous in
+some ‘simple’ situations.</p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -258,7 +259,7 @@ return the corresponding number of channels…</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="lgbm.html" class="btn btn-neutral float-left" title="LightGBM Regressor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="nn.html" class="btn btn-neutral float-right" title="NN Regressor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="perceptron.html" class="btn btn-neutral float-right" title="Perceptron Regressor" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
