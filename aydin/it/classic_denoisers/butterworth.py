@@ -317,6 +317,8 @@ def denoise_butterworth(
     return denoised
 
 
+# Todo: write a jitted version of this!
+# @jit(nopython=True, parallel=True)
 def _compute_distance_image(freq_cutoff, image, selected_axes):
     f = numpy.zeros_like(image, dtype=numpy.float32)
     axis_grid = tuple(
@@ -333,6 +335,5 @@ def _apw(freq_cutoff, max_padding):
 
 
 def _filter(image_f, f, order):
-    image_f *= 1 / numpy.sqrt(1 + numpy.sqrt(f) ** (2 * order))
-    image_f *= (1 + f ** order) ** (-0.5)
+    image_f /= numpy.sqrt(1 + f ** order)
     return image_f
