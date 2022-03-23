@@ -6,7 +6,26 @@ from aydin.util.log.log import lprint
 
 
 class SpatialFeatures(FeatureGroupBase):
+    """
+    Spatial Feature Group class
+
+    These features are simply the shifted, scaled, and possibly quantised
+    coordinates of the voxels themselves.
+    """
+
     def __init__(self, coarsening: int = 1, period: float = 0):
+        """
+        Constructor that configures these features.
+
+        Parameters
+        ----------
+        coarsening : int
+            How many pixels should have the same value?
+            (advanced)
+        period : float
+            If not zero then the feature is sinusoidal.
+            (advanced)
+        """
         super().__init__()
 
         self.coarsening = coarsening

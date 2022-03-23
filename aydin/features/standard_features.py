@@ -10,7 +10,13 @@ from aydin.util.log.log import lprint
 
 
 class StandardFeatureGenerator(ExtensibleFeatureGenerator):
-    """Standard Feature Generator"""
+    """
+    The standard feature generator provides the following set of features:
+    multiscale integral(uniform) features of different shapes, spatial
+    features, median features, dct features, deterministic random
+    convolutional features.
+
+    """
 
     def __init__(
         self,
@@ -46,51 +52,66 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
         kernel_shapes : numpy.typing.ArrayLike
             ArrayLike of kernel shapes.
         min_level : int
-            Minimum level of features to include
+            Minimum scale level of features to include
+            (advanced)
         max_level : int
-            Maximum level of features to include
+            Maximum scale level of features to include
         scale_one_width : int
             Width of the scale one features
+            (advanced)
         include_scale_one : bool
             True or False, argument to set decision
             on inclusion of scale-one-features
+            (advanced)
         include_fine_features : bool
             True or False, argument to set decision
             on inclusion of fine features
+            (advanced)
         include_corner_features : bool
             True or False, argument to set decision
             on inclusion of corner features
+            (advanced)
         include_line_features : bool
             True or False, argument to set decision
             on inclusion of line features
+            (advanced)
         decimate_large_scale_features : bool
             True or False, argument to set decision
             on decimation of large scale features
+            (advanced)
         extend_large_scale_features : bool
             True or False, argument to set decision
             on extension of large scale features.
+            (advanced)
         include_spatial_features : bool
             True or False, argument to set decision
-            on inclusion of spatial features
+            on inclusion of spatial features.
         spatial_features_coarsening : int
             Degree of coarsening to apply on spatial features
             to prevent identification of individual pixel values
+            (advanced)
         num_sinusoidal_features : int
             Number of sinusoidal features
+            (advanced)
         include_median_features : bool
             True or False, argument to set decision
             on inclusion of median features
+            (advanced)
         include_dct_features : bool
             True or False, argument to set decision
             on inclusion of dct features
+            (advanced)
         dct_max_freq : float
             Maximum included frequency during
             dct features computation.
+            (advanced)
         include_random_conv_features : bool
             True or False, argument to set decision
             on inclusion of random convolutional features
+            (advanced)
         dtype
             Datatype of the features
+            (advanced)
         """
         super().__init__()
 

@@ -1,9 +1,10 @@
 from functools import reduce
 from math import sqrt
 from operator import mul
-from typing import Tuple, Union, Optional
+from typing import Tuple, Union, Optional, Sequence
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.typing import ArrayLike
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.feature_extraction.image import _extract_patches
 
@@ -11,13 +12,41 @@ from aydin.util.log.log import lprint, lsection
 
 
 def extract_kernels(
-    image,
+    image: ArrayLike,
     size: int = 7,
     num_kernels: int = None,
     num_patches: int = 1e5,
     num_iterations: int = 100,
     display: bool = False,
-):
+) -> Sequence[ArrayLike]:
+    """
+    Extracts representative kernels from a given image using MiniBatchKMeans.
+
+    Parameters
+    ----------
+    image: ArrayLike
+        Image to compute kernels for.
+
+    size: int
+        Size of the kernels
+
+    num_kernels: int
+        Number of kernels to extract
+
+    num_patches: int
+        Number of image patches to consider.
+
+    num_iterations: int
+        Number of iterations.
+
+    display: bool
+        When True a napari window opens up to display the kernels.
+
+    Returns
+    -------
+    Sequence of kernels.
+
+    """
     if num_kernels is None:
         num_kernels = size ** image.ndim
 

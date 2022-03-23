@@ -14,7 +14,7 @@ from skimage.util import random_noise
 
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.lgbm import LGBMRegressor
-from aydin.regression.nn import NNRegressor
+from aydin.regression.perceptron import PerceptronRegressor
 
 
 def n(image):
@@ -89,5 +89,5 @@ def demo(regressor):
         viewer.add_image(n(denoised), name='denoised')
 
 
-demo(NNRegressor(max_epochs=10))
+demo(PerceptronRegressor(max_epochs=10))
 demo(LGBMRegressor(max_num_estimators=400))

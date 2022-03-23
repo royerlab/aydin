@@ -1,5 +1,7 @@
 import random
 from os.path import join
+from typing import Optional, Union, List, Tuple
+
 import keras.models
 import numpy
 from tensorflow.python.eager.context import device
@@ -44,7 +46,11 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         max_epochs: int = 30,
         patience: int = 4,
         learn_rate: float = 0.01,
-        **kwargs,
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
+        tile_min_margin: int = 8,
+        tile_max_margin: Optional[int] = None,
+        max_memory_usage_ratio: float = 0.9,
+        max_tiling_overhead: float = 0.1,
     ):
         """
 
@@ -52,35 +58,83 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         ----------
         training_architecture : str
             'shiftconv' or 'checkerbox' or 'random' or 'checkran' architecture
+            (advanced)
+
         model_architecture : str
             'unet' or 'jinet'
+
         batch_size : int
             Batch size for training
+
         nb_unet_levels : int
             Number of layers
+            (advanced)
+
         batch_norm
             Type of batch normalization (e.g. batch, instance)
-        activation
+            (advanced)
+
+        activation :
+            (advanced)
+
         patch_size : int
             Size for patch sample e.g. 64 for (64, 64) or (64, 64, 64)
+            (advanced)
+
         total_num_patches
             Total number of patches for training
+            (advanced)
+
         adoption_rate
-            % of random patches will be used for training, the rest will be discarded
+            Percentage of random patches will be used for training, the rest will be discarded
+
         mask_size
             Mask shape for masking architecture; int of the same size as the spatial dimension
+            (advanced)
+
         random_mask_ratio
             Probability of masked pixels in random masking approach
+            (advanced)
+
         max_epochs : int
             Maximum number of epochs allowed
+
         patience : int
             Patience for EarlyStop or ReducedLR to be triggered
+
         learn_rate : float
             Initial learn rate
-        kwargs
-            Meant to have only keyword arguments for super class constructor. Do NOT abuse.
+
+        blind_spots : Optional[Union[str, List[Tuple[int]]]]
+            List of voxel coordinates (relative to receptive field center) to
+            be included in the 'blind-spot'. If 'auto' is passed then the
+            blindspots are automatically determined from the image content.
+
+        tile_min_margin : int
+            Minimal width of tile margin in voxels.
+            (advanced)
+
+        tile_max_margin : Optional[int]
+            Maximal width of tile margin in voxels.
+            (advanced)
+
+        max_memory_usage_ratio : float
+            Maximum allowed memory load, value must be within [0, 1]. Default is 90%.
+            (advanced)
+
+        max_tiling_overhead : float
+            Maximum allowed margin overhead during tiling. Default is 10%.
+            (advanced)
+
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            blind_spots=blind_spots,
+            tile_min_margin=tile_min_margin,
+            tile_max_margin=tile_max_margin,
+            max_memory_usage_ratio=max_memory_usage_ratio,
+            max_tiling_overhead=max_tiling_overhead,
+        )
+
         self.model_architecture = model_architecture  # both
         self.batch_size = batch_size  # both
         self.batch_norm = batch_norm  # both
