@@ -82,10 +82,6 @@ def calibrate_denoise_harmonic(
         image, crop_size=crop_size_in_voxels, display_crop=display_crop
     )
 
-    # alpha range:
-    # alpha_range = numpy.concatenate(
-    #     [numpy.arange(0.01, 1, 0.1), 0.5 + 0.15 * numpy.arange(-1, 1, 0.1)]
-    # )
     alpha_range = (0.0, 1.0)
 
     # Parameters to test when calibrating the denoising algorithm

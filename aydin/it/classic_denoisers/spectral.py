@@ -140,7 +140,7 @@ def calibrate_denoise_spectral(
 
     # Partial function:
     _denoise_spectral = partial(
-        denoise_spectral, **(other_fixed_parameters | {'multi_core': False})
+        denoise_spectral, **(other_fixed_parameters | {'multi_core': True})
     )
 
     # Calibrate denoiser

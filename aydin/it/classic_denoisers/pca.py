@@ -95,7 +95,7 @@ def calibrate_denoise_pca(
 
     # Partial function:
     _denoise_pca = partial(
-        denoise_pca, **(other_fixed_parameters | {'multi_core': False})
+        denoise_pca, **(other_fixed_parameters | {'multi_core': True})
     )
 
     # Calibrate denoiser

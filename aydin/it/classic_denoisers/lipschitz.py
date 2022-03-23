@@ -161,6 +161,7 @@ def denoise_lipschitz(
     return image
 
 
+@jit(nopython=True, parallel=True)
 def _compute_error(array, median, lipschitz):
     # we compute the error map:
     error = median - array
