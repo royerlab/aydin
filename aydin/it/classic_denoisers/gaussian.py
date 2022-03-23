@@ -2,18 +2,21 @@ from functools import partial
 from typing import Optional
 
 import numpy
+from numpy.typing import ArrayLike
 from scipy.ndimage import gaussian_filter
 
+from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.j_invariance.j_invariant_smart import calibrate_denoiser_smart
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 
 def calibrate_denoise_gaussian(
-    image,
+    image: ArrayLike,
     max_sigma: float = 2,
     max_num_truncate: int = 4,
-    crop_size_in_voxels: Optional[int] = 128000,
-    max_num_evaluations: int = 256,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    optimiser: str = _defaults.default_optimiser,
+    max_num_evaluations: int = _defaults.default_max_evals_high,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -37,6 +40,12 @@ def calibrate_denoise_gaussian(
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate
         denoiser.
+        (advanced)
+
+    optimiser: str
+        Optimiser to use for finding the best denoising
+        parameters. Can be: 'smart' (default), or 'fast' for a mix of SHGO
+        followed by L-BFGS-B.
         (advanced)
 
     max_num_evaluations: int
@@ -82,12 +91,13 @@ def calibrate_denoise_gaussian(
 
     # Calibrate denoiser
     best_parameters = (
-        calibrate_denoiser_smart(
+        calibrate_denoiser(
             crop,
             _denoise_gaussian,
+            mode=optimiser,
             denoise_parameters=parameter_ranges,
-            display_images=display_images,
             max_num_evaluations=max_num_evaluations,
+            display_images=display_images,
         )
         | other_fixed_parameters
     )

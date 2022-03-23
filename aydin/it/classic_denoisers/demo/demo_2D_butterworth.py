@@ -1,7 +1,6 @@
 # flake8: noqa
 import numpy
 import numpy as np
-from scipy.ndimage import gaussian_filter
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
@@ -14,9 +13,7 @@ from aydin.io.datasets import (
     pollen,
     newyork,
     characters,
-    add_blur_2d,
 )
-from aydin.io.io import imwrite, imread
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
 from aydin.util.log.log import Log
 
@@ -26,7 +23,7 @@ def demo_butterworth(image, display=True):
     Demo for self-supervised denoising using camera image with synthetic noise
     """
     Log.enable_output = True
-    Log.set_log_max_depth(6)
+    Log.set_log_max_depth(7)
 
     image = normalise(image.astype(np.float32))
 

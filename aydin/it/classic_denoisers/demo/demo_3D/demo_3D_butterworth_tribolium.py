@@ -5,7 +5,7 @@ import numpy
 import numpy as np
 
 from aydin.io import imread
-from aydin.io.datasets import normalise, examples_single, examples_zipped
+from aydin.io.datasets import normalise, examples_zipped
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
 from aydin.util.log.log import Log, lprint
 

@@ -1,5 +1,6 @@
 import numpy
 from numba import jit
+from numpy.typing import ArrayLike
 from scipy.ndimage import median_filter, uniform_filter
 
 __fastmath = {'contract', 'afn', 'reassoc'}
@@ -7,11 +8,11 @@ __error_model = 'numpy'
 
 
 def calibrate_denoise_lipschitz(
-    image,
+    image: ArrayLike,
     lipschitz: float = 0.1,
     percentile: float = 0.001,
     alpha: float = 0.1,
-    max_num_iterations: int = 128,
+    max_num_iterations: int = _defaults.default_max_evals_normal,
     **other_fixed_parameters,
 ):
     """
@@ -38,7 +39,6 @@ def calibrate_denoise_lipschitz(
 
     max_num_iterations: int
         Maximum number of Lipschitz correction iterations to run. (advanced)
-
 
     other_fixed_parameters: dict
         Any other fixed parameters. (advanced)

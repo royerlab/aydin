@@ -2,22 +2,23 @@ import math
 from typing import Optional
 
 import numpy
+from numpy.typing import ArrayLike
 from sklearn.decomposition import SparseCoder
 
+from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.dictionary.dictionary import (
     fixed_dictionary,
     extract_normalised_vectorised_patches,
 )
-from aydin.util.j_invariance.j_invariant_classic import calibrate_denoiser_classic
-from aydin.util.j_invariance.j_invariant_smart import calibrate_denoiser_smart
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 from aydin.util.log.log import lsection, lprint
 from aydin.util.patch_size.patch_size import default_patch_size
 from aydin.util.patch_transform.patch_transform import reconstruct_from_nd_patches
 
 
 def calibrate_denoise_dictionary_fixed(
-    image,
+    image: ArrayLike,
     patch_size: int = None,
     try_omp: bool = True,
     try_lasso_lars: bool = False,
@@ -26,8 +27,9 @@ def calibrate_denoise_dictionary_fixed(
     try_threshold: bool = False,
     num_sparsity_values_to_try: int = 6,
     dictionaries: str = 'dct',
-    crop_size_in_voxels: Optional[int] = None,
-    max_num_evaluations: int = 256,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    optimiser: str = _defaults.default_optimiser,
+    max_num_evaluations: int = _defaults.default_max_evals_low,
     display_dictionary: bool = False,
     display_images: bool = False,
     display_crop: bool = False,
@@ -78,6 +80,12 @@ def calibrate_denoise_dictionary_fixed(
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate
         denoiser.
+        (advanced)
+
+    optimiser: str
+        Optimiser to use for finding the best denoising
+        parameters. Can be: 'smart' (default), or 'fast' for a mix of SHGO
+        followed by L-BFGS-B.
         (advanced)
 
     max_num_evaluations: int
@@ -145,15 +153,14 @@ def calibrate_denoise_dictionary_fixed(
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {
         'max_freq': (0.01, 1.3),
-        # numpy.arange(0.05, 1.4, 0.05),  # (0.01, 1.3),
         'coding_mode': coding_modes,
-        # 'lasso_lars', 'lasso_cd', 'lars', 'omp', 'threshold'
     }
 
     # Calibrate denoiser:
-    best_parameters = calibrate_denoiser_smart(
+    best_parameters = calibrate_denoiser(
         crop,
         _denoise_dictionary,
+        mode=optimiser,
         denoise_parameters=parameter_ranges,
         max_num_evaluations=max_num_evaluations,
     )
@@ -162,16 +169,16 @@ def calibrate_denoise_dictionary_fixed(
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {
         'sparsity': [1, 2, 3, 4, 8, 16][:num_sparsity_values_to_try],
-        # 'lasso_lars', 'lasso_cd', 'lars', 'omp', 'threshold'
     }
 
     # Calibrate denoiser:
     best_parameters = (
-        calibrate_denoiser_classic(
+        calibrate_denoiser(
             crop,
             _denoise_dictionary,
             denoise_parameters=parameter_ranges,
             other_fixed_parameters=best_parameters | other_fixed_parameters,
+            max_num_evaluations=max_num_evaluations,
             display_images=display_images,
         )
         | best_parameters

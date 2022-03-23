@@ -14,11 +14,11 @@ from aydin.util.log.log import lsection, lprint
 from aydin.util.optimizer.optimizer import Optimizer
 
 
-def calibrate_denoiser_smart(
+def calibrate_denoiser(
     image,
     denoise_function: Callable,
     denoise_parameters: Dict[str, Union[Tuple[float, float], List[Any]]],
-    mode: str = 'scipy',  #'smart', #
+    mode: str = 'fast',
     max_num_evaluations: int = 128,
     patience: int = 64,
     stride: int = 4,
@@ -161,94 +161,105 @@ def calibrate_denoiser_smart(
                         # our optimizer is a maximiser!
                         return -loss
 
-                    if mode == "smart":
-                        with lsection(
-                            f"Searching by 'smart optimiser' the best denoising parameters among: {numerical_parameters}"
-                        ):
+                    # First we check if there is no numerical parameters to optimise:
+                    if len(numerical_parameters_bounds) == 0:
+                        # If there is no numerical parameters to optimise, we just get the value for that categorical combination:
+                        new_parameters = {}
+                        new_loss_value = opt_function(new_parameters)
+                    else:
 
-                            # initialise optimiser:
-                            optimiser = Optimizer()
+                        if mode == "smart":
+                            with lsection(
+                                f"Searching by 'smart optimiser' the best denoising parameters among: {numerical_parameters}"
+                            ):
 
-                            # We optimise here:
-                            new_parameters, new_loss_value = optimiser.optimize(
-                                opt_function,
-                                bounds=numerical_parameters_bounds,
-                                max_num_evaluations=max_num_evaluations,
-                                patience=patience,
-                            )
+                                # initialise optimiser:
+                                optimiser: Optimizer = Optimizer()
 
-                            pass
+                                # We optimise here:
+                                new_parameters, new_loss_value = optimiser.optimize(
+                                    opt_function,
+                                    bounds=numerical_parameters_bounds,
+                                    max_num_evaluations=max_num_evaluations,
+                                    patience=patience,
+                                )
 
-                    if mode == "scipy":
-                        with lsection(
-                            f"Searching by SHGO followed by L-BFGS-B the best denoising parameters among: {numerical_parameters}"
-                        ):
+                                pass
 
-                            def callback(x):
-                                lprint(x)
+                        elif mode == "fast":
+                            with lsection(
+                                f"Searching by SHGO followed by L-BFGS-B the best denoising parameters among: {numerical_parameters}"
+                            ):
 
-                            # x0 = numpy.asarray(tuple((0.5 * (v[1] - v[0]) for (n, v) in
-                            #            numerical_parameters.items())))
-                            bounds = list(
-                                [v[0:2] for (n, v) in numerical_parameters.items()]
-                            )
+                                def callback(x):
+                                    lprint(x)
 
-                            # Impedance mismatch:
-                            def __function(_denoiser_args):
-                                return -opt_function(*tuple(_denoiser_args))
+                                # x0 = numpy.asarray(tuple((0.5 * (v[1] - v[0]) for (n, v) in
+                                #            numerical_parameters.items())))
+                                bounds = list(
+                                    [v[0:2] for (n, v) in numerical_parameters.items()]
+                                )
 
-                            # First we optimise with a global optimiser:
-                            result = shgo(
-                                func=__function,
-                                bounds=bounds,
-                                sampling_method='sobol',
-                                options={'maxev': max_num_evaluations // 4},
-                                callback=callback,
-                            )
-                            lprint(f"Global optimisation success: {result.success}")
-                            lprint(
-                                f"Global optimisation convergence message: {result.message}"
-                            )
-                            lprint(
-                                f"Global optimisation number of function evaluations: {result.nfev}"
-                            )
-                            lprint(f"Best parameters until now: {result.x}")
+                                # Impedance mismatch:
+                                def __function(_denoiser_args):
+                                    return -opt_function(*tuple(_denoiser_args))
 
-                            # starting point for next ioptimkisation round is result of previous step:
-                            x0 = result.x
+                                # First we optimise with a global optimiser:
+                                result = shgo(
+                                    func=__function,
+                                    bounds=bounds,
+                                    sampling_method='sobol',
+                                    options={'maxev': max_num_evaluations // 4},
+                                    callback=callback,
+                                )
+                                lprint(f"Global optimisation success: {result.success}")
+                                lprint(
+                                    f"Global optimisation convergence message: {result.message}"
+                                )
+                                lprint(
+                                    f"Global optimisation number of function evaluations: {result.nfev}"
+                                )
+                                lprint(f"Best parameters until now: {result.x}")
 
-                            # local optimisation using L-BFGS-B:
-                            result = minimize(
-                                fun=__function,
-                                x0=x0,
-                                method='L-BFGS-B',
-                                bounds=bounds,
-                                options={
-                                    'maxfun': max_num_evaluations,
-                                    'eps': 1e-2,
-                                    'ftol': 1e-8,
-                                    'gtol': 1e-12,
-                                },
-                                callback=callback,
-                            )
-                            lprint(f"Local optimisation success: {result.success}")
-                            lprint(
-                                f"Local optimisation convergence message: {result.message}"
-                            )
-                            lprint(
-                                f"Local optimisation number of function evaluations: {result.nfev}"
-                            )
+                                # starting point for next ioptimkisation round is result of previous step:
+                                x0 = result.x
 
-                            # We optimise here:
-                            new_parameters, new_loss_value = result.x, result.fun
+                                # local optimisation using L-BFGS-B:
+                                result = minimize(
+                                    fun=__function,
+                                    x0=x0,
+                                    method='L-BFGS-B',
+                                    bounds=bounds,
+                                    options={
+                                        'maxfun': max_num_evaluations,
+                                        'eps': 1e-2,
+                                        'ftol': 1e-8,
+                                        'gtol': 1e-12,
+                                    },
+                                    callback=callback,
+                                )
+                                lprint(f"Local optimisation success: {result.success}")
+                                lprint(
+                                    f"Local optimisation convergence message: {result.message}"
+                                )
+                                lprint(
+                                    f"Local optimisation number of function evaluations: {result.nfev}"
+                                )
+
+                                # We optimise here:
+                                new_parameters, new_loss_value = result.x, result.fun
+
+                        else:
+                            raise ValueError(f"Unknown optimisation mode: {mode}")
 
                     # We check if this is, or not, the best combination to date:
                     if (
                         new_loss_value > best_loss_value
                     ):  # our optimizer is a maximiser!
+
+                        best_numerical_parameters = new_parameters
                         best_combination = combination
                         best_loss_value = new_loss_value
-                        best_numerical_parameters = new_parameters
 
                     lprint(
                         f"Best numerical parameters: {best_numerical_parameters} for combination: {combination}"

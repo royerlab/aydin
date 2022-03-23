@@ -4,17 +4,19 @@ from typing import Sequence, Union, Optional, Tuple
 import numpy
 from numba import jit
 from numpy.fft import fftshift, ifftshift
+from numpy.typing import ArrayLike
 from scipy.fft import fftn, ifftn
 
+from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.j_invariance.j_invariant_smart import calibrate_denoiser_smart
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 __fastmath = {'contract', 'afn', 'reassoc'}
 __error_model = 'numpy'
 
 
 def calibrate_denoise_butterworth(
-    image,
+    image: ArrayLike,
     mode: str = 'full',
     axes: Optional[Tuple[int, ...]] = None,
     max_padding: int = 32,
@@ -22,8 +24,9 @@ def calibrate_denoise_butterworth(
     max_freq: float = 1.0,
     min_order: float = 0.5,
     max_order: float = 6.0,
-    crop_size_in_voxels: Optional[int] = 128000,
-    max_num_evaluations: int = 512,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    optimiser: str = _defaults.default_optimiser,
+    max_num_evaluations: int = _defaults.default_max_evals_normal,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -72,6 +75,12 @@ def calibrate_denoise_butterworth(
 
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate denoiser.
+        (advanced)
+
+    optimiser: str
+        Optimiser to use for finding the best denoising
+        parameters. Can be: 'smart' (default), or 'fast' for a mix of SHGO
+        followed by L-BFGS-B.
         (advanced)
 
     max_num_evaluations: int
@@ -168,9 +177,10 @@ def calibrate_denoise_butterworth(
 
     # Calibrate denoiser
     best_parameters = (
-        calibrate_denoiser_smart(
+        calibrate_denoiser(
             crop,
             _denoise_butterworth,
+            mode=optimiser,
             denoise_parameters=parameter_ranges,
             max_num_evaluations=max_num_evaluations,
             display_images=display_images,

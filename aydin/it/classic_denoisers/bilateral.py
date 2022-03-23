@@ -1,18 +1,22 @@
 from functools import partial
 from typing import Optional
+
 import numpy
-import numpy as np
+from numpy.typing import ArrayLike
 from skimage.restoration import denoise_bilateral as skimage_denoise_bilateral
 
+from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.denoise_nd.denoise_nd import extend_nd
-from aydin.util.j_invariance.j_invariant_classic import calibrate_denoiser_classic
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 
 def calibrate_denoise_bilateral(
-    image,
+    image: ArrayLike,
     bins: int = 10000,
-    crop_size_in_voxels: Optional[int] = None,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    optimiser: str = _defaults.default_optimiser,
+    max_num_evaluations: int = _defaults.default_max_evals_normal,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -40,6 +44,16 @@ def calibrate_denoise_bilateral(
         denoiser.
         (advanced)
 
+    optimiser: str
+        Optimiser to use for finding the best denoising
+        parameters. Can be: 'smart' (default), or 'fast' for a mix of SHGO
+        followed by L-BFGS-B.
+        (advanced)
+
+    max_num_evaluations: int
+        Maximum number of evaluations for finding the optimal parameters.
+        (advanced)
+
     display_images: bool
         When True the denoised images encountered during
         optimisation are shown
@@ -65,16 +79,10 @@ def calibrate_denoise_bilateral(
         image, crop_size=crop_size_in_voxels, display_crop=display_crop
     )
 
-    # Sigma spatial range:
-    sigma_spatial_range = np.arange(0.01, 1, 0.05) ** 1.5
-
-    # Sigma color range:
-    sigma_color_range = np.arange(0.01, 1, 0.05) ** 1.5
-
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {
-        'sigma_spatial': sigma_spatial_range,
-        'sigma_color': sigma_color_range,
+        'sigma_spatial': (0.01, 1),
+        'sigma_color': (0.01, 1),
     }
 
     # Combine fixed parameters:
@@ -85,10 +93,12 @@ def calibrate_denoise_bilateral(
 
     # Calibrate denoiser
     best_parameters = (
-        calibrate_denoiser_classic(
+        calibrate_denoiser(
             crop,
             _denoise_bilateral,
+            mode=optimiser,
             denoise_parameters=parameter_ranges,
+            max_num_evaluations=max_num_evaluations,
             display_images=display_images,
         )
         | other_fixed_parameters

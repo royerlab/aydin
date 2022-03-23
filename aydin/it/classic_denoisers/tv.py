@@ -2,16 +2,20 @@ from functools import partial
 from typing import Optional
 
 import numpy
+from numpy.typing import ArrayLike
 from skimage.restoration import denoise_tv_bregman
 from skimage.restoration._denoise import _denoise_tv_chambolle_nd
 
+from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.j_invariance.j_invariant_smart import calibrate_denoiser_smart
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 
 def calibrate_denoise_tv(
-    image,
-    crop_size_in_voxels: Optional[int] = 64000,
+    image: ArrayLike,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    optimiser: str = _defaults.default_optimiser,
+    max_num_evaluations: int = _defaults.default_max_evals_normal,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -29,6 +33,16 @@ def calibrate_denoise_tv(
 
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate denoiser.
+        (advanced)
+
+    optimiser: str
+        Optimiser to use for finding the best denoising
+        parameters. Can be: 'smart' (default), or 'fast' for a mix of SHGO
+        followed by L-BFGS-B.
+        (advanced)
+
+    max_num_evaluations: int
+        Maximum number of evaluations for finding the optimal parameters.
         (advanced)
 
     display_images: bool
@@ -77,10 +91,12 @@ def calibrate_denoise_tv(
 
     # Calibrate denoiser
     best_parameters = (
-        calibrate_denoiser_smart(
+        calibrate_denoiser(
             crop,
             _denoise_tv,
+            mode=optimiser,
             denoise_parameters=parameter_ranges,
+            max_num_evaluations=max_num_evaluations,
             display_images=display_images,
         )
         | other_fixed_parameters
