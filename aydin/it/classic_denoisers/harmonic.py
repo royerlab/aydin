@@ -25,7 +25,7 @@ def calibrate_denoise_harmonic(
     rank: bool = False,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
     optimiser: str = _defaults.default_optimiser,
-    max_num_evaluations: int = _defaults.default_max_evals_normal,
+    max_num_evaluations: int = _defaults.default_max_evals_verylow,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,

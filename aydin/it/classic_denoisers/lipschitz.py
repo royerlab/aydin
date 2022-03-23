@@ -3,6 +3,8 @@ from numba import jit
 from numpy.typing import ArrayLike
 from scipy.ndimage import median_filter, uniform_filter
 
+from aydin.it.classic_denoisers import _defaults
+
 __fastmath = {'contract', 'afn', 'reassoc'}
 __error_model = 'numpy'
 

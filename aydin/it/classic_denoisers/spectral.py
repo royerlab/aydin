@@ -344,6 +344,7 @@ def denoise_spectral(
     return denoised_image
 
 
+# @jit(nopython=True, parallel=True)
 def _freq_bias_window(shape: Tuple[int], alpha: float = 1):
     window_tuple = tuple(numpy.linspace(0, 1, s) ** 2 for s in shape)
     window_nd = numpy.sqrt(outer_sum(*window_tuple)) + 1e-6
@@ -354,8 +355,8 @@ def _freq_bias_window(shape: Tuple[int], alpha: float = 1):
     return window_nd
 
 
+# @jit(nopython=True, parallel=True)
 def _compute_distance_image_for_dxt(freq_cutoff, shape, selected_axes):
-
     # Normalise selected axes:
     if selected_axes is None:
         selected_axes = (a for a in range(len(shape)))
@@ -370,6 +371,7 @@ def _compute_distance_image_for_dxt(freq_cutoff, shape, selected_axes):
     return f
 
 
+@jit(nopython=True, parallel=True)
 def _compute_distance_image_for_fft(freq_cutoff, shape, selected_axes):
     f = numpy.zeros(shape=shape, dtype=numpy.float32)
     axis_grid = tuple(
@@ -382,7 +384,7 @@ def _compute_distance_image_for_fft(freq_cutoff, shape, selected_axes):
 
 
 def _filter(image_f, f, order):
-    factor = 1 / numpy.sqrt(1.0 + numpy.sqrt(f) ** (2 * order))
+    factor = 1 / numpy.sqrt(1.0 + f ** order)
     factor = factor.astype(numpy.float32)
     n = image_f.shape[0]
     for i in prange(n):
