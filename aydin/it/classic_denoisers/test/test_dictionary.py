@@ -12,12 +12,12 @@ from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 
 def test_dictionary_learned():
-    assert demo_dictionary_learned(cropped_newyork(), display=False) >= 0.636 - 0.015
+    assert demo_dictionary_learned(cropped_newyork(), display=False) >= 0.636 - 0.02
 
 
 @pytest.mark.heavy
 def test_dictionary_fixed():
-    assert demo_dictionary_fixed(cropped_newyork(), display=False) >= 0.636 - 0.015
+    assert demo_dictionary_fixed(cropped_newyork(), display=False) >= 0.636 - 0.02
 
 
 def test_dictionary_nd():

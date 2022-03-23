@@ -27,6 +27,7 @@ def calibrate_denoise_butterworth(
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_normal,
+    multi_core: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -87,6 +88,10 @@ def calibrate_denoise_butterworth(
         Maximum number of evaluations for finding the optimal parameters.
         (advanced)
 
+    multi_core: bool
+        Use all CPU cores during calibration.
+        (advanced)
+
     display_images: bool
         When True the denoised images encountered during optimisation are shown.
         (advanced)
@@ -125,7 +130,7 @@ def calibrate_denoise_butterworth(
     if mode == 'isotropic':
         # Partial function:
         _denoise_butterworth = partial(
-            denoise_butterworth, **(other_fixed_parameters | {'multi_core': False})
+            denoise_butterworth, **(other_fixed_parameters | {'multi_core': multi_core})
         )
 
         # Parameters to test when calibrating the denoising algorithm
@@ -145,7 +150,7 @@ def calibrate_denoise_butterworth(
             return denoise_butterworth(
                 *args,
                 freq_cutoff=_freq_cutoff,
-                **(kwargs | other_fixed_parameters),
+                **(kwargs | other_fixed_parameters | {'multi_core': multi_core}),
             )
 
         # Parameters to test when calibrating the denoising algorithm
@@ -164,7 +169,7 @@ def calibrate_denoise_butterworth(
             return denoise_butterworth(
                 *args,
                 freq_cutoff=_freq_cutoff,
-                **(kwargs | other_fixed_parameters | {'multi_core': False}),
+                **(kwargs | other_fixed_parameters | {'multi_core': multi_core}),
             )
 
         # Parameters to test when calibrating the denoising algorithm

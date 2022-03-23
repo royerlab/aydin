@@ -30,6 +30,7 @@ def calibrate_denoise_spectral(
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_low,
+    multi_core: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -79,6 +80,10 @@ def calibrate_denoise_spectral(
 
     max_num_evaluations: int
         Maximum number of evaluations for finding the optimal parameters.
+        (advanced)
+
+    multi_core: bool
+        Use all CPU cores during calibration.
         (advanced)
 
     display_images: bool
@@ -140,7 +145,7 @@ def calibrate_denoise_spectral(
 
     # Partial function:
     _denoise_spectral = partial(
-        denoise_spectral, **(other_fixed_parameters | {'multi_core': True})
+        denoise_spectral, **(other_fixed_parameters | {'multi_core': multi_core})
     )
 
     # Calibrate denoiser
