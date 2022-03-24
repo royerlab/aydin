@@ -20,7 +20,7 @@ def representative_crop(
     favour_odd_lengths: bool = False,
     fast_mode: bool = False,
     fast_mode_num_crops: int = 1500,
-    timeout_in_seconds: float = 1,
+    timeout_in_seconds: float = 2,
     return_slice: bool = False,
     display_crop: bool = False,
 ):

@@ -11,11 +11,10 @@ from aydin.util.log.log import lprint, lsection
 
 def dimension_analysis_on_image(
     image,
-    algorithm: str = 'butterworth',
     epsilon: float = 0.05,
     min_spatio_temporal: int = 2,
+    max_spatio_temporal: int = 4,
     max_channels_per_axis: int = 0,
-    max_sigma: float = 16.0,
     crop_size_in_voxels: Optional[int] = None,
     crop_timeout_in_seconds: float = 5,
     max_num_evaluations: Optional[int] = None,
@@ -40,14 +39,16 @@ def dimension_analysis_on_image(
         Image to analyse.
 
     algorithm : str
-       Algorithm used to analyse dimensions. May be: 'butterworth', or 'gaussian'.
-       The best and current default is 'butterworth'.
+       Algorithm used to analyse dimensions. May be: 'butterworth'.
 
     epsilon : float
         Value below which a correlation is considered zero.
 
     min_spatio_temporal: int
         Minimum number of spatio-temporal dimensions.
+
+    max_spatio_temporal: int
+        Maximum number of spatio-temporal dimensions.
 
     max_channels_per_axis: int
         Max number of channels per chanhnel axis.
@@ -79,16 +80,10 @@ def dimension_analysis_on_image(
     ):
 
         # Default crop sizes for different algorithms:
-        if algorithm == 'gaussian':
-            if crop_size_in_voxels is None:
-                crop_size_in_voxels = 1000000
-            if max_num_evaluations is None:
-                max_num_evaluations = 16
-        elif algorithm == 'butterworth':
-            if crop_size_in_voxels is None:
-                crop_size_in_voxels = 128000
-            if max_num_evaluations is None:
-                max_num_evaluations = 64
+        if crop_size_in_voxels is None:
+            crop_size_in_voxels = 128000
+        if max_num_evaluations is None:
+            max_num_evaluations = 256
 
         # Adjust min number of spatio-temporal dimensions:
         min_spatio_temporal = min(min_spatio_temporal, image.ndim)
@@ -100,106 +95,74 @@ def dimension_analysis_on_image(
             timeout_in_seconds=crop_timeout_in_seconds,
         )
 
-        crop = crop.astype(dtype=numpy.float32)
+        # convert to
+        crop = crop.astype(dtype=numpy.float32, copy=False)
 
         # Number of dimensions:
         nb_dim = len(crop.shape)
 
-        if algorithm == 'gaussian':
-            # Function to run per dimension:
-            def compute_value(_image, _axis: int):
-                _, best_parameters, _ = calibrate_denoise_gaussian(
-                    _image,
-                    axes=(_axis,),
-                    enable_extended_blind_spot=True,
-                    min_sigma=0.0,
-                    max_sigma=max_sigma,
-                    max_num_truncate=1,
-                    max_num_evaluations=max_num_evaluations,
-                )
+        _, best_parameters, _ = calibrate_denoise_butterworth(
+            crop,
+            min_order=1.0,
+            max_order=12.0,
+            max_num_evaluations=max_num_evaluations,
+            multi_core=True,
+        )
 
-                value = best_parameters['sigma']
-                return value
+        values = best_parameters['freq_cutoff']
 
-            # Run in paralell each axis:
-            values = Parallel(backend=backend, n_jobs=-1)(
-                delayed(compute_value)(crop, axis) for axis in range(nb_dim)
-            )
+        # Let's ensure there is a minimum number of spatio-temporal dimensions:
+        sorted_values = list(values)
 
-            lprint(
-                f"Correlation Values per axis: {values} (higher values means more correlation)"
-            )
+        # Values very close to 1.0 are probably just that, 1.0:
+        sorted_values = list([(1.0 if abs(1 - v) < 0.01 else v) for v in sorted_values])
 
-            # Batch axes:
-            batch_axes = tuple(
-                axis
-                for axis in range(image.ndim)
-                if values[axis] < epsilon and image.shape[axis] > max_channels_per_axis
-            )
+        # We sort the values:
+        sorted_values.sort()
 
-            # Channel axis are
-            channel_axes = tuple(
-                axis
-                for axis in batch_axes
-                if values[axis] >= epsilon
-                and image.shape[axis] <= max_channels_per_axis
-            )
+        # This is the index for the top n (n=min_spatio_temporal) most correlated dimensions:
+        index = min(min_spatio_temporal - 1, len(sorted_values) - 1)
 
-        elif algorithm == 'butterworth':
+        # This is the corresponding threshold so that at least these n dimensions are spatio-temporal:
+        threshold = sorted_values[index]
 
-            _, best_parameters, _ = calibrate_denoise_butterworth(
-                crop,
-                min_order=0.1,
-                max_order=16,
-                max_num_evaluations=max_num_evaluations,
-                multi_core=True,
-            )
+        # But we have to make sure that
+        threshold = max(1 - epsilon, threshold)
 
-            values = best_parameters['freq_cutoff']
+        lprint(
+            f"Correlation values per axis: {values} (lower values means more correlation)"
+        )
 
-            # Let's ensure there is a minimum number of spatio-temporal dimensions:
-            sorted_values = list(values)
-            sorted_values.sort()
-            index = min(min_spatio_temporal, len(sorted_values))
-            threshold = max(1 - epsilon, sorted_values[index])
+        lprint(
+            f"Threshold for identifying spatio-temporal dimension is ...<={threshold}"
+        )
 
-            lprint(
-                f"Correlation Values per axis: {values} (lower values means more correlation)"
-            )
+        # spatio-temporal axes:
+        st_axes = tuple(axis for axis in range(nb_dim) if values[axis] <= threshold)
 
-            lprint(
-                f"Threshold for distinguishing spatio-temporal dimension sis ...<{threshold}"
-            )
+        # We ensure that there is enough spatio-temporal dimensions by adding dimensions from the 'end':
+        for axis in reversed(range(nb_dim)):
+            if len(st_axes) < min_spatio_temporal:
+                st_axes = tuple(set(st_axes + (axis,)))
 
-            # Batch axes:
-            batch_axes = tuple(
-                axis
-                for axis in range(image.ndim)
-                if values[axis] >= threshold
-                and image.shape[axis] > max_channels_per_axis
-            )
+        # We ensure that there is not too many spatio-temporal dimensions by removing dimensions from the 'front':
+        for axis in reversed(range(nb_dim)):
+            if len(st_axes) > max_spatio_temporal:
+                st_axes = tuple(a for a in st_axes if a != axis)
 
-            # Channel axis are
-            channel_axes = tuple(
-                axis
-                for axis in batch_axes
-                if values[axis] < threshold
-                and image.shape[axis] <= max_channels_per_axis
-            )
+        # Batch axes:
+        batch_axes = tuple(
+            axis
+            for axis in range(nb_dim)
+            if axis not in st_axes and image.shape[axis] > max_channels_per_axis
+        )
 
-        # What if despite our best efforts there are no spatio-temporal dimensions left?
-        if len(batch_axes) + len(channel_axes) == image.ndim:
-            dims = range(image.ndim)
-            batch_axes = tuple(
-                axis
-                for axis in dims[0:-min_spatio_temporal]
-                if image.shape[axis] > max_channels_per_axis
-            )
-            channel_axes = tuple(
-                axis
-                for axis in dims[0:-min_spatio_temporal]
-                if image.shape[axis] <= max_channels_per_axis
-            )
+        # Channel axis are
+        channel_axes = tuple(
+            axis
+            for axis in range(nb_dim)
+            if axis not in st_axes and image.shape[axis] <= max_channels_per_axis
+        )
 
         lprint(
             f"Inferred batch axes: {batch_axes} and channel axes: {channel_axes} for image of shape {image.shape}"
