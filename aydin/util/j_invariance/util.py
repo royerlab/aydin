@@ -8,11 +8,7 @@ from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
 
 
 def _j_invariant_loss(
-    image,
-    denoise_function,
-    mask,
-    loss_function,
-    denoiser_kwargs=None,
+    image, denoise_function, mask, loss_function, denoiser_kwargs=None
 ):
     image = image.astype(dtype=numpy.float32, copy=False)
 

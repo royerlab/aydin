@@ -80,10 +80,7 @@ def calibrate_denoise_bilateral(
     )
 
     # Parameters to test when calibrating the denoising algorithm
-    parameter_ranges = {
-        'sigma_spatial': (0.01, 1),
-        'sigma_color': (0.01, 1),
-    }
+    parameter_ranges = {'sigma_spatial': (0.01, 1), 'sigma_color': (0.01, 1)}
 
     # Combine fixed parameters:
     other_fixed_parameters = other_fixed_parameters | {'bins': bins}

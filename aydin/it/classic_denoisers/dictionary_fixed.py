@@ -151,10 +151,7 @@ def calibrate_denoise_dictionary_fixed(
         coding_modes.append('threshold')
 
     # Parameters to test when calibrating the denoising algorithm
-    parameter_ranges = {
-        'max_freq': (0.01, 1.3),
-        'coding_mode': coding_modes,
-    }
+    parameter_ranges = {'max_freq': (0.01, 1.3), 'coding_mode': coding_modes}
 
     # Calibrate denoiser:
     best_parameters = calibrate_denoiser(
@@ -167,9 +164,7 @@ def calibrate_denoise_dictionary_fixed(
     lprint(f"Best parameters: {best_parameters}")
 
     # Parameters to test when calibrating the denoising algorithm
-    parameter_ranges = {
-        'sparsity': [1, 2, 3, 4, 8, 16][:num_sparsity_values_to_try],
-    }
+    parameter_ranges = {'sparsity': [1, 2, 3, 4, 8, 16][:num_sparsity_values_to_try]}
 
     # Calibrate denoiser:
     best_parameters = (

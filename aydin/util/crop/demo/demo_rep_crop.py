@@ -1,14 +1,7 @@
 # flake8: noqa
 from skimage.data import camera
 
-from aydin.io.datasets import (
-    dots,
-    lizard,
-    pollen,
-    newyork,
-    characters,
-    examples_single,
-)
+from aydin.io.datasets import dots, lizard, pollen, newyork, characters, examples_single
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.log.log import Log, lsection
 

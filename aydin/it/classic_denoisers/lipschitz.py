@@ -128,7 +128,7 @@ def denoise_lipschitz(
     median_ref = median_filter(image, size=3)
 
     # Wrap compute_error function:
-    wrapped_compute_error = jit(nopython=True, parallel=multi_core)(_compute_error)
+    wrapped_compute_error = _compute_error
 
     for i in range(max_num_iterations):
         # lprint(f"Iteration {i}")

@@ -121,12 +121,12 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             ]  # class name
 
             elem_class = response.__getattribute__(elem)
-            model_name = elem_class.__name__
+            # model_name = elem_class.__name__
             model_description = elem_class.__doc__.replace("\n\n", "<br><br>")
 
             descriptions.append(cnn_description + f"<br><br>{model_description}")
 
-            elem_class = response.__getattribute__(elem)
+            # elem_class = response.__getattribute__(elem)
 
         return descriptions
 
