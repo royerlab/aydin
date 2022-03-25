@@ -35,7 +35,7 @@ def calibrate_denoise_butterworth(
     Parameters
     ----------
     image: ArrayLike
-        Image to calibrate Sobolev denoiser for.
+        Image to calibrate Butterworth denoiser for.
 
     isotropic: bool
         When True, the filtering is isotropic

@@ -1,10 +1,8 @@
 from typing import Optional
 
 import numpy
-from joblib import delayed, Parallel
 
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
-from aydin.it.classic_denoisers.gaussian import calibrate_denoise_gaussian
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.log.log import lprint, lsection
 
@@ -18,7 +16,6 @@ def dimension_analysis_on_image(
     crop_size_in_voxels: Optional[int] = None,
     crop_timeout_in_seconds: float = 5,
     max_num_evaluations: Optional[int] = None,
-    backend: Optional[str] = None,
 ):
     """
     Analyses an image and tries to determine which dimensions are
@@ -65,9 +62,6 @@ def dimension_analysis_on_image(
     max_num_evaluations : int
         Maximum number of evaluations per axis.
 
-    backend : str
-        Backend used for computation.
-
     Returns
     -------
     List of batch axes and list of channel axes.
@@ -81,32 +75,22 @@ def dimension_analysis_on_image(
 
         # Default crop sizes for different algorithms:
         if crop_size_in_voxels is None:
-            crop_size_in_voxels = 128000
+            crop_size_in_voxels = 96000
         if max_num_evaluations is None:
             max_num_evaluations = 256
 
         # Adjust min number of spatio-temporal dimensions:
         min_spatio_temporal = min(min_spatio_temporal, image.ndim)
 
-        # obtain representative crop, to speed things up...
-        crop = representative_crop(
-            image,
-            crop_size=crop_size_in_voxels,
-            timeout_in_seconds=crop_timeout_in_seconds,
-        )
-
-        # convert to
-        crop = crop.astype(dtype=numpy.float32, copy=False)
-
         # Number of dimensions:
-        nb_dim = len(crop.shape)
+        nb_dim = len(image.shape)
 
         _, best_parameters, _ = calibrate_denoise_butterworth(
-            crop,
+            image,
             min_order=1.0,
             max_order=12.0,
             max_num_evaluations=max_num_evaluations,
-            multi_core=True,
+            crop_size_in_voxels=crop_size_in_voxels,
         )
 
         values = best_parameters['freq_cutoff']

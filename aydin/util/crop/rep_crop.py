@@ -97,6 +97,26 @@ def representative_crop(
     # cropped shape:
     cropped_shape = tuple(min(max(min_length, int(s * ratio)), s) for s in image.shape)
 
+    # If the crop size is still too big, we adjust that. This happens because
+    # we cannot crop dimensions that are too small, leading to an
+    # underestimation of the ratio.
+    for tries in range(8):
+        # First let's figure out the current crop size:
+        current_crop_size = math.prod(cropped_shape)
+
+        # we check if it is ok, or too large:
+        if current_crop_size < 1.05 * crop_size:
+            # we are ok if the crop size is within 10% of the desired size.
+            break
+
+        # If too large we compute the ratio by which to adjust it:
+        ratio = (crop_size / current_crop_size) ** (1 / image.ndim)
+
+        # we compute a new crop shape:
+        cropped_shape = tuple(
+            min(max(min_length, int(s * ratio)), s) for s in cropped_shape
+        )
+
     # Favour odd lengths if requested:
     if favour_odd_lengths:
         cropped_shape = tuple((s // 2) * 2 + 1 for s in cropped_shape)
