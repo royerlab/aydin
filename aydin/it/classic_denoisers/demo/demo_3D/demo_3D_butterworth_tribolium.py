@@ -5,7 +5,7 @@ import numpy
 import numpy as np
 
 from aydin.io import imread
-from aydin.io.datasets import normalise, examples_single, examples_zipped
+from aydin.io.datasets import normalise, examples_zipped
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
 from aydin.util.log.log import Log, lprint
 
@@ -30,7 +30,7 @@ def demo_butterworth_tribolium(noisy, display=True):
     #         viewer.add_image(noisy, name='noisy')
 
     function, parameters, _ = calibrate_denoise_butterworth(
-        noisy, isotropic=False, axes=(0, 1, 2)
+        noisy, mode='z-yx', axes=(0, 1, 2)
     )
     denoised = function(noisy, **parameters)
 

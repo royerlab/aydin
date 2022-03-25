@@ -1,10 +1,11 @@
 from functools import partial
+
 import numpy
 from numpy import random
 
 from aydin.it.classic_denoisers.butterworth import denoise_butterworth
-from aydin.util.j_invariance.j_invariant_classic import calibrate_denoiser_classic
 from aydin.util.crop.rep_crop import representative_crop
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 
 def resolution_estimate(image, precision: float = 0.01, display_images: bool = False):
@@ -40,7 +41,7 @@ def resolution_estimate(image, precision: float = 0.01, display_images: bool = F
     crop += random.normal(scale=sigma, size=crop.shape)
 
     # ranges:
-    freq_cutoff_range = numpy.arange(0.001, 1.0, precision)
+    freq_cutoff_range = list(numpy.arange(0.001, 1.0, precision))
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {'freq_cutoff': freq_cutoff_range}
@@ -49,7 +50,7 @@ def resolution_estimate(image, precision: float = 0.01, display_images: bool = F
     _denoise_sobolev = partial(denoise_butterworth, multi_core=False, order=2)
 
     # Calibrate denoiser
-    best_parameters = calibrate_denoiser_classic(
+    best_parameters = calibrate_denoiser(
         crop,
         _denoise_sobolev,
         denoise_parameters=parameter_ranges,

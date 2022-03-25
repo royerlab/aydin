@@ -1,17 +1,20 @@
 import numpy
 from numba import jit
+from numpy.typing import ArrayLike
 from scipy.ndimage import median_filter, uniform_filter
+
+from aydin.it.classic_denoisers import _defaults
 
 __fastmath = {'contract', 'afn', 'reassoc'}
 __error_model = 'numpy'
 
 
 def calibrate_denoise_lipschitz(
-    image,
+    image: ArrayLike,
     lipschitz: float = 0.1,
     percentile: float = 0.001,
     alpha: float = 0.1,
-    max_num_iterations: int = 128,
+    max_num_iterations: int = _defaults.default_max_evals_normal,
     **other_fixed_parameters,
 ):
     """
@@ -38,7 +41,6 @@ def calibrate_denoise_lipschitz(
 
     max_num_iterations: int
         Maximum number of Lipschitz correction iterations to run. (advanced)
-
 
     other_fixed_parameters: dict
         Any other fixed parameters. (advanced)
@@ -126,7 +128,7 @@ def denoise_lipschitz(
     median_ref = median_filter(image, size=3)
 
     # Wrap compute_error function:
-    wrapped_compute_error = jit(nopython=True, parallel=multi_core)(_compute_error)
+    wrapped_compute_error = _compute_error
 
     for i in range(max_num_iterations):
         # lprint(f"Iteration {i}")
@@ -161,6 +163,7 @@ def denoise_lipschitz(
     return image
 
 
+@jit(nopython=True, parallel=True)
 def _compute_error(array, median, lipschitz):
     # we compute the error map:
     error = median - array

@@ -1,7 +1,6 @@
 from typing import Sequence, Optional, Tuple
 
 import numpy
-from numpy import ndarray
 from numpy.typing import ArrayLike
 from scipy.ndimage import convolve, gaussian_filter
 

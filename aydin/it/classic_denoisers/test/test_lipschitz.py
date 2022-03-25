@@ -2,7 +2,6 @@
 from aydin.io.datasets import cropped_newyork
 from aydin.it.classic_denoisers.demo.demo_2D_lipschitz import demo_lipschitz
 
-from aydin.it.classic_denoisers.demo.demo_2D_nlm import demo_nlm
 from aydin.it.classic_denoisers.nlm import denoise_nlm
 from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 

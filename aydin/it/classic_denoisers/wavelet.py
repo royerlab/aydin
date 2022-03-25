@@ -2,18 +2,22 @@ from functools import partial
 from typing import Optional
 
 import numpy
-import numpy as np
+from numpy.typing import ArrayLike
 from skimage.restoration import denoise_wavelet as skimage_denoise_wavelet
 from skimage.restoration import estimate_sigma
 
+from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.j_invariance.j_invariant_classic import calibrate_denoiser_classic
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 
 def calibrate_denoise_wavelet(
-    image,
-    crop_size_in_voxels: Optional[int] = None,
+    image: ArrayLike,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    optimiser: str = _defaults.default_optimiser,
+    max_num_evaluations: int = _defaults.default_max_evals_normal,
     display_images: bool = False,
+    display_crop: bool = False,
     **other_fixed_parameters,
 ):
     """
@@ -32,8 +36,22 @@ def calibrate_denoise_wavelet(
         Number of voxels for crop used to calibrate denoiser.
         (advanced)
 
+    optimiser: str
+        Optimiser to use for finding the best denoising
+        parameters. Can be: 'smart' (default), or 'fast' for a mix of SHGO
+        followed by L-BFGS-B.
+        (advanced)
+
+    max_num_evaluations: int
+        Maximum number of evaluations for finding the optimal parameters.
+        (advanced)
+
     display_images: bool
         When True the denoised images encountered during optimisation are shown
+
+    display_crop: bool
+        Displays crop, for debugging purposes...
+        (advanced)
 
     other_fixed_parameters: dict
         Any other fixed parameters
@@ -47,14 +65,18 @@ def calibrate_denoise_wavelet(
     image = image.astype(dtype=numpy.float32, copy=False)
 
     # obtain representative crop, to speed things up...
-    crop = representative_crop(image, crop_size=crop_size_in_voxels)
+    crop = representative_crop(
+        image, crop_size=crop_size_in_voxels, display_crop=display_crop
+    )
 
     # We make a first estimate of the noise sigma:
     estimated_sigma = estimate_sigma(image)
 
     # Sigma range:
-    sigma_range = estimated_sigma * np.arange(0.25, 4, 0.01)
-    # sigma_range = (0.0, 10.0)
+    sigma_range = (
+        max(1e-9, min(0.25, estimated_sigma - 0.1)),
+        max(4, estimated_sigma + 1),
+    )
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {
@@ -78,10 +100,12 @@ def calibrate_denoise_wavelet(
 
     # Calibrate denoiser
     best_parameters = (
-        calibrate_denoiser_classic(
+        calibrate_denoiser(
             crop,
             _denoise_wavelet,
+            mode=optimiser,
             denoise_parameters=parameter_ranges,
+            max_num_evaluations=max_num_evaluations,
             display_images=display_images,
         )
         | other_fixed_parameters

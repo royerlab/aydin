@@ -18,7 +18,7 @@ def demo_lowpass_islet(noisy, display=True):
     noisy = normalise(noisy.astype(np.float32))
 
     function, parameters, _ = calibrate_denoise_butterworth(
-        noisy, isotropic=False, axes=(0, 1, 2)
+        noisy, mode='z-yx', axes=(0, 1, 2)
     )
     denoised = function(noisy, **parameters)
 
@@ -35,10 +35,6 @@ def demo_lowpass_islet(noisy, display=True):
 
 
 if __name__ == "__main__":
-    islet = examples_single.royerlab_hcr.get_array().squeeze()
-    # islet = islet[2, :, 400: 400 + 256, 700: 700 + 256]
-    islet = islet[1, :500, :500]
-    demo_lowpass_islet(islet)
-
-    # hyman_hela = examples_single.hyman_hela.get_array()
-    # demo_lowpass_anisotropic(hyman_hela)
+    hcr = examples_single.royerlab_hcr.get_array().squeeze()
+    hcr = hcr[:, 1, :500, :500]
+    demo_lowpass_islet(hcr)

@@ -13,12 +13,9 @@ from aydin.io.datasets import (
     lizard,
     pollen,
     characters,
-    cropped_newyork,
     dmel,
 )
-from aydin.it.classic_denoisers.bmnd import calibrate_denoise_bmnd
 from aydin.it.classic_denoisers.pca import calibrate_denoise_pca
-from aydin.it.classic_denoisers.spectral import calibrate_denoise_spectral
 from aydin.util.log.log import Log
 
 
