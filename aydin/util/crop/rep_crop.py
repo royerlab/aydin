@@ -106,7 +106,7 @@ def representative_crop(
 
         # we check if it is ok, or too large:
         if current_crop_size < 1.05 * crop_size:
-            # we are ok if the crop size is within 10% of the desired size.
+            # we are ok if the crop size is within 5% of the desired size.
             break
 
         # If too large we compute the ratio by which to adjust it:
