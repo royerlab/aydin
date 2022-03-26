@@ -17,7 +17,7 @@ def calibrate_denoise_wavelet(
     all_wavelets: bool = False,
     wavelet_name_filter: str = '',
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
-    optimiser: str = _defaults.default_optimiser,
+    optimiser: str = 'smart',  # using smart optimiser is important here!
     max_num_evaluations: int = _defaults.default_max_evals_normal,
     enable_extended_blind_spot: bool = True,
     display_images: bool = False,
@@ -107,14 +107,14 @@ def calibrate_denoise_wavelet(
         'db2',
         'haar',
         'bior4.4',  # same as CDF 9/7 from JPEG 2000 lossy
-        'sym9',
-        'coif1',
-        'coif5',
-        'dmey',
-        'bior2.2',
-        'bior3.1',
-        'bior3.3',
         'bior2.8',
+        # 'sym9',
+        # 'coif1',
+        # 'coif5',
+        # 'dmey',
+        # 'bior2.2',
+        # 'bior3.1',
+        # 'bior3.3',
     ]
 
     # List of wavelets to use:
@@ -130,11 +130,9 @@ def calibrate_denoise_wavelet(
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {
         'sigma': sigma_range,
-        'wavelet': wavelet_list,  #
+        'wavelet': wavelet_list,
         'mode': ['soft'],
-        'method': [
-            'BayesShrink',
-        ],
+        'method': ['BayesShrink'],
     }
 
     # Partial function:

@@ -23,7 +23,7 @@ def demo_wavelet(image, display=True):
     Demo for self-supervised denoising using camera image with synthetic noise
     """
     Log.enable_output = True
-    Log.set_log_max_depth(5)
+    Log.set_log_max_depth(6)
 
     image = normalise(image.astype(np.float32))
     noisy = add_noise(image)
