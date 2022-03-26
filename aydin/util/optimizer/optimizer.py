@@ -14,7 +14,13 @@ from aydin.util.log.log import lprint, lsection
 
 class Optimizer:
     def __init__(self):
-        pass
+
+        self.function = None
+        self.bounds = None
+        self.x = []
+        self.y = []
+        self.best_point = None
+        self.best_value = -math.inf
 
     def optimize(
         self,
@@ -27,7 +33,7 @@ class Optimizer:
         num_interpolated_evaluations: int = 128,
         workers: int = -1,
         backend: str = 'loky',
-    ):
+    ) -> Tuple[tuple[float, ...], float]:
         """
         Optimizes (maximizes) a given function by alternating between optimisation
         of a proxy function obtrained through interpolation, and exploration of the
@@ -46,6 +52,9 @@ class Optimizer:
 
         exploration_rate: float
             Rate at which to explore
+
+        patience: int
+            Patience: how many iterations with no progress before optimiser gives up.
 
         max_num_evaluations: int
             Maximum number of evaluations of the /a priori/ costly given function.

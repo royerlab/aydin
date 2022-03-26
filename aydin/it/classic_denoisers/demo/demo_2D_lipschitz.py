@@ -14,7 +14,6 @@ from aydin.io.datasets import (
     pollen,
     characters,
 )
-from aydin.it.classic_denoisers.gaussian import calibrate_denoise_gaussian
 from aydin.it.classic_denoisers.lipschitz import calibrate_denoise_lipschitz
 from aydin.util.log.log import Log
 

@@ -18,7 +18,7 @@ def demo_butterworth_cognet(noisy, display=True):
     noisy = normalise(noisy.astype(np.float32))
 
     function, parameters, _ = calibrate_denoise_butterworth(
-        noisy, isotropic=False, axes=(0, 1, 2, 3)
+        noisy, mode='z-yx', axes=(0, 1, 2, 3)
     )
     denoised = function(noisy, **parameters)
 

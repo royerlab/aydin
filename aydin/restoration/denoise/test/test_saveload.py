@@ -13,7 +13,7 @@ from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
 
 
 def test_saveload_classic_gaussian():
-    saveload(Classic(variant="gaussian"), min_psnr=20, min_ssim=0.71)
+    saveload(Classic(variant="gaussian"), min_psnr=19, min_ssim=0.61)
 
 
 def test_saveload_noise2selffgr():

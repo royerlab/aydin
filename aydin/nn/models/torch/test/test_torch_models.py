@@ -4,6 +4,7 @@ from itertools import chain
 
 import napari
 import numpy
+import pytest
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
@@ -30,6 +31,7 @@ def test_supervised_2D():
     assert result.dtype == input_array.dtype
 
 
+@pytest.mark.heavy
 def test_supervised_2D_n2t():
     lizard_image = normalise(camera())
     lizard_image = numpy.expand_dims(lizard_image, axis=0)

@@ -1,6 +1,8 @@
 import math
 from typing import Optional, Union, Tuple
+
 import numpy
+from numpy.typing import ArrayLike
 from pynndescent import NNDescent
 from scipy.fft import dctn, idctn
 
@@ -12,7 +14,7 @@ from aydin.util.patch_transform.patch_transform import (
 
 
 def calibrate_denoise_bmnd(
-    image, patch_size: Optional[Union[int, Tuple[int], str]] = None
+    image: ArrayLike, patch_size: Optional[Union[int, Tuple[int], str]] = None
 ):
     """
     Calibrates the BMnD denoiser for the given image and
