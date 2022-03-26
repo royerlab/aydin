@@ -20,7 +20,7 @@ def calibrate_denoise_butterworth(
     mode: str = 'full',
     axes: Optional[Tuple[int, ...]] = None,
     max_padding: int = 32,
-    min_freq: float = 0.001,
+    min_freq: float = 1e-9,
     max_freq: float = 1.0,
     min_order: float = 0.5,
     max_order: float = 6.0,
@@ -73,6 +73,7 @@ def calibrate_denoise_butterworth(
 
     max_order: float
         Maximal order for the Butterworth filter to use for calibration.
+        If min_order==max_order then no search is performed for the filter's order.
         (advanced)
 
     crop_size_in_voxels: int or None for default
@@ -197,8 +198,11 @@ def calibrate_denoise_butterworth(
 
     # If we only have a single parameter to optimise, we can go for a brute-force approach:
     if len(parameter_ranges) == 1:
-        step = (max_freq - min_freq) / max_num_evaluations
-        parameter_ranges = {'freq_cutoff': numpy.arange(min_freq, max_freq, step)}
+        parameter_ranges = {
+            'freq_cutoff': numpy.linspace(
+                min_freq, max_freq, max_num_evaluations
+            ).tolist()
+        }
         # Calibrate denoiser using classic calibrator:
         best_parameters = (
             calibrate_denoiser(
@@ -227,13 +231,10 @@ def calibrate_denoise_butterworth(
             | other_fixed_parameters
         )
 
-    if mode == 'full':
-        # We need to adjust a bit the type of parameters passed to the denoising function:
-        freq_cutoff = tuple(
-            best_parameters.pop(f'freq_cutoff_{i}') for i in range(image.ndim)
-        )
-        best_parameters |= {'freq_cutoff': freq_cutoff}
-    elif mode == 'xy-z' or mode == 'z-yx':
+    if mode == 'isotropic' or len(axes) == 1:
+        pass
+
+    elif (mode == 'xy-z' or mode == 'z-yx') and image.ndim == 3:
         # We need to adjust a bit the type of parameters passed to the denoising function:
         freq_cutoff_xy = best_parameters.pop('freq_cutoff_xy')
         freq_cutoff_z = best_parameters.pop('freq_cutoff_z')
@@ -243,6 +244,13 @@ def calibrate_denoise_butterworth(
         elif mode == 'xy-z':
             freq_cutoff = (freq_cutoff_xy, freq_cutoff_xy, freq_cutoff_z)
 
+        best_parameters |= {'freq_cutoff': freq_cutoff}
+
+    elif mode == 'full' or (mode == 'xy-z' or mode == 'z-yx'):
+        # We need to adjust a bit the type of parameters passed to the denoising function:
+        freq_cutoff = tuple(
+            best_parameters.pop(f'freq_cutoff_{i}') for i in range(image.ndim)
+        )
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
     # Memory needed:
@@ -305,19 +313,19 @@ def denoise_butterworth(
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
 
-    # Normalise freq_cutoff argument to tuple:
-    if type(freq_cutoff) is not tuple:
-        freq_cutoff = tuple((freq_cutoff,) * image.ndim)
-
-    # Number of workers:
-    workers = -1 if multi_core else 1
-
     # Default axes:
     if axes is None:
         axes = tuple(range(image.ndim))
 
     # Selected axes:
     selected_axes = tuple((a in axes) for a in range(image.ndim))
+
+    # Normalise freq_cutoff argument to tuple:
+    if type(freq_cutoff) is not tuple:
+        freq_cutoff = tuple(freq_cutoff if s else 1 for s in selected_axes)
+
+    # Number of workers:
+    workers = -1 if multi_core else 1
 
     # First we need to pad the image.
     # By how much? this depends on how much low filtering we need to do:
@@ -351,7 +359,11 @@ def denoise_butterworth(
     denoised = numpy.real(ifftn(image_f, workers=workers, axes=axes))
 
     # Crop to remove padding:
-    denoised = denoised[tuple(slice(u, -v) for u, v in pad_width)]
+    denoised = denoised[
+        tuple(
+            (slice(u, -v) if (u != 0 and v != 0) else slice(None)) for u, v in pad_width
+        )
+    ]
 
     return denoised
 

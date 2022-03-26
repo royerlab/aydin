@@ -13,9 +13,9 @@ def dimension_analysis_on_image(
     min_spatio_temporal: int = 2,
     max_spatio_temporal: int = 4,
     max_channels_per_axis: int = 0,
-    crop_size_in_voxels: Optional[int] = None,
+    crop_size_in_voxels: Optional[int] = 64000,
     crop_timeout_in_seconds: float = 5,
-    max_num_evaluations: Optional[int] = None,
+    max_num_evaluations: Optional[int] = 11,
 ):
     """
     Analyses an image and tries to determine which dimensions are
@@ -73,11 +73,12 @@ def dimension_analysis_on_image(
         "Analysing dimensions to determine which should be spatio-temporal, batch, or channel"
     ):
 
-        # Default crop sizes for different algorithms:
-        if crop_size_in_voxels is None:
-            crop_size_in_voxels = 96000
-        if max_num_evaluations is None:
-            max_num_evaluations = 256
+        # pre-crop so we can control the time it takes:
+        image = representative_crop(
+            image,
+            crop_size=crop_size_in_voxels,
+            timeout_in_seconds=crop_timeout_in_seconds,
+        )
 
         # Adjust min number of spatio-temporal dimensions:
         min_spatio_temporal = min(min_spatio_temporal, image.ndim)
@@ -85,15 +86,19 @@ def dimension_analysis_on_image(
         # Number of dimensions:
         nb_dim = len(image.shape)
 
-        _, best_parameters, _ = calibrate_denoise_butterworth(
-            image,
-            min_order=1.0,
-            max_order=12.0,
-            max_num_evaluations=max_num_evaluations,
-            crop_size_in_voxels=crop_size_in_voxels,
-        )
+        values = []
+        for axis in range(nb_dim):
+            _, best_parameters, _ = calibrate_denoise_butterworth(
+                image,
+                axes=(axis,),
+                min_order=4,
+                max_order=4,
+                max_num_evaluations=max_num_evaluations,
+                crop_size_in_voxels=crop_size_in_voxels,
+            )
 
-        values = best_parameters['freq_cutoff']
+            value = best_parameters['freq_cutoff']
+            values.append(value)
 
         # Let's ensure there is a minimum number of spatio-temporal dimensions:
         sorted_values = list(values)

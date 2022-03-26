@@ -16,14 +16,14 @@ def demo_dimension_analysis():
     Log.enable_output = True
     Log.set_log_max_depth(8)
 
-    test_dimension_analysis_cognet(display=True)
+    test_dimension_analysis_hela(display=True)
     test_dimension_analysis_royer(display=True)
+    test_dimension_analysis_cognet(display=True)
     test_dimension_analysis_flybrain(display=True)
     test_dimension_analysis_leonetti(display=True)
     test_dimension_analysis_myers(display=True)
     test_dimension_analysis_huang(display=True)
     test_dimension_analysis_maitre(display=True)
-    test_dimension_analysis_hela(display=True)
 
 
 demo_dimension_analysis()
