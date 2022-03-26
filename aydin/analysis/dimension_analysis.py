@@ -1,7 +1,5 @@
 from typing import Optional
 
-import numpy
-
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.log.log import lprint, lsection
