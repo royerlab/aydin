@@ -129,7 +129,7 @@ def calibrate_denoise_pca(
 
 
 def denoise_pca(
-    image,
+    image: ArrayLike,
     patch_size: Optional[Union[int, Tuple[int]]] = None,
     threshold: float = 0.1,
     reconstruction_gamma: float = 0,

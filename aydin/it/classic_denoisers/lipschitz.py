@@ -71,7 +71,7 @@ def calibrate_denoise_lipschitz(
 
 
 def denoise_lipschitz(
-    image,
+    image: ArrayLike,
     lipschitz: float = 0.05,
     percentile: float = 0.01,
     alpha: float = 0.1,
@@ -128,7 +128,7 @@ def denoise_lipschitz(
     median_ref = median_filter(image, size=3)
 
     # Wrap compute_error function:
-    wrapped_compute_error = _compute_error
+    wrapped_compute_error = jit(nopython=True, parallel=multi_core)(_compute_error)
 
     for i in range(max_num_iterations):
         # lprint(f"Iteration {i}")
@@ -163,7 +163,6 @@ def denoise_lipschitz(
     return image
 
 
-@jit(nopython=True, parallel=True)
 def _compute_error(array, median, lipschitz):
     # we compute the error map:
     error = median - array

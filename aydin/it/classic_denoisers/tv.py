@@ -114,7 +114,9 @@ def calibrate_denoise_tv(
     return denoise_tv, best_parameters, memory_needed
 
 
-def denoise_tv(image, algorithm: str = 'bregman', weight: float = 1, **kwargs):
+def denoise_tv(
+    image: ArrayLike, algorithm: str = 'bregman', weight: float = 1, **kwargs
+):
     """
     Denoises the given image using either scikit-image
     implementation of Bregman or Chambolle <a

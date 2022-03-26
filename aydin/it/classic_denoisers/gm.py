@@ -122,7 +122,7 @@ def calibrate_denoise_gm(
 
 
 def denoise_gm(
-    image,
+    image: ArrayLike,
     sigma: float = 0.5,
     size: int = 3,
     factor: float = 2,

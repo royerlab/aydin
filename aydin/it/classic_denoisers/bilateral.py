@@ -113,7 +113,13 @@ def calibrate_denoise_bilateral(
     return denoise_bilateral, best_parameters, memory_needed
 
 
-def denoise_bilateral(image, sigma_color=None, sigma_spatial=1, bins=10000, **kwargs):
+def denoise_bilateral(
+    image: ArrayLike,
+    sigma_color: Optional[float] = None,
+    sigma_spatial: float = 1,
+    bins: int = 10000,
+    **kwargs,
+):
     """
     Denoises the given image using a <a
     href="https://en.wikipedia.org/wiki/Bilateral_filter">bilateral

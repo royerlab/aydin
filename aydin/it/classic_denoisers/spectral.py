@@ -174,7 +174,7 @@ def calibrate_denoise_spectral(
 
 
 def denoise_spectral(
-    image,
+    image: ArrayLike,
     axes: Optional[Tuple[int, ...]] = None,
     patch_size: Optional[Union[int, Tuple[int], str]] = None,
     mode: str = 'dct',

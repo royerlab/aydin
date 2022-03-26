@@ -30,7 +30,7 @@ def demo_wavelet(image, display=True):
 
     function, parameters, memreq = calibrate_denoise_wavelet(
         noisy,
-        # all_wavelets=True,
+        all_wavelets=True,
         # wavelet_name_filter='sym'
     )
     denoised = function(noisy, **parameters)
@@ -59,18 +59,19 @@ def demo_wavelet(image, display=True):
 
 if __name__ == "__main__":
 
-    characters_image = characters()
-    demo_wavelet(characters_image)
-    pollen_image = pollen()
-    demo_wavelet(pollen_image)
-    lizard_image = lizard()
-    demo_wavelet(lizard_image)
     dots_image = dots()
     demo_wavelet(dots_image)
     camera_image = camera()
     demo_wavelet(camera_image)
     newyork_image = newyork()
     demo_wavelet(newyork_image)
+    characters_image = characters()
+    demo_wavelet(characters_image)
+    pollen_image = pollen()
+    demo_wavelet(pollen_image)
+    lizard_image = lizard()
+    demo_wavelet(lizard_image)
+
 
 ##['bior1.1',
 # 'bior1.3',

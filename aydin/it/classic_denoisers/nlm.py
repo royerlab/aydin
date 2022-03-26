@@ -122,7 +122,7 @@ def calibrate_denoise_nlm(
 
 
 def denoise_nlm(
-    image,
+    image: ArrayLike,
     patch_size: int = 7,
     patch_distance: int = 11,
     cutoff_distance: float = 0.1,

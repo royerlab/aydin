@@ -252,7 +252,7 @@ def calibrate_denoise_butterworth(
 
 
 def denoise_butterworth(
-    image,
+    image: ArrayLike,
     axes: Optional[Tuple[int, ...]] = None,
     freq_cutoff: Union[float, Sequence[float]] = 0.5,
     order: float = 1,

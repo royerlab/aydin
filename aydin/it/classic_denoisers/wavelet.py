@@ -91,17 +91,15 @@ def calibrate_denoise_wavelet(
         image, crop_size=crop_size_in_voxels, display_crop=display_crop
     )
 
-    # We make a first estimate of the noise sigma:
-    estimated_sigma = estimate_sigma(image)
-
     # Sigma range:
     sigma_range = (
-        max(1e-9, min(0.1, 0.5 * estimated_sigma - 0.1)),
-        max(2, 2 * estimated_sigma + 1),
+        1e-9,
+        1.0,
     )
 
-    # Lists of wavelets:
+    # List of all wavelets:
     all_wavelets_list = pywt.wavelist()
+
     best_wavelets_list = [
         'db1',
         'db2',
@@ -124,8 +122,18 @@ def calibrate_denoise_wavelet(
     filters = wavelet_name_filter.split(", ")
     filters = list(f.lower().strip() for f in filters)
 
-    # We only keep wavelets that are :
+    # We only keep wavelets that are in the filter:
     wavelet_list = list(w for w in wavelet_list if any(f in w for f in filters))
+
+    # Finally we exclude continuous wavelets that don't work for denoising:
+    continuous_wavelet_list = ['cgau', 'gaus', 'cmor', 'fbsp', 'morl', 'mexh', 'shan']
+    wavelet_list = list(
+        w for w in wavelet_list if all(f not in w for f in continuous_wavelet_list)
+    )
+
+    # If no wavelets remain, we use the best ones as a substitute:
+    if len(wavelet_list) == 0:
+        wavelet_list = best_wavelets_list
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {
@@ -185,7 +193,7 @@ def calibrate_denoise_wavelet(
 
 
 def denoise_wavelet(
-    image,
+    image: ArrayLike,
     wavelet: str = 'db1',
     sigma: float = None,
     mode: str = 'soft',

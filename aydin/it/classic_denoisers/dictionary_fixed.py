@@ -219,7 +219,7 @@ def calibrate_denoise_dictionary_fixed(
 
 
 def denoise_dictionary_fixed(
-    image,
+    image: ArrayLike,
     dictionary=None,
     coding_mode: str = 'omp',
     sparsity: int = 1,

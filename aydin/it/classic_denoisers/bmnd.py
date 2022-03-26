@@ -52,7 +52,7 @@ def calibrate_denoise_bmnd(
 
 
 def denoise_bmnd(
-    image,
+    image: ArrayLike,
     patch_size: Optional[Union[int, Tuple[int]]] = None,
     block_depth: Optional[int] = None,
     mode: str = 'median',

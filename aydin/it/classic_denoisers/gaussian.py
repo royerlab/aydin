@@ -17,7 +17,7 @@ def calibrate_denoise_gaussian(
     max_sigma: float = 2.0,
     max_num_truncate: int = 4,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
-    optimiser: str = _defaults.default_optimiser,
+    optimiser: str = 'smart',
     max_num_evaluations: int = _defaults.default_max_evals_high,
     enable_extended_blind_spot: bool = True,
     display_images: bool = False,
@@ -100,7 +100,7 @@ def calibrate_denoise_gaussian(
     sigma_range = (
         min_sigma,
         max(min_sigma, max_sigma) + 1e-9,
-    )  # numpy.arange(0.2, 2, 0.1) ** 1.5
+    )
 
     # Truncate range (order matters: we want 4 -- the default -- first):
     truncate_range = (
@@ -143,7 +143,7 @@ def calibrate_denoise_gaussian(
 
 
 def denoise_gaussian(
-    image,
+    image: ArrayLike,
     axes: Optional[Tuple[int, ...]] = None,
     sigma: float = 1,
     truncate: float = 4,
