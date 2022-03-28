@@ -1,0 +1,54 @@
+name: Pull Requests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  style:
+    name: Style Check
+    runs-on: ubuntu-latest
+    if: github.repository == 'royerlab/aydin'
+
+    strategy:
+      matrix:
+        python-version: [ 3.9 ]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install black
+      - name: Check code styling with Black
+        run: |
+          black --diff -S -t py39 aydin
+          black --check -S -t py39 aydin
+
+  lint:
+      name: Lint Check
+      runs-on: ubuntu-latest
+      if: github.repository == 'royerlab/aydin'
+
+      strategy:
+        matrix:
+          python-version: [ 3.9 ]
+
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python
+          uses: actions/setup-python@v2
+          with:
+            python-version: ${{ matrix.python-version }}
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            pip install flake8==4.0.1
+        - name: Check code with Flake8
+          run: |
+            flake8 --ignore E501,E203,E741,W503 aydin
