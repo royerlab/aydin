@@ -27,5 +27,5 @@ jobs:
           pip install black
       - name: Check code styling with Black
         run: |
-          black --check -S -t py36 aydin
           black --diff -S -t py36 aydin
+          black --check -S -t py36 aydin
