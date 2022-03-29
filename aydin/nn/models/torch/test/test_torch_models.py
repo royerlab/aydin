@@ -1,20 +1,20 @@
-import math
-from collections import OrderedDict
-from itertools import chain
-
-import napari
+# import math
+# from collections import OrderedDict
+# from itertools import chain
+#
+# import napari
 import numpy
 import pytest
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+# from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
-from aydin.io.datasets import lizard, add_noise, camera, normalise
+from aydin.io.datasets import add_noise, camera, normalise
 from aydin.nn.models.torch.torch_unet import UNetModel, n2t_unet_train_loop
 from aydin.nn.models.utils.torch_dataset import TorchDataset
-from aydin.nn.pytorch.it_ptcnn import to_numpy
-from aydin.nn.pytorch.optimizers.esadam import ESAdam
-from aydin.util.log.log import lprint
+# from aydin.nn.pytorch.it_ptcnn import to_numpy
+# from aydin.nn.pytorch.optimizers.esadam import ESAdam
+# from aydin.util.log.log import lprint
 
 
 def test_supervised_2D():
@@ -42,15 +42,15 @@ def test_supervised_2D_n2t():
     input_image = torch.tensor(input_image)
     lizard_image = torch.tensor(lizard_image)
 
-    learning_rate = 0.01
-    training_noise = 0.001
-    l2_weight_regularisation = 1e-9
-    patience = 128
-    patience_epsilon = 0.0
-    reduce_lr_factor = 0.5
-    reduce_lr_patience = patience // 2
-    reload_best_model_period = 1024
-    best_val_loss_value = math.inf
+    # learning_rate = 0.01
+    # training_noise = 0.001
+    # l2_weight_regularisation = 1e-9
+    # patience = 128
+    # patience_epsilon = 0.0
+    # reduce_lr_factor = 0.5
+    # reduce_lr_patience = patience // 2
+    # reload_best_model_period = 1024
+    # best_val_loss_value = math.inf
 
     dataset = TorchDataset(input_image, lizard_image, 64, self_supervised=False)
 
