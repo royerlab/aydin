@@ -11,6 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
 from aydin.nn.layers.pooling_down import PoolingDown
+
 # from aydin.nn.pytorch.it_ptcnn import to_numpy
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
