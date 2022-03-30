@@ -1,5 +1,3 @@
-import pytest
-
 from aydin.io.datasets import cropped_newyork
 from aydin.it.classic_denoisers.demo.demo_2D_harmonic import demo_harmonic
 from aydin.it.classic_denoisers.harmonic import denoise_harmonic
