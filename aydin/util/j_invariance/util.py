@@ -22,7 +22,7 @@ def _j_invariant_loss(
             mask=mask,
             denoiser_kwargs=denoiser_kwargs,
         )
-    except:
+    except RuntimeError:
         lprint(
             "Denoising failed during calibration, skipping by returning blank image "
         )
