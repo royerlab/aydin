@@ -5,7 +5,6 @@ import numpy
 import pywt
 from numpy.typing import ArrayLike
 from skimage.restoration import denoise_wavelet as skimage_denoise_wavelet
-from skimage.restoration import estimate_sigma
 
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
