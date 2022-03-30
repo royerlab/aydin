@@ -22,7 +22,8 @@ def calibrate_denoise_pca(
     patch_size: Optional[Union[int, Tuple[int], str]] = None,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
     optimiser: str = _defaults.default_optimiser,
-    max_num_evaluations: int = _defaults.default_max_evals_ultralow,
+    max_num_evaluations: int = _defaults.default_max_evals_hyperlow,
+    enable_extended_blind_spot: bool = True,
     multi_core: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
@@ -58,6 +59,10 @@ def calibrate_denoise_pca(
         Maximum number of evaluations for finding the optimal parameters.
         (advanced)
 
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
+        (advanced)
+
     multi_core: bool
         Use all CPU cores during calibration.
         (advanced)
@@ -90,7 +95,7 @@ def calibrate_denoise_pca(
     patch_size = default_patch_size(image, patch_size, odd=True)
 
     # Ranges:
-    threshold_range = (0.0, 1.0)
+    threshold_range = numpy.linspace(0, 1, max_num_evaluations).tolist()
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {'threshold': threshold_range}
@@ -111,6 +116,7 @@ def calibrate_denoise_pca(
             mode=optimiser,
             denoise_parameters=parameter_ranges,
             max_num_evaluations=max_num_evaluations,
+            enable_extended_blind_spot=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters
@@ -123,7 +129,7 @@ def calibrate_denoise_pca(
 
 
 def denoise_pca(
-    image,
+    image: ArrayLike,
     patch_size: Optional[Union[int, Tuple[int]]] = None,
     threshold: float = 0.1,
     reconstruction_gamma: float = 0,

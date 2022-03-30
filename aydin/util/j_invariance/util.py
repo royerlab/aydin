@@ -1,10 +1,13 @@
 import itertools
+import traceback
 
 import numpy
 from numpy import zeros_like
+from numpy.typing import ArrayLike
 from scipy.ndimage import convolve, gaussian_filter
 
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
+from aydin.util.log.log import lprint
 
 
 def _j_invariant_loss(
@@ -12,12 +15,19 @@ def _j_invariant_loss(
 ):
     image = image.astype(dtype=numpy.float32, copy=False)
 
-    denoised = _invariant_denoise(
-        image,
-        denoise_function=denoise_function,
-        mask=mask,
-        denoiser_kwargs=denoiser_kwargs,
-    )
+    try:
+        denoised = _invariant_denoise(
+            image,
+            denoise_function=denoise_function,
+            mask=mask,
+            denoiser_kwargs=denoiser_kwargs,
+        )
+    except RuntimeError:
+        lprint(
+            "Denoising failed during calibration, skipping by returning blank image "
+        )
+        print(traceback.format_exc())
+        denoised = numpy.zeros_like(image)
 
     loss = loss_function(image[mask], denoised[mask])
 
@@ -54,7 +64,12 @@ def _interpolate_image(image):
     return interpolation
 
 
-def _generate_mask(image, stride: int = 4, max_range: int = 4):
+def _generate_mask(
+    image: ArrayLike,
+    stride: int = 4,
+    max_range: int = 4,
+    enable_extended_blind_spot: bool = True,
+):
 
     # Generate slice for mask:
     spatialdims = image.ndim
@@ -65,10 +80,10 @@ def _generate_mask(image, stride: int = 4, max_range: int = 4):
 
     # Do we have to extend these spots?
     blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
-    extended_blind_spot = len(blind_spots) > 1
+    extended_blind_spot = len(blind_spots) > 1 and enable_extended_blind_spot
 
     if extended_blind_spot:
-        # If yes, we need to chnage the way we store the mask:
+        # If yes, we need to change the way we store the mask:
         mask_full = zeros_like(image, dtype=numpy.bool_)
         mask_full[mask] = True
         mask = mask_full

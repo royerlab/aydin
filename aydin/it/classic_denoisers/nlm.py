@@ -19,6 +19,7 @@ def calibrate_denoise_nlm(
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_normal,
+    enable_extended_blind_spot: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -52,6 +53,10 @@ def calibrate_denoise_nlm(
 
     max_num_evaluations: int
         Maximum number of evaluations for finding the optimal parameters.
+        (advanced)
+
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
         (advanced)
 
     display_images: bool
@@ -104,6 +109,7 @@ def calibrate_denoise_nlm(
             mode=optimiser,
             denoise_parameters=parameter_ranges,
             max_num_evaluations=max_num_evaluations,
+            enable_extended_blind_spot=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters
@@ -116,7 +122,7 @@ def calibrate_denoise_nlm(
 
 
 def denoise_nlm(
-    image,
+    image: ArrayLike,
     patch_size: int = 7,
     patch_distance: int = 11,
     cutoff_distance: float = 0.1,

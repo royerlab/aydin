@@ -25,7 +25,8 @@ def calibrate_denoise_harmonic(
     rank: bool = False,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
     optimiser: str = _defaults.default_optimiser,
-    max_num_evaluations: int = _defaults.default_max_evals_verylow,
+    max_num_evaluations: int = _defaults.default_max_evals_hyperlow,
+    enable_extended_blind_spot: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -58,6 +59,10 @@ def calibrate_denoise_harmonic(
         Maximum number of evaluations for finding the optimal parameters.
         (advanced)
 
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
+        (advanced)
+
     display_images: bool
         When True the denoised images encountered during optimisation are shown
 
@@ -82,21 +87,19 @@ def calibrate_denoise_harmonic(
         image, crop_size=crop_size_in_voxels, display_crop=display_crop
     )
 
-    alpha_range = (0.0, 1.0)
+    # Combine fixed parameters:
+    other_fixed_parameters = other_fixed_parameters | {'rank': rank}
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {
-        'alpha': alpha_range,
-        'filter': ['uniform', 'gaussian', 'median'],
+        'alpha': numpy.linspace(0, 1, max_num_evaluations).tolist(),
+        'filter': ['uniform'],
     }
-
-    # Combine fixed parameters:
-    other_fixed_parameters = other_fixed_parameters | {'rank': rank}
 
     # Partial function:
     _denoise_harmonic = partial(denoise_harmonic, **other_fixed_parameters)
 
-    # Calibrate denoiser
+    # Calibrate denoiser 1st pass:
     best_parameters = (
         calibrate_denoiser(
             crop,
@@ -104,6 +107,29 @@ def calibrate_denoise_harmonic(
             mode=optimiser,
             denoise_parameters=parameter_ranges,
             max_num_evaluations=max_num_evaluations,
+            enable_extended_blind_spot=enable_extended_blind_spot,
+            display_images=display_images,
+        )
+        | other_fixed_parameters
+    )
+
+    # Parameters to test when calibrating the denoising algorithm
+    parameter_ranges = {
+        'alpha': [
+            best_parameters['alpha'],
+        ],
+        'filter': ['uniform', 'gaussian', 'median'],
+    }
+
+    # Calibrate denoiser 2nd pass:
+    best_parameters = (
+        calibrate_denoiser(
+            crop,
+            _denoise_harmonic,
+            mode=optimiser,
+            denoise_parameters=parameter_ranges,
+            max_num_evaluations=max_num_evaluations,
+            enable_extended_blind_spot=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters
@@ -116,7 +142,7 @@ def calibrate_denoise_harmonic(
 
 
 def denoise_harmonic(
-    image,
+    image: ArrayLike,
     filter: str = 'uniform',
     rank: bool = False,
     max_iterations: int = 1024,

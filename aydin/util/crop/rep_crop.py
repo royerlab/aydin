@@ -22,7 +22,7 @@ def representative_crop(
     favour_odd_lengths: bool = False,
     search_mode: str = 'random',
     random_search_mode_num_crops: int = 1500,
-    max_time_in_seconds: float = 3,
+    timeout_in_seconds: float = 3,
     return_slice: bool = False,
     display_crop: bool = False,
 ):
@@ -65,7 +65,7 @@ def representative_crop(
     random_search_mode_num_crops: int
         Number of crops to check in 'random' search mode.
 
-    max_time_in_seconds: float
+    timeout_in_seconds: float
         Maximum amount of time in seconds that this function should run for.
         This avoids excessive computation for very large images.
 
@@ -100,6 +100,26 @@ def representative_crop(
 
     # cropped shape:
     cropped_shape = tuple(min(max(min_length, int(s * ratio)), s) for s in image.shape)
+
+    # If the crop size is still too big, we adjust that. This happens because
+    # we cannot crop dimensions that are too small, leading to an
+    # underestimation of the ratio.
+    for tries in range(8):
+        # First let's figure out the current crop size:
+        current_crop_size = math.prod(cropped_shape)
+
+        # we check if it is ok, or too large:
+        if current_crop_size < 1.05 * crop_size:
+            # we are ok if the crop size is within 5% of the desired size.
+            break
+
+        # If too large we compute the ratio by which to adjust it:
+        ratio = (crop_size / current_crop_size) ** (1 / image.ndim)
+
+        # we compute a new crop shape:
+        cropped_shape = tuple(
+            min(max(min_length, int(s * ratio)), s) for s in cropped_shape
+        )
 
     # Favour odd lengths if requested:
     if favour_odd_lengths:
@@ -179,9 +199,9 @@ def representative_crop(
                 # We make sure to have the full and original crop!
                 best_crop = image[best_slice]
 
-            if time.time() > start_time + max_time_in_seconds:
+            if time.time() > start_time + timeout_in_seconds:
                 lprint(
-                    f"Interrupting crop search because of timeout after {index} iterations!"
+                    f"Interrupting crop search because of timeout after {index} crops examined!"
                 )
                 break
 
@@ -224,9 +244,9 @@ def representative_crop(
                 # We make sure to have the full and original crop!
                 best_crop = image[best_slice]
 
-            if time.time() > start_time + max_time_in_seconds:
+            if time.time() > start_time + timeout_in_seconds:
                 lprint(
-                    f"Interrupting crop search because of timeout after {i} iterations!"
+                    f"Interrupting crop search because of timeout after {i} crops examined!"
                 )
                 break
     else:

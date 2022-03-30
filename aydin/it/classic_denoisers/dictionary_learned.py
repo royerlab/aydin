@@ -37,6 +37,7 @@ def calibrate_denoise_dictionary_learned(
     do_denoise_dictionary: bool = False,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
     max_num_evaluations: int = _defaults.default_max_evals_low,
+    enable_extended_blind_spot: bool = True,
     display_dictionary: bool = False,
     display_images: bool = False,
     display_crop: bool = False,
@@ -161,6 +162,10 @@ def calibrate_denoise_dictionary_learned(
         Maximum number of evaluations for finding the optimal parameters.
         (advanced)
 
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
+        (advanced)
+
     display_dictionary: bool
         If True displays dictionary with napari --
         for debug purposes.
@@ -265,6 +270,7 @@ def calibrate_denoise_dictionary_learned(
             mode=optimiser,
             denoise_parameters=parameter_ranges,
             max_num_evaluations=max_num_evaluations,
+            enable_extended_blind_spot=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters

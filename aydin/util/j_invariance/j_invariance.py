@@ -23,6 +23,7 @@ def calibrate_denoiser(
     patience: int = 64,
     stride: int = 4,
     loss_function: str = 'L2',
+    enable_extended_blind_spot: bool = True,
     display_images: bool = False,
     **other_fixed_parameters,
 ):
@@ -40,27 +41,39 @@ def calibrate_denoiser(
     ----------
     image: ArrayLike
         Image to calibate denoiser with.
+
     denoise_function: Callable
         Denosing function to calibrate. Should take an image as first parameter,
         all other parameters should have defaults
+
     denoise_parameters:
         Dictionary with keys corresponding to parameters of the denoising function.
         Values are either: (i) a list of possible values (categorical parameter),
         or (ii) a tuple of floats defining the bounds of that numerical parameter.
+
     mode: str
         Algorithm to use. Can be 'smart' and 'l-bfgs-b'.
+
     max_num_evaluations: int
         Max number of function evaluations. This is per the size of the cartesian
         product of categorical parameters.
+
     patience : int
         After 'patience' evaluations we stop the optimiser
+
     stride: int
         Stride to compute self-supervised loss.
+
     loss_function: str
         Loss/Error function: Can be:  'L1', 'L2', 'SSIM'
+
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
+
     display_images: bool
         If True the denoised images for each parameter tested are displayed.
         this _will_ be slow.
+
     other_fixed_parameters: dict
         Other fixed parameters to pass to the denoiser function.
 
@@ -90,7 +103,9 @@ def calibrate_denoiser(
     with lsection("Calibrating denoiser:"):
 
         # Generate mask:
-        mask = _generate_mask(image, stride)
+        mask = _generate_mask(
+            image, stride, enable_extended_blind_spot=enable_extended_blind_spot
+        )
 
         # first we separate the categorical from numerical parameters;
         categorical_parameters = {}
@@ -166,6 +181,7 @@ def calibrate_denoiser(
                         # If there is no numerical parameters to optimise, we just get the value for that categorical combination:
                         new_parameters = {}
                         new_loss_value = opt_function(new_parameters)
+                        lprint(f"Loss: {new_loss_value}")
                     else:
 
                         if mode == "smart":
@@ -219,7 +235,9 @@ def calibrate_denoiser(
                                 lprint(
                                     f"Global optimisation number of function evaluations: {result.nfev}"
                                 )
-                                lprint(f"Best parameters until now: {result.x}")
+                                lprint(
+                                    f"Best parameters until now: {result.x} for loss: {result.fun}"
+                                )
 
                                 # starting point for next ioptimkisation round is result of previous step:
                                 x0 = result.x
@@ -244,6 +262,9 @@ def calibrate_denoiser(
                                 )
                                 lprint(
                                     f"Local optimisation number of function evaluations: {result.nfev}"
+                                )
+                                lprint(
+                                    f"Best parameters until now: {result.x} for loss: {result.fun}"
                                 )
 
                                 # We optimise here:

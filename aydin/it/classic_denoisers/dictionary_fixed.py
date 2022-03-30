@@ -30,6 +30,7 @@ def calibrate_denoise_dictionary_fixed(
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_low,
+    enable_extended_blind_spot: bool = True,
     display_dictionary: bool = False,
     display_images: bool = False,
     display_crop: bool = False,
@@ -91,6 +92,10 @@ def calibrate_denoise_dictionary_fixed(
     max_num_evaluations: int
         Maximum number of evaluations for finding the
         optimal parameters.
+        (advanced)
+
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
         (advanced)
 
     display_dictionary: bool
@@ -160,6 +165,7 @@ def calibrate_denoise_dictionary_fixed(
         mode=optimiser,
         denoise_parameters=parameter_ranges,
         max_num_evaluations=max_num_evaluations,
+        enable_extended_blind_spot=enable_extended_blind_spot,
     )
     lprint(f"Best parameters: {best_parameters}")
 
@@ -175,6 +181,7 @@ def calibrate_denoise_dictionary_fixed(
             other_fixed_parameters=best_parameters | other_fixed_parameters,
             max_num_evaluations=max_num_evaluations,
             display_images=display_images,
+            enable_extended_blind_spot=enable_extended_blind_spot,
         )
         | best_parameters
         | other_fixed_parameters
@@ -212,7 +219,7 @@ def calibrate_denoise_dictionary_fixed(
 
 
 def denoise_dictionary_fixed(
-    image,
+    image: ArrayLike,
     dictionary=None,
     coding_mode: str = 'omp',
     sparsity: int = 1,

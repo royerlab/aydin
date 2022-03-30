@@ -30,6 +30,7 @@ def calibrate_denoise_spectral(
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_low,
+    enable_extended_blind_spot: bool = True,
     multi_core: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
@@ -80,6 +81,10 @@ def calibrate_denoise_spectral(
 
     max_num_evaluations: int
         Maximum number of evaluations for finding the optimal parameters.
+        (advanced)
+
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
         (advanced)
 
     multi_core: bool
@@ -156,6 +161,7 @@ def calibrate_denoise_spectral(
             mode=optimiser,
             denoise_parameters=parameter_ranges,
             max_num_evaluations=max_num_evaluations,
+            enable_extended_blind_spot=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters
@@ -168,7 +174,7 @@ def calibrate_denoise_spectral(
 
 
 def denoise_spectral(
-    image,
+    image: ArrayLike,
     axes: Optional[Tuple[int, ...]] = None,
     patch_size: Optional[Union[int, Tuple[int], str]] = None,
     mode: str = 'dct',
