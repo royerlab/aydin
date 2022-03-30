@@ -2,7 +2,7 @@ import math
 from collections import OrderedDict
 from itertools import chain
 
-import napari
+# import napari
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -11,7 +11,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
 from aydin.nn.layers.pooling_down import PoolingDown
-from aydin.nn.pytorch.it_ptcnn import to_numpy
+
+# from aydin.nn.pytorch.it_ptcnn import to_numpy
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 

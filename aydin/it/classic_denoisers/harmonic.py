@@ -4,6 +4,7 @@ from typing import Optional
 
 import numpy
 from numpy.linalg import norm
+from numpy.typing import ArrayLike
 from scipy.ndimage import (
     median_filter,
     minimum_filter,
@@ -13,17 +14,21 @@ from scipy.ndimage import (
     gaussian_filter,
 )
 
+from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.j_invariance.j_invariant_smart import calibrate_denoiser_smart
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 from aydin.util.log.log import lprint
 
 
 def calibrate_denoise_harmonic(
-    image,
+    image: ArrayLike,
     rank: bool = False,
-    crop_size_in_voxels: Optional[int] = None,
-    max_num_evaluations: int = 16,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    optimiser: str = _defaults.default_optimiser,
+    max_num_evaluations: int = _defaults.default_max_evals_hyperlow,
+    enable_extended_blind_spot: bool = True,
     display_images: bool = False,
+    display_crop: bool = False,
     **other_fixed_parameters,
 ):
     """
@@ -44,12 +49,26 @@ def calibrate_denoise_harmonic(
         Number of voxels for crop used to calibrate denoiser.
         (advanced)
 
+    optimiser: str
+        Optimiser to use for finding the best denoising
+        parameters. Can be: 'smart' (default), or 'fast' for a mix of SHGO
+        followed by L-BFGS-B.
+        (advanced)
+
     max_num_evaluations: int
         Maximum number of evaluations for finding the optimal parameters.
         (advanced)
 
+    enable_extended_blind_spot: bool
+        Set to True to enable extended blind-spot detection.
+        (advanced)
+
     display_images: bool
         When True the denoised images encountered during optimisation are shown
+
+    display_crop: bool
+        Displays crop, for debugging purposes...
+        (advanced)
 
     other_fixed_parameters: dict
         Any other fixed parameters
@@ -64,33 +83,53 @@ def calibrate_denoise_harmonic(
     image = image.astype(dtype=numpy.float32, copy=False)
 
     # obtain representative crop, to speed things up...
-    crop = representative_crop(image, crop_size=crop_size_in_voxels)
-
-    # alpha range:
-    # alpha_range = numpy.concatenate(
-    #     [numpy.arange(0.01, 1, 0.1), 0.5 + 0.15 * numpy.arange(-1, 1, 0.1)]
-    # )
-    alpha_range = (0.0, 1.0)
-
-    # Parameters to test when calibrating the denoising algorithm
-    parameter_ranges = {
-        'alpha': alpha_range,
-        'filter': ['uniform', 'gaussian', 'median'],
-    }
+    crop = representative_crop(
+        image, crop_size=crop_size_in_voxels, display_crop=display_crop
+    )
 
     # Combine fixed parameters:
     other_fixed_parameters = other_fixed_parameters | {'rank': rank}
 
+    # Parameters to test when calibrating the denoising algorithm
+    parameter_ranges = {
+        'alpha': numpy.linspace(0, 1, max_num_evaluations).tolist(),
+        'filter': ['uniform'],
+    }
+
     # Partial function:
     _denoise_harmonic = partial(denoise_harmonic, **other_fixed_parameters)
 
-    # Calibrate denoiser
+    # Calibrate denoiser 1st pass:
     best_parameters = (
-        calibrate_denoiser_smart(
+        calibrate_denoiser(
             crop,
             _denoise_harmonic,
+            mode=optimiser,
             denoise_parameters=parameter_ranges,
             max_num_evaluations=max_num_evaluations,
+            enable_extended_blind_spot=enable_extended_blind_spot,
+            display_images=display_images,
+        )
+        | other_fixed_parameters
+    )
+
+    # Parameters to test when calibrating the denoising algorithm
+    parameter_ranges = {
+        'alpha': [
+            best_parameters['alpha'],
+        ],
+        'filter': ['uniform', 'gaussian', 'median'],
+    }
+
+    # Calibrate denoiser 2nd pass:
+    best_parameters = (
+        calibrate_denoiser(
+            crop,
+            _denoise_harmonic,
+            mode=optimiser,
+            denoise_parameters=parameter_ranges,
+            max_num_evaluations=max_num_evaluations,
+            enable_extended_blind_spot=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters
@@ -103,7 +142,7 @@ def calibrate_denoise_harmonic(
 
 
 def denoise_harmonic(
-    image,
+    image: ArrayLike,
     filter: str = 'uniform',
     rank: bool = False,
     max_iterations: int = 1024,

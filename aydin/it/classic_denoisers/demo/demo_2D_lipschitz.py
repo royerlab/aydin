@@ -14,7 +14,6 @@ from aydin.io.datasets import (
     pollen,
     characters,
 )
-from aydin.it.classic_denoisers.gaussian import calibrate_denoise_gaussian
 from aydin.it.classic_denoisers.lipschitz import calibrate_denoise_lipschitz
 from aydin.util.log.log import Log
 
@@ -46,11 +45,11 @@ def demo_lipschitz(image, display=True):
     if display:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(image, name='image')
-            viewer.add_image(noisy, name='noisy')
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(image, name='image')
+        viewer.add_image(noisy, name='noisy')
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
     return ssim_denoised
 

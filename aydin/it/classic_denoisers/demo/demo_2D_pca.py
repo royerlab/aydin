@@ -13,12 +13,9 @@ from aydin.io.datasets import (
     lizard,
     pollen,
     characters,
-    cropped_newyork,
     dmel,
 )
-from aydin.it.classic_denoisers.bmnd import calibrate_denoise_bmnd
 from aydin.it.classic_denoisers.pca import calibrate_denoise_pca
-from aydin.it.classic_denoisers.spectral import calibrate_denoise_spectral
 from aydin.util.log.log import Log
 
 
@@ -48,11 +45,11 @@ def demo_pca(image, display=True):
     if display:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(image, name='image')
-            viewer.add_image(noisy, name='noisy')
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(image, name='image')
+        viewer.add_image(noisy, name='noisy')
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
     return ssim_denoised
 

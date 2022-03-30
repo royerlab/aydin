@@ -5,11 +5,9 @@ from aydin.util.log.log import lprint, lsection
 
 
 class SupportVectorRegressor(RegressorBase):
-    """Support Vector Regressor.
-    \n\n
-    Note: Way too slow when non-linear, nearly useless...
-    When using linear much faster, but does not perform better
-    than linear regression.
+    """
+    The Support Vector Regressor is too slow and does not in pour experience
+    perform better than random forests or gradient boosting.
     """
 
     def __init__(self, linear: bool = True):
@@ -19,6 +17,7 @@ class SupportVectorRegressor(RegressorBase):
         ----------
         linear : bool
             Flag to choose between a linear or non-linear SVR
+            (advanced)
 
         """
         super().__init__()
