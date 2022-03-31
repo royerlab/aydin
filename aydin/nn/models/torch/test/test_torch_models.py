@@ -33,28 +33,18 @@ def test_supervised_2D():
     assert result.dtype == input_array.dtype
 
 
-@pytest.mark.heavy
+# @pytest.mark.heavy
 def test_supervised_2D_n2t():
-    lizard_image = normalise(camera())
-    lizard_image = numpy.expand_dims(lizard_image, axis=0)
-    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+    clean_image = normalise(camera())
+    clean_image = numpy.expand_dims(clean_image, axis=0)
+    clean_image = numpy.expand_dims(clean_image, axis=0)
 
-    input_image = add_noise(lizard_image)
+    noisy_image = add_noise(clean_image)
 
-    input_image = torch.tensor(input_image)
-    lizard_image = torch.tensor(lizard_image)
+    noisy_image = torch.tensor(noisy_image)
+    clean_image = torch.tensor(clean_image)
 
-    # learning_rate = 0.01
-    # training_noise = 0.001
-    # l2_weight_regularisation = 1e-9
-    # patience = 128
-    # patience_epsilon = 0.0
-    # reduce_lr_factor = 0.5
-    # reduce_lr_patience = patience // 2
-    # reload_best_model_period = 1024
-    # best_val_loss_value = math.inf
-
-    dataset = TorchDataset(input_image, lizard_image, 64, self_supervised=False)
+    dataset = TorchDataset(noisy_image, clean_image, 64, self_supervised=False)
 
     data_loader = DataLoader(
         dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
@@ -64,11 +54,11 @@ def test_supervised_2D_n2t():
         nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
     )
 
-    n2t_unet_train_loop(input_image, lizard_image, model, data_loader)
-    result = model(input_image)
+    n2t_unet_train_loop(noisy_image, clean_image, model, data_loader)
+    result = model(noisy_image)
 
-    assert result.shape == input_image.shape
-    assert result.dtype == input_image.dtype
+    assert result.shape == noisy_image.shape
+    assert result.dtype == noisy_image.dtype
 
 
 def test_masking_2D():
