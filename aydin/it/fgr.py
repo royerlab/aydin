@@ -29,7 +29,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         voxel_keep_ratio: float = 1,
         max_voxels_for_training: Optional[int] = None,
         favour_bright_pixels: float = 0,
-        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
+        blind_spots: Optional[List[Tuple[int]]] = 'discover',
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
         max_memory_usage_ratio: float = 0.9,
@@ -80,10 +80,12 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             pixel intensities are treated equally. Positive values favour
             bright pixels, negative values favour dark pixels.
 
-        blind_spots : Optional[Union[str, List[Tuple[int]]]]
+        blind_spots : Optional[List[Tuple[int]]]
             List of voxel coordinates (relative to receptive field center) to
-            be included in the 'blind-spot'. If 'auto' is passed then the
-            blindspots are automatically determined from the image content.
+            be included in the blind-spot. If 'discover' is passed then the
+            blindspots are automatically discovered from the image content.
+            If an empty list is passed then no additional blindspots to the
+            center pixel are considered.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.

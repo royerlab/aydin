@@ -18,7 +18,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         main_channel: Optional[int] = None,
         max_voxels_for_training: Optional[int] = None,
         calibration_kwargs=None,
-        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
+        blind_spots: Optional[List[Tuple[int]]] = 'discover',
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
         max_memory_usage_ratio: float = 0.9,
@@ -40,10 +40,12 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             Maximum number of the voxels that can be
             used for training.
 
-        blind_spots : Optional[Union[str, List[Tuple[int]]]]
+        blind_spots : Optional[List[Tuple[int]]]
             List of voxel coordinates (relative to receptive field center) to
-            be included in the 'blind-spot'. If 'auto' is passed then the
-            blindspots are automatically determined from the image content.
+            be included in the blind-spot. If 'discover' is passed then the
+            blindspots are automatically discovered from the image content.
+            If an empty list is passed then no additional blindspots to the
+            center pixel are considered.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.

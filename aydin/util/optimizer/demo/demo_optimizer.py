@@ -40,7 +40,7 @@ def demo_optimizer_himmelblau():
     # function to optimise:
     def himmelblau(x, y):
         # https://en.wikipedia.org/wiki/Test_functions_for_optimization
-        return -((x**2 + y - 11) ** 2 + (x + y**2 - 7) ** 2)
+        return -((x ** 2 + y - 11) ** 2 + (x + y ** 2 - 7) ** 2)
 
     x, v = Optimizer().optimize(
         himmelblau, bounds=[(-5.0, 5.0), (-5.0, 5.0)], max_num_evaluations=512
@@ -63,8 +63,8 @@ def demo_optimizer_beale():
         # https://en.wikipedia.org/wiki/Test_functions_for_optimization
         return -(
             (1.5 - x + x * y) ** 2
-            + (2.25 - x + x * (y**2)) ** 2
-            + (2.625 - x + x * y**3) ** 2
+            + (2.25 - x + x * (y ** 2)) ** 2
+            + (2.625 - x + x * y ** 3) ** 2
         )
 
     x, v = Optimizer().optimize(
@@ -86,7 +86,7 @@ def demo_optimizer_matyas():
     # function to optimise:
     def matyas(x, y):
         # https://en.wikipedia.org/wiki/Test_functions_for_optimization
-        return -(0.26 * (x**2 + y**2) - 0.48 * x * y)
+        return -(0.26 * (x ** 2 + y ** 2) - 0.48 * x * y)
 
     x, v = Optimizer().optimize(
         matyas, bounds=[(-10.0, 10.0), (-10.0, 10.0)], max_num_evaluations=512
@@ -110,10 +110,10 @@ def demo_optimizer_goldsteinprice():
         return (
             1
             + (x + y + 1) ** 2
-            * (19 - 14 * x + 3 * (x**2) - 14 * y + 6 * x * y + 3 * (y**2))
+            * (19 - 14 * x + 3 * (x ** 2) - 14 * y + 6 * x * y + 3 * (y ** 2))
         ) * (
             (30 + (2 * x - 3 * y) ** 2)
-            * (18 - 32 * x + 12 * (x**2) + 48 * y - 36 * x * y + 27 * (y**2))
+            * (18 - 32 * x + 12 * (x ** 2) + 48 * y - 36 * x * y + 27 * (y ** 2))
         )
 
     x, v = Optimizer().optimize(
@@ -135,7 +135,7 @@ def demo_optimizer_rosenbrock():
     # function to optimise:
     def rosenbrock(x, y):
         # https://en.wikipedia.org/wiki/Test_functions_for_optimization
-        return -(100 * (y - x**2) ** 2 + (1 - x) ** 2)
+        return -(100 * (y - x ** 2) ** 2 + (1 - x) ** 2)
 
     x, v = Optimizer().optimize(
         rosenbrock, bounds=[(-10.0, 10.0), (-10.0, 10.0)], max_num_evaluations=512

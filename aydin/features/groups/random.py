@@ -42,7 +42,7 @@ class RandomFeatures(ConvolutionalFeatures):
             dct_kernels = []
 
             num_features = (
-                self.size**ndim if self._num_features is None else self._num_features
+                self.size ** ndim if self._num_features is None else self._num_features
             )
 
             shape = tuple((self.size,) * ndim)
