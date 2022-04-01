@@ -29,7 +29,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         voxel_keep_ratio: float = 1,
         max_voxels_for_training: Optional[int] = None,
         favour_bright_pixels: float = 0,
-        blind_spots: Optional[Union[str, List[Tuple[int]]]] = 'discover',
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = 'auto',
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
         max_memory_usage_ratio: float = 0.9,
