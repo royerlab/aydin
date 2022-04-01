@@ -22,9 +22,9 @@ def calibrate_denoise_butterworth(
     max_padding: int = 32,
     min_freq: float = 1e-9,
     max_freq: float = 1.0,
-    min_order: float = 0.5,
+    min_order: float = 2.0,
     max_order: float = 6.0,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_normal,
     enable_extended_blind_spot: bool = True,
@@ -210,7 +210,7 @@ def calibrate_denoise_butterworth(
                 _denoise_butterworth,
                 mode=optimiser,
                 denoise_parameters=parameter_ranges,
-                enable_extended_blind_spot=enable_extended_blind_spot,
+                blind_spots=enable_extended_blind_spot,
                 display_images=display_images,
             )
             | other_fixed_parameters
@@ -225,7 +225,7 @@ def calibrate_denoise_butterworth(
                 mode=optimiser,
                 denoise_parameters=parameter_ranges,
                 max_num_evaluations=max_num_evaluations,
-                enable_extended_blind_spot=enable_extended_blind_spot,
+                blind_spots=enable_extended_blind_spot,
                 display_images=display_images,
             )
             | other_fixed_parameters

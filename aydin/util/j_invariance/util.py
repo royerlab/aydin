@@ -79,10 +79,15 @@ def _generate_mask(
     )
 
     # Do we have to extend these spots?
-    blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
-    extended_blind_spot = len(blind_spots) > 1 and enable_extended_blind_spot
+    if enable_extended_blind_spot:
+        lprint(f"Detection of extended blindspots requested!")
+        blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
+        extended_blind_spot = len(blind_spots) > 1 and enable_extended_blind_spot
+    else:
+        extended_blind_spot = False
 
     if extended_blind_spot:
+        lprint(f"Extended blindspots detected: {blind_spots}")
         # If yes, we need to change the way we store the mask:
         mask_full = zeros_like(image, dtype=numpy.bool_)
         mask_full[mask] = True

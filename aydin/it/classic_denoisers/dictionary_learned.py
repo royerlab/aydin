@@ -35,7 +35,7 @@ def calibrate_denoise_dictionary_learned(
     alpha: int = 1,
     do_cleanup_dictionary: bool = True,
     do_denoise_dictionary: bool = False,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal,
     max_num_evaluations: int = _defaults.default_max_evals_low,
     enable_extended_blind_spot: bool = True,
     display_dictionary: bool = False,
@@ -270,7 +270,7 @@ def calibrate_denoise_dictionary_learned(
             mode=optimiser,
             denoise_parameters=parameter_ranges,
             max_num_evaluations=max_num_evaluations,
-            enable_extended_blind_spot=enable_extended_blind_spot,
+            blind_spots=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters

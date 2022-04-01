@@ -27,7 +27,7 @@ def calibrate_denoise_dictionary_fixed(
     try_threshold: bool = False,
     num_sparsity_values_to_try: int = 6,
     dictionaries: str = 'dct',
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_low,
     enable_extended_blind_spot: bool = True,
@@ -165,7 +165,7 @@ def calibrate_denoise_dictionary_fixed(
         mode=optimiser,
         denoise_parameters=parameter_ranges,
         max_num_evaluations=max_num_evaluations,
-        enable_extended_blind_spot=enable_extended_blind_spot,
+        blind_spots=enable_extended_blind_spot,
     )
     lprint(f"Best parameters: {best_parameters}")
 
@@ -181,7 +181,7 @@ def calibrate_denoise_dictionary_fixed(
             other_fixed_parameters=best_parameters | other_fixed_parameters,
             max_num_evaluations=max_num_evaluations,
             display_images=display_images,
-            enable_extended_blind_spot=enable_extended_blind_spot,
+            blind_spots=enable_extended_blind_spot,
         )
         | best_parameters
         | other_fixed_parameters

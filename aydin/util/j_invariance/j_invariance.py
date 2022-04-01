@@ -23,7 +23,7 @@ def calibrate_denoiser(
     patience: int = 64,
     stride: int = 4,
     loss_function: str = 'L2',
-    enable_extended_blind_spot: bool = True,
+    blind_spots: bool = True,
     display_images: bool = False,
     **other_fixed_parameters,
 ):
@@ -67,7 +67,7 @@ def calibrate_denoiser(
     loss_function: str
         Loss/Error function: Can be:  'L1', 'L2', 'SSIM'
 
-    enable_extended_blind_spot: bool
+    blind_spots: bool
         Set to True to enable extended blind-spot detection.
 
     display_images: bool
@@ -103,9 +103,7 @@ def calibrate_denoiser(
     with lsection("Calibrating denoiser:"):
 
         # Generate mask:
-        mask = _generate_mask(
-            image, stride, enable_extended_blind_spot=enable_extended_blind_spot
-        )
+        mask = _generate_mask(image, stride, enable_extended_blind_spot=blind_spots)
 
         # first we separate the categorical from numerical parameters;
         categorical_parameters = {}

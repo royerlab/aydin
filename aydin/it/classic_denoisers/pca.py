@@ -20,7 +20,7 @@ from aydin.util.patch_transform.patch_transform import (
 def calibrate_denoise_pca(
     image: ArrayLike,
     patch_size: Optional[Union[int, Tuple[int], str]] = None,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_hyperlow,
     enable_extended_blind_spot: bool = True,
@@ -116,7 +116,7 @@ def calibrate_denoise_pca(
             mode=optimiser,
             denoise_parameters=parameter_ranges,
             max_num_evaluations=max_num_evaluations,
-            enable_extended_blind_spot=enable_extended_blind_spot,
+            blind_spots=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters
