@@ -11,7 +11,7 @@ from aydin.io.datasets import examples_single
 from aydin.io.folders import get_temp_folder
 from aydin.io.io import mapped_tiff
 from aydin.it.fgr import ImageTranslatorFGR
-from aydin.regression.nn import NNRegressor
+from aydin.regression.perceptron import PerceptronRegressor
 
 
 def demo():
@@ -40,7 +40,7 @@ def demo():
         include_spatial_features=True,
     )
 
-    regressor = NNRegressor(max_epochs=200, patience=15)
+    regressor = PerceptronRegressor(max_epochs=200, patience=15)
 
     it = ImageTranslatorFGR(generator, regressor)
 

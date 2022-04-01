@@ -20,8 +20,15 @@ from aydin.util.log.log import lsection, lprint
 from aydin.util.tf.device import get_best_device_name
 
 
-class NNRegressor(RegressorBase):
-    """standard perceptron-like neural network regressor."""
+class PerceptronRegressor(RegressorBase):
+    """
+    The Perceptron Regressor uses a simple multi-layer perceptron neural
+    network. The big disadvantage of neural-network regressors is that they
+    are trained stochastically, which usually means that when your run them
+    twice you also get two different results. In some cases there can be
+    significant variance between runs which can be problematic when trying
+    to compare results.
+    """
 
     device_max_mem = psutil.virtual_memory().total
 
@@ -41,12 +48,15 @@ class NNRegressor(RegressorBase):
             Maximum number of epochs allowed
         learning_rate : float
             Learning rate
+            (advanced)
         patience : int
             Number of epochs required for early stopping
+            (advanced)
         depth : int
             Depth of the model
         loss : str
             Type of loss to be used
+            (advanced)
 
         """
         super().__init__()
@@ -329,7 +339,7 @@ class _NNModel:
                 assert num_of_features == x.shape[-1]
 
                 # How much memory is available in GPU:
-                max_gpu_mem_in_bytes = NNRegressor.device_max_mem
+                max_gpu_mem_in_bytes = PerceptronRegressor.device_max_mem
 
                 # We limit ourselves to using only a quarter of GPU memory:
                 max_number_of_floats = (max_gpu_mem_in_bytes // 4) // 4

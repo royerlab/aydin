@@ -8,6 +8,7 @@ from skimage.color import rgb2gray
 from skimage.draw import circle, circle_perimeter, line_aa
 
 from aydin.analysis.correlation import correlation, correlation_distance
+from aydin.io.datasets import examples_single
 
 
 def discs(shape=(512, 512), radius=10, num=512, fill=True, image=None):
@@ -162,6 +163,20 @@ def lines_example():
     print("lines3  %d,%d " % correlation_distance(lines3))
 
 
+def maitre_example():
+    image = examples_single.maitre_mouse.get_array()
+
+    plt.plot(correlation(image)[0][:plot_length], label='t')
+    plt.plot(correlation(image)[1][:plot_length], label='z')
+    plt.plot(correlation(image)[2][:plot_length], label='y')
+    plt.plot(correlation(image)[3][:plot_length], label='x')
+    plt.legend()
+    plt.show()
+
+    print(f"Maitre {correlation_distance(image)} ")
+
+
+maitre_example()
 noise_example()
 camera_example()
 astronaut_example()

@@ -15,9 +15,9 @@ from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.cb import CBRegressor
 from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.linear import LinearRegressor
-from aydin.regression.nn import NNRegressor
-from aydin.regression.rf import RFRegressor
-from aydin.regression.sv import SVRegressor
+from aydin.regression.perceptron import PerceptronRegressor
+from aydin.regression.random_forest import RandomForestRegressor
+from aydin.regression.support_vector import SupportVectorRegressor
 
 
 @pytest.mark.heavy
@@ -28,19 +28,19 @@ def test_saveload_Linear():
 
 @pytest.mark.heavy
 def test_saveload_RF():
-    regressor = RFRegressor()
+    regressor = RandomForestRegressor()
     saveload(StandardFeatureGenerator(), regressor, min_ssim=0.75)
 
 
 @pytest.mark.heavy
 def test_saveload_SVR():
-    regressor = SVRegressor()
+    regressor = SupportVectorRegressor()
     saveload(StandardFeatureGenerator(), regressor, min_psnr=22, min_ssim=0.71)
 
 
 @pytest.mark.heavy
 def test_saveload_NN():
-    regressor = NNRegressor(max_epochs=12)
+    regressor = PerceptronRegressor(max_epochs=12)
     saveload(StandardFeatureGenerator(), regressor, min_psnr=21, min_ssim=0.73)
 
 

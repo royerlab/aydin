@@ -11,7 +11,7 @@ from skimage.metrics import structural_similarity as ssim
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import normalise, add_noise
 from aydin.it.fgr import ImageTranslatorFGR
-from aydin.regression.nn import NNRegressor
+from aydin.regression.perceptron import PerceptronRegressor
 
 
 def demo():
@@ -23,7 +23,7 @@ def demo():
     noisy = add_noise(image)
 
     generator = StandardFeatureGenerator()  # max_level=4)
-    regressor = NNRegressor(max_epochs=1)
+    regressor = PerceptronRegressor(max_epochs=1)
 
     it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)
 

@@ -27,7 +27,7 @@ def demo_butterworth_cognet(noisy, display=True):
             viewer.add_image(noisy, name='noisy')
 
     function, parameters, _ = calibrate_denoise_butterworth(
-        noisy, isotropic=False, axes=(0, 1, 2)
+        noisy, mode='z-yx', axes=(0, 1, 2)
     )
     denoised = function(noisy, **parameters)
 

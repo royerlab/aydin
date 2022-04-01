@@ -4,8 +4,14 @@ from aydin.regression.lgbm import LGBMRegressor
 from aydin.util.log.log import lsection, lprint
 
 
-class RFRegressor(LGBMRegressor):
-    """Random Forrest Regressor (uses the LGBM library)."""
+class RandomForestRegressor(LGBMRegressor):
+    """
+    The Random Forrest Regressor uses random forrest regression as
+    implemented in the <a href="https://github.com/microsoft/LightGBM
+    ">LightGBM</a> libray. This regressor is very fast and has decent
+    performance, offering an attractive trade-off between speed and quality
+    that is advantageous for 'easy' datasets.
+    """
 
     def __init__(
         self,
@@ -23,17 +29,24 @@ class RFRegressor(LGBMRegressor):
         ----------
         num_leaves
             Number of leaves
+            (advanced)
         max_num_estimators
             Maximum number of estimators
         max_bin
             Maximum number of allowed bins
+            (advanced)
         learning_rate
-            Learning rate for the LightGBM model
+            Learning rate for the LightGBM random forrest model
+            (advanced)
         loss
             Type of loss to be used
+            (advanced)
         patience
             Number of rounds required for early stopping
+            (advanced)
         verbosity
+            Verbosity setting of LightGBM.
+            (advanced)
 
         """
         super().__init__(

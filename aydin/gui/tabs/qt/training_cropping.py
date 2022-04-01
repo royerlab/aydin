@@ -48,8 +48,8 @@ class TrainingCroppingTab(BaseCroppingTab):
                 image,
                 mode='contrast' if image.size > 1_000_000 else 'sobelmin',
                 crop_size=500_000,
-                fast_mode=image.size > 2_000_000,
-                fast_mode_num_crops=1024,
+                search_mode=image.size > 2_000_000,
+                random_search_mode_num_crops=1024,
                 return_slice=True,
             )
 

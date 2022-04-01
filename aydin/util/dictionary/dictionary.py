@@ -1,6 +1,7 @@
 from math import prod
 from typing import Optional, Tuple
 import numpy
+from numba import jit
 from numpy.linalg import norm
 from scipy.fft import idstn, idctn
 from scipy.ndimage import convolve
@@ -343,14 +344,15 @@ def dictionary_cleanup(
     return numpy.stack(filtered_patches)
 
 
+@jit(nopython=True, parallel=True)
 def _is_impulse(patch):
     if patch.min() < patch.max():
         patch = patch.copy()
         patch -= patch.min()
         patch /= patch.max()
 
-    number_of_positive = (patch[patch > 0.5]).size
-    number_of_negative = (patch[patch < 0.5]).size
+    number_of_positive = len([elem > 0.5 for elem in patch])
+    number_of_negative = len([elem < 0.5 for elem in patch])
 
     return number_of_positive == 1 or number_of_negative == 1
 

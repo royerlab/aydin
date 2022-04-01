@@ -39,6 +39,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
     "numpydoc",
     "sphinx_rtd_theme",
     # "sphinx_click.ext",
