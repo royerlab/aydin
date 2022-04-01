@@ -146,11 +146,9 @@ class LGBMRegressor(RegressorBase):
                 lprint(f"Number of validation data points: {y_valid.shape[0]}")
             lprint(f"Number of features per data point: {self.num_features}")
 
-            train_dataset = lightgbm.Dataset(x_train, y_train, silent=True)
+            train_dataset = lightgbm.Dataset(x_train, y_train)
             valid_dataset = (
-                lightgbm.Dataset(x_valid, y_valid, silent=True)
-                if has_valid_dataset
-                else None
+                lightgbm.Dataset(x_valid, y_valid) if has_valid_dataset else None
             )
 
             self.__epoch_counter = 0
@@ -173,8 +171,6 @@ class LGBMRegressor(RegressorBase):
 
             evals_result = {}
 
-            verbose_eval = (lgbm_callback is None) or (self.force_verbose_eval)
-
             self.early_stopping_callback = early_stopping(
                 self, self.early_stopping_rounds
             )
@@ -192,7 +188,6 @@ class LGBMRegressor(RegressorBase):
                     callbacks=[lgbm_callback, self.early_stopping_callback]
                     if has_valid_dataset
                     else [lgbm_callback],
-                    verbose_eval=verbose_eval,
                     evals_result=evals_result,
                 )
                 lprint("GBM fitting done.")

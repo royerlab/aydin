@@ -51,8 +51,8 @@ def calibrate_denoise_gaussian(
 
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate
-        denoiser.
-        (advanced)
+        denoiser. Increase this number by factors of two if denoising quality is
+        unsatisfactory.
 
     optimiser: str
         Optimiser to use for finding the best denoising
@@ -63,7 +63,8 @@ def calibrate_denoise_gaussian(
     max_num_evaluations: int
         Maximum number of evaluations for finding
         the optimal parameters.
-        (advanced)
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory.
 
     enable_extended_blind_spot: bool
         Automatically determines extended blind-spot extent.

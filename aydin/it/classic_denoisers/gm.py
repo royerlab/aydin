@@ -35,8 +35,8 @@ def calibrate_denoise_gm(
         Should be a positive odd number such as 3, 5, 7, ...
 
     crop_size_in_voxels: int or None for default
-        Number of voxels for crop used to calibrate denoiser.
-        (advanced)
+        Number of voxels for crop used to calibrate denoiser. Increase this
+        number by factors of two if denoising quality is unsatisfactory.
 
     optimiser: str
         Optimiser to use for finding the best denoising
@@ -46,7 +46,8 @@ def calibrate_denoise_gm(
 
     max_num_evaluations: int
         Maximum number of evaluations for finding the optimal parameters.
-        (advanced)
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory.
 
     enable_extended_blind_spot: bool
         Set to True to enable extended blind-spot detection.
