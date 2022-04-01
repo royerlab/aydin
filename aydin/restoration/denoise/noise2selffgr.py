@@ -253,7 +253,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
                 **self.lower_level_args["it"]["kwargs"]
                 if self.lower_level_args is not None
                 else {},
-                blind_spots='auto',  # TODO: ACS: please set this as default upstream
             )
 
         return it
