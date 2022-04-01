@@ -5,6 +5,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
+    QFileDialog,
     QTabWidget,
     QApplication,
     QStyle,
@@ -309,13 +310,23 @@ class MainPage(QWidget):
 
         if path is None:
             image_paths = [
-                get_options_json_path(i[5]) for i in self.data_model.images_to_denoise
+                get_options_json_path(i[4]) for i in self.data_model.images_to_denoise
             ]
         else:
             image_paths = [path]
 
         for path in image_paths:
             save_any_json(args_dict, path)
+
+    def load_pretrained_model(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        files, _ = QFileDialog.getOpenFileNames(
+            self, "Open File(s)", "", "All Files (*)", options=options
+        )
+
+        if files:
+            self.tabs["Denoise"].load_pretrained_model(pretrained_model_files=files)
 
     def filestab_changed(self):
         self.tabs["File(s)"].on_data_model_update()

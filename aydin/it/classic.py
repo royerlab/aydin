@@ -1,5 +1,5 @@
 import importlib
-from typing import Optional
+from typing import Optional, Union, List, Tuple
 import numpy
 
 from aydin.it import classic_denoisers
@@ -18,7 +18,11 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         main_channel: Optional[int] = None,
         max_voxels_for_training: Optional[int] = None,
         calibration_kwargs=None,
-        **kwargs,
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
+        tile_min_margin: int = 8,
+        tile_max_margin: Optional[int] = None,
+        max_memory_usage_ratio: float = 0.9,
+        max_tiling_overhead: float = 0.1,
     ):
         """Constructs a Classic image denoiser.
 
@@ -36,10 +40,34 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             Maximum number of the voxels that can be
             used for training.
 
-        kwargs : dict
-            Keyword arguments.
+        blind_spots : Optional[Union[str, List[Tuple[int]]]]
+            List of voxel coordinates (relative to receptive field center) to
+            be included in the 'blind-spot'. If 'auto' is passed then the
+            blindspots are automatically determined from the image content.
+
+        tile_min_margin : int
+            Minimal width of tile margin in voxels.
+            (advanced)
+
+        tile_max_margin : Optional[int]
+            Maximal width of tile margin in voxels.
+            (advanced)
+
+        max_memory_usage_ratio : float
+            Maximum allowed memory load, value must be within [0, 1]. Default is 90%.
+            (advanced)
+
+        max_tiling_overhead : float
+            Maximum allowed margin overhead during tiling. Default is 10%.
+            (advanced)
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            blind_spots=blind_spots,
+            tile_min_margin=tile_min_margin,
+            tile_max_margin=tile_max_margin,
+            max_memory_usage_ratio=max_memory_usage_ratio,
+            max_tiling_overhead=max_tiling_overhead,
+        )
 
         self.calibration_kwargs = (
             {} if calibration_kwargs is None else calibration_kwargs

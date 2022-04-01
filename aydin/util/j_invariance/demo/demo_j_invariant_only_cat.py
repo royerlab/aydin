@@ -7,14 +7,12 @@ from skimage.metrics import structural_similarity as ssim
 
 from aydin.io.datasets import normalise, add_noise, newyork
 from aydin.it.classic_denoisers.gaussian import denoise_gaussian
-from aydin.it.classic_denoisers.spectral import denoise_spectral
-from aydin.util.j_invariance.j_invariant_classic import calibrate_denoiser_classic
-from aydin.util.j_invariance.j_invariant_smart import calibrate_denoiser_smart
 from aydin.util.crop.rep_crop import representative_crop
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 from aydin.util.log.log import Log
 
 
-def demo_j_invariant_classic(image, display=True):
+def demo_j_invariant_only_cat(image, display=True):
     """
     Demo for self-supervised denoising using camera image with synthetic noise
     """
@@ -31,7 +29,7 @@ def demo_j_invariant_classic(image, display=True):
     parameter_ranges = {'sigma': (0.0, 1.0), 'truncate': [4, 1]}
 
     # Calibrate denoiser
-    best_parameters = calibrate_denoiser_classic(
+    best_parameters = calibrate_denoiser(
         crop,
         denoise_gaussian,
         denoise_parameters=parameter_ranges,
@@ -65,4 +63,4 @@ def demo_j_invariant_classic(image, display=True):
 
 
 if __name__ == "__main__":
-    demo_j_invariant_classic(newyork())
+    demo_j_invariant_only_cat(newyork())

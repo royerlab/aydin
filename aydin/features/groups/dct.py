@@ -8,9 +8,26 @@ from aydin.features.groups.convolutional import ConvolutionalFeatures
 class DCTFeatures(ConvolutionalFeatures):
     """
     DCT Feature Group class
+
+    Generates Discrete Cosine Transform (DCT) features.
     """
 
     def __init__(self, size: int, max_freq: float = 0.75, power: float = 0.5):
+        """
+        Constructor that configures these features.
+
+        Parameters
+        ----------
+        size : int
+            Size of the DCT filters
+        max_freq : float
+            Maximum frequency of DCT filters
+            (advanced)
+        power : float
+            Filters can be exponentiated to a given power to change behaviour.
+            (advanced)
+
+        """
         super().__init__(kernels=None)
         self.size = size
         self.max_freq = max_freq

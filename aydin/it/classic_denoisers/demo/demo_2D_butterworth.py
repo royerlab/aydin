@@ -14,7 +14,6 @@ from aydin.io.datasets import (
     newyork,
     characters,
 )
-from aydin.io.io import imwrite, imread
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
 from aydin.util.log.log import Log
 
@@ -24,20 +23,12 @@ def demo_butterworth(image, display=True):
     Demo for self-supervised denoising using camera image with synthetic noise
     """
     Log.enable_output = True
-    Log.set_log_max_depth(5)
-
-    #    image, _  = imread('/mnt/raid0/aydin_datasets/_example_datasets_for_use_cases/Gauss.png')
+    Log.set_log_max_depth(7)
 
     image = normalise(image.astype(np.float32))
 
+    # we add noise:
     noisy = add_noise(image)
-    # noisy = add_noise(
-    #     image,
-    #     intensity=1024,
-    #     variance=0.005,
-    #     sap=0.0)
-    #
-    # imwrite(noisy, '/mnt/raid0/aydin_datasets/_example_datasets_for_use_cases/Gauss_noisy.png')
 
     function, parameters, memreq = calibrate_denoise_butterworth(noisy)
     denoised = function(noisy, **parameters)
@@ -55,19 +46,19 @@ def demo_butterworth(image, display=True):
     if display:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(image, name='image')
-            viewer.add_image(noisy, name='noisy')
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(image, name='image')
+        viewer.add_image(noisy, name='noisy')
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
     return ssim_denoised
 
 
 if __name__ == "__main__":
+    demo_butterworth(pollen())
+    demo_butterworth(dots())
     demo_butterworth(newyork())
     demo_butterworth(characters())
-    demo_butterworth(pollen())
     demo_butterworth(lizard())
-    demo_butterworth(dots())
     demo_butterworth(camera())

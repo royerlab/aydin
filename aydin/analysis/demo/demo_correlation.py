@@ -11,7 +11,8 @@ def demo_analysis():
 
         array, metadata = io.imread(example_file_path)
         print(f"File        :  {example}")
-        print(f"Metadata    :  {metadata}")
+        if metadata is not None:
+            print(f"Metadata    :  {metadata}")
         print(f"Array shape :  {array.shape}")
         print(f"Array dtype :  {array.dtype}")
 

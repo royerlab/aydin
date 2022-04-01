@@ -8,7 +8,7 @@ from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io import io
 from aydin.io.datasets import examples_single
 from aydin.it.fgr import ImageTranslatorFGR
-from aydin.regression.nn import NNRegressor
+from aydin.regression.perceptron import PerceptronRegressor
 
 
 def demo():
@@ -24,7 +24,7 @@ def demo():
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
     generator = StandardFeatureGenerator(max_level=6, dtype=numpy.float16)
-    regressor = NNRegressor(depth=6, max_epochs=40, patience=10)
+    regressor = PerceptronRegressor(depth=6, max_epochs=40, patience=10)
     it = ImageTranslatorFGR(generator, regressor)
 
     start = time.time()

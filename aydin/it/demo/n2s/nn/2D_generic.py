@@ -11,7 +11,7 @@ from skimage.metrics import structural_similarity as ssim
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import newyork, pollen, normalise, add_noise, lizard, characters
 from aydin.it.fgr import ImageTranslatorFGR
-from aydin.regression.nn import NNRegressor
+from aydin.regression.perceptron import PerceptronRegressor
 
 """
     Demo for self-supervised denoising using camera image with synthetic noise
@@ -26,7 +26,7 @@ def demo(image, name):
     start_time = time.time()
 
     generator = StandardFeatureGenerator()
-    regressor = NNRegressor()
+    regressor = PerceptronRegressor()
 
     it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)
 
