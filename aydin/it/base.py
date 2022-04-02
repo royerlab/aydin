@@ -29,7 +29,7 @@ class ImageTranslatorBase(ABC):
     def __init__(
         self,
         monitor=None,
-        blind_spots: Optional[Union[str, List[Tuple[int]]]] = 'discover',
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
         max_memory_usage_ratio: float = 0.9,
@@ -43,9 +43,9 @@ class ImageTranslatorBase(ABC):
 
         blind_spots : Optional[Union[str,List[Tuple[int]]]]
             List of voxel coordinates (relative to receptive field center) to
-            be included in the blind-spot. If 'discover' is passed then the
+            be included in the blind-spot. If None is passed then the
             blindspots are automatically discovered from the image content.
-            If None is passed then no additional blindspots to the
+            If 'center' is passed then no additional blindspots to the
             center pixel are considered.
 
         tile_min_margin : int
@@ -264,7 +264,7 @@ class ImageTranslatorBase(ABC):
             )
 
             # Automatic blind-spot discovery:
-            if self.blind_spots == 'discover':
+            if self.blind_spots is None:
                 lprint(
                     "Automatic discovery of noise autocorrelation and specification of N2S blind-spots activated!"
                 )

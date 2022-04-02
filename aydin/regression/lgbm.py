@@ -5,7 +5,7 @@ from os.path import join
 
 import lightgbm
 import numpy
-from lightgbm import Booster
+from lightgbm import Booster, record_evaluation
 
 from aydin.regression.base import RegressorBase
 from aydin.regression.gbm_utils.callbacks import early_stopping
@@ -185,10 +185,13 @@ class LGBMRegressor(RegressorBase):
                     else valid_dataset,
                     early_stopping_rounds=None if has_valid_dataset else None,
                     num_boost_round=self.max_num_estimators,
-                    callbacks=[lgbm_callback, self.early_stopping_callback]
+                    callbacks=[
+                        lgbm_callback,
+                        self.early_stopping_callback,
+                        record_evaluation(evals_result),
+                    ]
                     if has_valid_dataset
                     else [lgbm_callback],
-                    evals_result=evals_result,
                 )
                 lprint("GBM fitting done.")
 

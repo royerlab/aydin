@@ -29,7 +29,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         voxel_keep_ratio: float = 1,
         max_voxels_for_training: Optional[int] = None,
         favour_bright_pixels: float = 0,
-        blind_spots: Optional[Union[str, List[Tuple[int]]]] = 'auto',
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
         max_memory_usage_ratio: float = 0.9,
@@ -82,9 +82,9 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
         blind_spots : Optional[Union[str,List[Tuple[int]]]]
             List of voxel coordinates (relative to receptive field center) to
-            be included in the blind-spot. If 'discover' is passed then the
+            be included in the blind-spot. If None is passed then the
             blindspots are automatically discovered from the image content.
-            If None is passed then no additional blindspots to the
+            If 'center' is passed then no additional blindspots to the
             center pixel are considered.
 
         tile_min_margin : int
@@ -233,7 +233,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         with lsection(f"Computing features for image of shape {image.shape}:"):
             excluded_voxels = (
                 None
-                if self.blind_spots is None
+                if 'center' in self.blind_spots
                 else list(
                     [
                         coordinate
@@ -249,7 +249,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
             excluded_voxels = (
                 None
-                if self.blind_spots is None
+                if 'center' in self.blind_spots
                 else list(
                     [
                         coordinate

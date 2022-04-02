@@ -46,7 +46,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         max_epochs: int = 30,
         patience: int = 4,
         learn_rate: float = 0.01,
-        blind_spots: Optional[Union[str, List[Tuple[int]]]] = 'discover',
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
         max_memory_usage_ratio: float = 0.9,
@@ -107,9 +107,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
         blind_spots : Optional[Union[str,List[Tuple[int]]]]
             List of voxel coordinates (relative to receptive field center) to
-            be included in the blind-spot. If 'discover' is passed then the
+            be included in the blind-spot. If None is passed then the
             blindspots are automatically discovered from the image content.
-            If None is passed then no additional blindspots to the
+            If 'center' is passed then no additional blindspots to the
             center pixel are considered.
 
         tile_min_margin : int
@@ -521,8 +521,10 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     if 'checkran' in self.training_architecture:
                         callbacks.append(self.reduce_learning_rate1)
 
-                    if self.blind_spots:
-                        self.blind_spots.remove((0, 0))
+                    if 'center' in self.blind_spots:
+                        self.blind_spots = []
+
+                    self.blind_spots.remove((0,) * self.spacetime_ndim)
 
                     if self.spacetime_ndim == 2:
                         stop_center_gradient = StopCenterGradient2D(self.blind_spots)
