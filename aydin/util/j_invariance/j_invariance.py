@@ -327,11 +327,16 @@ def calibrate_denoiser(
 
     # Display if needed:
     if display_images:
-        import napari
+        try:
+            import napari
 
-        with napari.gui_qt():
             viewer = napari.Viewer()
             viewer.add_image(image, name='image')
             viewer.add_image(numpy.stack(denoised_images), name='denoised')
+            napari.run()
+        except:
+            lprint(
+                "Problem while yrying to display images obtained during optimisation"
+            )
 
     return best_parameters | other_fixed_parameters

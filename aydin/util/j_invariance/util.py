@@ -48,15 +48,15 @@ def _invariant_denoise(masked_input_image, denoise_function, *, denoiser_kwargs=
     return output
 
 
-def _interpolate_image(image: ArrayLike, mode: str):
+def _interpolate_image(image: ArrayLike, mode: str, boundary_mode: str = 'mirror'):
 
     if mode == 'gaussian':
         kernel = _generate_gaussian_kernel(image.ndim, image.dtype)
-        interpolation = convolve(image, kernel, mode='mirror')
+        interpolation = convolve(image, kernel, mode=boundary_mode)
 
     elif mode == 'median':
         footprint = _generate_median_footprint(image.ndim, image.dtype)
-        interpolation = median_filter(image, footprint=footprint, mode='mirror')
+        interpolation = median_filter(image, footprint=footprint, mode=boundary_mode)
 
     return interpolation
 

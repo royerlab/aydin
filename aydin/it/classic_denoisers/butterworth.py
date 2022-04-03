@@ -31,6 +31,7 @@ def calibrate_denoise_butterworth(
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_normal,
     enable_extended_blind_spot: bool = True,
+    jinv_interpolation_mode: str = 'median',
     multi_core: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
@@ -106,6 +107,10 @@ def calibrate_denoise_butterworth(
     enable_extended_blind_spot: bool
         Set to True to enable extended blind-spot detection.
         (advanced)
+
+    jinv_interpolation_mode: str
+        J-invariance interpolation mode for masking. Can be: 'median' or
+        'gaussian'. (advanced)
 
     multi_core: bool
         Use all CPU cores during calibration.
@@ -236,6 +241,7 @@ def calibrate_denoise_butterworth(
                 _denoise_butterworth,
                 mode=optimiser,
                 denoise_parameters=parameter_ranges,
+                interpolation_mode=jinv_interpolation_mode,
                 blind_spots=enable_extended_blind_spot,
                 display_images=display_images,
             )
@@ -251,6 +257,7 @@ def calibrate_denoise_butterworth(
                 mode=optimiser,
                 denoise_parameters=parameter_ranges,
                 max_num_evaluations=max_num_evaluations,
+                interpolation_mode=jinv_interpolation_mode,
                 blind_spots=enable_extended_blind_spot,
                 display_images=display_images,
             )
@@ -275,6 +282,7 @@ def calibrate_denoise_butterworth(
                 mode=optimiser,
                 denoise_parameters=parameter_ranges,
                 max_num_evaluations=max_num_evaluations,
+                interpolation_mode=jinv_interpolation_mode,
                 blind_spots=enable_extended_blind_spot,
                 display_images=display_images,
             )
@@ -396,11 +404,14 @@ def denoise_butterworth(
     # By how much? this depends on how much low filtering we need to do:
     pad_width = tuple(
         (
-            (_apw(fc, min_padding, max_padding), _apw(fc, min_padding, max_padding))
+            (
+                _apw(s, fc, min_padding, max_padding),
+                _apw(s, fc, min_padding, max_padding),
+            )
             if sa
             else (0, 0)
         )
-        for sa, fc in zip(selected_axes, freq_cutoff)
+        for sa, fc, s in zip(selected_axes, freq_cutoff, image.shape)
     )
 
     # pad image:
@@ -465,8 +476,11 @@ def _compute_distance_image(freq_cutoff, image, selected_axes):
     return f
 
 
-def _apw(freq_cutoff, min_padding, max_padding):
-    return min(max_padding, max(min_padding, int(1.0 / (1e-10 + freq_cutoff))))
+def _apw(dim_size, freq_cutoff, min_padding, max_padding):
+    return min(
+        dim_size // 2,
+        min(max_padding, max(min_padding, int(1.0 / (1e-10 + freq_cutoff)))),
+    )
 
 
 def _filter_chebyshev(image_f, epsilon, chebyshev):
