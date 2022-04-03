@@ -233,7 +233,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         with lsection(f"Computing features for image of shape {image.shape}:"):
             excluded_voxels = (
                 None
-                if 'center' in self.blind_spots
+                if self.blind_spots is None or 'center' in self.blind_spots
                 else list(
                     [
                         coordinate
@@ -246,18 +246,6 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             lprint(f"exclude_center_feature = {exclude_center_feature}")
             lprint(f"exclude_center_value   = {exclude_center_value}")
             lprint(f"excluded_voxels        = {excluded_voxels}")
-
-            excluded_voxels = (
-                None
-                if 'center' in self.blind_spots
-                else list(
-                    [
-                        coordinate
-                        for coordinate in self.blind_spots
-                        if coordinate != (0,) * (image.ndim - 2)
-                    ]
-                )
-            )
 
             # If this is a part of a larger image, we can figure out what are the offsets and scales for the spatial features:
             spatial_feature_scale = (

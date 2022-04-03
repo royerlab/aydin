@@ -175,6 +175,4 @@ def test_dimension_analysis_myers(display: bool = False):
         napari.run()
 
     assert len(channel_axes) == 0
-
-    # Not super happy about this result here:
-    assert len(batch_axes) == 1
+    assert len(batch_axes) == 0

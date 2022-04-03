@@ -524,7 +524,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     if 'center' in self.blind_spots:
                         self.blind_spots = []
 
-                    self.blind_spots.remove((0,) * self.spacetime_ndim)
+                    center_pixel_coord = (0,) * self.spacetime_ndim
+                    if center_pixel_coord in self.blind_spots:
+                        self.blind_spots.remove((0,) * self.spacetime_ndim)
 
                     if self.spacetime_ndim == 2:
                         stop_center_gradient = StopCenterGradient2D(self.blind_spots)
