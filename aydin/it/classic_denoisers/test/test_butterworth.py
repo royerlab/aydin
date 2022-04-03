@@ -12,9 +12,9 @@ def test_butterworth():
 
 
 def test_butterworth_anisotropy():
-    image = dmel()
+    image = dmel()[450:-450, 64:-64]
 
-    image = gaussian_filter(image, sigma=[0.001, 4])
+    image = gaussian_filter(image, sigma=[0.001, 5])
 
     ssim_denoised, parameters = demo_butterworth(image, display=True)
 
