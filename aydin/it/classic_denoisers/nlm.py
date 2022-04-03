@@ -44,7 +44,9 @@ def calibrate_denoise_nlm(
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate denoiser.
         Increase this number by factors of two if denoising quality is
-        unsatisfactory.
+        unsatisfactory -- this can be important for very noisy images.
+        Values to try are: 65000, 128000, 256000, 320000.
+        We do not recommend values higher than 512000.
 
     optimiser: str
         Optimiser to use for finding the best denoising
