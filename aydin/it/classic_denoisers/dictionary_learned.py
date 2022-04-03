@@ -37,7 +37,8 @@ def calibrate_denoise_dictionary_learned(
     do_denoise_dictionary: bool = False,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal,
     max_num_evaluations: int = _defaults.default_max_evals_low,
-    enable_extended_blind_spot: bool = True,
+    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode,
     display_dictionary: bool = False,
     display_images: bool = False,
     display_crop: bool = False,
@@ -169,6 +170,11 @@ def calibrate_denoise_dictionary_learned(
         Set to True to enable extended blind-spot detection.
         (advanced)
 
+    jinv_interpolation_mode: str
+        J-invariance interpolation mode for masking. Can be: 'median' or
+        'gaussian'.
+        (advanced)
+
     display_dictionary: bool
         If True displays dictionary with napari --
         for debug purposes.
@@ -272,6 +278,7 @@ def calibrate_denoise_dictionary_learned(
             _denoise_dictionary,
             mode=optimiser,
             denoise_parameters=parameter_ranges,
+            interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
             blind_spots=enable_extended_blind_spot,
             display_images=display_images,

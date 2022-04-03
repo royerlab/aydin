@@ -19,7 +19,8 @@ def calibrate_denoise_gaussian(
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large,
     optimiser: str = 'smart',
     max_num_evaluations: int = _defaults.default_max_evals_high,
-    enable_extended_blind_spot: bool = True,
+    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -70,6 +71,11 @@ def calibrate_denoise_gaussian(
 
     enable_extended_blind_spot: bool
         Automatically determines extended blind-spot extent.
+
+    jinv_interpolation_mode: str
+        J-invariance interpolation mode for masking. Can be: 'median' or
+        'gaussian'.
+        (advanced)
 
     display_images: bool
         When True the denoised images encountered
@@ -132,6 +138,7 @@ def calibrate_denoise_gaussian(
             _denoise_gaussian,
             mode=optimiser,
             denoise_parameters=parameter_ranges,
+            interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
             blind_spots=enable_extended_blind_spot,
             display_images=display_images,

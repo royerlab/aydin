@@ -30,8 +30,8 @@ def calibrate_denoise_butterworth(
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_normal,
-    enable_extended_blind_spot: bool = True,
-    jinv_interpolation_mode: str = 'median',
+    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode,
     multi_core: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
@@ -112,7 +112,8 @@ def calibrate_denoise_butterworth(
 
     jinv_interpolation_mode: str
         J-invariance interpolation mode for masking. Can be: 'median' or
-        'gaussian'. (advanced)
+        'gaussian'.
+        (advanced)
 
     multi_core: bool
         Use all CPU cores during calibration.
