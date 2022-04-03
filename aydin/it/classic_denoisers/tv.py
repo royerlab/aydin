@@ -2,7 +2,9 @@ from functools import partial
 from typing import Optional
 
 import numpy
+from numba import jit
 from numpy.typing import ArrayLike
+from scipy.ndimage import gaussian_filter
 from skimage.restoration import denoise_tv_bregman
 from skimage.restoration._denoise import _denoise_tv_chambolle_nd
 
@@ -13,9 +15,10 @@ from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 def calibrate_denoise_tv(
     image: ArrayLike,
+    enable_mixing: bool = True,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal,
     optimiser: str = _defaults.default_optimiser,
-    max_num_evaluations: int = _defaults.default_max_evals_normal,
+    max_num_evaluations: int = _defaults.default_max_evals_high,
     enable_extended_blind_spot: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
@@ -31,6 +34,16 @@ def calibrate_denoise_tv(
     ----------
     image: ArrayLike
         Image to calibrate TV denoiser for.
+
+    enable_mixing: bool
+        TV denoising tends to return very non-natural looking piece-wise constant
+        images. To mitigate this  we give the option to mix a bit of the original
+        image denoised with a Gaussian filter. The sigma for the Gaussian filter
+        is also calibrated. Note: In some cases it might be simply better to not
+        use the TV denoised image and instead just use the
+        Gaussian-filter-denoised image, check the "beta" parameter during
+        optimisation, if that number is very close to 1.0 then you know you
+        should probably use a Butterworth or Gaussian denoiser.
 
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate denoiser.
@@ -90,8 +103,20 @@ def calibrate_denoise_tv(
         'weight': weight_range,
         'isotropic': [False, True],
         'algorithm': algorithms,
-        # 'algorithm': ['chambolle','bregman'], #
     }
+
+    if enable_mixing:
+        # alpha beta range:
+        alpha_range = (0.0, 1.0)
+        beta_range = (0.0, 1.0)
+        sigma_range = (0.0, 2.0)
+
+        # Add parameters to be optimised:
+        parameter_ranges |= {
+            'alpha': alpha_range,
+            'beta': beta_range,
+            'sigma': sigma_range,
+        }
 
     # Partial function:
     _denoise_tv = partial(denoise_tv, **other_fixed_parameters)
@@ -117,7 +142,13 @@ def calibrate_denoise_tv(
 
 
 def denoise_tv(
-    image: ArrayLike, algorithm: str = 'bregman', weight: float = 1, **kwargs
+    image: ArrayLike,
+    algorithm: str = 'bregman',
+    weight: float = 1,
+    alpha: float = 1.0,
+    beta: float = 0.0,
+    sigma: float = 0.0,
+    **kwargs,
 ):
     """
     Denoises the given image using either scikit-image
@@ -145,6 +176,18 @@ def denoise_tv(
         to a stronger prior during optimisation, and thus more aggressive
         denoising
 
+    alpha: float
+        TV denoising tends to return images that are dimmer, we have the option
+        of pushing the brightness here..
+
+    beta: float
+        TV denoising tends to return very non-natural looking images, here we give
+        the option to 'mix-in' back a bit of the original image denoised with a
+        gaussian filter.
+
+    sigma: float
+        Sigma for gaussian filtered image that is mixed with the TV denoised image.
+
     kwargs
         Any other parameters to be passed to scikit-image implementations
 
@@ -156,10 +199,22 @@ def denoise_tv(
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
 
-    # algorithm = parameters.pop('weight')
     if algorithm == 'bregman' and image.ndim <= 2:
-        return denoise_tv_bregman(image, weight=weight * 10, **kwargs)
-    if algorithm == 'chambolle' or image.ndim > 2:
+        denoised = denoise_tv_bregman(image, weight=weight * 10, **kwargs)
+
+    elif algorithm == 'chambolle' or image.ndim > 2:
         if 'isotropic' in kwargs:
             kwargs.pop('isotropic')
-        return _denoise_tv_chambolle_nd(image, weight=weight, **kwargs)
+        denoised = _denoise_tv_chambolle_nd(image, weight=weight, **kwargs)
+
+    if (alpha != 1.0 or beta > 1e-3) and sigma != 0.0:
+        # image = median_filter(image, size=3)
+        image = gaussian_filter(image, sigma=sigma)
+        denoised = _mixin(denoised, image, alpha, beta)
+
+    return denoised
+
+
+@jit(nopython=True, parallel=True)
+def _mixin(image_a: ArrayLike, image_b: ArrayLike, alpha: float, beta: float):
+    return alpha * image_a + beta * image_b

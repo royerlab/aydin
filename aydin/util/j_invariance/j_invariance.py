@@ -109,11 +109,22 @@ def calibrate_denoiser(
 
     with lsection("Calibrating denoiser:"):
 
+        # Convert image to float if that is not already the case:
+        image = image.astype(dtype=numpy.float32, copy=False)
+
         # Generate mask:
         mask = _generate_mask(image, stride, enable_extended_blind_spot=blind_spots)
 
         # Compute interpolated image:
         interpolation = _interpolate_image(image, interpolation_mode)
+
+        # Masked input image (fixed over optimisation!):
+        masked_input_image = image.copy()
+        masked_input_image[mask] = interpolation[mask]
+
+        # We backup the masked input image to make sure that it is unchanged after optimisation,
+        # which would indicate a 'non-behaving' denoiser that ioperates 'in-place'...
+        masked_input_image_backup = masked_input_image.copy()
 
         # first we separate the categorical from numerical parameters;
         categorical_parameters = {}
@@ -166,7 +177,7 @@ def calibrate_denoiser(
                         # We compute the J-inv loss:
                         loss = _j_invariant_loss(
                             image,
-                            interpolation,
+                            masked_input_image,
                             denoise_function,
                             mask=mask,
                             loss_function=loss_function,
@@ -262,7 +273,7 @@ def calibrate_denoiser(
                                     bounds=bounds,
                                     options={
                                         'maxfun': max_num_evaluations,
-                                        'eps': 1e-2,
+                                        'eps': 1e-6,
                                         'ftol': 1e-8,
                                         'gtol': 1e-12,
                                     },
@@ -307,6 +318,12 @@ def calibrate_denoiser(
             }
 
             lprint(f"Best parameters: {best_parameters}")
+
+        # We check that the masked input image is unchanged:
+        if not numpy.array_equal(masked_input_image_backup, masked_input_image):
+            raise RuntimeError(
+                f"The denoiser being calibrated is modifying the input image! Calibration will not be accurate!"
+            )
 
     # Display if needed:
     if display_images:

@@ -16,7 +16,7 @@ def test_butterworth_anisotropy():
 
     image = gaussian_filter(image, sigma=[0.001, 5])
 
-    ssim_denoised, parameters = demo_butterworth(image, display=True)
+    ssim_denoised, parameters = demo_butterworth(image, display=False)
 
     print(parameters)
     cutoffs = parameters['freq_cutoff']
