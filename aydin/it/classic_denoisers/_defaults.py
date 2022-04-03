@@ -1,6 +1,7 @@
 default_optimiser = 'smart'
 default_crop_size_normal = 96000
-default_crop_size_large = 256000
+default_crop_size_large = 128000
+default_crop_size_verylarge = 256000
 default_max_evals_hyperlow = 16
 default_max_evals_ultralow = 32
 default_max_evals_verylow = 64

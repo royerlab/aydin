@@ -6,6 +6,7 @@ from numba import jit
 from numpy.fft import fftshift, ifftshift
 from numpy.typing import ArrayLike
 from scipy.fft import fftn, ifftn
+from scipy.special import eval_chebyt
 
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
@@ -19,11 +20,13 @@ def calibrate_denoise_butterworth(
     image: ArrayLike,
     mode: str = 'full',
     axes: Optional[Tuple[int, ...]] = None,
+    other_filters: bool = False,
+    min_padding: int = 2,
     max_padding: int = 32,
     min_freq: float = 1e-9,
     max_freq: float = 1.0,
-    min_order: float = 2.0,
-    max_order: float = 6.0,
+    min_order: float = 1.0,
+    max_order: float = 8.0,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_normal,
@@ -51,6 +54,14 @@ def calibrate_denoise_butterworth(
 
     axes: Optional[Tuple[int,...]]
         Axes over which to apply low-pass filtering.
+        (advanced)
+
+    other_filters: bool
+        if True other filters similar to Butterworth are tried such as Type II
+        Chebyshev filter.
+
+    min_padding: int
+        Minimum amount of padding to be added to avoid edge effects.
         (advanced)
 
     max_padding: int
@@ -135,6 +146,7 @@ def calibrate_denoise_butterworth(
 
     # Combine fixed parameters:
     other_fixed_parameters = other_fixed_parameters | {
+        'min_padding': min_padding,
         'max_padding': max_padding,
         'axes': axes,
     }
@@ -169,10 +181,9 @@ def calibrate_denoise_butterworth(
         parameter_ranges = {
             'freq_cutoff_xy': freq_cutoff_range,
             'freq_cutoff_z': freq_cutoff_range,
-            'order': order_range,
         }
 
-    elif mode == 'full' or (mode == 'xy-z' or mode == 'z-yx'):
+    elif mode == 'full':
         # Partial function with parameter impedance match:
         def _denoise_butterworth(*args, **kwargs):
             _freq_cutoff = tuple(
@@ -189,18 +200,31 @@ def calibrate_denoise_butterworth(
             f'freq_cutoff_{i}': freq_cutoff_range for i in range(image.ndim)
         }
     else:
-        raise ValueError(f"Unsupported mode: {mode}")
+        raise ValueError(
+            f"Unsupported mode: {mode} for image of dimension: {image.ndim}"
+        )
 
-    if max_order > min_order:
-        parameter_ranges |= {'order': order_range}
-    elif max_order == min_order:
+    # This is the code that needs to be uncommented if reverting to single pass:
+    # if max_order > min_order:
+    #     parameter_ranges |= {'order': order_range}
+    # elif max_order == min_order:
+    #     other_fixed_parameters |= {'order': min_order}
+    # else:
+    #     raise ValueError(f"Invalid order range: {min_order} > {max_order}")
+
+    if max_order == min_order:
         other_fixed_parameters |= {'order': min_order}
-    else:
+    elif max_order < min_order:
         raise ValueError(f"Invalid order range: {min_order} > {max_order}")
+
+    if other_filters:
+        parameter_ranges |= {'filter_type': ['butterworth', 'chebyshev2']}  #
+
+    ## First optimisation pass:
 
     # If we only have a single parameter to optimise, we can go for a brute-force approach:
     if len(parameter_ranges) == 1:
-        parameter_ranges = {
+        parameter_ranges |= {
             'freq_cutoff': numpy.linspace(
                 min_freq, max_freq, max_num_evaluations
             ).tolist()
@@ -233,6 +257,33 @@ def calibrate_denoise_butterworth(
             | other_fixed_parameters
         )
 
+    # Second optimisation pass, for the order, if not fixed:
+    if max_order > min_order:
+        order_list = numpy.linspace(min_order, max_order, 32).tolist()
+
+        parameter_ranges = {'order': order_list} | {
+            k: [
+                v,
+            ]
+            for (k, v) in best_parameters.items()
+        }
+
+        best_parameters = (
+            calibrate_denoiser(
+                crop,
+                _denoise_butterworth,
+                mode=optimiser,
+                denoise_parameters=parameter_ranges,
+                max_num_evaluations=max_num_evaluations,
+                blind_spots=enable_extended_blind_spot,
+                display_images=display_images,
+            )
+            | other_fixed_parameters
+        )
+
+    ## Below we adjust the parameters because denoise_butterworth function (without underscore)
+    ## uses a different set of parameters...
+
     if mode == 'isotropic' or len(axes) == 1:
         pass
 
@@ -248,7 +299,7 @@ def calibrate_denoise_butterworth(
 
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
-    elif mode == 'full' or (mode == 'xy-z' or mode == 'z-yx'):
+    elif mode == 'full':
         # We need to adjust a bit the type of parameters passed to the denoising function:
         freq_cutoff = tuple(
             best_parameters.pop(f'freq_cutoff_{i}') for i in range(image.ndim)
@@ -264,8 +315,10 @@ def calibrate_denoise_butterworth(
 def denoise_butterworth(
     image: ArrayLike,
     axes: Optional[Tuple[int, ...]] = None,
+    filter_type: str = 'butterworth',
     freq_cutoff: Union[float, Sequence[float]] = 0.5,
-    order: float = 1,
+    order: float = 5,
+    min_padding: int = 2,
     max_padding: int = 32,
     multi_core: bool = True,
 ):
@@ -291,11 +344,21 @@ def denoise_butterworth(
     axes: Optional[Tuple[int,...]]
         Axes over which to apply lowpass filtering.
 
+    filter_type: str
+        Type of filter. The default is 'butterworth' but we have now introduced
+        another filter type: 'chebyshev2' which is a Type II Chebyshev filter
+        with a steeper cut-off than Butterworth at the cost of some ripples
+        in the rejected high frequencies.
+        (advanced)
+
     freq_cutoff: Union[float, Sequence[float]]
         Single or sequence cutoff frequency, must be within [0, 1]
 
     order: float
         Filter order, typically an integer above 1.
+
+    min_padding: int
+        Minimum amount of padding to be added to avoid edge effects.
 
     max_padding: int
         Maximum amount of padding to be added to avoid edge effects.
@@ -324,7 +387,7 @@ def denoise_butterworth(
 
     # Normalise freq_cutoff argument to tuple:
     if type(freq_cutoff) is not tuple:
-        freq_cutoff = tuple(freq_cutoff if s else 1 for s in selected_axes)
+        freq_cutoff = tuple(freq_cutoff if s else 1.0 for s in selected_axes)
 
     # Number of workers:
     workers = -1 if multi_core else 1
@@ -332,7 +395,11 @@ def denoise_butterworth(
     # First we need to pad the image.
     # By how much? this depends on how much low filtering we need to do:
     pad_width = tuple(
-        ((_apw(fc, max_padding), _apw(fc, max_padding)) if sa else (0, 0))
+        (
+            (_apw(fc, min_padding, max_padding), _apw(fc, min_padding, max_padding))
+            if sa
+            else (0, 0)
+        )
         for sa, fc in zip(selected_axes, freq_cutoff)
     )
 
@@ -348,11 +415,26 @@ def denoise_butterworth(
     # Compute squared distance image:
     f = _compute_distance_image(freq_cutoff, image, selected_axes)
 
-    # Chose filter implementation:
-    filter = jit(nopython=True, parallel=multi_core)(_filter)
+    # Choose filter type:
+    if filter_type == 'butterworth':
+        # Prepare filter:
+        _filter = _filter_butterworth
+        filter = jit(nopython=True, parallel=multi_core)(_filter)
 
-    # Apply filter:
-    image_f = filter(image_f, f, order)
+        # Apply filter:
+        image_f = filter(image_f, f, order)
+
+    elif filter_type == 'chebyshev2':
+        # Prepare filter:
+        _filter = _filter_chebyshev
+        filter = jit(nopython=True, parallel=multi_core)(_filter)
+
+        # Apply filter:
+        n = 5
+        epsilon = 1 / order
+        f = numpy.maximum(1e-6, f)
+        chebyshev = eval_chebyt(n, 1.0 / f)
+        image_f = filter(image_f, epsilon, chebyshev)
 
     # Shift back:
     image_f = ifftshift(image_f, axes=axes)
@@ -383,10 +465,15 @@ def _compute_distance_image(freq_cutoff, image, selected_axes):
     return f
 
 
-def _apw(freq_cutoff, max_padding):
-    return min(max_padding, max(1, int(1.0 / (1e-10 + freq_cutoff))))
+def _apw(freq_cutoff, min_padding, max_padding):
+    return min(max_padding, max(min_padding, int(1.0 / (1e-10 + freq_cutoff))))
 
 
-def _filter(image_f, f, order):
+def _filter_chebyshev(image_f, epsilon, chebyshev):
+    image_f /= numpy.sqrt(1 + 1 / ((epsilon * chebyshev) ** 2))
+    return image_f
+
+
+def _filter_butterworth(image_f, f, order):
     image_f /= numpy.sqrt(1 + f ** order)
     return image_f

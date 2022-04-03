@@ -4,20 +4,21 @@ import traceback
 import numpy
 from numpy import zeros_like
 from numpy.typing import ArrayLike
-from scipy.ndimage import convolve, gaussian_filter
+from scipy.ndimage import convolve, gaussian_filter, median_filter
 
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
 from aydin.util.log.log import lprint
 
 
 def _j_invariant_loss(
-    image, denoise_function, mask, loss_function, denoiser_kwargs=None
+    image, interp, denoise_function, mask, loss_function, denoiser_kwargs=None
 ):
     image = image.astype(dtype=numpy.float32, copy=False)
 
     try:
         denoised = _invariant_denoise(
             image,
+            interp,
             denoise_function=denoise_function,
             mask=mask,
             denoiser_kwargs=denoiser_kwargs,
@@ -34,32 +35,37 @@ def _j_invariant_loss(
     return loss
 
 
-def _invariant_denoise(image, denoise_function, mask, *, denoiser_kwargs=None):
+def _invariant_denoise(image, interp, denoise_function, mask, *, denoiser_kwargs=None):
 
     image = image.astype(dtype=numpy.float32, copy=False)
 
     if denoiser_kwargs is None:
         denoiser_kwargs = {}
 
-    interp = _interpolate_image(image)
-    output = numpy.zeros_like(image)
-
     input_image = image.copy()
     input_image[mask] = interp[mask]
-    output[mask] = denoise_function(input_image, **denoiser_kwargs)[mask]
+    output = denoise_function(input_image, **denoiser_kwargs)
 
     return output
 
 
-def _interpolate_image(image):
+def _interpolate_image(image: ArrayLike, mode: str):
 
-    conv_filter = numpy.zeros(shape=(3,) * image.ndim, dtype=image.dtype)
-    conv_filter.ravel()[conv_filter.size // 2] = 1
-    conv_filter = gaussian_filter(conv_filter, sigma=0.5)
-    conv_filter.ravel()[conv_filter.size // 2] = 0
-    conv_filter /= conv_filter.sum()
+    if mode == 'gaussian':
+        conv_filter = numpy.zeros(shape=(3,) * image.ndim, dtype=image.dtype)
+        conv_filter.ravel()[conv_filter.size // 2] = 1
+        conv_filter = gaussian_filter(conv_filter, sigma=0.5)
+        conv_filter.ravel()[conv_filter.size // 2] = 0
+        conv_filter /= conv_filter.sum()
 
-    interpolation = convolve(image, conv_filter, mode='mirror')
+        interpolation = convolve(image, conv_filter, mode='mirror')
+
+    elif mode == 'median':
+
+        footprint = numpy.ones(shape=(3,) * image.ndim, dtype=image.dtype)
+        footprint.ravel()[footprint.size // 2] = 0
+
+        interpolation = median_filter(image, footprint=footprint, mode='mirror')
 
     return interpolation
 

@@ -9,6 +9,7 @@ from aydin.util.j_invariance.util import (
     _generate_mask,
     _product_from_dict,
     _j_invariant_loss,
+    _interpolate_image,
 )
 from aydin.util.log.log import lsection, lprint
 from aydin.util.optimizer.optimizer import Optimizer
@@ -21,6 +22,7 @@ def calibrate_denoiser(
     mode: str = 'fast',
     max_num_evaluations: int = 128,
     patience: int = 64,
+    interpolation_mode: str = 'median',
     stride: int = 4,
     loss_function: str = 'L2',
     blind_spots: bool = True,
@@ -60,6 +62,11 @@ def calibrate_denoiser(
 
     patience : int
         After 'patience' evaluations we stop the optimiser
+
+    interpolation_mode: str
+        When masking we need to use a value for replacing the masked values.
+        One approach is to replace by zero: 'zero', or apply a Gaussian
+        filter: 'gaussian', or apply a median filter: 'median'
 
     stride: int
         Stride to compute self-supervised loss.
@@ -104,6 +111,9 @@ def calibrate_denoiser(
 
         # Generate mask:
         mask = _generate_mask(image, stride, enable_extended_blind_spot=blind_spots)
+
+        # Compute interpolated image:
+        interpolation = _interpolate_image(image, interpolation_mode)
 
         # first we separate the categorical from numerical parameters;
         categorical_parameters = {}
@@ -156,6 +166,7 @@ def calibrate_denoiser(
                         # We compute the J-inv loss:
                         loss = _j_invariant_loss(
                             image,
+                            interpolation,
                             denoise_function,
                             mask=mask,
                             loss_function=loss_function,
@@ -223,7 +234,10 @@ def calibrate_denoiser(
                                     func=__function,
                                     bounds=bounds,
                                     sampling_method='sobol',
-                                    options={'maxev': max_num_evaluations // 4},
+                                    options={
+                                        'maxev': max_num_evaluations // 4,
+                                        'disp': False,
+                                    },
                                     callback=callback,
                                 )
                                 lprint(f"Global optimisation success: {result.success}")
