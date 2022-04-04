@@ -9,6 +9,7 @@ from aydin.util.j_invariance.util import (
     _generate_mask,
     _product_from_dict,
     _j_invariant_loss,
+    _interpolate_image,
 )
 from aydin.util.log.log import lsection, lprint
 from aydin.util.optimizer.optimizer import Optimizer
@@ -21,9 +22,10 @@ def calibrate_denoiser(
     mode: str = 'fast',
     max_num_evaluations: int = 128,
     patience: int = 64,
+    interpolation_mode: str = 'median',
     stride: int = 4,
     loss_function: str = 'L2',
-    enable_extended_blind_spot: bool = True,
+    blind_spots: bool = True,
     display_images: bool = False,
     **other_fixed_parameters,
 ):
@@ -61,13 +63,18 @@ def calibrate_denoiser(
     patience : int
         After 'patience' evaluations we stop the optimiser
 
+    interpolation_mode: str
+        When masking we need to use a value for replacing the masked values.
+        One approach is to replace by zero: 'zero', or apply a Gaussian
+        filter: 'gaussian', or apply a median filter: 'median'
+
     stride: int
         Stride to compute self-supervised loss.
 
     loss_function: str
         Loss/Error function: Can be:  'L1', 'L2', 'SSIM'
 
-    enable_extended_blind_spot: bool
+    blind_spots: bool
         Set to True to enable extended blind-spot detection.
 
     display_images: bool
@@ -102,10 +109,22 @@ def calibrate_denoiser(
 
     with lsection("Calibrating denoiser:"):
 
+        # Convert image to float if that is not already the case:
+        image = image.astype(dtype=numpy.float32, copy=False)
+
         # Generate mask:
-        mask = _generate_mask(
-            image, stride, enable_extended_blind_spot=enable_extended_blind_spot
-        )
+        mask = _generate_mask(image, stride, enable_extended_blind_spot=blind_spots)
+
+        # Compute interpolated image:
+        interpolation = _interpolate_image(image, interpolation_mode)
+
+        # Masked input image (fixed over optimisation!):
+        masked_input_image = image.copy()
+        masked_input_image[mask] = interpolation[mask]
+
+        # We backup the masked input image to make sure that it is unchanged after optimisation,
+        # which would indicate a 'non-behaving' denoiser that ioperates 'in-place'...
+        masked_input_image_backup = masked_input_image.copy()
 
         # first we separate the categorical from numerical parameters;
         categorical_parameters = {}
@@ -158,6 +177,7 @@ def calibrate_denoiser(
                         # We compute the J-inv loss:
                         loss = _j_invariant_loss(
                             image,
+                            masked_input_image,
                             denoise_function,
                             mask=mask,
                             loss_function=loss_function,
@@ -225,7 +245,10 @@ def calibrate_denoiser(
                                     func=__function,
                                     bounds=bounds,
                                     sampling_method='sobol',
-                                    options={'maxev': max_num_evaluations // 4},
+                                    options={
+                                        'maxev': max_num_evaluations // 4,
+                                        'disp': False,
+                                    },
                                     callback=callback,
                                 )
                                 lprint(f"Global optimisation success: {result.success}")
@@ -250,7 +273,7 @@ def calibrate_denoiser(
                                     bounds=bounds,
                                     options={
                                         'maxfun': max_num_evaluations,
-                                        'eps': 1e-2,
+                                        'eps': 1e-6,
                                         'ftol': 1e-8,
                                         'gtol': 1e-12,
                                     },
@@ -296,13 +319,24 @@ def calibrate_denoiser(
 
             lprint(f"Best parameters: {best_parameters}")
 
+        # We check that the masked input image is unchanged:
+        if not numpy.array_equal(masked_input_image_backup, masked_input_image):
+            raise RuntimeError(
+                "The denoiser being calibrated is modifying the input image! Calibration will not be accurate!"
+            )
+
     # Display if needed:
     if display_images:
-        import napari
+        try:
+            import napari
 
-        with napari.gui_qt():
             viewer = napari.Viewer()
             viewer.add_image(image, name='image')
             viewer.add_image(numpy.stack(denoised_images), name='denoised')
+            napari.run()
+        except Exception:
+            lprint(
+                "Problem while trying to display images obtained during optimization"
+            )
 
     return best_parameters | other_fixed_parameters

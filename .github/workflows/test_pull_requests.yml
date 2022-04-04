@@ -74,7 +74,8 @@ jobs:
             python -m pip install --upgrade pip
             pip install -e .
             pip install pytest==6.2.5
+            pip install mock==4.0.3
         - name: Run the tests
           run: |
-            python -m pytest . --disable-pytest-warnings --durations=30
+            python -m pytest . --disable-pytest-warnings --durations=30 --show-capture=stderr
 

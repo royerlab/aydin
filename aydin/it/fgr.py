@@ -80,10 +80,12 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             pixel intensities are treated equally. Positive values favour
             bright pixels, negative values favour dark pixels.
 
-        blind_spots : Optional[Union[str, List[Tuple[int]]]]
+        blind_spots : Optional[Union[str,List[Tuple[int]]]]
             List of voxel coordinates (relative to receptive field center) to
-            be included in the 'blind-spot'. If 'auto' is passed then the
-            blindspots are automatically determined from the image content.
+            be included in the blind-spot. If None is passed then the
+            blindspots are automatically discovered from the image content.
+            If 'center' is passed then no additional blindspots to the
+            center pixel are considered.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.
@@ -231,7 +233,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         with lsection(f"Computing features for image of shape {image.shape}:"):
             excluded_voxels = (
                 None
-                if self.blind_spots is None
+                if self.blind_spots is None or 'center' in self.blind_spots
                 else list(
                     [
                         coordinate
@@ -244,18 +246,6 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             lprint(f"exclude_center_feature = {exclude_center_feature}")
             lprint(f"exclude_center_value   = {exclude_center_value}")
             lprint(f"excluded_voxels        = {excluded_voxels}")
-
-            excluded_voxels = (
-                None
-                if self.blind_spots is None
-                else list(
-                    [
-                        coordinate
-                        for coordinate in self.blind_spots
-                        if coordinate != (0,) * (image.ndim - 2)
-                    ]
-                )
-            )
 
             # If this is a part of a larger image, we can figure out what are the offsets and scales for the spatial features:
             spatial_feature_scale = (

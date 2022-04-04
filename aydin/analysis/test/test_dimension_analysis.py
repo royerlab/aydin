@@ -40,8 +40,7 @@ def test_dimension_analysis_hela(display: bool = False):
         napari.run()
 
     assert len(channel_axes) == 0
-    assert len(batch_axes) == 1
-    assert 1 in batch_axes
+    assert len(batch_axes) == 0
 
 
 def test_dimension_analysis_cognet(display: bool = False):
@@ -67,25 +66,25 @@ def test_dimension_analysis_cognet(display: bool = False):
     assert len(batch_axes) == 0
 
 
-def test_dimension_analysis_huang(display: bool = False):
-
-    image = examples_single.huang_fixed_pattern_noise.get_array()
-
-    batch_axes, channel_axes = dimension_analysis_on_image(image)
-
-    print(batch_axes)
-    print(channel_axes)
-
-    if display:
-        import napari
-
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        napari.run()
-
-    assert len(channel_axes) == 0
-    assert len(batch_axes) == 1
-    assert 0 in batch_axes
+# def test_dimension_analysis_huang(display: bool = False):
+#
+#     image = examples_single.huang_fixed_pattern_noise.get_array()
+#
+#     batch_axes, channel_axes = dimension_analysis_on_image(image)
+#
+#     print(batch_axes)
+#     print(channel_axes)
+#
+#     if display:
+#         import napari
+#
+#         viewer = napari.Viewer()
+#         viewer.add_image(image, name='image')
+#         napari.run()
+#
+#     assert len(channel_axes) == 0
+#     assert len(batch_axes) == 1
+#     assert 0 in batch_axes
 
 
 def test_dimension_analysis_royer(display: bool = False):

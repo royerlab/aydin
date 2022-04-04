@@ -1,11 +1,13 @@
 import gc
 import math
 import multiprocessing
+import tempfile
+from importlib.util import find_spec
 from os.path import join
 
 import lightgbm
 import numpy
-from lightgbm import Booster
+from lightgbm import Booster, record_evaluation
 
 from aydin.regression.base import RegressorBase
 from aydin.regression.gbm_utils.callbacks import early_stopping
@@ -33,7 +35,7 @@ class LGBMRegressor(RegressorBase):
         patience: int = 5,
         verbosity: int = -1,
         compute_load: float = 0.95,
-        gpu_prediction: bool = False,
+        inference_mode: str = None,
         compute_training_loss: bool = False,
     ):
         """Constructs a LightGBM regressor.
@@ -63,8 +65,12 @@ class LGBMRegressor(RegressorBase):
         compute_load
             Allowed load on computational resources in percentage
             (advanced)
-        gpu_prediction : bool
-            True enables GPU acceleration if available
+        inference_mode : str
+            Choses inference mode: can be 'opencl' for an OpenCL backend,
+            'lleaves' for the very fast lleaves library (only OSX and Linux),
+            'lgbm' for the standard lightGBM inference engine, and 'auto' (or None)
+            tries the best/fastest options first and fallback to lightGBM default
+            inference.
             (advanced)
         compute_training_loss : bool
             Flag to tell LightGBM whether to compute training loss or not
@@ -83,7 +89,7 @@ class LGBMRegressor(RegressorBase):
         self.early_stopping_rounds = patience
         self.verbosity = verbosity
         self.compute_load = compute_load
-        self.gpu_prediction = gpu_prediction
+        self.inference_mode = 'auto' if inference_mode is None else inference_mode
         self.compute_training_loss = compute_training_loss  # This can be expensive
 
         self.opencl_predictor = None
@@ -94,6 +100,7 @@ class LGBMRegressor(RegressorBase):
             lprint(f"max bin: {self.max_bin}")
             lprint(f"n_estimators: {self.max_num_estimators}")
             lprint(f"patience: {self.early_stopping_rounds}")
+            lprint(f"inference_mode: {self.inference_mode}")
 
     def _get_params(self, num_samples, dtype=numpy.float32):
         # min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
@@ -146,11 +153,9 @@ class LGBMRegressor(RegressorBase):
                 lprint(f"Number of validation data points: {y_valid.shape[0]}")
             lprint(f"Number of features per data point: {self.num_features}")
 
-            train_dataset = lightgbm.Dataset(x_train, y_train, silent=True)
+            train_dataset = lightgbm.Dataset(x_train, y_train)
             valid_dataset = (
-                lightgbm.Dataset(x_valid, y_valid, silent=True)
-                if has_valid_dataset
-                else None
+                lightgbm.Dataset(x_valid, y_valid) if has_valid_dataset else None
             )
 
             self.__epoch_counter = 0
@@ -173,8 +178,6 @@ class LGBMRegressor(RegressorBase):
 
             evals_result = {}
 
-            verbose_eval = (lgbm_callback is None) or (self.force_verbose_eval)
-
             self.early_stopping_callback = early_stopping(
                 self, self.early_stopping_rounds
             )
@@ -189,11 +192,13 @@ class LGBMRegressor(RegressorBase):
                     else valid_dataset,
                     early_stopping_rounds=None if has_valid_dataset else None,
                     num_boost_round=self.max_num_estimators,
-                    callbacks=[lgbm_callback, self.early_stopping_callback]
+                    callbacks=[
+                        lgbm_callback,
+                        self.early_stopping_callback,
+                        record_evaluation(evals_result),
+                    ]
                     if has_valid_dataset
                     else [lgbm_callback],
-                    verbose_eval=verbose_eval,
-                    evals_result=evals_result,
                 )
                 lprint("GBM fitting done.")
 
@@ -212,13 +217,13 @@ class LGBMRegressor(RegressorBase):
                 loss_history = {'validation': evals_result['valid_0'][self.metric]}
 
             gc.collect()
-            return _LGBMModel(model, self.gpu_prediction, loss_history)
+            return _LGBMModel(model, self.inference_mode, loss_history)
 
 
 class _LGBMModel:
-    def __init__(self, model, gpu_prediction, loss_history):
+    def __init__(self, model, inference_mode, loss_history):
         self.model: Booster = model
-        self.gpu_prediction = gpu_prediction
+        self.inference_mode = inference_mode
         self.loss_history = loss_history
 
     def _save_internals(self, path: str):
@@ -242,33 +247,77 @@ class _LGBMModel:
             lprint(f"Number of data points             : {x.shape[0]}")
             lprint(f"Number of features per data points: {x.shape[-1]}")
 
+            # we decide here what 'auto' means:
+            if self.inference_mode == 'auto':
+                if x.shape[0] > 5e6:
+                    # Lleaves takes a long time to compile models, so only
+                    # interesting for very large inferences!
+                    self.inference_mode = 'lleaves'
+                else:
+                    self.inference_mode = 'lgbm'
+
             lprint("GBM regressor predicting now...")
-            if self.gpu_prediction:
+            if self.inference_mode == 'opencl' and find_spec('pyopencl'):
                 try:
-                    lprint("Attempting OpenCL-based regression.")
-                    from aydin.regression.gbm_utils.opencl_prediction import (
-                        GBMOpenCLPrediction,
-                    )
-
-                    if self.opencl_predictor is None:
-                        self.opencl_predictor = GBMOpenCLPrediction()
-
-                    prediction = self.opencl_predictor.predict(
-                        self.model, x, num_iteration=self.model.best_iteration
-                    )
-
-                    # We clear the OpenCL ressources:
-                    del self.opencl_predictor
-                    self.opencl_predictor = None
-
-                    return prediction
+                    return self._predict_opencl(x)
                 except Exception:
-                    lprint(
-                        "Failed OpenCL-based regression, doing CPU based prediction."
+                    # printing stack trace
+                    # traceback.print_exc()
+                    lprint("Failed OpenCL-based regression!")
+
+            if self.inference_mode == 'lleaves' and find_spec('lleaves'):
+                try:
+                    return self._predict_lleaves(x)
+                except Exception:
+                    # printing stack trace
+                    # traceback.print_exc()
+                    lprint("Failed lleaves-based regression!")
+
+            # This must work!
+            return self._predict_lgbm(x)
+
+    def _predict_lleaves(self, x):
+
+        with lsection("Attempting lleaves-based regression."):
+
+            # Creating lleaves model and compiling it:
+            with lsection("Model saving and compilation"):
+                # Creating temporary file:
+                with tempfile.NamedTemporaryFile() as temp_file:
+
+                    # Saving LGBM model:
+                    self.model.save_model(
+                        temp_file.name, num_iteration=self.model.best_iteration
                     )
 
-            prediction = self.model.predict(x, num_iteration=self.model.best_iteration)
-            # LGBM is annoying, it spits out float64s
-            prediction = prediction.astype(numpy.float32, copy=False)
-            lprint("GBM regressor predicting done!")
-            return prediction
+                    import lleaves
+
+                    llvm_model = lleaves.Model(model_file=temp_file.name)
+                    llvm_model.compile()
+
+            prediction = llvm_model.predict(x)
+
+        return prediction
+
+    def _predict_opencl(self, x):
+        with lsection("Attempting lleaves-based regression."):
+            from aydin.regression.gbm_utils.opencl_prediction import (
+                GBMOpenCLPrediction,
+            )
+
+            if self.opencl_predictor is None:
+                self.opencl_predictor = GBMOpenCLPrediction()
+            prediction = self.opencl_predictor.predict(
+                self.model, x, num_iteration=self.model.best_iteration
+            )
+            # We clear the OpenCL ressources:
+            del self.opencl_predictor
+            self.opencl_predictor = None
+        return prediction
+
+    def _predict_lgbm(self, x):
+        prediction = self.model.predict(x, num_iteration=self.model.best_iteration)
+        # LGBM is annoying, it spits out float64s
+        prediction = prediction.astype(numpy.float32, copy=False)
+        lprint("GBM regressor predicting done!")
+        return prediction

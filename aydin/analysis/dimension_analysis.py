@@ -1,5 +1,8 @@
 from typing import Optional
 
+import numpy
+from numba import jit
+
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.log.log import lprint, lsection
@@ -11,9 +14,9 @@ def dimension_analysis_on_image(
     min_spatio_temporal: int = 2,
     max_spatio_temporal: int = 4,
     max_channels_per_axis: int = 0,
-    crop_size_in_voxels: Optional[int] = 64000,
+    crop_size_in_voxels: Optional[int] = 128000,
     crop_timeout_in_seconds: float = 5,
-    max_num_evaluations: Optional[int] = 11,
+    max_num_evaluations: Optional[int] = 21,
 ):
     """
     Analyses an image and tries to determine which dimensions are
@@ -78,6 +81,12 @@ def dimension_analysis_on_image(
             timeout_in_seconds=crop_timeout_in_seconds,
         )
 
+        # Robust normalisation of image:
+        min_value = numpy.percentile(image, q=2)
+        max_value = numpy.percentile(image, q=98)
+        if max_value > min_value:
+            image = _normalise(image, min_value, max_value)
+
         # Adjust min number of spatio-temporal dimensions:
         min_spatio_temporal = min(min_spatio_temporal, image.ndim)
 
@@ -91,8 +100,12 @@ def dimension_analysis_on_image(
                 axes=(axis,),
                 min_order=4,
                 max_order=4,
+                optimiser='smart',
                 max_num_evaluations=max_num_evaluations,
+                jinv_interpolation_mode='gaussian',
+                enable_extended_blind_spot=False,
                 crop_size_in_voxels=crop_size_in_voxels,
+                display_images=False,
             )
 
             value = best_parameters['freq_cutoff']
@@ -156,3 +169,10 @@ def dimension_analysis_on_image(
         )
 
         return batch_axes, channel_axes
+
+
+@jit(nopython=True, parallel=True)
+def _normalise(image, min_value, max_value):
+    image = numpy.clip(image, a_min=min_value, a_max=max_value)
+    image = (image - min_value) / (max_value - min_value)
+    return image

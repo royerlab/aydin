@@ -13,20 +13,22 @@ from aydin.io.datasets import (
     pollen,
     lizard,
     dots,
+    cropped_newyork,
+    dmel,
 )
 from aydin.it.classic_denoisers.tv import calibrate_denoise_tv
 from aydin.util.log.log import Log
 
 
-def demo_tv(image, display=True):
+def demo_tv(image, do_add_noise=True, display=True):
     """
     Demo for self-supervised denoising using camera image with synthetic noise
     """
     Log.enable_output = True
-    Log.set_log_max_depth(5)
+    Log.set_log_max_depth(6)
 
     image = normalise(image.astype(np.float32))
-    noisy = add_noise(image)
+    noisy = add_noise(image) if do_add_noise else image
 
     function, parameters, memreq = calibrate_denoise_tv(noisy)
     denoised = function(noisy, **parameters)
@@ -54,15 +56,11 @@ def demo_tv(image, display=True):
 
 
 if __name__ == "__main__":
-    newyork_image = newyork()
-    demo_tv(newyork_image)
-    characters_image = characters()
-    demo_tv(characters_image)
-    pollen_image = pollen()
-    demo_tv(pollen_image)
-    lizard_image = lizard()
-    demo_tv(lizard_image)
-    dots_image = dots()
-    demo_tv(dots_image)
-    camera_image = camera()
-    demo_tv(camera_image)
+    demo_tv(dmel(), do_add_noise=False)
+    demo_tv(cropped_newyork())
+    demo_tv(newyork())
+    demo_tv(characters())
+    demo_tv(pollen())
+    demo_tv(lizard())
+    demo_tv(dots())
+    demo_tv(camera())

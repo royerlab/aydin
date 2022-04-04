@@ -41,10 +41,12 @@ class ImageTranslatorBase(ABC):
         ----------
         monitor
 
-        blind_spots : Optional[Union[str, List[Tuple[int]]]]
+        blind_spots : Optional[Union[str,List[Tuple[int]]]]
             List of voxel coordinates (relative to receptive field center) to
-            be included in the 'blind-spot'. If 'auto' is passed then the
-            blindspots are automatically determined from the image content.
+            be included in the blind-spot. If None is passed then the
+            blindspots are automatically discovered from the image content.
+            If 'center' is passed then no additional blindspots to the
+            center pixel are considered.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.
@@ -262,7 +264,7 @@ class ImageTranslatorBase(ABC):
             )
 
             # Automatic blind-spot discovery:
-            if self.blind_spots == 'auto':
+            if self.blind_spots is None:
                 lprint(
                     "Automatic discovery of noise autocorrelation and specification of N2S blind-spots activated!"
                 )

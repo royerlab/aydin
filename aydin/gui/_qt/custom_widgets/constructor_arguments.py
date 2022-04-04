@@ -122,6 +122,8 @@ class ConstructorArgumentsWidget(QWidget):
                 value = lineedit.text()
             elif "dtype" in str(annotation):
                 value = numpy.dtype(lineedit.text())
+            elif "str" in str(annotation):
+                value = lineedit.text()
             else:
                 value = json.loads(lineedit.text())
 
