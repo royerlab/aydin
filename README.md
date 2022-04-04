@@ -72,7 +72,7 @@ graphics card, then we recommend you try the Noise2Self-FGR-cb denoiser.
 For detailed use-cases check [here](https://royerlab.github.io/aydin/use_cases/introduction.html#).  
 
 We regularly come up with new approaches and ideas, there is just not enough time to write papers about all these ideas.
-This means that the best 'publication' for some of these novel algorithms is this repo itsel, and so please be so kind as to
+This means that the best 'publication' for some of these novel algorithms is this repo itself, and so please be so kind as to
 cite this repo (see below) for any ideas that you would use or reuse.
 We have a long todo list of existing, modified, as well as original algorithms that we plan to add to *Aydin* in the next weeks and months. We will do so progressively as time allows. Stay tuned!
 

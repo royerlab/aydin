@@ -1,3 +1,4 @@
+# flake8: noqa
 from scipy.ndimage import gaussian_filter
 
 from aydin.io.datasets import cropped_newyork, dots, dmel

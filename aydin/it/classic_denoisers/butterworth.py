@@ -150,7 +150,7 @@ def calibrate_denoise_butterworth(
 
     # ranges:
     freq_cutoff_range = (min_freq, max_freq)
-    order_range = (min_order, max_order)
+    # order_range = (min_order, max_order)
 
     # Combine fixed parameters:
     other_fixed_parameters = other_fixed_parameters | {
@@ -228,7 +228,7 @@ def calibrate_denoise_butterworth(
     if other_filters:
         parameter_ranges |= {'filter_type': ['butterworth', 'chebyshev2']}  #
 
-    ## First optimisation pass:
+    # # First optimisation pass:
 
     # If we only have a single parameter to optimise, we can go for a brute-force approach:
     if len(parameter_ranges) == 1:
@@ -292,8 +292,8 @@ def calibrate_denoise_butterworth(
             | other_fixed_parameters
         )
 
-    ## Below we adjust the parameters because denoise_butterworth function (without underscore)
-    ## uses a different set of parameters...
+    # Below we adjust the parameters because denoise_butterworth function (without underscore)
+    # uses a different set of parameters...
 
     if mode == 'isotropic' or len(axes) == 1:
         pass
@@ -492,5 +492,5 @@ def _filter_chebyshev(image_f, epsilon, chebyshev):
 
 
 def _filter_butterworth(image_f, f, order):
-    image_f /= numpy.sqrt(1 + f ** order)
+    image_f /= numpy.sqrt(1 + f**order)
     return image_f

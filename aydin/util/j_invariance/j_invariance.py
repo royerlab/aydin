@@ -322,7 +322,7 @@ def calibrate_denoiser(
         # We check that the masked input image is unchanged:
         if not numpy.array_equal(masked_input_image_backup, masked_input_image):
             raise RuntimeError(
-                f"The denoiser being calibrated is modifying the input image! Calibration will not be accurate!"
+                "The denoiser being calibrated is modifying the input image! Calibration will not be accurate!"
             )
 
     # Display if needed:
@@ -334,9 +334,9 @@ def calibrate_denoiser(
             viewer.add_image(image, name='image')
             viewer.add_image(numpy.stack(denoised_images), name='denoised')
             napari.run()
-        except:
+        except Exception:
             lprint(
-                "Problem while yrying to display images obtained during optimisation"
+                "Problem while trying to display images obtained during optimization"
             )
 
     return best_parameters | other_fixed_parameters
