@@ -87,14 +87,14 @@ def _generate_mask(
 
     # Generate slice for mask:
     spatialdims = image.ndim
-    n_masks = stride ** spatialdims
+    n_masks = stride**spatialdims
     mask = _generate_grid_slice(
         image.shape[:spatialdims], offset=n_masks // 2, stride=stride
     )
 
     # Do we have to extend these spots?
     if enable_extended_blind_spot:
-        lprint(f"Detection of extended blindspots requested!")
+        lprint("Detection of extended blindspots requested!")
         blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
         extended_blind_spot = len(blind_spots) > 1 and enable_extended_blind_spot
     else:

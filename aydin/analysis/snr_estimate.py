@@ -34,7 +34,7 @@ def snr_estimate(image) -> float:
     f = numpy.zeros_like(image)
     axis_grid = tuple(numpy.linspace(0, 1, s) for s in image.shape)
     for x in numpy.meshgrid(*axis_grid, indexing='ij'):
-        f += x ** 2
+        f += x**2
     f = numpy.sqrt(f)
 
     # define two domains:
