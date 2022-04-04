@@ -1,5 +1,9 @@
-default_optimiser = 'fast'
-default_crop_size = 96000
+default_optimiser = 'smart'
+default_enable_extended_blind_spot = False
+default_jinv_interpolation_mode = 'median'
+default_crop_size_normal = 96000
+default_crop_size_large = 128000
+default_crop_size_verylarge = 256000
 default_max_evals_hyperlow = 16
 default_max_evals_ultralow = 32
 default_max_evals_verylow = 64

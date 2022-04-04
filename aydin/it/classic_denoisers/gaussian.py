@@ -16,10 +16,11 @@ def calibrate_denoise_gaussian(
     min_sigma: float = 0.0,
     max_sigma: float = 2.0,
     max_num_truncate: int = 4,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large,
     optimiser: str = 'smart',
     max_num_evaluations: int = _defaults.default_max_evals_high,
-    enable_extended_blind_spot: bool = True,
+    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -50,9 +51,11 @@ def calibrate_denoise_gaussian(
         (advanced)
 
     crop_size_in_voxels: int or None for default
-        Number of voxels for crop used to calibrate
-        denoiser.
-        (advanced)
+        Number of voxels for crop used to calibrate denoiser.
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory -- this can be important for very noisy images.
+        Values to try are: 65000, 128000, 256000, 320000.
+        We do not recommend values higher than 512000.
 
     optimiser: str
         Optimiser to use for finding the best denoising
@@ -63,10 +66,16 @@ def calibrate_denoise_gaussian(
     max_num_evaluations: int
         Maximum number of evaluations for finding
         the optimal parameters.
-        (advanced)
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory.
 
     enable_extended_blind_spot: bool
         Automatically determines extended blind-spot extent.
+
+    jinv_interpolation_mode: str
+        J-invariance interpolation mode for masking. Can be: 'median' or
+        'gaussian'.
+        (advanced)
 
     display_images: bool
         When True the denoised images encountered
@@ -129,8 +138,9 @@ def calibrate_denoise_gaussian(
             _denoise_gaussian,
             mode=optimiser,
             denoise_parameters=parameter_ranges,
+            interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
-            enable_extended_blind_spot=enable_extended_blind_spot,
+            blind_spots=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters

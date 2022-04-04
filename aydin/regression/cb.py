@@ -4,7 +4,7 @@ import multiprocessing
 import shutil
 from os.path import join
 from tempfile import mkdtemp
-from typing import Sequence
+from typing import Sequence, Optional
 import numpy
 from catboost import CatBoostRegressor, CatBoostError, Pool
 
@@ -30,10 +30,10 @@ class CBRegressor(RegressorBase):
     def __init__(
         self,
         num_leaves: int = 512,
-        max_num_estimators: int = 2048,
-        min_num_estimators: int = 512,
+        max_num_estimators: Optional[int] = None,
+        min_num_estimators: Optional[int] = None,
         max_bin: int = None,
-        learning_rate: float = 0.01,
+        learning_rate: Optional[float] = None,
         loss: str = 'l1',
         patience: int = 32,
         compute_load: float = 0.95,
@@ -47,16 +47,17 @@ class CBRegressor(RegressorBase):
         num_leaves : int
             Number of leaves.
             (advanced)
-        max_num_estimators : int
-            Maximum number of estimators
-        min_num_estimators : int
-            Minimum number of estimators
+        max_num_estimators : Optional[int]
+            Maximum number of estimators.
+        min_num_estimators : Optional[int]
+            Minimum number of estimators.
             (advanced)
         max_bin : int
             Maximum number of allowed bins
             (advanced)
-        learning_rate : float
-            Learning rate for the catboost model
+        learning_rate : Optional[float]
+            Learning rate for the catboost model. The learning rate is determined
+            automatically if the value None is given.
             (advanced)
         loss : str
             Type of loss to be used
@@ -106,7 +107,7 @@ class CBRegressor(RegressorBase):
         int
 
         """
-        return 40e6 if self.gpu else 1e6
+        return int(40e6 if self.gpu else 1e6)
 
     def _get_params(
         self, num_samples, num_features, learning_rate, dtype, use_gpu, train_folder
@@ -126,8 +127,13 @@ class CBRegressor(RegressorBase):
 
         gpu_ram_type = 'CpuPinnedMemory' if num_samples > 10e6 else 'GpuRam'
 
+        if self.max_num_estimators is None:
+            iterations = 4096 if use_gpu else 2048
+        else:
+            iterations = self.max_num_estimators
+
         params = {
-            "iterations": self.max_num_estimators,
+            "iterations": iterations,
             "task_type": "GPU" if use_gpu else "CPU",
             "devices": 'NULL'
             if self.gpu_devices is None
@@ -147,11 +153,15 @@ class CBRegressor(RegressorBase):
             'bagging_temperature': 1,
             'min_data_in_leaf': min_data_in_leaf,
             'l2_leaf_reg': 30,
-            'feature_border_type': 'UniformAndQuantiles'
+            'feature_border_type': 'UniformAndQuantiles',
+            # 'verbose_eval' : 10,
+            'metric_period': 50 if use_gpu else 1,
             # "num_leaves": self.num_leaves,
+            "learning_rate": learning_rate,
         }
 
-        params["learning_rate"] = learning_rate
+        # Note: we could add optional automatic meta-parameter tunning by using cross val:
+        # https://effectiveml.com/using-grid-search-to-optimise-catboost-parameters.html
 
         return params
 
@@ -200,10 +210,19 @@ class CBRegressor(RegressorBase):
                 # CatBoost fails (best_iter == 0 or too small) sometimes to train if learning rate is too high, this loops
                 # tries increasingly smaller learning rates until training succeeds (best_iter>min_n_estimators)
                 learning_rate = self.learning_rate
+
+                # Default min num of estimators:
+                if self.min_num_estimators is None:
+                    min_num_estimators = 1024 if self.gpu else 512
+                else:
+                    min_num_estimators = self.min_num_estimators
+
                 for i in range(10):
                     if not self.stop_training_callback.continue_training:
                         break
-                    lprint(f"Trying learning rate of {learning_rate}")
+                    lprint(
+                        f"Trying learning rate of '{learning_rate}' (None -> automatic)"
+                    )
 
                     # The purpose of this try block is to protect against failure to use GPU.
                     try:
@@ -239,7 +258,7 @@ class CBRegressor(RegressorBase):
                     # best_iteration_ might be None if there is no validation data provided...
                     if (
                         model.best_iteration_ is None
-                        or model.best_iteration_ > self.min_num_estimators
+                        or model.best_iteration_ > min_num_estimators
                     ):
                         self.learning_rate = learning_rate
                         lprint(
@@ -249,7 +268,9 @@ class CBRegressor(RegressorBase):
                     else:
                         # Reduce learning rate:
                         if learning_rate is None:
-                            learning_rate = 0.01
+                            # If None we were using an automatic value, we set the leraning rate so we can start
+                            # with the (relatively high) default value of 0.1
+                            learning_rate = 2 * 0.1
                         learning_rate *= 0.5
                         lprint(
                             f"CatBoost fitting failed! best_iteration=={model.best_iteration_} < {self.min_num_estimators} reducing learning rate to: {learning_rate}"

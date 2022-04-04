@@ -27,10 +27,11 @@ def calibrate_denoise_dictionary_fixed(
     try_threshold: bool = False,
     num_sparsity_values_to_try: int = 6,
     dictionaries: str = 'dct',
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal,
     optimiser: str = _defaults.default_optimiser,
     max_num_evaluations: int = _defaults.default_max_evals_low,
-    enable_extended_blind_spot: bool = True,
+    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode,
     display_dictionary: bool = False,
     display_images: bool = False,
     display_crop: bool = False,
@@ -79,9 +80,11 @@ def calibrate_denoise_dictionary_fixed(
         'dst'.
 
     crop_size_in_voxels: int or None for default
-        Number of voxels for crop used to calibrate
-        denoiser.
-        (advanced)
+        Number of voxels for crop used to calibrate denoiser.
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory -- this can be important for very noisy images.
+        Values to try are: 65000, 128000, 256000, 320000.
+        We do not recommend values higher than 512000.
 
     optimiser: str
         Optimiser to use for finding the best denoising
@@ -91,11 +94,16 @@ def calibrate_denoise_dictionary_fixed(
 
     max_num_evaluations: int
         Maximum number of evaluations for finding the
-        optimal parameters.
-        (advanced)
+        optimal parameters. Increase this number by factors of two if denoising
+        quality is unsatisfactory.
 
     enable_extended_blind_spot: bool
         Set to True to enable extended blind-spot detection.
+        (advanced)
+
+    jinv_interpolation_mode: str
+        J-invariance interpolation mode for masking. Can be: 'median' or
+        'gaussian'.
         (advanced)
 
     display_dictionary: bool
@@ -164,8 +172,9 @@ def calibrate_denoise_dictionary_fixed(
         _denoise_dictionary,
         mode=optimiser,
         denoise_parameters=parameter_ranges,
+        interpolation_mode=jinv_interpolation_mode,
         max_num_evaluations=max_num_evaluations,
-        enable_extended_blind_spot=enable_extended_blind_spot,
+        blind_spots=enable_extended_blind_spot,
     )
     lprint(f"Best parameters: {best_parameters}")
 
@@ -178,10 +187,11 @@ def calibrate_denoise_dictionary_fixed(
             crop,
             _denoise_dictionary,
             denoise_parameters=parameter_ranges,
+            interpolation_mode=jinv_interpolation_mode,
             other_fixed_parameters=best_parameters | other_fixed_parameters,
             max_num_evaluations=max_num_evaluations,
             display_images=display_images,
-            enable_extended_blind_spot=enable_extended_blind_spot,
+            blind_spots=enable_extended_blind_spot,
         )
         | best_parameters
         | other_fixed_parameters
