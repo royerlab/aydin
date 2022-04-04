@@ -155,11 +155,13 @@ class CBRegressor(RegressorBase):
             'l2_leaf_reg': 30,
             'feature_border_type': 'UniformAndQuantiles',
             #'verbose_eval' : 10,
-            'metric_period': 50 if use_gpu else 1
+            'metric_period': 50 if use_gpu else 1,
             # "num_leaves": self.num_leaves,
+            "learning_rate": learning_rate,
         }
 
-        params["learning_rate"] = learning_rate
+        # Note: we could add optional automatic meta-parameter tunning by using cross val:
+        # https://effectiveml.com/using-grid-search-to-optimise-catboost-parameters.html
 
         return params
 
