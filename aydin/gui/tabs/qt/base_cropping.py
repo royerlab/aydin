@@ -9,7 +9,7 @@ from qtpy.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
-from aydin.gui._qt.custom_widgets.qt_slider_with_labels import QRangeSliderWithLabels
+from aydin.gui._qt.custom_widgets.qt_rangeslider_with_labels import QRangeSliderWithLabels
 from aydin.util.misc.units import human_readable_byte_size
 
 
@@ -246,6 +246,13 @@ class BaseCroppingTab(QWidget):
 
     def update_crop_label_layer(self):
         self.crop_layer.data = self.selection_array
+
+    def update_current_viewer_dims(self, slider_label, value):
+        dims_axis_to_update = self._metadata.axes.find(slider_label)
+        current_step = list(self.viewer_model.dims.current_step)
+        current_step[dims_axis_to_update] = value
+
+        self.viewer_model.dims.current_step = tuple(current_step)
 
     def update_summary(self):
         self.summary_nbvoxels_label.setText(
