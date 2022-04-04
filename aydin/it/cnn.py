@@ -226,7 +226,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             self.infmodel = keras.models.load_model(join(path, "tf_inf_model"))
 
     def get_receptive_field_radius(self, nb_unet_levels, shiftconv=False):
-        """TODO: add proper docstrings here
+        """
 
         Parameters
         ----------
