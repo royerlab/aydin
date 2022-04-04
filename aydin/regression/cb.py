@@ -31,7 +31,7 @@ class CBRegressor(RegressorBase):
         self,
         num_leaves: int = 512,
         max_num_estimators: Optional[int] = None,
-        min_num_estimators: int = 512,
+        min_num_estimators: Optional[int] = None,
         max_bin: int = None,
         learning_rate: Optional[float] = None,
         loss: str = 'l1',
@@ -48,9 +48,9 @@ class CBRegressor(RegressorBase):
             Number of leaves.
             (advanced)
         max_num_estimators : Optional[int]
-            Maximum number of estimators
-        min_num_estimators : int
-            Minimum number of estimators
+            Maximum number of estimators.
+        min_num_estimators : Optional[int]
+            Minimum number of estimators.
             (advanced)
         max_bin : int
             Maximum number of allowed bins
@@ -107,7 +107,7 @@ class CBRegressor(RegressorBase):
         int
 
         """
-        return 40e6 if self.gpu else 1e6
+        return int(40e6 if self.gpu else 1e6)
 
     def _get_params(
         self, num_samples, num_features, learning_rate, dtype, use_gpu, train_folder
@@ -210,6 +210,13 @@ class CBRegressor(RegressorBase):
                 # CatBoost fails (best_iter == 0 or too small) sometimes to train if learning rate is too high, this loops
                 # tries increasingly smaller learning rates until training succeeds (best_iter>min_n_estimators)
                 learning_rate = self.learning_rate
+
+                # Default min num of estimators:
+                if self.min_num_estimators is None:
+                    min_num_estimators = 1024 if self.gpu else 512
+                else:
+                    min_num_estimators = self.min_num_estimators
+
                 for i in range(10):
                     if not self.stop_training_callback.continue_training:
                         break
@@ -251,7 +258,7 @@ class CBRegressor(RegressorBase):
                     # best_iteration_ might be None if there is no validation data provided...
                     if (
                         model.best_iteration_ is None
-                        or model.best_iteration_ > self.min_num_estimators
+                        or model.best_iteration_ > min_num_estimators
                     ):
                         self.learning_rate = learning_rate
                         lprint(
