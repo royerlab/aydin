@@ -18,7 +18,7 @@ def test_saveload_bilateral():
 
 
 def test_saveload_gaussian():
-    saveload("gaussian", min_psnr=20, min_ssim=0.71)
+    saveload("gaussian", min_psnr=20, min_ssim=0.61)
 
 
 @pytest.mark.heavy
@@ -30,7 +30,7 @@ def test_saveload_lipschitz():
     saveload("lipschitz", min_psnr=12, min_ssim=0.16)
 
 
-# @pytest.mark.heavy
+@pytest.mark.heavy
 def test_saveload_pca():
     saveload("pca", min_psnr=20, min_ssim=0.60)
 

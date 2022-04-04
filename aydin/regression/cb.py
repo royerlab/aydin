@@ -14,7 +14,16 @@ from aydin.util.log.log import lsection, lprint
 
 
 class CBRegressor(RegressorBase):
-    """CatBoost Regressor."""
+    """
+    The CatBoost Regressor uses the gradient boosting library <a
+    href="https://github.com/catboost">CatBoost</a> to perform regression
+    from a set of feature vectors and target values. CatBoost main advantage
+    is that it is very fast compared to other gradient boosting libraries --
+    in particular when GPU acceleration is available. Compared to other
+    libraries (lightGBM, XGBoost) it is much easier to ship the GPU enabled
+    version because it just works. It performs comparably and sometimes
+    better than other libraries like LightGBM.
+    """
 
     model: CatBoostRegressor
 
@@ -37,24 +46,33 @@ class CBRegressor(RegressorBase):
         ----------
         num_leaves : int
             Number of leaves.
+            (advanced)
         max_num_estimators : int
             Maximum number of estimators
         min_num_estimators : int
             Minimum number of estimators
+            (advanced)
         max_bin : int
             Maximum number of allowed bins
+            (advanced)
         learning_rate : float
             Learning rate for the catboost model
+            (advanced)
         loss : str
             Type of loss to be used
+            (advanced)
         patience : int
             Number of rounds required for early stopping
+            (advanced)
         compute_load : float
             Allowed load on computational resources in percentage
+            (advanced)
         gpu : bool
-            Flag to tell catboost try to use GPU or do not
+            True enables GPU acceleration if available
+            (advanced)
         gpu_devices : Sequence[int]
             List of GPU device indices to be used by CatBoost
+            (advanced)
         """
         super().__init__()
 

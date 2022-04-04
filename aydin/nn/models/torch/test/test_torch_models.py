@@ -1,19 +1,22 @@
-import math
-from collections import OrderedDict
-from itertools import chain
-
-import napari
+# import math
+# from collections import OrderedDict
+# from itertools import chain
+#
+# import napari
 import numpy
+import pytest
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+
+# from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
-from aydin.io.datasets import lizard, add_noise, camera, normalise
+from aydin.io.datasets import add_noise, camera, normalise
 from aydin.nn.models.torch.torch_unet import UNetModel, n2t_unet_train_loop
 from aydin.nn.models.utils.torch_dataset import TorchDataset
-from aydin.nn.pytorch.it_ptcnn import to_numpy
-from aydin.nn.pytorch.optimizers.esadam import ESAdam
-from aydin.util.log.log import lprint
+
+# from aydin.nn.pytorch.it_ptcnn import to_numpy
+# from aydin.nn.pytorch.optimizers.esadam import ESAdam
+# from aydin.util.log.log import lprint
 
 
 def test_supervised_2D():
@@ -30,6 +33,7 @@ def test_supervised_2D():
     assert result.dtype == input_array.dtype
 
 
+@pytest.mark.heavy
 def test_supervised_2D_n2t():
     lizard_image = normalise(camera())
     lizard_image = numpy.expand_dims(lizard_image, axis=0)

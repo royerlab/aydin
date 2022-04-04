@@ -13,7 +13,15 @@ from aydin.util.log.log import lsection, lprint
 
 
 class LGBMRegressor(RegressorBase):
-    """LightGBM Regressor."""
+    """
+    The LightGBM Regressor uses the gradient boosting library <a
+    href="https://github.com/microsoft/LightGBM">LightGBM</a> to perform
+    regression from a set of feature vectors and target values. LightGBM is a
+    solid library but we do yet support GPU training and inference. Because
+    of lack of GPU support LightGBM is slower than CatBoost, sometimes
+    LightGBM gives better results than Catbboost, but not often enough to
+    justify the loss of speed.
+    """
 
     def __init__(
         self,
@@ -34,22 +42,33 @@ class LGBMRegressor(RegressorBase):
         ----------
         num_leaves
             Number of leaves
+            (advanced)
         max_num_estimators
             Maximum number of estimators
         max_bin
             Maximum number of allowed bins
+            (advanced)
         learning_rate
             Learning rate for the LightGBM model
+            (advanced)
         loss
             Type of loss to be used
+            (advanced)
         patience
             Number of rounds required for early stopping
+            (advanced)
         verbosity
+            Verbosity setting of LightGBM.
+            (advanced)
         compute_load
             Allowed load on computational resources in percentage
+            (advanced)
         gpu_prediction : bool
+            True enables GPU acceleration if available
+            (advanced)
         compute_training_loss : bool
             Flag to tell LightGBM whether to compute training loss or not
+            (advanced)
 
         """
         super().__init__()
@@ -198,14 +217,14 @@ class LGBMRegressor(RegressorBase):
 
 class _LGBMModel:
     def __init__(self, model, gpu_prediction, loss_history):
-        self.model = model
+        self.model: Booster = model
         self.gpu_prediction = gpu_prediction
         self.loss_history = loss_history
 
     def _save_internals(self, path: str):
         if self.model is not None:
             lgbm_model_file = join(path, 'lgbm_model.txt')
-            self.model.save(lgbm_model_file)
+            self.model.save_model(lgbm_model_file)
 
     def _load_internals(self, path: str):
         lgbm_model_file = join(path, 'lgbm_model.txt')

@@ -41,12 +41,12 @@ class DenoiseTab(QWidget):
     longer, as do in general patch and dictionary based methods.
     <split>
     Our own favourite is a novel variant on the Noise2Self theme which relies on carefully crafted features and
-    gradient boosting (N2S-FGR-cb or -lgbm). CNN-based Noise2Self denoising is also available but is currently on of
+    gradient boosting (N2S-FGR-cb or -lgbm). CNN-based Noise2Self denoising is also available but is currently one of
     our least favourites because of its propensity to hallucinate detail, slowness, and overall worse performance. In
-    fine, there is no silver bullet, there is not a single denoising algorithm that can tackle all denoising
-    challenges, instead you need to choose and play with a variety of algorithms to find the one that will fit you
-    needs both in terms of processing speed, visual appearance, and downstream analysis constraints. Denoising is a
-    form of image analysis that consists in separating signal from noise, with the definition of signal and noise
+    the end, there is no silver bullet, there is not a single denoising algorithm that can tackle all denoising
+    challenges, instead you need to choose and play with a variety of algorithms to find the one that will fit your
+    needs both in terms of processing speed, visual appearance, and downstream analysis constraints and validations.
+    Denoising is a form of image analysis that consists in separating signal from noise, with the definition of signal and noise
     being to some extent, subjective and context dependent.
     """
 

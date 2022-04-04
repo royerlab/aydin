@@ -115,6 +115,7 @@ def auto_detect_blindspots(
     # What is the intensity of the nth strongest correlation?
     noise_auto_flat = noise_auto.flatten()
     noise_auto_flat.sort()
+    max_blind_spots = min(len(noise_auto_flat), max_blind_spots)
     nth_strongest_correlation = noise_auto_flat[-max_blind_spots]
 
     # We adjust the threshold to take into account the max number of blindspots requested:
@@ -192,7 +193,8 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
     analysis = analysis.clip(0, numpy.math.inf)
 
     # We normalise to a sum of 1:
-    analysis /= analysis.max()
+    if analysis.max() > 0:
+        analysis /= analysis.max()
 
     # Now we have the noise autocorelogram, we can crop that to the expected max range:
     analysis = analysis[center_slice]
@@ -240,9 +242,14 @@ def _phase_correlation(image, reference_image) -> numpy.ndarray:
     r : numpy.ndarray
 
     """
-    G_a = scipy.fft.fftn(image, workers=-1)
-    G_b = scipy.fft.fftn(reference_image, workers=-1)
-    conj_b = numpy.ma.conjugate(G_b)
-    R = G_a * conj_b
-    r = numpy.absolute(scipy.fft.ifftn(R, workers=-1))
-    return r
+    image_f = scipy.fft.fftn(image, workers=-1)
+
+    if image is not reference_image:
+        reference_image_f = scipy.fft.fftn(reference_image, workers=-1)
+    else:
+        reference_image_f = image_f
+
+    reference_image_f_conj = numpy.ma.conjugate(reference_image_f)
+    phase_correlation_f = image_f * reference_image_f_conj
+    phase_correlation = numpy.absolute(scipy.fft.ifftn(phase_correlation_f, workers=-1))
+    return phase_correlation

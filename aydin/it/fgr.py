@@ -1,6 +1,6 @@
 import gc
 import time
-from typing import Optional
+from typing import Optional, Union, List, Tuple
 import numpy
 
 from aydin.features.base import FeatureGeneratorBase
@@ -16,7 +16,7 @@ from aydin.util.offcore.offcore import offcore_array
 
 class ImageTranslatorFGR(ImageTranslatorBase):
     """
-    Feature Generation & Regression (FGR) based Image TranslatorFGR Image Translator
+    Feature Generation & Regression (FGR) based Image TranslatorFGR Image Translator.
     """
 
     feature_generator: FeatureGeneratorBase
@@ -28,41 +28,91 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         balance_training_data: bool = False,
         voxel_keep_ratio: float = 1,
         max_voxels_for_training: Optional[int] = None,
-        favour_bright_pixels: bool = False,
-        **kwargs,
+        favour_bright_pixels: float = 0,
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = 'auto',
+        tile_min_margin: int = 8,
+        tile_max_margin: Optional[int] = None,
+        max_memory_usage_ratio: float = 0.9,
+        max_tiling_overhead: float = 0.1,
     ):
-        """Constructs a FGR image translator. FGR image translators use feature generation
-        and regression learning to acheive image translation.
+        """Constructs a FGR image translator. FGR image translators use
+        feature generation and regression learning to acheive image
+        translation. Typically used to denoise images using the Noise 2Self
+        principle.
 
         Parameters
         ----------
         feature_generator : FeatureGeneratorBase
             Feature generator.
+            (advanced)
+
         regressor : RegressorBase
             Regressor.
+            (advanced)
+
         balance_training_data : bool
-            Limits number training entries per target
-            value histogram bin.
+            Balancing the training data improves image denoising performance
+            by avoiding the over-representation of certain pixel intensities
+            in the training data. For example, for images that are very dark
+            with mostly dark background and only few bright regions,
+            the brightness histogram will be is very skewed. In that case
+            you want to turn on balancing so that the training data better
+            represents the pixel values at all brightness levels.
+
         voxel_keep_ratio : float
-            Ratio of the voxels to keep for training.
+            Ratio of the voxels to keep for training. Reduce this number to
+            speed up denoising or if the images are extremely large and
+            repetitive. (advanced)
+
         max_voxels_for_training : int, optional
-            Maximum number of the voxels that can be
-            used for training.
-        favour_bright_pixels : bool
-            Marks bright pixels more favourable for
-            the data histogram balancer.
-        kwargs : dict
-            Keyword arguments.
+            Maximum number of the voxels that can be used for training. This
+            option limits the amount of training data and thus also limits
+            the time required for training. In our experience we don't
+            necessarily need more than several million voxels to train an
+            effective denoiser. Different regressors (lgbm, cb, ...) can
+            handle varying sizes of training data. We recommend at least a
+            million (1e6) and ta most 40 million if you have a powerfull
+            machine with GPU and if you are armed with patience. (advanced)
+
+        favour_bright_pixels : float
+            Value within [-1.0, 1.0] that controls whether to favour bright
+            or dark pixels during training data balancing. By default (0) all
+            pixel intensities are treated equally. Positive values favour
+            bright pixels, negative values favour dark pixels.
+
+        blind_spots : Optional[Union[str, List[Tuple[int]]]]
+            List of voxel coordinates (relative to receptive field center) to
+            be included in the 'blind-spot'. If 'auto' is passed then the
+            blindspots are automatically determined from the image content.
+
+        tile_min_margin : int
+            Minimal width of tile margin in voxels.
+            (advanced)
+
+        tile_max_margin : Optional[int]
+            Maximal width of tile margin in voxels.
+            (advanced)
+
         max_memory_usage_ratio : float
-            Maximum allowed memory load.
+            Maximum allowed memory load, value must be within [0, 1]. Default is 90%.
+            (advanced)
+
         max_tiling_overhead : float
-            Maximum allowed margin overhead during tiling.
+            Maximum allowed margin overhead during tiling. Default is 10%.
+            (advanced)
+
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            blind_spots=blind_spots,
+            tile_min_margin=tile_min_margin,
+            tile_max_margin=tile_max_margin,
+            max_memory_usage_ratio=max_memory_usage_ratio,
+            max_tiling_overhead=max_tiling_overhead,
+        )
 
         self.voxel_keep_ratio = voxel_keep_ratio
         self.balance_training_data = balance_training_data
-        self.favour_bright_pixels = favour_bright_pixels
+        self.favour_bright_pixels = max(min(favour_bright_pixels, 1.0), -1.0)
         self.feature_generator = (
             StandardFeatureGenerator()
             if feature_generator is None
@@ -471,8 +521,12 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         )
         lprint(f"Effective keep-ratio is: {effective_keep_ratio}")
         lprint(
-            f"Favouring bright pixels: {'yes' if self.favour_bright_pixels else 'no'}"
+            f"Favouring bright pixels: {'yes' if self.favour_bright_pixels > 0 else 'no'}"
         )
+        if self.favour_bright_pixels != 0:
+            lprint(
+                f"Favouring bright pixels by a linear slope of: {self.favour_bright_pixels}"
+            )
 
         # We decide on a 'batch' length that will be used to shuffle, select and then copy the training data...
         num_of_voxels_per_stack = input_image[2:].size

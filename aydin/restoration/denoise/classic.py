@@ -88,7 +88,7 @@ class Classic(DenoiseRestorationBase):
         By default it is None.
     """
 
-    disabled_modules = ["bilateral", "bmnd"]
+    disabled_modules = ["bilateral", "bmnd", "_defaults"]
 
     def __init__(
         self,
