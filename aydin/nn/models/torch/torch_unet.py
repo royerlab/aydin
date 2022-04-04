@@ -68,35 +68,24 @@ class UNetModel(nn.Module):
 
         self.conv_with_batch_norms_second_half = []
         for layer_index in range(self.nb_unet_levels):
-            if (
-                layer_index == 0
-            ):  # Handle special case input dimensions for the first layer
-                self.conv_with_batch_norms_second_half.append(
-                    ConvWithBatchNorm(
-                        self.unet_bottom_conv_out_channels,
-                        self.nb_filters
-                        * max((self.nb_unet_levels - layer_index - 2), 1),
-                        spacetime_ndim,
-                    )
-                )
+            if layer_index == 0:
+                # Handle special case input dimensions for the first layer
+                input_channels = self.unet_bottom_conv_out_channels
             else:
-                self.conv_with_batch_norms_second_half.append(
-                    ConvWithBatchNorm(
-                        self.nb_filters
-                        * max((self.nb_unet_levels - layer_index - 1 - 2), 1),
-                        self.nb_filters
-                        * max((self.nb_unet_levels - layer_index - 2), 1),
-                        spacetime_ndim,
-                    )
+                input_channels = self.nb_filters * max((self.nb_unet_levels - layer_index - 1 - 2), 1)
+
+            self.conv_with_batch_norms_second_half.append(
+                ConvWithBatchNorm(
+                    input_channels,
+                    self.nb_filters * max((self.nb_unet_levels - layer_index - 2), 1),
+                    spacetime_ndim,
                 )
+            )
 
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
-        if spacetime_ndim == 2:
-            self.conv = nn.Conv2d(8, 1, 1)
-        else:
-            self.conv = nn.Conv3d(8, 1, 1)
+        self.conv = nn.Conv2d(8, 1, 1) if spacetime_ndim == 2 else nn.Conv3d(8, 1, 1)
 
         self.maskout = None  # TODO: assign correct maskout module
 

@@ -402,7 +402,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     else:
                         target_image = img_train
 
-            # Last check of input size espetially for shiftconv
+            # Last check of input size especially for shiftconv
             if 'shiftconv' == self.training_architecture and self.self_supervised:
                 # TODO: Hirofumi what is going on the conditional below <-- check input dim is compatible w/ shiftconv
                 if (
