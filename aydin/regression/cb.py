@@ -237,6 +237,20 @@ class CBRegressor(RegressorBase):
                         lprint(f"Initialising CatBoost with {params}")
                         model = CatBoostRegressor(**params)
 
+                        # Logging callback:
+                        class MetricsCheckerCallback:
+                            def after_iteration(self, info):
+                                iteration = info.iteration
+                                metrics = info.metrics
+                                lprint(f"Iteration: {iteration} metrics: {metrics}")
+                                return True
+
+                        # Callbacks:
+                        callbacks = None if self.gpu else [MetricsCheckerCallback()]  #
+
+                        # When to be silent? when we actually can printout the logs.
+                        silent = not self.gpu
+
                         lprint(
                             f"Fitting CatBoost model for: X{x_train_shape} -> y{y_train_shape}"
                         )
@@ -245,7 +259,8 @@ class CBRegressor(RegressorBase):
                             eval_set=(x_valid, y_valid) if has_valid_dataset else None,
                             early_stopping_rounds=self.early_stopping_rounds,
                             use_best_model=has_valid_dataset,
-                            # callbacks=[self.stop_training_callback],
+                            callbacks=callbacks,
+                            silent=silent,
                         )
                     except CatBoostError as e:
                         print(e)
