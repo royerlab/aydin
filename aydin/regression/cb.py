@@ -147,7 +147,9 @@ class CBRegressor(RegressorBase):
             'bagging_temperature': 1,
             'min_data_in_leaf': min_data_in_leaf,
             'l2_leaf_reg': 30,
-            'feature_border_type': 'UniformAndQuantiles'
+            'feature_border_type': 'UniformAndQuantiles',
+            #'verbose_eval' : 10,
+            'metric_period': 50 if use_gpu else 1
             # "num_leaves": self.num_leaves,
         }
 
