@@ -31,6 +31,7 @@ class ConstructorArgumentsWidget(QWidget):
         for index, (name, default_value) in enumerate(zip(arg_names, arg_defaults)):
             param_name = name.strip().replace('_', ' ')
             param_label = QLabel(f"{param_name}: ")
+            param_label.setWordWrap(True)
             param_label.setToolTip(f"{param_name}")
 
             if default_value is None:
