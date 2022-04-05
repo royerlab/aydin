@@ -27,6 +27,3 @@ def test_denoise():
     runner = CliRunner()
     result = runner.invoke(cli, ['denoise'])
     assert result.exit_code == 1
-
-
-
