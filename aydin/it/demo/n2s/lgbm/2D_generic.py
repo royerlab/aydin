@@ -41,7 +41,11 @@ def demo(image, name):
         include_fine_features=True,
         include_spatial_features=True,
     )
-    regressor = LGBMRegressor(patience=128, compute_training_loss=True)
+    regressor = LGBMRegressor(
+        patience=128,
+        # loss='poisson',
+        compute_training_loss=True,
+    )
 
     it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)
 
@@ -106,13 +110,8 @@ def demo(image, name):
         viewer.add_image(normalise(denoised), name='denoised')
 
 
-camera_image = camera()
-demo(camera_image, "camera")
-lizard_image = lizard()
-demo(lizard_image, "lizard")
-pollen_image = pollen()
-demo(pollen_image, "pollen")
-dots_image = dots()
-demo(dots_image, "dots")
-newyork_image = newyork()
-demo(newyork_image, "newyork")
+demo(newyork(), "newyork")
+demo(camera(), "camera")
+demo(lizard(), "lizard")
+demo(pollen(), "pollen")
+demo(dots(), "dots")

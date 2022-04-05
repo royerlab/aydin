@@ -87,7 +87,7 @@ def _generate_mask(
 
     # Generate slice for mask:
     spatialdims = image.ndim
-    n_masks = stride**spatialdims
+    n_masks = stride ** spatialdims
     mask = _generate_grid_slice(
         image.shape[:spatialdims], offset=n_masks // 2, stride=stride
     )

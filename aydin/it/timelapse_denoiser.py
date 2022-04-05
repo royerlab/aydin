@@ -226,10 +226,10 @@ class TimelapseDenoiser:
                     return average_stack
 
                 coarse_window_list_past = [
-                    get_average(ftw * 2**i) for i in range(1, ctw + 1)
+                    get_average(ftw * 2 ** i) for i in range(1, ctw + 1)
                 ]
                 coarse_window_list_future = [
-                    get_average(-ftw * 2**i) for i in range(1, ctw + 1)
+                    get_average(-ftw * 2 ** i) for i in range(1, ctw + 1)
                 ]
 
             input_array_for_tp = numpy.stack(

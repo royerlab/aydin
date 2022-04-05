@@ -184,7 +184,7 @@ def simulate_camera_image(
     all_electrons = dark_electrons + electrons
 
     # max ADU:
-    max_adu = numpy.int(2**bitdepth - 1)
+    max_adu = numpy.int(2 ** bitdepth - 1)
 
     # Convert to discrete numbers (ADU):
     adu = (all_electrons * gain_image + offset_image).astype(dtype)
