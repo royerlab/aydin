@@ -1,21 +1,32 @@
-# from click.testing import CliRunner
-#
-# from aydin.cli.cli import update
-#
-#
-# def test_update():
-#     runner = CliRunner()
-#     result = runner.invoke(update)
-#     assert result.exit_code == 0
+from click.testing import CliRunner
 
 
-# def test_noise2self():
-#     runner = CliRunner()
-#     result = runner.invoke(noise2self, [])
-#     assert result.exit_code == 1
-#
-#
-# def test_info():
-#     runner = CliRunner()
-#     result = runner.invoke(info, [])
-#     assert result.exit_code == 1
+from aydin.cli.cli import cli
+
+
+def test_info():
+    runner = CliRunner()
+    result = runner.invoke(cli, ['info'])
+    assert result.exit_code == 0
+
+
+def test_cite():
+    runner = CliRunner()
+    result = runner.invoke(cli, ['cite'])
+    assert result.exit_code == 0
+    assert "10.5281/zenodo.5654826" in result.output
+
+
+def test_handle_files():
+    runner = CliRunner()
+    result = runner.invoke(cli, ['handle_files'])
+    assert result.exit_code == 0
+
+
+def test_denoise():
+    runner = CliRunner()
+    result = runner.invoke(cli, ['denoise'])
+    assert result.exit_code == 1
+
+
+
