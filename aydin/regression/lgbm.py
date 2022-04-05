@@ -341,9 +341,7 @@ class _LGBMModel:
 
     def _predict_opencl(self, x):
         with lsection("Attempting lleaves-based regression."):
-            from aydin.regression.gbm_utils.opencl_prediction import (
-                GBMOpenCLPrediction,
-            )
+            from aydin.regression.gbm_utils.opencl_prediction import GBMOpenCLPrediction
 
             if self.opencl_predictor is None:
                 self.opencl_predictor = GBMOpenCLPrediction()

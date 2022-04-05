@@ -272,10 +272,7 @@ def calibrate_denoise_butterworth(
         order_list = numpy.linspace(min_order, max_order, 32).tolist()
 
         parameter_ranges = {'order': order_list} | {
-            k: [
-                v,
-            ]
-            for (k, v) in best_parameters.items()
+            k: [v] for (k, v) in best_parameters.items()
         }
 
         best_parameters = (
