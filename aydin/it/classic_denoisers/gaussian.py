@@ -106,24 +106,15 @@ def calibrate_denoise_gaussian(
         axes = tuple(range(image.ndim))
 
     # Size range:
-    sigma_range = (
-        min_sigma,
-        max(min_sigma, max_sigma) + 1e-9,
-    )
+    sigma_range = (min_sigma, max(min_sigma, max_sigma) + 1e-9)
 
     # Truncate range (order matters: we want 4 -- the default -- first):
     truncate_range = (
-        [
-            4,
-        ]
-        if max_num_truncate is None
-        else [4, 8, 2, 1][: min(max_num_truncate, 4)]
+        [4] if max_num_truncate is None else [4, 8, 2, 1][: min(max_num_truncate, 4)]
     )
 
     # Combine fixed parameters:
-    other_fixed_parameters = other_fixed_parameters | {
-        'axes': axes,
-    }
+    other_fixed_parameters = other_fixed_parameters | {'axes': axes}
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {'sigma': sigma_range, 'truncate': truncate_range}

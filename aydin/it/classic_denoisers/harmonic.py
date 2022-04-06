@@ -126,9 +126,7 @@ def calibrate_denoise_harmonic(
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {
-        'alpha': [
-            best_parameters['alpha'],
-        ],
+        'alpha': [best_parameters['alpha']],
         'filter': ['uniform', 'gaussian', 'median'],
     }
 
