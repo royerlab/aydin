@@ -263,6 +263,8 @@ class MainPage(QWidget):
         )
 
     def _toggle_spatial_features(self):
+        self.tabs["Denoise"].disable_spatial_features = tuple(self.tabs["Dimensions"].dimensions) == self.tabs["Training Crop"].images[0].shape
+
         self.tabs["Denoise"].refresh_available_backends()
 
     def add_activity_dockable(self):

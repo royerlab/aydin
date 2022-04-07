@@ -94,6 +94,7 @@ class DenoiseTabMethodWidget(QWidget):
                 arg_defaults=sub_dict["defaults"],
                 arg_annotations=sub_dict["annotations"],
                 reference_class=sub_dict["reference_class"],
+                disable_spatial_features=disable_spatial_features,
             )
             self.constructor_arguments_widget_dict[
                 component
