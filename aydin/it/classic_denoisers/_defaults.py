@@ -4,7 +4,7 @@ DefaultValue = namedtuple(typename="DefaultValue", field_names=["value"])
 
 default_optimiser = DefaultValue('smart')
 default_enable_extended_blind_spot = DefaultValue(False)
-default_jinv_interpolation_mode = DefaultValue('median')
+default_jinv_interpolation_mode = DefaultValue('gaussian')
 default_crop_size_normal = DefaultValue(96000)
 default_crop_size_large = DefaultValue(128000)
 default_crop_size_verylarge = DefaultValue(256000)
