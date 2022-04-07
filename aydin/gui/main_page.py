@@ -47,6 +47,8 @@ class MainPage(QWidget):
         self.threadpool = threadpool
         self.status_bar = status_bar
 
+        self.disable_spatial_features = False
+
         self.setAcceptDrops(True)
 
         self.tooltips = JSONResourceLoader(resource_file_name="tooltips.json")
@@ -263,14 +265,13 @@ class MainPage(QWidget):
         )
 
     def _toggle_spatial_features(self):
-        self.tabs["Denoise"].disable_spatial_features = (
-            tuple(self.tabs["Dimensions"].dimensions)
-            != self.tabs["Training Crop"].images[0].shape
-        )
-
-        self.tabs["Denoise"].set_advanced_enabled(
-            not self.parent.advancedModeButton.isEnabled()  # `not` is needed just to refresh
-        )
+        disable_spatial_features = self.tabs["Training Crop"].disable_spatial_features()
+        if disable_spatial_features != self.disable_spatial_features:
+            self.tabs["Denoise"].disable_spatial_features = disable_spatial_features
+            self.tabs["Denoise"].set_advanced_enabled(
+                not self.parent.advancedModeButton.isEnabled()  # `not` is needed to just refresh Denoise tab
+            )
+            self.disable_spatial_features = disable_spatial_features
 
     def add_activity_dockable(self):
         self.activity_dock.setHidden(True)

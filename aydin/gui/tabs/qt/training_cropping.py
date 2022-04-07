@@ -71,7 +71,6 @@ class TrainingCroppingTab(BaseCroppingTab):
                 self.x_crop_slider.slider.setValues((x_slice.start, x_slice.stop))
 
     def update_summary(self):
-
         super().update_summary()
 
         self.parent._toggle_spatial_features()
@@ -85,3 +84,11 @@ class TrainingCroppingTab(BaseCroppingTab):
             )
         else:
             self.size_warning_label.setText("")
+
+    def disable_spatial_features(self):
+        return (
+            self.x_crop_slider.slider.range() != self.x_crop_slider.slider.values()
+            or self.y_crop_slider.slider.range() != self.y_crop_slider.slider.values()
+            or self.z_crop_slider.slider.range() != self.z_crop_slider.slider.values()
+            or self.t_crop_slider.slider.range() != self.t_crop_slider.slider.values()
+        )
