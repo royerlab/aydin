@@ -1,6 +1,6 @@
 default_optimiser = 'smart'
 default_enable_extended_blind_spot = False
-default_jinv_interpolation_mode = 'median'
+default_jinv_interpolation_mode = 'gaussian'
 default_crop_size_normal = 96000
 default_crop_size_large = 128000
 default_crop_size_verylarge = 256000

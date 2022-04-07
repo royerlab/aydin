@@ -29,7 +29,7 @@ class CBRegressor(RegressorBase):
 
     def __init__(
         self,
-        num_leaves: int = 512,
+        num_leaves: int = None,
         max_num_estimators: Optional[int] = None,
         min_num_estimators: Optional[int] = None,
         max_bin: int = None,
@@ -38,41 +38,72 @@ class CBRegressor(RegressorBase):
         patience: int = 32,
         compute_load: float = 0.95,
         gpu: bool = True,
-        gpu_devices: Sequence[int] = None,
+        gpu_devices: Optional[Sequence[int]] = None,
     ):
         """Constructs a CatBoost regressor.
 
         Parameters
         ----------
         num_leaves : int
-            Number of leaves.
+            Number of leaves in the decision trees.
+            We recommend values between 128 and 512.
             (advanced)
+
         max_num_estimators : Optional[int]
-            Maximum number of estimators.
+            Maximum number of estimators (trees). Typical values range from 1024
+            to 4096. Use larger values for more difficult datasets. If training
+            stops exactly at these values that is a sign you need to increase this
+            number. Quality of the results typically increases with the number of
+            estimators, but so does computation time too.
+            We do not recommend using a value of more than 10000.
+
         min_num_estimators : Optional[int]
-            Minimum number of estimators.
+            Minimum number of estimators. Training restarts with a lower learning
+            rate if the number of estimators is too low as defined by this threshold.
+            Regressor that have too few estimators typically lead to poor results.
             (advanced)
+
         max_bin : int
-            Maximum number of allowed bins
+            Maximum number of allowed bins. The features are quantised into that
+            many bins. Higher values achieve better quantisation of features but
+            also leads to longer training and more memory consumption. We do not
+            recommend changing this parameter.
+            When using GPU training the number of bins must be equal or below 254.
             (advanced)
+
         learning_rate : Optional[float]
             Learning rate for the catboost model. The learning rate is determined
-            automatically if the value None is given.
+            automatically if the value None is given. We recommend values around 0.01.
             (advanced)
+
         loss : str
-            Type of loss to be used
+            Type of loss to be used. Van be 'l1' for L1 loss (MAE), and 'l2' for
+            L2 loss (RMSE), 'Lq:q=1.5' with q>=1 real number as power coefficient (here q=1.5),
+            'Poisson' for Poisson loss, 'Huber:delta=0.1' for Huber loss with delta=0.1,
+            'Expectile:alpha=0.5' for expectile loss with alpha parameter set to 0.5,
+            or 'expectile' as a shortcut for 'Expectile:alpha=0.5'.
+            We recommend using: 'l1', 'l2', and 'Poisson'.
             (advanced)
+
         patience : int
-            Number of rounds required for early stopping
+            Number of rounds after which training stops if no improvement occurs.
             (advanced)
+
         compute_load : float
-            Allowed load on computational resources in percentage
+            Allowed load on computational resources in percentage, typically used
+            for CPU training when deciding on how many available cores to use.
             (advanced)
+
         gpu : bool
-            True enables GPU acceleration if available
+            True enables GPU acceleration if available. Fallsback to CPU if it
+            fails for any reason.
             (advanced)
-        gpu_devices : Sequence[int]
-            List of GPU device indices to be used by CatBoost
+
+        gpu_devices : Optional[Sequence[int]]
+            List of GPU device indices to be used by CatBoost. For example,
+            to use GPUs of index 0 and 1, set to '0:1'. For a range of devices
+            set to '0-3' for example for all devices 0,1,2,3. It is recommended
+            to only use together similar or ideally identical GPU devices.
             (advanced)
         """
         super().__init__()
@@ -80,7 +111,7 @@ class CBRegressor(RegressorBase):
         self.force_verbose_eval = False
         self.stop_training_callback = CatBoostStopTrainingCallback()
 
-        self.num_leaves = num_leaves
+        self.num_leaves = 512 if num_leaves is None else num_leaves
         self.max_num_estimators = max_num_estimators
         self.min_num_estimators = min_num_estimators
         if max_bin is None:
@@ -113,24 +144,39 @@ class CBRegressor(RegressorBase):
         self, num_samples, num_features, learning_rate, dtype, use_gpu, train_folder
     ):
 
+        # Setting min data in leaf:
         min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
-        # lprint(f'min_data_in_leaf: {min_data_in_leaf}')
+        lprint(f'min_data_in_leaf: {min_data_in_leaf}')
 
-        objective = self.metric
-        if objective == 'l1':
+        # Normalise losses/metrics/objectives:
+        objective: str = self.metric
+        if objective.lower() == 'l1':
             objective = 'MAE'
-        elif objective == 'l2':
+        elif objective.lower() == 'l2':
             objective = 'RMSE'
+        elif objective.lower() == 'poisson':
+            objective = 'Poisson'
+        elif objective.lower() == 'expectile':
+            objective = 'Expectile:alpha=0.5'
+        else:
+            objective = 'l1'
+        lprint(f'objective: {objective}')
 
+        # We pick a max depth:
         max_depth = max(3, int(math.log2(self.num_leaves)) - 1)
         max_depth = min(max_depth, 8) if use_gpu else max_depth
+        lprint(f'max_depth: {max_depth}')
 
+        # If the dataset is really big we want to switch to pinned memeory:
         gpu_ram_type = 'CpuPinnedMemory' if num_samples > 10e6 else 'GpuRam'
+        lprint(f'gpu_ram_type: {gpu_ram_type}')
 
+        # Setting max number of iterations:
         if self.max_num_estimators is None:
             iterations = 4096 if use_gpu else 2048
         else:
             iterations = self.max_num_estimators
+        lprint(f'max_num_estimators: {iterations}')
 
         params = {
             "iterations": iterations,
@@ -237,6 +283,20 @@ class CBRegressor(RegressorBase):
                         lprint(f"Initialising CatBoost with {params}")
                         model = CatBoostRegressor(**params)
 
+                        # Logging callback:
+                        class MetricsCheckerCallback:
+                            def after_iteration(self, info):
+                                iteration = info.iteration
+                                metrics = info.metrics
+                                lprint(f"Iteration: {iteration} metrics: {metrics}")
+                                return True
+
+                        # Callbacks:
+                        callbacks = None if self.gpu else [MetricsCheckerCallback()]  #
+
+                        # When to be silent? when we actually can printout the logs.
+                        silent = not self.gpu
+
                         lprint(
                             f"Fitting CatBoost model for: X{x_train_shape} -> y{y_train_shape}"
                         )
@@ -245,7 +305,8 @@ class CBRegressor(RegressorBase):
                             eval_set=(x_valid, y_valid) if has_valid_dataset else None,
                             early_stopping_rounds=self.early_stopping_rounds,
                             use_best_model=has_valid_dataset,
-                            # callbacks=[self.stop_training_callback],
+                            callbacks=callbacks,
+                            silent=silent,
                         )
                     except CatBoostError as e:
                         print(e)
@@ -268,9 +329,9 @@ class CBRegressor(RegressorBase):
                     else:
                         # Reduce learning rate:
                         if learning_rate is None:
-                            # If None we were using an automatic value, we set the leraning rate so we can start
+                            # If None we were using an automatic value, we set the learning rate so we can start
                             # with the (relatively high) default value of 0.1
-                            learning_rate = 2 * 0.1
+                            learning_rate = 2 * 0.5
                         learning_rate *= 0.5
                         lprint(
                             f"CatBoost fitting failed! best_iteration=={model.best_iteration_} < {self.min_num_estimators} reducing learning rate to: {learning_rate}"

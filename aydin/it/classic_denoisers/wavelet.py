@@ -101,10 +101,7 @@ def calibrate_denoise_wavelet(
     )
 
     # Sigma range:
-    sigma_range = (
-        1e-9,
-        1.0,
-    )
+    sigma_range = (1e-9, 1.0)
 
     # List of all wavelets:
     all_wavelets_list = pywt.wavelist()
@@ -172,12 +169,8 @@ def calibrate_denoise_wavelet(
 
     # Next pass we optimise the mode and method:
     parameter_ranges = {
-        'sigma': [
-            best_parameters['sigma'],
-        ],
-        'wavelet': [
-            best_parameters['wavelet'],
-        ],  #
+        'sigma': [best_parameters['sigma']],
+        'wavelet': [best_parameters['wavelet']],  #
         'mode': ['soft', 'hard'],
         'method': ['BayesShrink', 'VisuShrink'],
     }
