@@ -88,9 +88,7 @@ class ConstructorArgumentsWidget(QWidget):
             self.arguments_layout.addWidget(
                 param_label, index, 0, alignment=Qt.AlignTop
             )
-            self.arguments_layout.addWidget(
-                param_edit, index, 1, alignment=Qt.AlignTop
-            )
+            self.arguments_layout.addWidget(param_edit, index, 1, alignment=Qt.AlignTop)
             self.arguments_layout.addWidget(
                 param_description, index, 2, alignment=Qt.AlignTop
             )

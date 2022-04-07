@@ -18,7 +18,9 @@ from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_inst
 
 
 class DenoiseTabMethodWidget(QWidget):
-    def __init__(self, parent, name=None, description=None, disable_spatial_features=False):
+    def __init__(
+        self, parent, name=None, description=None, disable_spatial_features=False
+    ):
         super(QWidget, self).__init__(parent)
 
         self.parent = parent
