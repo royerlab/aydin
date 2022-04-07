@@ -262,6 +262,9 @@ class MainPage(QWidget):
             not self.parent.advancedModeButton.isEnabled()
         )
 
+    def _toggle_spatial_features(self):
+        self.tabs["Denoise"].refresh_available_backends()
+
     def add_activity_dockable(self):
         self.activity_dock.setHidden(True)
         self.parent.addDockWidget(Qt.BottomDockWidgetArea, self.activity_dock)

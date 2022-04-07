@@ -32,6 +32,7 @@ class TrainingCroppingTab(BaseCroppingTab):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
 
         self.use_same_crop_checkbox = QCheckBox("Use same cropping for denoising")
         self.use_same_crop_checkbox.toggled.connect(
@@ -72,6 +73,8 @@ class TrainingCroppingTab(BaseCroppingTab):
     def update_summary(self):
 
         super().update_summary()
+
+        self.parent._toggle_spatial_features()
 
         if math.prod(self.cropped_image[0].shape) > 50_000_000:
             self.size_warning_label.setText(
