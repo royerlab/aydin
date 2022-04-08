@@ -23,7 +23,7 @@ def test_info():
 def test_cite():
     runner = CliRunner()
     result = runner.invoke(cli, ['cite'])
-    print(result.output)
+
     assert result.exit_code == 0
     assert "10.5281/zenodo.5654826" in result.output
 
@@ -31,9 +31,9 @@ def test_cite():
 def test_handle_files():
     file_list = [
         examples_single.generic_lizard.get_path(),
-        examples_single.fountain.get_path()
+        examples_single.fountain.get_path(),
     ]
-    filepaths, image_arrays, metadatas = handle_files(file_list, "")
+    filepaths, image_arrays, metadatas = handle_files(file_list, slicing="")
 
     assert filepaths == file_list
 
@@ -48,7 +48,7 @@ def test_handle_files():
     assert metadatas[1].dtype == examples_single.fountain.get_array().dtype
 
 
-def test_denoise():
+def test_denoise_saveload():
     runner = CliRunner()
     result = runner.invoke(cli, ['denoise'])
     assert result.exit_code == 1
