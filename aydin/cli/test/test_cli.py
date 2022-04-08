@@ -7,17 +7,17 @@ from aydin.util.log.log import Log
 
 def test_info():
     Log.override_test_exclusion = True
+    Log.force_click_echo = True
+
     image_path = examples_single.generic_lizard.get_path()
 
     runner = CliRunner()
     result = runner.invoke(cli, ['info', image_path])
-    print(result.output)
-    print(result.stdout_bytes)
 
     assert result.exit_code == 0
-    assert "Reading" in result.stdout_bytes
-    print(result.output)
-    assert "Metadata" in result.stdout
+    assert "Reading" in result.output
+    assert "Metadata" in result.output
+    assert "batch" in result.output
 
 
 def test_cite():
