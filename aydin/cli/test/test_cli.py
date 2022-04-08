@@ -49,6 +49,32 @@ def test_handle_files():
 
 
 def test_denoise_saveload():
+    image_path = examples_single.gauss_noisy.get_path()
+
+    # Denoise
     runner = CliRunner()
-    result = runner.invoke(cli, ['denoise'])
-    assert result.exit_code == 1
+    result = runner.invoke(cli, ['denoise', image_path])
+
+    assert result.exit_code == 0
+
+    # Denoise with the pre-trained model
+    result = runner.invoke(cli, ['denoise', image_path])
+    assert result.exit_code == 0
+
+    # denoised = denoised.clip(0, 1)
+    #
+    # psnr_noisy = psnr(noisy, image)
+    # ssim_noisy = ssim(noisy, image)
+    # print("noisy", psnr_noisy, ssim_noisy)
+    #
+    # psnr_denoised = psnr(denoised, image)
+    # ssim_denoised = ssim(denoised, image)
+    # print("denoised", psnr_denoised, ssim_denoised)
+    #
+    # assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
+    # assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
+    #
+    # # if the line below fails, then the parameters of the image the lgbm regressohave   been broken.
+    # # do not change the number below, but instead, fix the problem -- most likely a parameter.
+    #
+    # assert psnr_denoised > min_psnr and ssim_denoised > min_ssim
