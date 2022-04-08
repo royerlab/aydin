@@ -14,7 +14,7 @@ def calibrate_denoise_lipschitz(
     lipschitz: float = 0.1,
     percentile: float = 0.001,
     alpha: float = 0.1,
-    max_num_iterations: int = _defaults.default_max_evals_normal,
+    max_num_iterations: int = _defaults.default_max_evals_normal.value,
     **other_fixed_parameters,
 ):
     """
