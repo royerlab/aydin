@@ -50,15 +50,15 @@ def test_handle_files():
 
 def test_denoise_saveload():
     image_path = examples_single.gauss_noisy.get_path()
+    print(image_path)
 
     # Denoise
     runner = CliRunner()
     result = runner.invoke(cli, ['denoise', image_path])
-
     assert result.exit_code == 0
 
     # Denoise with the pre-trained model
-    result = runner.invoke(cli, ['denoise', image_path])
+    result = runner.invoke(cli, ['denoise', '--model-path=', '--use-model', image_path])
     assert result.exit_code == 0
 
     # denoised = denoised.clip(0, 1)
