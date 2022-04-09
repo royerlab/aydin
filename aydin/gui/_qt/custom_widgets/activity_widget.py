@@ -35,6 +35,7 @@ class ActivityWidget(QWidget):
 
         # Add information
         self.infoTextBox = QTextEdit(lineWrapMode=QTextEdit.NoWrap)
+        self.infoTextBox
 
         # We are using an empty press event otherwise cursor jumps to the point clicked
         self.infoTextBox.mousePressEvent = self.qtextedit_mousepressevent
