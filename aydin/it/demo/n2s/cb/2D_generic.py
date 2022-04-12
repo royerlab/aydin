@@ -33,7 +33,15 @@ def demo(image, name, do_add_noise=True):
         include_spatial_features=True,
     )
 
-    regressor = CBRegressor(patience=32, gpu=True, min_num_estimators=1024)
+    regressor = CBRegressor(
+        patience=32,
+        # loss='poisson',
+        # loss='Expectile:alpha=0.5',
+        # loss='Huber:delta=0.1',
+        # loss='Lq:q=1.5',
+        gpu=True,
+        min_num_estimators=1024,
+    )
 
     it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)
 

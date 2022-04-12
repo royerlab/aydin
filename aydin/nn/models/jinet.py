@@ -103,7 +103,7 @@ class JINetModel(Model):
         super().__init__(input_lyr, y)
 
         # Compile the model
-        self.compile(optimizer=Adam(lr=learning_rate), loss='mse')
+        self.compile(optimizer=Adam(learning_rate=learning_rate), loss='mse')
         self.compiled = True
 
     def size(self):

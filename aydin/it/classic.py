@@ -1,5 +1,5 @@
 import importlib
-from typing import Optional, Union, List, Tuple
+from typing import Optional
 import numpy
 
 from aydin.it import classic_denoisers
@@ -18,7 +18,6 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         main_channel: Optional[int] = None,
         max_voxels_for_training: Optional[int] = None,
         calibration_kwargs=None,
-        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
         max_memory_usage_ratio: float = 0.9,
@@ -40,11 +39,6 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             Maximum number of the voxels that can be
             used for training.
 
-        blind_spots : Optional[Union[str, List[Tuple[int]]]]
-            List of voxel coordinates (relative to receptive field center) to
-            be included in the 'blind-spot'. If 'auto' is passed then the
-            blindspots are automatically determined from the image content.
-
         tile_min_margin : int
             Minimal width of tile margin in voxels.
             (advanced)
@@ -62,7 +56,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             (advanced)
         """
         super().__init__(
-            blind_spots=blind_spots,
+            blind_spots=None,
             tile_min_margin=tile_min_margin,
             tile_max_margin=tile_max_margin,
             max_memory_usage_ratio=max_memory_usage_ratio,
@@ -104,20 +98,16 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         """
         with lsection(f"Saving 'classic' image denoiser to {path}"):
             frozen = super().save(path)
-            # TODO: implement!
 
         return frozen
 
     def _load_internals(self, path: str):
         with lsection(f"Loading 'classic' image denoiser from {path}"):
-            # TODO: implement!
             pass
-            # self.best_parameters = FeatureGeneratorBase.load(path)
 
     # We exclude certain fields from saving:
     def __getstate__(self):
         state = self.__dict__.copy()
-        # TODO: implement!
         return state
 
     def _train(

@@ -1,3 +1,5 @@
+import traceback
+
 from qtpy.QtWidgets import QWidget, QHBoxLayout
 
 from aydin.gui._qt.custom_widgets.denoise_tab_pretrained_method import (
@@ -164,6 +166,7 @@ class DenoiseJobRunner(QWidget):
                 self.parent.status_bar.showMessage(
                     "There is a mistake with given parameter values..."
                 )
+                traceback.print_exc()
                 return
 
             # Initialize required restoration instances

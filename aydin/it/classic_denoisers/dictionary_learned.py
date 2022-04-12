@@ -29,15 +29,16 @@ def calibrate_denoise_dictionary_learned(
     try_ica: bool = False,
     try_sdl: bool = False,
     num_sparsity_values_to_try: int = 6,
-    optimiser: str = _defaults.default_optimiser,
+    optimiser: str = _defaults.default_optimiser.value,
     num_iterations: int = 1024,
     batch_size: int = 3,
     alpha: int = 1,
     do_cleanup_dictionary: bool = True,
     do_denoise_dictionary: bool = False,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
-    max_num_evaluations: int = _defaults.default_max_evals_low,
-    enable_extended_blind_spot: bool = True,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
+    max_num_evaluations: int = _defaults.default_max_evals_low.value,
+    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot.value,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
     display_dictionary: bool = False,
     display_images: bool = False,
     display_crop: bool = False,
@@ -148,9 +149,11 @@ def calibrate_denoise_dictionary_learned(
         (advanced)
 
     crop_size_in_voxels: int or None for default
-        Number of voxels for crop used to calibrate
-        denoiser.
-        (advanced)
+        Number of voxels for crop used to calibrate denoiser.
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory -- this can be important for very noisy images.
+        Values to try are: 65000, 128000, 256000, 320000.
+        We do not recommend values higher than 512000.
 
     optimiser: str
         Optimiser to use for finding the best denoising
@@ -160,10 +163,16 @@ def calibrate_denoise_dictionary_learned(
 
     max_num_evaluations: int
         Maximum number of evaluations for finding the optimal parameters.
-        (advanced)
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory.
 
     enable_extended_blind_spot: bool
         Set to True to enable extended blind-spot detection.
+        (advanced)
+
+    jinv_interpolation_mode: str
+        J-invariance interpolation mode for masking. Can be: 'median' or
+        'gaussian'.
         (advanced)
 
     display_dictionary: bool
@@ -269,8 +278,9 @@ def calibrate_denoise_dictionary_learned(
             _denoise_dictionary,
             mode=optimiser,
             denoise_parameters=parameter_ranges,
+            interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
-            enable_extended_blind_spot=enable_extended_blind_spot,
+            blind_spots=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters

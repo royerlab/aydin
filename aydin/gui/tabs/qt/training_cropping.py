@@ -9,22 +9,30 @@ class TrainingCroppingTab(BaseCroppingTab):
     """
     Cropping Image for training & auto-tuning
 
-    Use the sliders to select a region of the image to define the cropping region for training or auto-tuning. Aydin
-    automatically suggests a crop based on the image content.
+    Use the sliders to select a region of the image to define the cropping
+    region for training or auto-tuning. Aydin automatically suggests a crop
+    based on the image content.
 
     <moreless>
 
-    It is often not advised to use the entire image for training or auto-tuning. You may want to focus the attention
-    of the algorithm to a specific region, exclude excessive dark background. or simply reduce the time required for
-    training or auto-tuning. In the case of neural networks (CNN, NN) and dictionary based methods more data does
-    help, methods using gradient boosting less so (N2S-FGR-cb/lgbm), and simpler methods such as low-pass filtering (
-    Butterworth, Gaussian, ...) need very data (but ideally highly contrasted and detail rich regions) to work.
+    It is often advised not to use the entire image for training or
+    calibration You may want to focus the attention of the algorithm to a
+    specific region with structures of interest and exclude excessive dark
+    background. Or simply reduce the time required for training or
+    auto-tuning. In the case of neural networks (CNN, NN) and dictionary
+    based methods more data does help, methods using gradient boosting less
+    so (N2S-FGR-cb/lgbm), and simpler methods such as low-pass filtering (
+    Butterworth, Gaussian, ...) need much less data (but ideally highly
+    contrasted and detail rich regions) to work. if the results are
+    unsatisfactory, try extending the cropped region to encompass more of the
+    image (within reason).
 
     <split>
     """
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
 
         self.use_same_crop_checkbox = QCheckBox("Use same cropping for denoising")
         self.use_same_crop_checkbox.toggled.connect(
@@ -63,8 +71,9 @@ class TrainingCroppingTab(BaseCroppingTab):
                 self.x_crop_slider.slider.setValues((x_slice.start, x_slice.stop))
 
     def update_summary(self):
-
         super().update_summary()
+
+        self.parent._toggle_spatial_features()
 
         if math.prod(self.cropped_image[0].shape) > 50_000_000:
             self.size_warning_label.setText(
@@ -75,3 +84,11 @@ class TrainingCroppingTab(BaseCroppingTab):
             )
         else:
             self.size_warning_label.setText("")
+
+    def disable_spatial_features(self):
+        return (
+            self.x_crop_slider.slider.range() != self.x_crop_slider.slider.values()
+            or self.y_crop_slider.slider.range() != self.y_crop_slider.slider.values()
+            or self.z_crop_slider.slider.range() != self.z_crop_slider.slider.values()
+            or self.t_crop_slider.slider.range() != self.t_crop_slider.slider.values()
+        )

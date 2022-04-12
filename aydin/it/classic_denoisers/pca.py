@@ -20,10 +20,11 @@ from aydin.util.patch_transform.patch_transform import (
 def calibrate_denoise_pca(
     image: ArrayLike,
     patch_size: Optional[Union[int, Tuple[int], str]] = None,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size,
-    optimiser: str = _defaults.default_optimiser,
-    max_num_evaluations: int = _defaults.default_max_evals_hyperlow,
-    enable_extended_blind_spot: bool = True,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
+    optimiser: str = _defaults.default_optimiser.value,
+    max_num_evaluations: int = _defaults.default_max_evals_hyperlow.value,
+    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot.value,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
     multi_core: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
@@ -47,7 +48,10 @@ def calibrate_denoise_pca(
 
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate denoiser.
-        (advanced)
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory -- this can be important for very noisy images.
+        Values to try are: 65000, 128000, 256000, 320000.
+        We do not recommend values higher than 512000.
 
     optimiser: str
         Optimiser to use for finding the best denoising
@@ -57,10 +61,16 @@ def calibrate_denoise_pca(
 
     max_num_evaluations: int
         Maximum number of evaluations for finding the optimal parameters.
-        (advanced)
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory.
 
     enable_extended_blind_spot: bool
         Set to True to enable extended blind-spot detection.
+        (advanced)
+
+    jinv_interpolation_mode: str
+        J-invariance interpolation mode for masking. Can be: 'median' or
+        'gaussian'.
         (advanced)
 
     multi_core: bool
@@ -95,7 +105,7 @@ def calibrate_denoise_pca(
     patch_size = default_patch_size(image, patch_size, odd=True)
 
     # Ranges:
-    threshold_range = numpy.linspace(0, 1, max_num_evaluations).tolist()
+    threshold_range = list(numpy.linspace(0, 1, max_num_evaluations).tolist())
 
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {'threshold': threshold_range}
@@ -115,8 +125,9 @@ def calibrate_denoise_pca(
             _denoise_pca,
             mode=optimiser,
             denoise_parameters=parameter_ranges,
+            interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
-            enable_extended_blind_spot=enable_extended_blind_spot,
+            blind_spots=enable_extended_blind_spot,
             display_images=display_images,
         )
         | other_fixed_parameters

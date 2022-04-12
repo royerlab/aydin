@@ -1,67 +1,81 @@
 import itertools
 import traceback
+from functools import lru_cache
 
 import numpy
 from numpy import zeros_like
 from numpy.typing import ArrayLike
-from scipy.ndimage import convolve, gaussian_filter
+from scipy.ndimage import convolve, gaussian_filter, median_filter
 
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
 from aydin.util.log.log import lprint
 
 
 def _j_invariant_loss(
-    image, denoise_function, mask, loss_function, denoiser_kwargs=None
+    image,
+    masked_input_image,
+    denoise_function,
+    mask,
+    loss_function,
+    denoiser_kwargs=None,
 ):
-    image = image.astype(dtype=numpy.float32, copy=False)
-
     try:
         denoised = _invariant_denoise(
-            image,
+            masked_input_image=masked_input_image,
             denoise_function=denoise_function,
-            mask=mask,
             denoiser_kwargs=denoiser_kwargs,
         )
     except RuntimeError:
         lprint(
-            "Denoising failed during calibration, skipping by returning blank image "
+            "Denoising failed during calibration, skipping by returning "
+            "the original image (not denoised)."
         )
         print(traceback.format_exc())
-        denoised = numpy.zeros_like(image)
+        denoised = image.copy()
 
     loss = loss_function(image[mask], denoised[mask])
 
     return loss
 
 
-def _invariant_denoise(image, denoise_function, mask, *, denoiser_kwargs=None):
-
-    image = image.astype(dtype=numpy.float32, copy=False)
+def _invariant_denoise(masked_input_image, denoise_function, *, denoiser_kwargs=None):
 
     if denoiser_kwargs is None:
         denoiser_kwargs = {}
 
-    interp = _interpolate_image(image)
-    output = numpy.zeros_like(image)
-
-    input_image = image.copy()
-    input_image[mask] = interp[mask]
-    output[mask] = denoise_function(input_image, **denoiser_kwargs)[mask]
+    output = denoise_function(masked_input_image, **denoiser_kwargs)
 
     return output
 
 
-def _interpolate_image(image):
+def _interpolate_image(image: ArrayLike, mode: str, boundary_mode: str = 'mirror'):
 
-    conv_filter = numpy.zeros(shape=(3,) * image.ndim, dtype=image.dtype)
-    conv_filter.ravel()[conv_filter.size // 2] = 1
-    conv_filter = gaussian_filter(conv_filter, sigma=0.5)
-    conv_filter.ravel()[conv_filter.size // 2] = 0
-    conv_filter /= conv_filter.sum()
+    if mode == 'gaussian':
+        kernel = _generate_gaussian_kernel(image.ndim, image.dtype)
+        interpolation = convolve(image, kernel, mode=boundary_mode)
 
-    interpolation = convolve(image, conv_filter, mode='mirror')
+    elif mode == 'median':
+        footprint = _generate_median_footprint(image.ndim, image.dtype)
+        interpolation = median_filter(image, footprint=footprint, mode=boundary_mode)
 
     return interpolation
+
+
+@lru_cache(maxsize=None)
+def _generate_gaussian_kernel(ndim: int, dtype):
+    kernel = numpy.zeros(shape=(3,) * ndim, dtype=dtype)
+    kernel.ravel()[kernel.size // 2] = 1
+    kernel = gaussian_filter(kernel, sigma=0.5)
+    kernel.ravel()[kernel.size // 2] = 0
+    kernel /= kernel.sum()
+    return kernel
+
+
+@lru_cache(maxsize=None)
+def _generate_median_footprint(ndim: int, dtype):
+    footprint = numpy.ones(shape=(3,) * ndim, dtype=dtype)
+    footprint.ravel()[footprint.size // 2] = 0
+    return footprint
 
 
 def _generate_mask(
@@ -79,10 +93,15 @@ def _generate_mask(
     )
 
     # Do we have to extend these spots?
-    blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
-    extended_blind_spot = len(blind_spots) > 1 and enable_extended_blind_spot
+    if enable_extended_blind_spot:
+        lprint("Detection of extended blindspots requested!")
+        blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
+        extended_blind_spot = len(blind_spots) > 1 and enable_extended_blind_spot
+    else:
+        extended_blind_spot = False
 
     if extended_blind_spot:
+        lprint(f"Extended blindspots detected: {blind_spots}")
         # If yes, we need to change the way we store the mask:
         mask_full = zeros_like(image, dtype=numpy.bool_)
         mask_full[mask] = True
