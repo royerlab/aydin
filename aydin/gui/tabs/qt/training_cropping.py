@@ -64,9 +64,12 @@ class TrainingCroppingTab(BaseCroppingTab):
             if type(response) == tuple:
                 best_slice = response[1]
 
-                # TODO: extend this implementation to handle all chosen spatial-temporal dimensions
+                t_slice = best_slice[images[0][2].axes.find("T")]
+                z_slice = best_slice[images[0][2].axes.find("Z")]
                 y_slice = best_slice[images[0][2].axes.find("Y")]
                 x_slice = best_slice[images[0][2].axes.find("X")]
+                self.t_crop_slider.slider.setValues((t_slice.start, t_slice.stop))
+                self.z_crop_slider.slider.setValues((z_slice.start, z_slice.stop))
                 self.y_crop_slider.slider.setValues((y_slice.start, y_slice.stop))
                 self.x_crop_slider.slider.setValues((x_slice.start, x_slice.stop))
 
