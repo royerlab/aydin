@@ -90,8 +90,8 @@ class TrainingCroppingTab(BaseCroppingTab):
 
     def disable_spatial_features(self):
         return (
-            self.x_crop_slider.slider.range() != self.x_crop_slider.slider.values()
-            or self.y_crop_slider.slider.range() != self.y_crop_slider.slider.values()
-            or self.z_crop_slider.slider.range() != self.z_crop_slider.slider.values()
-            or self.t_crop_slider.slider.range() != self.t_crop_slider.slider.values()
+            (not self.x_crop_slider.isHidden() and self.x_crop_slider.slider.range() != self.x_crop_slider.slider.values())
+            or (not self.y_crop_slider.isHidden() and self.y_crop_slider.slider.range() != self.y_crop_slider.slider.values())
+            or (not self.z_crop_slider.isHidden() and self.z_crop_slider.slider.range() != self.z_crop_slider.slider.values())
+            or (not self.t_crop_slider.isHidden() and self.t_crop_slider.slider.range() != self.t_crop_slider.slider.values())
         )
