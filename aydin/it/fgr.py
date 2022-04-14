@@ -71,7 +71,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             necessarily need more than several million voxels to train an
             effective denoiser. Different regressors (lgbm, cb, ...) can
             handle varying sizes of training data. We recommend at least a
-            million (1e6) and ta most 40 million if you have a powerfull
+            million (1e6) and at most 40 million if you have a powerfull
             machine with GPU and if you are armed with patience. (advanced)
 
         favour_bright_pixels : float
@@ -82,10 +82,17 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
         blind_spots : Optional[Union[str,List[Tuple[int]]]]
             List of voxel coordinates (relative to receptive field center) to
-            be included in the blind-spot. If None is passed then the
-            blindspots are automatically discovered from the image content.
-            If 'center' is passed then no additional blindspots to the
-            center pixel are considered.
+            be included in the blind-spot. For example, you can enter:
+            '<axis>#<radius>' to extend the blindspot along a given axis by a
+            certain radius. For example, for an image of dimension 3, 'x#1'
+            extends the blind spot to cover voxels of relative coordinates:
+            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,
+            enter: 'x#1,y#1' by comma separating between axis. To specify the
+            axis you can use integer indices, or 'x', 'y', 'z', and 't'
+            (dimension order is tzyx with x being always the last dimension).
+            If None is passed then the blindspots are automatically discovered
+            from the image content. If 'center' is passed then no additional
+            blindspots to the center pixel are considered.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.

@@ -150,7 +150,7 @@ class UniformFeatures(FeatureGroupBase):
                 kernel_scales += [3, 5, 7]
             if include_line_features:
                 kernel_scales += [3, 5, 7]
-            kernel_scales += [2**i - 1 for i in range(2, 12)]
+            kernel_scales += [2 ** i - 1 for i in range(2, 12)]
         if kernel_shapes is None:
             kernel_shapes = []
             if include_scale_one:

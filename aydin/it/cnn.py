@@ -107,10 +107,17 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
         blind_spots : Optional[Union[str,List[Tuple[int]]]]
             List of voxel coordinates (relative to receptive field center) to
-            be included in the blind-spot. If None is passed then the
-            blindspots are automatically discovered from the image content.
-            If 'center' is passed then no additional blindspots to the
-            center pixel are considered.
+            be included in the blind-spot. For example, you can enter:
+            '<axis>#<radius>' to extend the blindspot along a given axis by a
+            certain radius. For example, for an image of dimension 3, 'x#1'
+            extends the blind spot to cover voxels of relative coordinates:
+            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,
+            enter: 'x#1,y#1' by comma separating between axis. To specify the
+            axis you can use integer indices, or 'x', 'y', 'z', and 't'
+            (dimension order is tzyx with x being always the last dimension).
+            If None is passed then the blindspots are automatically discovered
+            from the image content. If 'center' is passed then no additional
+            blindspots to the center pixel are considered.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.
@@ -286,10 +293,10 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 )
 
                 self.patch_size = (
-                    self.patch_size - self.patch_size % 2**self.nb_unet_levels
+                    self.patch_size - self.patch_size % 2 ** self.nb_unet_levels
                 )
 
-                if self.patch_size < 2**self.nb_unet_levels:
+                if self.patch_size < 2 ** self.nb_unet_levels:
                     raise ValueError(
                         'Number of layers is too large for given patch size.'
                     )
@@ -310,11 +317,11 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             # Check patch_size for unet models
             if 'unet' in self.model_architecture:
                 patch_size = numpy.array(self.patch_size)
-                if (patch_size.max() / (2**self.nb_unet_levels) <= 0).any():
+                if (patch_size.max() / (2 ** self.nb_unet_levels) <= 0).any():
                     raise ValueError(
                         f'Tile size is too small. The largest dimension of tile size has to be >= {2 ** self.nb_unet_levels}.'
                     )
-                if (patch_size[-2:] % 2**self.nb_unet_levels != 0).any():
+                if (patch_size[-2:] % 2 ** self.nb_unet_levels != 0).any():
                     raise ValueError(
                         f'Tile sizes on XY plane have to be multiple of 2^{self.nb_unet_levels}'
                     )
@@ -411,7 +418,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     numpy.mod(
                         img_train.shape[1:][:-1],
                         numpy.repeat(
-                            2**self.nb_unet_levels, len(img_train.shape[1:][:-1])
+                            2 ** self.nb_unet_levels, len(img_train.shape[1:][:-1])
                         ),
                     )
                     != 0
@@ -603,11 +610,11 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 input_image = numpy.pad(input_image, pad_width1, 'edge')
                 spatial_shape = numpy.array(input_image.shape[1:-1])
 
-            if not (spatial_shape % 2**self.nb_unet_levels == 0).all():
+            if not (spatial_shape % 2 ** self.nb_unet_levels == 0).all():
                 reshaped_for_model = True
                 pad_width0 = (
-                    2**self.nb_unet_levels
-                    - (spatial_shape % 2**self.nb_unet_levels)
+                    2 ** self.nb_unet_levels
+                    - (spatial_shape % 2 ** self.nb_unet_levels)
                     # + pad_square
                 ) / 2
                 pad_width2 = (
