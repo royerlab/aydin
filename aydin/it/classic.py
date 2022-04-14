@@ -17,7 +17,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         method: str = "butterworth",
         main_channel: Optional[int] = None,
         max_voxels_for_training: Optional[int] = None,
-        calibration_kwargs=None,
+        calibration_kwargs: Optional[dict]=None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
         max_memory_usage_ratio: float = 0.9,
