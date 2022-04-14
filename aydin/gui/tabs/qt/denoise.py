@@ -64,6 +64,7 @@ class DenoiseTab(QWidget):
 
         self.leftlist = QListWidget()
 
+        self.disable_spatial_features = False
         self.loaded_backends = []
 
         (
@@ -176,7 +177,10 @@ class DenoiseTab(QWidget):
 
             self.stacked_widget.addWidget(
                 DenoiseTabMethodWidget(
-                    self, name=backend_option, description=description_list[index]
+                    self,
+                    name=backend_option,
+                    description=description_list[index],
+                    disable_spatial_features=self.disable_spatial_features,
                 )
             )
 
