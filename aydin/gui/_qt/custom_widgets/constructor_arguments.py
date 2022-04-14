@@ -16,6 +16,7 @@ class ConstructorArgumentsWidget(QWidget):
         arg_defaults=None,
         arg_annotations=None,
         reference_class=None,
+        disable_spatial_features=False,
     ):
         super(QWidget, self).__init__(parent)
         self.parent = parent
@@ -38,14 +39,14 @@ class ConstructorArgumentsWidget(QWidget):
                 default_value = "auto"
 
             if "'bool'" in str(arg_annotations[name]):
-                param_linedit = QCheckBox()
-                param_linedit.setChecked(default_value)
+                param_edit = QCheckBox()
+                param_edit.setChecked(default_value)
             elif "dtype" in str(arg_annotations[name]):
-                param_linedit = QLineEdit(str(default_value.__name__), self)
+                param_edit = QLineEdit(str(default_value.__name__), self)
             else:
-                param_linedit = QLineEdit(str(default_value), self)
+                param_edit = QLineEdit(str(default_value), self)
 
-            param_linedit.setToolTip(
+            param_edit.setToolTip(
                 f"{self.annotation_prettifier(arg_annotations[name])}"
             )
 
@@ -68,17 +69,26 @@ class ConstructorArgumentsWidget(QWidget):
             param_description.setWordWrap(True)
             param_description.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
-            self.line_edits.append(param_linedit)
+            self.line_edits.append(param_edit)
             self.annotations.append(arg_annotations[name])
 
             param_label.setFixedWidth(200)
-            param_linedit.setFixedWidth(100)
+            param_edit.setFixedWidth(100)
+
+            if disable_spatial_features and param_name == "include spatial features":
+                if "'bool'" in str(arg_annotations[name]):
+                    param_edit.setChecked(False)
+                else:
+                    param_edit.clear()
+
+                param_label.setEnabled(False)
+                param_edit.setEnabled(False)
+                param_description.setEnabled(False)
+
             self.arguments_layout.addWidget(
                 param_label, index, 0, alignment=Qt.AlignTop
             )
-            self.arguments_layout.addWidget(
-                param_linedit, index, 1, alignment=Qt.AlignTop
-            )
+            self.arguments_layout.addWidget(param_edit, index, 1, alignment=Qt.AlignTop)
             self.arguments_layout.addWidget(
                 param_description, index, 2, alignment=Qt.AlignTop
             )

@@ -103,8 +103,6 @@ class QRangeSlider(QWidget):
         return tuple([self._slider_to_data_value(v) for v in self.sliderValues()])
 
     def setValues(self, values):
-        if values[1] - values[0] < 64:
-            return
         self.setSliderValues([self._data_to_slider_value(v) for v in values])
 
     def sliderValues(self):
