@@ -1,6 +1,6 @@
 import math
 from functools import partial
-from typing import Callable, Dict, Union, Tuple, List, Any
+from typing import Callable, Dict, Union, Tuple, List, Any, Optional
 import numpy
 from scipy.optimize import minimize, shgo
 
@@ -25,7 +25,7 @@ def calibrate_denoiser(
     interpolation_mode: str = 'median',
     stride: int = 4,
     loss_function: str = 'L2',
-    blind_spots: bool = True,
+    blind_spots: Optional[List[Tuple[int]]] = None,
     display_images: bool = False,
     **other_fixed_parameters,
 ):
@@ -74,8 +74,10 @@ def calibrate_denoiser(
     loss_function: str
         Loss/Error function: Can be:  'L1', 'L2', 'SSIM'
 
-    blind_spots: bool
-        Set to True to enable extended blind-spot detection.
+    blind_spots: Optional[List[Tuple[int]]]
+        Set to None to enable automatic blind-spot detection.
+        Otherwise provide list of blindspots. For example:
+        [(0,0,0),(1,0,0),(-1,0,0)].
 
     display_images: bool
         If True the denoised images for each parameter tested are displayed.
@@ -113,12 +115,14 @@ def calibrate_denoiser(
         image = image.astype(dtype=numpy.float32, copy=False)
 
         # Generate mask:
-        mask = _generate_mask(image, stride, enable_extended_blind_spot=blind_spots)
+        mask = _generate_mask(image, stride, blind_spots=blind_spots)
 
         # Compute interpolated image:
-        interpolation = _interpolate_image(image, interpolation_mode)
+        interpolation = _interpolate_image(
+            image, mask, num_iterations=2 * stride, mode=interpolation_mode
+        )
 
-        # Masked input image (fixed over optimisation!):
+        # Masked input image (fixed during optimisation!):
         masked_input_image = image.copy()
         masked_input_image[mask] = interpolation[mask]
 

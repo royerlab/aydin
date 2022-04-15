@@ -55,6 +55,7 @@ def resolution_estimate(image, precision: float = 0.01, display_images: bool = F
         _denoise_sobolev,
         denoise_parameters=parameter_ranges,
         display_images=display_images,
+        interpolation_mode='gaussian',
     )
 
     norm_frequency = best_parameters.pop('freq_cutoff')

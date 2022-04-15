@@ -26,7 +26,7 @@ class Optimizer:
         self,
         function: Callable,
         bounds: List[Union[Tuple[int, ...], Tuple[float, ...]]],
-        init_strategies: str = 'corners+centers+random',
+        init_strategies: str = 'corners+twopoints',
         exploration_rate: float = 0.4,
         patience: int = 64,
         max_num_evaluations: int = 128,
@@ -95,10 +95,14 @@ class Optimizer:
 
         # First we initialise with some points on the corners:
         if 'corners' in init_strategies:
-            with lsection("Evaluating function at corners"):
+            with lsection("Evaluating function at corners (and centers)"):
 
                 if 'centers' in init_strategies:
                     init_grid = tuple((u, 0.5 * (u + v), v) for u, v in bounds)
+                elif 'twopoints' in init_strategies:
+                    init_grid = tuple(
+                        (u, 0.33 * (u + v), 0.66 * (u + v), v) for u, v in bounds
+                    )
                 else:
                     init_grid = copy(bounds)
 

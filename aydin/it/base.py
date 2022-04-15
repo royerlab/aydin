@@ -7,6 +7,7 @@ from typing import Union, List, Optional, Tuple
 import jsonpickle
 import numpy
 import psutil
+from numpy import array2string
 
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
 from aydin.it.exceptions.base import ArrayShapeDoesNotMatchError
@@ -275,10 +276,12 @@ class ImageTranslatorBase(ABC):
                 lprint(
                     "Automatic discovery of noise autocorrelation and specification of N2S blind-spots activated!"
                 )
-                self.blind_spots = auto_detect_blindspots(
+                self.blind_spots, autocorrelogram = auto_detect_blindspots(
                     shape_normalised_input_image[0, 0]
-                )[0]
+                )
                 lprint(f"Blind spots: {self.blind_spots}")
+                # auto_str = array2string(autocorrelogram, precision=2, separator=',', suppress_small=True, threshold=128, edgeitems=16, sign='+')
+                # lprint(f"Autocorrelogram: {auto_str}")
             elif type(self.blind_spots) == str and '#' in self.blind_spots:
                 # Number of spatio-temporal dims:
                 st_ndim = shape_normalised_input_image.ndim - 2

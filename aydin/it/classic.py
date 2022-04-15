@@ -1,5 +1,5 @@
 import importlib
-from typing import Optional
+from typing import Optional, Union, List, Tuple
 import numpy
 
 from aydin.it import classic_denoisers
@@ -18,6 +18,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         main_channel: Optional[int] = None,
         max_voxels_for_training: Optional[int] = None,
         calibration_kwargs: Optional[dict] = None,
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
         max_memory_usage_ratio: float = 0.9,
@@ -39,6 +40,24 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             Maximum number of the voxels that can be
             used for training.
 
+        calibration_kwargs : Optional[dict]
+            Depending on the classic denoising algorithm you can use this parameter
+            to pass the calibration parameters. (advanced) (hidden)
+
+        blind_spots : Optional[Union[str,List[Tuple[int]]]]
+            List of voxel coordinates (relative to receptive field center) to
+            be included in the blind-spot. For example, you can enter:
+            '<axis>#<radius>' to extend the blindspot along a given axis by a
+            certain radius. For example, for an image of dimension 3, 'x#1'
+            extends the blind spot to cover voxels of relative coordinates:
+            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,
+            enter: 'x#1,y#1' by comma separating between axis. To specify the
+            axis you can use integer indices, or 'x', 'y', 'z', and 't'
+            (dimension order is tzyx with x being always the last dimension).
+            If None is passed then the blindspots are automatically discovered
+            from the image content. If 'center' is passed then no additional
+            blindspots to the center pixel are considered.
+
         tile_min_margin : int
             Minimal width of tile margin in voxels.
             (advanced)
@@ -56,7 +75,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             (advanced)
         """
         super().__init__(
-            blind_spots=None,
+            blind_spots=blind_spots,
             tile_min_margin=tile_min_margin,
             tile_max_margin=tile_max_margin,
             max_memory_usage_ratio=max_memory_usage_ratio,
@@ -139,7 +158,9 @@ class ImageDenoiserClassic(ImageTranslatorBase):
                     denoising_function,
                     best_parameters,
                     memory_requirements,
-                ) = self.calibration_function(image, **self.calibration_kwargs)
+                ) = self.calibration_function(
+                    image, blind_spots=self.blind_spots, **self.calibration_kwargs
+                )
 
                 # Add obtained best parameters to the list per channel:
                 self.denoising_functions.append(denoising_function)

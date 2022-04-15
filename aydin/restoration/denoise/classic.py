@@ -284,6 +284,7 @@ class Classic(DenoiseRestorationBase):
                 it = ImageDenoiserClassic(
                     method=method,
                     calibration_kwargs=self.lower_level_args["calibration"]["kwargs"],
+                    **self.lower_level_args["it"]["kwargs"],
                 )
             else:
                 it = ImageDenoiserClassic(method=self.backend)
