@@ -17,6 +17,7 @@ from aydin.gui._qt.custom_widgets.overlay import Overlay
 from aydin.gui._qt.custom_widgets.program_flow_diagram import QProgramFlowDiagramWidget
 from aydin.gui._qt.job_runners.denoise_job_runner import DenoiseJobRunner
 from aydin.gui.tabs.data_model import DataModel
+from aydin.gui.tabs.qt.analysis import AnalysisTab
 from aydin.gui.tabs.qt.dimensions import DimensionsTab
 from aydin.gui.tabs.qt.denoise import DenoiseTab
 from aydin.gui.tabs.qt.files import FilesTab
@@ -62,6 +63,7 @@ class MainPage(QWidget):
             "Denoising Crop": DenoisingCroppingTab(self),
             "Pre/Post-Processing": ProcessingTab(self),
             "Denoise": DenoiseTab(self),
+            "Analysis": AnalysisTab(self),
         }
 
         self.data_model = DataModel(self)
