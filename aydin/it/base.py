@@ -783,6 +783,6 @@ class ImageTranslatorBase(ABC):
                 spot = (0,) * axis + (r,) + (0,) * (st_ndim - 1 - axis)
                 blind_spots.add(spot)
 
-        lprint(f"Parsed blindspot from shorthand notation: {self.blind_spots} ")
+        lprint(f"Parsed blindspot from shorthand notation: {blind_spots} ")
 
         return list(blind_spots)
