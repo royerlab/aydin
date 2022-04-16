@@ -54,7 +54,8 @@ class ImageTranslatorBase(ABC):
             (dimension order is tzyx with x being always the last dimension).
             If None is passed then the blindspots are automatically discovered
             from the image content. If 'center' is passed then no additional
-            blindspots to the center pixel are considered.
+            blindspots to the center pixel are considered. If 'center' is passed
+            then only the default single center voxel blind-spot is used.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.
@@ -75,7 +76,7 @@ class ImageTranslatorBase(ABC):
         """
         self.self_supervised = False
         self.monitor = monitor
-        self.blind_spots = blind_spots
+        self.blind_spots: Optional[Union[str, List[Tuple[int]]]] = blind_spots
         self.tile_max_margin = tile_max_margin
         self.tile_min_margin = tile_min_margin
 
@@ -282,11 +283,13 @@ class ImageTranslatorBase(ABC):
                 lprint(f"Blind spots: {self.blind_spots}")
                 # auto_str = array2string(autocorrelogram, precision=2, separator=',', suppress_small=True, threshold=128, edgeitems=16, sign='+')
                 # lprint(f"Autocorrelogram: {auto_str}")
-            elif type(self.blind_spots) == str and '#' in self.blind_spots:
+            elif type(self.blind_spots) == str:
                 # Number of spatio-temporal dims:
                 st_ndim = shape_normalised_input_image.ndim - 2
                 # Parse:
-                self.blind_spots = self._parse_blind_spot_shorthand_notation(st_ndim)
+                self.blind_spots = self._parse_blind_spot_shorthand_notation(
+                    self.blind_spots, st_ndim
+                )
 
             # Verify that input and target images have same shape:
             # We do this after normalisation because that's easier
@@ -747,42 +750,50 @@ class ImageTranslatorBase(ABC):
 
         return batch_result, chan_result
 
-    def _parse_blind_spot_shorthand_notation(self, st_ndim):
-        lprint(f"Blindspot shorthand notation detected: {self.blind_spots} ")
+    @staticmethod
+    def _parse_blind_spot_shorthand_notation(blind_spots: str, st_ndim: int):
+        lprint(f"Blindspot shorthand notation detected: {blind_spots} ")
         # Replace commas with spaces:
-        self.blind_spots = self.blind_spots.replace(',', ' ')
+        blind_spots = blind_spots.replace(',', ' ')
         # First split by white space:
-        parts = self.blind_spots.split()
+        parts = blind_spots.split()
 
         # We accumulate parsed blind spots here:
-        blind_spots = set()
+        blind_spots_set = set()
         # To avoid confusiuon we always include the center pixel:
-        blind_spots.add((0,) * st_ndim)
-        for part in parts:
-            splitted_part = part.split('#')
-            axis = splitted_part[0].strip()
+        blind_spots_set.add((0,) * st_ndim)
 
-            # Parse shorthand axis notation:
-            if axis == 'x':
-                axis = st_ndim - 1 - 0
-            elif axis == 'y':
-                axis = st_ndim - 1 - 1
-            elif axis == 'z':
-                axis = st_ndim - 1 - 2
-            elif axis == 't':
-                axis = st_ndim - 1 - 3
-            else:
-                axis = int(axis)
+        if 'center' in blind_spots:
+            # We don't extend!
+            pass
+        else:
+            for part in parts:
+                splitted_part = part.split('#')
+                axis = splitted_part[0].strip()
 
-            # Ensure axis is in range:
-            axis = max(0, min(st_ndim - 1, axis))
+                # Parse shorthand axis notation:
+                if axis == 'x':
+                    axis = st_ndim - 1 - 0
+                elif axis == 'y':
+                    axis = st_ndim - 1 - 1
+                elif axis == 'z':
+                    axis = st_ndim - 1 - 2
+                elif axis == 't':
+                    axis = st_ndim - 1 - 3
+                else:
+                    axis = int(axis)
 
-            radius = int(splitted_part[1].strip())
+                # Ensure axis is in range:
+                axis = max(0, min(st_ndim - 1, axis))
 
-            for r in range(-radius, radius + 1):
-                spot = (0,) * axis + (r,) + (0,) * (st_ndim - 1 - axis)
-                blind_spots.add(spot)
+                radius = int(splitted_part[1].strip())
+
+                for r in range(-radius, radius + 1):
+                    spot = (0,) * axis + (r,) + (0,) * (st_ndim - 1 - axis)
+                    blind_spots_set.add(spot)
+
+        blind_spots = list(blind_spots_set)
 
         lprint(f"Parsed blindspot from shorthand notation: {blind_spots} ")
 
-        return list(blind_spots)
+        return blind_spots

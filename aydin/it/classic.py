@@ -56,7 +56,8 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             (dimension order is tzyx with x being always the last dimension).
             If None is passed then the blindspots are automatically discovered
             from the image content. If 'center' is passed then no additional
-            blindspots to the center pixel are considered.
+            blindspots to the center pixel are considered.  If 'center' is passed
+            then only the default single center voxel blind-spot is used.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.

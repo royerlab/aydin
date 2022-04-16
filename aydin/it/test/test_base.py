@@ -224,8 +224,7 @@ def test_blindspot_shorthand_notation():
     it = ImageTranslatorFGR()
 
     def _get_blindspot_parsed(blind_spots):
-        it.blind_spots = blind_spots
-        return it._parse_blind_spot_shorthand_notation(st_ndim=2)
+        return it._parse_blind_spot_shorthand_notation(blind_spots, st_ndim=2)
 
     blind_spots = _get_blindspot_parsed('0#2')
     print(blind_spots)

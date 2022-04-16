@@ -111,10 +111,16 @@ def _generate_mask(
 
     # Generate slice for mask:
     spatialdims = image.ndim
+
+    # Compute slicing for mask:
     n_masks = stride ** spatialdims
-    mask = _generate_grid_slice(
+    mask_slice = _generate_grid_slice(
         image.shape[:spatialdims], offset=n_masks // 2, stride=stride
     )
+
+    # Compute default mask:
+    mask = zeros_like(image, dtype=numpy.bool_)
+    mask[mask_slice] = True
 
     # Do we have to extend these spots?
     if blind_spots is None:
@@ -125,10 +131,6 @@ def _generate_mask(
 
     if extended_blind_spot:
         lprint(f"Extended blindspots detected: {blind_spots}")
-        # If yes, we need to change the way we store the mask:
-        mask_full = zeros_like(image, dtype=numpy.bool_)
-        mask_full[mask] = True
-        mask = mask_full
 
         # Determine size of spot kernel:
         min_coord = tuple(

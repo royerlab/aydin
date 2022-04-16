@@ -47,9 +47,7 @@ def test_it_fgr_nn():
 
 def test_it_fgr_cb():
     regressor = CBRegressor(max_num_estimators=256, min_num_estimators=64)
-    do_it_fgr_with_self_supervised(
-        regressor, min_ssim=0.78
-    )  # TODO: original was 0.85 investigate later
+    do_it_fgr_with_self_supervised(regressor, min_ssim=0.779)
 
 
 def test_it_fgr_cb_supervised():

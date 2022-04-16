@@ -2,7 +2,7 @@ import itertools
 import math
 import traceback
 from copy import copy
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Tuple, Union, Optional
 import numpy
 from joblib import Parallel, delayed
 from numpy.linalg import LinAlgError, norm
@@ -26,7 +26,7 @@ class Optimizer:
         self,
         function: Callable,
         bounds: List[Union[Tuple[int, ...], Tuple[float, ...]]],
-        init_strategies: str = 'corners+twopoints',
+        init_strategies: Optional[str] = None,
         exploration_rate: float = 0.4,
         patience: int = 64,
         max_num_evaluations: int = 128,
@@ -48,7 +48,8 @@ class Optimizer:
             Bounds for function parameters
 
         init_strategies: str
-            Initialisation strategies. Can contain: 'corners', 'centers', and 'random'
+            Initialisation strategies. Can contain: 'two', 'three', xor 'four',
+            and 'random'. If None a default combination is used.
 
         exploration_rate: float
             Rate at which to explore
@@ -93,29 +94,33 @@ class Optimizer:
         self.best_point = None
         self.best_value = -math.inf
 
+        # Default init startegy:
+        if init_strategies is None:
+            init_strategies = 'three+random'
+
         # First we initialise with some points on the corners:
-        if 'corners' in init_strategies:
-            with lsection("Evaluating function at corners (and centers)"):
-
-                if 'centers' in init_strategies:
-                    init_grid = tuple((u, 0.5 * (u + v), v) for u, v in bounds)
-                elif 'twopoints' in init_strategies:
-                    init_grid = tuple(
-                        (u, 0.33 * (u + v), 0.66 * (u + v), v) for u, v in bounds
-                    )
-                else:
-                    init_grid = copy(bounds)
-
-                point_list = list(itertools.product(*init_grid))
-                self._add_points(
-                    point_list, workers=workers, backend=backend, display_points=True
+        with lsection("Evaluating function at corners (and centers)"):
+            if 'two' in init_strategies:
+                init_grid = copy(bounds)
+            elif 'three' in init_strategies:
+                init_grid = tuple((u, 0.5 * (u + v), v) for u, v in bounds)
+            elif 'four' in init_strategies:
+                init_grid = tuple(
+                    (u, 0.33 * (u + v), 0.66 * (u + v), v) for u, v in bounds
                 )
 
-        # First we initialise with some random points:
-        if 'random' in init_strategies:
-            with lsection("Evaluating function at random points"):
-                point_list = list(self._random_sample() for _ in range(min(4, 2 * n)))
-                self._add_points(point_list, workers=workers)
+            point_list = list(itertools.product(*init_grid))
+            self._add_points(
+                point_list, workers=workers, backend=backend, display_points=True
+            )
+
+            # Then we initialise with some random points:
+            if 'random' in init_strategies:
+                with lsection("Evaluating function at random points"):
+                    point_list = list(
+                        self._random_sample() for _ in range(min(4, 2 * n))
+                    )
+                    self._add_points(point_list, workers=workers)
 
         # Foir how long did we not see an improvement?
         self.since_last_best = 0

@@ -25,9 +25,10 @@ def calibrate_denoise_butterworth(
     max_padding: int = 32,
     min_freq: float = 1e-9,
     max_freq: float = 1.0,
+    frequency_tolerance: float = 0.05,
     min_order: float = 1.0,
     max_order: float = 8.0,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large.value,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_superlarge.value,
     optimiser: str = _defaults.default_optimiser.value,
     max_num_evaluations: int = _defaults.default_max_evals_normal.value,
     blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
@@ -79,6 +80,16 @@ def calibrate_denoise_butterworth(
         typically close to one.
         (advanced)
 
+    frequency_tolerance: float
+        Frequency tolerance within [0,1]. We allow a little bit more
+        high-frequencies to go through the low-pass. This effectively reduces
+        the effect of denoising but also is a way to be conservative about
+        removing potentially important information at the boundary (in
+        frequency space) between signal and noise. This can also improve the
+        appearance of the images by avoiding the impression that the images
+        have been blurred too much. Increase this value by small steps of
+        0.05 to reduce blurring if the image seems too blurry. (advanced)
+
     min_order: float
         Minimal order for the Butterworth filter to use for calibration.
         (advanced)
@@ -92,8 +103,8 @@ def calibrate_denoise_butterworth(
         Number of voxels for crop used to calibrate denoiser.
         Increase this number by factors of two if denoising quality is
         unsatisfactory -- this can be important for very noisy images.
-        Values to try are: 65000, 128000, 256000, 320000.
-        We do not recommend values higher than 512000.
+        Values to try are: 256000, 320000, 1'000'000, 2'000'000.
+        We do not recommend values higher than 3000000.
 
     optimiser: str
         Optimiser to use for finding the best denoising
@@ -316,6 +327,11 @@ def calibrate_denoise_butterworth(
             best_parameters.pop(f'freq_cutoff_{i}') for i in range(image.ndim)
         )
         best_parameters |= {'freq_cutoff': freq_cutoff}
+
+    # We apply the frequency tolerance:
+    best_parameters['freq_cutoff'] = tuple(
+        (min(1.0, f + frequency_tolerance) for f in best_parameters['freq_cutoff'])
+    )
 
     # Memory needed:
     memory_needed = 6 * image.nbytes  # complex numbers and more

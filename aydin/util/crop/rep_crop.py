@@ -16,7 +16,7 @@ def representative_crop(
     image: ArrayLike,
     mode: str = 'sobelmin',
     crop_size: Optional[int] = None,
-    min_length: int = 16,
+    min_length: int = 32,
     smoothing_size: int = 1.0,
     equal_sides: bool = False,
     favour_odd_lengths: bool = False,
@@ -144,7 +144,7 @@ def representative_crop(
 
     # Instead of searching for all possible crops, we take into
     # account the size of the crops to define a 'granularity' (
-    # stride) of the transtlations used for search:
+    # stride) of the translations used for search:
     granularity_factor = 4
     granularity = tuple(cs // granularity_factor for cs in cropped_shape)
 
