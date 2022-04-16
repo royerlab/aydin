@@ -21,7 +21,7 @@ def test_butterworth_anisotropy():
 
     print(parameters)
     cutoffs = parameters['freq_cutoff']
-    assert cutoffs[0] > 2 * cutoffs[1]
+    assert cutoffs[0] > cutoffs[1]
 
 
 def test_butterworth_nd():
