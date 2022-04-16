@@ -81,14 +81,16 @@ def calibrate_denoise_butterworth(
         (advanced)
 
     frequency_tolerance: float
-        Frequency tolerance within [0,1]. We allow a little bit more
-        high-frequencies to go through the low-pass. This effectively reduces
-        the effect of denoising but also is a way to be conservative about
-        removing potentially important information at the boundary (in
-        frequency space) between signal and noise. This can also improve the
-        appearance of the images by avoiding the impression that the images
-        have been blurred too much. Increase this value by small steps of
-        0.05 to reduce blurring if the image seems too blurry. (advanced)
+        Frequency tolerance within [-1,1]. A positive value lets more
+        high-frequencies to go through the low-pass, negative values bring
+        down the cut-off frequencies, zero has no effect. Positive values
+        reduces the effect of denoising but also lead to conservative
+        filtering that avoids removing potentially important information at
+        the boundary (in frequency space) between signal and noise. This can
+        also improve the appearance of the images by avoiding the impression
+        that the images have been 'over-blurred'. Increase this value by
+        small steps of 0.05 to reduce blurring if the image seems too blurry.
+        (advanced)
 
     min_order: float
         Minimal order for the Butterworth filter to use for calibration.
@@ -330,7 +332,10 @@ def calibrate_denoise_butterworth(
 
     # We apply the frequency tolerance:
     best_parameters['freq_cutoff'] = tuple(
-        (min(1.0, f + frequency_tolerance) for f in best_parameters['freq_cutoff'])
+        (
+            min(1.0, max(0.0, f + frequency_tolerance))
+            for f in best_parameters['freq_cutoff']
+        )
     )
 
     # Memory needed:
