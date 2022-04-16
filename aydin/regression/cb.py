@@ -398,11 +398,25 @@ class _CBModel:
             # Create pool object:
             x_pool = Pool(data=x)
 
-            with lsection("CatBoost prediction now"):
-                prediction = self.model.predict(
-                    x_pool, thread_count=-1, verbose=True
+            def _predict(task_type):
+                return self.model.predict(
+                    x_pool,
+                    thread_count=-1 if task_type == 'CPU' else 1,
+                    verbose=True,
+                    task_type=task_type,
                 ).astype(numpy.float32, copy=False)
-                # task_type='CPU') # YOUHOUU!
+
+            with lsection("CatBoost prediction now"):
+                prediction = _predict('CPU')
+
+                # Unfirtunately this does not work yet, please keep code for when it does...
+                # try:
+                #     lprint("Trying GPU inference...")
+                #     prediction = _predict('GPU')
+                #     lprint("Success!")
+                # except:
+                #     lprint("GPU inference failed, trying CPU inference instead...")
+                #     prediction = _predict('CPU')
 
             lprint("CatBoost regressor predicting done!")
             return prediction

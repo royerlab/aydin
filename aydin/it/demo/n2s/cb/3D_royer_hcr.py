@@ -17,10 +17,12 @@ def demo(image):
     Log.enable_output = True
     # Log.set_log_max_depth(5)
 
-    generator = StandardFeatureGenerator()
+    generator = StandardFeatureGenerator(include_spatial_features=True)
     regressor = CBRegressor(patience=20, gpu=True)
 
-    it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)
+    it = ImageTranslatorFGR(
+        feature_generator=generator, regressor=regressor, balance_training_data=True
+    )
 
     it.add_transform(VarianceStabilisationTransform())
     it.add_transform(RangeTransform())
@@ -37,12 +39,7 @@ def demo(image):
         viewer.add_image(denoised, name='denoised')
 
 
-islet = examples_single.royerlab_hcr.get_array().squeeze()
-# import napari
-# with napari.gui_qt():
-#     viewer = napari.Viewer()
-#     viewer.add_image(islet, name='islet')
-# islet = islet[2, :20, 400 : 400 + 256, 700 : 700 + 256]
-islet = islet[1]
+hcr = examples_single.royerlab_hcr.get_array().squeeze()
+hcr = hcr[1]
 
-demo(islet)
+demo(hcr)

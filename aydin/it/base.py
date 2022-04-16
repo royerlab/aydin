@@ -281,8 +281,18 @@ class ImageTranslatorBase(ABC):
                     shape_normalised_input_image[0, 0]
                 )
                 lprint(f"Blind spots: {self.blind_spots}")
-                # auto_str = array2string(autocorrelogram, precision=2, separator=',', suppress_small=True, threshold=128, edgeitems=16, sign='+')
-                # lprint(f"Autocorrelogram: {auto_str}")
+                autocorrelogram_values = numpy.unique(autocorrelogram)
+                autocorrelogram_values = numpy.sort(autocorrelogram_values)[::-1][:5]
+                auto_str = array2string(
+                    autocorrelogram_values,
+                    precision=4,
+                    separator=',',
+                    suppress_small=True,
+                    threshold=128,
+                    edgeitems=16,
+                    sign='+',
+                )
+                lprint(f"Autocorrelogram unique values in decreasing order: {auto_str}")
             elif type(self.blind_spots) == str:
                 # Number of spatio-temporal dims:
                 st_ndim = shape_normalised_input_image.ndim - 2
