@@ -172,6 +172,10 @@ class examples_single(Enum):
         '1UyF5HkZLwTaoiBf1sLHkTdw09yyCJyKO',
         'Leonetti_p1H8_2_SNCA_PyProcessed_IJClean.tif',
     )
+    leonetti_arhgap21 = (
+        '1arq6nj4oiJaxG7dPHjhYVTSYXM2Czpgx',
+        'Leonetti_OC-FOV_ARHGAP21_ENSG00000107863_CID000556_FID00030711_stack.tif',
+    )
 
     # XYZ
     huang_fixed_pattern_noise = (

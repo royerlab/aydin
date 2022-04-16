@@ -45,6 +45,7 @@ class QProgramFlowDiagramWidget(QWidget):
             "Chessboard": examples_single.brown_chessboard_gray,
             "HCR (Royer)": examples_single.royerlab_hcr,
             "Blastocyst Fracking (Maitre)": examples_single.maitre_mouse,
+            "OpenCell ARHGAP21 (Leonetti)": examples_single.leonetti_arhgap21,
         }
         for item in menu_items.keys():
             action = menu.addAction(item)
