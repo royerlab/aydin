@@ -89,8 +89,8 @@ def calibrate_denoise_butterworth(
         the boundary (in frequency space) between signal and noise. This can
         also improve the appearance of the images by avoiding the impression
         that the images have been 'over-blurred'. Increase this value by
-        small steps of 0.05 to reduce blurring if the image seems too blurry.
-        (advanced)
+        small steps of 0.05 to reduce blurring if the image seems too fuzzy.
+
 
     min_order: float
         Minimal order for the Butterworth filter to use for calibration.
