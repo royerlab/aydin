@@ -90,20 +90,29 @@ class ConvolutionalFeatures(FeatureGroupBase):
                 missing[aslice] = weight
 
             # We apply a Gaussian filter to find neighbooring voxels from which we can estimate the missing values:
-            missing = gaussian_filter(missing, sigma=1)
+            missing = gaussian_filter(missing, sigma=0.5)
+
+            # Save the sum so:
+            saved_sum = missing.sum()
 
             # We zero the excluded voxels from it:
             for aslice in slices:
                 missing[aslice] = 0
 
             # We rescale the missing value estimation kernel:
-            missing /= missing.sum()
+            missing *= saved_sum / missing.sum()
 
             # We add the missing-value-estimation to the kernel:
             kernel += missing
 
         # Convolution:
         convolve(self.image, weights=kernel, output=feature)
+
+        # import napari
+        # from napari import Viewer
+        # viewer = Viewer()
+        # viewer.add_image(self.image, name='self.image')
+        # viewer.add_image(feature, name='feature')
 
     def finish(self):
         self.image = None

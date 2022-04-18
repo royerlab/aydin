@@ -31,6 +31,7 @@ def demo(image, name, do_add_noise=True):
         include_scale_one=True,
         include_fine_features=True,
         include_spatial_features=True,
+        include_lowpass_features=True,
     )
 
     regressor = CBRegressor(

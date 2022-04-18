@@ -2,6 +2,7 @@ import numpy
 
 from aydin.features.extensible_features import ExtensibleFeatureGenerator
 from aydin.features.groups.dct import DCTFeatures
+from aydin.features.groups.lowpass import LowPassFeatures
 from aydin.features.groups.median import MedianFeatures
 from aydin.features.groups.random import RandomFeatures
 from aydin.features.groups.spatial import SpatialFeatures
@@ -36,6 +37,8 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
         spatial_features_coarsening: int = 2,
         num_sinusoidal_features: int = 0,
         include_median_features: bool = False,
+        include_lowpass_features: bool = True,
+        num_lowpass_features: int = 8,
         include_dct_features: bool = False,
         dct_max_freq: float = 0.5,
         include_random_conv_features: bool = False,
@@ -132,6 +135,17 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             with kernels of sizes 3^n, 5^n and 7^n.
             (advanced)
 
+        include_lowpass_features : bool
+            Includes lowpass image features that are computed by applying
+            Butterworth filters at regular frequency intervals. Highly effective
+            for images for which Butterworth denoising also works well. However,
+            for large dimensions with many dimensions feature generation can be
+            slow.
+
+        num_lowpass_features : int
+            Number of lowpass features to include.
+            (advanced)
+
         include_dct_features : bool
             When True DCT features computed on per-voxel-centerd image patches
             are included.
@@ -146,6 +160,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             When True random convolutional features are included.
             This is experimental and of academic interest only.
             (advanced)
+
 
         dtype
             Datatype of the features
@@ -203,3 +218,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             self.add_feature_group(rnd3)
             self.add_feature_group(rnd5)
             self.add_feature_group(rnd7)
+
+        if include_lowpass_features:
+            lowpass = LowPassFeatures(num_features=num_lowpass_features)
+            self.add_feature_group(lowpass)
