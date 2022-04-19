@@ -4,7 +4,7 @@ import numpy
 from numpy.random import rand
 from scipy.ndimage import gaussian_filter
 
-from aydin.features.groups.convolutional import ConvolutionalFeatures
+from aydin.features.groups.convolution import ConvolutionalFeatures
 
 
 class RandomFeatures(ConvolutionalFeatures):

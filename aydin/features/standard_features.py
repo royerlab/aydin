@@ -95,6 +95,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             flavour of uniform features that consist in summing up the pixel
             intensity values along one-pixel-wide lines around the center
             pixel.
+            (advanced)
 
         decimate_large_scale_features : bool
             When True large scale features are decimated. To reduce the number
@@ -147,7 +148,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             (advanced)
 
         include_dct_features : bool
-            When True DCT features computed on per-voxel-centerd image patches
+            When True DCT features computed on per-voxel-centered image patches
             are included.
             (advanced)
 

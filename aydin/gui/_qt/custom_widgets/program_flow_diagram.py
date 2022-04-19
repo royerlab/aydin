@@ -38,6 +38,7 @@ class QProgramFlowDiagramWidget(QWidget):
         self.load_sample_image_button = QPushButton("Load example")
         menu = QMenu()
         menu_items = {
+            "New York (Royer)": examples_single.newyork_noisy,
             "Fountain": examples_single.fountain,
             "Mona Lisa": examples_single.monalisa,
             "Gauss": examples_single.gauss_noisy,

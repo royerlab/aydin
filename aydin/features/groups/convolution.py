@@ -15,20 +15,29 @@ class ConvolutionalFeatures(FeatureGroupBase):
     Generates convolutional features given a set of kernels.
     """
 
-    def __init__(self, kernels: Optional[Sequence[ArrayLike]]):
+    def __init__(
+        self,
+        kernels: Optional[Sequence[ArrayLike]],
+        separable: bool = True,
+    ):
         """
         Constructor that configures these features.
 
         Parameters
         ----------
         kernels : Optional[Sequence[ArrayLike]]
-            Sequence of kernels to use to compiute features.
+            Sequence of kernels to use to compute features.
+
+        separable : bool
+            If True the kernels are assumed to be separable as identical 1d
+            kernels for each axis.
+
         """
         super().__init__()
         self.kernels = kernels if kernels is None else list(kernels)
         self.image = None
         self.excluded_voxels: Sequence[Tuple[int, ...]] = []
-
+        self.separable = separable
         self.kwargs = None
 
     @property
@@ -106,16 +115,44 @@ class ConvolutionalFeatures(FeatureGroupBase):
             kernel += missing
 
         # Convolution:
-        convolve(self.image, weights=kernel, output=feature)
+        _convolve(
+            image=self.image, kernel=kernel, separable=self.separable, output=feature
+        )
 
-        # import napari
-        # from napari import Viewer
-        # viewer = Viewer()
-        # viewer.add_image(self.image, name='self.image')
-        # viewer.add_image(feature, name='feature')
+        # if self.image.size > 4**4:
+        #     import napari
+        #     from napari import Viewer
+        #     viewer = Viewer()
+        #     viewer.add_image(self.image, name='self.image')
+        #     viewer.add_image(feature, name='feature')
+        #     napari.run()
 
     def finish(self):
         self.image = None
         self.excluded_voxels = None
         self.kwargs = None
         self.kernels = None
+
+
+def _convolve(image: ArrayLike, kernel: ArrayLike, separable: bool, output: ArrayLike):
+
+    if separable and kernel.ndim == 1:
+
+        # Looping through the axis:
+        for axis in range(image.ndim):
+
+            # prepare shape:
+            shape = [
+                1,
+            ] * image.ndim
+            shape[axis] = kernel.shape[0]
+
+            # reshape kernel:
+            kernel = kernel.reshape(*shape)
+
+            # convolve:
+            convolve_output = output if axis == image.ndim - 1 else None
+            image = convolve(image, weights=kernel, output=convolve_output)
+
+    else:
+        convolve(image, weights=kernel, output=output)

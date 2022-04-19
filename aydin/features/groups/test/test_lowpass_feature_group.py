@@ -15,12 +15,16 @@ def test_lowpass_feature_group():
     # get image:
     image = n(camera().astype(numpy.float32))
 
+    # settings:
+    num_features = 9
+    max_size = 11
+
     # Instantiates low-pass features:
-    lowpass = LowPassFeatures()
-    assert lowpass.num_features(image.ndim) == 8
+    lowpass = LowPassFeatures(num_features=num_features, max_size=max_size)
+    assert lowpass.num_features(image.ndim) == num_features
 
     # Check receptive field radius:
-    assert lowpass.receptive_field_radius == 3
+    assert lowpass.receptive_field_radius == max_size // 2
 
     # Set image:
     lowpass.prepare(image)

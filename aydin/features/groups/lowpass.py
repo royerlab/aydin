@@ -1,7 +1,7 @@
 import numpy
-from scipy.ndimage import gaussian_filter
 
-from aydin.features.groups.convolutional import ConvolutionalFeatures
+
+from aydin.features.groups.convolution import ConvolutionalFeatures
 from aydin.it.classic_denoisers.butterworth import denoise_butterworth
 
 
@@ -20,6 +20,7 @@ class LowPassFeatures(ConvolutionalFeatures):
         min_freq: float = 0.15,
         max_freq: float = 0.75,
         order: float = 2,
+        separable: bool = False,
     ):
         """
         Constructor that configures these features.
@@ -48,8 +49,12 @@ class LowPassFeatures(ConvolutionalFeatures):
             Butterworth filter order.
             (advanced)
 
+        separable : bool
+            If True the kernels are assumed to be separable as identical 1d
+            kernels for each axis.
+
         """
-        super().__init__(kernels=None)
+        super().__init__(kernels=None, separable=separable)
 
         self.min_size = min_size
         self.max_size = max_size
@@ -74,7 +79,11 @@ class LowPassFeatures(ConvolutionalFeatures):
 
     def _ensure_random_kernels_available(self, ndim: int):
         # Ensures that the kernels are available for subsequent steps.
-        # We can't construct the kernels until we know the dimension of the image
+        # We can't construct the kernels until we know the dimension of the image.
+
+        # if we are in the 'separable' case, we only need to generate 1d kernels:
+        ndim = 1 if self.separable else ndim
+
         if self.kernels is None or self.kernels[0].ndim != ndim:
             lowpass_kernels = []
 
@@ -103,7 +112,7 @@ class LowPassFeatures(ConvolutionalFeatures):
 
     @property
     def receptive_field_radius(self) -> int:
-        return self.size // 2
+        return max(self.sizes) // 2
 
     def num_features(self, ndim: int) -> int:
         self._ensure_random_kernels_available(ndim)

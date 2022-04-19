@@ -1,6 +1,6 @@
 from typing import Union, Optional
 
-from aydin.features.groups.convolutional import ConvolutionalFeatures
+from aydin.features.groups.convolution import ConvolutionalFeatures
 from aydin.features.groups.extract_kernels import extract_kernels
 
 

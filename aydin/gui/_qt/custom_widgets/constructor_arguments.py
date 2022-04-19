@@ -75,6 +75,7 @@ class ConstructorArgumentsWidget(QWidget):
             param_description = QLabel(description)
             param_description.setWordWrap(True)
             param_description.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            param_description.setToolTip(f"{description}")
 
             self.arg_names.append(name)
             self.line_edits.append(param_edit)

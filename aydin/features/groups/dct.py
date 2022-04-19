@@ -2,7 +2,7 @@ import numpy
 from numpy.linalg import norm
 from scipy.fft import idstn
 
-from aydin.features.groups.convolutional import ConvolutionalFeatures
+from aydin.features.groups.convolution import ConvolutionalFeatures
 
 
 class DCTFeatures(ConvolutionalFeatures):

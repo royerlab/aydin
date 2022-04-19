@@ -2,7 +2,7 @@ import numpy
 from scipy.ndimage import convolve
 from skimage.exposure import rescale_intensity
 
-from aydin.features.groups.convolutional import ConvolutionalFeatures
+from aydin.features.groups.convolution import ConvolutionalFeatures
 from aydin.io.datasets import camera
 
 
