@@ -289,9 +289,12 @@ def ssim(files, **kwargs):
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
-    lprint("ssim: ", structural_similarity(
-        normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
-    ))
+    lprint(
+        "ssim: ",
+        structural_similarity(
+            normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
+        ),
+    )
 
 
 @cli.command()
@@ -308,9 +311,12 @@ def psnr(files, **kwargs):
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
-    lprint("ssim: ", peak_signal_noise_ratio(
-        normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
-    ))
+    lprint(
+        "ssim: ",
+        peak_signal_noise_ratio(
+            normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
+        ),
+    )
 
 
 def handle_files(files, slicing):
