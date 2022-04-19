@@ -4,10 +4,10 @@ import numpy
 from numpy.random import rand
 from scipy.ndimage import gaussian_filter
 
-from aydin.features.groups.convolution import ConvolutionalFeatures
+from aydin.features.groups.correlation import CorrelationFeatures
 
 
-class RandomFeatures(ConvolutionalFeatures):
+class RandomFeatures(CorrelationFeatures):
     """
     Random Feature Group class
 

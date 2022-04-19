@@ -2,10 +2,10 @@ import numpy
 from numpy.linalg import norm
 from scipy.fft import idstn
 
-from aydin.features.groups.convolution import ConvolutionalFeatures
+from aydin.features.groups.correlation import CorrelationFeatures
 
 
-class DCTFeatures(ConvolutionalFeatures):
+class DCTFeatures(CorrelationFeatures):
     """
     DCT Feature Group class
 

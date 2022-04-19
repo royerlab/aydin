@@ -2,17 +2,18 @@ from typing import Sequence, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
-from scipy.ndimage import convolve, gaussian_filter
+from scipy.ndimage import gaussian_filter
 
 from aydin.features.groups.base import FeatureGroupBase
+from aydin.util.fast_correlation.correlation import correlate
 from aydin.util.log.log import lprint
 
 
-class ConvolutionalFeatures(FeatureGroupBase):
+class CorrelationFeatures(FeatureGroupBase):
     """
-    Convolutional Feature Group class
+    Correlation (convolutional) Feature Group class
 
-    Generates convolutional features given a set of kernels.
+    Generates correlative features given a set of kernels.
     """
 
     def __init__(
@@ -59,7 +60,7 @@ class ConvolutionalFeatures(FeatureGroupBase):
     def compute_feature(self, index: int, feature):
         kernel = self.kernels[index]
         lprint(
-            f"Convolutional feature: {index} of shape={kernel.shape}, excluded_voxels={self.excluded_voxels}"
+            f"Correlative feature: {index} of shape={kernel.shape}, excluded_voxels={self.excluded_voxels}"
         )
 
         if len(self.excluded_voxels) > 0:
@@ -115,7 +116,7 @@ class ConvolutionalFeatures(FeatureGroupBase):
             kernel += missing
 
         # Convolution:
-        _convolve(
+        _correlate(
             image=self.image, kernel=kernel, separable=self.separable, output=feature
         )
 
@@ -134,7 +135,7 @@ class ConvolutionalFeatures(FeatureGroupBase):
         self.kernels = None
 
 
-def _convolve(image: ArrayLike, kernel: ArrayLike, separable: bool, output: ArrayLike):
+def _correlate(image: ArrayLike, kernel: ArrayLike, separable: bool, output: ArrayLike):
 
     if separable and kernel.ndim == 1:
 
@@ -151,8 +152,8 @@ def _convolve(image: ArrayLike, kernel: ArrayLike, separable: bool, output: Arra
             kernel = kernel.reshape(*shape)
 
             # convolve:
-            convolve_output = output if axis == image.ndim - 1 else None
-            image = convolve(image, weights=kernel, output=convolve_output)
+            correlate_output = output if axis == image.ndim - 1 else None
+            image = correlate(image, weights=kernel, output=correlate_output)
 
     else:
-        convolve(image, weights=kernel, output=output)
+        correlate(image, weights=kernel, output=output)

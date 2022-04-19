@@ -1,11 +1,11 @@
 import numpy
 
 
-from aydin.features.groups.convolution import ConvolutionalFeatures
+from aydin.features.groups.correlation import CorrelationFeatures
 from aydin.it.classic_denoisers.butterworth import denoise_butterworth
 
 
-class LowPassFeatures(ConvolutionalFeatures):
+class LowPassFeatures(CorrelationFeatures):
     """
     Low-Pass Feature Group class
 

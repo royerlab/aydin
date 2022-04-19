@@ -2,7 +2,7 @@ import numpy
 from scipy.ndimage import convolve
 from skimage.exposure import rescale_intensity
 
-from aydin.features.groups.convolution import ConvolutionalFeatures
+from aydin.features.groups.correlation import CorrelationFeatures
 from aydin.io.datasets import camera
 
 
@@ -19,7 +19,7 @@ def test_convolutional_feature_group():
     # Instantiates convolutional features:
     ones = numpy.ones(shape=(3, 3))
     twos = 2 * numpy.ones(shape=(3, 3))
-    convolutions = ConvolutionalFeatures(kernels=[ones, twos])
+    convolutions = CorrelationFeatures(kernels=[ones, twos])
     assert convolutions.num_features(image.ndim) == 2
 
     # Check receptive field radius:
