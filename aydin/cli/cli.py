@@ -7,8 +7,11 @@ from glob import glob
 import click
 import numpy
 import napari
+from skimage.metrics import peak_signal_noise_ratio
+from skimage.metrics import structural_similarity
 
 from aydin.gui.gui import run
+from aydin.io.datasets import normalise
 from aydin.it.base import ImageTranslatorBase
 from aydin.restoration.deconvolve.lr import LucyRichardson
 from aydin.io.io import imwrite, imread
@@ -270,6 +273,44 @@ def hyperstack(files, **kwargs):
 
     result_path, index_counter = get_output_image_path(result_path)
     imwrite(stacked_image, result_path)
+
+
+@cli.command()
+@click.argument('files', nargs=2)
+@click.option('-s', '--slicing', default='', type=str)
+def ssim(files, **kwargs):
+    """aydin ssim command
+
+    Parameters
+    ----------
+    files
+    kwargs : dict
+
+    """
+    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
+
+    lprint("ssim: ", structural_similarity(
+        normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
+    ))
+
+
+@cli.command()
+@click.argument('files', nargs=2)
+@click.option('-s', '--slicing', default='', type=str)
+def psnr(files, **kwargs):
+    """aydin ssim command
+
+    Parameters
+    ----------
+    files
+    kwargs : dict
+
+    """
+    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
+
+    lprint("ssim: ", peak_signal_noise_ratio(
+        normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
+    ))
 
 
 def handle_files(files, slicing):
