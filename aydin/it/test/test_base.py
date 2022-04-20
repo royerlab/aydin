@@ -16,7 +16,6 @@ from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.regression.cb import CBRegressor
-from aydin.regression.linear import LinearRegressor
 
 
 def test_get_tilling_strategy_and_margins():
