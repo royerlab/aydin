@@ -18,7 +18,7 @@ class FeatureGeneratorBase(ABC):
     """
 
     _max_non_batch_dims = 4
-    _max_voxels = 512**3
+    _max_voxels = 512 ** 3
 
     def __init__(self):
         """
