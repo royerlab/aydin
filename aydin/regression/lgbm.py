@@ -4,6 +4,7 @@ import multiprocessing
 import tempfile
 from importlib.util import find_spec
 from os.path import join
+from typing import Optional
 
 import lightgbm
 import numpy
@@ -27,10 +28,10 @@ class LGBMRegressor(RegressorBase):
 
     def __init__(
         self,
-        num_leaves: int = 127,
-        max_num_estimators: int = int(1e4),
+        num_leaves: Optional[int] = None,
+        max_num_estimators: Optional[int] = None,
         max_bin: int = 512,
-        learning_rate: float = 0.01,
+        learning_rate: Optional[float] = None,
         loss: str = 'l1',
         patience: int = 5,
         verbosity: int = -1,
@@ -43,28 +44,49 @@ class LGBMRegressor(RegressorBase):
         Parameters
         ----------
         num_leaves
-            Number of leaves
+            Number of leaves in the decision trees.
+            We recommend values between 128 and 512.
             (advanced)
+
         max_num_estimators
-            Maximum number of estimators
+            Maximum number of estimators (trees). Typical values range from 1024
+            to 4096. Use larger values for more difficult datasets. If training
+            stops exactly at these values that is a sign you need to increase this
+            number. Quality of the results typically increases with the number of
+            estimators, but so does computation time too.
+            We do not recommend using a value of more than 10000.
+
         max_bin
-            Maximum number of allowed bins
+            Maximum number of allowed bins. The features are quantised into that
+            many bins. Higher values achieve better quantisation of features but
+            also leads to longer training and more memory consumption. We do not
+            recommend changing this parameter.
             (advanced)
+
         learning_rate
-            Learning rate for the LightGBM model
+            Learning rate for the catboost model. The learning rate is determined
+            automatically if the value None is given. We recommend values around 0.01.
             (advanced)
+
         loss
-            Type of loss to be used
+            Type of loss to be used. Van be 'l1' for L1 loss (MAE), and 'l2' for
+            L2 loss (RMSE), 'huber' for Huber loss, 'poisson' for Poisson loss,
+            and 'quantile' for Auantile loss. We recommend using: 'l1'.
             (advanced)
+
         patience
-            Number of rounds required for early stopping
+            Number of rounds after which training stops if no improvement occurs.
             (advanced)
+
         verbosity
             Verbosity setting of LightGBM.
             (advanced)
+
         compute_load
-            Allowed load on computational resources in percentage
+            Allowed load on computational resources in percentage, typically used
+            for CPU training when deciding on how many available cores to use.
             (advanced)
+
         inference_mode : str
             Choses inference mode: can be 'opencl' for an OpenCL backend,
             'lleaves' for the very fast lleaves library (only OSX and Linux),
@@ -72,6 +94,7 @@ class LGBMRegressor(RegressorBase):
             tries the best/fastest options first and fallback to lightGBM default
             inference.
             (advanced)
+
         compute_training_loss : bool
             Flag to tell LightGBM whether to compute training loss or not
             (advanced)
@@ -81,10 +104,12 @@ class LGBMRegressor(RegressorBase):
 
         self.force_verbose_eval = False
 
-        self.num_leaves = num_leaves
-        self.max_num_estimators = max_num_estimators
+        self.num_leaves = 512 if num_leaves is None else num_leaves
+        self.max_num_estimators = (
+            int(1e4) if max_num_estimators is None else max_num_estimators
+        )
         self.max_bin = max_bin
-        self.learning_rate = learning_rate
+        self.learning_rate = 0.01 if learning_rate is None else learning_rate
         self.metric = loss
         self.early_stopping_rounds = patience
         self.verbosity = verbosity
@@ -104,19 +129,34 @@ class LGBMRegressor(RegressorBase):
 
     def _get_params(self, num_samples, dtype=numpy.float32):
         # min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
-        max_depth = max(3, int(int(math.log2(self.num_leaves))) - 1)
-        max_bin = 256 if dtype == numpy.uint8 else self.max_bin
 
-        lprint(f'learning_rate:  {self.learning_rate}')
+        # Preparing objective:
+        objective = self.metric
+        if objective.lower() == 'l1':
+            objective = 'regression_l1'
+        elif objective.lower() == 'l2':
+            objective = 'regression_l2'
+        elif objective.lower() == 'huber':
+            objective = 'huber'
+        elif objective.lower() == 'poisson':
+            objective = 'poisson'
+        elif objective.lower() == 'quantile':
+            objective = 'quantile'
+        else:
+            objective = 'regression_l1'
+
+        lprint(f'objective: {self.num_leaves}')
+
+        # Setting max depth:
+        max_depth = max(3, int(int(math.log2(self.num_leaves))) - 1)
         lprint(f'max_depth:  {max_depth}')
-        lprint(f'num_leaves: {self.num_leaves}')
+
+        # Setting max bin:
+        max_bin = 256 if dtype == numpy.uint8 else self.max_bin
         lprint(f'max_bin:    {max_bin}')
 
-        objective = self.metric
-        if objective == 'l1':
-            objective = 'regression_l1'
-        elif objective == 'l2':
-            objective = 'regression_l2'
+        lprint(f'learning_rate:  {self.learning_rate}')
+        lprint(f'num_leaves: {self.num_leaves}')
 
         params = {
             "device": "cpu",
@@ -301,9 +341,7 @@ class _LGBMModel:
 
     def _predict_opencl(self, x):
         with lsection("Attempting lleaves-based regression."):
-            from aydin.regression.gbm_utils.opencl_prediction import (
-                GBMOpenCLPrediction,
-            )
+            from aydin.regression.gbm_utils.opencl_prediction import GBMOpenCLPrediction
 
             if self.opencl_predictor is None:
                 self.opencl_predictor = GBMOpenCLPrediction()

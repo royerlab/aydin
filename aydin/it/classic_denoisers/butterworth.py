@@ -27,11 +27,11 @@ def calibrate_denoise_butterworth(
     max_freq: float = 1.0,
     min_order: float = 1.0,
     max_order: float = 8.0,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large,
-    optimiser: str = _defaults.default_optimiser,
-    max_num_evaluations: int = _defaults.default_max_evals_normal,
-    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot,
-    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large.value,
+    optimiser: str = _defaults.default_optimiser.value,
+    max_num_evaluations: int = _defaults.default_max_evals_normal.value,
+    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot.value,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
     multi_core: bool = True,
     display_images: bool = False,
     display_crop: bool = False,
@@ -272,10 +272,7 @@ def calibrate_denoise_butterworth(
         order_list = numpy.linspace(min_order, max_order, 32).tolist()
 
         parameter_ranges = {'order': order_list} | {
-            k: [
-                v,
-            ]
-            for (k, v) in best_parameters.items()
+            k: [v] for (k, v) in best_parameters.items()
         }
 
         best_parameters = (

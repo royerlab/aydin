@@ -32,6 +32,7 @@ class TrainingCroppingTab(BaseCroppingTab):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.parent = parent
 
         self.use_same_crop_checkbox = QCheckBox("Use same cropping for denoising")
         self.use_same_crop_checkbox.toggled.connect(
@@ -63,15 +64,19 @@ class TrainingCroppingTab(BaseCroppingTab):
             if type(response) == tuple:
                 best_slice = response[1]
 
-                # TODO: extend this implementation to handle all chosen spatial-temporal dimensions
+                t_slice = best_slice[images[0][2].axes.find("T")]
+                z_slice = best_slice[images[0][2].axes.find("Z")]
                 y_slice = best_slice[images[0][2].axes.find("Y")]
                 x_slice = best_slice[images[0][2].axes.find("X")]
+                self.t_crop_slider.slider.setValues((t_slice.start, t_slice.stop))
+                self.z_crop_slider.slider.setValues((z_slice.start, z_slice.stop))
                 self.y_crop_slider.slider.setValues((y_slice.start, y_slice.stop))
                 self.x_crop_slider.slider.setValues((x_slice.start, x_slice.stop))
 
     def update_summary(self):
-
         super().update_summary()
+
+        self.parent._toggle_spatial_features()
 
         if math.prod(self.cropped_image[0].shape) > 50_000_000:
             self.size_warning_label.setText(
@@ -82,3 +87,27 @@ class TrainingCroppingTab(BaseCroppingTab):
             )
         else:
             self.size_warning_label.setText("")
+
+    def disable_spatial_features(self):
+        return (
+            (
+                not self.x_crop_slider.isHidden()
+                and self.x_crop_slider.slider.range()
+                != self.x_crop_slider.slider.values()
+            )
+            or (
+                not self.y_crop_slider.isHidden()
+                and self.y_crop_slider.slider.range()
+                != self.y_crop_slider.slider.values()
+            )
+            or (
+                not self.z_crop_slider.isHidden()
+                and self.z_crop_slider.slider.range()
+                != self.z_crop_slider.slider.values()
+            )
+            or (
+                not self.t_crop_slider.isHidden()
+                and self.t_crop_slider.slider.range()
+                != self.t_crop_slider.slider.values()
+            )
+        )

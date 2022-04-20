@@ -114,7 +114,7 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
         exclude_center_value : bool
             If true, the center pixel is never used
             to compute any feature, different feature generation algorithms can
-            take different approaches to acheive that.
+            take different approaches to achieve that.
 
         features : ndarray
             If None the feature array is allocated internally,
@@ -126,23 +126,27 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
             dimension.
 
         passthrough_channels : Optional[Tuple[bool]]
-            Optional tuple of booleans that specify which channels are 'pass-through'
-            channels, i.e. channels that are not featurised and directly used as features.
+            Optional tuple of booleans that specify which channels are
+            'pass-through' channels, i.e. channels that are not featurised
+            and directly used as features.
 
         num_reserved_features : int
             Number of features to be left as blank,
             useful when adding features separately.
 
         excluded_voxels : Optional[List[Tuple[int]]]
-            List of pixel coordinates -- expressed as tuple of ints relative to the central pixel --
-            that will be excluded from any computed features. This is used for implementing
-            'extended blind-spot' N2S denoising approaches.
+            List of pixel coordinates -- expressed as tuple of ints relative to
+            the central pixel -- that will be excluded from any computed features.
+            This is used for implementing 'extended blind-spot' N2S denoising
+            approaches.
 
         spatial_feature_offset: Optional[Tuple[float, ...]]
-            Offset vector to be applied (added) to the spatial features (if used).
+            Offset vector to be applied (added) to the spatial features
+            (if used).
 
         spatial_feature_scale: Optional[Tuple[float, ...]]
-            Scale vector to be applied (multiplied) to the spatial features (if used).
+            Scale vector to be applied (multiplied) to the spatial features
+            (if used).
 
         Returns
         -------

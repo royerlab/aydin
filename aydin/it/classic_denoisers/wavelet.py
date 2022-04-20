@@ -15,11 +15,11 @@ def calibrate_denoise_wavelet(
     image: ArrayLike,
     all_wavelets: bool = False,
     wavelet_name_filter: str = '',
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
     optimiser: str = 'smart',  # using smart optimiser is important here!
-    max_num_evaluations: int = _defaults.default_max_evals_normal,
-    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot,
-    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode,
+    max_num_evaluations: int = _defaults.default_max_evals_normal.value,
+    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot.value,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -101,10 +101,7 @@ def calibrate_denoise_wavelet(
     )
 
     # Sigma range:
-    sigma_range = (
-        1e-9,
-        1.0,
-    )
+    sigma_range = (1e-9, 1.0)
 
     # List of all wavelets:
     all_wavelets_list = pywt.wavelist()
@@ -172,12 +169,8 @@ def calibrate_denoise_wavelet(
 
     # Next pass we optimise the mode and method:
     parameter_ranges = {
-        'sigma': [
-            best_parameters['sigma'],
-        ],
-        'wavelet': [
-            best_parameters['wavelet'],
-        ],  #
+        'sigma': [best_parameters['sigma']],
+        'wavelet': [best_parameters['wavelet']],  #
         'mode': ['soft', 'hard'],
         'method': ['BayesShrink', 'VisuShrink'],
     }

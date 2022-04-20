@@ -71,13 +71,14 @@ class UniformFeatures(FeatureGroupBase):
             (advanced)
 
         min_level : int
-            Minimum scale level of features to include
+            Minimum scale level of features to include.
             (advanced)
 
-        max_level : int Maximum scale level of features to include.
-        Generating features with less levels speeds up computation but also
-        reduces the quality of the denoising, typically in very flat regions
-        of the image.
+        max_level : int
+            Maximum scale level of features to include.
+            Generating features with less levels speeds up computation but also
+            reduces the quality of the denoising, typically in very flat regions
+            of the image.
 
         scale_one_width : int
             Width of scale-one features.
