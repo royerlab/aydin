@@ -1,5 +1,4 @@
 import numpy
-from numpy import absolute
 from numpy.random import rand
 from scipy.ndimage import correlate
 from skimage.exposure import rescale_intensity

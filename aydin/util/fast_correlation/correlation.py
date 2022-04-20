@@ -11,6 +11,6 @@ def correlate(image: ArrayLike, weights: ArrayLike, output: ArrayLike = None):
     try:
         output = numba_cpu_correlate(image=image, kernel=weights, output=output)
         return output
-    except:
+    except Exception:
         traceback.print_exc()
         return scipy_ndimage_correlate(image=image, kernel=weights, output=output)

@@ -3,7 +3,7 @@ import multiprocessing
 import numpy
 from joblib import Parallel, delayed
 from numpy.typing import ArrayLike
-from scipy.ndimage import uniform_filter, correlate
+from scipy.ndimage import correlate
 
 from aydin.util.array.nd import nd_split_slices, remove_margin_slice
 

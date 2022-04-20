@@ -1,6 +1,3 @@
-from math import ceil
-
-import numba
 import numpy
 from numba import jit, prange
 from numpy.typing import ArrayLike
@@ -14,7 +11,7 @@ def numba_cpu_correlate(image: ArrayLike, kernel: ArrayLike, output=None):
     # Kernel must have odd dimenions:
     if any((s % 2) == 0 for s in kernel.shape):
         raise ValueError(
-            f"This convolution function only supports kernels with odd lengths."
+            "This convolution function only supports kernels with odd lengths."
         )
 
     # Numba does not support float16 yet:
