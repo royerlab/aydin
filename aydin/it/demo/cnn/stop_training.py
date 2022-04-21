@@ -78,4 +78,5 @@ def demo():
         viewer.add_image(n(denoised_inf), name='denoised_inf')
 
 
-demo()
+if __name__ == "__main__":
+    demo()

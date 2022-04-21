@@ -106,18 +106,18 @@ def demo(image, name, do_add_noise=True):
     plt.show()
 
 
-newyork_image = newyork()
-demo(newyork_image, "newyork")
-lizard_image = lizard()
-demo(lizard_image, "lizard")
+if __name__ == "__main__":
+    newyork_image = newyork()
+    demo(newyork_image, "newyork")
+    lizard_image = lizard()
+    demo(lizard_image, "lizard")
 
-camera_image = camera()
-demo(camera_image, "camera")
-# characters_image = characters()
-# demo(characters_image, "characters")
-pollen_image = pollen()
-demo(pollen_image, "pollen")
+    camera_image = camera()
+    demo(camera_image, "camera")
+    # characters_image = characters()
+    # demo(characters_image, "characters")
+    pollen_image = pollen()
+    demo(pollen_image, "pollen")
 
-
-dots_image = dots()
-demo(dots_image, "dots")
+    dots_image = dots()
+    demo(dots_image, "dots")

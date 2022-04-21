@@ -21,11 +21,10 @@ def _j_invariant_loss(
     denoiser_kwargs=None,
 ):
     try:
-        denoised = _invariant_denoise(
-            masked_input_image=masked_input_image,
-            denoise_function=denoise_function,
-            denoiser_kwargs=denoiser_kwargs,
-        )
+        if denoiser_kwargs is None:
+            denoiser_kwargs = {}
+
+        denoised = denoise_function(masked_input_image, **denoiser_kwargs)
     except RuntimeError:
         lprint(
             "Denoising failed during calibration, skipping by returning "
@@ -37,16 +36,6 @@ def _j_invariant_loss(
     loss = loss_function(image[mask], denoised[mask])
 
     return loss
-
-
-def _invariant_denoise(masked_input_image, denoise_function, *, denoiser_kwargs=None):
-
-    if denoiser_kwargs is None:
-        denoiser_kwargs = {}
-
-    output = denoise_function(masked_input_image, **denoiser_kwargs)
-
-    return output
 
 
 def _interpolate_image(
@@ -79,17 +68,18 @@ def _interpolate_image(
                 interpolation, footprint=median_footprint, mode=boundary_mode
             )
 
-        # Enforce that non-masked values are set:
+        # Enforce that non-masked values are set to the original's image values:
         interpolation[~mask] = image[~mask]
 
     return interpolation
 
 
 @lru_cache(maxsize=None)
-def _generate_gaussian_kernel(ndim: int, dtype):
-    kernel = numpy.zeros(shape=(3,) * ndim, dtype=dtype)
+def _generate_gaussian_kernel(ndim: int, dtype, size: int = 5, sigma: float = 0.75):
+
+    kernel = numpy.zeros(shape=(size,) * ndim, dtype=dtype)
     kernel.ravel()[kernel.size // 2] = 1
-    kernel = gaussian_filter(kernel, sigma=0.5)
+    kernel = gaussian_filter(kernel, sigma=sigma)
     kernel.ravel()[kernel.size // 2] = 0
     kernel /= kernel.sum()
     return kernel
@@ -113,7 +103,7 @@ def _generate_mask(
     spatialdims = image.ndim
 
     # Compute slicing for mask:
-    n_masks = stride**spatialdims
+    n_masks = stride ** spatialdims
     mask_slice = _generate_grid_slice(
         image.shape[:spatialdims], offset=n_masks // 2, stride=stride
     )

@@ -39,7 +39,8 @@ def demo(image):
         viewer.add_image(denoised, name='denoised')
 
 
-hcr = examples_single.royerlab_hcr.get_array().squeeze()
-hcr = hcr[1]
+if __name__ == "__main__":
+    hcr = examples_single.royerlab_hcr.get_array().squeeze()
+    hcr = hcr[1]
 
-demo(hcr)
+    demo(hcr)

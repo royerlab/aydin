@@ -20,4 +20,5 @@ def demo_analysis():
         print(f"Correlations:  {correlations} ")
 
 
-demo_analysis()
+if __name__ == "__main__":
+    demo_analysis()

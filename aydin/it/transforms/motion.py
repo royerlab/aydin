@@ -383,7 +383,7 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
             # We compute the center of mass:
             # We take the square to squash small values far from the maximum that are likely noisy...
             signed_com_shift = (
-                numpy.array(scipy.ndimage.center_of_mass(cropped_correlation**2))
+                numpy.array(scipy.ndimage.center_of_mass(cropped_correlation ** 2))
                 - fine_window_radius
             )
 

@@ -330,18 +330,19 @@ def calibrate_denoise_butterworth(
         )
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
-    # We apply the frequency tolerance:
+    # Normalise single float cutoff freq to tuple:
     if type(best_parameters['freq_cutoff']) is float:
-        best_parameters['freq_cutoff'] = min(
-            1.0, max(0.0, best_parameters['freq_cutoff'] + frequency_tolerance)
-        )
-    else:
         best_parameters['freq_cutoff'] = tuple(
-            (
-                min(1.0, max(0.0, f + frequency_tolerance))
-                for f in best_parameters['freq_cutoff']
-            )
+            (best_parameters['freq_cutoff'],) * image.ndim
         )
+
+    # Add frequency_tolerance to all cutoff frequencies:
+    best_parameters['freq_cutoff'] = tuple(
+        (
+            min(1.0, max(0.0, f + frequency_tolerance))
+            for f in best_parameters['freq_cutoff']
+        )
+    )
 
     # Memory needed:
     memory_needed = 6 * image.nbytes  # complex numbers and more
@@ -518,5 +519,5 @@ def _filter_chebyshev(image_f, epsilon, chebyshev):
 
 
 def _filter_butterworth(image_f, f, order):
-    image_f /= numpy.sqrt(1 + f**order)
+    image_f /= numpy.sqrt(1 + f ** order)
     return image_f

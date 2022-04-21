@@ -7,7 +7,7 @@ from scipy.fft import dctn
 from aydin.analysis.resolution_estimate import resolution_estimate
 
 
-def snr_estimate(image) -> float:
+def snr_estimate(image, display_images: bool = False) -> float:
     """Estimates the signal to noise ratio of an image in DB.
 
     A value of 0 means that the signal and noise have roughly the same energy,
@@ -18,6 +18,10 @@ def snr_estimate(image) -> float:
     Parameters
     ----------
     image : numpy.typing.ArrayLike
+        Image to compute SNR estimate for.
+
+    display_images: bool
+        If true displays the spectrum in a napari window.
 
     Returns
     -------
@@ -27,6 +31,20 @@ def snr_estimate(image) -> float:
     # First we estimate resolution:
     frequency, image = resolution_estimate(image)
 
+    # import napari
+    # viewer = napari.Viewer()
+    # viewer.add_image(image, name='clean_image')
+    # napari.run()
+
+    # cast and copy:
+    image = image.astype(numpy.float32)
+
+    # Normalise:
+    image -= image.mean()
+    variance = image.var()
+    if variance > 0:
+        image /= variance
+
     # Compute the DCT:
     image_dct = dctn(image, workers=-1)
 
@@ -34,7 +52,7 @@ def snr_estimate(image) -> float:
     f = numpy.zeros_like(image)
     axis_grid = tuple(numpy.linspace(0, 1, s) for s in image.shape)
     for x in numpy.meshgrid(*axis_grid, indexing='ij'):
-        f += x**2
+        f += x ** 2
     f = numpy.sqrt(f)
 
     # define two domains:
@@ -44,6 +62,22 @@ def snr_estimate(image) -> float:
     # First we measure the energy of both signa and noise:
     signal_energy = norm(image_dct[signal_domain]) ** 2
     noise_energy = norm(image_dct[noise_domain]) ** 2
+
+    if display_images:
+        import napari
+
+        viewer = napari.Viewer()
+        viewer.add_image(image, name='image')
+        viewer.add_image(image_dct, name='image_dct')
+
+        image_dct_signal = image_dct.copy()
+        image_dct_signal[noise_domain] = 0
+        viewer.add_image(image_dct_signal, name='image_dct_signal')
+
+        image_dct_noise = image_dct.copy()
+        image_dct_noise[signal_domain] = 0
+        viewer.add_image(image_dct_noise, name='image_dct_noise')
+        napari.run()
 
     # However, this is an underestimate of the noise, because we assume that
     # the noise is uniformly distributed in frequency space. Therefore, we need

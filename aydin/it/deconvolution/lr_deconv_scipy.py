@@ -25,7 +25,7 @@ class ImageTranslatorLRDeconvScipy(ImageTranslatorLRDeconv):
         super().__init__(*args, **kwargs)
 
         self.max_voxels_per_tile = (
-            512**3 if self.max_voxels_per_tile is None else self.max_voxels_per_tile
+            512 ** 3 if self.max_voxels_per_tile is None else self.max_voxels_per_tile
         )
 
     def _convert_array_format_in(self, input_image):

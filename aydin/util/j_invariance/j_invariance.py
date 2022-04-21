@@ -19,12 +19,12 @@ def calibrate_denoiser(
     image,
     denoise_function: Callable,
     denoise_parameters: Dict[str, Union[Tuple[float, float], List[Any]]],
-    mode: str = 'fast',
+    mode: str = 'smart',
     max_num_evaluations: int = 128,
     patience: int = 64,
-    interpolation_mode: str = 'median',
+    interpolation_mode: str = 'gaussian',
     stride: int = 4,
-    loss_function: str = 'L2',
+    loss_function: str = 'L1',
     blind_spots: Optional[List[Tuple[int]]] = None,
     display_images: bool = False,
     **other_fixed_parameters,
@@ -123,8 +123,7 @@ def calibrate_denoiser(
         )
 
         # Masked input image (fixed during optimisation!):
-        masked_input_image = image.copy()
-        masked_input_image[mask] = interpolation[mask]
+        masked_input_image = interpolation.copy()
 
         # We backup the masked input image to make sure that it is unchanged after optimisation,
         # which would indicate a 'non-behaving' denoiser that ioperates 'in-place'...

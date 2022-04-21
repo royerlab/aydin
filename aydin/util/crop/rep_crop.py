@@ -86,7 +86,7 @@ def representative_crop(
     start_time = time.time()
 
     # convert type:
-    image = image.astype(dtype=numpy.float32, copy=False)
+    image = image.astype(dtype=numpy.float32)
 
     # Normalise:
     image_min = image.min()
@@ -198,7 +198,7 @@ def representative_crop(
         # the relative size of the crop versus whole image:
         random_search_mode_num_crops = min(
             random_search_mode_num_crops,
-            (granularity_factor**image.ndim) * int(image.size / crop_size),
+            (granularity_factor ** image.ndim) * int(image.size / crop_size),
         )
 
         for index in range(random_search_mode_num_crops):

@@ -27,4 +27,5 @@ def demo_noise_model():
         viewer.add_image(noise_model, name='noise_model')
 
 
-demo_noise_model()
+if __name__ == "__main__":
+    demo_noise_model()
