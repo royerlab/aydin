@@ -332,7 +332,9 @@ def calibrate_denoise_butterworth(
 
     # We apply the frequency tolerance:
     if type(best_parameters['freq_cutoff']) is float:
-        best_parameters['freq_cutoff'] = min(1.0, max(0.0, best_parameters['freq_cutoff'] + frequency_tolerance))
+        best_parameters['freq_cutoff'] = min(
+            1.0, max(0.0, best_parameters['freq_cutoff'] + frequency_tolerance)
+        )
     else:
         best_parameters['freq_cutoff'] = tuple(
             (
