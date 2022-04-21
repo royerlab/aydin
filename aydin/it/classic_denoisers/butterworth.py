@@ -119,7 +119,7 @@ def calibrate_denoise_butterworth(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -331,12 +331,17 @@ def calibrate_denoise_butterworth(
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
     # We apply the frequency tolerance:
-    best_parameters['freq_cutoff'] = tuple(
-        (
-            min(1.0, max(0.0, f + frequency_tolerance))
-            for f in best_parameters['freq_cutoff']
+    if type(best_parameters['freq_cutoff']) is float:
+        best_parameters['freq_cutoff'] = min(
+            1.0, max(0.0, best_parameters['freq_cutoff'] + frequency_tolerance)
         )
-    )
+    else:
+        best_parameters['freq_cutoff'] = tuple(
+            (
+                min(1.0, max(0.0, f + frequency_tolerance))
+                for f in best_parameters['freq_cutoff']
+            )
+        )
 
     # Memory needed:
     memory_needed = 6 * image.nbytes  # complex numbers and more
