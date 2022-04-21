@@ -21,7 +21,7 @@ def demo(image, name, do_add_noise=True):
     Demo for self-supervised denoising using camera image with synthetic noise
     """
     Log.enable_output = True
-    Log.set_log_max_depth(8)
+    Log.set_log_max_depth(9)
 
     image = normalise(image.astype(np.float32))
     noisy = add_noise(image) if do_add_noise else image
@@ -31,6 +31,7 @@ def demo(image, name, do_add_noise=True):
         include_scale_one=True,
         include_fine_features=True,
         include_spatial_features=True,
+        include_lowpass_features=True,
     )
 
     regressor = CBRegressor(

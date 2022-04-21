@@ -7,13 +7,20 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import normalise, add_noise, dots, camera, cropped_newyork
+from aydin.io.datasets import (
+    normalise,
+    add_noise,
+    dots,
+    camera,
+    cropped_newyork,
+    newyork,
+)
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.cb import CBRegressor
 from aydin.util.log.log import Log
 
 
-def demo(image, name, do_add_noise=True):
+def demo(image, do_add_noise=True):
     """
     Demo for self-supervised denoising using camera image with synthetic noise
     """
@@ -24,14 +31,15 @@ def demo(image, name, do_add_noise=True):
     noisy = add_noise(image) if do_add_noise else image
 
     generator = StandardFeatureGenerator(
-        include_corner_features=True,
+        include_corner_features=False,
         include_scale_one=True,
-        include_fine_features=True,
-        include_spatial_features=True,
-        include_median_features=True,
-        include_dct_features=True,
+        include_fine_features=False,
+        include_spatial_features=False,
+        include_median_features=False,
+        include_dct_features=False,
         num_sinusoidal_features=4,
-        include_random_conv_features=True,
+        include_random_conv_features=False,
+        include_lowpass_features=True,
     )
 
     regressor = CBRegressor(patience=256, gpu=True, min_num_estimators=1024)
@@ -68,14 +76,15 @@ def demo(image, name, do_add_noise=True):
         viewer.add_image(denoised, name='denoised')
 
 
+newyork_image = newyork()
+demo(newyork_image, "newyork")
 camera_image = camera()
 demo(camera_image, "camera")
 # lizard_image = lizard()
 # demo(lizard_image, "lizard")
 # pollen_image = pollen()
 # demo(pollen_image, "pollen")
-# newyork_image = newyork()
-# demo(newyork_image, "newyork")
+
 newyork_image = cropped_newyork()
 demo(newyork_image, "newyork")
 dots_image = dots()

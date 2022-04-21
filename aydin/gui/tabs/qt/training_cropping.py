@@ -54,9 +54,9 @@ class TrainingCroppingTab(BaseCroppingTab):
             image = images[0][1]
             response = representative_crop(
                 image,
-                mode='contrast' if image.size > 1_000_000 else 'sobelmin',
-                crop_size=500_000,
-                search_mode=image.size > 2_000_000,
+                mode='contrast' if image.size > 5_000_000 else 'sobelmin',
+                crop_size=2_000_000,
+                search_mode='random' if image.size > 10_000_000 else 'systematic',
                 random_search_mode_num_crops=1024,
                 return_slice=True,
             )

@@ -4,20 +4,21 @@ from random import randrange
 from typing import Optional
 
 import numpy
-from numba import jit
+from numpy import absolute
 from numpy.typing import ArrayLike
-from scipy.ndimage import sobel, laplace
+from scipy.ndimage import sobel, gaussian_filter
 
-from aydin.util.fast_uniform_filter.uniform_filter import uniform_filter_auto
-from aydin.util.log.log import lprint
+from aydin.util.edge_filter.fast_edge_filter import fast_edge_filter
+from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
+from aydin.util.log.log import lprint, lsection
 
 
 def representative_crop(
     image: ArrayLike,
-    mode: str = 'sobelmin',
+    mode: str = 'contrast',
     crop_size: Optional[int] = None,
-    min_length: int = 16,
-    smoothing_size: int = 1.0,
+    min_length: int = 32,
+    smoothing_sigma: int = 0.5,
     equal_sides: bool = False,
     favour_odd_lengths: bool = False,
     search_mode: str = 'random',
@@ -47,9 +48,9 @@ def representative_crop(
     min_length : int
         Crop axis lengths cannot be smaller than this number.
 
-    smoothing_size : int
-        Uniform filter smoothing to achieve some crude denoising and thus
-        make it a bit easier to estimate the score.
+    smoothing_sigma : int
+        Sigma value for Gaussian filter smoothing to achieve some crude denoising and thus
+        make it a bit easier to estimate the score per crop.
 
     equal_sides : bool
         When True the crop will have all its sides of equal size (square, cube, ...)
@@ -83,6 +84,53 @@ def representative_crop(
 
     # Start time:
     start_time = time.time()
+
+    # convert type:
+    image = image.astype(dtype=numpy.float32, copy=False)
+
+    # Normalise:
+    image_min = image.min()
+    image_max = image.max()
+    image -= image_min
+    if image_max > 0:
+        image /= image_max
+
+    # Apply filter:
+    with lsection(f"Apply cropping filter to image of: {image.shape}"):
+
+        sigma = tuple((smoothing_sigma if s > min_length else 0 for s in image.shape))
+        size = tuple((16 if s > min_length else 1 for s in image.shape))
+
+        filtered_image = gaussian_filter(image, sigma=sigma) - parallel_uniform_filter(
+            image, size=size
+        )
+
+        if mode == 'contrast':
+            pass
+        elif mode == 'sobelfast':
+            filtered_image = _sobel_fast(filtered_image)
+        elif mode == 'sobel':
+            filtered_image = _sobel_magnitude(filtered_image)
+        elif mode == 'sobelmin':
+            filtered_image = _sobel_minimum(filtered_image)
+        elif mode == 'sobelmax':
+            filtered_image = _sobel_maximum(filtered_image)
+        else:
+            raise ValueError(f"Unknown mode: {mode}")
+    #
+    # import napari
+    # with napari.gui_qt():
+    #     viewer = napari.Viewer()
+    #     viewer.add_image(image, name='image')
+    #     viewer.add_image(filtered_image, name='filtered_image')
+
+    # To speed up cropping we apply a divide and conquer to 'pre-crop' the image recusively:
+    # if precropping:
+    #     image = _precrop(image,
+    #                      crop_size=crop_size,
+    #                      min_length=min_length,
+    #                      mode=mode,
+    #                      smoothing_size=smoothing_size)
 
     # Number of voxels in image:
     num_voxels = image.size
@@ -133,10 +181,6 @@ def representative_crop(
     # range for translation:
     translation_range = tuple(s - cs for s, cs in zip(image.shape, cropped_shape))
 
-    # min and max for crop value normalisation:
-    image_min = None
-    image_max = None
-
     # We loop through a number of crops and keep the one wit the best score:
     best_score = -1
     best_slice = None
@@ -144,7 +188,7 @@ def representative_crop(
 
     # Instead of searching for all possible crops, we take into
     # account the size of the crops to define a 'granularity' (
-    # stride) of the transtlations used for search:
+    # stride) of the translations used for search:
     granularity_factor = 4
     granularity = tuple(cs // granularity_factor for cs in cropped_shape)
 
@@ -178,15 +222,9 @@ def representative_crop(
             )
 
             # extract crop:
-            crop = image[crop_slice]
+            crop = filtered_image[crop_slice]
 
-            score = evaluate_crop(
-                crop=crop,
-                image_min=image_min,
-                image_max=image_max,
-                mode=mode,
-                smoothing_size=smoothing_size,
-            )
+            score = numpy.std(crop)
 
             # slice object for the actual crop:
             crop_slice = _crop_slice(translation, cropped_shape, 1)
@@ -226,15 +264,9 @@ def representative_crop(
             )
 
             # extract crop:
-            crop = image[crop_slice]
+            crop = filtered_image[crop_slice]
 
-            score = evaluate_crop(
-                crop=crop,
-                image_min=image_min,
-                image_max=image_max,
-                mode=mode,
-                smoothing_size=smoothing_size,
-            )
+            score = numpy.std(crop)
 
             # update best score and image:
             if score > best_score and not math.isinf(score):
@@ -253,7 +285,6 @@ def representative_crop(
         raise ValueError(f"Unsupported search mode: {search_mode}")
 
     if display_crop:
-        smoothed_best_crop = _smoothing(best_crop, size=smoothing_size)
 
         import napari
 
@@ -261,7 +292,6 @@ def representative_crop(
             viewer = napari.Viewer()
             viewer.add_image(image, name='image')
             viewer.add_image(best_crop, name='best_crop')
-            viewer.add_image(smoothed_best_crop, name='smoothed_best_crop')
 
     if return_slice:
         return best_crop, best_slice
@@ -269,55 +299,11 @@ def representative_crop(
         return best_crop
 
 
-def evaluate_crop(crop, image_min, image_max, mode, smoothing_size):
-
-    # smooth crop as a crude denoising:
-    smoothed_crop = _smoothing(crop, size=smoothing_size)
-
-    # convert type:
-    smoothed_crop = smoothed_crop.astype(dtype=numpy.float32, copy=False)
-
-    # Normalise:
-    smoothed_crop = _normalise_crop(crop, image_max, image_min, smoothed_crop)
-
-    # compute score:
-    if mode == 'contrast':
-        score = numpy.std(smoothed_crop)
-    elif mode == 'sobel':
-        score = numpy.std(_sobel_magnitude(smoothed_crop))
-    elif mode == 'sobelmin':
-        score = numpy.std(_sobel_minimum(smoothed_crop))
-    elif mode == 'laplace':
-        score = numpy.std(laplace(smoothed_crop))
-    else:
-        raise ValueError(f"Unknown mode: {mode}")
-    return score
-
-
-@jit(
-    nopython=True,
-    parallel=True,
-    error_model='numpy',
-    fastmath={'contract', 'afn', 'reassoc'},
-)
-def _normalise_crop(crop, image_max, image_min, smoothed_crop):
-    if image_min is None or image_max is None:
-        image_min = crop.min()
-        image_max = crop.max()
-    # Normalise crop values:
-    smoothed_crop -= image_min
-    smoothed_crop /= image_max
-    return smoothed_crop
-
-
-def _smoothing(crop, size):
-    smoothed_crop = uniform_filter_auto(crop, size=1 + 2 * size, printout_choice=False)
-    return smoothed_crop
-
-
 def _sobel_magnitude(image):
     magnitude = numpy.zeros_like(image)
     for axis in range(image.ndim):
+        if image.shape[axis] < 32:
+            continue
         magnitude += sobel(image, axis=axis) ** 2
     return numpy.sqrt(magnitude)
 
@@ -325,8 +311,114 @@ def _sobel_magnitude(image):
 def _sobel_minimum(image):
     minimum = None
     for axis in range(image.ndim):
+        if image.shape[axis] < 32:
+            continue
+        sobel_image = absolute(sobel(image, axis=axis))
         if minimum is None:
-            minimum = sobel(image, axis=axis)
+            minimum = sobel_image
         else:
-            minimum = numpy.minimum(minimum, sobel(image, axis=axis))
-    return minimum
+            minimum = numpy.minimum(minimum, sobel_image)
+    if minimum is None:
+        return image
+    else:
+        return minimum
+
+
+def _sobel_maximum(image):
+    maximum = None
+    for axis in range(image.ndim):
+        if image.shape[axis] < 32:
+            continue
+        sobel_image = absolute(fast_edge_filter(image, axis=axis))
+        if maximum is None:
+            maximum = sobel_image
+        else:
+            maximum = numpy.maximum(maximum, sobel_image)
+    if maximum is None:
+        return image
+    else:
+        return maximum
+
+
+def _sobel_fast(image):
+
+    longest_axis = max(image.shape)
+    axis = image.shape.index(longest_axis)
+
+    return absolute(fast_edge_filter(image, axis=axis))
+
+
+#
+# def _precrop(image, crop_size, min_length, mode, smoothing_size, slice=None):
+#
+#     # If image is already smaller than requested then we don't need to do anything:
+#     if image.size <= crop_size:
+#         return image
+#
+#     # cropped shape:
+#     cropped_shape = tuple(
+#         min(max(min_length, int(s // 2)), s) for s in image.shape)
+#
+#     # range for translation:
+#     translation_range = tuple(s - cs for s, cs in zip(image.shape, cropped_shape))
+#
+#     # Instead of searching for all possible crops, we take into
+#     # account the size of the crops to define a 'granularity' (
+#     # stride) of the translations used for search:
+#     granularity_factor = 4
+#     granularity = tuple(cs // granularity_factor for cs in cropped_shape)
+#
+#     # grid for translations:
+#     translation_indices = tuple(
+#         max(1, int(granularity_factor * r / cs))
+#         for r, cs in zip(translation_range, cropped_shape)
+#     )
+#
+#     # Best scores and crop:
+#     best_score = -1
+#     best_slice = None
+#     best_crop = None
+#
+#     for i, index in enumerate(numpy.ndindex(translation_indices)):
+#         # translation:
+#         translation = tuple(
+#             int(i * cs / granularity_factor) for i, cs in
+#             zip(index, cropped_shape)
+#         )
+#
+#         # slice object for cropping:
+#         crop_slice = tuple(
+#             slice(t, t + s) for t, s in zip(translation, cropped_shape)
+#         )
+#
+#         # extract crop:
+#         crop = image[crop_slice]
+#
+#         score = evaluate_crop(
+#             crop=crop,
+#             mode=mode,
+#             smoothing_size=smoothing_size,
+#         )
+#
+#         if score > best_score:
+#             best_score = score
+#             best_slice = crop_slice
+#             best_crop = crop
+#
+#
+#     # If the best block is too small we abort and return the original image,
+#     # because we are just 'pre-cropping' and we should still get a bigger crop:
+#     if best_crop.size < crop_size:
+#         return image, best_slice
+#
+#
+#     # If the crop is fine then we proceed with the recursive call to further cutdown on the croip size:
+#     precrop = _precrop(best_crop,
+#                        crop_size,
+#                        min_length,
+#                        mode,
+#                        smoothing_size)
+#
+#     # Return:
+#     return precrop
+#

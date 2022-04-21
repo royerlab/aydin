@@ -103,7 +103,7 @@ def dimension_analysis_on_image(
                 optimiser='smart',
                 max_num_evaluations=max_num_evaluations,
                 jinv_interpolation_mode='gaussian',
-                enable_extended_blind_spot=False,
+                blind_spots=False,
                 crop_size_in_voxels=crop_size_in_voxels,
                 display_images=False,
             )

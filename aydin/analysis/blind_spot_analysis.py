@@ -13,7 +13,7 @@ def auto_detect_blindspots(
     image,
     batch_axes: Tuple[bool] = None,
     channel_axes: Tuple[bool] = None,
-    threshold=0.01,
+    threshold=0.1,
     max_blind_spots=3,
     max_range: int = 3,
     window: int = 31,

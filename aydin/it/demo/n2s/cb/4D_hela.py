@@ -17,15 +17,18 @@ def demo():
     image_path = examples_single.hyman_hela.get_path()
     image, metadata = io.imread(image_path)
     print(image.shape)
-    # image = image[0:10, 15:35, 130:167, 130:177]
-    # image = image[:, :, 100:-100, 100:-100]
-    # print(image.shape)
+
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
-    generator = StandardFeatureGenerator(max_level=7)
+    generator = StandardFeatureGenerator(max_level=7, include_spatial_features=True)
     regressor = CBRegressor()
 
-    it = ImageTranslatorFGR(generator, regressor, max_voxels_for_training=1e6)
+    it = ImageTranslatorFGR(
+        generator,
+        regressor,
+        balance_training_data=True,
+        max_voxels_for_training=10_000_000,
+    )
 
     batch_dims = (False, False, False, False)
 

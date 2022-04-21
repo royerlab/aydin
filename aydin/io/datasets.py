@@ -95,6 +95,10 @@ def cropped_newyork(crop_amount=256):
     return newyork()[crop_amount:-crop_amount, crop_amount:-crop_amount]
 
 
+def newyork_noisy():
+    return examples_single.newyork_noisy.get_array()
+
+
 def pollen():
     return examples_single.generic_pollen.get_array()
 
@@ -136,6 +140,7 @@ class examples_single(Enum):
         array, _ = io.imread(self.get_path())
         return array
 
+    newyork_noisy = ('13ompUqT7Ti64fStqx76I9j9voWMZWnfA', 'newyork_noisy.tif')
     fountain = ('1JP-_j-6U7J1gNc9IZCZ_GsgXTcybmZgS', 'fountain.png')
     monalisa = ('15T3oTCyz7ugnPLTsKc0a9NT17g9GJsO_', 'monalisa.png')
     gauss_noisy = ('17e_ECJA7DUQGu9JELbTkAKbOVVE9olHN', 'Gauss_noisy.png')
@@ -171,6 +176,10 @@ class examples_single(Enum):
     leonetti_snca = (
         '1UyF5HkZLwTaoiBf1sLHkTdw09yyCJyKO',
         'Leonetti_p1H8_2_SNCA_PyProcessed_IJClean.tif',
+    )
+    leonetti_arhgap21 = (
+        '1arq6nj4oiJaxG7dPHjhYVTSYXM2Czpgx',
+        'Leonetti_OC-FOV_ARHGAP21_ENSG00000107863_CID000556_FID00030711_stack.tif',
     )
 
     # XYZ

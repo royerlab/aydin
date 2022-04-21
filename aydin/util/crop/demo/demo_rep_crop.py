@@ -6,7 +6,9 @@ from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.log.log import Log, lsection
 
 
-def demo_representative_crop(image, search_mode: str = 'random', display: bool = True):
+def demo_representative_crop(
+    image, crop_size=64000, search_mode: str = 'random', display: bool = True
+):
     """
     Demo for self-supervised denoising using camera image with synthetic noise
     """
@@ -14,7 +16,7 @@ def demo_representative_crop(image, search_mode: str = 'random', display: bool =
     Log.set_log_max_depth(5)
 
     with lsection(f"Computing crop for image of shape: {image.shape}"):
-        crop_size = 64000
+
         crop = representative_crop(
             image, crop_size=crop_size, search_mode=search_mode, display_crop=False
         )
@@ -32,8 +34,28 @@ def demo_representative_crop(image, search_mode: str = 'random', display: bool =
 
 if __name__ == "__main__":
 
-    islet = examples_single.royerlab_hcr.get_array().squeeze()[:, 0, ...]
-    demo_representative_crop(islet, search_mode='random')
+    demo_representative_crop(
+        examples_single.royerlab_hcr.get_array().squeeze()[:, 0, ...],
+        crop_size=1_000_000,
+    )
+
+    demo_representative_crop(
+        examples_single.royerlab_hcr.get_array().squeeze()[:, 1, ...],
+        crop_size=1_000_000,
+    )
+
+    demo_representative_crop(
+        examples_single.royerlab_hcr.get_array().squeeze()[:, 2, ...],
+        crop_size=1_000_000,
+    )
+
+    demo_representative_crop(
+        examples_single.maitre_mouse.get_array(), crop_size=1_000_000, display=True
+    )
+
+    demo_representative_crop(
+        examples_single.leonetti_arhgap21.get_array(), crop_size=1_000_000, display=True
+    )
 
     demo_representative_crop(newyork())
     demo_representative_crop(camera())

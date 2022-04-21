@@ -2,33 +2,43 @@ from typing import Sequence, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
-from scipy.ndimage import convolve, gaussian_filter
+from scipy.ndimage import gaussian_filter
 
 from aydin.features.groups.base import FeatureGroupBase
+from aydin.util.fast_correlation.correlation import correlate
 from aydin.util.log.log import lprint
 
 
-class ConvolutionalFeatures(FeatureGroupBase):
+class CorrelationFeatures(FeatureGroupBase):
     """
-    Convolutional Feature Group class
+    Correlation (convolutional) Feature Group class
 
-    Generates convolutional features given a set of kernels.
+    Generates correlative features given a set of kernels.
     """
 
-    def __init__(self, kernels: Optional[Sequence[ArrayLike]]):
+    def __init__(
+        self,
+        kernels: Optional[Sequence[ArrayLike]],
+        separable: bool = True,
+    ):
         """
         Constructor that configures these features.
 
         Parameters
         ----------
         kernels : Optional[Sequence[ArrayLike]]
-            Sequence of kernels to use to compiute features.
+            Sequence of kernels to use to compute features.
+
+        separable : bool
+            If True the kernels are assumed to be separable as identical 1d
+            kernels for each axis.
+
         """
         super().__init__()
         self.kernels = kernels if kernels is None else list(kernels)
         self.image = None
         self.excluded_voxels: Sequence[Tuple[int, ...]] = []
-
+        self.separable = separable
         self.kwargs = None
 
     @property
@@ -50,7 +60,7 @@ class ConvolutionalFeatures(FeatureGroupBase):
     def compute_feature(self, index: int, feature):
         kernel = self.kernels[index]
         lprint(
-            f"Convolutional feature: {index} of shape={kernel.shape}, excluded_voxels={self.excluded_voxels}"
+            f"Correlative feature: {index} of shape={kernel.shape}, excluded_voxels={self.excluded_voxels}"
         )
 
         if len(self.excluded_voxels) > 0:
@@ -90,23 +100,60 @@ class ConvolutionalFeatures(FeatureGroupBase):
                 missing[aslice] = weight
 
             # We apply a Gaussian filter to find neighbooring voxels from which we can estimate the missing values:
-            missing = gaussian_filter(missing, sigma=1)
+            missing = gaussian_filter(missing, sigma=0.5)
+
+            # Save the sum so:
+            saved_sum = missing.sum()
 
             # We zero the excluded voxels from it:
             for aslice in slices:
                 missing[aslice] = 0
 
             # We rescale the missing value estimation kernel:
-            missing /= missing.sum()
+            missing *= saved_sum / missing.sum()
 
             # We add the missing-value-estimation to the kernel:
             kernel += missing
 
         # Convolution:
-        convolve(self.image, weights=kernel, output=feature)
+        _correlate(
+            image=self.image, kernel=kernel, separable=self.separable, output=feature
+        )
+
+        # if self.image.size > 4**4:
+        #     import napari
+        #     from napari import Viewer
+        #     viewer = Viewer()
+        #     viewer.add_image(self.image, name='self.image')
+        #     viewer.add_image(feature, name='feature')
+        #     napari.run()
 
     def finish(self):
         self.image = None
         self.excluded_voxels = None
         self.kwargs = None
         self.kernels = None
+
+
+def _correlate(image: ArrayLike, kernel: ArrayLike, separable: bool, output: ArrayLike):
+
+    if separable and kernel.ndim == 1:
+
+        # Looping through the axis:
+        for axis in range(image.ndim):
+
+            # prepare shape:
+            shape = [
+                1,
+            ] * image.ndim
+            shape[axis] = kernel.shape[0]
+
+            # reshape kernel:
+            kernel = kernel.reshape(*shape)
+
+            # convolve:
+            correlate_output = output if axis == image.ndim - 1 else None
+            image = correlate(image, weights=kernel, output=correlate_output)
+
+    else:
+        correlate(image, weights=kernel, output=output)
