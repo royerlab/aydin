@@ -128,14 +128,14 @@ def receptive_field_conv(kernel, stride, n0=1, n_lyrs=1):
 
 
 def receptive_field_pool(kernel, n0=1, n_lyrs=1):
-    n1 = n0 * kernel**n_lyrs
+    n1 = n0 * kernel ** n_lyrs
     return n1
 
 
 def receptive_field_pool(kernel, n0=1, shift_n=0, n_lyrs=1):
-    n1 = n0 * kernel**n_lyrs
+    n1 = n0 * kernel ** n_lyrs
     if shift_n > 1:  # shift_n is the Nst pooling lyr
-        s = 1 + 2**shift_n
+        s = 1 + 2 ** shift_n
     else:
         s = shift_n
     return n1, s

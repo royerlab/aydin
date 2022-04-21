@@ -48,7 +48,7 @@ def extract_kernels(
 
     """
     if num_kernels is None:
-        num_kernels = size**image.ndim
+        num_kernels = size ** image.ndim
 
     # #############################################################################
     # Learn the dictionary of images
