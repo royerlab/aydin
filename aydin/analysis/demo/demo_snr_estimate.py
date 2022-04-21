@@ -1,4 +1,4 @@
-import pytest
+# import pytest
 from numpy.random.mtrand import normal
 
 from aydin.analysis.snr_estimate import snr_estimate
