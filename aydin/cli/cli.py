@@ -208,7 +208,9 @@ def lucyrichardson(files, psf_path, **kwargs):
         deconvolved = lr.deconvolve(input_image)
 
         path, index_counter = get_output_image_path(
-            filepath, operation_type="deconvolved", output_folder=kwargs["output_folder"]
+            filepath,
+            operation_type="deconvolved",
+            output_folder=kwargs["output_folder"],
         )
         imwrite(deconvolved, path)
 
@@ -271,7 +273,9 @@ def hyperstack(files, **kwargs):
 
     stacked_image = numpy.stack(image_arrays)
 
-    result_path, index_counter = get_output_image_path(result_path, operation_type="hyperstacked")
+    result_path, index_counter = get_output_image_path(
+        result_path, operation_type="hyperstacked"
+    )
     imwrite(stacked_image, result_path)
 
 
