@@ -116,7 +116,7 @@ def denoise(files, **kwargs):
             noisy_metadata.channel_axes = ast.literal_eval(kwargs["channel_axes"])
 
         output_path, index_counter = get_output_image_path(
-            path, output_folder=kwargs["output_folder"]
+            path, operation_type="denoised", output_folder=kwargs["output_folder"]
         )
 
         if kwargs['use_model']:
@@ -208,7 +208,7 @@ def lucyrichardson(files, psf_path, **kwargs):
         deconvolved = lr.deconvolve(input_image)
 
         path, index_counter = get_output_image_path(
-            filepath, "deconvolved", output_folder=kwargs["output_folder"]
+            filepath, operation_type="deconvolved", output_folder=kwargs["output_folder"]
         )
         imwrite(deconvolved, path)
 
@@ -271,7 +271,7 @@ def hyperstack(files, **kwargs):
 
     stacked_image = numpy.stack(image_arrays)
 
-    result_path, index_counter = get_output_image_path(result_path)
+    result_path, index_counter = get_output_image_path(result_path, operation_type="hyperstacked")
     imwrite(stacked_image, result_path)
 
 

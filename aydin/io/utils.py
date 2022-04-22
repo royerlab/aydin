@@ -110,6 +110,8 @@ def get_output_image_path(
         (Correct output path, counter).
 
     """
+    if operation_type not in ["denoised", "deconvolved", "hyperstacked"]:
+        raise ValueError(f"invalud value for operation_type parameter: {operation_type}")
 
     if output_folder:
         path = os.path.join(output_folder, Path(path).name)
