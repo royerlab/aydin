@@ -56,7 +56,7 @@ def resolution_estimate(image, precision: int = 2, display_images: bool = False)
         parameter_ranges = {'freq_cutoff': freq_cutoff_range}
 
         # Partial function:
-        _denoise_function = partial(denoise_butterworth, multi_core=True, order=2)
+        _denoise_function = partial(denoise_butterworth, multi_core=True, order=5)
 
         # import napari
         # viewer = napari.Viewer()

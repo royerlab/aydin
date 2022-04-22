@@ -68,15 +68,19 @@ def snr_estimate(image, display_images: bool = False) -> float:
 
         viewer = napari.Viewer()
         viewer.add_image(image, name='image')
-        viewer.add_image(image_dct, name='image_dct')
+        viewer.add_image(numpy.log1p(numpy.abs(image_dct)), name='image_dct')
 
         image_dct_signal = image_dct.copy()
         image_dct_signal[noise_domain] = 0
-        viewer.add_image(image_dct_signal, name='image_dct_signal')
+        viewer.add_image(
+            numpy.log1p(numpy.abs(image_dct_signal)), name='image_dct_signal'
+        )
 
         image_dct_noise = image_dct.copy()
         image_dct_noise[signal_domain] = 0
-        viewer.add_image(image_dct_noise, name='image_dct_noise')
+        viewer.add_image(
+            numpy.log1p(numpy.abs(image_dct_noise)), name='image_dct_noise'
+        )
         napari.run()
 
     # However, this is an underestimate of the noise, because we assume that

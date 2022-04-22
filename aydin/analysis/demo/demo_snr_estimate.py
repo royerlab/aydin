@@ -1,4 +1,5 @@
 # import pytest
+import pytest
 from numpy.random.mtrand import normal
 
 from aydin.analysis.snr_estimate import snr_estimate
@@ -45,11 +46,12 @@ def demo_snr_estimate(display: bool = True):
     lprint(f"noise5_dB={noise5_dB}")
     lprint(f"clean_dB ={clean_dB}")
 
-    # assert noise1_dB == pytest.approx(-42, 1, 5)
-    # assert noise2_dB == pytest.approx(-20, 1, 1)
-    # assert noise3_dB == pytest.approx(-0, 1, 1)
-    # assert noise4_dB == pytest.approx(19, 1, 1)
-    # assert noise5_dB == pytest.approx(33, 1, 1)
+    assert noise1_dB == pytest.approx(-41.0, 1, 5)
+    assert noise2_dB == pytest.approx(-31.1, 1, 1)
+    assert noise3_dB == pytest.approx(-11.0, 1, 1)
+    assert noise4_dB == pytest.approx(8.6, 1, 1)
+    assert noise5_dB == pytest.approx(26.8, 1, 1)
+    assert clean_dB == pytest.approx(31.1, 1, 1)
 
 
 if __name__ == "__main__":

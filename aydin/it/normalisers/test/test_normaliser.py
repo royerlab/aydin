@@ -75,7 +75,7 @@ def test_shape_norm_with_singleton_dim():
 
 
 def test_percentile_normaliser():
-    input_path = examples_single.fountain.get_path()
+    input_path = examples_single.noisy_fountain.get_path()
 
     assert path.exists(input_path)
 
@@ -112,7 +112,7 @@ def _test_percentile_normaliser_internal(input_path):
 
 
 def test_minmax_normaliser():
-    input_path = examples_single.fountain.get_path()
+    input_path = examples_single.noisy_fountain.get_path()
 
     assert path.exists(input_path)
 
