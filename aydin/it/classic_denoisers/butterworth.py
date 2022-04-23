@@ -330,19 +330,19 @@ def calibrate_denoise_butterworth(
         )
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
-    # Normalise single float cutoff freq to tuple:
-    if type(best_parameters['freq_cutoff']) is float:
-        best_parameters['freq_cutoff'] = tuple(
-            (best_parameters['freq_cutoff'],) * image.ndim
-        )
+    # function to add freq. tol.:
+    def _add_freq_tol(f):
+        return min(1.0, max(0.0, f + frequency_tolerance))
 
     # Add frequency_tolerance to all cutoff frequencies:
-    best_parameters['freq_cutoff'] = tuple(
-        (
-            min(1.0, max(0.0, f + frequency_tolerance))
-            for f in best_parameters['freq_cutoff']
+    if type(best_parameters['freq_cutoff']) is float:
+        # If single float we add to freq:
+        best_parameters['freq_cutoff'] = _add_freq_tol(best_parameters['freq_cutoff'])
+    else:
+        # If tuple float we add to all freqs:
+        best_parameters['freq_cutoff'] = tuple(
+            (_add_freq_tol(f) for f in best_parameters['freq_cutoff'])
         )
-    )
 
     # Memory needed:
     memory_needed = 6 * image.nbytes  # complex numbers and more
