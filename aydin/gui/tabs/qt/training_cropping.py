@@ -59,6 +59,7 @@ class TrainingCroppingTab(BaseCroppingTab):
                 search_mode='random' if image.size > 10_000_000 else 'systematic',
                 random_search_mode_num_crops=1024,
                 return_slice=True,
+                timeout_in_seconds=1,
             )
 
             if type(response) == tuple:
