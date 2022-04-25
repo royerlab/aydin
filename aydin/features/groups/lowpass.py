@@ -101,10 +101,10 @@ class LowPassFeatures(CorrelationFeatures):
                 kernel /= kernel.sum()
 
                 # import napari
-                # with napari.gui_qt():
-                #      from napari import Viewer
-                #      viewer = Viewer()
-                #      viewer.add_image(kernel, name='kernel')
+                # from napari import Viewer
+                # viewer = Viewer()
+                # viewer.add_image(kernel, name='kernel')
+                # napari.run()
 
                 lowpass_kernels.append(kernel)
 

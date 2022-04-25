@@ -50,6 +50,7 @@ def demo(image, name, do_add_noise=True):
         # loss='Lq:q=1.5',
         gpu=True,
         min_num_estimators=1024,
+        max_num_estimators=4096,
     )
 
     it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)

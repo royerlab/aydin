@@ -269,19 +269,30 @@ def calibrate_denoiser(
                                 x0 = result.x
 
                                 # local optimisation using L-BFGS-B:
-                                result = minimize(
-                                    fun=__function,
-                                    x0=x0,
-                                    method='L-BFGS-B',
-                                    bounds=bounds,
-                                    options={
-                                        'maxfun': max_num_evaluations,
-                                        'eps': 1e-6,
-                                        'ftol': 1e-8,
-                                        'gtol': 1e-12,
-                                    },
-                                    callback=callback,
-                                )
+                                gtol = 1e-12
+                                eps = 1e-10
+                                for i in range(4):
+                                    result = minimize(
+                                        fun=__function,
+                                        x0=x0,
+                                        method='L-BFGS-B',
+                                        bounds=bounds,
+                                        options={
+                                            'maxfun': max_num_evaluations,
+                                            'eps': eps,
+                                            'ftol': 1e-8,
+                                            'gtol': gtol,
+                                        },
+                                        callback=callback,
+                                    )
+                                    if (
+                                        not 'NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+                                        in result.message
+                                    ):
+                                        break
+                                    x0 = result.x
+                                    eps *= 100
+
                                 lprint(f"Local optimisation success: {result.success}")
                                 lprint(
                                     f"Local optimisation convergence message: {result.message}"
