@@ -158,7 +158,6 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
 
     # Cast, copy, and normalise:
     image = image.astype(numpy.float32, copy=True)
-    image /= norm(image)
 
     # First we compute the auto-correlation of the raw image:
     auto_corr = _autocorrelation(image, window=window)
@@ -214,6 +213,7 @@ def _autocorrelation(image, window: int = 31) -> numpy.ndarray:
     array : numpy.ndarray
 
     """
+    image = image / norm(image)
 
     array = _phase_correlation(image, image)
     shift = tuple(min(window, s) // 2 for s in image.shape)
