@@ -23,7 +23,7 @@ from aydin.util.log.log import lprint
 def calibrate_denoise_harmonic(
     image: ArrayLike,
     rank: bool = False,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_verylarge.value,
     optimiser: str = _defaults.default_optimiser.value,
     max_num_evaluations: int = _defaults.default_max_evals_hyperlow.value,
     blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
@@ -124,6 +124,7 @@ def calibrate_denoise_harmonic(
             max_num_evaluations=max_num_evaluations,
             blind_spots=blind_spots,
             display_images=display_images,
+            loss_function='L2',
         )
         | other_fixed_parameters
     )
@@ -145,6 +146,7 @@ def calibrate_denoise_harmonic(
             max_num_evaluations=max_num_evaluations,
             blind_spots=blind_spots,
             display_images=display_images,
+            loss_function='L2',
         )
         | other_fixed_parameters
     )

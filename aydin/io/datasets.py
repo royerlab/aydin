@@ -5,7 +5,6 @@ from os.path import join, exists
 from typing import Optional
 import gdown
 import numpy
-import skimage
 from scipy.ndimage import binary_dilation, zoom
 from scipy.signal import convolve
 from scipy.signal import convolve2d
@@ -78,7 +77,7 @@ def lizard():
 
 
 def camera():
-    return skimage.data.camera().astype(numpy.float32, copy=False)
+    return examples_single.generic_camera.get_array()
 
 
 def newyork():
@@ -95,7 +94,7 @@ def cropped_newyork(crop_amount=256):
 
 
 def newyork_noisy():
-    return examples_single.newyork_noisy.get_array()
+    return examples_single.noisy_newyork.get_array()
 
 
 def pollen():
@@ -139,17 +138,8 @@ class examples_single(Enum):
         array, _ = io.imread(self.get_path())
         return array
 
-    newyork_noisy = ('13ompUqT7Ti64fStqx76I9j9voWMZWnfA', 'newyork_noisy.tif')
-    fountain = ('1JP-_j-6U7J1gNc9IZCZ_GsgXTcybmZgS', 'fountain.png')
-    monalisa = ('15T3oTCyz7ugnPLTsKc0a9NT17g9GJsO_', 'monalisa.png')
-    gauss_noisy = ('17e_ECJA7DUQGu9JELbTkAKbOVVE9olHN', 'Gauss_noisy.png')
-    periodic_noise = ('1HfwF6gnzHFFdJ-tozllU_h14vNk9GZOG', 'periodic_noise.png')
-    brown_chessboard_gray = (
-        '1gnqwhZ7HrRaScj6QF_P2Pl_6WAcLzCgR',
-        'Brown_SIDD_chessboard_gray.png',
-    )
-
     # XY natural images (2D monochrome):
+    generic_camera = ('1S205p0oI-dEQIFbBuFu3QSlMqWA2xk6B', 'camera.png')
     generic_crowd = ('13UHK8MjhBviv31mAW2isdG4G-aGaNJIj', 'crowd.tif')
     generic_mandrill = ('1B33ELiFuCV0OJ6IHh7Ix9lvImwI_QkR-', 'mandrill.tif')
     generic_newyork = ('15Nuu_NU3iNuoPRmpFbrGIY0VT0iCmuKu', 'newyork.png')
@@ -158,12 +148,26 @@ class examples_single(Enum):
     generic_scafoldings = ('1ZiWhHnkuaQH-BS8B71y00wkN1Ylo38nY', 'scafoldings.png')
     generic_andromeda = ('1Zl3DtkwUlZSbvpxGILexiIoLW1JOdJh8', 'andromeda.png')
 
+    # XY noisy (2D monochrome):
+    noisy_fountain = ('1JP-_j-6U7J1gNc9IZCZ_GsgXTcybmZgS', 'fountain.png')
+    noisy_newyork = ('13ompUqT7Ti64fStqx76I9j9voWMZWnfA', 'newyork_noisy.tif')
+    noisy_monalisa = ('15T3oTCyz7ugnPLTsKc0a9NT17g9GJsO_', 'monalisa.png')
+    noisy_gauss = ('17e_ECJA7DUQGu9JELbTkAKbOVVE9olHN', 'Gauss_noisy.png')
+    noisy_brown_chessboard = (
+        '1gnqwhZ7HrRaScj6QF_P2Pl_6WAcLzCgR',
+        'Brown_SIDD_chessboard_gray.png',
+    )
+
+    # Patterned noise (2D monochrome)
+    periodic_noise = ('1HfwF6gnzHFFdJ-tozllU_h14vNk9GZOG', 'periodic_noise.png')
+
     # Characters (2D monochrome, inverted):
     generic_characters = ('1ZWkHFI2iddKa9qv6tft4QZlCoDS5fLMK', 'characters.jpg')
 
     # XYC (RGB)
     rgbtest = ('1KvhcGBqEQ5N9mwxHwy14NVp8OJ-9GCsH', 'rgbtest.png')
 
+    # Leonetti datasets:
     leonetti_tm7sf2 = (
         '1HHsbZ6jyuJkIj6c7kGtsPKOgpUxo0ihw',
         'Leonetti_p4B3_1_TM7SF2_PyProcessed_IJClean.tif',
@@ -208,7 +212,6 @@ class examples_single(Enum):
     )
 
     # 2D+t
-
     cognet_nanotube1 = (
         '1SmrBheUc6p5qTgtIEzedCwbN87HOW_O_',
         'Cognet_r03-s01-100mW-20ms-175 50xplpeg-173.tif',

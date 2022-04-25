@@ -69,17 +69,18 @@ def demo_par_uniform(image_name: str, image, size=128, repeats=32):
     )
 
 
-image_2d = characters().astype(numpy.float32)
-image_3d = examples_single.royerlab_hcr.get_array().squeeze()[2]
-image_4d = examples_single.hyman_hela.get_array().squeeze()
+if __name__ == "__main__":
+    image_2d = characters().astype(numpy.float32)
+    image_3d = examples_single.royerlab_hcr.get_array().squeeze()[2]
+    image_4d = examples_single.hyman_hela.get_array().squeeze()
 
-sizes = [3, 9, 64, 127, 317, 511]
+    sizes = [3, 9, 64, 127, 317, 511]
 
-for size in sizes:
-    demo_par_uniform("characters 2D", image_2d, size=size)
+    for size in sizes:
+        demo_par_uniform("characters 2D", image_2d, size=size)
 
-for size in sizes:
-    demo_par_uniform("islet 3D", image_3d, size=size, repeats=1)
+    for size in sizes:
+        demo_par_uniform("islet 3D", image_3d, size=size, repeats=1)
 
-for size in sizes:
-    demo_par_uniform("hela 4D", image_4d, size=size, repeats=1)
+    for size in sizes:
+        demo_par_uniform("hela 4D", image_4d, size=size, repeats=1)

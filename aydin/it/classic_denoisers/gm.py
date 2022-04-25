@@ -17,7 +17,7 @@ def calibrate_denoise_gm(
     optimiser: str = _defaults.default_optimiser.value,
     max_num_evaluations: int = _defaults.default_max_evals_normal.value,
     blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
-    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
+    jinv_interpolation_mode: str = 'median',
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,

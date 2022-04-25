@@ -3,12 +3,20 @@ import os
 import time
 import numpy
 import numpy as np
-from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import normalise, add_noise, dots, newyork, lizard, pollen
+from aydin.io.datasets import (
+    normalise,
+    add_noise,
+    dots,
+    newyork,
+    lizard,
+    pollen,
+    characters,
+    camera,
+)
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
@@ -42,6 +50,7 @@ def demo(image, name, do_add_noise=True):
         # loss='Lq:q=1.5',
         gpu=True,
         min_num_estimators=1024,
+        max_num_estimators=4096,
     )
 
     it = ImageTranslatorFGR(feature_generator=generator, regressor=regressor)
@@ -106,18 +115,10 @@ def demo(image, name, do_add_noise=True):
     plt.show()
 
 
-newyork_image = newyork()
-demo(newyork_image, "newyork")
-lizard_image = lizard()
-demo(lizard_image, "lizard")
-
-camera_image = camera()
-demo(camera_image, "camera")
-# characters_image = characters()
-# demo(characters_image, "characters")
-pollen_image = pollen()
-demo(pollen_image, "pollen")
-
-
-dots_image = dots()
-demo(dots_image, "dots")
+if __name__ == "__main__":
+    demo(newyork(), "newyork")
+    demo(camera(), "camera")
+    demo(lizard(), "lizard")
+    demo(characters(), "characters")
+    demo(pollen(), "pollen")
+    demo(dots(), "dots")

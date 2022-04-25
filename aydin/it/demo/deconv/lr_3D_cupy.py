@@ -64,10 +64,11 @@ def demo(image):
         viewer.add_image(lr_deconvolved_image, name='lr_deconvolved_image')
 
 
-image = examples_single.janelia_flybrain.get_array()
-image = image[:, 1, :, :].astype(numpy.float32)
-# image = examples_single.keller_dmel.get_array()
-# image = image.astype(numpy.float32)
-image = rescale_intensity(image, in_range='image', out_range=(0, 1))
+if __name__ == "__main__":
+    image = examples_single.janelia_flybrain.get_array()
+    image = image[:, 1, :, :].astype(numpy.float32)
+    # image = examples_single.keller_dmel.get_array()
+    # image = image.astype(numpy.float32)
+    image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
-demo(image)
+    demo(image)

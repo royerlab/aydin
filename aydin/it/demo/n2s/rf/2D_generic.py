@@ -75,18 +75,15 @@ def demo(image, name):
         viewer.add_image(normalise(denoised), name='denoised')
 
 
-newyork_image = newyork()
-demo(newyork_image, "newyork")
-characters_image = characters()
-demo(characters_image, "characters")
+if __name__ == "__main__":
+    newyork_image = newyork()
+    demo(newyork_image, "newyork")
+    characters_image = characters()
+    demo(characters_image, "characters")
 
-camera_image = camera()
-demo(camera_image, "camera")
-lizard_image = lizard()
-demo(lizard_image, "lizard")
-pollen_image = pollen()
-demo(pollen_image, "pollen")
-
-
-fibsem_image = fibsem()
-demo(fibsem_image, "fibsem")
+    camera_image = camera()
+    demo(camera_image, "camera")
+    lizard_image = lizard()
+    demo(lizard_image, "lizard")
+    pollen_image = pollen()
+    demo(pollen_image, "pollen")

@@ -2,7 +2,7 @@ from collections import namedtuple
 
 DefaultValue = namedtuple(typename="DefaultValue", field_names=["value"])
 
-default_optimiser = DefaultValue('smart')
+default_optimiser = DefaultValue('fast')
 default_blind_spots = DefaultValue(None)
 default_jinv_interpolation_mode = DefaultValue('gaussian')
 default_crop_size_normal = DefaultValue(96000)
