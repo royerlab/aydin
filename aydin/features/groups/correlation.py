@@ -1,11 +1,11 @@
-from typing import Sequence, Optional, Tuple
+from typing import Sequence, Optional, Tuple, Callable
 
 import numpy
 from numpy.typing import ArrayLike
 from scipy.ndimage import gaussian_filter
 
 from aydin.features.groups.base import FeatureGroupBase
-from aydin.util.fast_correlation.correlation import correlate
+from aydin.util.fast_correlation.correlation import correlate as fast_correlate
 from aydin.util.log.log import lprint
 
 
@@ -20,6 +20,7 @@ class CorrelationFeatures(FeatureGroupBase):
         self,
         kernels: Optional[Sequence[ArrayLike]],
         separable: bool = True,
+        _correlate_func: Callable = None,
     ):
         """
         Constructor that configures these features.
@@ -40,6 +41,12 @@ class CorrelationFeatures(FeatureGroupBase):
         self.excluded_voxels: Sequence[Tuple[int, ...]] = []
         self.separable = separable
         self.kwargs = None
+
+        if _correlate_func is None:
+            _correlate_func = fast_correlate
+            # _correlate_func = correlate
+
+        self._correlate_func = _correlate_func
 
     @property
     def receptive_field_radius(self) -> int:
@@ -116,7 +123,7 @@ class CorrelationFeatures(FeatureGroupBase):
             kernel += missing
 
         # Convolution:
-        _correlate(
+        self._correlate(
             image=self.image, kernel=kernel, separable=self.separable, output=feature
         )
 
@@ -134,26 +141,29 @@ class CorrelationFeatures(FeatureGroupBase):
         self.kwargs = None
         self.kernels = None
 
+    def _correlate(
+        self, image: ArrayLike, kernel: ArrayLike, separable: bool, output: ArrayLike
+    ):
 
-def _correlate(image: ArrayLike, kernel: ArrayLike, separable: bool, output: ArrayLike):
+        if separable and kernel.ndim == 1:
 
-    if separable and kernel.ndim == 1:
+            # Looping through the axis:
+            for axis in range(image.ndim):
 
-        # Looping through the axis:
-        for axis in range(image.ndim):
+                # prepare shape:
+                shape = [
+                    1,
+                ] * image.ndim
+                shape[axis] = kernel.shape[0]
 
-            # prepare shape:
-            shape = [
-                1,
-            ] * image.ndim
-            shape[axis] = kernel.shape[0]
+                # reshape kernel:
+                kernel = kernel.reshape(*shape)
 
-            # reshape kernel:
-            kernel = kernel.reshape(*shape)
+                # convolve:
+                correlate_output = output if axis == image.ndim - 1 else None
+                image = self._correlate_func(
+                    image, weights=kernel, output=correlate_output
+                )
 
-            # convolve:
-            correlate_output = output if axis == image.ndim - 1 else None
-            image = correlate(image, weights=kernel, output=correlate_output)
-
-    else:
-        correlate(image, weights=kernel, output=output)
+        else:
+            self._correlate_func(image, weights=kernel, output=output)

@@ -15,10 +15,10 @@ class LowPassFeatures(CorrelationFeatures):
     def __init__(
         self,
         num_features: int = 9,
-        min_size: int = 3,
-        max_size: int = 11,
-        min_freq: float = 0.15,
-        max_freq: float = 0.75,
+        min_size: int = 5,
+        max_size: int = 9,
+        min_freq: float = 0.50,
+        max_freq: float = 0.90,
         order: float = 2,
         separable: bool = False,
     ):
@@ -101,10 +101,10 @@ class LowPassFeatures(CorrelationFeatures):
                 kernel /= kernel.sum()
 
                 # import napari
-                # with napari.gui_qt():
-                #      from napari import Viewer
-                #      viewer = Viewer()
-                #      viewer.add_image(kernel, name='kernel')
+                # from napari import Viewer
+                # viewer = Viewer()
+                # viewer.add_image(kernel, name='kernel')
+                # napari.run()
 
                 lowpass_kernels.append(kernel)
 

@@ -331,7 +331,7 @@ class CBRegressor(RegressorBase):
                         if learning_rate is None:
                             # If None we were using an automatic value, we set the learning rate so we can start
                             # with the (relatively high) default value of 0.1
-                            learning_rate = 2 * 0.5
+                            learning_rate = 2 * 0.1
                         learning_rate *= 0.5
                         lprint(
                             f"CatBoost fitting failed! best_iteration=={model.best_iteration_} < {self.min_num_estimators} reducing learning rate to: {learning_rate}"

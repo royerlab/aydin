@@ -75,7 +75,8 @@ def demo(image):
             viewer.add_image(denoised[..., i], name=f'denoised {cm[i]}')
 
 
-image = rgbtest()
-demo(image)
-image = astronaut()
-demo(image)
+if __name__ == "__main__":
+    image = rgbtest()
+    demo(image)
+    image = astronaut()
+    demo(image)

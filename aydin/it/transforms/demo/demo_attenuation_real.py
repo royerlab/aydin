@@ -60,4 +60,5 @@ def demo_attenuation_correction_real():
         )
 
 
-demo_attenuation_correction_real()
+if __name__ == "__main__":
+    demo_attenuation_correction_real()

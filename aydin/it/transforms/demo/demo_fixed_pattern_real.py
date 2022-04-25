@@ -20,4 +20,5 @@ def demo_fixed_pattern_real():
         viewer.add_image(pre_processed, name='pre_processed')
 
 
-demo_fixed_pattern_real()
+if __name__ == "__main__":
+    demo_fixed_pattern_real()

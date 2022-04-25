@@ -24,4 +24,5 @@ def demo_histogram():
     assert numpy.abs(postprocessed - image).mean() < 1e-5
 
 
-demo_histogram()
+if __name__ == "__main__":
+    demo_histogram()
