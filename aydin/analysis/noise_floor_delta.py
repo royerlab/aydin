@@ -1,9 +1,7 @@
-
-
 def noise_floor_delta_over_z(noisy_array, denoised_array) -> float:
     """
     This method calculates the noise floor level difference on spectra
-    of a noisy and a denoised array (does NOT require groundtruth). 
+    of a noisy and a denoised array (does NOT require groundtruth).
 
     Parameters
     ----------
