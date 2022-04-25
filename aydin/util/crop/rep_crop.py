@@ -4,13 +4,12 @@ from random import randrange
 from typing import Optional, Callable
 
 import numpy
-from numba import jit, prange, vectorize, float64, float32
+from numba import jit, prange, vectorize, float32
 from numpy import absolute
 from numpy.typing import ArrayLike
 from scipy.ndimage import sobel, gaussian_filter
 
 from aydin.util.edge_filter.fast_edge_filter import fast_edge_filter
-from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
 from aydin.util.log.log import lprint, lsection
 
 
@@ -110,7 +109,7 @@ def representative_crop(
         # save reference to original image:
         original_image = image
 
-        with lsection(f"Cast and normalise image..."):
+        with lsection("Cast and normalise image..."):
             # Cast, if needed:
             image = image.astype(numpy.float32)
             # Normalise:

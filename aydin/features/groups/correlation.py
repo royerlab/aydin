@@ -2,7 +2,7 @@ from typing import Sequence, Optional, Tuple, Callable
 
 import numpy
 from numpy.typing import ArrayLike
-from scipy.ndimage import gaussian_filter, correlate
+from scipy.ndimage import gaussian_filter
 
 from aydin.features.groups.base import FeatureGroupBase
 from aydin.util.fast_correlation.correlation import correlate as fast_correlate

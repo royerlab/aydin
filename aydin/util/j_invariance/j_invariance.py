@@ -286,8 +286,8 @@ def calibrate_denoiser(
                                         callback=callback,
                                     )
                                     if (
-                                        not 'NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
-                                        in result.message
+                                        'NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+                                        not in result.message
                                     ):
                                         break
                                     x0 = result.x

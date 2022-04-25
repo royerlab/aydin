@@ -1,3 +1,4 @@
+# flake8: noqa
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import examples_single

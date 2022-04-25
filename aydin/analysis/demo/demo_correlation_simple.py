@@ -1,3 +1,4 @@
+# flake8: noqa
 import random
 from math import pi, cos, sin
 

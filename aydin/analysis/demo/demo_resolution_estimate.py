@@ -1,3 +1,4 @@
+# flake8: noqa
 import numpy
 from scipy.ndimage import gaussian_filter
 

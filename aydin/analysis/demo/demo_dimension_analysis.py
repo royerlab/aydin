@@ -1,3 +1,4 @@
+# flake8: noqa
 from aydin.analysis.test.test_dimension_analysis import (
     test_dimension_analysis_maitre,
     test_dimension_analysis_hela,
