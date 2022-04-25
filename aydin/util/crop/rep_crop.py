@@ -4,14 +4,69 @@ from random import randrange
 from typing import Optional, Callable
 
 import numpy
-from numba import jit, prange, vectorize, float64, float32
+from numba import jit, prange, vectorize, float32
 from numpy import absolute
 from numpy.typing import ArrayLike
 from scipy.ndimage import sobel, gaussian_filter
 
 from aydin.util.edge_filter.fast_edge_filter import fast_edge_filter
-from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
 from aydin.util.log.log import lprint, lsection
+
+
+def super_fast_representative_crop(
+    image: ArrayLike,
+    crop_size: int,
+    min_length: int = 32,
+    return_slice: bool = False,
+    display_crop: bool = False,
+    *args,
+    **kwargs,
+):
+
+    num_eff_dim = max(1, len(tuple(s >= min_length for s in image.shape)))
+
+    est_crop_length = crop_size ** (1 / num_eff_dim)
+
+    slice_ = (None,) * image.ndim
+
+    for axis in range(image.ndim):
+        proj_axes = (axis, (axis + 1) % image.ndim)
+
+        if any(image.shape[a] < min_length for a in proj_axes):
+            continue
+
+        axes = tuple((a for a in range(image.ndim) if a not in proj_axes))
+
+        projection = numpy.amax(image, axis=axes, keepdims=True)
+
+        proj_crop_size = int(max(1, est_crop_length ** 2))
+
+        proj_crop, proj_slice_ = representative_crop(
+            projection,
+            crop_size=proj_crop_size,
+            return_slice=True,
+            display_crop=True,
+            *args,
+            **kwargs,
+        )
+
+        # Replace slice(0, 1, 1) with None:
+        proj_slice_ = tuple(
+            (None if ps == slice(0, 1, 1) else ps for ps in proj_slice_)
+        )
+
+        slice_ = tuple((ps if s is None else s for s, ps in zip(slice_, proj_slice_)))
+
+        pass
+
+    # Replace None with slice(None):
+    slice_ = tuple((slice(None) if s is None else s for s in slice_))
+
+    crop = image[slice_]
+    if return_slice:
+        return crop, slice_
+    else:
+        return crop
 
 
 def representative_crop(
