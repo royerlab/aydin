@@ -7,5 +7,4 @@ def demo_noise_floor_delta():
     noise_floor_delta = noise_floor_delta_over_z(denoised_image, noisy_image)
 
 
-
 demo_noise_floor_delta()
