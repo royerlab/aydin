@@ -3,12 +3,10 @@ from skimage.data import camera
 
 from aydin.io.datasets import dots, lizard, pollen, newyork, characters, examples_single
 from aydin.util.crop.rep_crop import representative_crop, super_fast_representative_crop
-from aydin.util.log.log import Log, lsection
+from aydin.util.log.log import Log, lsection, lprint
 
 
-def demo_representative_crop(
-    image, crop_size=64000, search_mode: str = 'random', display: bool = True
-):
+def demo_representative_crop(image, crop_size=64000, display: bool = True):
     """
     Demo for self-supervised denoising using camera image with synthetic noise
     """
@@ -17,7 +15,7 @@ def demo_representative_crop(
 
     def _crop_fun():
         return super_fast_representative_crop(
-            image, crop_size=crop_size, search_mode=search_mode, display_crop=False
+            image, crop_size=crop_size, display_crop=False
         )
 
     # Warmup (numba compilation)
@@ -35,32 +33,34 @@ def demo_representative_crop(
         viewer.add_image(crop, name='crop')
         napari.run()
 
-    assert crop.size <= int(crop_size * 1.25)
+    lprint(f"Crop size requested: {crop_size} obtained: {crop.size}")
+
+    assert crop.size >= int(crop_size * 0.75) and crop.size <= int(crop_size * 1.25)
 
 
 if __name__ == "__main__":
 
-    # demo_representative_crop(
-    #     examples_single.maitre_mouse.get_array(), crop_size=1_000_000
-    # )
-    #
-    # demo_representative_crop(
-    #     examples_single.royerlab_hcr.get_array().squeeze()[:, 0, ...],
-    #     crop_size=1_000_000,
-    # )
-    #
-    # demo_representative_crop(
-    #     examples_single.royerlab_hcr.get_array().squeeze()[:, 1, ...],
-    #     crop_size=1_000_000,
-    # )
-    #
-    # demo_representative_crop(
-    #     examples_single.royerlab_hcr.get_array().squeeze()[:, 2, ...],
-    #     crop_size=1_000_000,
-    # )
-
     demo_representative_crop(
         examples_single.leonetti_arhgap21.get_array(), crop_size=1_000_000
+    )
+
+    demo_representative_crop(
+        examples_single.maitre_mouse.get_array(), crop_size=1_000_000
+    )
+
+    demo_representative_crop(
+        examples_single.royerlab_hcr.get_array().squeeze()[:, 0, ...],
+        crop_size=1_000_000,
+    )
+
+    demo_representative_crop(
+        examples_single.royerlab_hcr.get_array().squeeze()[:, 1, ...],
+        crop_size=1_000_000,
+    )
+
+    demo_representative_crop(
+        examples_single.royerlab_hcr.get_array().squeeze()[:, 2, ...],
+        crop_size=1_000_000,
     )
 
     demo_representative_crop(newyork())

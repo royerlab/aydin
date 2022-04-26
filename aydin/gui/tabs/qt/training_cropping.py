@@ -2,7 +2,7 @@ import math
 from qtpy.QtWidgets import QCheckBox
 
 from aydin.gui.tabs.qt.base_cropping import BaseCroppingTab
-from aydin.util.crop.rep_crop import representative_crop
+from aydin.util.crop.rep_crop import representative_crop, super_fast_representative_crop
 
 
 class TrainingCroppingTab(BaseCroppingTab):
@@ -52,7 +52,7 @@ class TrainingCroppingTab(BaseCroppingTab):
 
         if len(images) == 1:
             image = images[0][1]
-            response = representative_crop(
+            response = super_fast_representative_crop(
                 image,
                 mode='contrast' if image.size > 5_000_000 else 'sobelmin',
                 crop_size=2_000_000,

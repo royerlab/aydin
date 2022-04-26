@@ -17,56 +17,113 @@ def super_fast_representative_crop(
     image: ArrayLike,
     crop_size: int,
     min_length: int = 32,
+    search_mode: str = 'systematic',
+    granularity_factor: int = 1,
+    min_num_crops: int = 64,
+    timeout_in_seconds: float = 2,
     return_slice: bool = False,
     display_crop: bool = False,
     *args,
     **kwargs,
 ):
+    with lsection(
+        f"Super fast cropping image of size: {image.shape} with at most {crop_size} voxels"
+    ):
 
-    num_eff_dim = max(1, len(tuple(s >= min_length for s in image.shape)))
+        # Permutate array so that shape is in decreasing axis length:
+        shape = image.shape
+        permutation = sorted(range(len(shape)), key=lambda k: shape[k], reverse=True)
+        image_t = numpy.transpose(image, axes=permutation)
 
-    est_crop_length = crop_size ** (1 / num_eff_dim)
+        # Number of effective dimensions:
+        num_eff_dim = max(1, len(tuple(0 for s in image_t.shape if s >= min_length)))
 
-    slice_ = (None,) * image.ndim
+        # We Adjust the crop size to take into account axis that are too short:
+        crop_size //= int(numpy.prod(tuple((s for s in image.shape if s < min_length))))
 
-    for axis in range(image.ndim):
-        proj_axes = (axis, (axis + 1) % image.ndim)
+        # Estimated crop length per axis:
+        total_size_effective = int(
+            numpy.prod(tuple((s for s in image.shape if s >= min_length)))
+        )
+        factor = (crop_size / total_size_effective) ** (1 / num_eff_dim)
+        crop_lengths = tuple((s * factor for s in image_t.shape))
 
-        if any(image.shape[a] < min_length for a in proj_axes):
-            continue
+        # Timeout per 2D projection:
+        timeout_in_seconds = max(1, timeout_in_seconds // num_eff_dim)
 
-        axes = tuple((a for a in range(image.ndim) if a not in proj_axes))
+        # Starting slice:
+        slice_ = (None,) * image_t.ndim
 
-        projection = numpy.amax(image, axis=axes, keepdims=True)
+        # We iterate through all consecutive axis pairs:
+        for axis in range(image_t.ndim):
 
-        proj_crop_size = int(max(1, est_crop_length ** 2))
+            # Pair:
+            proj_axes = (axis, (axis + 1) % image_t.ndim)
 
-        proj_crop, proj_slice_ = representative_crop(
-            projection,
-            crop_size=proj_crop_size,
-            return_slice=True,
-            display_crop=True,
-            *args,
-            **kwargs,
+            with lsection(
+                f"Projecting image of shape: {image.shape} so that axes: {proj_axes} remain"
+            ):
+
+                # We skip axis that are too short:
+                if any(image_t.shape[a] < min_length for a in proj_axes):
+                    continue
+
+                # Project away other axis:
+                axes = tuple((a for a in range(image_t.ndim) if a not in proj_axes))
+                projection = numpy.mean(image_t, axis=axes, keepdims=True)
+
+            # crop size:
+            proj_crop_size = int(
+                max(1, int(numpy.prod(tuple(crop_lengths[a] for a in proj_axes))))
+            )
+
+            # Delegate 2D cropping:
+            proj_crop, proj_slice_ = representative_crop(
+                projection,
+                crop_size=proj_crop_size,
+                search_mode=search_mode,
+                granularity_factor=granularity_factor,
+                min_num_crops=min_num_crops,
+                return_slice=True,
+                display_crop=display_crop,
+                timeout_in_seconds=timeout_in_seconds,
+                *args,
+                **kwargs,
+            )
+
+            # Replace slice(0, 1, 1) with None:
+            proj_slice_ = tuple(
+                (
+                    None if ps in [slice(0, 1, 1), slice(0, 1, None)] else ps
+                    for ps in proj_slice_
+                )
+            )
+
+            slice_ = tuple(
+                (ps if s is None else s for s, ps in zip(slice_, proj_slice_))
+            )
+
+            # If we have figured it all, then we stop:
+            if all(s is not None for s in slice_):
+                lprint(f"Done!")
+                break
+
+        # permutate back to original axis order:
+        inverse_permutation = numpy.argsort(permutation)
+        slice_ = tuple(slice_[inverse_permutation[i]] for i in range(len(slice_)))
+
+        # Convert slice to explicit indices:
+        slice_ = tuple(
+            slice(0, s, 1) if sl is None else sl for sl, s in zip(slice_, image.shape)
         )
 
-        # Replace slice(0, 1, 1) with None:
-        proj_slice_ = tuple(
-            (None if ps == slice(0, 1, 1) else ps for ps in proj_slice_)
-        )
-
-        slice_ = tuple((ps if s is None else s for s, ps in zip(slice_, proj_slice_)))
-
-        pass
-
-    # Replace None with slice(None):
-    slice_ = tuple((slice(None) if s is None else s for s in slice_))
-
-    crop = image[slice_]
-    if return_slice:
-        return crop, slice_
-    else:
-        return crop
+        # Crop Image:
+        crop = image[slice_]
+        if return_slice:
+            # Return slice if requested:
+            return crop, slice_
+        else:
+            return crop
 
 
 def representative_crop(
@@ -78,6 +135,7 @@ def representative_crop(
     equal_sides: bool = False,
     favour_odd_lengths: bool = False,
     search_mode: str = 'random',
+    granularity_factor: int = 4,
     random_search_mode_num_crops: int = 1512,
     min_num_crops: int = 512,
     timeout_in_seconds: float = 2,
@@ -121,6 +179,9 @@ def representative_crop(
         Search mode for best crops. Can be 'random' or 'systematic'. In
         random mode we pick random crops, in systematic mode we check every
         possible strided crop.
+
+    granularity_factor: int
+        Granularity of search. higher values correspond to more overlap between candidate crops.
 
     random_search_mode_num_crops: int
         Number of crops to check in 'random' search mode.
@@ -167,9 +228,9 @@ def representative_crop(
 
         with lsection(f"Cast and normalise image..."):
             # Cast, if needed:
-            image = image.astype(numpy.float32)
+            image = image.astype(numpy.float32, copy=False)
             # Normalise:
-            image = _normalise(image)
+            # image = _normalise(image)
 
         # Apply filter:
         with lsection(f"Apply cropping filter to image of shape: {image.shape}"):
@@ -219,7 +280,10 @@ def representative_crop(
 
         if ratio >= 1:
             # If the image is small enough no point in getting a crop!
-            return image
+            if return_slice:
+                return image, (slice(None),) * image.ndim
+            else:
+                return image
 
         # cropped shape:
         cropped_shape = tuple(
@@ -266,10 +330,10 @@ def representative_crop(
         # Instead of searching for all possible crops, we take into
         # account the size of the crops to define a 'granularity' (
         # stride) of the translations used for search:
-        granularity_factor = 4
+
         granularity = tuple(cs // granularity_factor for cs in cropped_shape)
 
-        if search_mode == 'random' or image.size > 1e6:
+        if search_mode == 'random':
 
             # We make sure that the number of crops is not too large given
             # the relative size of the crop versus whole image:
@@ -328,11 +392,16 @@ def representative_crop(
                 for r, cs in zip(translation_range, cropped_shape)
             )
 
-            for i, i in enumerate(numpy.ndindex(translation_indices)):
+            for i, index in enumerate(numpy.ndindex(translation_indices)):
+
+                print(
+                    f"i={i}, index={index}, translation_indices={translation_indices}"
+                )
 
                 # translation:
                 translation = tuple(
-                    int(i * cs / granularity_factor) for i, cs in zip(i, cropped_shape)
+                    int(j * cs / granularity_factor)
+                    for j, cs in zip(index, cropped_shape)
                 )
 
                 # slice object for cropping:
@@ -365,10 +434,10 @@ def representative_crop(
 
             import napari
 
-            with napari.gui_qt():
-                viewer = napari.Viewer()
-                viewer.add_image(image, name='image')
-                viewer.add_image(best_crop, name='best_crop')
+            viewer = napari.Viewer()
+            viewer.add_image(image.squeeze(), name='image')
+            viewer.add_image(best_crop.squeeze(), name='best_crop')
+            napari.run()
 
         #     print(_fast_std.signatures)
         #     for sig in _fast_std.signatures:
@@ -447,7 +516,7 @@ def _rescale(x, min_value, max_value):
 
 
 @jit(nopython=True, parallel=True, fastmath=True)
-def _fast_std(image: ArrayLike, workers=32, decimation=1):
+def _fast_std(image: ArrayLike, workers=16, decimation=1):
 
     array = image.ravel()
     length = array.size

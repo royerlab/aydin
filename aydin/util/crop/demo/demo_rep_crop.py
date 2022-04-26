@@ -3,7 +3,7 @@ from skimage.data import camera
 
 from aydin.io.datasets import dots, lizard, pollen, newyork, characters, examples_single
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.log.log import Log, lsection
+from aydin.util.log.log import Log, lsection, lprint
 
 
 def demo_representative_crop(
@@ -35,7 +35,9 @@ def demo_representative_crop(
         viewer.add_image(crop, name='crop')
         napari.run()
 
-    assert crop.size <= int(crop_size * 1.25)
+    lprint(f"Crop size requested: {crop_size} obtained: {crop.size}")
+
+    assert crop.size >= int(crop_size * 0.75) and crop.size <= int(crop_size * 1.25)
 
 
 if __name__ == "__main__":
