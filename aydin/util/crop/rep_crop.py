@@ -113,7 +113,7 @@ def representative_crop(
         # save reference to original image:
         original_image = image
 
-        with lsection(f"Cast and normalise image..."):
+        with lsection("Cast and normalise image..."):
             # Cast, if needed:
             image = image.astype(numpy.float32, copy=False)
             # Normalise:
@@ -226,7 +226,7 @@ def representative_crop(
             # the relative size of the crop versus whole image:
             random_search_mode_num_crops = min(
                 random_search_mode_num_crops,
-                (granularity_factor ** image.ndim) * int(image.size / crop_size),
+                (granularity_factor**image.ndim) * int(image.size / crop_size),
             )
 
             for i in range(random_search_mode_num_crops):
