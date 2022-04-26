@@ -22,6 +22,7 @@ def representative_crop(
     equal_sides: bool = False,
     favour_odd_lengths: bool = False,
     search_mode: str = 'random',
+    granularity_factor: int = 4,
     random_search_mode_num_crops: int = 1512,
     min_num_crops: int = 512,
     timeout_in_seconds: float = 2,
@@ -65,6 +66,9 @@ def representative_crop(
         Search mode for best crops. Can be 'random' or 'systematic'. In
         random mode we pick random crops, in systematic mode we check every
         possible strided crop.
+
+    granularity_factor: int
+        Granularity of search. higher values correspond to more overlap between candidate crops.
 
     random_search_mode_num_crops: int
         Number of crops to check in 'random' search mode.
@@ -111,9 +115,9 @@ def representative_crop(
 
         with lsection("Cast and normalise image..."):
             # Cast, if needed:
-            image = image.astype(numpy.float32)
+            image = image.astype(numpy.float32, copy=False)
             # Normalise:
-            image = _normalise(image)
+            # image = _normalise(image)
 
         # Apply filter:
         with lsection(f"Apply cropping filter to image of shape: {image.shape}"):
@@ -163,7 +167,10 @@ def representative_crop(
 
         if ratio >= 1:
             # If the image is small enough no point in getting a crop!
-            return image
+            if return_slice:
+                return image, (slice(None),) * image.ndim
+            else:
+                return image
 
         # cropped shape:
         cropped_shape = tuple(
@@ -210,10 +217,10 @@ def representative_crop(
         # Instead of searching for all possible crops, we take into
         # account the size of the crops to define a 'granularity' (
         # stride) of the translations used for search:
-        granularity_factor = 4
+
         granularity = tuple(cs // granularity_factor for cs in cropped_shape)
 
-        if search_mode == 'random' or image.size > 1e6:
+        if search_mode == 'random':
 
             # We make sure that the number of crops is not too large given
             # the relative size of the crop versus whole image:
@@ -272,11 +279,16 @@ def representative_crop(
                 for r, cs in zip(translation_range, cropped_shape)
             )
 
-            for i, i in enumerate(numpy.ndindex(translation_indices)):
+            for i, index in enumerate(numpy.ndindex(translation_indices)):
+
+                # print(
+                #     f"i={i}, index={index}, translation_indices={translation_indices}"
+                # )
 
                 # translation:
                 translation = tuple(
-                    int(i * cs / granularity_factor) for i, cs in zip(i, cropped_shape)
+                    int(j * cs / granularity_factor)
+                    for j, cs in zip(index, cropped_shape)
                 )
 
                 # slice object for cropping:
@@ -309,10 +321,10 @@ def representative_crop(
 
             import napari
 
-            with napari.gui_qt():
-                viewer = napari.Viewer()
-                viewer.add_image(image, name='image')
-                viewer.add_image(best_crop, name='best_crop')
+            viewer = napari.Viewer()
+            viewer.add_image(image.squeeze(), name='image')
+            viewer.add_image(best_crop.squeeze(), name='best_crop')
+            napari.run()
 
         #     print(_fast_std.signatures)
         #     for sig in _fast_std.signatures:
@@ -391,7 +403,7 @@ def _rescale(x, min_value, max_value):
 
 
 @jit(nopython=True, parallel=True, fastmath=True)
-def _fast_std(image: ArrayLike, workers=32, decimation=1):
+def _fast_std(image: ArrayLike, workers=16, decimation=1):
 
     array = image.ravel()
     length = array.size
