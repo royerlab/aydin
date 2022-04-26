@@ -12,7 +12,7 @@ from aydin.io.datasets import (
     examples_single,
     normalise,
 )
-from aydin.util.crop.sf_rep_crop import super_fast_representative_crop
+from aydin.util.crop.super_fast_rep_crop import super_fast_representative_crop
 from aydin.util.log.log import Log, lsection, lprint
 
 

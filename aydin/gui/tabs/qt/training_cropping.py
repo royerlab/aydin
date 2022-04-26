@@ -2,7 +2,7 @@ import math
 from qtpy.QtWidgets import QCheckBox
 
 from aydin.gui.tabs.qt.base_cropping import BaseCroppingTab
-from aydin.util.crop.sf_rep_crop import super_fast_representative_crop
+from aydin.util.crop.super_fast_rep_crop import super_fast_representative_crop
 
 
 class TrainingCroppingTab(BaseCroppingTab):
