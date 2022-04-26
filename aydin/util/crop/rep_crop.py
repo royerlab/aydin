@@ -226,7 +226,7 @@ def representative_crop(
             # the relative size of the crop versus whole image:
             random_search_mode_num_crops = min(
                 random_search_mode_num_crops,
-                (granularity_factor**image.ndim) * int(image.size / crop_size),
+                (granularity_factor ** image.ndim) * int(image.size / crop_size),
             )
 
             for i in range(random_search_mode_num_crops):

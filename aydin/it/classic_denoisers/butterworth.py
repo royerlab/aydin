@@ -519,5 +519,5 @@ def _filter_chebyshev(image_f, epsilon, chebyshev):
 
 
 def _filter_butterworth(image_f, f, order):
-    image_f /= numpy.sqrt(1 + f**order)
+    image_f /= numpy.sqrt(1 + f ** order)
     return image_f

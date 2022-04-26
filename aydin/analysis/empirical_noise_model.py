@@ -2,7 +2,7 @@ import numpy
 from numpy.random import randint
 
 
-def distill_noise_model(clean_array, noisy_array, nb_samples: int = 2**18):
+def distill_noise_model(clean_array, noisy_array, nb_samples: int = 2 ** 18):
     """
     Given a clean array and a corresponding noisy array,
     this function analyses for each value in the clean array all the possible observed noisy values.
