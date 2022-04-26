@@ -2,7 +2,7 @@ import math
 from qtpy.QtWidgets import QCheckBox
 
 from aydin.gui.tabs.qt.base_cropping import BaseCroppingTab
-from aydin.util.crop.rep_crop import representative_crop, super_fast_representative_crop
+from aydin.util.crop.sf_rep_crop import super_fast_representative_crop
 
 
 class TrainingCroppingTab(BaseCroppingTab):
@@ -54,12 +54,12 @@ class TrainingCroppingTab(BaseCroppingTab):
             image = images[0][1]
             response = super_fast_representative_crop(
                 image,
-                mode='contrast' if image.size > 5_000_000 else 'sobelmin',
+                mode='contrast',
                 crop_size=2_000_000,
-                search_mode='random' if image.size > 10_000_000 else 'systematic',
+                search_mode='random' if image.size > 500_000_000 else 'systematic',
                 random_search_mode_num_crops=1024,
                 return_slice=True,
-                timeout_in_seconds=1,
+                timeout_in_seconds=1.5,
             )
 
             if type(response) == tuple:

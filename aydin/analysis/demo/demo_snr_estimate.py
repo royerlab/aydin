@@ -1,3 +1,4 @@
+# flake8: noqa
 # import pytest
 import pytest
 from numpy.random.mtrand import normal

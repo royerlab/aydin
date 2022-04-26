@@ -13,119 +13,6 @@ from aydin.util.edge_filter.fast_edge_filter import fast_edge_filter
 from aydin.util.log.log import lprint, lsection
 
 
-def super_fast_representative_crop(
-    image: ArrayLike,
-    crop_size: int,
-    min_length: int = 32,
-    search_mode: str = 'systematic',
-    granularity_factor: int = 1,
-    min_num_crops: int = 64,
-    timeout_in_seconds: float = 2,
-    return_slice: bool = False,
-    display_crop: bool = False,
-    *args,
-    **kwargs,
-):
-    with lsection(
-        f"Super fast cropping image of size: {image.shape} with at most {crop_size} voxels"
-    ):
-
-        # Permutate array so that shape is in decreasing axis length:
-        shape = image.shape
-        permutation = sorted(range(len(shape)), key=lambda k: shape[k], reverse=True)
-        image_t = numpy.transpose(image, axes=permutation)
-
-        # Number of effective dimensions:
-        num_eff_dim = max(1, len(tuple(0 for s in image_t.shape if s >= min_length)))
-
-        # We Adjust the crop size to take into account axis that are too short:
-        crop_size //= int(numpy.prod(tuple((s for s in image.shape if s < min_length))))
-
-        # Estimated crop length per axis:
-        total_size_effective = int(
-            numpy.prod(tuple((s for s in image.shape if s >= min_length)))
-        )
-        factor = (crop_size / total_size_effective) ** (1 / num_eff_dim)
-        crop_lengths = tuple((s * factor for s in image_t.shape))
-
-        # Timeout per 2D projection:
-        timeout_in_seconds = max(1, timeout_in_seconds // num_eff_dim)
-
-        # Starting slice:
-        slice_ = (None,) * image_t.ndim
-
-        # We iterate through all consecutive axis pairs:
-        for axis in range(image_t.ndim):
-
-            # Pair:
-            proj_axes = (axis, (axis + 1) % image_t.ndim)
-
-            with lsection(
-                f"Projecting image of shape: {image.shape} so that axes: {proj_axes} remain"
-            ):
-
-                # We skip axis that are too short:
-                if any(image_t.shape[a] < min_length for a in proj_axes):
-                    continue
-
-                # Project away other axis:
-                axes = tuple((a for a in range(image_t.ndim) if a not in proj_axes))
-                projection = numpy.mean(image_t, axis=axes, keepdims=True)
-
-            # crop size:
-            proj_crop_size = int(
-                max(1, int(numpy.prod(tuple(crop_lengths[a] for a in proj_axes))))
-            )
-
-            # Delegate 2D cropping:
-            proj_crop, proj_slice_ = representative_crop(
-                projection,
-                crop_size=proj_crop_size,
-                search_mode=search_mode,
-                granularity_factor=granularity_factor,
-                min_num_crops=min_num_crops,
-                return_slice=True,
-                display_crop=display_crop,
-                timeout_in_seconds=timeout_in_seconds,
-                *args,
-                **kwargs,
-            )
-
-            # Replace slice(0, 1, 1) with None:
-            proj_slice_ = tuple(
-                (
-                    None if ps in [slice(0, 1, 1), slice(0, 1, None)] else ps
-                    for ps in proj_slice_
-                )
-            )
-
-            slice_ = tuple(
-                (ps if s is None else s for s, ps in zip(slice_, proj_slice_))
-            )
-
-            # If we have figured it all, then we stop:
-            if all(s is not None for s in slice_):
-                lprint(f"Done!")
-                break
-
-        # permutate back to original axis order:
-        inverse_permutation = numpy.argsort(permutation)
-        slice_ = tuple(slice_[inverse_permutation[i]] for i in range(len(slice_)))
-
-        # Convert slice to explicit indices:
-        slice_ = tuple(
-            slice(0, s, 1) if sl is None else sl for sl, s in zip(slice_, image.shape)
-        )
-
-        # Crop Image:
-        crop = image[slice_]
-        if return_slice:
-            # Return slice if requested:
-            return crop, slice_
-        else:
-            return crop
-
-
 def representative_crop(
     image: ArrayLike,
     mode: str = 'contrast',
@@ -394,9 +281,9 @@ def representative_crop(
 
             for i, index in enumerate(numpy.ndindex(translation_indices)):
 
-                print(
-                    f"i={i}, index={index}, translation_indices={translation_indices}"
-                )
+                # print(
+                #     f"i={i}, index={index}, translation_indices={translation_indices}"
+                # )
 
                 # translation:
                 translation = tuple(

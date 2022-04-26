@@ -1,3 +1,4 @@
+# flake8: noqa
 from numpy.random.mtrand import randint
 
 from aydin.analysis.empirical_noise_model import (

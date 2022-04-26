@@ -6,7 +6,6 @@ from typing import Optional
 
 import gdown
 import numpy
-import skimage
 from scipy.ndimage import binary_dilation, zoom
 from scipy.signal import convolve
 from scipy.signal import convolve2d

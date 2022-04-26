@@ -1,7 +1,17 @@
 # flake8: noqa
+import numpy
+from numpy.random import normal
 from skimage.data import camera
 
-from aydin.io.datasets import dots, lizard, pollen, newyork, characters, examples_single
+from aydin.io.datasets import (
+    dots,
+    lizard,
+    pollen,
+    newyork,
+    characters,
+    examples_single,
+    normalise,
+)
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.log.log import Log, lsection, lprint
 
@@ -14,6 +24,9 @@ def demo_representative_crop(
     """
     Log.enable_output = True
     Log.set_log_max_depth(5)
+
+    image = normalise(image.astype(numpy.float32))
+    image += 0.1 * normal(size=image.shape, scale=0.1)
 
     def _crop_fun():
         return representative_crop(

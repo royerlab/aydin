@@ -1,3 +1,4 @@
+# flake8: noqa
 import numpy
 
 from aydin.analysis.camera_simulation import simulate_camera_image
