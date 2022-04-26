@@ -45,7 +45,9 @@ def super_fast_representative_crop(
         lprint(f"Scaling by factors: {downscale_factor}")
 
         # Compute zoom factor
-        zoom_per_axis = tuple(1.0 / d if s > 1 else 1 for d, s in zip(downscale_factor, image.shape))
+        zoom_per_axis = tuple(
+            1.0 / d if s > 1 else 1 for d, s in zip(downscale_factor, image.shape)
+        )
         lprint(f"zoom_per_axis: {zoom_per_axis}")
 
         # Downsample image:
