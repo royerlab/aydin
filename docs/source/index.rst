@@ -97,6 +97,7 @@ If you find Aydin useful and use it in your work, please kindly consider to cite
    Introduction <use_cases/introduction.rst>
    Denoising Basics with Aydin <use_cases/basics.rst>
    Denoising Spinning-Disk Confocal Microscopy Images with Aydin <use_cases/confocal.rst>
+   Denoising OpenCell Images with Aydin <use_cases/opencell.rst>
 
 .. toctree::
    :maxdepth: 1
