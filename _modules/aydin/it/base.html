@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -108,6 +109,7 @@
 <span class="kn">import</span> <span class="nn">jsonpickle</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">psutil</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array2string</span>
 
 <span class="kn">from</span> <span class="nn">aydin.analysis.blind_spot_analysis</span> <span class="kn">import</span> <span class="n">auto_detect_blindspots</span>
 <span class="kn">from</span> <span class="nn">aydin.it.exceptions.base</span> <span class="kn">import</span> <span class="n">ArrayShapeDoesNotMatchError</span>
@@ -142,10 +144,20 @@
 <span class="sd">        ----------</span>
 <span class="sd">        monitor</span>
 
-<span class="sd">        blind_spots : Optional[Union[str, List[Tuple[int]]]]</span>
+<span class="sd">        blind_spots : Optional[Union[str,List[Tuple[int]]]]</span>
 <span class="sd">            List of voxel coordinates (relative to receptive field center) to</span>
-<span class="sd">            be included in the &#39;blind-spot&#39;. If &#39;auto&#39; is passed then the</span>
-<span class="sd">            blindspots are automatically determined from the image content.</span>
+<span class="sd">            be included in the blind-spot. For example, you can enter:</span>
+<span class="sd">            &#39;&lt;axis&gt;#&lt;radius&gt;&#39; to extend the blindspot along a given axis by a</span>
+<span class="sd">            certain radius. For example, for an image of dimension 3, &#39;x#1&#39;</span>
+<span class="sd">            extends the blind spot to cover voxels of relative coordinates:</span>
+<span class="sd">            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,</span>
+<span class="sd">            enter: &#39;x#1,y#1&#39; by comma separating between axis. To specify the</span>
+<span class="sd">            axis you can use integer indices, or &#39;x&#39;, &#39;y&#39;, &#39;z&#39;, and &#39;t&#39;</span>
+<span class="sd">            (dimension order is tzyx with x being always the last dimension).</span>
+<span class="sd">            If None is passed then the blindspots are automatically discovered</span>
+<span class="sd">            from the image content. If &#39;center&#39; is passed then no additional</span>
+<span class="sd">            blindspots to the center pixel are considered. If &#39;center&#39; is passed</span>
+<span class="sd">            then only the default single center voxel blind-spot is used.</span>
 
 <span class="sd">        tile_min_margin : int</span>
 <span class="sd">            Minimal width of tile margin in voxels.</span>
@@ -166,7 +178,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="o">=</span> <span class="n">monitor</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="o">=</span> <span class="n">blind_spots</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]]</span> <span class="o">=</span> <span class="n">blind_spots</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tile_max_margin</span> <span class="o">=</span> <span class="n">tile_max_margin</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tile_min_margin</span> <span class="o">=</span> <span class="n">tile_min_margin</span>
 
@@ -174,7 +186,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">max_memory_usage_ratio</span> <span class="o">=</span> <span class="n">max_memory_usage_ratio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_tiling_overhead</span> <span class="o">=</span> <span class="n">max_tiling_overhead</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_voxels_per_tile</span> <span class="o">=</span> <span class="mi">768</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_voxels_per_tile</span> <span class="o">=</span> <span class="mi">768</span><span class="o">**</span><span class="mi">3</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">callback_period</span> <span class="o">=</span> <span class="mi">3</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_callback_time_sec</span> <span class="o">=</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span>
@@ -363,14 +375,33 @@
             <span class="p">)</span>
 
             <span class="c1"># Automatic blind-spot discovery:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">lprint</span><span class="p">(</span>
                     <span class="s2">&quot;Automatic discovery of noise autocorrelation and specification of N2S blind-spots activated!&quot;</span>
                 <span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="o">=</span> <span class="n">auto_detect_blindspots</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">,</span> <span class="n">autocorrelogram</span> <span class="o">=</span> <span class="n">auto_detect_blindspots</span><span class="p">(</span>
                     <span class="n">shape_normalised_input_image</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="p">)</span>
                 <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Blind spots: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">autocorrelogram_values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">autocorrelogram</span><span class="p">)</span>
+                <span class="n">autocorrelogram_values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">autocorrelogram_values</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="mi">5</span><span class="p">]</span>
+                <span class="n">auto_str</span> <span class="o">=</span> <span class="n">array2string</span><span class="p">(</span>
+                    <span class="n">autocorrelogram_values</span><span class="p">,</span>
+                    <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                    <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span>
+                    <span class="n">suppress_small</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">threshold</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                    <span class="n">edgeitems</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+                    <span class="n">sign</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Autocorrelogram unique values in decreasing order: </span><span class="si">{</span><span class="n">auto_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="c1"># Number of spatio-temporal dims:</span>
+                <span class="n">st_ndim</span> <span class="o">=</span> <span class="n">shape_normalised_input_image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span>
+                <span class="c1"># Parse:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_blind_spot_shorthand_notation</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">,</span> <span class="n">st_ndim</span>
+                <span class="p">)</span>
 
             <span class="c1"># Verify that input and target images have same shape:</span>
             <span class="c1"># We do this after normalisation because that&#39;s easier</span>
@@ -602,7 +633,7 @@
 
             <span class="c1"># how much do we have to tile because of the suggested tile size?</span>
             <span class="n">split_factor_suggested_tile_size</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="p">(</span>
-                <span class="n">suggested_tile_size</span> <span class="o">**</span> <span class="n">num_spatio_temp_dim</span>
+                <span class="n">suggested_tile_size</span><span class="o">**</span><span class="n">num_spatio_temp_dim</span>
             <span class="p">)</span>
             <span class="n">lprint</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;How much do we need to tile because of the suggested tile size? : </span><span class="si">{</span><span class="n">split_factor_suggested_tile_size</span><span class="si">}</span><span class="s2"> times.&quot;</span>
@@ -829,7 +860,55 @@
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No axes can be both batch and chan axes!&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">batch_result</span><span class="p">,</span> <span class="n">chan_result</span></div></div>
+        <span class="k">return</span> <span class="n">batch_result</span><span class="p">,</span> <span class="n">chan_result</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_blind_spot_shorthand_notation</span><span class="p">(</span><span class="n">blind_spots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">st_ndim</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Blindspot shorthand notation detected: </span><span class="si">{</span><span class="n">blind_spots</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+        <span class="c1"># Replace commas with spaces:</span>
+        <span class="n">blind_spots</span> <span class="o">=</span> <span class="n">blind_spots</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="c1"># First split by white space:</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">blind_spots</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="c1"># We accumulate parsed blind spots here:</span>
+        <span class="n">blind_spots_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="c1"># To avoid confusiuon we always include the center pixel:</span>
+        <span class="n">blind_spots_set</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="n">st_ndim</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;center&#39;</span> <span class="ow">in</span> <span class="n">blind_spots</span><span class="p">:</span>
+            <span class="c1"># We don&#39;t extend!</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+                <span class="n">splitted_part</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="n">splitted_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+                <span class="c1"># Parse shorthand axis notation:</span>
+                <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+                    <span class="n">axis</span> <span class="o">=</span> <span class="n">st_ndim</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">0</span>
+                <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+                    <span class="n">axis</span> <span class="o">=</span> <span class="n">st_ndim</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span>
+                    <span class="n">axis</span> <span class="o">=</span> <span class="n">st_ndim</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span>
+                <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span>
+                    <span class="n">axis</span> <span class="o">=</span> <span class="n">st_ndim</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">3</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">axis</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+
+                <span class="c1"># Ensure axis is in range:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">st_ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="p">))</span>
+
+                <span class="n">radius</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">splitted_part</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">radius</span><span class="p">,</span> <span class="n">radius</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">spot</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="n">axis</span> <span class="o">+</span> <span class="p">(</span><span class="n">r</span><span class="p">,)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">st_ndim</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">axis</span><span class="p">)</span>
+                    <span class="n">blind_spots_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">spot</span><span class="p">)</span>
+
+        <span class="n">blind_spots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">blind_spots_set</span><span class="p">)</span>
+
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsed blindspot from shorthand notation: </span><span class="si">{</span><span class="n">blind_spots</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">blind_spots</span></div>
 </pre></div>
 
            </div>

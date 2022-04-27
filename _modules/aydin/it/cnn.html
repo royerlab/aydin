@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -206,10 +207,20 @@
 <span class="sd">        learn_rate : float</span>
 <span class="sd">            Initial learn rate</span>
 
-<span class="sd">        blind_spots : Optional[Union[str, List[Tuple[int]]]]</span>
+<span class="sd">        blind_spots : Optional[Union[str,List[Tuple[int]]]]</span>
 <span class="sd">            List of voxel coordinates (relative to receptive field center) to</span>
-<span class="sd">            be included in the &#39;blind-spot&#39;. If &#39;auto&#39; is passed then the</span>
-<span class="sd">            blindspots are automatically determined from the image content.</span>
+<span class="sd">            be included in the blind-spot. For example, you can enter:</span>
+<span class="sd">            &#39;&lt;axis&gt;#&lt;radius&gt;&#39; to extend the blindspot along a given axis by a</span>
+<span class="sd">            certain radius. For example, for an image of dimension 3, &#39;x#1&#39;</span>
+<span class="sd">            extends the blind spot to cover voxels of relative coordinates:</span>
+<span class="sd">            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,</span>
+<span class="sd">            enter: &#39;x#1,y#1&#39; by comma separating between axis. To specify the</span>
+<span class="sd">            axis you can use integer indices, or &#39;x&#39;, &#39;y&#39;, &#39;z&#39;, and &#39;t&#39;</span>
+<span class="sd">            (dimension order is tzyx with x being always the last dimension).</span>
+<span class="sd">            If None is passed then the blindspots are automatically discovered</span>
+<span class="sd">            from the image content. If &#39;center&#39; is passed then no additional</span>
+<span class="sd">            blindspots to the center pixel are considered.  If &#39;center&#39; is passed</span>
+<span class="sd">            then only the default single center voxel blind-spot is used.</span>
 
 <span class="sd">        tile_min_margin : int</span>
 <span class="sd">            Minimal width of tile margin in voxels.</span>
@@ -385,10 +396,10 @@
                 <span class="p">)</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">%</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span>
                 <span class="p">)</span>
 
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s1">&#39;Number of layers is too large for given patch size.&#39;</span>
                     <span class="p">)</span>
@@ -409,11 +420,11 @@
             <span class="c1"># Check patch_size for unet models</span>
             <span class="k">if</span> <span class="s1">&#39;unet&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_architecture</span><span class="p">:</span>
                 <span class="n">patch_size</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">patch_size</span><span class="p">)</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">patch_size</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">patch_size</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s1">&#39;Tile size is too small. The largest dimension of tile size has to be &gt;= </span><span class="si">{</span><span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="si">}</span><span class="s1">.&#39;</span>
                     <span class="p">)</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">patch_size</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">patch_size</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">%</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s1">&#39;Tile sizes on XY plane have to be multiple of 2^</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="si">}</span><span class="s1">&#39;</span>
                     <span class="p">)</span>
@@ -510,7 +521,7 @@
                     <span class="n">numpy</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span>
                         <span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:][:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
                         <span class="n">numpy</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span>
-                            <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:][:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
                         <span class="p">),</span>
                     <span class="p">)</span>
                     <span class="o">!=</span> <span class="mi">0</span>
@@ -620,8 +631,12 @@
                     <span class="k">if</span> <span class="s1">&#39;checkran&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_architecture</span><span class="p">:</span>
                         <span class="n">callbacks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reduce_learning_rate1</span><span class="p">)</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="o">.</span><span class="n">remove</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="s1">&#39;center&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="n">center_pixel_coord</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span>
+                    <span class="k">if</span> <span class="n">center_pixel_coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="o">.</span><span class="n">remove</span><span class="p">((</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                         <span class="n">stop_center_gradient</span> <span class="o">=</span> <span class="n">StopCenterGradient2D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">)</span>
@@ -698,11 +713,11 @@
                 <span class="n">input_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">pad_width1</span><span class="p">,</span> <span class="s1">&#39;edge&#39;</span><span class="p">)</span>
                 <span class="n">spatial_shape</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">spatial_shape</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">spatial_shape</span> <span class="o">%</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
                 <span class="n">reshaped_for_model</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">pad_width0</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span>
-                    <span class="o">-</span> <span class="p">(</span><span class="n">spatial_shape</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">)</span>
+                    <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span>
+                    <span class="o">-</span> <span class="p">(</span><span class="n">spatial_shape</span> <span class="o">%</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">nb_unet_levels</span><span class="p">)</span>
                     <span class="c1"># + pad_square</span>
                 <span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
                 <span class="n">pad_width2</span> <span class="o">=</span> <span class="p">(</span>

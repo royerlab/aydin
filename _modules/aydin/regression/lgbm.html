@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -102,11 +103,14 @@
 <span></span><span class="kn">import</span> <span class="nn">gc</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">from</span> <span class="nn">importlib.util</span> <span class="kn">import</span> <span class="n">find_spec</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">lightgbm</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">Booster</span>
+<span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">Booster</span><span class="p">,</span> <span class="n">record_evaluation</span>
 
 <span class="kn">from</span> <span class="nn">aydin.regression.base</span> <span class="kn">import</span> <span class="n">RegressorBase</span>
 <span class="kn">from</span> <span class="nn">aydin.regression.gbm_utils.callbacks</span> <span class="kn">import</span> <span class="n">early_stopping</span>
@@ -126,15 +130,15 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">num_leaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">127</span><span class="p">,</span>
-        <span class="n">max_num_estimators</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">),</span>
+        <span class="n">num_leaves</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_num_estimators</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">max_bin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span>
-        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">loss</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;l1&#39;</span><span class="p">,</span>
         <span class="n">patience</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
         <span class="n">verbosity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">compute_load</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span>
-        <span class="n">gpu_prediction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">inference_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">compute_training_loss</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Constructs a LightGBM regressor.</span>
@@ -142,31 +146,57 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        num_leaves</span>
-<span class="sd">            Number of leaves</span>
+<span class="sd">            Number of leaves in the decision trees.</span>
+<span class="sd">            We recommend values between 128 and 512.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        max_num_estimators</span>
-<span class="sd">            Maximum number of estimators</span>
+<span class="sd">            Maximum number of estimators (trees). Typical values range from 1024</span>
+<span class="sd">            to 4096. Use larger values for more difficult datasets. If training</span>
+<span class="sd">            stops exactly at these values that is a sign you need to increase this</span>
+<span class="sd">            number. Quality of the results typically increases with the number of</span>
+<span class="sd">            estimators, but so does computation time too.</span>
+<span class="sd">            We do not recommend using a value of more than 10000.</span>
+
 <span class="sd">        max_bin</span>
-<span class="sd">            Maximum number of allowed bins</span>
+<span class="sd">            Maximum number of allowed bins. The features are quantised into that</span>
+<span class="sd">            many bins. Higher values achieve better quantisation of features but</span>
+<span class="sd">            also leads to longer training and more memory consumption. We do not</span>
+<span class="sd">            recommend changing this parameter.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        learning_rate</span>
-<span class="sd">            Learning rate for the LightGBM model</span>
+<span class="sd">            Learning rate for the catboost model. The learning rate is determined</span>
+<span class="sd">            automatically if the value None is given. We recommend values around 0.01.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        loss</span>
-<span class="sd">            Type of loss to be used</span>
+<span class="sd">            Type of loss to be used. Van be &#39;l1&#39; for L1 loss (MAE), and &#39;l2&#39; for</span>
+<span class="sd">            L2 loss (RMSE), &#39;huber&#39; for Huber loss, &#39;poisson&#39; for Poisson loss,</span>
+<span class="sd">            and &#39;quantile&#39; for Auantile loss. We recommend using: &#39;l1&#39;.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        patience</span>
-<span class="sd">            Number of rounds required for early stopping</span>
+<span class="sd">            Number of rounds after which training stops if no improvement occurs.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        verbosity</span>
 <span class="sd">            Verbosity setting of LightGBM.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        compute_load</span>
-<span class="sd">            Allowed load on computational resources in percentage</span>
+<span class="sd">            Allowed load on computational resources in percentage, typically used</span>
+<span class="sd">            for CPU training when deciding on how many available cores to use.</span>
 <span class="sd">            (advanced)</span>
-<span class="sd">        gpu_prediction : bool</span>
-<span class="sd">            True enables GPU acceleration if available</span>
+
+<span class="sd">        inference_mode : str</span>
+<span class="sd">            Choses inference mode: can be &#39;opencl&#39; for an OpenCL backend,</span>
+<span class="sd">            &#39;lleaves&#39; for the very fast lleaves library (only OSX and Linux),</span>
+<span class="sd">            &#39;lgbm&#39; for the standard lightGBM inference engine, and &#39;auto&#39; (or None)</span>
+<span class="sd">            tries the best/fastest options first and fallback to lightGBM default</span>
+<span class="sd">            inference.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        compute_training_loss : bool</span>
 <span class="sd">            Flag to tell LightGBM whether to compute training loss or not</span>
 <span class="sd">            (advanced)</span>
@@ -176,15 +206,17 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">force_verbose_eval</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span> <span class="o">=</span> <span class="n">num_leaves</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_num_estimators</span> <span class="o">=</span> <span class="n">max_num_estimators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span> <span class="o">=</span> <span class="mi">512</span> <span class="k">if</span> <span class="n">num_leaves</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">num_leaves</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_num_estimators</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="mf">1e4</span><span class="p">)</span> <span class="k">if</span> <span class="n">max_num_estimators</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">max_num_estimators</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_bin</span> <span class="o">=</span> <span class="n">max_bin</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="k">if</span> <span class="n">learning_rate</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">learning_rate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="n">loss</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_rounds</span> <span class="o">=</span> <span class="n">patience</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">=</span> <span class="n">verbosity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compute_load</span> <span class="o">=</span> <span class="n">compute_load</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gpu_prediction</span> <span class="o">=</span> <span class="n">gpu_prediction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inference_mode</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span> <span class="k">if</span> <span class="n">inference_mode</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">inference_mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compute_training_loss</span> <span class="o">=</span> <span class="n">compute_training_loss</span>  <span class="c1"># This can be expensive</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="o">=</span> <span class="kc">None</span>
@@ -195,22 +227,38 @@
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max bin: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_bin</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;n_estimators: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_num_estimators</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;patience: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_rounds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;inference_mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">inference_mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
         <span class="c1"># min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))</span>
-        <span class="n">max_depth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span><span class="p">)))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">max_bin</span> <span class="o">=</span> <span class="mi">256</span> <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_bin</span>
 
-        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;learning_rate:  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># Preparing objective:</span>
+        <span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span>
+        <span class="k">if</span> <span class="n">objective</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;l1&#39;</span><span class="p">:</span>
+            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;regression_l1&#39;</span>
+        <span class="k">elif</span> <span class="n">objective</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;l2&#39;</span><span class="p">:</span>
+            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;regression_l2&#39;</span>
+        <span class="k">elif</span> <span class="n">objective</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;huber&#39;</span><span class="p">:</span>
+            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;huber&#39;</span>
+        <span class="k">elif</span> <span class="n">objective</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;poisson&#39;</span><span class="p">:</span>
+            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;poisson&#39;</span>
+        <span class="k">elif</span> <span class="n">objective</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;quantile&#39;</span><span class="p">:</span>
+            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;quantile&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;regression_l1&#39;</span>
+
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;objective: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Setting max depth:</span>
+        <span class="n">max_depth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span><span class="p">)))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;max_depth:  </span><span class="si">{</span><span class="n">max_depth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;num_leaves: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Setting max bin:</span>
+        <span class="n">max_bin</span> <span class="o">=</span> <span class="mi">256</span> <span class="k">if</span> <span class="n">dtype</span> <span class="o">==</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_bin</span>
         <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;max_bin:    </span><span class="si">{</span><span class="n">max_bin</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="n">objective</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metric</span>
-        <span class="k">if</span> <span class="n">objective</span> <span class="o">==</span> <span class="s1">&#39;l1&#39;</span><span class="p">:</span>
-            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;regression_l1&#39;</span>
-        <span class="k">elif</span> <span class="n">objective</span> <span class="o">==</span> <span class="s1">&#39;l2&#39;</span><span class="p">:</span>
-            <span class="n">objective</span> <span class="o">=</span> <span class="s1">&#39;regression_l2&#39;</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;learning_rate:  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;num_leaves: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_leaves</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;device&quot;</span><span class="p">:</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
@@ -247,11 +295,9 @@
                 <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of validation data points: </span><span class="si">{</span><span class="n">y_valid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of features per data point: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
             <span class="n">valid_dataset</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">has_valid_dataset</span>
-                <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">lightgbm</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span><span class="n">x_valid</span><span class="p">,</span> <span class="n">y_valid</span><span class="p">)</span> <span class="k">if</span> <span class="n">has_valid_dataset</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">__epoch_counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -274,8 +320,6 @@
 
             <span class="n">evals_result</span> <span class="o">=</span> <span class="p">{}</span>
 
-            <span class="n">verbose_eval</span> <span class="o">=</span> <span class="p">(</span><span class="n">lgbm_callback</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">force_verbose_eval</span><span class="p">)</span>
-
             <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_callback</span> <span class="o">=</span> <span class="n">early_stopping</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_rounds</span>
             <span class="p">)</span>
@@ -290,11 +334,13 @@
                     <span class="k">else</span> <span class="n">valid_dataset</span><span class="p">,</span>
                     <span class="n">early_stopping_rounds</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">has_valid_dataset</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">num_boost_round</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_num_estimators</span><span class="p">,</span>
-                    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">lgbm_callback</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_callback</span><span class="p">]</span>
+                    <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span>
+                        <span class="n">lgbm_callback</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">early_stopping_callback</span><span class="p">,</span>
+                        <span class="n">record_evaluation</span><span class="p">(</span><span class="n">evals_result</span><span class="p">),</span>
+                    <span class="p">]</span>
                     <span class="k">if</span> <span class="n">has_valid_dataset</span>
                     <span class="k">else</span> <span class="p">[</span><span class="n">lgbm_callback</span><span class="p">],</span>
-                    <span class="n">verbose_eval</span><span class="o">=</span><span class="n">verbose_eval</span><span class="p">,</span>
-                    <span class="n">evals_result</span><span class="o">=</span><span class="n">evals_result</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;GBM fitting done.&quot;</span><span class="p">)</span>
 
@@ -313,13 +359,13 @@
                 <span class="n">loss_history</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;validation&#39;</span><span class="p">:</span> <span class="n">evals_result</span><span class="p">[</span><span class="s1">&#39;valid_0&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">metric</span><span class="p">]}</span>
 
             <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">_LGBMModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpu_prediction</span><span class="p">,</span> <span class="n">loss_history</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="n">_LGBMModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_mode</span><span class="p">,</span> <span class="n">loss_history</span><span class="p">)</span></div>
 
 
 <span class="k">class</span> <span class="nc">_LGBMModel</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">gpu_prediction</span><span class="p">,</span> <span class="n">loss_history</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">inference_mode</span><span class="p">,</span> <span class="n">loss_history</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span> <span class="n">Booster</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gpu_prediction</span> <span class="o">=</span> <span class="n">gpu_prediction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inference_mode</span> <span class="o">=</span> <span class="n">inference_mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span> <span class="o">=</span> <span class="n">loss_history</span>
 
     <span class="k">def</span> <span class="nf">_save_internals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -343,36 +389,78 @@
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of data points             : </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of features per data points: </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
+            <span class="c1"># we decide here what &#39;auto&#39; means:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_mode</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">5e6</span><span class="p">:</span>
+                    <span class="c1"># Lleaves takes a long time to compile models, so only</span>
+                    <span class="c1"># interesting for very large inferences!</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">inference_mode</span> <span class="o">=</span> <span class="s1">&#39;lleaves&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">inference_mode</span> <span class="o">=</span> <span class="s1">&#39;lgbm&#39;</span>
+
             <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;GBM regressor predicting now...&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gpu_prediction</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_mode</span> <span class="o">==</span> <span class="s1">&#39;opencl&#39;</span> <span class="ow">and</span> <span class="n">find_spec</span><span class="p">(</span><span class="s1">&#39;pyopencl&#39;</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Attempting OpenCL-based regression.&quot;</span><span class="p">)</span>
-                    <span class="kn">from</span> <span class="nn">aydin.regression.gbm_utils.opencl_prediction</span> <span class="kn">import</span> <span class="p">(</span>
-                        <span class="n">GBMOpenCLPrediction</span><span class="p">,</span>
-                    <span class="p">)</span>
-
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="o">=</span> <span class="n">GBMOpenCLPrediction</span><span class="p">()</span>
-
-                    <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">num_iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">best_iteration</span>
-                    <span class="p">)</span>
-
-                    <span class="c1"># We clear the OpenCL ressources:</span>
-                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="o">=</span> <span class="kc">None</span>
-
-                    <span class="k">return</span> <span class="n">prediction</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_opencl</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="n">lprint</span><span class="p">(</span>
-                        <span class="s2">&quot;Failed OpenCL-based regression, doing CPU based prediction.&quot;</span>
+                    <span class="c1"># printing stack trace</span>
+                    <span class="c1"># traceback.print_exc()</span>
+                    <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Failed OpenCL-based regression!&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference_mode</span> <span class="o">==</span> <span class="s1">&#39;lleaves&#39;</span> <span class="ow">and</span> <span class="n">find_spec</span><span class="p">(</span><span class="s1">&#39;lleaves&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_lleaves</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="c1"># printing stack trace</span>
+                    <span class="c1"># traceback.print_exc()</span>
+                    <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Failed lleaves-based regression!&quot;</span><span class="p">)</span>
+
+            <span class="c1"># This must work!</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_lgbm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_predict_lleaves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Attempting lleaves-based regression.&quot;</span><span class="p">):</span>
+
+            <span class="c1"># Creating lleaves model and compiling it:</span>
+            <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Model saving and compilation&quot;</span><span class="p">):</span>
+                <span class="c1"># Creating temporary file:</span>
+                <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">()</span> <span class="k">as</span> <span class="n">temp_file</span><span class="p">:</span>
+
+                    <span class="c1"># Saving LGBM model:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save_model</span><span class="p">(</span>
+                        <span class="n">temp_file</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">num_iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">best_iteration</span>
                     <span class="p">)</span>
 
-            <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">num_iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">best_iteration</span><span class="p">)</span>
-            <span class="c1"># LGBM is annoying, it spits out float64s</span>
-            <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;GBM regressor predicting done!&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">prediction</span>
+                    <span class="kn">import</span> <span class="nn">lleaves</span>
+
+                    <span class="n">llvm_model</span> <span class="o">=</span> <span class="n">lleaves</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">model_file</span><span class="o">=</span><span class="n">temp_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">llvm_model</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
+
+            <span class="n">prediction</span> <span class="o">=</span> <span class="n">llvm_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">prediction</span>
+
+    <span class="k">def</span> <span class="nf">_predict_opencl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Attempting lleaves-based regression.&quot;</span><span class="p">):</span>
+            <span class="kn">from</span> <span class="nn">aydin.regression.gbm_utils.opencl_prediction</span> <span class="kn">import</span> <span class="n">GBMOpenCLPrediction</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="o">=</span> <span class="n">GBMOpenCLPrediction</span><span class="p">()</span>
+            <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">num_iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">best_iteration</span>
+            <span class="p">)</span>
+            <span class="c1"># We clear the OpenCL ressources:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">opencl_predictor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">prediction</span>
+
+    <span class="k">def</span> <span class="nf">_predict_lgbm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">num_iteration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">best_iteration</span><span class="p">)</span>
+        <span class="c1"># LGBM is annoying, it spits out float64s</span>
+        <span class="n">prediction</span> <span class="o">=</span> <span class="n">prediction</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;GBM regressor predicting done!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">prediction</span>
 </pre></div>
 
            </div>

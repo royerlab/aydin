@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -158,7 +159,7 @@
 <span class="sd">        mode : str</span>
 <span class="sd">            Range normalisation mode: &#39;minmax&#39; or &#39;percentile&#39;</span>
 <span class="sd">        percentile : Optional[float]</span>
-<span class="sd">            Percentile value for the &#39;percentile&#39; mode.</span>
+<span class="sd">            Percentile value within [0, 1] for the &#39;percentile&#39; mode.</span>
 <span class="sd">            If None the percentile value is automatically chosen</span>
 <span class="sd">            based on the number of voxels in the image.</span>
 <span class="sd">        force_float_datatype: bool</span>

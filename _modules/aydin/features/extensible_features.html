@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -215,7 +216,7 @@
 <span class="sd">        exclude_center_value : bool</span>
 <span class="sd">            If true, the center pixel is never used</span>
 <span class="sd">            to compute any feature, different feature generation algorithms can</span>
-<span class="sd">            take different approaches to acheive that.</span>
+<span class="sd">            take different approaches to achieve that.</span>
 
 <span class="sd">        features : ndarray</span>
 <span class="sd">            If None the feature array is allocated internally,</span>
@@ -227,23 +228,27 @@
 <span class="sd">            dimension.</span>
 
 <span class="sd">        passthrough_channels : Optional[Tuple[bool]]</span>
-<span class="sd">            Optional tuple of booleans that specify which channels are &#39;pass-through&#39;</span>
-<span class="sd">            channels, i.e. channels that are not featurised and directly used as features.</span>
+<span class="sd">            Optional tuple of booleans that specify which channels are</span>
+<span class="sd">            &#39;pass-through&#39; channels, i.e. channels that are not featurised</span>
+<span class="sd">            and directly used as features.</span>
 
 <span class="sd">        num_reserved_features : int</span>
 <span class="sd">            Number of features to be left as blank,</span>
 <span class="sd">            useful when adding features separately.</span>
 
 <span class="sd">        excluded_voxels : Optional[List[Tuple[int]]]</span>
-<span class="sd">            List of pixel coordinates -- expressed as tuple of ints relative to the central pixel --</span>
-<span class="sd">            that will be excluded from any computed features. This is used for implementing</span>
-<span class="sd">            &#39;extended blind-spot&#39; N2S denoising approaches.</span>
+<span class="sd">            List of pixel coordinates -- expressed as tuple of ints relative to</span>
+<span class="sd">            the central pixel -- that will be excluded from any computed features.</span>
+<span class="sd">            This is used for implementing &#39;extended blind-spot&#39; N2S denoising</span>
+<span class="sd">            approaches.</span>
 
 <span class="sd">        spatial_feature_offset: Optional[Tuple[float, ...]]</span>
-<span class="sd">            Offset vector to be applied (added) to the spatial features (if used).</span>
+<span class="sd">            Offset vector to be applied (added) to the spatial features</span>
+<span class="sd">            (if used).</span>
 
 <span class="sd">        spatial_feature_scale: Optional[Tuple[float, ...]]</span>
-<span class="sd">            Scale vector to be applied (multiplied) to the spatial features (if used).</span>
+<span class="sd">            Scale vector to be applied (multiplied) to the spatial features</span>
+<span class="sd">            (if used).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>

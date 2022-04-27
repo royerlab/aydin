@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -103,6 +104,7 @@
 
 <span class="kn">from</span> <span class="nn">aydin.features.extensible_features</span> <span class="kn">import</span> <span class="n">ExtensibleFeatureGenerator</span>
 <span class="kn">from</span> <span class="nn">aydin.features.groups.dct</span> <span class="kn">import</span> <span class="n">DCTFeatures</span>
+<span class="kn">from</span> <span class="nn">aydin.features.groups.lowpass</span> <span class="kn">import</span> <span class="n">LowPassFeatures</span>
 <span class="kn">from</span> <span class="nn">aydin.features.groups.median</span> <span class="kn">import</span> <span class="n">MedianFeatures</span>
 <span class="kn">from</span> <span class="nn">aydin.features.groups.random</span> <span class="kn">import</span> <span class="n">RandomFeatures</span>
 <span class="kn">from</span> <span class="nn">aydin.features.groups.spatial</span> <span class="kn">import</span> <span class="n">SpatialFeatures</span>
@@ -137,6 +139,8 @@
         <span class="n">spatial_features_coarsening</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
         <span class="n">num_sinusoidal_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">include_median_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">include_lowpass_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_lowpass_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
         <span class="n">include_dct_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">dct_max_freq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
         <span class="n">include_random_conv_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -148,68 +152,119 @@
 <span class="sd">        ----------</span>
 <span class="sd">        kernel_widths : numpy.typing.ArrayLike</span>
 <span class="sd">            ArrayLike of kernel widths.</span>
+
 <span class="sd">        kernel_scales : numpy.typing.ArrayLike</span>
 <span class="sd">            ArrayLike of kernel scales.</span>
+
 <span class="sd">        kernel_shapes : numpy.typing.ArrayLike</span>
 <span class="sd">            ArrayLike of kernel shapes.</span>
+
 <span class="sd">        min_level : int</span>
 <span class="sd">            Minimum scale level of features to include</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        max_level : int</span>
 <span class="sd">            Maximum scale level of features to include</span>
+
 <span class="sd">        scale_one_width : int</span>
-<span class="sd">            Width of the scale one features</span>
+<span class="sd">            Width of the scale one features.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        include_scale_one : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on inclusion of scale-one-features</span>
-<span class="sd">            (advanced)</span>
+<span class="sd">            When True scale-one-features are included. Uniform scale-one</span>
+<span class="sd">            features consist in simply passing the intensity values of pixels</span>
+<span class="sd">            in direct proximity to the center pixel. These features encode</span>
+<span class="sd">            high-frequency information that might be heavily contaminated by</span>
+<span class="sd">            noise, so use with caution. We recommend using this only for</span>
+<span class="sd">            moderate noise levels, or for images where strong high-frequency</span>
+<span class="sd">            signal is present and needs to be recovered.</span>
+
 <span class="sd">        include_fine_features : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on inclusion of fine features</span>
-<span class="sd">            (advanced)</span>
+<span class="sd">            When True fine features are included. Uniform fine features</span>
+<span class="sd">            consist in summing up pixel values over small groups of 2 or 3</span>
+<span class="sd">            pixels surrounding the center pixel. These features encode higher</span>
+<span class="sd">            frequency information than other features (only scale-one feature</span>
+<span class="sd">            are even higher frequency).</span>
+
 <span class="sd">        include_corner_features : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on inclusion of corner features</span>
-<span class="sd">            (advanced)</span>
+<span class="sd">            When True corner features are included. Corner features are</span>
+<span class="sd">            uniform features that consists in summing the intensity values of</span>
+<span class="sd">            groups of pixels along the corners of the typical default</span>
+<span class="sd">            multi-scale features.</span>
+
 <span class="sd">        include_line_features : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on inclusion of line features</span>
+<span class="sd">            When True line features are included. Line features are another</span>
+<span class="sd">            flavour of uniform features that consist in summing up the pixel</span>
+<span class="sd">            intensity values along one-pixel-wide lines around the center</span>
+<span class="sd">            pixel.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        decimate_large_scale_features : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on decimation of large scale features</span>
+<span class="sd">            When True large scale features are decimated. To reduce the number</span>
+<span class="sd">            of features it can be advantageous to reduce the number of</span>
+<span class="sd">            large-scale (low-freq) features by decimating them. This is done</span>
+<span class="sd">            by removing center features that overlap with already covered</span>
+<span class="sd">            features at lower scales.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        extend_large_scale_features : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on extension of large scale features.</span>
+<span class="sd">            When True large scale features are extended. Extending large</span>
+<span class="sd">            scale features makes these feature cover more pixels by</span>
+<span class="sd">            overlapping pixels at the center of the receptive field.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        include_spatial_features : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on inclusion of spatial features.</span>
+<span class="sd">            When True spatial features are included. Spatial features are simply</span>
+<span class="sd">            the shifted, scaled, and possibly quantised coordinates of the voxels</span>
+<span class="sd">            themselves. This should only be used if you train on the whole image</span>
+<span class="sd">            that you intend to process. If applied on other images than the one</span>
+<span class="sd">            trained on, ensure that any spatial bias learned such as the position</span>
+<span class="sd">            of certain image structures or degradation over space is consistent</span>
+<span class="sd">            between the image you trained on and the images you process.</span>
+
 <span class="sd">        spatial_features_coarsening : int</span>
 <span class="sd">            Degree of coarsening to apply on spatial features</span>
-<span class="sd">            to prevent identification of individual pixel values</span>
+<span class="sd">            to prevent identification of individual pixel values.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        num_sinusoidal_features : int</span>
-<span class="sd">            Number of sinusoidal features</span>
+<span class="sd">            Number of sinusoidal features to include. Sinusoidal features are</span>
+<span class="sd">            spatial features that are sinusoidal.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        include_median_features : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on inclusion of median features</span>
+<span class="sd">            When True median features are included. Median features consist</span>
+<span class="sd">            in the median-filtered image</span>
+<span class="sd">            with kernels of sizes 3^n, 5^n and 7^n.</span>
 <span class="sd">            (advanced)</span>
+
+<span class="sd">        include_lowpass_features : bool</span>
+<span class="sd">            Includes lowpass image features that are computed by applying</span>
+<span class="sd">            Butterworth filters at regular frequency intervals. Highly effective</span>
+<span class="sd">            for images for which Butterworth denoising also works well. However,</span>
+<span class="sd">            for large dimensions with many dimensions feature generation can be</span>
+<span class="sd">            slow.</span>
+
+<span class="sd">        num_lowpass_features : int</span>
+<span class="sd">            Number of lowpass features to include.</span>
+<span class="sd">            (advanced)</span>
+
 <span class="sd">        include_dct_features : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on inclusion of dct features</span>
+<span class="sd">            When True DCT features computed on per-voxel-centered image patches</span>
+<span class="sd">            are included.</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        dct_max_freq : float</span>
-<span class="sd">            Maximum included frequency during</span>
-<span class="sd">            dct features computation.</span>
+<span class="sd">            Maximum included frequency during dct features computation.</span>
+<span class="sd">            Should be a number within [0, 1]</span>
 <span class="sd">            (advanced)</span>
+
 <span class="sd">        include_random_conv_features : bool</span>
-<span class="sd">            True or False, argument to set decision</span>
-<span class="sd">            on inclusion of random convolutional features</span>
+<span class="sd">            When True random convolutional features are included.</span>
+<span class="sd">            This is experimental and of academic interest only.</span>
 <span class="sd">            (advanced)</span>
+
+
 <span class="sd">        dtype</span>
 <span class="sd">            Datatype of the features</span>
 <span class="sd">            (advanced)</span>
@@ -241,7 +296,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">spatial</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">num_sinusoidal_features</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">periods</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sinusoidal_features</span><span class="p">)])</span>
+            <span class="n">periods</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sinusoidal_features</span><span class="p">)])</span>
             <span class="k">for</span> <span class="n">period</span> <span class="ow">in</span> <span class="n">periods</span><span class="p">:</span>
                 <span class="n">spatial</span> <span class="o">=</span> <span class="n">SpatialFeatures</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">spatial</span><span class="p">)</span>
@@ -265,7 +320,11 @@
             <span class="n">rnd7</span> <span class="o">=</span> <span class="n">RandomFeatures</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">num_features</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">rnd3</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">rnd5</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">rnd7</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">rnd7</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">include_lowpass_features</span><span class="p">:</span>
+            <span class="n">lowpass</span> <span class="o">=</span> <span class="n">LowPassFeatures</span><span class="p">(</span><span class="n">num_features</span><span class="o">=</span><span class="n">num_lowpass_features</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">lowpass</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

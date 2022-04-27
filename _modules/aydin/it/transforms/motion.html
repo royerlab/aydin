@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -484,7 +485,7 @@
             <span class="c1"># We compute the center of mass:</span>
             <span class="c1"># We take the square to squash small values far from the maximum that are likely noisy...</span>
             <span class="n">signed_com_shift</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span><span class="n">cropped_correlation</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span><span class="n">cropped_correlation</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
                 <span class="o">-</span> <span class="n">fine_window_radius</span>
             <span class="p">)</span>
 

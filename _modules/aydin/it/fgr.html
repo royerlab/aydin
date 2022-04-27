@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -172,7 +173,7 @@
 <span class="sd">            necessarily need more than several million voxels to train an</span>
 <span class="sd">            effective denoiser. Different regressors (lgbm, cb, ...) can</span>
 <span class="sd">            handle varying sizes of training data. We recommend at least a</span>
-<span class="sd">            million (1e6) and ta most 40 million if you have a powerfull</span>
+<span class="sd">            million (1e6) and at most 40 million if you have a powerfull</span>
 <span class="sd">            machine with GPU and if you are armed with patience. (advanced)</span>
 
 <span class="sd">        favour_bright_pixels : float</span>
@@ -181,10 +182,20 @@
 <span class="sd">            pixel intensities are treated equally. Positive values favour</span>
 <span class="sd">            bright pixels, negative values favour dark pixels.</span>
 
-<span class="sd">        blind_spots : Optional[Union[str, List[Tuple[int]]]]</span>
+<span class="sd">        blind_spots : Optional[Union[str,List[Tuple[int]]]]</span>
 <span class="sd">            List of voxel coordinates (relative to receptive field center) to</span>
-<span class="sd">            be included in the &#39;blind-spot&#39;. If &#39;auto&#39; is passed then the</span>
-<span class="sd">            blindspots are automatically determined from the image content.</span>
+<span class="sd">            be included in the blind-spot. For example, you can enter:</span>
+<span class="sd">            &#39;&lt;axis&gt;#&lt;radius&gt;&#39; to extend the blindspot along a given axis by a</span>
+<span class="sd">            certain radius. For example, for an image of dimension 3, &#39;x#1&#39;</span>
+<span class="sd">            extends the blind spot to cover voxels of relative coordinates:</span>
+<span class="sd">            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,</span>
+<span class="sd">            enter: &#39;x#1,y#1&#39; by comma separating between axis. To specify the</span>
+<span class="sd">            axis you can use integer indices, or &#39;x&#39;, &#39;y&#39;, &#39;z&#39;, and &#39;t&#39;</span>
+<span class="sd">            (dimension order is tzyx with x being always the last dimension).</span>
+<span class="sd">            If None is passed then the blindspots are automatically discovered</span>
+<span class="sd">            from the image content. If &#39;center&#39; is passed then no additional</span>
+<span class="sd">            blindspots to the center pixel are considered.  If &#39;center&#39; is passed</span>
+<span class="sd">            then only the default single center voxel blind-spot is used.</span>
 
 <span class="sd">        tile_min_margin : int</span>
 <span class="sd">            Minimal width of tile margin in voxels.</span>
@@ -332,7 +343,7 @@
         <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Computing features for image of shape </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">):</span>
             <span class="n">excluded_voxels</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="kc">None</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="s1">&#39;center&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span>
                 <span class="k">else</span> <span class="nb">list</span><span class="p">(</span>
                     <span class="p">[</span>
                         <span class="n">coordinate</span>
@@ -345,18 +356,6 @@
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exclude_center_feature = </span><span class="si">{</span><span class="n">exclude_center_feature</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exclude_center_value   = </span><span class="si">{</span><span class="n">exclude_center_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;excluded_voxels        = </span><span class="si">{</span><span class="n">excluded_voxels</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-            <span class="n">excluded_voxels</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="kc">None</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="ow">is</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="nb">list</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="n">coordinate</span>
-                        <span class="k">for</span> <span class="n">coordinate</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span>
-                        <span class="k">if</span> <span class="n">coordinate</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
-                    <span class="p">]</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
 
             <span class="c1"># If this is a part of a larger image, we can figure out what are the offsets and scales for the spatial features:</span>
             <span class="n">spatial_feature_scale</span> <span class="o">=</span> <span class="p">(</span>

@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -222,12 +223,12 @@
             <span class="p">]</span>  <span class="c1"># class name</span>
 
             <span class="n">elem_class</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
-            <span class="n">model_name</span> <span class="o">=</span> <span class="n">elem_class</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="c1"># model_name = elem_class.__name__</span>
             <span class="n">model_description</span> <span class="o">=</span> <span class="n">elem_class</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;br&gt;&lt;br&gt;&quot;</span><span class="p">)</span>
 
             <span class="n">descriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cnn_description</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;&lt;br&gt;&lt;br&gt;</span><span class="si">{</span><span class="n">model_description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="n">elem_class</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+            <span class="c1"># elem_class = response.__getattribute__(elem)</span>
 
         <span class="k">return</span> <span class="n">descriptions</span>
 

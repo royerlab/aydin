@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Introduction &mdash; Aydin  documentation</title>
+  <title>Denoising OpenCell Images with Aydin &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -21,8 +21,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Restoration" href="restoration.html" />
-    <link rel="prev" title="Apply variance stabilisation transform" href="../tutorials/api_tutorials/transforms/variance_stabilisation.html" /> 
+    <link rel="next" title="Tutorials Home" href="../tutorials/tutorials_home.html" />
+    <link rel="prev" title="Denoising Spinning-Disk Confocal Microscopy Images with Aydin" href="confocal.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,11 +47,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/basics.html">Denoising Basics with Aydin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Denoising OpenCell Images with Aydin</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -61,16 +61,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="restoration.html">Restoration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="image_translator.html">Image Translator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="transforms.html">Transforms</a></li>
-<li class="toctree-l1"><a class="reference internal" href="feature_generator.html">Feature Generator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="regressors.html">Regressors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="io.html">IO</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nn.html">NN</a></li>
-<li class="toctree-l1"><a class="reference internal" href="options_json.html">Options JSON</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/options_json.html">Options JSON</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
 <ul>
@@ -92,9 +92,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>API Introduction</li>
+      <li>Denoising OpenCell Images with Aydin</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/api/introduction.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/use_cases/opencell.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -102,28 +102,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="api-introduction">
-<h1>API Introduction<a class="headerlink" href="#api-introduction" title="Permalink to this headline"></a></h1>
-<p>Aydin API generally follow from upstream APIs. Aydin provides a multi-layer API
-with varying levels of configurability and functionality, which is built on top
-of the packages we use for computation and other purposes.</p>
-<ol class="arabic simple">
-<li><p><a class="reference external" href="restoration.html">Restoration</a></p></li>
-<li><p><a class="reference external" href="image_translator.html">Image Translator</a></p></li>
-<li><p><a class="reference external" href="transforms.html">Transforms</a></p></li>
-<li><p><a class="reference external" href="feature_generator.html">Feature Generator</a></p></li>
-<li><p><a class="reference external" href="regressors.html">Regressors</a></p></li>
-<li><p><a class="reference external" href="io.html">IO</a></p></li>
-<li><p><a class="reference external" href="nn.html">NN</a></p></li>
-</ol>
-</section>
+  <section id="denoising-opencell-images-with-aydin">
+<h1>Denoising OpenCell Images with Aydin<a class="headerlink" href="#denoising-opencell-images-with-aydin" title="Permalink to this headline"></a></h1>
+<iframe src="https://docs.google.com/document/d/e/2PACX-1vTb5DWYJSjzmzRyA9gy0Et80tz5AqhN_FW_P1UDMod2jZLwYtaRU7FKxO-RfPJ2hK7kl-weXBTH7GQR/pub?embedded=true" height="7380" width="720"></iframe></section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../tutorials/api_tutorials/transforms/variance_stabilisation.html" class="btn btn-neutral float-left" title="Apply variance stabilisation transform" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="restoration.html" class="btn btn-neutral float-right" title="Restoration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="confocal.html" class="btn btn-neutral float-left" title="Denoising Spinning-Disk Confocal Microscopy Images with Aydin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../tutorials/tutorials_home.html" class="btn btn-neutral float-right" title="Tutorials Home" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
