@@ -47,6 +47,7 @@ class QProgramFlowDiagramWidget(QWidget):
             "HCR (Royer)": examples_single.royerlab_hcr,
             "Blastocyst Fracking (Maitre)": examples_single.maitre_mouse,
             "OpenCell ARHGAP21 (Leonetti)": examples_single.leonetti_arhgap21,
+            "OpenCell ANKRD11  (Leonetti)": examples_single.leonetti_ankrd11,
         }
         for item in menu_items.keys():
             action = menu.addAction(item)
