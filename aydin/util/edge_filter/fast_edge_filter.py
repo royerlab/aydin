@@ -9,13 +9,9 @@ def fast_edge_filter(array: ArrayLike, axis: int = 0, gpu: bool = True):
     # Cast to float:
     array = array.astype(dtype=numpy.float32, copy=False)
 
-    negative = [
-        '0',
-    ] * array.ndim
+    negative = ['0'] * array.ndim
     negative[axis] = '-1'
-    positive = [
-        '0',
-    ] * array.ndim
+    positive = ['0'] * array.ndim
     positive[axis] = '+1'
 
     kernel_str = f"""
