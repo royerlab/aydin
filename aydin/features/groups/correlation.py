@@ -151,9 +151,7 @@ class CorrelationFeatures(FeatureGroupBase):
             for axis in range(image.ndim):
 
                 # prepare shape:
-                shape = [
-                    1,
-                ] * image.ndim
+                shape = [1] * image.ndim
                 shape[axis] = kernel.shape[0]
 
                 # reshape kernel:

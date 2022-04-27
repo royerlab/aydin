@@ -54,8 +54,7 @@ def demo_super_fast_representative_crop(image, crop_size=64000, display: bool = 
 if __name__ == "__main__":
 
     demo_super_fast_representative_crop(
-        examples_single.royerlab_hcr.get_array().squeeze(),
-        crop_size=1_000_000,
+        examples_single.royerlab_hcr.get_array().squeeze(), crop_size=1_000_000
     )
 
     demo_super_fast_representative_crop(
