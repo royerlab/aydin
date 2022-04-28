@@ -33,6 +33,6 @@ jobs:
           make clean
           make html
       - name: Update doc
-          run: |
-            make clean
-            make html
+        run: |
+          make clean
+          make html
