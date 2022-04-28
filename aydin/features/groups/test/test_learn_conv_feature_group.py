@@ -1,7 +1,7 @@
 import numpy
 from skimage.exposure import rescale_intensity
 
-from aydin.features.groups.learned_conv import LearnedConvolutionalFeatures
+from aydin.features.groups.learned_conv import LearnedCorrelationFeatures
 from aydin.io.datasets import camera
 
 
@@ -16,7 +16,7 @@ def test_learned_conv_feature_group():
     image = n(camera().astype(numpy.float32))
 
     # Instantiates DCT features:
-    lconv = LearnedConvolutionalFeatures(size=5, num_kernels=30)
+    lconv = LearnedCorrelationFeatures(size=5, num_kernels=30)
     assert lconv.num_features(image.ndim) == 30
     assert lconv.receptive_field_radius == 2
 

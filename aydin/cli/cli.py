@@ -7,8 +7,11 @@ from glob import glob
 import click
 import numpy
 import napari
+from skimage.metrics import peak_signal_noise_ratio
+from skimage.metrics import structural_similarity
 
 from aydin.gui.gui import run
+from aydin.io.datasets import normalise
 from aydin.it.base import ImageTranslatorBase
 from aydin.restoration.deconvolve.lr import LucyRichardson
 from aydin.io.io import imwrite, imread
@@ -113,7 +116,7 @@ def denoise(files, **kwargs):
             noisy_metadata.channel_axes = ast.literal_eval(kwargs["channel_axes"])
 
         output_path, index_counter = get_output_image_path(
-            path, output_folder=kwargs["output_folder"]
+            path, operation_type="denoised", output_folder=kwargs["output_folder"]
         )
 
         if kwargs['use_model']:
@@ -205,7 +208,9 @@ def lucyrichardson(files, psf_path, **kwargs):
         deconvolved = lr.deconvolve(input_image)
 
         path, index_counter = get_output_image_path(
-            filepath, "deconvolved", output_folder=kwargs["output_folder"]
+            filepath,
+            operation_type="deconvolved",
+            output_folder=kwargs["output_folder"],
         )
         imwrite(deconvolved, path)
 
@@ -268,8 +273,54 @@ def hyperstack(files, **kwargs):
 
     stacked_image = numpy.stack(image_arrays)
 
-    result_path, index_counter = get_output_image_path(result_path)
+    result_path, index_counter = get_output_image_path(
+        result_path, operation_type="hyperstacked"
+    )
     imwrite(stacked_image, result_path)
+
+
+@cli.command()
+@click.argument('files', nargs=2)
+@click.option('-s', '--slicing', default='', type=str)
+def ssim(files, **kwargs):
+    """aydin ssim command
+
+    Parameters
+    ----------
+    files
+    kwargs : dict
+
+    """
+    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
+
+    lprint(
+        "ssim: ",
+        structural_similarity(
+            normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
+        ),
+    )
+
+
+@cli.command()
+@click.argument('files', nargs=2)
+@click.option('-s', '--slicing', default='', type=str)
+def psnr(files, **kwargs):
+    """aydin ssim command
+
+    Parameters
+    ----------
+    files
+    kwargs : dict
+
+    """
+    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
+
+    lprint(
+        "ssim: ",
+        peak_signal_noise_ratio(
+            normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
+        ),
+    )
 
 
 def handle_files(files, slicing):

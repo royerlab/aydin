@@ -64,4 +64,5 @@ def demo_blind_spot_analysis():
         viewer.add_image(noise_auto, name='noise_auto')
 
 
-demo_blind_spot_analysis()
+if __name__ == "__main__":
+    demo_blind_spot_analysis()

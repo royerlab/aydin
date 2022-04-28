@@ -1,10 +1,10 @@
 from typing import Union, Optional
 
-from aydin.features.groups.convolutional import ConvolutionalFeatures
+from aydin.features.groups.correlation import CorrelationFeatures
 from aydin.features.groups.extract_kernels import extract_kernels
 
 
-class LearnedConvolutionalFeatures(ConvolutionalFeatures):
+class LearnedCorrelationFeatures(CorrelationFeatures):
     """
     Learned Convolutions Feature Group class
 

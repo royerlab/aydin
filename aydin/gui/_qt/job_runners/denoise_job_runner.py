@@ -72,7 +72,7 @@ class DenoiseJobRunner(QWidget):
                 results.append(denoised)
 
                 output_path, file_counter = get_output_image_path(
-                    image_path, output_folder=output_folder
+                    image_path, operation_type="denoised", output_folder=output_folder
                 )
 
                 imwrite(denoised, output_path)

@@ -25,4 +25,5 @@ def demo_xyz():
         viewer.add_image(psf_xyz_array, name='fast_rz')
 
 
-demo_xyz()
+if __name__ == "__main__":
+    demo_xyz()

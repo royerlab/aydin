@@ -1,3 +1,4 @@
+# flake8: noqa
 from aydin.analysis.correlation import correlation_distance
 from aydin.io import io
 from aydin.io.datasets import examples_single
@@ -20,4 +21,5 @@ def demo_analysis():
         print(f"Correlations:  {correlations} ")
 
 
-demo_analysis()
+if __name__ == "__main__":
+    demo_analysis()
