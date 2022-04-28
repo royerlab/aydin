@@ -18,7 +18,7 @@ to run large jobs offline, and an
 `API <https://royerlab.github.io/aydin/api/introduction.html>`_ for
 custom coding and integration into other packages.
 
-Our GitHub repository can be found `here <https://github.com/royerlab/aydin>`_. You can
+Our source code repository can be found `on GitHub <https://github.com/royerlab/aydin>`_. You can
 `open issues <https://github.com/royerlab/aydin/issues>`_ to communicate bug reports and
 feature requests and find `our releases <https://github.com/royerlab/aydin/releases>`_.
 
