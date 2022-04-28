@@ -89,7 +89,7 @@ jobs:
 # ----
 
   build2:
-    needs: build1
+#    needs: build1
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/truatpasteurdotfr/docker-c7-singularity-builder:main
