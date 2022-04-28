@@ -7,6 +7,7 @@ from typing import Union, List, Optional, Tuple
 import jsonpickle
 import numpy
 import psutil
+from numpy import array2string
 
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
 from aydin.it.exceptions.base import ArrayShapeDoesNotMatchError
@@ -40,18 +41,42 @@ class ImageTranslatorBase(ABC):
         Parameters
         ----------
         monitor
-        blind_spots : Optional[Union[str, List[Tuple[int]]]]
+
+        blind_spots : Optional[Union[str,List[Tuple[int]]]]
+            List of voxel coordinates (relative to receptive field center) to
+            be included in the blind-spot. For example, you can enter:
+            '<axis>#<radius>' to extend the blindspot along a given axis by a
+            certain radius. For example, for an image of dimension 3, 'x#1'
+            extends the blind spot to cover voxels of relative coordinates:
+            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,
+            enter: 'x#1,y#1' by comma separating between axis. To specify the
+            axis you can use integer indices, or 'x', 'y', 'z', and 't'
+            (dimension order is tzyx with x being always the last dimension).
+            If None is passed then the blindspots are automatically discovered
+            from the image content. If 'center' is passed then no additional
+            blindspots to the center pixel are considered. If 'center' is passed
+            then only the default single center voxel blind-spot is used.
+
         tile_min_margin : int
+            Minimal width of tile margin in voxels.
+            (advanced)
+
         tile_max_margin : Optional[int]
+            Maximal width of tile margin in voxels.
+            (advanced)
+
         max_memory_usage_ratio : float
-            Maximum allowed memory load.
+            Maximum allowed memory load, value must be within [0, 1]. Default
+            is 90%. (advanced)
+
         max_tiling_overhead : float
-            Maximum allowed margin overhead during tiling.
+            Maximum allowed margin overhead during tiling. Default is 10%.
+            (advanced)
 
         """
         self.self_supervised = False
         self.monitor = monitor
-        self.blind_spots = blind_spots
+        self.blind_spots: Optional[Union[str, List[Tuple[int]]]] = blind_spots
         self.tile_max_margin = tile_max_margin
         self.tile_min_margin = tile_min_margin
 
@@ -59,7 +84,7 @@ class ImageTranslatorBase(ABC):
 
         self.max_memory_usage_ratio = max_memory_usage_ratio
         self.max_tiling_overhead = max_tiling_overhead
-        self.max_voxels_per_tile = 768 ** 3
+        self.max_voxels_per_tile = 768**3
 
         self.callback_period = 3
         self.last_callback_time_sec = -math.inf
@@ -248,14 +273,33 @@ class ImageTranslatorBase(ABC):
             )
 
             # Automatic blind-spot discovery:
-            if self.blind_spots == 'auto':
+            if self.blind_spots is None:
                 lprint(
                     "Automatic discovery of noise autocorrelation and specification of N2S blind-spots activated!"
                 )
-                self.blind_spots = auto_detect_blindspots(
+                self.blind_spots, autocorrelogram = auto_detect_blindspots(
                     shape_normalised_input_image[0, 0]
-                )[0]
+                )
                 lprint(f"Blind spots: {self.blind_spots}")
+                autocorrelogram_values = numpy.unique(autocorrelogram)
+                autocorrelogram_values = numpy.sort(autocorrelogram_values)[::-1][:5]
+                auto_str = array2string(
+                    autocorrelogram_values,
+                    precision=4,
+                    separator=',',
+                    suppress_small=True,
+                    threshold=128,
+                    edgeitems=16,
+                    sign='+',
+                )
+                lprint(f"Autocorrelogram unique values in decreasing order: {auto_str}")
+            elif type(self.blind_spots) == str:
+                # Number of spatio-temporal dims:
+                st_ndim = shape_normalised_input_image.ndim - 2
+                # Parse:
+                self.blind_spots = self._parse_blind_spot_shorthand_notation(
+                    self.blind_spots, st_ndim
+                )
 
             # Verify that input and target images have same shape:
             # We do this after normalisation because that's easier
@@ -487,7 +531,7 @@ class ImageTranslatorBase(ABC):
 
             # how much do we have to tile because of the suggested tile size?
             split_factor_suggested_tile_size = image.size / (
-                suggested_tile_size ** num_spatio_temp_dim
+                suggested_tile_size**num_spatio_temp_dim
             )
             lprint(
                 f"How much do we need to tile because of the suggested tile size? : {split_factor_suggested_tile_size} times."
@@ -715,3 +759,51 @@ class ImageTranslatorBase(ABC):
             raise Exception("No axes can be both batch and chan axes!")
 
         return batch_result, chan_result
+
+    @staticmethod
+    def _parse_blind_spot_shorthand_notation(blind_spots: str, st_ndim: int):
+        lprint(f"Blindspot shorthand notation detected: {blind_spots} ")
+        # Replace commas with spaces:
+        blind_spots = blind_spots.replace(',', ' ')
+        # First split by white space:
+        parts = blind_spots.split()
+
+        # We accumulate parsed blind spots here:
+        blind_spots_set = set()
+        # To avoid confusiuon we always include the center pixel:
+        blind_spots_set.add((0,) * st_ndim)
+
+        if 'center' in blind_spots:
+            # We don't extend!
+            pass
+        else:
+            for part in parts:
+                splitted_part = part.split('#')
+                axis = splitted_part[0].strip()
+
+                # Parse shorthand axis notation:
+                if axis == 'x':
+                    axis = st_ndim - 1 - 0
+                elif axis == 'y':
+                    axis = st_ndim - 1 - 1
+                elif axis == 'z':
+                    axis = st_ndim - 1 - 2
+                elif axis == 't':
+                    axis = st_ndim - 1 - 3
+                else:
+                    axis = int(axis)
+
+                # Ensure axis is in range:
+                axis = max(0, min(st_ndim - 1, axis))
+
+                radius = int(splitted_part[1].strip())
+
+                for r in range(-radius, radius + 1):
+                    spot = (0,) * axis + (r,) + (0,) * (st_ndim - 1 - axis)
+                    blind_spots_set.add(spot)
+
+        blind_spots = list(blind_spots_set)
+
+        lprint(f"Parsed blindspot from shorthand notation: {blind_spots} ")
+
+        return blind_spots

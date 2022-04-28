@@ -59,6 +59,7 @@ class SystemSummaryWidget(QWidget):
             self,
         )
         self.cpu_group_box_layout.addWidget(self.cpu_load_label2)
+
         if self.cpu_load_values[0] >= 30:
             self.cpu_load_label0.setStyleSheet("QLabel {color: red;}")
         elif self.cpu_load_values[0] > 15:

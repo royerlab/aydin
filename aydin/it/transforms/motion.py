@@ -4,7 +4,7 @@ from typing import Union, Optional, Sequence
 import numpy
 import scipy
 
-# from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike
 from scipy.ndimage import gaussian_filter
 from scipy.optimize import curve_fit
 
@@ -25,7 +25,7 @@ class MotionStabilisationTransform(ImageTransformBase):
     we assume that all frames can be registered to a common reference frame,
     and thus that all images have a common background that can be used for
     registration. For completeness, multiple axis can be specified and the
-    correction is applied along each in sequence.
+    correction is applied along each in sequence.(advanced)
     """
 
     preprocess_description = (
@@ -124,7 +124,7 @@ class MotionStabilisationTransform(ImageTransformBase):
     def __repr__(self):
         return self.__str__()
 
-    def preprocess(self, array):
+    def preprocess(self, array: ArrayLike):
         with lsection(f"Motion-correcting array of shape: {array.shape}:"):
 
             self._original_dtype = array.dtype
@@ -154,7 +154,7 @@ class MotionStabilisationTransform(ImageTransformBase):
                 array = self._depermutate(array, axis=axis)
             return array
 
-    def postprocess(self, array):
+    def postprocess(self, array: ArrayLike):
 
         if not self.do_postprocess:
             return array
@@ -180,24 +180,24 @@ class MotionStabilisationTransform(ImageTransformBase):
 
             return array
 
-    def _permutate(self, array, axis: int):
+    def _permutate(self, array: ArrayLike, axis: int):
         permutation = self._get_permutation(array, axis=axis)
         array = numpy.transpose(array, axes=permutation)
         return array
 
-    def _depermutate(self, array, axis: int):
+    def _depermutate(self, array: ArrayLike, axis: int):
         permutation = self._get_permutation(array, axis=axis, inverse=True)
         array = numpy.transpose(array, axes=permutation)
         return array
 
-    def _get_permutation(self, array, axis: int, inverse=False):
+    def _get_permutation(self, array: ArrayLike, axis: int, inverse=False):
         permutation = (axis,) + tuple(a for a in range(array.ndim) if a != axis)
         if inverse:
             permutation = numpy.argsort(permutation)
         return permutation
 
 
-def _shift_transform(array, shifts, pad, crop, pad_mode='wrap'):
+def _shift_transform(array: ArrayLike, shifts, pad, crop, pad_mode='wrap'):
     """ """
 
     min_shift = abs(numpy.min(shifts, axis=0))
@@ -234,7 +234,7 @@ def _shift_transform(array, shifts, pad, crop, pad_mode='wrap'):
 
 
 def _measure_shifts(
-    array,
+    array: ArrayLike,
     reference_index: Optional[int] = None,
     center: bool = False,
     max_pixel_shift: Optional[int] = None,
@@ -383,7 +383,7 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
             # We compute the center of mass:
             # We take the square to squash small values far from the maximum that are likely noisy...
             signed_com_shift = (
-                numpy.array(scipy.ndimage.center_of_mass(cropped_correlation ** 2))
+                numpy.array(scipy.ndimage.center_of_mass(cropped_correlation**2))
                 - fine_window_radius
             )
 
@@ -396,7 +396,7 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
     return shift, correlation
 
 
-def _fast_denoise(array, sigma):
+def _fast_denoise(array: ArrayLike, sigma):
     denoised = gaussian_filter(array, sigma=sigma, mode='wrap')
     return denoised
 

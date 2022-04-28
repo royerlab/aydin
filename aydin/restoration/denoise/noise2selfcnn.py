@@ -14,7 +14,11 @@ from aydin.util.log.log import lsection
 
 
 class Noise2SelfCNN(DenoiseRestorationBase):
-    """Noise2Self image denoising using "Convolutional Neural Networks" (CNN)"""
+    """
+    Noise2Self image denoising using the "Convolutional Neural Networks" (
+    CNN) approach. Follows from the theory exposed in the <a
+    href="https://arxiv.org/abs/1901.11365">Noise2Self paper</a>.
+    """
 
     def __init__(
         self,
@@ -42,7 +46,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         super().__init__()
         self.lower_level_args = lower_level_args
         self.backend_it, self.backend_or_model = (
-            variant.split("-") if variant is not None else ("cnn", "jinet")
+            ("cnn", "jinet") if variant is None else variant.split("-")
         )
 
         self.input_model_path = input_model_path
@@ -117,11 +121,12 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             ]  # class name
 
             elem_class = response.__getattribute__(elem)
-            descriptions.append(
-                cnn_description
-                + "<br><br>"
-                + elem_class.__doc__.replace("\n\n", "<br><br>")
-            )
+            # model_name = elem_class.__name__
+            model_description = elem_class.__doc__.replace("\n\n", "<br><br>")
+
+            descriptions.append(cnn_description + f"<br><br>{model_description}")
+
+            # elem_class = response.__getattribute__(elem)
 
         return descriptions
 

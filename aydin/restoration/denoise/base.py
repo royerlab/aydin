@@ -6,6 +6,7 @@ import shutil
 from abc import abstractmethod, ABC
 from pathlib import Path
 
+from aydin.it.base import ImageTranslatorBase
 from aydin.util.log.log import lprint
 
 
@@ -131,7 +132,7 @@ class DenoiseRestorationBase(ABC):
         shutil.rmtree(model_folder)
 
     @staticmethod
-    def archive_model(source, destination):
+    def archive(source, destination):
         """Archives the model to given destination.
 
         Parameters
@@ -144,15 +145,21 @@ class DenoiseRestorationBase(ABC):
         format = "zip"
         archive_from = os.path.dirname(source)
         archive_to = os.path.basename(source.strip(os.sep))
-        shutil.make_archive(name, format, archive_from, archive_to)
+
         if os.path.exists(os.path.join(destination, f"{name}.{format}")):
             lprint(
                 "Previously existing model will be deleted before saving the new model"
             )
             os.remove(os.path.join(destination, f"{name}.{format}"))
-        shutil.move(f"{name}.{format}", destination)
 
-    def save_model(self, model_path):
+        shutil.make_archive(name, format, archive_from, archive_to)
+
+        try:
+            shutil.move(f"{name}.{format}", destination)
+        except shutil.Error as e:
+            lprint(e)
+
+    def save(self, model_path):
         """Saves the latest trained model next to the input image file.
 
         Parameters
@@ -164,7 +171,21 @@ class DenoiseRestorationBase(ABC):
         self.it.save(model_path)
 
         # Make archive for the model
-        self.archive_model(model_path, os.path.dirname(model_path))
+        self.archive(model_path, os.path.dirname(model_path))
 
         # clean the model folder
         self.clean_model_folder(model_path)
+
+    def load(self, model_path: str):
+        """
+
+        Parameters
+        ----------
+        model_path : str
+            whole path to the model including the model zip name
+
+        """
+
+        lprint(f"Loading image translator from: {model_path}")
+        shutil.unpack_archive(model_path, os.path.dirname(model_path), "zip")
+        self.it = ImageTranslatorBase.load(model_path[:-4])

@@ -1,5 +1,10 @@
+import traceback
+
 from qtpy.QtWidgets import QWidget, QHBoxLayout
 
+from aydin.gui._qt.custom_widgets.denoise_tab_pretrained_method import (
+    DenoiseTabPretrainedMethodWidget,
+)
 from aydin.gui._qt.output_wrapper import OutputWrapper
 from aydin.gui._qt.job_runners.worker import Worker
 from aydin.io.io import imwrite
@@ -8,7 +13,10 @@ from aydin.io.utils import (
     get_options_json_path,
     get_save_model_path,
 )
-from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_instance
+from aydin.restoration.denoise.util.denoise_utils import (
+    get_denoiser_class_instance,
+    get_pretrained_denoiser_class_instance,
+)
 from aydin.util.log.log import Log, lprint
 
 
@@ -30,13 +38,6 @@ class DenoiseJobRunner(QWidget):
         self.widget_layout = QHBoxLayout()
 
         self.start_button.clicked.connect(self.prep_and_run)
-        # self.widget_layout.addWidget(self.start_button)
-
-        # self.stop_button = QPushButton(
-        #     "Stop", icon=QApplication.style().standardIcon(QStyle.SP_MediaStop)
-        # )
-        # self.stop_button.clicked.connect(self.stop_func)
-        # self.widget_layout.addWidget(self.stop_button)
 
         self.setLayout(self.widget_layout)
 
@@ -49,12 +50,18 @@ class DenoiseJobRunner(QWidget):
 
         results = []
 
-        for training_image, inference_image, image_path in zip(
-            self.training_images, self.inference_images, self.image_paths
+        for training_image, inference_image, image_path, output_folder in zip(
+            self.training_images,
+            self.inference_images,
+            self.image_paths,
+            self.output_folders,
         ):
-            self.denoiser.train(
-                training_image, batch_axes=self.batch_axes, chan_axes=self.channel_axes
-            )
+            if not self.pretrained:
+                self.denoiser.train(
+                    training_image,
+                    batch_axes=self.batch_axes,
+                    chan_axes=self.channel_axes,
+                )
 
             if self.denoiser.it:
                 denoised = self.denoiser.denoise(
@@ -64,21 +71,27 @@ class DenoiseJobRunner(QWidget):
                 )
                 results.append(denoised)
 
-                output_path, file_counter = get_output_image_path(image_path)
+                output_path, file_counter = get_output_image_path(
+                    image_path, operation_type="denoised", output_folder=output_folder
+                )
 
                 imwrite(denoised, output_path)
                 if self.save_options_json:
                     json_path = get_options_json_path(
-                        image_path, passed_counter=file_counter
+                        image_path,
+                        passed_counter=file_counter,
+                        output_folder=output_folder,
                     )
                     self.parent.save_options_json(json_path)
                     lprint(f"DONE, options json written in {json_path}")
 
                 if self.save_model:
                     model_path = get_save_model_path(
-                        image_path, passed_counter=file_counter
+                        image_path,
+                        passed_counter=file_counter,
+                        output_folder=output_folder,
                     )
-                    self.denoiser.save_model(model_path)
+                    self.denoiser.save(model_path)
                     lprint(f"DONE, trained model written in {model_path}")
 
                 lprint(f"DONE, results written in {output_path}")
@@ -107,7 +120,8 @@ class DenoiseJobRunner(QWidget):
 
     def prep_and_run(self):
         # Get images and their related data
-        self.image_paths = [i[5] for i in self.parent.data_model.images_to_denoise]
+        self.image_paths = [i[4] for i in self.parent.data_model.images_to_denoise]
+        self.output_folders = [i[5] for i in self.parent.data_model.images_to_denoise]
         if len(self.image_paths) == 0:
             lprint("Aydin cannot be started with no image")
             return
@@ -123,24 +137,44 @@ class DenoiseJobRunner(QWidget):
         self.batch_axes = self.parent.tabs["Dimensions"].batch_axes
         self.channel_axes = self.parent.tabs["Dimensions"].channel_axes
         self.denoise_backend = self.parent.tabs["Denoise"].selected_backend
+
+        self.pretrained = (
+            self.parent.tabs["Denoise"].current_backend_widget.__class__
+            is DenoiseTabPretrainedMethodWidget
+        )
+
         self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
 
-        self.lower_level_args = self.parent.tabs["Denoise"].lower_level_args
+        if self.pretrained:
+            self.denoiser = get_pretrained_denoiser_class_instance(
+                self.parent.tabs["Denoise"].current_backend_widget.loaded_it
+            )
+            self.save_options_json = False
+            self.save_model = False
+        else:
+            self.save_options_json = self.parent.tabs[
+                "Denoise"
+            ].current_backend_widget.save_json_checkbox.isChecked()
 
-        self.save_options_json = self.parent.tabs[
-            "Denoise"
-        ].current_backend_qwidget.save_json_checkbox.isChecked()
+            self.save_model = self.parent.tabs[
+                "Denoise"
+            ].current_backend_widget.save_model_checkbox.isChecked()
 
-        self.save_model = self.parent.tabs[
-            "Denoise"
-        ].current_backend_qwidget.save_model_checkbox.isChecked()
+            try:
+                lower_level_args = self.parent.tabs["Denoise"].lower_level_args
+            except Exception:
+                self.parent.status_bar.showMessage(
+                    "There is a mistake with given parameter values..."
+                )
+                traceback.print_exc()
+                return
 
-        # Initialize required restoration instances
-        self.denoiser = get_denoiser_class_instance(
-            variant=self.denoise_backend,
-            lower_level_args=self.lower_level_args,
-            it_transforms=self.it_transforms,
-        )
+            # Initialize required restoration instances
+            self.denoiser = get_denoiser_class_instance(
+                variant=self.denoise_backend,
+                lower_level_args=lower_level_args,
+                it_transforms=self.it_transforms,
+            )
 
         Log.gui_statusbar = self.parent.parent.statusBar
 

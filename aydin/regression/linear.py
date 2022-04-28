@@ -5,9 +5,10 @@ from aydin.util.log.log import lsection, lprint
 
 
 class LinearRegressor(RegressorBase):
-    """Linear Regressor.
-    \n\n
-    Note: Fast but overall poor performance -- as expected.
+    """
+    The Linear Regressor is the simplest of all repressors, and in general
+    performs poorly. However, it is also very fast and can be advantageous in
+    some 'simple' situations.
     """
 
     def __init__(

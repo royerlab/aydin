@@ -1,28 +1,34 @@
 import math
 import time
 from random import randrange
-from typing import Optional
+from typing import Optional, Callable
 
 import numpy
-from scipy.ndimage import sobel, laplace
+from numba import jit, prange, vectorize, float32
+from numpy import absolute
+from numpy.typing import ArrayLike
+from scipy.ndimage import sobel, gaussian_filter
 
-from aydin.util.fast_uniform_filter.uniform_filter import uniform_filter_auto
-from aydin.util.log.log import lprint
+from aydin.util.edge_filter.fast_edge_filter import fast_edge_filter
+from aydin.util.log.log import lprint, lsection
 
 
 def representative_crop(
-    image,
-    mode: str = 'sobelmin',
+    image: ArrayLike,
+    mode: str = 'contrast',
     crop_size: Optional[int] = None,
-    min_length: int = 16,
-    smoothing_size: int = 1.0,
+    min_length: int = 32,
+    smoothing_sigma: int = 0.5,
     equal_sides: bool = False,
     favour_odd_lengths: bool = False,
-    fast_mode: bool = False,
-    fast_mode_num_crops: int = 1500,
-    max_time_in_seconds: float = 1,
+    search_mode: str = 'random',
+    granularity_factor: int = 4,
+    random_search_mode_num_crops: int = 1512,
+    min_num_crops: int = 512,
+    timeout_in_seconds: float = 2,
     return_slice: bool = False,
     display_crop: bool = False,
+    std_fun: Callable = None,  # numpy.std
 ):
     """Extract a representative crop from the image. Searches for the crop of given
     (approximate) size with highest score. The score is simply the sum of sobel
@@ -37,7 +43,8 @@ def representative_crop(
         Image to extract representative crop from
 
     mode : str
-        Strategy for picking crop.
+        Metric for picking crop. Can be : 'contrast' (fastest), 'sobel', 'sobelmin',
+        'sobelmax' We recommend 'contrast'.
 
     crop_size : int
         Crop size in voxels. Default (None) is 32000.
@@ -45,9 +52,9 @@ def representative_crop(
     min_length : int
         Crop axis lengths cannot be smaller than this number.
 
-    smoothing_size : int
-        Uniform filter smoothing to achieve some crude denoising and thus
-        make it a bit easier to estimate the score.
+    smoothing_sigma : int
+        Sigma value for Gaussian filter smoothing to achieve some crude denoising and thus
+        make it a bit easier to estimate the score per crop.
 
     equal_sides : bool
         When True the crop will have all its sides of equal size (square, cube, ...)
@@ -55,13 +62,21 @@ def representative_crop(
     favour_odd_lengths : bool
         If possible favours crops that have odd shape lengths.
 
-    fast_mode: bool
-        In fast mode we pick random crops instead of checking every possible strided crop.
+    search_mode: bool
+        Search mode for best crops. Can be 'random' or 'systematic'. In
+        random mode we pick random crops, in systematic mode we check every
+        possible strided crop.
 
-    fast_mode_num_crops: int
-        Number of crops to check in fast mode.
+    granularity_factor: int
+        Granularity of search. higher values correspond to more overlap between candidate crops.
 
-    max_time_in_seconds: float
+    random_search_mode_num_crops: int
+        Number of crops to check in 'random' search mode.
+
+    min_num_crops : int
+        Min number of crops to examine.
+
+    timeout_in_seconds: float
         Maximum amount of time in seconds that this function should run for.
         This avoids excessive computation for very large images.
 
@@ -77,204 +92,335 @@ def representative_crop(
 
     """
 
+    # Debug:
+    # _fast_std.parallel_diagnostics(level=4)
+
+    # Std function:
+    if std_fun is None:
+        std_fun = _fast_std
+
+    # Compile numba functions:
+    # _fast_std(numpy.ones(100, dtype=numpy.float32))
+    # _normalise(numpy.ones(100, dtype=numpy.float32))
+
     # Start time:
     start_time = time.time()
 
-    # Number of voxels in image:
-    num_voxels = image.size
+    with lsection(
+        f"Cropping image of size: {image.shape} with at most {crop_size} voxels and mode {mode}"
+    ):
 
-    # Default number of voxels:
-    if crop_size is None:
-        crop_size = 32000
+        # save reference to original image:
+        original_image = image
 
-    # Ratio by which to crop to acheive max num voxels:
-    ratio = (crop_size / num_voxels) ** (1 / image.ndim)
+        with lsection("Cast and normalise image..."):
+            # Cast, if needed:
+            image = image.astype(numpy.float32, copy=False)
+            # Normalise:
+            # image = _normalise(image)
 
-    if ratio >= 1:
-        # If the image is small enough no point in getting a crop!
-        return image
+        # Apply filter:
+        with lsection(f"Apply cropping filter to image of shape: {image.shape}"):
 
-    # cropped shape:
-    cropped_shape = tuple(min(max(min_length, int(s * ratio)), s) for s in image.shape)
+            # Smoothing:
+            sigma = tuple(
+                (smoothing_sigma if s > min_length else 0 for s in image.shape)
+            )
+            image = gaussian_filter(image, sigma=sigma)
 
-    # Favour odd lengths if requested:
-    if favour_odd_lengths:
-        cropped_shape = tuple((s // 2) * 2 + 1 for s in cropped_shape)
+            if mode == 'contrast':
+                pass
+            elif mode == 'sobelfast':
+                image = _sobel_fast(image)
+            elif mode == 'sobel':
+                image = _sobel_magnitude(image)
+            elif mode == 'sobelmin':
+                image = _sobel_minimum(image)
+            elif mode == 'sobelmax':
+                image = _sobel_maximum(image)
+            else:
+                raise ValueError(f"Unknown mode: {mode}")
+        #
+        # import napari
+        # with napari.gui_qt():
+        #     viewer = napari.Viewer()
+        #     viewer.add_image(image, name='image')
+        #     viewer.add_image(filtered_image, name='filtered_image')
 
-    # We enforce equal sides if requested:
-    if equal_sides:
-        min_length = min(cropped_shape)
-        cropped_shape = tuple((min_length,) * image.ndim)
+        # To speed up cropping we apply a divide and conquer to 'pre-crop' the image recusively:
+        # if precropping:
+        #     image = _precrop(image,
+        #                      crop_size=crop_size,
+        #                      min_length=min_length,
+        #                      mode=mode,
+        #                      smoothing_size=smoothing_size)
 
-    # range for translation:
-    translation_range = tuple(s - cs for s, cs in zip(image.shape, cropped_shape))
+        # Number of voxels in image:
+        num_voxels = image.size
 
-    # grid for translations:
-    translation_indices = tuple(
-        max(1, int(2 * r / cs)) for r, cs in zip(translation_range, cropped_shape)
-    )
+        # Default number of voxels:
+        if crop_size is None:
+            crop_size = 32000
 
-    # min and max for crop value normalisation:
-    image_min = None
-    image_max = None
+        # Ratio by which to crop to achieve max num voxels:
+        ratio = (crop_size / num_voxels) ** (1 / image.ndim)
 
-    # We loop through a number of crops and keep the one wit the best score:
-    best_score = -1
-    best_slice = None
-    best_crop = None
+        if ratio >= 1:
+            # If the image is small enough no point in getting a crop!
+            if return_slice:
+                return image, (slice(None),) * image.ndim
+            else:
+                return image
 
-    if fast_mode and image.size > 1e6:
+        # cropped shape:
+        cropped_shape = tuple(
+            min(max(min_length, int(s * ratio)), s) for s in image.shape
+        )
 
-        # We make sure that the number of crops is not too large given
-        # the relative size of the crop versus whole image:
-        fast_mode_num_crops = min(fast_mode_num_crops, int(image.size / crop_size))
+        # If the crop size is still too big, we adjust that. This happens because
+        # we cannot crop dimensions that are too small, leading to an
+        # underestimation of the ratio.
+        for tries in range(8):
+            # First let's figure out the current crop size:
+            current_crop_size = math.prod(cropped_shape)
 
-        for index in range(fast_mode_num_crops):
+            # we check if it is ok, or too large:
+            if current_crop_size < 1.05 * crop_size:
+                # we are ok if the crop size is within 5% of the desired size.
+                break
 
-            # translation:
-            translation = tuple(
-                (randrange(0, s - cs) if cs != s else 0)
-                for s, cs in zip(image.shape, cropped_shape)
+            # If too large we compute the ratio by which to adjust it:
+            ratio = (crop_size / current_crop_size) ** (1 / image.ndim)
+
+            # we compute a new crop shape:
+            cropped_shape = tuple(
+                min(max(min_length, int(s * ratio)), s) for s in cropped_shape
             )
 
-            # function to get crop slice:
-            def _crop_slice(translation, cropped_shape, downscale: int = 1):
-                return tuple(
-                    slice(t, t + s, downscale)
-                    for t, s in zip(translation, cropped_shape)
+        # Favour odd lengths if requested:
+        if favour_odd_lengths:
+            cropped_shape = tuple((s // 2) * 2 + 1 for s in cropped_shape)
+
+        # We enforce equal sides if requested:
+        if equal_sides:
+            min_length = min(cropped_shape)
+            cropped_shape = tuple((min_length,) * image.ndim)
+
+        # range for translation:
+        translation_range = tuple(s - cs for s, cs in zip(image.shape, cropped_shape))
+
+        # We loop through a number of crops and keep the one wit the best score:
+        best_score = -1
+        best_slice = None
+        best_crop = None
+
+        # Instead of searching for all possible crops, we take into
+        # account the size of the crops to define a 'granularity' (
+        # stride) of the translations used for search:
+
+        granularity = tuple(cs // granularity_factor for cs in cropped_shape)
+
+        if search_mode == 'random':
+
+            # We make sure that the number of crops is not too large given
+            # the relative size of the crop versus whole image:
+            random_search_mode_num_crops = min(
+                random_search_mode_num_crops,
+                (granularity_factor**image.ndim) * int(image.size / crop_size),
+            )
+
+            for i in range(random_search_mode_num_crops):
+
+                # translation:
+                translation = tuple(
+                    (randrange(0, max(1, (s - cs) // g)) * g if cs != s else 0)
+                    for s, cs, g in zip(image.shape, cropped_shape, granularity)
                 )
 
-            # slice object for cropping:
-            crop_slice = _crop_slice(
-                translation, cropped_shape, 2 if image.size > 1e8 else 1
+                # function to get crop slice:
+                def _crop_slice(translation, cropped_shape, downscale: int = 1):
+                    return tuple(
+                        slice(t, t + s, downscale)
+                        for t, s in zip(translation, cropped_shape)
+                    )
+
+                # slice object for cropping:
+                crop_slice = _crop_slice(
+                    translation, cropped_shape, 2 if image.size > 1e8 else 1
+                )
+
+                # extract crop:
+                crop = image[crop_slice]
+
+                score = std_fun(crop)
+
+                # slice object for the actual crop:
+                crop_slice = _crop_slice(translation, cropped_shape, 1)
+
+                # update best score and image:
+                if score > best_score and not math.isinf(score):
+                    best_score = score
+                    best_slice = crop_slice
+
+                    # We make sure to have the full and original crop!
+                    best_crop = original_image[best_slice]
+
+                if i >= min_num_crops and time.time() > start_time + timeout_in_seconds:
+                    lprint(
+                        f"Interrupting crop search because of timeout after {i} crops examined!"
+                    )
+                    break
+
+        elif search_mode == 'systematic':
+
+            # grid for translations:
+            translation_indices = tuple(
+                max(1, int(granularity_factor * r / cs))
+                for r, cs in zip(translation_range, cropped_shape)
             )
 
-            # extract crop:
-            crop = image[crop_slice]
+            for i, index in enumerate(numpy.ndindex(translation_indices)):
 
-            score = evaluate_crop(
-                crop=crop,
-                image_min=image_min,
-                image_max=image_max,
-                mode=mode,
-                smoothing_size=smoothing_size,
-            )
+                # print(
+                #     f"i={i}, index={index}, translation_indices={translation_indices}"
+                # )
 
-            # slice object for the actual crop:
-            crop_slice = _crop_slice(translation, cropped_shape, 1)
+                # translation:
+                translation = tuple(
+                    int(j * cs / granularity_factor)
+                    for j, cs in zip(index, cropped_shape)
+                )
 
-            # update best score and image:
-            if score > best_score and not math.isinf(score):
-                best_score = score
-                best_slice = crop_slice
+                # slice object for cropping:
+                crop_slice = tuple(
+                    slice(t, t + s) for t, s in zip(translation, cropped_shape)
+                )
 
-                # We make sure to have the full and original crop!
-                best_crop = image[best_slice]
+                # extract crop:
+                crop = image[crop_slice]
 
-            if time.time() > start_time + max_time_in_seconds:
-                lprint("Interrupting crop search because of timeout!")
-                break
+                score = std_fun(crop)
 
-    else:
-        for index in numpy.ndindex(translation_indices):
+                # update best score and image:
+                if score > best_score and not math.isinf(score):
+                    best_score = score
+                    best_slice = crop_slice
 
-            # translation:
-            translation = tuple(int(i * cs / 2) for i, cs in zip(index, cropped_shape))
+                    # We make sure to have the full and original crop!
+                    best_crop = original_image[best_slice]
 
-            # slice object for cropping:
-            crop_slice = tuple(
-                slice(t, t + s) for t, s in zip(translation, cropped_shape)
-            )
+                if i >= min_num_crops and time.time() > start_time + timeout_in_seconds:
+                    lprint(
+                        f"Interrupting crop search because of timeout after {i} crops examined!"
+                    )
+                    break
+        else:
+            raise ValueError(f"Unsupported search mode: {search_mode}")
 
-            # extract crop:
-            crop = image[crop_slice]
+        if display_crop:
 
-            score = evaluate_crop(
-                crop=crop,
-                image_min=image_min,
-                image_max=image_max,
-                mode=mode,
-                smoothing_size=smoothing_size,
-            )
+            import napari
 
-            # update best score and image:
-            if score > best_score and not math.isinf(score):
-                best_score = score
-                best_slice = crop_slice
-
-                # We make sure to have the full and original crop!
-                best_crop = image[best_slice]
-
-            if time.time() > start_time + max_time_in_seconds:
-                lprint("Interrupting crop search because of timeout!")
-                break
-
-    if display_crop:
-        smoothed_best_crop = _smoothing(best_crop, size=smoothing_size)
-
-        import napari
-
-        with napari.gui_qt():
             viewer = napari.Viewer()
-            viewer.add_image(image, name='image')
-            viewer.add_image(best_crop, name='best_crop')
-            viewer.add_image(smoothed_best_crop, name='smoothed_best_crop')
+            viewer.add_image(image.squeeze(), name='image')
+            viewer.add_image(best_crop.squeeze(), name='best_crop')
+            napari.run()
 
-    if return_slice:
-        return best_crop, best_slice
-    else:
-        return best_crop
+        #     print(_fast_std.signatures)
+        #     for sig in _fast_std.signatures:
+        #         print(_fast_std.inspect_asm(sig))`
 
-
-def evaluate_crop(crop, image_min, image_max, mode, smoothing_size):
-    # smooth crop as a crude denoising:
-    smoothed_crop = _smoothing(crop, size=smoothing_size)
-    # convert type:
-    smoothed_crop = smoothed_crop.astype(dtype=numpy.float32, copy=False)
-
-    if image_min is None or image_max is None:
-        image_min = crop.min()
-        image_max = crop.max()
-    else:
-        # Normalise crop values:
-        smoothed_crop -= image_min
-        smoothed_crop /= image_max
-    # compute score:
-    if mode == 'contrast':
-        score = numpy.std(smoothed_crop)
-    elif mode == 'sobel':
-        score = numpy.std(_sobel_magnitude(smoothed_crop))
-    elif mode == 'sobelmin':
-        score = numpy.std(_sobel_minimum(smoothed_crop))
-    elif mode == 'laplace':
-        score = numpy.std(laplace(smoothed_crop))
-    else:
-        raise ValueError(f"Unknown mode: {mode}")
-    return score
-
-
-def _smoothing(crop, size):
-    smoothed_crop = uniform_filter_auto(crop, size=1 + 2 * size, printout_choice=False)
-    # smoothed_crop = gaussian_filter(crop, sigma=size)
-    return smoothed_crop
+        if return_slice:
+            return best_crop, best_slice
+        else:
+            return best_crop
 
 
 def _sobel_magnitude(image):
-
     magnitude = numpy.zeros_like(image)
     for axis in range(image.ndim):
+        if image.shape[axis] < 32:
+            continue
         magnitude += sobel(image, axis=axis) ** 2
-
     return numpy.sqrt(magnitude)
 
 
 def _sobel_minimum(image):
-
     minimum = None
     for axis in range(image.ndim):
+        if image.shape[axis] < 32:
+            continue
+        sobel_image = absolute(sobel(image, axis=axis))
         if minimum is None:
-            minimum = sobel(image, axis=axis)
+            minimum = sobel_image
         else:
-            minimum = numpy.minimum(minimum, sobel(image, axis=axis))
+            minimum = numpy.minimum(minimum, sobel_image)
+    if minimum is None:
+        return image
+    else:
+        return minimum
 
-    return minimum
+
+def _sobel_maximum(image):
+    maximum = None
+    for axis in range(image.ndim):
+        if image.shape[axis] < 32:
+            continue
+        sobel_image = absolute(fast_edge_filter(image, axis=axis))
+        if maximum is None:
+            maximum = sobel_image
+        else:
+            maximum = numpy.maximum(maximum, sobel_image)
+    if maximum is None:
+        return image
+    else:
+        return maximum
+
+
+def _sobel_fast(image):
+
+    longest_axis = max(image.shape)
+    axis = image.shape.index(longest_axis)
+
+    return absolute(fast_edge_filter(image, axis=axis))
+
+
+@jit(nopython=True, parallel=True, fastmath=True)
+def _normalise(image):
+
+    # Normalise:
+    image_min = float32(image.min())
+    image_max = float32(image.max())
+    if image_max - image_min > 0:
+        return _rescale(image, image_min, image_max)
+    else:
+        return image - image_min
+
+
+@vectorize([float32(float32, float32, float32)])
+def _rescale(x, min_value, max_value):
+    return (x - min_value) / (max_value - min_value)
+
+
+@jit(nopython=True, parallel=True, fastmath=True)
+def _fast_std(image: ArrayLike, workers=16, decimation=1):
+
+    array = image.ravel()
+    length = array.size
+    num_chunks = workers
+    chunk_length = (length // num_chunks) + num_chunks
+
+    std = 0.0
+
+    for c in prange(num_chunks):
+
+        start = c * chunk_length
+        stop = (c + 1) * chunk_length
+        if stop >= length:
+            stop = length
+
+        sub_array = array[start:stop:decimation]
+        chunk_std = numpy.std(sub_array)
+        std = max(std, chunk_std)
+
+    return std

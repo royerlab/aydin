@@ -45,9 +45,10 @@ def demo(image, max_epochs=10):
         )
 
 
-image_path = examples_single.hyman_hela.get_path()
-array, metadata = io.imread(image_path)
-# array = array[0:10, 15:35, 130:167, 130:177]
-array = array[:, :, 100:300, 100:300].astype(np.float32)
-array = rescale_intensity(array, in_range='image', out_range=(0, 1))
-demo(array)
+if __name__ == "__main__":
+    image_path = examples_single.hyman_hela.get_path()
+    array, metadata = io.imread(image_path)
+    # array = array[0:10, 15:35, 130:167, 130:177]
+    array = array[:, :, 100:300, 100:300].astype(np.float32)
+    array = rescale_intensity(array, in_range='image', out_range=(0, 1))
+    demo(array)

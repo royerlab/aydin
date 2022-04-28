@@ -8,7 +8,7 @@ from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io import io
 from aydin.io.datasets import examples_single
 from aydin.it.fgr import ImageTranslatorFGR
-from aydin.regression.nn import NNRegressor
+from aydin.regression.perceptron import PerceptronRegressor
 
 
 def demo():
@@ -22,7 +22,7 @@ def demo():
 
     generator = StandardFeatureGenerator()
 
-    regressor = NNRegressor()
+    regressor = PerceptronRegressor()
 
     it = ImageTranslatorFGR(generator, regressor, balance_training_data=True)
 
@@ -44,4 +44,5 @@ def demo():
         viewer.add_image(denoised, name='denoised')
 
 
-demo()
+if __name__ == "__main__":
+    demo()

@@ -9,9 +9,20 @@ from aydin.util.log.log import lprint
 class TranslationFeatures(FeatureGroupBase):
     """
     Translations Feature Group class
+
+    These features are just the image itself translated by a set of vectors.
     """
 
     def __init__(self, translations: Sequence[Tuple[int, ...]]):
+        """
+        Constructor that configures these features.
+
+        Parameters
+        ----------
+        translations : Sequence[Tuple[int, ...]]
+            Sequence of translation vectors.
+
+        """
         super().__init__()
         self.translations = list(translations)
         self.image = None

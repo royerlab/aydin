@@ -101,7 +101,9 @@ class DimensionsTab(QWidget):
             child_count = root.childCount()
             for i in range(child_count):
                 item = root.child(i)
-                response.append(item.text(0))
+                if i == 0:
+                    response = [int(item.text(x)) for x in range(1, 5)]
+                    break
 
         return None if response == [] else response
 

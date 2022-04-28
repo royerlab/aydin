@@ -12,11 +12,11 @@ class DataHistogramBalancer:
 
     def __init__(
         self,
-        number_of_bins=1024,
-        keep_ratio=1,
-        balance=True,
-        use_median=False,
-        favour_bright_pixels=False,
+        number_of_bins: int = 1024,
+        keep_ratio: float = 1,
+        balance: bool = True,
+        use_median: bool = False,
+        favour_bright_pixels: float = 0,
     ):
         """Constructs DataHistogramBalancer.
 
@@ -26,7 +26,7 @@ class DataHistogramBalancer:
         keep_ratio : float
         balance : bool
         use_median : bool
-        favour_bright_pixels : bool
+        favour_bright_pixels : float
         """
 
         self.favour_bright_pixels = favour_bright_pixels
@@ -124,9 +124,11 @@ class DataHistogramBalancer:
             math.ceil(self.keep_ratio * self.total_entries / self.number_of_bins)
         )
 
-        if self.favour_bright_pixels:
+        if self.favour_bright_pixels > 0:
+            beta = self.favour_bright_pixels
+            n = self.number_of_bins
             self.max_entries_per_bin = [
-                2 * max_density * i / self.number_of_bins
+                2 * beta * max_density * (i / n) + (1 - beta) * max_density
                 for i in range(self.number_of_bins)
             ]
         else:

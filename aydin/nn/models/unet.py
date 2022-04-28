@@ -32,7 +32,8 @@ from aydin.util.log.log import lprint
 
 
 class UNetModel(Model):
-    """UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:
+    """
+    Standard UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:
     self-supervised learning with shift and conv scheme non-shiftconv: self-supervised learning by masking pixels at
     each iteration
     """
@@ -41,6 +42,7 @@ class UNetModel(Model):
         self,
         input_layer_size,
         spacetime_ndim,
+        training_architecture: str = 'random',
         mini_batch_size: int = 1,
         nb_unet_levels: int = 4,
         normalization: str = 'batch',  # None,  # 'instance',
@@ -58,34 +60,47 @@ class UNetModel(Model):
 
         Parameters
         ----------
-        input_layer_size
-        spacetime_ndim
+        input_layer_size :
+            TODO: missing!
+        spacetime_ndim :
+            TODO: missing!
         mini_batch_size : int
             Mini-batch size
+            (advanced)
         nb_unet_levels : int
             Depth level of the UNet
+            (advanced)
         normalization : string
             normalization type, can be `batch` and `instance` for now
+            (advanced)
         activation : string
             Type of the activation function to use
+            (advanced)
         supervised : bool
             Flag that controls training approach
+            (advanced)
         shiftconv : bool
             Flag that controls use of shift convolutions
+            (advanced)
         nfilters : int
             Number of filters in first layer
+            (advanced)
         learning_rate : float
             Learning rate
         original_zdim : int
             Original Z-dimension length
+            (advanced)
         weight_decay : int
             coefficient of l1 regularizer
+            (advanced)
         residual : bool
             whether to use add or concat at merging layers
+            (advanced)
         pooling_mode : str
         """
         self.compiled = False
 
+        self.training_architecture = training_architecture
         self.rot_batch_size = mini_batch_size
         self.num_lyr = nb_unet_levels
         self.normalization = normalization
@@ -424,7 +439,6 @@ class UNetModel(Model):
         max_epochs=None,
         ReduceLR_patience=None,
         reduce_lr_factor=0.3,
-        parent=None,
     ):
         """
 
@@ -448,7 +462,6 @@ class UNetModel(Model):
         max_epochs
         ReduceLR_patience
         reduce_lr_factor
-        parent
 
         Returns
         -------
@@ -593,3 +606,34 @@ class UNetModel(Model):
             loss_history = -1
 
         return loss_history
+
+    def predict(
+        self,
+        x,
+        batch_size=None,
+        verbose=0,
+        steps=None,
+        callbacks=None,
+        max_queue_size=10,
+        workers=1,
+        use_multiprocessing=False,
+    ):
+        """Overwritten model predict method.
+
+        Parameters
+        ----------
+        x
+        batch_size
+        verbose
+        steps
+        callbacks
+        max_queue_size
+        workers
+        use_multiprocessing
+
+        Returns
+        -------
+
+        """
+        # TODO: move as much as you can from it cnn _translate
+        return super().predict(x, batch_size=batch_size, verbose=verbose)

@@ -65,4 +65,5 @@ def demo():
         # viewer.add_image(rescale_intensity(denoised_predict, in_range='image', out_range=(0, 1)), name='denoised_predict%d' % param)
 
 
-demo()
+if __name__ == "__main__":
+    demo()

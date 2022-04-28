@@ -1,3 +1,4 @@
+# flake8: noqa
 from aydin.analysis.correlation import correlation_distance
 from aydin.io import io
 from aydin.io.datasets import examples_single
@@ -11,7 +12,8 @@ def demo_analysis():
 
         array, metadata = io.imread(example_file_path)
         print(f"File        :  {example}")
-        print(f"Metadata    :  {metadata}")
+        if metadata is not None:
+            print(f"Metadata    :  {metadata}")
         print(f"Array shape :  {array.shape}")
         print(f"Array dtype :  {array.dtype}")
 
@@ -19,4 +21,5 @@ def demo_analysis():
         print(f"Correlations:  {correlations} ")
 
 
-demo_analysis()
+if __name__ == "__main__":
+    demo_analysis()

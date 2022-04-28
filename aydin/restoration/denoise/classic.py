@@ -1,4 +1,5 @@
 import importlib
+import inspect
 import os
 import platform
 import shutil
@@ -88,7 +89,7 @@ class Classic(DenoiseRestorationBase):
         By default it is None.
     """
 
-    disabled_modules = ["bilateral", "bmnd"]
+    disabled_modules = ["bilateral", "bmnd", "_defaults"]
 
     def __init__(
         self,
@@ -130,6 +131,18 @@ class Classic(DenoiseRestorationBase):
         """
         arguments = {}
 
+        # IT Classic
+        it = ImageDenoiserClassic
+
+        fullargspec3 = inspect.getfullargspec(ImageDenoiserClassic.__init__)
+
+        it_args = {
+            "arguments": fullargspec3.args[3:],
+            "defaults": fullargspec3.defaults[2:],
+            "annotations": fullargspec3.annotations,
+            "reference_class": it,
+        }
+
         # Methods
         method_modules = self.get_implementations_in_a_module(classic_denoisers)
 
@@ -160,7 +173,10 @@ class Classic(DenoiseRestorationBase):
                     del calibration_args["annotations"][arg_name]
 
             calibration_args["backend"] = module.name
-            arguments["Classic-" + module.name] = {"calibration": calibration_args}
+            arguments["Classic-" + module.name] = {
+                "calibration": calibration_args,
+                "it": it_args,
+            }
 
         return arguments
 
@@ -268,6 +284,7 @@ class Classic(DenoiseRestorationBase):
                 it = ImageDenoiserClassic(
                     method=method,
                     calibration_kwargs=self.lower_level_args["calibration"]["kwargs"],
+                    **self.lower_level_args["it"]["kwargs"],
                 )
             else:
                 it = ImageDenoiserClassic(method=self.backend)

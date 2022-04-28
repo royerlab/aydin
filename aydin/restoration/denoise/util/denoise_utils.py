@@ -1,7 +1,28 @@
 import importlib
 
+from aydin import Classic
 from aydin.restoration import denoise
 from aydin.restoration.denoise.base import DenoiseRestorationBase
+from aydin.restoration.denoise.noise2selfcnn import Noise2SelfCNN
+from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
+
+
+def get_pretrained_denoiser_class_instance(loaded_model_it):
+    if "Classic" in loaded_model_it.__class__.__name__:
+        denoiser_class = Classic
+    elif "FGR" in loaded_model_it.__class__.__name__:
+        denoiser_class = Noise2SelfFGR
+    elif "CNN" in loaded_model_it.__class__.__name__:
+        denoiser_class = Noise2SelfCNN
+    else:
+        raise ValueError(
+            "Loaded model is not supported on restoration level implementations."
+        )
+
+    denoiser = denoiser_class()
+    denoiser.it = loaded_model_it
+
+    return denoiser
 
 
 def get_denoiser_class_instance(variant, lower_level_args=None, it_transforms=None):
@@ -31,6 +52,13 @@ def get_denoiser_class_instance(variant, lower_level_args=None, it_transforms=No
     ]  # class name
 
     denoiser_class = response.__getattribute__(elem)
+
+    if (
+        it_transforms is None
+        and lower_level_args is not None
+        and lower_level_args["processing"]
+    ):
+        it_transforms = lower_level_args["processing"]
 
     return denoiser_class(
         lower_level_args=lower_level_args, it_transforms=it_transforms

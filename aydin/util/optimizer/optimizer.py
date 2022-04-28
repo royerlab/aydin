@@ -2,7 +2,7 @@ import itertools
 import math
 import traceback
 from copy import copy
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Tuple, Union, Optional
 import numpy
 from joblib import Parallel, delayed
 from numpy.linalg import LinAlgError, norm
@@ -14,19 +14,26 @@ from aydin.util.log.log import lprint, lsection
 
 class Optimizer:
     def __init__(self):
-        pass
+
+        self.function = None
+        self.bounds = None
+        self.x = []
+        self.y = []
+        self.best_point = None
+        self.best_value = -math.inf
 
     def optimize(
         self,
         function: Callable,
         bounds: List[Union[Tuple[int, ...], Tuple[float, ...]]],
-        init_strategies: str = 'corners+centers+random',
+        init_strategies: Optional[str] = None,
         exploration_rate: float = 0.4,
         patience: int = 64,
         max_num_evaluations: int = 128,
         num_interpolated_evaluations: int = 128,
         workers: int = -1,
-    ):
+        backend: str = 'loky',
+    ) -> Tuple[tuple[float, ...], float]:
         """
         Optimizes (maximizes) a given function by alternating between optimisation
         of a proxy function obtrained through interpolation, and exploration of the
@@ -41,10 +48,14 @@ class Optimizer:
             Bounds for function parameters
 
         init_strategies: str
-            Initialisation strategies. Can contain: 'corners', 'centers', and 'random'
+            Initialisation strategies. Can contain: 'two', 'three', xor 'four',
+            and 'random'. If None a default combination is used.
 
         exploration_rate: float
             Rate at which to explore
+
+        patience: int
+            Patience: how many iterations with no progress before optimiser gives up.
 
         max_num_evaluations: int
             Maximum number of evaluations of the /a priori/ costly given function.
@@ -54,6 +65,9 @@ class Optimizer:
 
         workers: int
             Number of workers, if -1 the maximum is used.
+
+        backend: str
+            Backend to use for joblib parallelism.
 
 
         Returns
@@ -80,23 +94,33 @@ class Optimizer:
         self.best_point = None
         self.best_value = -math.inf
 
+        # Default init startegy:
+        if init_strategies is None:
+            init_strategies = 'three+random'
+
         # First we initialise with some points on the corners:
-        if 'corners' in init_strategies:
-            with lsection("Evaluating function at corners"):
+        with lsection("Evaluating function at corners (and centers)"):
+            if 'two' in init_strategies:
+                init_grid = copy(bounds)
+            elif 'three' in init_strategies:
+                init_grid = tuple((u, 0.5 * (u + v), v) for u, v in bounds)
+            elif 'four' in init_strategies:
+                init_grid = tuple(
+                    (u, 0.33 * (u + v), 0.66 * (u + v), v) for u, v in bounds
+                )
 
-                if 'centers' in init_strategies:
-                    init_grid = tuple((u, 0.5 * (u + v), v) for u, v in bounds)
-                else:
-                    init_grid = copy(bounds)
+            point_list = list(itertools.product(*init_grid))
+            self._add_points(
+                point_list, workers=workers, backend=backend, display_points=True
+            )
 
-                point_list = list(itertools.product(*init_grid))
-                self._add_points(point_list, workers=workers, display_points=True)
-
-        # First we initialise with some random points:
-        if 'random' in init_strategies:
-            with lsection("Evaluating function at random points"):
-                point_list = list(self._random_sample() for _ in range(min(4, 2 * n)))
-                self._add_points(point_list, workers=workers)
+            # Then we initialise with some random points:
+            if 'random' in init_strategies:
+                with lsection("Evaluating function at random points"):
+                    point_list = list(
+                        self._random_sample() for _ in range(min(4, 2 * n))
+                    )
+                    self._add_points(point_list, workers=workers)
 
         # Foir how long did we not see an improvement?
         self.since_last_best = 0
@@ -152,7 +176,13 @@ class Optimizer:
 
         return self.best_point, self.best_value
 
-    def _add_points(self, point_list: List, workers=-1, display_points=False):
+    def _add_points(
+        self,
+        point_list: List,
+        workers: int = -1,
+        backend: str = 'loky',
+        display_points=False,
+    ):
 
         # Normalise points:
         point_list = list(
@@ -166,7 +196,7 @@ class Optimizer:
             return _value
 
         # Evaluate function in parallel:
-        values = Parallel(n_jobs=workers, backend='threading')(
+        values = Parallel(n_jobs=workers, backend=backend)(
             delayed(_function)(*point) for point in point_list
         )
 
