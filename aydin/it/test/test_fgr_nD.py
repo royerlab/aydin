@@ -12,7 +12,7 @@ from aydin.io.datasets import add_noise
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.cb import CBRegressor
 from aydin.regression.lgbm import LGBMRegressor
-from aydin.regression.nn import NNRegressor
+from aydin.regression.perceptron import PerceptronRegressor
 from aydin.util.log.log import Log
 
 display_for_debug = False
@@ -129,7 +129,7 @@ def it_fgr_nD(
     generator = StandardFeatureGenerator()
 
     if regressor == 'nn':
-        regressor = NNRegressor(max_epochs=10)
+        regressor = PerceptronRegressor(max_epochs=10)
     elif regressor == 'gbm':
         regressor = LGBMRegressor()
     elif regressor == 'cb':

@@ -13,7 +13,7 @@ def auto_detect_blindspots(
     image,
     batch_axes: Tuple[bool] = None,
     channel_axes: Tuple[bool] = None,
-    threshold=0.01,
+    threshold=0.15,
     max_blind_spots=3,
     max_range: int = 3,
     window: int = 31,
@@ -107,14 +107,10 @@ def auto_detect_blindspots(
     # We compute the autocorrelogram of the noise:
     noise_auto = noise_autocorrelation(image, max_range=max_range, window=window)
 
-    # import napari
-    # with napari.gui_qt():
-    #     viewer = napari.Viewer()
-    #     viewer.add_image(noise_auto, name='noise_auto')
-
     # What is the intensity of the nth strongest correlation?
     noise_auto_flat = noise_auto.flatten()
     noise_auto_flat.sort()
+    max_blind_spots = min(len(noise_auto_flat), max_blind_spots)
     nth_strongest_correlation = noise_auto_flat[-max_blind_spots]
 
     # We adjust the threshold to take into account the max number of blindspots requested:
@@ -160,7 +156,8 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
         noise autocorrelogram of shape (max_range*2+1,)*ndim  where ndim is the number of dimensions of the input image.
     """
 
-    # Enfor
+    # Cast, copy, and normalise:
+    image = image.astype(numpy.float32, copy=True)
 
     # First we compute the auto-correlation of the raw image:
     auto_corr = _autocorrelation(image, window=window)
@@ -192,7 +189,8 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
     analysis = analysis.clip(0, numpy.math.inf)
 
     # We normalise to a sum of 1:
-    analysis /= analysis.max()
+    if analysis.max() > 0:
+        analysis /= analysis.max()
 
     # Now we have the noise autocorelogram, we can crop that to the expected max range:
     analysis = analysis[center_slice]
@@ -215,8 +213,7 @@ def _autocorrelation(image, window: int = 31) -> numpy.ndarray:
     array : numpy.ndarray
 
     """
-    image = image.astype(numpy.float32)
-    image /= norm(image)
+    image = image / norm(image)
 
     array = _phase_correlation(image, image)
     shift = tuple(min(window, s) // 2 for s in image.shape)
@@ -240,9 +237,14 @@ def _phase_correlation(image, reference_image) -> numpy.ndarray:
     r : numpy.ndarray
 
     """
-    G_a = scipy.fft.fftn(image, workers=-1)
-    G_b = scipy.fft.fftn(reference_image, workers=-1)
-    conj_b = numpy.ma.conjugate(G_b)
-    R = G_a * conj_b
-    r = numpy.absolute(scipy.fft.ifftn(R, workers=-1))
-    return r
+    image_f = scipy.fft.fftn(image, workers=-1)
+
+    if image is not reference_image:
+        reference_image_f = scipy.fft.fftn(reference_image, workers=-1)
+    else:
+        reference_image_f = image_f
+
+    reference_image_f_conj = numpy.ma.conjugate(reference_image_f)
+    phase_correlation_f = image_f * reference_image_f_conj
+    phase_correlation = numpy.absolute(scipy.fft.ifftn(phase_correlation_f, workers=-1))
+    return phase_correlation

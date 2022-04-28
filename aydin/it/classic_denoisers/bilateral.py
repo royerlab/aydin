@@ -1,19 +1,26 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, List, Tuple
+
 import numpy
-import numpy as np
+from numpy.typing import ArrayLike
 from skimage.restoration import denoise_bilateral as skimage_denoise_bilateral
 
+from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.denoise_nd.denoise_nd import extend_nd
-from aydin.util.j_invariance.j_invariant_classic import calibrate_denoiser_classic
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 
 def calibrate_denoise_bilateral(
-    image,
+    image: ArrayLike,
     bins: int = 10000,
-    crop_size_in_voxels: Optional[int] = None,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
+    optimiser: str = _defaults.default_optimiser.value,
+    max_num_evaluations: int = _defaults.default_max_evals_normal.value,
+    blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
+    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
     display_images: bool = False,
+    display_crop: bool = False,
     **other_fixed_parameters,
 ):
     """
@@ -32,14 +39,46 @@ def calibrate_denoise_bilateral(
         Number of discrete values for Gaussian weights of
         color filtering. A larger value results in improved
         accuracy.
+        (advanced)
 
     crop_size_in_voxels: int or None for default
-        Number of voxels for crop used to calibrate
-        denoiser.
+        Number of voxels for crop used to calibrate denoiser.
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory -- this can be important for very noisy images.
+        Values to try are: 65000, 128000, 256000, 320000.
+        We do not recommend values higher than 512000.
+
+    optimiser: str
+        Optimiser to use for finding the best denoising
+        parameters. Can be: 'smart' (default), or 'fast' for a mix of SHGO
+        followed by L-BFGS-B.
+        (advanced)
+
+    max_num_evaluations: int
+        Maximum number of evaluations for finding the optimal parameters.
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory.
+
+    blind_spots: bool
+        List of voxel coordinates (relative to receptive field center) to
+        be included in the blind-spot. For example, you can give a list of
+        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
+        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)
+        (advanced) (hidden)
+
+    jinv_interpolation_mode: str
+        J-invariance interpolation mode for masking. Can be: 'median' or
+        'gaussian'.
+        (advanced)
 
     display_images: bool
         When True the denoised images encountered during
         optimisation are shown
+        (advanced) (hidden)
+
+    display_crop: bool
+        Displays crop, for debugging purposes...
+        (advanced) (hidden)
 
     other_fixed_parameters: dict
         Any other fixed parameters
@@ -53,19 +92,12 @@ def calibrate_denoise_bilateral(
     image = image.astype(dtype=numpy.float32, copy=False)
 
     # obtain representative crop, to speed things up...
-    crop = representative_crop(image, crop_size=crop_size_in_voxels)
-
-    # Sigma spatial range:
-    sigma_spatial_range = np.arange(0.01, 1, 0.05) ** 1.5
-
-    # Sigma color range:
-    sigma_color_range = np.arange(0.01, 1, 0.05) ** 1.5
+    crop = representative_crop(
+        image, crop_size=crop_size_in_voxels, display_crop=display_crop
+    )
 
     # Parameters to test when calibrating the denoising algorithm
-    parameter_ranges = {
-        'sigma_spatial': sigma_spatial_range,
-        'sigma_color': sigma_color_range,
-    }
+    parameter_ranges = {'sigma_spatial': (0.01, 1), 'sigma_color': (0.01, 1)}
 
     # Combine fixed parameters:
     other_fixed_parameters = other_fixed_parameters | {'bins': bins}
@@ -75,10 +107,14 @@ def calibrate_denoise_bilateral(
 
     # Calibrate denoiser
     best_parameters = (
-        calibrate_denoiser_classic(
+        calibrate_denoiser(
             crop,
             _denoise_bilateral,
+            mode=optimiser,
             denoise_parameters=parameter_ranges,
+            interpolation_mode=jinv_interpolation_mode,
+            max_num_evaluations=max_num_evaluations,
+            blind_spots=blind_spots,
             display_images=display_images,
         )
         | other_fixed_parameters
@@ -90,7 +126,13 @@ def calibrate_denoise_bilateral(
     return denoise_bilateral, best_parameters, memory_needed
 
 
-def denoise_bilateral(image, sigma_color=None, sigma_spatial=1, bins=10000, **kwargs):
+def denoise_bilateral(
+    image: ArrayLike,
+    sigma_color: Optional[float] = None,
+    sigma_spatial: float = 1,
+    bins: int = 10000,
+    **kwargs,
+):
     """
     Denoises the given image using a <a
     href="https://en.wikipedia.org/wiki/Bilateral_filter">bilateral

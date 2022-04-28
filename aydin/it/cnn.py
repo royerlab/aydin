@@ -1,5 +1,7 @@
 import random
 from os.path import join
+from typing import Optional, Union, List, Tuple
+
 import keras.models
 import numpy
 from tensorflow.python.eager.context import device
@@ -44,7 +46,11 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         max_epochs: int = 30,
         patience: int = 4,
         learn_rate: float = 0.01,
-        **kwargs,
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
+        tile_min_margin: int = 8,
+        tile_max_margin: Optional[int] = None,
+        max_memory_usage_ratio: float = 0.9,
+        max_tiling_overhead: float = 0.1,
     ):
         """
 
@@ -52,35 +58,93 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         ----------
         training_architecture : str
             'shiftconv' or 'checkerbox' or 'random' or 'checkran' architecture
+            (advanced)
+
         model_architecture : str
             'unet' or 'jinet'
+
         batch_size : int
             Batch size for training
+
         nb_unet_levels : int
             Number of layers
+            (advanced)
+
         batch_norm
             Type of batch normalization (e.g. batch, instance)
-        activation
+            (advanced)
+
+        activation :
+            (advanced)
+
         patch_size : int
             Size for patch sample e.g. 64 for (64, 64) or (64, 64, 64)
+            (advanced)
+
         total_num_patches
             Total number of patches for training
+            (advanced)
+
         adoption_rate
-            % of random patches will be used for training, the rest will be discarded
+            Percentage of random patches will be used for training, the rest will be discarded
+
         mask_size
             Mask shape for masking architecture; int of the same size as the spatial dimension
+            (advanced)
+
         random_mask_ratio
             Probability of masked pixels in random masking approach
+            (advanced)
+
         max_epochs : int
             Maximum number of epochs allowed
+
         patience : int
             Patience for EarlyStop or ReducedLR to be triggered
+
         learn_rate : float
             Initial learn rate
-        kwargs
-            Meant to have only keyword arguments for super class constructor. Do NOT abuse.
+
+        blind_spots : Optional[Union[str,List[Tuple[int]]]]
+            List of voxel coordinates (relative to receptive field center) to
+            be included in the blind-spot. For example, you can enter:
+            '<axis>#<radius>' to extend the blindspot along a given axis by a
+            certain radius. For example, for an image of dimension 3, 'x#1'
+            extends the blind spot to cover voxels of relative coordinates:
+            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,
+            enter: 'x#1,y#1' by comma separating between axis. To specify the
+            axis you can use integer indices, or 'x', 'y', 'z', and 't'
+            (dimension order is tzyx with x being always the last dimension).
+            If None is passed then the blindspots are automatically discovered
+            from the image content. If 'center' is passed then no additional
+            blindspots to the center pixel are considered.  If 'center' is passed
+            then only the default single center voxel blind-spot is used.
+
+        tile_min_margin : int
+            Minimal width of tile margin in voxels.
+            (advanced)
+
+        tile_max_margin : Optional[int]
+            Maximal width of tile margin in voxels.
+            (advanced)
+
+        max_memory_usage_ratio : float
+            Maximum allowed memory load, value must be within [0, 1]. Default is 90%.
+            (advanced)
+
+        max_tiling_overhead : float
+            Maximum allowed margin overhead during tiling. Default is 10%.
+            (advanced)
+
         """
-        super().__init__(**kwargs)
+        super().__init__(
+            blind_spots=blind_spots,
+            tile_min_margin=tile_min_margin,
+            tile_max_margin=tile_max_margin,
+            max_memory_usage_ratio=max_memory_usage_ratio,
+            max_tiling_overhead=max_tiling_overhead,
+        )
+
         self.model_architecture = model_architecture  # both
         self.batch_size = batch_size  # both
         self.batch_norm = batch_norm  # both
@@ -172,6 +236,18 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             self.infmodel = keras.models.load_model(join(path, "tf_inf_model"))
 
     def get_receptive_field_radius(self, nb_unet_levels, shiftconv=False):
+        """TODO: add proper docstrings here
+
+        Parameters
+        ----------
+        nb_unet_levels : int
+        shiftconv : bool
+
+        Returns
+        -------
+        int
+
+        """
         if shiftconv:
             rf = 7 if nb_unet_levels == 0 else 36 * 2 ** (nb_unet_levels - 1) - 6
         else:
@@ -184,10 +260,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
         """
         self.stop_fitting = True
-
-    def retrain(self, input_image, target_image, training_architecture=None):
-        self.training_architecture = training_architecture
-        self.train(input_image, target_image)
 
     def _train(
         self,
@@ -222,10 +294,10 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 )
 
                 self.patch_size = (
-                    self.patch_size - self.patch_size % 2 ** self.nb_unet_levels
+                    self.patch_size - self.patch_size % 2**self.nb_unet_levels
                 )
 
-                if self.patch_size < 2 ** self.nb_unet_levels:
+                if self.patch_size < 2**self.nb_unet_levels:
                     raise ValueError(
                         'Number of layers is too large for given patch size.'
                     )
@@ -246,11 +318,11 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             # Check patch_size for unet models
             if 'unet' in self.model_architecture:
                 patch_size = numpy.array(self.patch_size)
-                if (patch_size.max() / (2 ** self.nb_unet_levels) <= 0).any():
+                if (patch_size.max() / (2**self.nb_unet_levels) <= 0).any():
                     raise ValueError(
                         f'Tile size is too small. The largest dimension of tile size has to be >= {2 ** self.nb_unet_levels}.'
                     )
-                if (patch_size[-2:] % 2 ** self.nb_unet_levels != 0).any():
+                if (patch_size[-2:] % 2**self.nb_unet_levels != 0).any():
                     raise ValueError(
                         f'Tile sizes on XY plane have to be multiple of 2^{self.nb_unet_levels}'
                     )
@@ -283,7 +355,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     + self.batch_size
                 )
 
-            lprint("Available mem: ", available_device_memory())
+            lprint(f"Available mem: {available_device_memory()}")
             lprint(f"Batch size for training: {self.batch_size}")
 
             # Decide whether to use validation pixels or patches
@@ -342,12 +414,12 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Last check of input size espetially for shiftconv
             if 'shiftconv' == self.training_architecture and self.self_supervised:
-                # TODO: Hirofumi what is going on the conditional below :D  <-- check input dim is compatible w/ shiftconv
+                # TODO: Hirofumi what is going on the conditional below <-- check input dim is compatible w/ shiftconv
                 if (
                     numpy.mod(
                         img_train.shape[1:][:-1],
                         numpy.repeat(
-                            2 ** self.nb_unet_levels, len(img_train.shape[1:][:-1])
+                            2**self.nb_unet_levels, len(img_train.shape[1:][:-1])
                         ),
                     )
                     != 0
@@ -404,7 +476,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 lprint(f'Batch normalization: {self.batch_norm}')
                 lprint(f'Training input size: {img_train.shape[1:]}')
 
-            # End of train function and beginning of _train from legacy implmentation
+            # End of train function and beginning of _train from legacy implementation
             input_image = img_train
 
             with lsection(
@@ -457,8 +529,12 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     if 'checkran' in self.training_architecture:
                         callbacks.append(self.reduce_learning_rate1)
 
-                    if self.blind_spots:
-                        self.blind_spots.remove((0, 0))
+                    if 'center' in self.blind_spots:
+                        self.blind_spots = []
+
+                    center_pixel_coord = (0,) * self.spacetime_ndim
+                    if center_pixel_coord in self.blind_spots:
+                        self.blind_spots.remove((0,) * self.spacetime_ndim)
 
                     if self.spacetime_ndim == 2:
                         stop_center_gradient = StopCenterGradient2D(self.blind_spots)
@@ -492,21 +568,20 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     self.loss_history = self.model.fit(
                         input_image=input_image,
                         target_image=target_image,
+                        max_epochs=self.max_epochs,
                         callbacks=callbacks,
-                        train_valid_ratio=train_valid_ratio,
+                        verbose=self.verbose,
+                        batch_size=self.batch_size,
+                        total_num_patches=self.total_num_patches,
                         img_val=self.validation_images,
+                        create_patches_for_validation=self._create_patches_for_validation,
+                        train_valid_ratio=train_valid_ratio,
                         val_marker=self.validation_markers,
                         training_architecture=self.training_architecture,
-                        create_patches_for_validation=self._create_patches_for_validation,
-                        total_num_patches=self.total_num_patches,
-                        batch_size=self.batch_size,
                         random_mask_ratio=self.random_mask_ratio,
                         patch_size=self.patch_size,
                         mask_size=self.mask_size,
-                        verbose=self.verbose,
-                        max_epochs=self.max_epochs,
                         ReduceLR_patience=self.ReduceLR_patience,
-                        parent=self,
                     )
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
@@ -536,11 +611,11 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 input_image = numpy.pad(input_image, pad_width1, 'edge')
                 spatial_shape = numpy.array(input_image.shape[1:-1])
 
-            if not (spatial_shape % 2 ** self.nb_unet_levels == 0).all():
+            if not (spatial_shape % 2**self.nb_unet_levels == 0).all():
                 reshaped_for_model = True
                 pad_width0 = (
-                    2 ** self.nb_unet_levels
-                    - (spatial_shape % 2 ** self.nb_unet_levels)
+                    2**self.nb_unet_levels
+                    - (spatial_shape % 2**self.nb_unet_levels)
                     # + pad_square
                 ) / 2
                 pad_width2 = (
@@ -558,12 +633,12 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Change the batch_size in split layer or input dimensions accordingly
             kwargs_for_infmodel = {
+                'spacetime_ndim': self.spacetime_ndim,
                 'mini_batch_size': 1,
                 'nb_unet_levels': self.nb_unet_levels,
                 'normalization': self.batch_norm,
                 'activation': self.activation_fun,
                 'shiftconv': 'shiftconv' == self.training_architecture,
-                'spacetime_ndim': self.spacetime_ndim,
             }
 
             if len(input_image.shape[1:-1]) == 2:

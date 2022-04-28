@@ -50,12 +50,12 @@ class SummaryTab(QWidget):
 
         self.tabs_explanation_text = QLabel(
             """
-            File(s) Tab        -> See list added file(s).\n
-            Image(s) Tab       -> See corresponding image(s) and select which ones to denoise.\n
-            Dimension Tab      -> Tell Aydin how to interpret the different image dimensions.\n
-            Training Crop Tab  -> Crop your image(s) for the purpose of training the denoising model.\n
-            Inference Crop Tab -> Crop your image(s) for the purpose of actual denoising.\n
-            Denoise Tab        -> Select denoising algorithm and corresponding settings.\n
+            File(s) Tab        \t➡ See list added file(s).\n
+            Image(s) Tab       \t➡ See corresponding image(s) and select which ones to denoise.\n
+            Dimension Tab      \t➡ Tell Aydin how to interpret the different image dimensions.\n
+            Training Crop Tab  \t➡ Crop your image(s) for the purpose of training the denoising model.\n
+            Inference Crop Tab \t➡ Crop your image(s) for the purpose of actual denoising.\n
+            Denoise Tab        \t➡ Select denoising algorithm and corresponding settings.\n
             """,
             self,
         )

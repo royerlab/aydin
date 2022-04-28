@@ -14,7 +14,11 @@ from aydin.nn.models.utils.training_architectures import get_jinet_fit_args
 
 
 class JINetModel(Model):
-    """JINet model for 2D and 3D images."""
+    """
+    The JINet model is a hybrid CNN-perceptron model that leverages dilated
+    convolutions to incorporate a built-in 'blind-spot' as required for N2S
+    denoising. Supports both 2D and 3D images.
+    """
 
     def __init__(
         self,
@@ -34,23 +38,34 @@ class JINetModel(Model):
 
         Parameters
         ----------
-        input_layer_size
-        spacetime_ndim
+        input_layer_size :
+            TODO: missing!
+        spacetime_ndim :
+            TODO: missing!
         num_output_channels : int
             number of output channels
+            (advanced)
         kernel_sizes : int
             a list of kernel sizes; corresponding to num_features
+            (advanced)
         num_features : int
             a list of number of channels; corresponding to kernel_sizes
+            (advanced)
         num_dense_layers : int
             number of dense layers after feature extraction
+            (advanced)
         num_channels : int
             number of channels in the dense layer
+            (advanced)
         final_relu : bool
             whether having the final ReLU or not
+            (advanced)
         degressive_residuals : bool
             whether having weight decay in the dense layers
+            (advanced)
         learning_rate : float
+            TODO: missing!
+            (advanced)
         kwargs
         """
         if spacetime_ndim != 2 and spacetime_ndim != 3:
@@ -88,7 +103,7 @@ class JINetModel(Model):
         super().__init__(input_lyr, y)
 
         # Compile the model
-        self.compile(optimizer=Adam(lr=learning_rate), loss='mse')
+        self.compile(optimizer=Adam(learning_rate=learning_rate), loss='mse')
         self.compiled = True
 
     def size(self):
@@ -148,6 +163,37 @@ class JINetModel(Model):
         )
 
         return loss_history
+
+    def predict(
+        self,
+        x,
+        batch_size=None,
+        verbose=0,
+        steps=None,
+        callbacks=None,
+        max_queue_size=10,
+        workers=1,
+        use_multiprocessing=False,
+    ):
+        """Overwritten model predict method.
+
+        Parameters
+        ----------
+        x
+        batch_size
+        verbose
+        steps
+        callbacks
+        max_queue_size
+        workers
+        use_multiprocessing
+
+        Returns
+        -------
+
+        """
+        # TODO: move as much as you can from it cnn _translate
+        return super().predict(x, batch_size=batch_size, verbose=verbose)
 
     def jinet_core(self, input_lyr):
         dilated_conv_list = []

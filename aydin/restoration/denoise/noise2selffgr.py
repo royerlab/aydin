@@ -19,14 +19,16 @@ from aydin.util.log.log import lsection
 if os.getenv("BUNDLED_AYDIN") == "1":
     from aydin.regression.lgbm import LGBMRegressor  # noqa: F401
     from aydin.regression.linear import LinearRegressor  # noqa: F401
-    from aydin.regression.nn import NNRegressor  # noqa: F401
-    from aydin.regression.rf import RFRegressor  # noqa: F401
-    from aydin.regression.sv import SVRegressor  # noqa: F401
+    from aydin.regression.perceptron import PerceptronRegressor  # noqa: F401
+    from aydin.regression.random_forest import RandomForestRegressor  # noqa: F401
+    from aydin.regression.support_vector import SupportVectorRegressor  # noqa: F401
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):
     """
-    Noise2Self image denoising "Feature Generation & Regression" (FGR)
+    Noise2Self image denoising using the "Feature Generation & Regression" (
+    FGR) approach. Follows from the theory exposed in the <a
+    href="https://arxiv.org/abs/1901.11365">Noise2Self paper</a>.
     """
 
     def __init__(
@@ -140,6 +142,10 @@ class Noise2SelfFGR(DenoiseRestorationBase):
     @property
     def implementations_description(self):
         fgr_description = Noise2SelfFGR.__doc__.strip()
+
+        feature_generator_name = StandardFeatureGenerator.__name__.replace(
+            "FeatureGenerator", ""
+        )
         feature_generator_description = StandardFeatureGenerator.__doc__.strip()
 
         descriptions = []
@@ -155,12 +161,14 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             ]  # class name
 
             elem_class = response.__getattribute__(elem)
+            regressor_name = elem_class.__name__.replace("Regressor", "")
+            regressor_description = elem_class.__doc__.replace("\n\n", "<br><br>")
+
             descriptions.append(
                 fgr_description
-                + ", uses "
-                + feature_generator_description
-                + " and uses "
-                + elem_class.__doc__.replace("\n\n", "<br><br>")
+                + f" Uses the {feature_generator_name} feature generator and {regressor_name} regressor. "
+                + f"<br><br>About the feature generator: {feature_generator_description}"
+                + f"<br><br>About the regressor: {regressor_description}"
             )
 
         return descriptions
@@ -245,7 +253,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
                 **self.lower_level_args["it"]["kwargs"]
                 if self.lower_level_args is not None
                 else {},
-                blind_spots='auto',  # TODO: ACS: please set this as default upstream
             )
 
         return it

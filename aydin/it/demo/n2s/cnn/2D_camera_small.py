@@ -56,5 +56,6 @@ def demo(image, max_epochs=4, image_width=200):
         viewer.add_image(normalise(denoised_inf), name='denoised_inf')
 
 
-camera_image = camera()
-demo(camera_image)
+if __name__ == "__main__":
+    camera_image = camera()
+    demo(camera_image)

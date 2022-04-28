@@ -26,4 +26,5 @@ def demo_padding():
     assert numpy.abs(postprocessed - image).mean() < 1e-8
 
 
-demo_padding()
+if __name__ == "__main__":
+    demo_padding()

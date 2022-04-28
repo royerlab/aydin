@@ -12,9 +12,9 @@ from aydin.regression.base import RegressorBase
 from aydin.regression.cb import CBRegressor
 from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.linear import LinearRegressor
-from aydin.regression.nn import NNRegressor
-from aydin.regression.rf import RFRegressor
-from aydin.regression.sv import SVRegressor
+from aydin.regression.perceptron import PerceptronRegressor
+from aydin.regression.random_forest import RandomForestRegressor
+from aydin.regression.support_vector import SupportVectorRegressor
 
 
 def test_linear_regressor():
@@ -23,12 +23,12 @@ def test_linear_regressor():
 
 
 def test_rf_regressor():
-    regressor = RFRegressor()
+    regressor = RandomForestRegressor()
     with_regressor(regressor, min_ssim=0.6)
 
 
 def test_svr_regressor():
-    regressor = SVRegressor()
+    regressor = SupportVectorRegressor()
     with_regressor(regressor, min_ssim=0.65)
 
 
@@ -43,7 +43,7 @@ def test_cb_regressor():
 
 
 def test_nn_regressor():
-    regressor = NNRegressor(max_epochs=6, depth=6)
+    regressor = PerceptronRegressor(max_epochs=6, depth=6)
     with_regressor(regressor, min_ssim=0.64)
 
 

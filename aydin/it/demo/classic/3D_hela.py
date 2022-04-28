@@ -31,7 +31,7 @@ def demo():
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
     # image = image[0:3]
 
-    it = ImageDenoiserClassic(method="spectral")
+    it = ImageDenoiserClassic(method="butterworth")
 
     it.transforms_list.append(RangeTransform())
     it.transforms_list.append(PaddingTransform())
@@ -59,4 +59,5 @@ def demo():
         viewer.add_image(denoised, name='denoised')
 
 
-demo()
+if __name__ == "__main__":
+    demo()

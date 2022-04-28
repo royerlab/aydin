@@ -71,6 +71,39 @@ and process each channel separately might be cooler. At least we believe so, hen
 give our users a checkbox that lets them split each channel of a multi-channel stack into
 separate images.
 
+
+Choosing images to denoise
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../resources/aydin_images_tab_choose_to_denoise.png
+
+We provide details on how we interpret each image loaded to ``Aydin Studio`` on the ``Image(s)`` tab.
+Also this is the last place to decide, which of the loaded images you want to denoise. For each loaded
+image, you can decide to denoise or not with the help of checkbox provided on the denoise column.
+
+
+Setting output folder to a specific image
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../resources/aydin_images_tab_single_file_output_folder.png
+
+By default, ``Aydin Studio`` tries to write the result image and related files to the same exact
+folder of the input image file. This comes handy, when you like to find the input/output images
+together, however, we understand that this might not be always the case for all of our users and
+let our users to specify output folder for each loaded image by double-clicking to the last column
+of each image entry on the ``Image(s)`` tab.
+
+
+Setting output folder to all loaded images
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: ../resources/aydin_images_tab_all_files_output_folder.png
+
+It is also possible to set output folder to all loaded images to ``Aydin Studio``. You can select the
+image row with your desired output folder for all images then click the ``output folder`` header (highlighted
+on the screenshot) to set same output folder to the all loaded images.
+
+
 Dimensions tab
 ~~~~~~~~~~~~~~~
 
@@ -141,7 +174,7 @@ Saving denoising options and trained model
 
 You can save your option selections for the selected variant with the help of ``Save Options JSON``
 button in ``Run`` menubar located on the top part of ``Aydin Studio`` window. You can pass the
-saved JSON file to ``Aydin CLI``(TODO: link aydin cli page) to train new models for new images
+saved JSON file to :doc:`Aydin CLI <cli_tutorials>`  to train new models for new images
 and denoise them. Worth to mention that ``Aydin Studio``  saves the options JSON next to the resulting
 image by default on each run.
 

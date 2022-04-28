@@ -6,7 +6,7 @@ from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 
 def test_nlm():
-    assert demo_nlm(cropped_newyork(), display=False) >= 0.626 - 0.01
+    assert demo_nlm(cropped_newyork(), display=False) >= 0.626 - 0.02
 
 
 def test_nlm_nd():
