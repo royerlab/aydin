@@ -175,3 +175,5 @@ html_show_sphinx = False
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "aydindoc"
+
+numpydoc_show_class_members = False 
