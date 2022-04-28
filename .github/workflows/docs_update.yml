@@ -11,7 +11,7 @@ jobs:
   style:
     name: Docs Update
     runs-on: ubuntu-latest
-    if: github.repository == 'royerlab/aydin'
+    if: github.repository == 'AhmetCanSolak/aydin'
 
     strategy:
       matrix:
@@ -29,10 +29,6 @@ jobs:
           pip install -e .
           pip install -r docs/requirements-docs.txt
       - name: Build docs
-        run: |
-          make clean
-          make html
-      - name: Update doc
         run: |
           make clean
           make html
