@@ -2,9 +2,8 @@ FROM continuumio/miniconda3:master
 MAINTAINER Tru Huynh <tru@pasteur.fr>
 
 RUN apt-get update && \
-    apt-get install -y && \
-    apt-get install -y wget bzip2 && \
-    apt-get install -y libglu1-mesa  libgl1-mesa-dri 
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
+DEBIAN_FRONTEND=noninteractive apt-get install -y wget bzip2 libglu1-mesa  libgl1-mesa-dri 
 
 # https://royerlab.github.io/aydin/getting_started/install.html
 RUN apt-get update && apt-get install -y \
