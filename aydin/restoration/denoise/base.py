@@ -35,7 +35,7 @@ class DenoiseRestorationBase(ABC):
 
     @abstractmethod
     def train(
-        self, noisy_image, *, batch_axes=None, chan_axes=None, image_path=None, **kwargs
+        self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs
     ):
         """Method to run training.
 

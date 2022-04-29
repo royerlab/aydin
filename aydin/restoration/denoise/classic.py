@@ -107,7 +107,6 @@ class Classic(DenoiseRestorationBase):
 
         self.input_model_path = input_model_path
         self.use_model_flag = use_model
-        self.model_folder_path = None
 
         self.it = None
         self.it_transforms = (
@@ -282,7 +281,7 @@ class Classic(DenoiseRestorationBase):
                 self.it.add_transform(transform_class(**transform_kwargs))
 
     def train(
-        self, noisy_image, *, batch_axes=None, chan_axes=None, image_path=None, **kwargs
+        self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs
     ):
         """Method to run training for Noise2Self FGR.
 
@@ -293,7 +292,6 @@ class Classic(DenoiseRestorationBase):
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-        image_path : str
 
         Returns
         -------
@@ -320,9 +318,6 @@ class Classic(DenoiseRestorationBase):
                 else 3,
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
-
-            # Save the trained model
-            # self.save_model(image_path)  # TODO:  fix the problems here
 
     def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to denoise an image with trained Noise2Self FGR.
