@@ -34,9 +34,7 @@ class DenoiseRestorationBase(ABC):
         NotImplementedError()
 
     @abstractmethod
-    def train(
-        self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs
-    ):
+    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to run training.
 
         Parameters

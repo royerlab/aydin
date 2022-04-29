@@ -236,9 +236,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
                 transform_kwargs = transform["kwargs"]
                 self.it.add_transform(transform_class(**transform_kwargs))
 
-    def train(
-        self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs
-    ):
+    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to run training for Noise2Self FGR.
 
         Parameters
