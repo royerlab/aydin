@@ -79,10 +79,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             else it_transforms
         )
 
-        self.has_less_than_one_million_voxels = False
-        self.has_less_than_one_trillion_voxels = True
-        self.number_of_dims = -1
-
     @property
     def configurable_arguments(self):
         """Returns the configurable arguments that will be exposed
@@ -176,19 +172,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
     def stop_running(self):
         """Method to stop running N2S instance"""
         self.it.stop_training()
-
-    def set_image_metrics(self, image_shape):
-        """Sets several image metric parameters used internally.
-
-        Parameters
-        ----------
-        image_shape : tuple
-
-        """
-        self.number_of_dims = len(image_shape)
-        number_of_voxels = numpy.prod(numpy.array(image_shape))
-        self.has_less_than_one_million_voxels = number_of_voxels < 1000000
-        self.has_less_than_one_trillion_voxels = number_of_voxels < 1000000000000
 
     def get_generator(self):
         """Returns the corresponding generator instance for given selections.
@@ -284,7 +267,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
         """
         with lsection("Noise2Self train is starting..."):
-            self.set_image_metrics(noisy_image.shape)
 
             self.it = self.get_translator(
                 feature_generator=self.get_generator(), regressor=self.get_regressor()
