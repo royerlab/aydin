@@ -2,7 +2,6 @@ import importlib
 import inspect
 import os
 import shutil
-import numpy
 
 from aydin import regression
 from aydin.features.standard_features import StandardFeatureGenerator
