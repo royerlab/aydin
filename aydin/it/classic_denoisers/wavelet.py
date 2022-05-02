@@ -224,12 +224,12 @@ def denoise_wavelet(
         The type of wavelet to perform and can be any of the options
         ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
         ``wavelet`` can be any of ``{'db2', 'haar', 'sym9'}`` and many more
-          (see PyWavelets documentation).
+        (see PyWavelets documentation).
 
     sigma : float or list, optional
         The noise standard deviation used when computing the wavelet detail
         coefficient threshold(s). When None (default), the noise standard
-        deviation is estimated via the method in [2]_.
+        deviation is estimated via the method in (2)_.
 
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
@@ -238,7 +238,7 @@ def denoise_wavelet(
 
     method : {'BayesShrink', 'VisuShrink'}, optional
         Thresholding method to be used. The currently supported methods are
-        "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
+        "BayesShrink" (1)_ and "VisuShrink" (2)_. Defaults to "BayesShrink".
 
     kwargs : dict
         Any other parameters to be passed to scikit-image implementations
