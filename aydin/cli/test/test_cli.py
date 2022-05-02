@@ -31,7 +31,7 @@ def test_cite():
 def test_handle_files():
     file_list = [
         examples_single.generic_lizard.get_path(),
-        examples_single.fountain.get_path(),
+        examples_single.noisy_fountain.get_path(),
     ]
     filepaths, image_arrays, metadatas = handle_files(file_list, slicing="")
 
@@ -39,24 +39,24 @@ def test_handle_files():
 
     assert image_arrays[0].shape == examples_single.generic_lizard.get_array().shape
     assert image_arrays[0].dtype == examples_single.generic_lizard.get_array().dtype
-    assert image_arrays[1].shape == examples_single.fountain.get_array().shape
-    assert image_arrays[1].dtype == examples_single.fountain.get_array().dtype
+    assert image_arrays[1].shape == examples_single.noisy_fountain.get_array().shape
+    assert image_arrays[1].dtype == examples_single.noisy_fountain.get_array().dtype
 
     assert metadatas[0].shape == examples_single.generic_lizard.get_array().shape
     assert metadatas[0].dtype == examples_single.generic_lizard.get_array().dtype
-    assert metadatas[1].shape == examples_single.fountain.get_array().shape
-    assert metadatas[1].dtype == examples_single.fountain.get_array().dtype
+    assert metadatas[1].shape == examples_single.noisy_fountain.get_array().shape
+    assert metadatas[1].dtype == examples_single.noisy_fountain.get_array().dtype
 
 
-def test_denoise_saveload():
-    image_path = examples_single.fountain.get_path()
-    print(image_path)
+def test_denoise():
+    image_path = examples_single.noisy_fountain.get_path()
 
     # Denoise
     runner = CliRunner()
     result = runner.invoke(cli, ['denoise', image_path])
     assert result.exit_code == 0
 
+    # TODO: turn this into a saveload testcase
     # Denoise with the pre-trained model
     # result = runner.invoke(cli, ['denoise', '--model-path=', '--use-model', image_path])
     # assert result.exit_code == 0
