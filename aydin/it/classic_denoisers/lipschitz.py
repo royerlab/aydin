@@ -1,3 +1,5 @@
+from typing import Optional, List, Tuple
+
 import numpy
 from numba import jit
 from numpy.typing import ArrayLike
@@ -15,6 +17,7 @@ def calibrate_denoise_lipschitz(
     percentile: float = 0.001,
     alpha: float = 0.1,
     max_num_iterations: int = _defaults.default_max_evals_normal.value,
+    blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
     **other_fixed_parameters,
 ):
     """
@@ -41,6 +44,13 @@ def calibrate_denoise_lipschitz(
 
     max_num_iterations: int
         Maximum number of Lipschitz correction iterations to run. (advanced)
+
+    blind_spots: bool
+        List of voxel coordinates (relative to receptive field center) to
+        be included in the blind-spot. For example, you can give a list of
+        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
+        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)
+        (advanced) (hidden)
 
     other_fixed_parameters: dict
         Any other fixed parameters. (advanced)

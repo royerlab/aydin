@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Sequence, Union, Optional, Tuple
+from typing import Sequence, Union, Optional, Tuple, List
 
 import numpy
 from numba import jit
@@ -25,12 +25,13 @@ def calibrate_denoise_butterworth(
     max_padding: int = 32,
     min_freq: float = 1e-9,
     max_freq: float = 1.0,
+    frequency_tolerance: float = 0.05,
     min_order: float = 1.0,
     max_order: float = 8.0,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large.value,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_superlarge.value,
     optimiser: str = _defaults.default_optimiser.value,
     max_num_evaluations: int = _defaults.default_max_evals_normal.value,
-    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot.value,
+    blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
     jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
     multi_core: bool = True,
     display_images: bool = False,
@@ -79,6 +80,18 @@ def calibrate_denoise_butterworth(
         typically close to one.
         (advanced)
 
+    frequency_tolerance: float
+        Frequency tolerance within [-1,1]. A positive value lets more
+        high-frequencies to go through the low-pass, negative values bring
+        down the cut-off frequencies, zero has no effect. Positive values
+        reduces the effect of denoising but also lead to conservative
+        filtering that avoids removing potentially important information at
+        the boundary (in frequency space) between signal and noise. This can
+        also improve the appearance of the images by avoiding the impression
+        that the images have been 'over-blurred'. Increase this value by
+        small steps of 0.05 to reduce blurring if the image seems too fuzzy.
+
+
     min_order: float
         Minimal order for the Butterworth filter to use for calibration.
         (advanced)
@@ -92,8 +105,8 @@ def calibrate_denoise_butterworth(
         Number of voxels for crop used to calibrate denoiser.
         Increase this number by factors of two if denoising quality is
         unsatisfactory -- this can be important for very noisy images.
-        Values to try are: 65000, 128000, 256000, 320000.
-        We do not recommend values higher than 512000.
+        Values to try are: 256000, 320000, 1'000'000, 2'000'000.
+        We do not recommend values higher than 3000000.
 
     optimiser: str
         Optimiser to use for finding the best denoising
@@ -106,9 +119,12 @@ def calibrate_denoise_butterworth(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    enable_extended_blind_spot: bool
-        Set to True to enable extended blind-spot detection.
-        (advanced)
+    blind_spots: Optional[List[Tuple[int]]]
+        List of voxel coordinates (relative to receptive field center) to
+        be included in the blind-spot. For example, you can give a list of
+        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
+        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)
+        (advanced) (hidden)
 
     jinv_interpolation_mode: str
         J-invariance interpolation mode for masking. Can be: 'median' or
@@ -121,11 +137,11 @@ def calibrate_denoise_butterworth(
 
     display_images: bool
         When True the denoised images encountered during optimisation are shown.
-        (advanced)
+        (advanced) (hidden)
 
     display_crop: bool
         Displays crop, for debugging purposes...
-        (advanced)
+        (advanced) (hidden)
 
     other_fixed_parameters: dict
         Any other fixed parameters. (advanced)
@@ -245,7 +261,7 @@ def calibrate_denoise_butterworth(
                 mode=optimiser,
                 denoise_parameters=parameter_ranges,
                 interpolation_mode=jinv_interpolation_mode,
-                blind_spots=enable_extended_blind_spot,
+                blind_spots=blind_spots,
                 display_images=display_images,
             )
             | other_fixed_parameters
@@ -261,7 +277,7 @@ def calibrate_denoise_butterworth(
                 denoise_parameters=parameter_ranges,
                 max_num_evaluations=max_num_evaluations,
                 interpolation_mode=jinv_interpolation_mode,
-                blind_spots=enable_extended_blind_spot,
+                blind_spots=blind_spots,
                 display_images=display_images,
             )
             | other_fixed_parameters
@@ -283,7 +299,7 @@ def calibrate_denoise_butterworth(
                 denoise_parameters=parameter_ranges,
                 max_num_evaluations=max_num_evaluations,
                 interpolation_mode=jinv_interpolation_mode,
-                blind_spots=enable_extended_blind_spot,
+                blind_spots=blind_spots,
                 display_images=display_images,
             )
             | other_fixed_parameters
@@ -313,6 +329,20 @@ def calibrate_denoise_butterworth(
             best_parameters.pop(f'freq_cutoff_{i}') for i in range(image.ndim)
         )
         best_parameters |= {'freq_cutoff': freq_cutoff}
+
+    # function to add freq. tol.:
+    def _add_freq_tol(f):
+        return min(1.0, max(0.0, f + frequency_tolerance))
+
+    # Add frequency_tolerance to all cutoff frequencies:
+    if type(best_parameters['freq_cutoff']) is float:
+        # If single float we add to freq:
+        best_parameters['freq_cutoff'] = _add_freq_tol(best_parameters['freq_cutoff'])
+    else:
+        # If tuple float we add to all freqs:
+        best_parameters['freq_cutoff'] = tuple(
+            (_add_freq_tol(f) for f in best_parameters['freq_cutoff'])
+        )
 
     # Memory needed:
     memory_needed = 6 * image.nbytes  # complex numbers and more

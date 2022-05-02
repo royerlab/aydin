@@ -38,13 +38,16 @@ class QProgramFlowDiagramWidget(QWidget):
         self.load_sample_image_button = QPushButton("Load example")
         menu = QMenu()
         menu_items = {
-            "Fountain": examples_single.fountain,
-            "Mona Lisa": examples_single.monalisa,
-            "Gauss": examples_single.gauss_noisy,
+            "New York (Royer)": examples_single.noisy_newyork,
+            "Fountain": examples_single.noisy_fountain,
+            "Mona Lisa": examples_single.noisy_monalisa,
+            "Gauss": examples_single.noisy_gauss,
             "Periodic": examples_single.periodic_noise,
-            "Chessboard": examples_single.brown_chessboard_gray,
+            "Chessboard": examples_single.noisy_brown_chessboard,
             "HCR (Royer)": examples_single.royerlab_hcr,
             "Blastocyst Fracking (Maitre)": examples_single.maitre_mouse,
+            "OpenCell ARHGAP21 (Leonetti)": examples_single.leonetti_arhgap21,
+            "OpenCell ANKRD11  (Leonetti)": examples_single.leonetti_ankrd11,
         }
         for item in menu_items.keys():
             action = menu.addAction(item)

@@ -46,7 +46,7 @@ def demo_j_invariant_only_cat(image, display=True):
     psnr_denoised = psnr(image, denoised)
     ssim_denoised = ssim(image, denoised)
     print("         noisy   :", psnr_noisy, ssim_noisy)
-    print("spectral denoised:", psnr_denoised, ssim_denoised)
+    print("         denoised:", psnr_denoised, ssim_denoised)
 
     if display:
         import napari

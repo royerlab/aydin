@@ -87,4 +87,5 @@ def demo_high_pass_real():
         )
 
 
-demo_high_pass_real()
+if __name__ == "__main__":
+    demo_high_pass_real()

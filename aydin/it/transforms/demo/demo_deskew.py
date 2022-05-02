@@ -26,4 +26,5 @@ def demo_deskew():
         viewer.add_image(s_array, name='s_array')
 
 
-demo_deskew()
+if __name__ == "__main__":
+    demo_deskew()

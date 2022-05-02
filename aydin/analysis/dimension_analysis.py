@@ -14,7 +14,7 @@ def dimension_analysis_on_image(
     min_spatio_temporal: int = 2,
     max_spatio_temporal: int = 4,
     max_channels_per_axis: int = 0,
-    crop_size_in_voxels: Optional[int] = 128000,
+    crop_size_in_voxels: Optional[int] = 512000,
     crop_timeout_in_seconds: float = 5,
     max_num_evaluations: Optional[int] = 21,
 ):
@@ -103,7 +103,7 @@ def dimension_analysis_on_image(
                 optimiser='smart',
                 max_num_evaluations=max_num_evaluations,
                 jinv_interpolation_mode='gaussian',
-                enable_extended_blind_spot=False,
+                # blind_spots=False,
                 crop_size_in_voxels=crop_size_in_voxels,
                 display_images=False,
             )

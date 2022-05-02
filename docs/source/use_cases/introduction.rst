@@ -16,6 +16,7 @@ and further improving this material, please check this page for updates!
 
 #. `Denoising Basics with Aydin <basics.html>`_
 #. `Denoising Spinning-Disk Confocal Microscopy Images with Aydin <confocal.html>`_
+#. `Denoising OpenCell Images with Aydin <opencell.html>`_
 
 Note: We are always interested in learning about new challenging images, please contact us by filling an issue
 `here <https://github.com/royerlab/aydin/issues>`_ if you face difficulties or have a dataset that resists our methods.

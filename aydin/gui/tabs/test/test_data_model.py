@@ -15,7 +15,7 @@ def test_not_adding_non_existing_filepaths():
 
 def test_adding_files():
     data_model = DataModel(Mock())
-    fpath = examples_single.fountain.get_path()
+    fpath = examples_single.noisy_fountain.get_path()
     data_model.add_filepaths([fpath])
     array, metadata = imread(fpath)
     target_dict = {fpath: (array, metadata)}
@@ -30,7 +30,7 @@ def test_adding_files():
 
 def test_removing_files():
     data_model = DataModel(Mock())
-    fpath = examples_single.fountain.get_path()
+    fpath = examples_single.noisy_fountain.get_path()
     data_model.add_filepaths([fpath])
 
     data_model.clear_filepaths()

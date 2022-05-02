@@ -21,7 +21,7 @@ class ConstructorArgumentsWidget(QWidget):
         super(QWidget, self).__init__(parent)
         self.parent = parent
 
-        self.arg_names = arg_names
+        self.arg_names = []
         self.annotations = []
         self.reference_class = reference_class
         self.line_edits = []
@@ -30,6 +30,28 @@ class ConstructorArgumentsWidget(QWidget):
         self.arguments_layout.setAlignment(Qt.AlignTop)
 
         for index, (name, default_value) in enumerate(zip(arg_names, arg_defaults)):
+
+            # First we get the description:
+            if inspect.isclass(reference_class):
+                doc = docstring_parser.parse(reference_class.__init__.__doc__)
+            else:
+                doc = docstring_parser.parse(reference_class.__doc__)
+            description = ""
+            for param in doc.params:
+                if param.arg_name == name:
+                    description = param.description
+
+            if description is not None:
+                # Parameters that are marked with (hidden) in their docstrings are 'hidden:
+                if '(hidden)' in description:
+                    # Skip this parameter
+                    continue
+
+                # Handle None to auto replacement:
+                description = description.replace("None", "'auto'")
+                # Replace new lines with spaces to avoid wrapping conflicts:
+                description = description.replace('\n', ' ')
+
             param_name = name.strip().replace('_', ' ')
             param_label = QLabel(f"{param_name}: ")
             param_label.setWordWrap(True)
@@ -50,25 +72,12 @@ class ConstructorArgumentsWidget(QWidget):
                 f"{self.annotation_prettifier(arg_annotations[name])}"
             )
 
-            if inspect.isclass(reference_class):
-                doc = docstring_parser.parse(reference_class.__init__.__doc__)
-            else:
-                doc = docstring_parser.parse(reference_class.__doc__)
-            description = ""
-            for param in doc.params:
-                if param.arg_name == name:
-                    description = param.description
-
-            if description is not None:
-                # Handle None to auto replacement:
-                description = description.replace("None", "'auto'")
-                # Replace new lines with spaces to avoid wrapping conflicts:
-                description = description.replace('\n', ' ')
-
             param_description = QLabel(description)
             param_description.setWordWrap(True)
             param_description.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            param_description.setToolTip(f"{description}")
 
+            self.arg_names.append(name)
             self.line_edits.append(param_edit)
             self.annotations.append(arg_annotations[name])
 
@@ -144,10 +153,9 @@ class ConstructorArgumentsWidget(QWidget):
 
     def set_advanced_enabled(self, enable: bool = False):
         for _ in range(self.arguments_layout.rowCount()):
-            if (
-                "(advanced)"
-                in self.arguments_layout.itemAtPosition(_, 2).widget().text()
-            ):
+
+            item = self.arguments_layout.itemAtPosition(_, 2)
+            if item is not None and ("(advanced)" in item.widget().text()):
                 for column_index in range(3):
                     self.arguments_layout.itemAtPosition(
                         _, column_index

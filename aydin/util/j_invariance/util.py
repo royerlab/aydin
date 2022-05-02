@@ -1,9 +1,10 @@
 import itertools
 import traceback
-from functools import lru_cache
+from functools import lru_cache, reduce
+from typing import Optional, List, Tuple
 
 import numpy
-from numpy import zeros_like
+from numpy import zeros_like, zeros
 from numpy.typing import ArrayLike
 from scipy.ndimage import convolve, gaussian_filter, median_filter
 
@@ -20,11 +21,10 @@ def _j_invariant_loss(
     denoiser_kwargs=None,
 ):
     try:
-        denoised = _invariant_denoise(
-            masked_input_image=masked_input_image,
-            denoise_function=denoise_function,
-            denoiser_kwargs=denoiser_kwargs,
-        )
+        if denoiser_kwargs is None:
+            denoiser_kwargs = {}
+
+        denoised = denoise_function(masked_input_image, **denoiser_kwargs)
     except RuntimeError:
         lprint(
             "Denoising failed during calibration, skipping by returning "
@@ -38,34 +38,48 @@ def _j_invariant_loss(
     return loss
 
 
-def _invariant_denoise(masked_input_image, denoise_function, *, denoiser_kwargs=None):
+def _interpolate_image(
+    image: ArrayLike,
+    mask: ArrayLike,
+    mode: str,
+    num_iterations: int,
+    boundary_mode: str = 'mirror',
+):
 
-    if denoiser_kwargs is None:
-        denoiser_kwargs = {}
+    # Prepare kernels and footprints:
+    gaussian_kernel = _generate_gaussian_kernel(image.ndim, image.dtype)
+    median_footprint = _generate_median_footprint(image.ndim, image.dtype)
 
-    output = denoise_function(masked_input_image, **denoiser_kwargs)
+    # Prepare initial interpolation:
+    interpolation = numpy.zeros_like(image)
+    interpolation[...] = image
 
-    return output
+    # Ensure no J-invariant leakage:
+    interpolation[mask] = 0
 
+    # Run multiple iterations of the interpolation by diffusion:
+    for i in range(num_iterations):
 
-def _interpolate_image(image: ArrayLike, mode: str, boundary_mode: str = 'mirror'):
+        # Aply diffusion step:
+        if mode == 'gaussian':
+            interpolation = convolve(interpolation, gaussian_kernel, mode=boundary_mode)
+        elif mode == 'median':
+            interpolation = median_filter(
+                interpolation, footprint=median_footprint, mode=boundary_mode
+            )
 
-    if mode == 'gaussian':
-        kernel = _generate_gaussian_kernel(image.ndim, image.dtype)
-        interpolation = convolve(image, kernel, mode=boundary_mode)
-
-    elif mode == 'median':
-        footprint = _generate_median_footprint(image.ndim, image.dtype)
-        interpolation = median_filter(image, footprint=footprint, mode=boundary_mode)
+        # Enforce that non-masked values are set to the original's image values:
+        interpolation[~mask] = image[~mask]
 
     return interpolation
 
 
 @lru_cache(maxsize=None)
-def _generate_gaussian_kernel(ndim: int, dtype):
-    kernel = numpy.zeros(shape=(3,) * ndim, dtype=dtype)
+def _generate_gaussian_kernel(ndim: int, dtype, size: int = 5, sigma: float = 0.75):
+
+    kernel = numpy.zeros(shape=(size,) * ndim, dtype=dtype)
     kernel.ravel()[kernel.size // 2] = 1
-    kernel = gaussian_filter(kernel, sigma=0.5)
+    kernel = gaussian_filter(kernel, sigma=sigma)
     kernel.ravel()[kernel.size // 2] = 0
     kernel /= kernel.sum()
     return kernel
@@ -82,32 +96,44 @@ def _generate_mask(
     image: ArrayLike,
     stride: int = 4,
     max_range: int = 4,
-    enable_extended_blind_spot: bool = True,
+    blind_spots: Optional[List[Tuple[int]]] = None,
 ):
 
     # Generate slice for mask:
     spatialdims = image.ndim
+
+    # Compute slicing for mask:
     n_masks = stride**spatialdims
-    mask = _generate_grid_slice(
+    mask_slice = _generate_grid_slice(
         image.shape[:spatialdims], offset=n_masks // 2, stride=stride
     )
 
+    # Compute default mask:
+    mask = zeros_like(image, dtype=numpy.bool_)
+    mask[mask_slice] = True
+
     # Do we have to extend these spots?
-    if enable_extended_blind_spot:
+    if blind_spots is None:
         lprint("Detection of extended blindspots requested!")
         blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
-        extended_blind_spot = len(blind_spots) > 1 and enable_extended_blind_spot
-    else:
-        extended_blind_spot = False
+
+    extended_blind_spot = len(blind_spots) > 1
 
     if extended_blind_spot:
         lprint(f"Extended blindspots detected: {blind_spots}")
-        # If yes, we need to change the way we store the mask:
-        mask_full = zeros_like(image, dtype=numpy.bool_)
-        mask_full[mask] = True
-        mask = mask_full
 
-        spot_kernel = zeros_like(noise_auto, dtype=numpy.bool_)
+        # Determine size of spot kernel:
+        min_coord = tuple(
+            reduce(lambda u, v: (min(a, b) for a, b in zip(u, v)), blind_spots)
+        )
+        max_coord = tuple(
+            reduce(lambda u, v: (max(a, b) for a, b in zip(u, v)), blind_spots)
+        )
+        spot_kernel_shape = tuple(
+            (1 + 2 * max(abs(u), abs(v)) for u, v in zip(max_coord, min_coord))
+        )
+
+        spot_kernel = zeros(spot_kernel_shape, dtype=numpy.bool_)
         for blind_spot in blind_spots:
             blind_spot = tuple(
                 slice(s // 2 + x, s // 2 + x + 1)

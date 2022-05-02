@@ -4,10 +4,10 @@ import numpy
 from numpy.random import rand
 from scipy.ndimage import gaussian_filter
 
-from aydin.features.groups.convolutional import ConvolutionalFeatures
+from aydin.features.groups.correlation import CorrelationFeatures
 
 
-class RandomFeatures(ConvolutionalFeatures):
+class RandomFeatures(CorrelationFeatures):
     """
     Random Feature Group class
 
@@ -39,7 +39,7 @@ class RandomFeatures(ConvolutionalFeatures):
         # Ensures that the kernels are available for subsequent steps.
         # We can't construct the kernels until we know the dimension of the image
         if self.kernels is None or self.kernels[0].ndim != ndim:
-            dct_kernels = []
+            rnd_kernels = []
 
             num_features = (
                 self.size**ndim if self._num_features is None else self._num_features
@@ -60,9 +60,9 @@ class RandomFeatures(ConvolutionalFeatures):
                 #      viewer = Viewer()
                 #      viewer.add_image(kernel, name='kernel')
 
-                dct_kernels.append(kernel)
+                rnd_kernels.append(kernel)
 
-            self.kernels = dct_kernels
+            self.kernels = rnd_kernels
 
     @property
     def receptive_field_radius(self) -> int:
