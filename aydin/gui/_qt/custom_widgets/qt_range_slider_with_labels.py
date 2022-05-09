@@ -5,7 +5,7 @@ from aydin.gui._qt.custom_widgets.qt_range_slider import QHRangeSlider
 
 class QRangeSliderWithLabels(QWidget):
     def __init__(self, parent, label="N/A", size=100, min_length=32):
-        super(QWidget, self).__init__(parent)
+        super(QRangeSliderWithLabels, self).__init__(parent)
         self.parent = parent
         self.size = size
         self.min_length = min_length

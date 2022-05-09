@@ -4,7 +4,7 @@ from qtpy.QtCore import Qt
 
 class QVerticalLineBreakWidget(QWidget):
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(QVerticalLineBreakWidget, self).__init__(parent)
         self.parent = parent
 
         self.layout = QHBoxLayout()
