@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QMenu
 from qtpy.QtWidgets import (
     QHBoxLayout,
     QWidget,
+    QMenu,
     QPushButton,
     QToolButton,
     QStyle,
