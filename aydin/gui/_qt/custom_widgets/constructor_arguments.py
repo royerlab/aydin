@@ -18,7 +18,7 @@ class ConstructorArgumentsWidget(QWidget):
         reference_class=None,
         disable_spatial_features=False,
     ):
-        super(QWidget, self).__init__(parent)
+        super(ConstructorArgumentsWidget, self).__init__(parent)
         self.parent = parent
 
         self.arg_names = []

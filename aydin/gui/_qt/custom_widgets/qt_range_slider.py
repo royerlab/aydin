@@ -43,7 +43,7 @@ class QRangeSlider(QWidget):
         parent : qtpy.QtWidgets.QWidget
             Parent widget.
         """
-        super().__init__(parent)
+        super(QRangeSlider, self).__init__(parent)
         self.handle_radius = 8
         self.slider_width = 6
         self.moving = "none"
