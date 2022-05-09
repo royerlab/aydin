@@ -19,7 +19,7 @@ class BaseCroppingTab(QWidget):
     """Use the sliders to select a region of the image to crop."""
 
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(BaseCroppingTab, self).__init__(parent)
         self.parent = parent
 
         self._image = None
