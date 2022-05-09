@@ -9,7 +9,7 @@ from qtpy.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
-from aydin.gui._qt.custom_widgets.qt_rangeslider_with_labels import (
+from aydin.gui._qt.custom_widgets.qt_range_slider_with_labels import (
     QRangeSliderWithLabels,
 )
 from aydin.util.misc.units import human_readable_byte_size
@@ -19,7 +19,7 @@ class BaseCroppingTab(QWidget):
     """Use the sliders to select a region of the image to crop."""
 
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(BaseCroppingTab, self).__init__(parent)
         self.parent = parent
 
         self._image = None

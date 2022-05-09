@@ -40,9 +40,10 @@ def demo_salt_and_pepper(image=newyork()):
         viewer.add_image(corrected, name='corrected')
 
 
-demo_salt_and_pepper(newyork())
-demo_salt_and_pepper(characters())
-demo_salt_and_pepper(pollen())
-demo_salt_and_pepper(lizard())
-demo_salt_and_pepper(dots())
-demo_salt_and_pepper(camera())
+if __name__ == "__main__":
+    demo_salt_and_pepper(newyork())
+    demo_salt_and_pepper(characters())
+    demo_salt_and_pepper(pollen())
+    demo_salt_and_pepper(lizard())
+    demo_salt_and_pepper(dots())
+    demo_salt_and_pepper(camera())

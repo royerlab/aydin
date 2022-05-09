@@ -4,10 +4,11 @@ from aydin.gui._qt.custom_widgets.qt_range_slider import QHRangeSlider
 
 
 class QRangeSliderWithLabels(QWidget):
-    def __init__(self, parent, label="N/A", size=100):
-        super(QWidget, self).__init__(parent)
+    def __init__(self, parent, label="N/A", size=100, min_length=32):
+        super(QRangeSliderWithLabels, self).__init__(parent)
         self.parent = parent
         self.size = size
+        self.min_length = min_length
 
         # Slider1
         self.widget_layout = QHBoxLayout()
@@ -53,7 +54,8 @@ class QRangeSliderWithLabels(QWidget):
     def slider_value_changed(self, event):
         lower, upper = self.slider.values()
 
-        if self.slider_label.text() in ["X", "Y"] and upper - lower < 64:
+        if self.slider_label.text() in ["X", "Y"] and upper - lower <= self.min_length:
+
             self.slider.setValues((self.lower_cutoff, self.upper_cutoff))
             return
 

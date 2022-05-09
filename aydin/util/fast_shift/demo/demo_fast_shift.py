@@ -40,16 +40,16 @@ def demo_fast_shift(image_name: str, image, _shift, repeats=32):
     # )
 
 
-image_2d = fibsem(full=True).astype(numpy.float32)
-image_3d = examples_single.royerlab_hcr.get_array().squeeze()[2]
-image_4d = examples_single.hyman_hela.get_array().squeeze()
+if __name__ == "__main__":
+    image_2d = fibsem(full=True).astype(numpy.float32)
+    image_3d = examples_single.royerlab_hcr.get_array().squeeze()[2]
+    image_4d = examples_single.hyman_hela.get_array().squeeze()
 
+    for _shift in [(3, -1), (17, -51), (-317, 511)]:
+        demo_fast_shift("fibsem 2D", image_2d, _shift=_shift, repeats=1)
 
-for _shift in [(3, -1), (17, -51), (-317, 511)]:
-    demo_fast_shift("fibsem 2D", image_2d, _shift=_shift, repeats=1)
+    for _shift in [(3, -1, 2), (17, -51, 7), (-317, 511, -128)]:
+        demo_fast_shift("islet 3D", image_3d, _shift=_shift, repeats=1)
 
-for _shift in [(3, -1, 2), (17, -51, 7), (-317, 511, -128)]:
-    demo_fast_shift("islet 3D", image_3d, _shift=_shift, repeats=1)
-
-for _shift in [(3, -1, 2, -7), (17, -51, -20, 10), (-317, 511, -126, 212)]:
-    demo_fast_shift("hela 4D", image_4d, _shift=_shift, repeats=1)
+    for _shift in [(3, -1, 2, -7), (17, -51, -20, 10), (-317, 511, -126, 212)]:
+        demo_fast_shift("hela 4D", image_4d, _shift=_shift, repeats=1)

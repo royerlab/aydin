@@ -39,7 +39,7 @@ class DimensionsTab(QWidget):
     """
 
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(DimensionsTab, self).__init__(parent)
         self.parent = parent
 
         self._axes = None

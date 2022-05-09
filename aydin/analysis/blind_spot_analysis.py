@@ -13,7 +13,7 @@ def auto_detect_blindspots(
     image,
     batch_axes: Tuple[bool] = None,
     channel_axes: Tuple[bool] = None,
-    threshold=0.01,
+    threshold=0.15,
     max_blind_spots=3,
     max_range: int = 3,
     window: int = 31,
@@ -107,11 +107,6 @@ def auto_detect_blindspots(
     # We compute the autocorrelogram of the noise:
     noise_auto = noise_autocorrelation(image, max_range=max_range, window=window)
 
-    # import napari
-    # with napari.gui_qt():
-    #     viewer = napari.Viewer()
-    #     viewer.add_image(noise_auto, name='noise_auto')
-
     # What is the intensity of the nth strongest correlation?
     noise_auto_flat = noise_auto.flatten()
     noise_auto_flat.sort()
@@ -161,7 +156,8 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
         noise autocorrelogram of shape (max_range*2+1,)*ndim  where ndim is the number of dimensions of the input image.
     """
 
-    # Enfor
+    # Cast, copy, and normalise:
+    image = image.astype(numpy.float32, copy=True)
 
     # First we compute the auto-correlation of the raw image:
     auto_corr = _autocorrelation(image, window=window)
@@ -217,8 +213,7 @@ def _autocorrelation(image, window: int = 31) -> numpy.ndarray:
     array : numpy.ndarray
 
     """
-    image = image.astype(numpy.float32)
-    image /= norm(image)
+    image = image / norm(image)
 
     array = _phase_correlation(image, image)
     shift = tuple(min(window, s) // 2 for s in image.shape)

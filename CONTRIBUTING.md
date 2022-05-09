@@ -69,10 +69,10 @@ Once you're ready to share your contribution with us you should submit it as a P
 
 ```bash
 # Create a new environment
-conda create -n aydin_env python=3.9
+conda create -n aydin python=3.9
 
 # Activate the environment
-conda activate aydin_env
+conda activate aydin
 
 # Install Aydin
 pip install -e .
@@ -80,12 +80,9 @@ pip install -e .
 # Install development specific dependencies
 pip install -r requirements/development.txt
 
-# Install pre-commit hooks
-pre-commit install
-
 # Before making a PR make sure tests are passing
 # To run tests
-python -m pytest . --disable-pytest-warnings
+python -m pytest . --disable-pytest-warnings --show-capture=stderr
 
 # Before making a PR also check if your branch
 # passes style guidelines

@@ -56,6 +56,7 @@ def demo(image):
         viewer.add_image(denoised_corrected, name='denoised_corrected')
 
 
-islet = examples_single.royerlab_hcr.get_array().squeeze()
-islet = islet[2, :20, 400 : 400 + 256, 700 : 700 + 256]
-demo(islet)
+if __name__ == "__main__":
+    hcr = examples_single.royerlab_hcr.get_array().squeeze()
+    hcr = hcr[2, :20, 400 : 400 + 256, 700 : 700 + 256]
+    demo(hcr)
