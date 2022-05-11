@@ -1,6 +1,6 @@
 from qtpy.QtWidgets import QWidget, QHBoxLayout, QLabel, QPushButton
 
-from aydin.gui._qt.custom_widgets.qt_range_slider import QHRangeSlider
+from aydin.gui._qt.custom_widgets.range_slider import QHRangeSlider
 
 
 class QRangeSliderWithLabels(QWidget):
@@ -23,6 +23,7 @@ class QRangeSliderWithLabels(QWidget):
         )
 
         self.slider.setStep(1.0)
+        self.slider.rangeChanged.connect(self.slider_range_changed)
         self.slider.valuesChanged.connect(self.slider_value_changed)
 
         self.widget_layout.addWidget(self.slider, 80)
@@ -41,6 +42,10 @@ class QRangeSliderWithLabels(QWidget):
         )
         self.widget_layout.addWidget(self.select_all_button)
 
+        self.range_label = QLabel(f"[0,{str(size)})")
+        self.range_label.setDisabled(True)
+        self.widget_layout.addWidget(self.range_label)
+
         self.setLayout(self.widget_layout)
 
     @property
@@ -50,6 +55,9 @@ class QRangeSliderWithLabels(QWidget):
     @property
     def upper_cutoff(self):
         return int(self.upper_limit_label.text())
+
+    def slider_range_changed(self, event):
+        self.range_label.setText(f"[0,{event[1]})")
 
     def slider_value_changed(self, event):
         lower, upper = self.slider.values()
