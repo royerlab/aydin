@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:35
     steps:
+      - uses: actions/checkout@v2
       - name: Install Python
         run: |
           dnf install python3.9 -y
@@ -16,5 +17,5 @@ jobs:
       - name: Install dependencies
         run: |
           ls
-          cat /etc/os-release 
+          cat /etc/os-release
 #          pip install -e .
