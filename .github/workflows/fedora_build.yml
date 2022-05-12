@@ -10,4 +10,6 @@ jobs:
       - run: |
           echo This job does specify a container.
           echo It runs in the container instead of the VM.
+          which python
+          which python3
         name: Run in container
