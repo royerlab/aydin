@@ -27,7 +27,7 @@ class ImagesTab(QWidget):
     """
 
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(ImagesTab, self).__init__(parent)
         self.parent = parent
 
         self.tab_layout = QVBoxLayout()

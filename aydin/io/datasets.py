@@ -184,6 +184,10 @@ class examples_single(Enum):
         '1arq6nj4oiJaxG7dPHjhYVTSYXM2Czpgx',
         'Leonetti_OC-FOV_ARHGAP21_ENSG00000107863_CID000556_FID00030711_stack.tif',
     )
+    leonetti_ankrd11 = (
+        '1Bl0WlEPeDe8MmlWy8_KaZS9QKthvSDHM',
+        'Leonetti_OC-FOV_ANKRD11_ENSG00000167522_CID001385_FID00033338_stack.tif',
+    )
 
     # XYZ
     huang_fixed_pattern_noise = (
