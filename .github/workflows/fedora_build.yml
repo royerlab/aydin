@@ -5,7 +5,7 @@ on: [push]
 jobs:
   fedora-build:
     runs-on: ubuntu-latest
-    container: node:10.16-jessie
+    container: fedora:35
     steps:
       - run: |
           echo This job does specify a container.
