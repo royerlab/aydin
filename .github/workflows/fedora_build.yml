@@ -16,4 +16,5 @@ jobs:
       - name: Install dependencies
         run: |
           ls
+          cat /etc/os-release 
 #          pip install -e .
