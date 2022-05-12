@@ -10,7 +10,7 @@ jobs:
       - name: Install Python
         run: |
           dnf install python3.9 -y
-          dnf install python3.9-pip -y
+          dnf install python3-pip -y
           echo All going well till this point
           python3.9 -V
       - name: Install dependencies
