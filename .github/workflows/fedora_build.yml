@@ -17,10 +17,8 @@ jobs:
       - name: Install dependencies
         run: |
           ls
-          where pip3
-          where pip
-          where python3.9
-          where python
+          python3.9 -V
+          python -V
           pip3 install -e .
           pip3 install -r requirements/development.txt
           sh build/linux/build.sh
