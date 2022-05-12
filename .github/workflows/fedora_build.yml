@@ -12,5 +12,6 @@ jobs:
           echo It runs in the container instead of the VM.
           dnf install python3
           dnf install python3-pip
-          python --version
+          echo All going well till this point
+          pip install aydin
         name: Run in container
