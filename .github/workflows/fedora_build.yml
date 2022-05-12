@@ -1,0 +1,13 @@
+name: Fedora-build
+
+on: [push]
+
+jobs:
+  fedora-build:
+    runs-on: ubuntu-latest
+    container: node:10.16-jessie
+    steps:
+      - run: |
+          echo This job does specify a container.
+          echo It runs in the container instead of the VM.
+        name: Run in container
