@@ -13,6 +13,5 @@ jobs:
           dnf install python3 -y
           dnf install python3-pip -y
           echo All going well till this point
-          python -V
           python3 -V
         name: Run in container
