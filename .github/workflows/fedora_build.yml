@@ -12,5 +12,5 @@ jobs:
           echo It runs in the container instead of the VM.
           dnf install python3
           dnf install python3-pip
-          python3 -V
+          python -V
         name: Run in container
