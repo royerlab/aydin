@@ -15,4 +15,5 @@ jobs:
           python3.9 -V
       - name: Install dependencies
         run: |
+          ls
           pip install -e .
