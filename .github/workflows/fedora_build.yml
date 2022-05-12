@@ -10,8 +10,8 @@ jobs:
       - run: |
           echo This job does specify a container.
           echo It runs in the container instead of the VM.
-          dnf install python3
-          dnf install python3-pip
+          dnf install python3 -y
+          dnf install python3-pip -y
           echo All going well till this point
           pip install aydin
         name: Run in container
