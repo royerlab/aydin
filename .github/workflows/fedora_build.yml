@@ -20,6 +20,6 @@ jobs:
           python3.9 -V
           pip3 --version
           pip --version
-          pip3 install -e .
-          pip3 install -r requirements/development.txt
+          sudo -H pip3 install -e .
+          sudo -H pip3 install -r requirements/development.txt
           sh build/linux/build.sh
