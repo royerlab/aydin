@@ -13,8 +13,9 @@ jobs:
           sudo dnf install curl -y
           curl --output anaconda.sh https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
           chmod +x anaconda.sh
-          bash anaconda.sh -b 
-          conda init bash
+          bash anaconda.sh -b
+          eval "$(/github/home/anaconda/bin/conda shell.bash hook)"
+          conda init
       - name: Install dependencies
         run: |
           python -V
