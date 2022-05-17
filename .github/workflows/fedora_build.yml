@@ -10,15 +10,14 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Python
         run: |
-          dnf remove python3 --skip-broken
-          dnf install python3.9 -y
-          dnf install python3-pip -y
-          echo All going well till this point
-          python3.9 -V
+          sudo dnf install curl -y
+          curl --output anaconda.sh https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+          chmod +x anaconda.sh
+          bash anaconda.sh -y
+          conda init bash
       - name: Install dependencies
         run: |
-          ls
-          python3.9 -V
+          python -V
           pip3 --version
           pip --version
           python3.9 -m pip install --upgrade pip
