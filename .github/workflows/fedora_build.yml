@@ -13,7 +13,7 @@ jobs:
           sudo dnf install curl -y
           curl --output anaconda.sh https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
           chmod +x anaconda.sh
-          bash anaconda.sh -y
+          bash anaconda.sh
           conda init bash
       - name: Install dependencies
         run: |
