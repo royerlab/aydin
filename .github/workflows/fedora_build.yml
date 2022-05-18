@@ -23,6 +23,6 @@ jobs:
           pip3 --version
           pip --version
           python3.9 -m pip install --upgrade pip
-          sudo -H pip install -e .
-          sudo -H pip install -r requirements/development.txt
+          pip install -e .
+          pip install -r requirements/development.txt
           sh build/linux/build.sh
