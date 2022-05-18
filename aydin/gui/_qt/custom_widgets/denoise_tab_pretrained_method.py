@@ -15,7 +15,7 @@ from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
 
 class DenoiseTabPretrainedMethodWidget(QWidget):
     def __init__(self, parent, loaded_it):
-        super(QWidget, self).__init__(parent)
+        super(DenoiseTabPretrainedMethodWidget, self).__init__(parent)
 
         self.parent = parent
         self.loaded_it = loaded_it

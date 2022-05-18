@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QMenu
 from qtpy.QtWidgets import (
     QHBoxLayout,
     QWidget,
+    QMenu,
     QPushButton,
     QToolButton,
     QStyle,
@@ -15,7 +15,7 @@ from aydin.io.datasets import examples_single
 
 class QProgramFlowDiagramWidget(QWidget):
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(QProgramFlowDiagramWidget, self).__init__(parent)
         self.parent = parent
         self.highlightable_buttons = []
 

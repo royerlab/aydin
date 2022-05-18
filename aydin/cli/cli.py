@@ -199,7 +199,7 @@ def lucyrichardson(files, psf_path, **kwargs):
     psf_kernel /= psf_kernel.sum()
 
     filepaths, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
-    for filepath, input_image, metadata in zip(filepaths, image_arrays, metadatas):
+    for filepath, input_image in zip(filepaths, image_arrays):
         lr = LucyRichardson(
             psf_kernel=psf_kernel, max_num_iterations=20, backend=kwargs['backend']
         )

@@ -183,7 +183,7 @@ Here are some issues that are being actively addressed and will be addressed asa
 ## Road Map:
 
 Planned features:
-  - Toggling between 'Advanced' and 'Basic' modes to show and hide advanced algorithms.
+  - ~~Toggling between 'Advanced' and 'Basic' modes to show and hide advanced algorithms.~~ :white_check_mark:
   - Loading of denoising model and configurations (JSON) on *Aydin Studio*
   - Pytorch backend
 

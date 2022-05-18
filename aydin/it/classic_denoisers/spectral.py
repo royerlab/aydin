@@ -209,7 +209,7 @@ def denoise_spectral(
     \n\n
     Note: This seems like a lot of parameters, but thanks to our
     auto-tuning approach these parameters are all automatically
-     determined 😊.
+    determined 😊.
 
     Parameters
     ----------
