@@ -20,9 +20,6 @@ jobs:
           conda create -y -n ay39 python=3.9
           conda activate ay39
           python -V
-          pip3 --version
-          pip --version
-          python3.9 -m pip install --upgrade pip
           pip install -e .
           pip install -r requirements/development.txt
           sh build/linux/build.sh
