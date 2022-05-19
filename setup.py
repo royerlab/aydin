@@ -24,7 +24,8 @@ if sys.version_info < (3, 9):
 # os.system("pip install -r " + os.path.join('requirements', 'pyopencl.txt'))
 
 setup(
-    use_scm_version={"write_to": "aydin/_version.py"},
+    # use_scm_version={"write_to": "aydin/_version.py"},
     setup_requires=['setuptools_scm'],
+    version="0.1.14",
     entry_points={'console_scripts': ['aydin=aydin.cli.cli:cli']},
 )
