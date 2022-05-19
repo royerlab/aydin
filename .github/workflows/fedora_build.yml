@@ -22,6 +22,7 @@ jobs:
           python -V
           export SETUPTOOLS_SCM_DEBUG=1
           python -c "import setuptools; print(setuptools.__version__)"
+          ls -lh
           pip install -e .
           pip install -r requirements/development.txt
           sh build/linux/build.sh
