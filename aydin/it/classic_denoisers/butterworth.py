@@ -220,9 +220,19 @@ def calibrate_denoise_butterworth(
             freq_cutoff_t = kwargs.pop('freq_cutoff_t')
 
             if mode == 't-z-yx':
-                _freq_cutoff = (freq_cutoff_t, freq_cutoff_z, freq_cutoff_xy, freq_cutoff_xy)
+                _freq_cutoff = (
+                    freq_cutoff_t,
+                    freq_cutoff_z,
+                    freq_cutoff_xy,
+                    freq_cutoff_xy,
+                )
             elif mode == 'xy-z-t':
-                _freq_cutoff = (freq_cutoff_xy, freq_cutoff_xy, freq_cutoff_z, freq_cutoff_t)
+                _freq_cutoff = (
+                    freq_cutoff_xy,
+                    freq_cutoff_xy,
+                    freq_cutoff_z,
+                    freq_cutoff_t,
+                )
 
             return denoise_butterworth(
                 *args,
