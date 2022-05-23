@@ -7,8 +7,11 @@ from glob import glob
 import click
 import numpy
 import napari
-from skimage.metrics import peak_signal_noise_ratio
-from skimage.metrics import structural_similarity
+from skimage.metrics import (
+    mean_squared_error,
+    peak_signal_noise_ratio,
+    structural_similarity,
+)
 
 from aydin.gui.gui import run
 from aydin.io.datasets import normalise
@@ -305,7 +308,7 @@ def ssim(files, **kwargs):
 @click.argument('files', nargs=2)
 @click.option('-s', '--slicing', default='', type=str)
 def psnr(files, **kwargs):
-    """aydin ssim command
+    """aydin psnr command
 
     Parameters
     ----------
@@ -316,8 +319,30 @@ def psnr(files, **kwargs):
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
     lprint(
-        "ssim: ",
+        "psnr: ",
         peak_signal_noise_ratio(
+            normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
+        ),
+    )
+
+
+@cli.command()
+@click.argument('files', nargs=2)
+@click.option('-s', '--slicing', default='', type=str)
+def mse(files, **kwargs):
+    """aydin mean squared error command
+
+    Parameters
+    ----------
+    files
+    kwargs : dict
+
+    """
+    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
+
+    lprint(
+        "psnr: ",
+        mean_squared_error(
             normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
         ),
     )
