@@ -194,7 +194,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             self.add_feature_group(spatial)
 
         if num_sinusoidal_features > 0:
-            periods = list([1 / 2**i for i in range(num_sinusoidal_features)])
+            periods = list([1 / 2 ** i for i in range(num_sinusoidal_features)])
             for period in periods:
                 spatial = SpatialFeatures(period=period)
                 self.add_feature_group(spatial)

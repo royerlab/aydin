@@ -74,7 +74,7 @@ def get_experiment_kernel(
     elif noise_type[0:2] == 'g2':
         # Circular repeating pattern
         scale = 1
-        dist = uu**2 + vv**2
+        dist = uu ** 2 + vv ** 2
         kernel = np.cos(np.sqrt(dist) / scale) * gaussian_kernel((sz[0], sz[1]), 10)
 
     elif noise_type[0:2] == 'g3':
@@ -84,7 +84,7 @@ def get_experiment_kernel(
 
     elif noise_type[0:2] == 'g4':
         # Pink noise
-        dist = uu**2 + vv**2
+        dist = uu ** 2 + vv ** 2
         n = sz[0] * sz[1]
         spec = np.sqrt((np.sqrt(n) * 1e-2) / (np.sqrt(dist) + np.sqrt(n) * 1e-2))
         kernel = fftshift(ifft2(ifftshift(spec)))
@@ -95,13 +95,13 @@ def get_experiment_kernel(
     # -- Noise with additional white component --
 
     if len(noise_type) > 2 and noise_type[2] == 'w':
-        kernel = kernel / np.sqrt(np.sum(kernel**2))
+        kernel = kernel / np.sqrt(np.sum(kernel ** 2))
         kalpha = np.sqrt((1 - beta) + beta * abs(fft2(kernel, (sz[0], sz[1]))) ** 2)
         kernel = fftshift(ifft2(kalpha))
 
     kernel = np.real(kernel)
     # Correct variance
-    kernel = kernel / np.sqrt(np.sum(kernel**2)) * np.sqrt(noise_var)
+    kernel = kernel / np.sqrt(np.sum(kernel ** 2)) * np.sqrt(noise_var)
 
     return kernel
 

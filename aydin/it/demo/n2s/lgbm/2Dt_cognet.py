@@ -33,7 +33,7 @@ def demo():
 
     generator = StandardFeatureGenerator(
         kernel_widths=[5] + [1] + [3] * 10,
-        kernel_scales=[1] + [2] + [2**i - 1 for i in range(2, 12)],
+        kernel_scales=[1] + [2] + [2 ** i - 1 for i in range(2, 12)],
         kernel_shapes=['l2'] * 2 + ['l2'] * 3 + ['l1+nc'] * 5 + ['l1+oc'] * 2,
         max_level=9,
         include_spatial_features=True,
