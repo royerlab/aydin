@@ -7,7 +7,11 @@ from glob import glob
 import click
 import numpy
 import napari
-from skimage.metrics import mean_squared_error, peak_signal_noise_ratio, structural_similarity
+from skimage.metrics import (
+    mean_squared_error,
+    peak_signal_noise_ratio,
+    structural_similarity,
+)
 
 from aydin.gui.gui import run
 from aydin.io.datasets import normalise
