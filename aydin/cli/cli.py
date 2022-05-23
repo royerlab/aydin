@@ -305,7 +305,7 @@ def ssim(files, **kwargs):
 @click.argument('files', nargs=2)
 @click.option('-s', '--slicing', default='', type=str)
 def psnr(files, **kwargs):
-    """aydin ssim command
+    """aydin psnr command
 
     Parameters
     ----------
@@ -316,7 +316,7 @@ def psnr(files, **kwargs):
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
     lprint(
-        "ssim: ",
+        "psnr: ",
         peak_signal_noise_ratio(
             normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
         ),
