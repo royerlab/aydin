@@ -7,9 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:35
     steps:
+      - name: Install Git
+        run: |
+          sudo dnf -y install git
+          git --version
       - uses: actions/checkout@v2
       - name: Install Python
         run: |
+          git --version
           sudo dnf install curl -y
           curl --output anaconda.sh https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
           chmod +x anaconda.sh
@@ -23,9 +28,6 @@ jobs:
           export SETUPTOOLS_SCM_DEBUG=1
           python -c "import setuptools; print(setuptools.__version__)"
           ls -lh
-          sudo dnf -y install git
-          git --version
-          git tag -l
           pip install -e .
           pip install -r requirements/development.txt
           sh build/linux/build.sh
