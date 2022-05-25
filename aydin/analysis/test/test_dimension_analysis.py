@@ -1,3 +1,5 @@
+import pytest
+
 from aydin.analysis.dimension_analysis import dimension_analysis_on_image
 from aydin.io.datasets import examples_single
 
