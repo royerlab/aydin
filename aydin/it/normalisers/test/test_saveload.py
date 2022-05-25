@@ -32,7 +32,7 @@ def test_identity_saveload():
 
 
 def saveload(normaliser):
-    input_path = examples_single.hyman_hela.get_path()
+    input_path = examples_single.maitre_mouse.get_path()
     array, metadata = imread(input_path)
     assert array.dtype == numpy.uint16
 
