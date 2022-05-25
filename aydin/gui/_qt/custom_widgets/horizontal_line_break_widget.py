@@ -4,7 +4,7 @@ from qtpy.QtCore import Qt
 
 class QHorizontalLineBreakWidget(QWidget):
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(QHorizontalLineBreakWidget, self).__init__(parent)
         self.parent = parent
 
         self.layout = QHBoxLayout()

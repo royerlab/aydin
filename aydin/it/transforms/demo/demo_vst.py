@@ -37,4 +37,5 @@ def demo_vst():
             viewer.add_image(postprocessed, name='postprocessed_' + mode)
 
 
-demo_vst()
+if __name__ == "__main__":
+    demo_vst()

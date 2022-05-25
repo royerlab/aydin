@@ -110,8 +110,9 @@ def demo(image, name):
         viewer.add_image(normalise(denoised), name='denoised')
 
 
-demo(newyork(), "newyork")
-demo(camera(), "camera")
-demo(lizard(), "lizard")
-demo(pollen(), "pollen")
-demo(dots(), "dots")
+if __name__ == "__main__":
+    demo(newyork(), "newyork")
+    demo(camera(), "camera")
+    demo(lizard(), "lizard")
+    demo(pollen(), "pollen")
+    demo(dots(), "dots")

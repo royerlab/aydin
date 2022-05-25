@@ -1,4 +1,4 @@
-from tensorflow.python.keras.api.keras import (
+from tensorflow.keras import (
     initializers,
     regularizers,
     constraints,

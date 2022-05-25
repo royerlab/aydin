@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 import numpy
 from numpy.typing import ArrayLike
@@ -13,14 +13,13 @@ from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 def calibrate_denoise_gaussian(
     image: ArrayLike,
     axes: Optional[Tuple[int, ...]] = None,
-    min_sigma: float = 0.0,
+    min_sigma: float = 1e-6,
     max_sigma: float = 2.0,
-    max_num_truncate: int = 4,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_large.value,
-    optimiser: str = 'smart',
+    optimiser: str = 'fast',
     max_num_evaluations: int = _defaults.default_max_evals_high.value,
-    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot.value,
-    jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
+    blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
+    jinv_interpolation_mode: str = 'median',
     display_images: bool = False,
     display_crop: bool = False,
     **other_fixed_parameters,
@@ -45,11 +44,6 @@ def calibrate_denoise_gaussian(
     max_sigma: float
         Maximum sigma for Gaussian filter.
 
-    max_num_truncate: int
-        Maximum number of Gaussian filter truncations to try.
-        If None, the default (4) is fixed and no search is done for that parameter.
-        (advanced)
-
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate denoiser.
         Increase this number by factors of two if denoising quality is
@@ -69,8 +63,12 @@ def calibrate_denoise_gaussian(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    enable_extended_blind_spot: bool
-        Automatically determines extended blind-spot extent.
+    blind_spots: bool
+        List of voxel coordinates (relative to receptive field center) to
+        be included in the blind-spot. For example, you can give a list of
+        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
+        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)
+        (advanced) (hidden)
 
     jinv_interpolation_mode: str
         J-invariance interpolation mode for masking. Can be: 'median' or
@@ -80,10 +78,11 @@ def calibrate_denoise_gaussian(
     display_images: bool
         When True the denoised images encountered
         during optimisation are shown
+        (advanced) (hidden)
 
     display_crop: bool
         Displays crop, for debugging purposes...
-        (advanced)
+        (advanced) (hidden)
 
     other_fixed_parameters: dict
         Any other fixed parameters
@@ -108,16 +107,11 @@ def calibrate_denoise_gaussian(
     # Size range:
     sigma_range = (min_sigma, max(min_sigma, max_sigma) + 1e-9)
 
-    # Truncate range (order matters: we want 4 -- the default -- first):
-    truncate_range = (
-        [4] if max_num_truncate is None else [4, 8, 2, 1][: min(max_num_truncate, 4)]
-    )
-
     # Combine fixed parameters:
     other_fixed_parameters = other_fixed_parameters | {'axes': axes}
 
     # Parameters to test when calibrating the denoising algorithm
-    parameter_ranges = {'sigma': sigma_range, 'truncate': truncate_range}
+    parameter_ranges = {'sigma': sigma_range}
 
     # Partial function:
     _denoise_gaussian = partial(denoise_gaussian, **other_fixed_parameters)
@@ -131,8 +125,9 @@ def calibrate_denoise_gaussian(
             denoise_parameters=parameter_ranges,
             interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
-            blind_spots=enable_extended_blind_spot,
+            blind_spots=blind_spots,
             display_images=display_images,
+            loss_function='L1',
         )
         | other_fixed_parameters
     )
@@ -146,8 +141,8 @@ def calibrate_denoise_gaussian(
 def denoise_gaussian(
     image: ArrayLike,
     axes: Optional[Tuple[int, ...]] = None,
-    sigma: float = 1,
-    truncate: float = 4,
+    sigma: float = 1.0,
+    truncate: float = 4.0,
     **kwargs,
 ):
     """

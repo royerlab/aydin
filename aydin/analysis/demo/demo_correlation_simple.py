@@ -1,3 +1,4 @@
+# flake8: noqa
 import random
 from math import pi, cos, sin
 
@@ -176,11 +177,12 @@ def maitre_example():
     print(f"Maitre {correlation_distance(image)} ")
 
 
-maitre_example()
-noise_example()
-camera_example()
-astronaut_example()
-clock_example()
-coins_example()
-discs_example()
-lines_example()
+if __name__ == "__main__":
+    maitre_example()
+    noise_example()
+    camera_example()
+    astronaut_example()
+    clock_example()
+    coins_example()
+    discs_example()
+    lines_example()
