@@ -147,7 +147,7 @@ def _test_compute_correlation_3d(_fun_, shape=(3, 5, 7)):
 
 
 def _test_compute_correlation_4d(_fun_, shape=(3, 5, 7, 9)):
-    image = examples_single.hyman_hela.get_array().squeeze()
+    image = examples_single.maitre_mouse.get_array().squeeze()
     image = image[..., 0:64, 0:64]
     image = image.astype(numpy.float32)
 
