@@ -35,7 +35,7 @@ def test_run_n2s_fgr():
         {"class": RangeTransform, "kwargs": {}},
         {"class": PaddingTransform, "kwargs": {}},
     ]
-    n2s = Noise2SelfFGR(variant="fgr-cb", it_transforms=transforms)
+    n2s = Noise2SelfFGR(it_transforms=transforms)
     n2s.train(noisy_image)
     denoised_image = n2s.denoise(noisy_image).clip(0, 1)
 
