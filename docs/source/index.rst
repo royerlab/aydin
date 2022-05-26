@@ -99,6 +99,8 @@ If you find Aydin useful and use it in your work, please kindly consider to cite
    Aydin Denoising of Spinning-Disk Confocal Images of Zebrafish Embryos from Royer Lab (CZ Biohub, San Francisco) <use_cases/confocal_royer.rst>
    Aydin Denoising Spinning-Disk Confocal Microscopy Images of Mouse embryos from the Maitre Lab (Curie, Paris) <use_cases/confocal_maitre.rst>
    Aydin Denoising of OpenCell Images <use_cases/opencell.rst>
+   Aydin Denoising of the Noisy ‘New York’ Test Image <use_cases/newyork.rst>
+
 
 .. toctree::
    :maxdepth: 1
