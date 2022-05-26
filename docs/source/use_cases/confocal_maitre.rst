@@ -1,4 +1,4 @@
-Aydin Denoising Spinning-Disk Confocal Microscopy Images of Mouse embryos from the Maitre Lab (Curie, Paris)
+Aydin Denoising Spinning-Disk Confocal Microscopy Images of Mouse Embryos from the Maitre Lab (Curie, Paris)
 ================================================================================================================
 
 

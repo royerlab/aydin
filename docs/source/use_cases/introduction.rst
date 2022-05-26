@@ -15,10 +15,10 @@ post- processing steps, and how to adjust their parameters. We are actively popu
 and further improving this material, please check this page for updates!
 
 #. `Denoising Basics with Aydin <basics.html>`_
-#. `Aydin Denoising of the Noisy ‘New York’ Test Image <newyork.html>`_
-#. `Aydin Denoising of Spinning-Disk Confocal Images of Zebrafish Embryos from Royer Lab (CZ Biohub, San Francisco) <confocal_royer.html>`_
-#. `Aydin Denoising Spinning-Disk Confocal Microscopy Images of Mouse embryos from the Maitre Lab (Curie, Paris) <confocal_maitre.html>`_
-#. `Aydin Denoising of OpenCell Images <opencell.html>`_
+#. `Noisy ‘New York’ Test Image <newyork.html>`_
+#. `Spinning-Disk Confocal Images of Zebrafish Embryos from Royer Lab (CZ Biohub, San Francisco) <confocal_royer.html>`_
+#. `Spinning-Disk Confocal Microscopy Images of Mouse Embryos from the Maitre Lab (Curie, Paris) <confocal_maitre.html>`_
+#. `OpenCell Images <opencell.html>`_
 
 
 Note: We are always interested in learning about new challenging images, please contact us by filling an issue
