@@ -245,10 +245,10 @@ class MainPage(QWidget):
         try:
             self.data_model.add_filepaths([sample.get_path()])
             self.tabwidget.setCurrentIndex(1)
-        except:
+        except Exception:
             # Download failed:
             # printing stack trace
-            lprint(f"Failed to download or open file!")
+            lprint("Failed to download or open file!")
             traceback.print_exception(*sys.exc_info())
 
     def handle_use_same_crop_state_changed(self):
