@@ -50,8 +50,10 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../use_cases/basics.html">Denoising Basics with Aydin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/newyork.html">Aydin Denoising of the Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/confocal_royer.html">Aydin Denoising of Spinning-Disk Confocal Images of Zebrafish Embryos from Royer Lab (CZ Biohub, San Francisco)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/confocal_maitre.html">Aydin Denoising Spinning-Disk Confocal Microscopy Images of Mouse embryos from the Maitre Lab (Curie, Paris)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/opencell.html">Aydin Denoising of OpenCell Images</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -198,39 +200,6 @@ to enable developers who might want to use same feature:</p>
 multiscale integral(uniform) features of different shapes, spatial
 features, median features, dct features, deterministic random
 convolutional features.</p>
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.standard_features.StandardFeatureGenerator.add_feature_group" title="aydin.features.standard_features.StandardFeatureGenerator.add_feature_group"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_feature_group</span></code></a>(feature_group, *args, **kwargs)</p></td>
-<td><p>Adds a feature to this feature generator.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.standard_features.StandardFeatureGenerator.clear_features" title="aydin.features.standard_features.StandardFeatureGenerator.clear_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_features</span></code></a>()</p></td>
-<td><p>Clears the features group list</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.standard_features.StandardFeatureGenerator.compute" title="aydin.features.standard_features.StandardFeatureGenerator.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(image[, exclude_center_feature, ...])</p></td>
-<td><p>Computes the features given an image.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.standard_features.StandardFeatureGenerator.create_feature_array" title="aydin.features.standard_features.StandardFeatureGenerator.create_feature_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_feature_array</span></code></a>(image, nb_features)</p></td>
-<td><p>Creates a feature array of the right size and possibly in a 'lazy' way using memory mapping.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.standard_features.StandardFeatureGenerator.get_num_features" title="aydin.features.standard_features.StandardFeatureGenerator.get_num_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_num_features</span></code></a>(ndim)</p></td>
-<td><p>Returns the number of features when considering translations</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.standard_features.StandardFeatureGenerator.get_receptive_field_radius" title="aydin.features.standard_features.StandardFeatureGenerator.get_receptive_field_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_receptive_field_radius</span></code></a>()</p></td>
-<td><p>Returns the receptive field radius in pixels</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.standard_features.StandardFeatureGenerator.load" title="aydin.features.standard_features.StandardFeatureGenerator.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
-<td><p>Returns a 'all-batteries-inlcuded' feature generator from a given path (folder)</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.standard_features.StandardFeatureGenerator.save" title="aydin.features.standard_features.StandardFeatureGenerator.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
-<td><p>Saves a 'all-batteries-included' feature generator at a given path (folder)</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aydin.features.standard_features.StandardFeatureGenerator.add_feature_group">
 <span class="sig-name descname"><span class="pre">add_feature_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_group</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aydin.features.groups.base.FeatureGroupBase</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.features.standard_features.StandardFeatureGenerator.add_feature_group" title="Permalink to this definition"></a></dt>
@@ -408,39 +377,6 @@ approaches.</p>
 <dt class="sig sig-object py" id="aydin.features.extensible_features.ExtensibleFeatureGenerator">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.features.extensible_features.</span></span><span class="sig-name descname"><span class="pre">ExtensibleFeatureGenerator</span></span><a class="reference internal" href="../_modules/aydin/features/extensible_features.html#ExtensibleFeatureGenerator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator" title="Permalink to this definition"></a></dt>
 <dd><p>Extensible Feature Generator class</p>
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator.add_feature_group" title="aydin.features.extensible_features.ExtensibleFeatureGenerator.add_feature_group"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_feature_group</span></code></a>(feature_group, *args, **kwargs)</p></td>
-<td><p>Adds a feature to this feature generator.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator.clear_features" title="aydin.features.extensible_features.ExtensibleFeatureGenerator.clear_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_features</span></code></a>()</p></td>
-<td><p>Clears the features group list</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator.compute" title="aydin.features.extensible_features.ExtensibleFeatureGenerator.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(image[, exclude_center_feature, ...])</p></td>
-<td><p>Computes the features given an image.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator.create_feature_array" title="aydin.features.extensible_features.ExtensibleFeatureGenerator.create_feature_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_feature_array</span></code></a>(image, nb_features)</p></td>
-<td><p>Creates a feature array of the right size and possibly in a 'lazy' way using memory mapping.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator.get_num_features" title="aydin.features.extensible_features.ExtensibleFeatureGenerator.get_num_features"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_num_features</span></code></a>(ndim)</p></td>
-<td><p>Returns the number of features when considering translations</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator.get_receptive_field_radius" title="aydin.features.extensible_features.ExtensibleFeatureGenerator.get_receptive_field_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_receptive_field_radius</span></code></a>()</p></td>
-<td><p>Returns the receptive field radius in pixels</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator.load" title="aydin.features.extensible_features.ExtensibleFeatureGenerator.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
-<td><p>Returns a 'all-batteries-inlcuded' feature generator from a given path (folder)</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator.save" title="aydin.features.extensible_features.ExtensibleFeatureGenerator.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
-<td><p>Saves a 'all-batteries-included' feature generator at a given path (folder)</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aydin.features.extensible_features.ExtensibleFeatureGenerator.add_feature_group">
 <span class="sig-name descname"><span class="pre">add_feature_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_group</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aydin.features.groups.base.FeatureGroupBase</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/features/extensible_features.html#ExtensibleFeatureGenerator.add_feature_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.features.extensible_features.ExtensibleFeatureGenerator.add_feature_group" title="Permalink to this definition"></a></dt>
@@ -618,30 +554,6 @@ approaches.</p>
 <dt class="sig sig-object py" id="aydin.features.base.FeatureGeneratorBase">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.features.base.</span></span><span class="sig-name descname"><span class="pre">FeatureGeneratorBase</span></span><a class="reference internal" href="../_modules/aydin/features/base.html#FeatureGeneratorBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.features.base.FeatureGeneratorBase" title="Permalink to this definition"></a></dt>
 <dd><p>Feature Generator base class</p>
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.base.FeatureGeneratorBase.compute" title="aydin.features.base.FeatureGeneratorBase.compute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute</span></code></a>(image[, exclude_center_feature, ...])</p></td>
-<td><p>Computes the features given an image.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.base.FeatureGeneratorBase.create_feature_array" title="aydin.features.base.FeatureGeneratorBase.create_feature_array"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_feature_array</span></code></a>(image, nb_features)</p></td>
-<td><p>Creates a feature array of the right size and possibly in a 'lazy' way using memory mapping.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.base.FeatureGeneratorBase.get_receptive_field_radius" title="aydin.features.base.FeatureGeneratorBase.get_receptive_field_radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_receptive_field_radius</span></code></a>()</p></td>
-<td><p>Returns the receptive field radius in pixels</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#aydin.features.base.FeatureGeneratorBase.load" title="aydin.features.base.FeatureGeneratorBase.load"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load</span></code></a>(path)</p></td>
-<td><p>Returns a 'all-batteries-inlcuded' feature generator from a given path (folder)</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#aydin.features.base.FeatureGeneratorBase.save" title="aydin.features.base.FeatureGeneratorBase.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(path)</p></td>
-<td><p>Saves a 'all-batteries-included' feature generator at a given path (folder)</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py method">
 <dt class="sig sig-object py" id="aydin.features.base.FeatureGeneratorBase.compute">
 <em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_center_feature</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_center_value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_last_dim</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passthrough_channels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_reserved_features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">excluded_voxels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_feature_offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_feature_scale</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/features/base.html#FeatureGeneratorBase.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.features.base.FeatureGeneratorBase.compute" title="Permalink to this definition"></a></dt>

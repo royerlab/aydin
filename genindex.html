@@ -47,8 +47,10 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="use_cases/introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="use_cases/basics.html">Denoising Basics with Aydin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases/newyork.html">Aydin Denoising of the Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases/confocal_royer.html">Aydin Denoising of Spinning-Disk Confocal Images of Zebrafish Embryos from Royer Lab (CZ Biohub, San Francisco)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases/confocal_maitre.html">Aydin Denoising Spinning-Disk Confocal Microscopy Images of Mouse embryos from the Maitre Lab (Curie, Paris)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases/opencell.html">Aydin Denoising of OpenCell Images</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -159,12 +161,42 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.bilateral.calibrate_denoise_bilateral">calibrate_denoise_bilateral() (in module aydin.it.classic_denoisers.bilateral)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.bmnd.calibrate_denoise_bmnd">calibrate_denoise_bmnd() (in module aydin.it.classic_denoisers.bmnd)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.butterworth.calibrate_denoise_butterworth">calibrate_denoise_butterworth() (in module aydin.it.classic_denoisers.butterworth)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.dictionary_fixed.calibrate_denoise_dictionary_fixed">calibrate_denoise_dictionary_fixed() (in module aydin.it.classic_denoisers.dictionary_fixed)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.dictionary_learned.calibrate_denoise_dictionary_learned">calibrate_denoise_dictionary_learned() (in module aydin.it.classic_denoisers.dictionary_learned)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.gaussian.calibrate_denoise_gaussian">calibrate_denoise_gaussian() (in module aydin.it.classic_denoisers.gaussian)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.gm.calibrate_denoise_gm">calibrate_denoise_gm() (in module aydin.it.classic_denoisers.gm)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.harmonic.calibrate_denoise_harmonic">calibrate_denoise_harmonic() (in module aydin.it.classic_denoisers.harmonic)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.lipschitz.calibrate_denoise_lipschitz">calibrate_denoise_lipschitz() (in module aydin.it.classic_denoisers.lipschitz)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.nlm.calibrate_denoise_nlm">calibrate_denoise_nlm() (in module aydin.it.classic_denoisers.nlm)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.pca.calibrate_denoise_pca">calibrate_denoise_pca() (in module aydin.it.classic_denoisers.pca)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.spectral.calibrate_denoise_spectral">calibrate_denoise_spectral() (in module aydin.it.classic_denoisers.spectral)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.tv.calibrate_denoise_tv">calibrate_denoise_tv() (in module aydin.it.classic_denoisers.tv)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.wavelet.calibrate_denoise_wavelet">calibrate_denoise_wavelet() (in module aydin.it.classic_denoisers.wavelet)</a>
+</li>
       <li><a href="api/regressors/cb.html#aydin.regression.cb.CBRegressor">CBRegressor (class in aydin.regression.cb)</a>
 </li>
       <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic">Classic (class in aydin.restoration.denoise.classic)</a>
 </li>
       <li><a href="api/restorations/denoise_restoration.html#aydin.classic_denoise">classic_denoise() (in module aydin)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.clean_model_folder">clean_model_folder() (aydin.restoration.denoise.classic.Classic static method)</a>
 
       <ul>
@@ -189,8 +221,6 @@
         <li><a href="api/image_translators/fgr.html#aydin.it.fgr.ImageTranslatorFGR.clear_transforms">(aydin.it.fgr.ImageTranslatorFGR method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/feature_generator.html#aydin.features.base.FeatureGeneratorBase.compute">compute() (aydin.features.base.FeatureGeneratorBase method)</a>
 
       <ul>
@@ -231,8 +261,36 @@
         <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.denoise">(aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR method)</a>
 </li>
       </ul></li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.bilateral.denoise_bilateral">denoise_bilateral() (in module aydin.it.classic_denoisers.bilateral)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.bmnd.denoise_bmnd">denoise_bmnd() (in module aydin.it.classic_denoisers.bmnd)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.butterworth.denoise_butterworth">denoise_butterworth() (in module aydin.it.classic_denoisers.butterworth)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.dictionary_fixed.denoise_dictionary_fixed">denoise_dictionary_fixed() (in module aydin.it.classic_denoisers.dictionary_fixed)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.dictionary_learned.denoise_dictionary_learned">denoise_dictionary_learned() (in module aydin.it.classic_denoisers.dictionary_learned)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.gaussian.denoise_gaussian">denoise_gaussian() (in module aydin.it.classic_denoisers.gaussian)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.gm.denoise_gm">denoise_gm() (in module aydin.it.classic_denoisers.gm)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.harmonic.denoise_harmonic">denoise_harmonic() (in module aydin.it.classic_denoisers.harmonic)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.lipschitz.denoise_lipschitz">denoise_lipschitz() (in module aydin.it.classic_denoisers.lipschitz)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.nlm.denoise_nlm">denoise_nlm() (in module aydin.it.classic_denoisers.nlm)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.pca.denoise_pca">denoise_pca() (in module aydin.it.classic_denoisers.pca)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.spectral.denoise_spectral">denoise_spectral() (in module aydin.it.classic_denoisers.spectral)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.tv.denoise_tv">denoise_tv() (in module aydin.it.classic_denoisers.tv)</a>
+</li>
+      <li><a href="api/image_translators/classic.html#aydin.it.classic_denoisers.wavelet.denoise_wavelet">denoise_wavelet() (in module aydin.it.classic_denoisers.wavelet)</a>
+</li>
       <li><a href="api/transforms.html#aydin.it.transforms.deskew.DeskewTransform">DeskewTransform (class in aydin.it.transforms.deskew)</a>
 </li>
   </ul></td>
@@ -553,12 +611,6 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.set_image_metrics">set_image_metrics() (aydin.restoration.denoise.classic.Classic method)</a>
-
-      <ul>
-        <li><a href="api/restorations/denoise_restoration.html#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.set_image_metrics">(aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR method)</a>
-</li>
-      </ul></li>
       <li><a href="api/nn/jinet.html#aydin.nn.models.jinet.JINetModel.size">size() (aydin.nn.models.jinet.JINetModel method)</a>
 
       <ul>

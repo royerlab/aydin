@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Why Aydin? &mdash; Aydin  documentation</title>
+  <title>Aydin Denoising of the Noisy ‘New York’ Test Image &mdash; Aydin  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
@@ -20,7 +20,9 @@
         <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Aydin Denoising of Spinning-Disk Confocal Images of Zebrafish Embryos from Royer Lab (CZ Biohub, San Francisco)" href="confocal_royer.html" />
+    <link rel="prev" title="Denoising Basics with Aydin." href="basics.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,15 +43,17 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hardware_requirements.html">Hardware Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/basics.html">Denoising Basics with Aydin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use_cases/opencell.html">Denoising OpenCell Images with Aydin</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Aydin Denoising of the Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="confocal_royer.html">Aydin Denoising of Spinning-Disk Confocal Images of Zebrafish Embryos from Royer Lab (CZ Biohub, San Francisco)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="confocal_maitre.html">Aydin Denoising Spinning-Disk Confocal Microscopy Images of Mouse embryos from the Maitre Lab (Curie, Paris)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opencell.html">Aydin Denoising of OpenCell Images</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -90,9 +94,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Why Aydin?</li>
+      <li>Aydin Denoising of the Noisy ‘New York’ Test Image</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/getting_started/why_aydin.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/use_cases/newyork.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -100,56 +104,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="why-aydin">
-<h1>Why Aydin?<a class="headerlink" href="#why-aydin" title="Permalink to this headline"></a></h1>
-<section id="denoising">
-<h2>Denoising<a class="headerlink" href="#denoising" title="Permalink to this headline"></a></h2>
-<p>Aydin and it is implemented to be a lightweight, robust, versatile and
-highly configurable denoising package. Aydin is denoising for all.</p>
-</section>
-<section id="robust-denoising">
-<h2>Robust Denoising<a class="headerlink" href="#robust-denoising" title="Permalink to this headline"></a></h2>
-<p>TODO: Comparison table</p>
-</section>
-<section id="less-halucinations-more-useful-data">
-<h2>Less Halucinations, More Useful Data<a class="headerlink" href="#less-halucinations-more-useful-data" title="Permalink to this headline"></a></h2>
-<p>TODO: Figure for less halucinations</p>
-</section>
-<section id="accessible-via-api-cli-gui">
-<h2>Accessible via API, CLI, GUI<a class="headerlink" href="#accessible-via-api-cli-gui" title="Permalink to this headline"></a></h2>
-<p>TODO: GUI ss, CLI example command, API example snippet, all with links</p>
-</section>
-<section id="automatic-blind-spot-detection">
-<h2>Automatic blind spot detection<a class="headerlink" href="#automatic-blind-spot-detection" title="Permalink to this headline"></a></h2>
-<p>TODO: explanation + figure</p>
-</section>
-<section id="preprocessing-and-postprocessing-helpers">
-<h2>Preprocessing and Postprocessing helpers<a class="headerlink" href="#preprocessing-and-postprocessing-helpers" title="Permalink to this headline"></a></h2>
-<p>Denoising quality can be – in some cases – dramatically improved by applying some carefully
-crafted transformations. You can find here all these transformations and their parameters.
-We recommend you test the effect of each individually, as well as the combined effect of all selected
-before starting the denoising.</p>
-</section>
-<section id="deconvolution">
-<h2>Deconvolution<a class="headerlink" href="#deconvolution" title="Permalink to this headline"></a></h2>
-<p>Currently Aydin implements Lucy-Richardson Deconvolution method only and can be run with a
-custom PSF provided. This can be used via CLI and API currently, not supported on GUI.</p>
-</section>
-<section id="viewing-images">
-<h2>Viewing Images<a class="headerlink" href="#viewing-images" title="Permalink to this headline"></a></h2>
-<p>Napari, nD image browser, is internally integrated to Aydin, hence, at any given time a user
-can view their images in a napari window while using Aydin.</p>
-</section>
-<section id="hyperstacking">
-<h2>Hyperstacking<a class="headerlink" href="#hyperstacking" title="Permalink to this headline"></a></h2>
-<p>It is pretty easy to hyperstack images before denoising with Aydin.</p>
-</section>
-</section>
+  <section id="aydin-denoising-of-the-noisy-new-york-test-image">
+<h1>Aydin Denoising of the Noisy ‘New York’ Test Image<a class="headerlink" href="#aydin-denoising-of-the-noisy-new-york-test-image" title="Permalink to this headline"></a></h1>
+<iframe src="https://docs.google.com/document/d/e/2PACX-1vTN02pamOpFk5MrVg7lLRxwU_I0jj7IvEjUVYIoGEamnDaOXD4RGoiduN0eLrZLCiiwpYQFNvsCJecO/pub?embedded=true" height="9680" width="720"></iframe></section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="basics.html" class="btn btn-neutral float-left" title="Denoising Basics with Aydin." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="confocal_royer.html" class="btn btn-neutral float-right" title="Aydin Denoising of Spinning-Disk Confocal Images of Zebrafish Embryos from Royer Lab (CZ Biohub, San Francisco)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 
