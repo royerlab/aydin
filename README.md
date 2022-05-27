@@ -132,6 +132,15 @@ brew install libomp
 
 You can install *Brew* by following the instructions [here](https://brew.sh/).
 
+### Ubuntu/Linux specific dependencies:
+
+If you encounter problems running Aydin in Ubuntu/linux,
+please install the following package:
+
+```bash
+sudo apt install libqt5x11extras5
+```
+
 ## How to run ?
 
 Assuming that you have installed *Aydin* in an environment, you can:
