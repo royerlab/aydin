@@ -1,3 +1,4 @@
+# flake8: noqa
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import examples_single
@@ -53,4 +54,5 @@ def demo_blind_spot_analysis():
         viewer.add_image(noise_auto, name='noise_auto')
 
 
-demo_blind_spot_analysis()
+if __name__ == "__main__":
+    demo_blind_spot_analysis()

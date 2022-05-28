@@ -62,10 +62,11 @@ def demo(image):
         viewer.add_image(lr_deconvolved_image, name='lr_deconvolved_image')
 
 
-image = examples_single.janelia_flybrain.get_array()
-# image = image[:, 1, :, :].astype(numpy.float32)
-image = image[:, 1, 228:-228, 228:-228].astype(numpy.float32)
-# image = image[100:165, 133:217, 150:231]
-image = rescale_intensity(image, in_range='image', out_range=(0, 1))
+if __name__ == "__main__":
+    image = examples_single.janelia_flybrain.get_array()
+    # image = image[:, 1, :, :].astype(numpy.float32)
+    image = image[:, 1, 228:-228, 228:-228].astype(numpy.float32)
+    # image = image[100:165, 133:217, 150:231]
+    image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
-demo(image)
+    demo(image)

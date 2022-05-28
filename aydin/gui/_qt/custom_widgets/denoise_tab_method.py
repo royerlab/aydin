@@ -21,7 +21,7 @@ class DenoiseTabMethodWidget(QWidget):
     def __init__(
         self, parent, name=None, description=None, disable_spatial_features=False
     ):
-        super(QWidget, self).__init__(parent)
+        super(DenoiseTabMethodWidget, self).__init__(parent)
 
         self.parent = parent
         self.name = name

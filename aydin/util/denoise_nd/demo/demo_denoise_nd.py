@@ -29,4 +29,5 @@ def demo_denoise_nd():
         viewer.add_image(denoised, name='denoised')
 
 
-demo_denoise_nd()
+if __name__ == "__main__":
+    demo_denoise_nd()

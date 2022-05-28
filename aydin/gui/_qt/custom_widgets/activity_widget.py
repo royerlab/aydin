@@ -26,7 +26,7 @@ class ActivityWidget(QWidget):
     """
 
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(ActivityWidget, self).__init__(parent)
 
         self.parent = parent
 

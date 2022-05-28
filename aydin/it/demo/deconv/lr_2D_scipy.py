@@ -69,5 +69,6 @@ def demo(image):
         viewer.add_image(lr_deconvolved_image, name='lr_deconvolved_image')
 
 
-demo(newyork())
-demo(characters())
+if __name__ == "__main__":
+    demo(newyork())
+    demo(characters())

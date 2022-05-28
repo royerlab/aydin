@@ -1,3 +1,6 @@
+import sys
+import traceback
+
 import napari
 from qtpy.QtCore import Qt, QSize
 from qtpy.QtWidgets import (
@@ -28,6 +31,7 @@ from aydin.gui.tabs.qt.summary import SummaryTab
 from aydin.gui.resources.json_resource_loader import JSONResourceLoader
 from aydin.gui.tabs.qt.training_cropping import TrainingCroppingTab
 from aydin.io.utils import get_options_json_path
+from aydin.util.log.log import lprint
 from aydin.util.misc.json import save_any_json
 
 
@@ -43,7 +47,7 @@ class MainPage(QWidget):
     """
 
     def __init__(self, parent, threadpool, status_bar):
-        super(QWidget, self).__init__(parent)
+        super(MainPage, self).__init__(parent)
         self.parent = parent
         self.threadpool = threadpool
         self.status_bar = status_bar
@@ -240,8 +244,14 @@ class MainPage(QWidget):
             e.ignore()
 
     def load_sample_image(self, sample):
-        self.data_model.add_filepaths([sample.get_path()])
-        self.tabwidget.setCurrentIndex(1)
+        try:
+            self.data_model.add_filepaths([sample.get_path()])
+            self.tabwidget.setCurrentIndex(1)
+        except Exception:
+            # Download failed:
+            # printing stack trace
+            lprint("Failed to download or open file!")
+            traceback.print_exception(*sys.exc_info())
 
     def handle_use_same_crop_state_changed(self):
         self.enable_disable_a_tab(

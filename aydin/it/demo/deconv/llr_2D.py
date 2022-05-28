@@ -108,6 +108,7 @@ def demo(image):
         viewer.add_image(llr_deconvolved_image, name='llr_deconvolved_image')
 
 
-image = characters()[0:1024, 0:1024]
+if __name__ == "__main__":
+    image = characters()[0:1024, 0:1024]
 
-demo(image)
+    demo(image)

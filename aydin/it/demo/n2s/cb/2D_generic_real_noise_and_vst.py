@@ -70,15 +70,15 @@ def _denoise(noisy, mode):
     return denoised
 
 
-# lizard_image = lizard()
-# demo(lizard_image, "lizard")
-pollen_image = pollen()
-demo(pollen_image, "pollen")
-newyork_image = newyork()
-demo(newyork_image, "newyork")
-characters_image = characters()
-demo(characters_image, "characters")
+if __name__ == "__main__":
+    # lizard_image = lizard()
+    # demo(lizard_image, "lizard")
+    pollen_image = pollen()
+    demo(pollen_image, "pollen")
+    newyork_image = newyork()
+    demo(newyork_image, "newyork")
+    characters_image = characters()
+    demo(characters_image, "characters")
 
-
-# dots_image = dots()
-# demo(dots_image, "dots")
+    # dots_image = dots()
+    # demo(dots_image, "dots")

@@ -4,6 +4,8 @@ import sys
 import time
 from contextlib import contextmanager
 
+import click
+
 
 class Log:
     """
@@ -19,6 +21,7 @@ class Log:
     max_depth = math.inf
     log_elapsed_time = True
     override_test_exclusion = False
+    force_click_echo = False
 
     # Define special characters:
     __vl__ = '│'  # 'Vertical Line'
@@ -44,7 +47,10 @@ class Log:
     @staticmethod
     def native_print(*args, sep=' ', end='\n', file=sys.__stdout__):
         if Log.enable_output:
-            print(*args, sep=sep, end=end, file=file)
+            if Log.force_click_echo:
+                click.echo(*args)
+            else:
+                print(*args, sep=sep, end=end, file=file)
 
         if Log.guiEnabled and Log.gui_callback is not None:
             result = ""
@@ -57,6 +63,15 @@ class Log:
 
             if Log.gui_statusbar is not None:
                 Log.gui_statusbar.showMessage(result)
+
+    @staticmethod
+    @contextmanager
+    def test_context():
+        Log.override_test_exclusion = True
+        Log.force_click_echo = True
+        yield
+        Log.override_test_exclusion = False
+        Log.force_click_echo = False
 
     def set_log_elapsed_time(log_elapsed_time: bool):
         Log.log_elapsed_time = log_elapsed_time

@@ -3,7 +3,6 @@ import inspect
 import os
 import platform
 import shutil
-import numpy
 
 from aydin.it import classic_denoisers
 from aydin.it.base import ImageTranslatorBase
@@ -107,7 +106,6 @@ class Classic(DenoiseRestorationBase):
 
         self.input_model_path = input_model_path
         self.use_model_flag = use_model
-        self.model_folder_path = None
 
         self.it = None
         self.it_transforms = (
@@ -119,10 +117,6 @@ class Classic(DenoiseRestorationBase):
             if it_transforms is None
             else it_transforms
         )
-
-        self.has_less_than_one_million_voxels = False
-        self.has_less_than_one_trillion_voxels = True
-        self.number_of_dims = -1
 
     @property
     def configurable_arguments(self):
@@ -241,19 +235,6 @@ class Classic(DenoiseRestorationBase):
         """Method to stop running N2S instance"""
         self.it.stop_training()
 
-    def set_image_metrics(self, image_shape):
-        """Sets several image metric parameters used internally.
-
-        Parameters
-        ----------
-        image_shape : tuple
-
-        """
-        self.number_of_dims = len(image_shape)
-        number_of_voxels = numpy.prod(numpy.array(image_shape))
-        self.has_less_than_one_million_voxels = number_of_voxels < 1000000
-        self.has_less_than_one_trillion_voxels = number_of_voxels < 1000000000000
-
     def get_translator(self):
         """Returns the corresponding translator instance for given selections.
 
@@ -284,6 +265,7 @@ class Classic(DenoiseRestorationBase):
                 it = ImageDenoiserClassic(
                     method=method,
                     calibration_kwargs=self.lower_level_args["calibration"]["kwargs"],
+                    **self.lower_level_args["it"]["kwargs"],
                 )
             else:
                 it = ImageDenoiserClassic(method=self.backend)
@@ -297,9 +279,7 @@ class Classic(DenoiseRestorationBase):
                 transform_kwargs = transform["kwargs"]
                 self.it.add_transform(transform_class(**transform_kwargs))
 
-    def train(
-        self, noisy_image, *, batch_axes=None, chan_axes=None, image_path=None, **kwargs
-    ):
+    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to run training for Noise2Self FGR.
 
         Parameters
@@ -309,7 +289,6 @@ class Classic(DenoiseRestorationBase):
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-        image_path : str
 
         Returns
         -------
@@ -317,7 +296,6 @@ class Classic(DenoiseRestorationBase):
 
         """
         with lsection("Noise2Self train is starting..."):
-            self.set_image_metrics(noisy_image.shape)
 
             self.it = self.get_translator()
 
@@ -337,9 +315,6 @@ class Classic(DenoiseRestorationBase):
                 else 3,
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
-
-            # Save the trained model
-            # self.save_model(image_path)  # TODO:  fix the problems here
 
     def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to denoise an image with trained Noise2Self FGR.
