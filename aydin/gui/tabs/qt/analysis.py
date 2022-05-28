@@ -17,7 +17,7 @@ class AnalysisTab(QWidget):
 
         self.tab_layout = QVBoxLayout()
 
-        self.snr_estimate_label = QLabel(f"snr_estimate: ")
+        self.snr_estimate_label = QLabel("snr_estimate: ")
         self.tab_layout.addWidget(self.snr_estimate_label)
 
         # Horizontal Line Break
