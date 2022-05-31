@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -155,8 +156,13 @@
 <span class="sd">        Possible modes are: &#39;isotropic&#39; for isotropic, meaning only one</span>
 <span class="sd">        frequency cut-off is calibrated for all axes , &#39;z-yx&#39; (or &#39;xy-z&#39;) for 3D</span>
 <span class="sd">        stacks where the cut-off frequency for the x and y axes is the same but</span>
-<span class="sd">        different for the z axis, and &#39;full&#39; for which all frequency cut-offs are</span>
-<span class="sd">        different. Use &#39;z-yx&#39; for axes are ordered as: z, y and then x (default).</span>
+<span class="sd">        different for the z axis, &#39;t-z-yx&#39; (or &#39;xy-z-t&#39;) for 3D+t</span>
+<span class="sd">        timelapse where the cut-off frequency for the x and y axes is the same but</span>
+<span class="sd">        different for the z and t axis, and &#39;full&#39; for which all frequency cut-offs are</span>
+<span class="sd">        different. Use &#39;z-yx&#39; or &#39;t-z-yx&#39; for axes are ordered as: t, z, y and then x which is the default.</span>
+<span class="sd">        If for some reason the axis order is reversed you can use &#39;xy-z&#39; or &#39;xy-z-t&#39;.</span>
+<span class="sd">        Note: for 2D+t timelapses where the resolution over x and y are expected to be the same,</span>
+<span class="sd">        simply use: &#39;z-yx&#39; (or &#39;xy-z&#39;).</span>
 
 <span class="sd">    axes: Optional[Tuple[int,...]]</span>
 <span class="sd">        Axes over which to apply low-pass filtering.</span>
@@ -311,6 +317,41 @@
             <span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">,</span>
         <span class="p">}</span>
 
+    <span class="k">elif</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z-t&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;t-z-yx&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="c1"># Partial function with parameter impedance match:</span>
+        <span class="k">def</span> <span class="nf">_denoise_butterworth</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">freq_cutoff_xy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_xy&#39;</span><span class="p">)</span>
+            <span class="n">freq_cutoff_z</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">)</span>
+            <span class="n">freq_cutoff_t</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_t&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;t-z-yx&#39;</span><span class="p">:</span>
+                <span class="n">_freq_cutoff</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">freq_cutoff_t</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_z</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_xy</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_xy</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z-t&#39;</span><span class="p">:</span>
+                <span class="n">_freq_cutoff</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">freq_cutoff_xy</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_xy</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_z</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_t</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">denoise_butterworth</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">freq_cutoff</span><span class="o">=</span><span class="n">_freq_cutoff</span><span class="p">,</span>
+                <span class="o">**</span><span class="p">(</span><span class="n">kwargs</span> <span class="o">|</span> <span class="n">other_fixed_parameters</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;multi_core&#39;</span><span class="p">:</span> <span class="n">multi_core</span><span class="p">}),</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Parameters to test when calibrating the denoising algorithm</span>
+        <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;freq_cutoff_xy&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">,</span>
+            <span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">,</span>
+            <span class="s1">&#39;freq_cutoff_t&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">,</span>
+        <span class="p">}</span>
+
     <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
         <span class="c1"># Partial function with parameter impedance match:</span>
         <span class="k">def</span> <span class="nf">_denoise_butterworth</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -424,6 +465,19 @@
             <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_z</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z&#39;</span><span class="p">:</span>
             <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_z</span><span class="p">)</span>
+
+        <span class="n">best_parameters</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">:</span> <span class="n">freq_cutoff</span><span class="p">}</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z-t&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;t-z-yx&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="c1"># We need to adjust a bit the type of parameters passed to the denoising function:</span>
+        <span class="n">freq_cutoff_xy</span> <span class="o">=</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_xy&#39;</span><span class="p">)</span>
+        <span class="n">freq_cutoff_z</span> <span class="o">=</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">)</span>
+        <span class="n">freq_cutoff_t</span> <span class="o">=</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_t&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;t-z-yx&#39;</span><span class="p">:</span>
+            <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_t</span><span class="p">,</span> <span class="n">freq_cutoff_z</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z-t&#39;</span><span class="p">:</span>
+            <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_z</span><span class="p">,</span> <span class="n">freq_cutoff_t</span><span class="p">)</span>
 
         <span class="n">best_parameters</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">:</span> <span class="n">freq_cutoff</span><span class="p">}</span>
 

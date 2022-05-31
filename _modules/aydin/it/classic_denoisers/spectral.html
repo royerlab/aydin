@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -128,7 +129,7 @@
     <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">patch_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">try_dct</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">try_fft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">try_fft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">try_dst</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">max_order</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">6.0</span><span class="p">,</span>
     <span class="n">crop_size_in_voxels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_crop_size_normal</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
@@ -501,7 +502,7 @@
     <span class="k">return</span> <span class="n">f</span>
 
 
-<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># @jit(nopython=True, parallel=True)</span>
 <span class="k">def</span> <span class="nf">_compute_distance_image_for_fft</span><span class="p">(</span><span class="n">freq_cutoff</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">selected_axes</span><span class="p">):</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
     <span class="n">axis_grid</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
