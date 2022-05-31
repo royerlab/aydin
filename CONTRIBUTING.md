@@ -86,7 +86,7 @@ python -m pytest . --disable-pytest-warnings --show-capture=stderr
 
 # Before making a PR also check if your branch
 # passes style guidelines
-black --check -S -t py36 .
+black --check -S -t py39 .
 flake8 --ignore E501,E203,E741,W503 aydin
 ```
 
