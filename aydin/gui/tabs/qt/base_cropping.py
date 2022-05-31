@@ -238,11 +238,11 @@ class BaseCroppingTab(QWidget):
         self.crop_layer.colormap = "cyan"
 
         for slider_widget in self.viewer_qt.dims.slider_widgets:
-            slider_widget.layout().itemAt(0).widget().setMinimumWidth(75)
-            slider_widget.layout().itemAt(1).widget().setMaximumWidth(75)
-            slider_widget.layout().itemAt(1).widget().setText("Play")
-            slider_widget.layout().itemAt(3).widget().setMinimumWidth(75)
-            slider_widget.layout().itemAt(5).widget().setMinimumWidth(75)
+            slider_widget.main_layout().itemAt(0).widget().setMinimumWidth(75)
+            slider_widget.main_layout().itemAt(1).widget().setMaximumWidth(75)
+            slider_widget.main_layout().itemAt(1).widget().setText("Play")
+            slider_widget.main_layout().itemAt(3).widget().setMinimumWidth(75)
+            slider_widget.main_layout().itemAt(5).widget().setMinimumWidth(75)
 
         self.update_summary()
 
