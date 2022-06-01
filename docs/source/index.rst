@@ -100,6 +100,7 @@ If you find Aydin useful and use it in your work, please kindly consider to cite
    Spinning-Disk Confocal Images of Zebrafish Embryos <use_cases/confocal_royer.rst>
    Spinning-Disk Confocal Microscopy Images of Mouse Embryos <use_cases/confocal_maitre.rst>
    OpenCell Images <use_cases/opencell.rst>
+   Chicken Embryos LSM 780 Images <use_cases/pourquie.rst>
 
 
 .. toctree::
