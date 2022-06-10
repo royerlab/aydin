@@ -373,47 +373,55 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 ):
                     self._create_patches_for_validation = True
 
-            tile_input_and_target_images()
+            tile_input_and_target_images(
+                input_image,
+                target_image,
+                patch_size,
+                self.total_num_patches,
+                self.adoption_rate,
+                self.create_patches_for_validation,
+                self.self_supervised,
+            )
 
             # Tile input and target image
-            if self.patch_size is not None:
-                with lsection('Random patch sampling...'):
-                    lprint(f'Total number of patches: {self.total_num_patches}')
-                    input_patch_idx = random_sample_patches(
-                        input_image,
-                        self.patch_size,
-                        self.total_num_patches,
-                        self.adoption_rate,
-                    )
-
-                    self.total_num_patches = len(input_patch_idx)
-
-                    img_train_patch = []
-
-                    if self._create_patches_for_validation:
-                        for i in input_patch_idx:
-                            img_train_patch.append(input_image[i])
-                        img_train = numpy.vstack(img_train_patch)
-                    else:
-                        img_val_patch = []
-                        marker_patch = []
-                        for i in input_patch_idx:
-                            img_train_patch.append(img_train[i])
-                            img_val_patch.append(img_val[i])
-                            marker_patch.append(val_marker[i])
-                        img_train = numpy.vstack(img_train_patch)
-                        img_val = numpy.vstack(img_val_patch)
-                        val_marker = numpy.vstack(marker_patch)
-                        self.validation_images = img_val
-                        self.validation_markers = val_marker
-
-                    if not self.self_supervised:
-                        target_patch = []
-                        for i in input_patch_idx:
-                            target_patch.append(target_image[i])
-                        target_image = numpy.vstack(target_patch)
-                    else:
-                        target_image = img_train
+            # if self.patch_size is not None:
+            #     with lsection('Random patch sampling...'):
+            #         lprint(f'Total number of patches: {self.total_num_patches}')
+            #         input_patch_idx = random_sample_patches(
+            #             input_image,
+            #             self.patch_size,
+            #             self.total_num_patches,
+            #             self.adoption_rate,
+            #         )
+            #
+            #         self.total_num_patches = len(input_patch_idx)
+            #
+            #         img_train_patch = []
+            #
+            #         if self._create_patches_for_validation:
+            #             for i in input_patch_idx:
+            #                 img_train_patch.append(input_image[i])
+            #             img_train = numpy.vstack(img_train_patch)
+            #         else:
+            #             img_val_patch = []
+            #             marker_patch = []
+            #             for i in input_patch_idx:
+            #                 img_train_patch.append(img_train[i])
+            #                 img_val_patch.append(img_val[i])
+            #                 marker_patch.append(val_marker[i])
+            #             img_train = numpy.vstack(img_train_patch)
+            #             img_val = numpy.vstack(img_val_patch)
+            #             val_marker = numpy.vstack(marker_patch)
+            #             self.validation_images = img_val
+            #             self.validation_markers = val_marker
+            #
+            #         if not self.self_supervised:
+            #             target_patch = []
+            #             for i in input_patch_idx:
+            #                 target_patch.append(target_image[i])
+            #             target_image = numpy.vstack(target_patch)
+            #         else:
+            #             target_image = img_train
 
             # Last check of input size espetially for shiftconv
             if 'shiftconv' == self.training_architecture and self.self_supervised:
