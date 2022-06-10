@@ -11,9 +11,9 @@ from tensorflow.python.keras.layers import (
     MaxPooling2D,
     AveragePooling3D,
     MaxPooling3D,
-    BatchNormalization,
 )
 from tensorflow.python.keras.regularizers import l1
+from tensorflow.python.layers.normalization import BatchNormalization
 
 from aydin.nn.layers.instance_norm import InstanceNormalization
 from aydin.nn.layers.util import Swish
