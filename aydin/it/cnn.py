@@ -376,10 +376,10 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             tile_input_and_target_images(
                 input_image,
                 target_image,
-                patch_size,
+                self.patch_size,
                 self.total_num_patches,
                 self.adoption_rate,
-                self.create_patches_for_validation,
+                self._create_patches_for_validation,
                 self.self_supervised,
             )
 
