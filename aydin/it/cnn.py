@@ -10,6 +10,7 @@ from aydin.io.folders import get_temp_folder
 from aydin.it.base import ImageTranslatorBase
 from aydin.nn.models.jinet import JINetModel
 from aydin.nn.models.unet import UNetModel
+from aydin.nn.models.utils.n2s_image_tile import tile_input_and_target_images
 from aydin.nn.util.callbacks import (
     EarlyStopping,
     ReduceLROnPlateau,
@@ -371,6 +372,8 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     f'Validation data will be created by monitoring {train_valid_ratio} of the patches/images in the input data.'
                 ):
                     self._create_patches_for_validation = True
+
+            tile_input_and_target_images()
 
             # Tile input and target image
             if self.patch_size is not None:

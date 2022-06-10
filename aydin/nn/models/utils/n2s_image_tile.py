@@ -9,6 +9,9 @@ def tile_input_and_target_images(
         target_image,
         patch_size: int,
         total_num_patches: int,
+        adoption_rate,
+        create_patches_for_validation,
+        self_supervised,
 ):
     # Tile input and target image
     if patch_size is not None:
@@ -25,7 +28,7 @@ def tile_input_and_target_images(
 
             img_train_patch = []
 
-            if _create_patches_for_validation:
+            if create_patches_for_validation:
                 for i in input_patch_idx:
                     img_train_patch.append(input_image[i])
                 img_train = numpy.vstack(img_train_patch)
@@ -49,3 +52,5 @@ def tile_input_and_target_images(
                 target_image = numpy.vstack(target_patch)
             else:
                 target_image = img_train
+
+        # TODO: return
