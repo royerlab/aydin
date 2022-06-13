@@ -10,7 +10,7 @@ from aydin.io.folders import get_temp_folder
 from aydin.it.base import ImageTranslatorBase
 from aydin.nn.models.jinet import JINetModel
 from aydin.nn.models.unet import UNetModel
-from aydin.nn.models.utils.n2s_image_tile import tile_input_and_target_images
+from aydin.nn.models.utils.image_tile import tile_input_and_target_images
 from aydin.nn.util.callbacks import (
     EarlyStopping,
     ReduceLROnPlateau,
@@ -39,7 +39,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         nb_unet_levels: int = 3,
         batch_norm: str = "instance",
         activation: str = 'ReLU',
-        patch_size: int = 64,
+        patch_size: int = None,
         total_num_patches: int = None,
         adoption_rate: float = 0.5,
         mask_size: int = 5,
