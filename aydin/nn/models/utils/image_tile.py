@@ -5,16 +5,16 @@ from aydin.util.log.log import lsection, lprint
 
 
 def tile_input_and_target_images(
-        input_image,
-        target_image,
-        img_train,
-        img_val,
-        val_marker,
-        patch_size: int,
-        total_num_patches: int,
-        adoption_rate,
-        create_patches_for_validation,
-        self_supervised,
+    input_image,
+    target_image,
+    img_train,
+    img_val,
+    val_marker,
+    patch_size: int,
+    total_num_patches: int,
+    adoption_rate,
+    create_patches_for_validation,
+    self_supervised,
 ):
     # Tile input and target image
     if patch_size is not None:
