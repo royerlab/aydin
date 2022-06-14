@@ -10,6 +10,7 @@ from aydin.io.folders import get_temp_folder
 from aydin.it.base import ImageTranslatorBase
 from aydin.nn.models.jinet import JINetModel
 from aydin.nn.models.unet import UNetModel
+from aydin.nn.models.utils.unet_patch_size import get_ideal_patch_size
 from aydin.nn.util.callbacks import (
     EarlyStopping,
     ReduceLROnPlateau,
@@ -38,7 +39,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         nb_unet_levels: int = 3,
         batch_norm: str = "instance",
         activation: str = 'ReLU',
-        patch_size: int = 64,
+        patch_size: Optional[Union[int, List[int]]] = None,
         total_num_patches: int = None,
         adoption_rate: float = 0.5,
         mask_size: int = 5,
@@ -235,25 +236,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             self.model = keras.models.load_model(join(path, "tf_model"))
             self.infmodel = keras.models.load_model(join(path, "tf_inf_model"))
 
-    def get_receptive_field_radius(self, nb_unet_levels, shiftconv=False):
-        """TODO: add proper docstrings here
-
-        Parameters
-        ----------
-        nb_unet_levels : int
-        shiftconv : bool
-
-        Returns
-        -------
-        int
-
-        """
-        if shiftconv:
-            rf = 7 if nb_unet_levels == 0 else 36 * 2 ** (nb_unet_levels - 1) - 6
-        else:
-            rf = 3 if nb_unet_levels == 0 else 18 * 2 ** (nb_unet_levels - 1) - 4
-        return int(rf // 2)
-
     def stop_training(self):
         """Stops currently running training within the instance by turning the flag
         true for early stop callback.
@@ -285,35 +267,13 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Compute patch size from batch size
             if self.patch_size is None:
-                self.patch_size = (
-                    self.get_receptive_field_radius(
-                        self.nb_unet_levels,
-                        shiftconv='shiftconv' == self.training_architecture,
-                    )
-                    * 2
-                )
-
-                self.patch_size = (
-                    self.patch_size - self.patch_size % 2**self.nb_unet_levels
-                )
-
-                if self.patch_size < 2**self.nb_unet_levels:
-                    raise ValueError(
-                        'Number of layers is too large for given patch size.'
-                    )
-
-            lprint(f'Patch size: {self.patch_size}')
-            # TODO: Do we need to have one if statement to automatically convert self.batch_size = 1 for shiftconv?
-            if 'shiftconv' in self.training_architecture or (
-                self.model_architecture == "jinet" and self.spacetime_ndim == 3
-            ):
-                self.batch_size = 1
-                lprint(
-                    'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
+                self.patch_size = get_ideal_patch_size(
+                    self.nb_unet_levels, self.training_architecture
                 )
 
             # Adjust patch_size for given input shape
-            self.patch_size = [self.patch_size] * self.spacetime_ndim
+            if isinstance(self.patch_size, int):
+                self.patch_size = [self.patch_size] * self.spacetime_ndim
 
             # Check patch_size for unet models
             if 'unet' in self.model_architecture:
@@ -332,6 +292,15 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 smallest_dim = min(self.input_dim[:-1])
                 self.patch_size[numpy.argsort(self.input_dim[:-1])[0]] = (
                     smallest_dim // 2 * 2
+                )
+
+            # TODO: Do we need to have one if statement to automatically convert self.batch_size = 1 for shiftconv?
+            if 'shiftconv' in self.training_architecture or (
+                self.model_architecture == "jinet" and self.spacetime_ndim == 3
+            ):
+                self.batch_size = 1
+                lprint(
+                    'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
                 )
 
             # Determine total number of patches
