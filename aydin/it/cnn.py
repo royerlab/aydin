@@ -267,7 +267,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Compute patch size from batch size
             if self.patch_size is None:
-                self.patch_size = get_ideal_patch_size(self.nb_unet_levels, self.training_architecture)
+                self.patch_size = get_ideal_patch_size(
+                    self.nb_unet_levels, self.training_architecture
+                )
 
             # TODO: Do we need to have one if statement to automatically convert self.batch_size = 1 for shiftconv?
             if 'shiftconv' in self.training_architecture or (
