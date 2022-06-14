@@ -25,7 +25,6 @@ def test_it_cnn_history():
         model_architecture="unet",
         training_architecture='checkran',
         nb_unet_levels=1,
-        patch_size=64,
         batch_size=1,
         mask_size=3,
         total_num_patches=1,

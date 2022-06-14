@@ -38,7 +38,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         nb_unet_levels: int = 3,
         batch_norm: str = "instance",
         activation: str = 'ReLU',
-        patch_size: int = 64,
+        patch_size: int = None,
         total_num_patches: int = None,
         adoption_rate: float = 0.5,
         mask_size: int = 5,
