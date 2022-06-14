@@ -39,7 +39,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         nb_unet_levels: int = 3,
         batch_norm: str = "instance",
         activation: str = 'ReLU',
-        patch_size: int = None,
+        patch_size: Optional[Union[int, List[int]]] = None,
         total_num_patches: int = None,
         adoption_rate: float = 0.5,
         mask_size: int = 5,
@@ -271,17 +271,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     self.nb_unet_levels, self.training_architecture
                 )
 
-            # TODO: Do we need to have one if statement to automatically convert self.batch_size = 1 for shiftconv?
-            if 'shiftconv' in self.training_architecture or (
-                self.model_architecture == "jinet" and self.spacetime_ndim == 3
-            ):
-                self.batch_size = 1
-                lprint(
-                    'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
-                )
-
             # Adjust patch_size for given input shape
-            self.patch_size = [self.patch_size] * self.spacetime_ndim
+            if isinstance(self.patch_size, int):
+                self.patch_size = [self.patch_size] * self.spacetime_ndim
 
             # Check patch_size for unet models
             if 'unet' in self.model_architecture:
@@ -300,6 +292,15 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 smallest_dim = min(self.input_dim[:-1])
                 self.patch_size[numpy.argsort(self.input_dim[:-1])[0]] = (
                     smallest_dim // 2 * 2
+                )
+
+            # TODO: Do we need to have one if statement to automatically convert self.batch_size = 1 for shiftconv?
+            if 'shiftconv' in self.training_architecture or (
+                self.model_architecture == "jinet" and self.spacetime_ndim == 3
+            ):
+                self.batch_size = 1
+                lprint(
+                    'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
                 )
 
             # Determine total number of patches
