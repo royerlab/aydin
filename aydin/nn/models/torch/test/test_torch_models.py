@@ -11,6 +11,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from aydin.io.datasets import add_noise, camera, normalise
+from aydin.nn.models.torch.torch_jinet import JINetModel
 from aydin.nn.models.torch.torch_unet import UNetModel, n2t_unet_train_loop
 from aydin.nn.models.utils.torch_dataset import TorchDataset
 
@@ -19,7 +20,7 @@ from aydin.nn.models.utils.torch_dataset import TorchDataset
 # from aydin.util.log.log import lprint
 
 
-def test_supervised_2D():
+def test_forward_2D_unet():
     input_array = torch.zeros((1, 1, 64, 64))
     model2d = UNetModel(
         # (64, 64, 1),
@@ -34,7 +35,7 @@ def test_supervised_2D():
 
 
 @pytest.mark.heavy
-def test_supervised_2D_n2t():
+def test_supervised_2D_unet_n2t():
     lizard_image = normalise(camera())
     lizard_image = numpy.expand_dims(lizard_image, axis=0)
     lizard_image = numpy.expand_dims(lizard_image, axis=0)
@@ -70,7 +71,7 @@ def test_supervised_2D_n2t():
     # assert result.dtype == input_image.dtype
 
 
-def test_masking_2D():
+def test_masking_2D_unet():
     input_array = torch.zeros((1, 1, 64, 64))
     model2d = UNetModel(
         # (64, 64, 1),
@@ -83,15 +84,15 @@ def test_masking_2D():
     assert result.dtype == input_array.dtype
 
 
-# def test_jinet_2D():
-#     input_array = torch.zeros((1, 1, 64, 64))
-#     model2d = JINetModel((64, 64, 1), spacetime_ndim=2)
-#     result = model2d.predict([input_array])
-#     assert result.shape == input_array.shape
-#     assert result.dtype == input_array.dtype
+def test_forward_2D_jinet():
+    input_array = torch.zeros((1, 1, 64, 64))
+    model2d = JINetModel((64, 64, 1), spacetime_ndim=2)
+    result = model2d.predict([input_array])
+    assert result.shape == input_array.shape
+    assert result.dtype == input_array.dtype
 
 
-def test_supervised_3D():
+def test_supervised_3D_unet():
     input_array = torch.zeros((1, 1, 64, 64, 64))
     model3d = UNetModel(
         # (64, 64, 64, 1),
@@ -104,7 +105,7 @@ def test_supervised_3D():
     assert result.dtype == input_array.dtype
 
 
-def test_masking_3D():
+def test_masking_3D_unet():
     input_array = torch.zeros((1, 1, 64, 64, 64))
     model3d = UNetModel(
         # (64, 64, 64, 1),
