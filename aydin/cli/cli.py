@@ -18,7 +18,7 @@ from aydin.io.datasets import normalise
 from aydin.it.base import ImageTranslatorBase
 from aydin.restoration.deconvolve.lr import LucyRichardson
 from aydin.io.io import imwrite, imread
-from aydin.io.utils import get_output_image_path, get_save_model_path
+from aydin.io.utils import get_output_image_path, get_save_model_path, split_image_channels
 from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_instance
 from aydin.util.misc.json import load_any_json
 from aydin.util.log.log import lprint, Log
@@ -257,6 +257,18 @@ def view(files, **kwargs):
 
         for idx, image in enumerate(image_arrays):
             viewer.add_image(image, name=filenames[idx])
+
+
+@cli.command()
+@click.argument('files', nargs=-1)
+@click.option('-s', '--slicing', default='', type=str)
+def split_channels(files, **kwargs):
+    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
+
+    for filename,  image_array,  metadata in zip(filenames, image_arrays, metadatas):
+        splitted_arrays, splitted_metadatas = split_image_channels(image_array, metadata)
+
+        imwrite()
 
 
 @cli.command()
