@@ -274,10 +274,16 @@ def split_channels(files, **kwargs):
             image_array, metadata
         )
 
-        splitted_filenames = [f"channel_{_}_{filename}" for _ in range(len(splitted_arrays))]
+        splitted_filenames = [
+            f"channel_{_}_{filename}" for _ in range(len(splitted_arrays))
+        ]
 
-        for splitted_filename, splitted_array, splitted_metadata in zip(splitted_filenames, splitted_arrays, splitted_metadatas):
-            imwrite(splitted_array, splitted_filename, splitted_metadata, overwrite=False)
+        for splitted_filename, splitted_array, splitted_metadata in zip(
+            splitted_filenames, splitted_arrays, splitted_metadatas
+        ):
+            imwrite(
+                splitted_array, splitted_filename, splitted_metadata, overwrite=False
+            )
             lprint(f"writing {splitted_filename} is done.")
 
 
