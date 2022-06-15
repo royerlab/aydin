@@ -274,7 +274,8 @@ def split_channels(files, **kwargs):
             image_array, metadata
         )
 
-        imwrite()
+        for splitted_array, splitted_metadata in zip(splitted_arrays, splitted_metadatas):
+            imwrite(splitted_array, filename, metadata, overwrite=False)
 
 
 @cli.command()
