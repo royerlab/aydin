@@ -267,6 +267,16 @@ def view(files, **kwargs):
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 def split_channels(files, **kwargs):
+    """aydin split-channels command. Takes multi-channel images as
+    input, splits its channels into separate images and writes them
+    back.
+
+    Parameters
+    ----------
+    files
+    kwargs
+
+    """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
     for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
