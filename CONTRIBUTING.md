@@ -74,6 +74,9 @@ conda create -n aydin python=3.9
 # Activate the environment
 conda activate aydin
 
+# For Macs (OSX) you first need to do:
+brew install libomp
+
 # Install Aydin
 pip install -e .
 

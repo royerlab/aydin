@@ -73,8 +73,8 @@ class MainPage(QWidget):
         self.activity_dock = QDockWidget("Activity", self)
 
         # MainPage layout
-        self.widget_layout = QVBoxLayout()
-        self.widget_layout.setAlignment(Qt.AlignTop)
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setAlignment(Qt.AlignTop)
 
         # navbar
         self.navbar_layout = QHBoxLayout()
@@ -171,7 +171,7 @@ class MainPage(QWidget):
         self.navbar_layout.addLayout(self.navbar_layout_right)
 
         self.navbar_layout.setAlignment(Qt.AlignTop)
-        self.widget_layout.addLayout(self.navbar_layout)
+        self.main_layout.addLayout(self.navbar_layout)
 
         # TabWidget
         self.tabwidget = QTabWidget(self)
@@ -179,13 +179,13 @@ class MainPage(QWidget):
         for key, value in self.tabs.items():
             self.tabwidget.addTab(value, key)
 
-        self.widget_layout.addWidget(self.tabwidget)
+        self.main_layout.addWidget(self.tabwidget)
 
         self.overlay = Overlay(self)
         self.overlay.hide()
 
         # Set layout for the main page widget
-        self.setLayout(self.widget_layout)
+        self.setLayout(self.main_layout)
 
         self.tabs["Dimensions"].dimensions = None
         self.tabs["Training Crop"].images = []
