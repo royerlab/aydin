@@ -8,13 +8,13 @@ Thank you for taking the time to contribute!
 
 ## Suggesting a feature
 
-We can't think of everything. If you've got a good idea for a feature, then please let us know!
+If you've got a good idea for a feature, then please let us know!
 
-Feature suggestions are embraced, but will often be filed for a rainy day. If you require a feature urgently it's best to write it yourself. Don't forget to share :)
+Feature suggestions are embraced.
 
 When suggesting a feature, make sure to:
 
-* Check the code on repo to make sure it's not already hiding in an unreleased version ;)
+* Check the code on repo to make sure it's not already hiding in an unreleased version
 * Considered if it's necessary in the library, or is an advanced technique that could be separately explained in an example
 * Check existing issues, open and closed, to make sure it hasn't already been suggested
 
@@ -33,31 +33,30 @@ Be as detailed as possible, and be ready to answer questions when we get back to
 
 If you've decided to fix a bug, even something as small as a single-letter typo then great! Anything that improves the code/documentation for all future users is warmly welcomed.
 
-If you decide to work on a  requested feature it's best to let us (and everyone else) know what you're working on to avoid any duplciation of effort. You can do this by replying to the original Issue for the request.
+If you decide to work on a  requested feature it's best to let us (and everyone else) know what you're working on to avoid any duplication of the effort. You can do this by replying to the original Issue for the request.
 
-When contributing a new example or making a change to a library please keep your code style consistent with ours. We try to stick to the pep8 guidelines for Python (https://www.python.org/dev/peps/pep-0008/).
+When contributing a new example or making a change to a library please keep your code style consistent with ours. We try to stick to the pep8 guidelines for Python (https://www.python.org/dev/peps/pep-0008/) in general.
 
 ### Submitting your code
 
 Once you're ready to share your contribution with us you should submit it as a Pull Request.
 
 * Be ready to receive and embrace constructive feedback.
-* Be prepared for rejection; we can't always accept contributions. If you're unsure, ask first!
 
 1. First, start with a new branch on your fork from the target branch
 2. Submit changes to new branch of your fork
 3. Wait for the review and merge.
-4. Upon merge make sure you fetch upstream and update your master branch.
+4. Upon merge make sure you fetch upstream and update your clone.
 
 #### Do
 
-* Do use our own internal logging [API](https://github.com/royerlab/aydin/blob/master/aydin/util/log/log.py)
-* Do use pep8 style guidelines + our preferences with `black` formatter
-* Use NumPy style docstrings
-* Do comment your code where necessary
-* Do submit only a single example/feature per pull-request
-* Do include a description of what your example is expected to do
-* Do add details of your example to README.md and CONTRIBUTING.md if it is needed
+* Use our own internal logging [API](https://github.com/royerlab/aydin/blob/master/aydin/util/log/log.py)
+* Use pep8 style guidelines + our preferences with `black` formatter
+* Use only NumPy style docstrings
+* Comment your code where necessary
+* Submit only a single example/feature per pull-request
+* Include a description of what your example is expected to do
+* Add details of your example to README.md and CONTRIBUTING.md if it is needed
 
 #### Don't
 
