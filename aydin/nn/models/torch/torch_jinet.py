@@ -44,7 +44,7 @@ class JINetModel(nn.Module):
 
             dilated_conv_list.append(x)
 
-        x = cat(dilated_conv_list)  #  TODO: pass axis as -1
+        x = cat()(dilated_conv_list)  #  TODO: pass axis as -1
         
         if self.nb_channels is None:
             nb_channels = total_nb_features * 2
