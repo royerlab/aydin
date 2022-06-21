@@ -11,6 +11,7 @@ from aydin.it.base import ImageTranslatorBase
 from aydin.nn.models.jinet import JINetModel
 from aydin.nn.models.unet import UNetModel
 from aydin.nn.models.utils.image_tile import tile_input_and_target_images
+from aydin.nn.util.data_util import random_sample_patches
 from aydin.nn.models.utils.unet_patch_size import get_ideal_patch_size
 from aydin.nn.util.callbacks import (
     EarlyStopping,
@@ -342,58 +343,58 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 ):
                     self._create_patches_for_validation = True
 
-            tile_input_and_target_images(
-                input_image,
-                target_image,
-                img_train,
-                img_val,
-                val_marker,
-                self.patch_size,
-                self.total_num_patches,
-                self.adoption_rate,
-                self._create_patches_for_validation,
-                self.self_supervised,
-            )
+            # tile_input_and_target_images(
+            #     input_image,
+            #     target_image,
+            #     img_train,
+            #     img_val,
+            #     val_marker,
+            #     self.patch_size,
+            #     self.total_num_patches,
+            #     self.adoption_rate,
+            #     self._create_patches_for_validation,
+            #     self.self_supervised,
+            # )
 
             # Tile input and target image
-            # if self.patch_size is not None:
-            #     with lsection('Random patch sampling...'):
-            #         lprint(f'Total number of patches: {self.total_num_patches}')
-            #         input_patch_idx = random_sample_patches(
-            #             input_image,
-            #             self.patch_size,
-            #             self.total_num_patches,
-            #             self.adoption_rate,
-            #         )
-            #
-            #         self.total_num_patches = len(input_patch_idx)
-            #
-            #         img_train_patch = []
-            #
-            #         if self._create_patches_for_validation:
-            #             for i in input_patch_idx:
-            #                 img_train_patch.append(input_image[i])
-            #             img_train = numpy.vstack(img_train_patch)
-            #         else:
-            #             img_val_patch = []
-            #             marker_patch = []
-            #             for i in input_patch_idx:
-            #                 img_train_patch.append(img_train[i])
-            #                 img_val_patch.append(img_val[i])
-            #                 marker_patch.append(val_marker[i])
-            #             img_train = numpy.vstack(img_train_patch)
-            #             img_val = numpy.vstack(img_val_patch)
-            #             val_marker = numpy.vstack(marker_patch)
-            #             self.validation_images = img_val
-            #             self.validation_markers = val_marker
-            #
-            #         if not self.self_supervised:
-            #             target_patch = []
-            #             for i in input_patch_idx:
-            #                 target_patch.append(target_image[i])
-            #             target_image = numpy.vstack(target_patch)
-            #         else:
-            #             target_image = img_train
+            if self.patch_size is not None:
+                with lsection('Random patch sampling...'):
+                    lprint(f'Total number of patches: {self.total_num_patches}')
+                    input_patch_idx = random_sample_patches(
+                        input_image,
+                        self.patch_size,
+                        self.total_num_patches,
+                        self.adoption_rate,
+                    )
+
+                    self.total_num_patches = len(input_patch_idx)
+
+                    img_train_patch = []
+
+                    if self._create_patches_for_validation:
+                        for i in input_patch_idx:
+                            img_train_patch.append(input_image[i])
+                        img_train = numpy.vstack(img_train_patch)
+                    else:
+                        img_val_patch = []
+                        marker_patch = []
+                        for i in input_patch_idx:
+                            img_train_patch.append(img_train[i])
+                            img_val_patch.append(img_val[i])
+                            marker_patch.append(val_marker[i])
+                        img_train = numpy.vstack(img_train_patch)
+                        img_val = numpy.vstack(img_val_patch)
+                        val_marker = numpy.vstack(marker_patch)
+                        self.validation_images = img_val
+                        self.validation_markers = val_marker
+
+                    if not self.self_supervised:
+                        target_patch = []
+                        for i in input_patch_idx:
+                            target_patch.append(target_image[i])
+                        target_image = numpy.vstack(target_patch)
+                    else:
+                        target_image = img_train
 
             # Last check of input size espetially for shiftconv
             if 'shiftconv' == self.training_architecture and self.self_supervised:
@@ -436,16 +437,20 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 'shiftconv' == self.training_architecture and self.self_supervised
             )
 
+            unet_only_model_constructor_kwargs = {
+                "mini_batch_size": self.batch_size,  # unet only
+                "nb_unet_levels": self.nb_unet_levels,  # unet only
+                "normalization": self.batch_norm,  # unet only
+                "activation": self.activation_fun,  # unet only
+                "supervised": not self.self_supervised,  # unet only
+                "shiftconv": shiftconv,  # unet only
+            } if self.model_architecture == "unet" else {}
+
             self.model = self.model_class(
                 img_train.shape[1:],
-                spacetime_ndim=self.spacetime_ndim,
-                mini_batch_size=self.batch_size,
-                nb_unet_levels=self.nb_unet_levels,
-                normalization=self.batch_norm,
-                activation=self.activation_fun,
-                supervised=not self.self_supervised,
-                shiftconv=shiftconv,
+                self.spacetime_ndim,
                 learning_rate=self.learn_rate,
+                **unet_only_model_constructor_kwargs,
             )
 
             with lsection('CNN model summary:'):
