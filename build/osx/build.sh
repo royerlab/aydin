@@ -9,7 +9,7 @@ pip uninstall imagecodecs
 
 echo "building app..."
 #onefolder
-pyinstaller -D -y --clean aydin.spec # -D -y --clean
+pyinstaller -y --clean aydin.spec # -D -y --clean
 
 
 mkdir -p dist/aydin_0.1.5rc12.app/Contents/MacOS

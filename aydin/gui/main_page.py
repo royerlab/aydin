@@ -1,3 +1,6 @@
+import sys
+import traceback
+
 import napari
 from qtpy.QtCore import Qt, QSize
 from qtpy.QtWidgets import (
@@ -27,6 +30,7 @@ from aydin.gui.tabs.qt.summary import SummaryTab
 from aydin.gui.resources.json_resource_loader import JSONResourceLoader
 from aydin.gui.tabs.qt.training_cropping import TrainingCroppingTab
 from aydin.io.utils import get_options_json_path
+from aydin.util.log.log import lprint
 from aydin.util.misc.json import save_any_json
 
 
@@ -69,8 +73,8 @@ class MainPage(QWidget):
         self.activity_dock = QDockWidget("Activity", self)
 
         # MainPage layout
-        self.widget_layout = QVBoxLayout()
-        self.widget_layout.setAlignment(Qt.AlignTop)
+        self.main_layout = QVBoxLayout()
+        self.main_layout.setAlignment(Qt.AlignTop)
 
         # navbar
         self.navbar_layout = QHBoxLayout()
@@ -167,7 +171,7 @@ class MainPage(QWidget):
         self.navbar_layout.addLayout(self.navbar_layout_right)
 
         self.navbar_layout.setAlignment(Qt.AlignTop)
-        self.widget_layout.addLayout(self.navbar_layout)
+        self.main_layout.addLayout(self.navbar_layout)
 
         # TabWidget
         self.tabwidget = QTabWidget(self)
@@ -175,13 +179,13 @@ class MainPage(QWidget):
         for key, value in self.tabs.items():
             self.tabwidget.addTab(value, key)
 
-        self.widget_layout.addWidget(self.tabwidget)
+        self.main_layout.addWidget(self.tabwidget)
 
         self.overlay = Overlay(self)
         self.overlay.hide()
 
         # Set layout for the main page widget
-        self.setLayout(self.widget_layout)
+        self.setLayout(self.main_layout)
 
         self.tabs["Dimensions"].dimensions = None
         self.tabs["Training Crop"].images = []
@@ -238,8 +242,14 @@ class MainPage(QWidget):
             e.ignore()
 
     def load_sample_image(self, sample):
-        self.data_model.add_filepaths([sample.get_path()])
-        self.tabwidget.setCurrentIndex(1)
+        try:
+            self.data_model.add_filepaths([sample.get_path()])
+            self.tabwidget.setCurrentIndex(1)
+        except Exception:
+            # Download failed:
+            # printing stack trace
+            lprint("Failed to download or open file!")
+            traceback.print_exception(*sys.exc_info())
 
     def handle_use_same_crop_state_changed(self):
         self.enable_disable_a_tab(
