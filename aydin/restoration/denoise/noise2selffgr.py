@@ -326,7 +326,7 @@ def noise2self_fgr(noisy, *, batch_axes=None, chan_axes=None, variant=None):
 
     """
     # Run N2S and save the result
-    n2s = Noise2SelfFGR(variant=variant)
+    n2s = Noise2SelfFGR()
 
     # Train
     n2s.train(noisy, batch_axes=batch_axes, chan_axes=chan_axes)
