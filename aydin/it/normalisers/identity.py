@@ -13,7 +13,7 @@ class IdentityNormaliser(NormaliserBase):
 
         Parameters
         ----------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
 
         """
         self.original_dtype = array.dtype
