@@ -10,7 +10,7 @@ def test_info():
         image_path = examples_single.generic_lizard.get_path()
 
         runner = CliRunner()
-        result = runner.invoke(cli, ['info', image_path])
+        result = runner.invoke(cli, ['info', image_path, '--slicing', ""])
 
         assert result.exit_code == 0
         assert "Reading" in result.output
