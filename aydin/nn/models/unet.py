@@ -427,7 +427,6 @@ class UNetModel(Model):
         train_valid_ratio=None,
         img_val=None,
         val_marker=None,
-        training_architecture=None,
         create_patches_for_validation=None,
         total_num_patches=None,
         batch_size=None,
@@ -450,7 +449,6 @@ class UNetModel(Model):
         train_valid_ratio
         img_val
         val_marker
-        training_architecture
         create_patches_for_validation
         total_num_patches
         batch_size
@@ -474,7 +472,7 @@ class UNetModel(Model):
             tv_ratio = 0
 
         validation_data, validation_steps = get_unet_fit_args(
-            train_method=training_architecture,
+            train_method=self.training_architecture,
             create_patches_for_validation=create_patches_for_validation,
             input_image=input_image,
             total_num_patches=total_num_patches,
@@ -488,7 +486,7 @@ class UNetModel(Model):
             replace_by=replace_by,
         )
 
-        if 'shiftconv' in training_architecture:
+        if 'shiftconv' in self.training_architecture:
             loss_history = super().fit(
                 input_image,
                 target_image,
@@ -498,7 +496,7 @@ class UNetModel(Model):
                 batch_size=batch_size,
                 validation_data=validation_data,
             )
-        elif 'checkerbox' in training_architecture:
+        elif 'checkerbox' in self.training_architecture:
             loss_history = super().fit(
                 maskedgen(input_image, batch_size, mask_size, replace_by=replace_by),
                 epochs=max_epochs,
@@ -511,7 +509,7 @@ class UNetModel(Model):
                 validation_data=validation_data,
                 validation_steps=validation_steps,
             )
-        elif 'random' in training_architecture:
+        elif 'random' in self.training_architecture:
             loss_history = super().fit(
                 randmaskgen(
                     input_image,
@@ -529,7 +527,7 @@ class UNetModel(Model):
                 validation_data=validation_data,
                 validation_steps=validation_steps,
             )
-        elif 'checkran' in training_architecture:
+        elif 'checkran' in self.training_architecture:
             # train with checkerbox first
             lprint('Starting with checkerbox masking.')
             history_checkerbox = super().fit(

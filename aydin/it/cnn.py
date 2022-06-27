@@ -565,7 +565,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         create_patches_for_validation=self._create_patches_for_validation,
                         train_valid_ratio=train_valid_ratio,
                         val_marker=self.validation_markers,
-                        training_architecture=self.training_architecture,
                         random_mask_ratio=self.random_mask_ratio,
                         patch_size=self.patch_size,
                         mask_size=self.mask_size,
