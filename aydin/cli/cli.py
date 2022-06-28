@@ -73,7 +73,7 @@ def cli(ctx):
 @click.option(
     '-ca', '--channel-axes', type=str, help='only pass while denoising a single image'
 )
-@click.option('-v', '--variant', default='noise2selffgr-cb')
+@click.option('-d', '--denoiser', default='noise2selffgr-cb')
 @click.option('--use-model/--save-model', default=False)
 @click.option('--model-path', default=None)
 @click.option('--lower-level-args', default=None)
@@ -93,10 +93,10 @@ def denoise(files, **kwargs):
     # Check whether a filename is provided for lower-level-args json
     if kwargs["lower_level_args"]:
         lower_level_args = load_any_json(kwargs['lower_level_args'])
-        backend = lower_level_args["variant"]
+        denoiser = lower_level_args["variant"]
     else:
         lower_level_args = None
-        backend = kwargs["variant"]
+        denoiser = kwargs["denoiser"]
 
     filenames = []
     for filename in files:
@@ -148,7 +148,7 @@ def denoise(files, **kwargs):
             kwargs_to_pass.pop("channel_axes")
 
             denoiser = get_denoiser_class_instance(
-                lower_level_args=lower_level_args, variant=backend
+                lower_level_args=lower_level_args, variant=denoiser
             )
 
             denoiser.train(
