@@ -29,7 +29,7 @@ def calibrate_denoise_wavelet(
     ">wavelet</a> denoiser for the given image and returns the optimal
     parameters obtained using the N2S loss.
 
-    Note: we use the scikt-image implementation of wavelet denoising.
+    Note: we use the scikit-image implementation of wavelet denoising.
 
     Parameters
     ----------

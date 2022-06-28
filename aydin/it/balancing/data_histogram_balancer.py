@@ -46,10 +46,10 @@ class DataHistogramBalancer:
 
         Parameters
         ----------
-        array
-        batch_length
-        percentile
-        num_batches_to_sample
+        array : numpy.ArrayLike
+        batch_length : int
+        percentile : float
+        num_batches_to_sample : int
 
         """
 
