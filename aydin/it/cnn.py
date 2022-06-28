@@ -297,14 +297,14 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 )
 
             # TODO: Do we need to have one if statement to automatically convert self.batch_size = 1 for shiftconv?
-            if self.model_architecture == "unet" and 'shiftconv' in self.training_architecture:
+            if 'shiftconv' in self.training_architecture or (self.model_architecture == "jinet" and self.spacetime_ndim == 3):
                 self.batch_size = 1
                 lprint(
                     'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
                 )
 
-            if self.model_architecture == "jinet" and self.spacetime_ndim == 3:
-                self.batch_size = 1
+            # if self.model_architecture == "jinet" and self.spacetime_ndim == 3:
+            #     self.batch_size = 1
 
             # Determine total number of patches
             if self.total_num_patches is None:
@@ -446,6 +446,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 "supervised": not self.self_supervised,  # unet only
                 "shiftconv": shiftconv,  # unet only
             } if self.model_architecture == "unet" else {}
+
+            print(unet_only_model_constructor_kwargs)
+            # print(list(**unet_only_model_constructor_kwargs))
 
             self.model = self.model_class(
                 img_train.shape[1:],
