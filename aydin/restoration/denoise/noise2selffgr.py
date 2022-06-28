@@ -2,6 +2,7 @@ import importlib
 import inspect
 import os
 import shutil
+from typing import Optional
 
 from aydin import regression
 from aydin.features.standard_features import StandardFeatureGenerator
@@ -11,16 +12,13 @@ from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.regression.cb import CBRegressor
+from aydin.regression.lgbm import LGBMRegressor
+from aydin.regression.linear import LinearRegressor
+from aydin.regression.perceptron import PerceptronRegressor
+from aydin.regression.random_forest import RandomForestRegressor
+from aydin.regression.support_vector import SupportVectorRegressor
 from aydin.restoration.denoise.base import DenoiseRestorationBase
 from aydin.util.log.log import lsection
-
-
-if os.getenv("BUNDLED_AYDIN") == "1":
-    from aydin.regression.lgbm import LGBMRegressor  # noqa: F401
-    from aydin.regression.linear import LinearRegressor  # noqa: F401
-    from aydin.regression.perceptron import PerceptronRegressor  # noqa: F401
-    from aydin.regression.random_forest import RandomForestRegressor  # noqa: F401
-    from aydin.regression.support_vector import SupportVectorRegressor  # noqa: F401
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):
@@ -201,7 +199,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
                 "random_forest": RandomForestRegressor,
                 "support_vector": SupportVectorRegressor,
             }
-            return regressors[self.variant]
+            return regressors[self.variant]()
 
         if self.lower_level_args is None:
             regressor = CBRegressor()
