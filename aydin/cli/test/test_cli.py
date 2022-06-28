@@ -9,9 +9,6 @@ def test_info():
     with Log.test_context():
         image_path = examples_single.generic_lizard.get_path()
 
-        print(image_path)
-        print(type(image_path))
-
         runner = CliRunner()
         result = runner.invoke(cli, ['info', image_path, '--slicing', ""])
 
