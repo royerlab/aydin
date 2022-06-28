@@ -439,12 +439,13 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             )
 
             unet_only_model_constructor_kwargs = {
-                "mini_batch_size": self.batch_size,  # unet only
-                "nb_unet_levels": self.nb_unet_levels,  # unet only
-                "normalization": self.batch_norm,  # unet only
-                "activation": self.activation_fun,  # unet only
-                "supervised": not self.self_supervised,  # unet only
-                "shiftconv": shiftconv,  # unet only
+                "mini_batch_size": self.batch_size,
+                "nb_unet_levels": self.nb_unet_levels,
+                "normalization": self.batch_norm,
+                "activation": self.activation_fun,
+                "supervised": not self.self_supervised,
+                "shiftconv": shiftconv,
+                "training_architecture": self.training_architecture,
             } if self.model_architecture == "unet" else {}
 
             print(unet_only_model_constructor_kwargs)
@@ -454,13 +455,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 img_train.shape[1:],
                 spacetime_ndim=self.spacetime_ndim,
                 learning_rate=self.learn_rate,
-                mini_batch_size= self.batch_size,  # unet only
-                nb_unet_levels= self.nb_unet_levels,  # unet only
-                normalization= self.batch_norm,  # unet only
-                activation= self.activation_fun,  # unet only
-                supervised= not self.self_supervised,  # unet only
-                shiftconv= shiftconv,  # unet only
-                # **unet_only_model_constructor_kwargs,
+                **unet_only_model_constructor_kwargs,
             )
 
             with lsection('CNN model summary:'):
