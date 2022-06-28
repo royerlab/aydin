@@ -37,7 +37,8 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         ----------
         variant : str, optional
             Variant of CNN denoiser to be used. Variant would supersede
-            the denoiser option passed in lower_level_args.
+            the denoiser option passed in lower_level_args. Currently, we
+            support only two variants: `unet` and `jinet`.
         use_model : bool
             Flag to choose to train a new model or infer from a
             previously trained model. By default it is None.

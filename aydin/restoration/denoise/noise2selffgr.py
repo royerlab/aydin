@@ -42,7 +42,10 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         ----------
         variant : str, optional
             Variant of FGR denoiser to be used. Variant would supersede
-            the denoiser option passed in lower_level_args.
+            the denoiser option passed in lower_level_args. `implementations`
+            property would return a complete list of variants (with a prefix
+            of 'Noise2SelfFGR-`) that can be used
+            on a given installation. Example variants: `cb`, `lgbm`, ...
         use_model : bool
             Flag to choose to train a new model or infer from a
             previously trained model. By default it is None.

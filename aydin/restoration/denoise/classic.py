@@ -74,19 +74,7 @@ if os.getenv("BUNDLED_AYDIN") == "1":
 
 
 class Classic(DenoiseRestorationBase):
-    """Classic Image Denoising.
-
-    Parameters
-    ----------
-    variant : str
-        Opacity of the layer visual, between 0.0 and 1.0.
-    use_model : bool
-        Flag to choose to train a new model or infer from a
-        previously trained model. By default it is None.
-    input_model_path : string
-        Path to model that is desired to be used for inference.
-        By default it is None.
-    """
+    """Classic Image Denoising"""
 
     disabled_modules = ["bilateral", "bmnd", "_defaults"]
 
@@ -99,6 +87,26 @@ class Classic(DenoiseRestorationBase):
         lower_level_args=None,
         it_transforms=None,
     ):
+        """
+
+        Parameters
+        ----------
+        variant : str
+            Variant of the Classic denoiser to be used. Variant
+            would supersede the denoiser option passed in lower_level_args.
+            `implementations` property would return a complete list
+            of variants (with a prefix of 'Classic-`) that can be used
+            on a given installation. Example variants: `butterworth`,
+            `gaussian`, `lipschitz`, `nlm`, ...
+        use_model : bool
+            Flag to choose to train a new model or infer from a
+            previously trained model. By default it is None.
+        input_model_path : string
+            Path to model that is desired to be used for inference.
+            By default it is None.
+        lower_level_args
+        it_transforms
+        """
         super().__init__()
         self.lower_level_args = lower_level_args
 
