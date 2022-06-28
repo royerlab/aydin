@@ -13,7 +13,7 @@ def test_info():
         print(type(image_path))
 
         runner = CliRunner()
-        result = runner.invoke(cli, ['--debug', 'info', image_path])
+        result = runner.invoke(cli, ['info', image_path, '--slicing', ""])
 
         assert result.exit_code == 0
         assert "Reading" in result.output
