@@ -8,11 +8,7 @@ from aydin.util.log.log import lsection, lprint
 
 
 class PercentileNormaliser(NormaliserBase):
-    """Percentile Normaliser
-
-
-
-    """
+    """Percentile Normaliser"""
 
     percent: float
 
