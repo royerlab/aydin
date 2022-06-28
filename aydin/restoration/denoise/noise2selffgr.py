@@ -33,6 +33,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
     def __init__(
         self,
         *,
+        variant: Optional[str] = None,
         use_model=None,
         input_model_path=None,
         lower_level_args=None,
@@ -41,6 +42,8 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         """
         Parameters
         ----------
+        variant : str, optional
+            Variant of FGR denoiser to be used. 
         use_model : bool
             Flag to choose to train a new model or infer from a
             previously trained model. By default it is None.
