@@ -93,7 +93,7 @@ class Classic(DenoiseRestorationBase):
     def __init__(
         self,
         *,
-        variant: str = 'butterworth',
+        variant: str = None,
         use_model=None,
         input_model_path=None,
         lower_level_args=None,
@@ -102,7 +102,7 @@ class Classic(DenoiseRestorationBase):
         super().__init__()
         self.lower_level_args = lower_level_args
 
-        self.backend = variant
+        self.variant = variant
 
         self.input_model_path = input_model_path
         self.use_model_flag = use_model
@@ -248,6 +248,9 @@ class Classic(DenoiseRestorationBase):
         it : ImageTranslatorBase
 
         """
+        if self.variant:
+            return ImageDenoiserClassic(method=self.variant)
+
         # Use a pre-saved model or train a new one from scratch and save it
         if self.use_model_flag:
             # Unarchive the model file and load its ImageTranslator object into self.it
@@ -256,19 +259,16 @@ class Classic(DenoiseRestorationBase):
             )
             it = ImageTranslatorBase.load(self.input_model_path[:-4])
         else:
-            if self.lower_level_args is not None:
-                method = (
-                    self.backend
-                    if self.lower_level_args["variant"] is None
-                    else self.lower_level_args["variant"].split("-")[1]
-                )
+            if self.lower_level_args is not None and  self.lower_level_args["variant"] is not None:
+                method = self.lower_level_args["variant"].split("-")[1]
+
                 it = ImageDenoiserClassic(
                     method=method,
                     calibration_kwargs=self.lower_level_args["calibration"]["kwargs"],
                     **self.lower_level_args["it"]["kwargs"],
                 )
             else:
-                it = ImageDenoiserClassic(method=self.backend)
+                it = ImageDenoiserClassic()
 
         return it
 
