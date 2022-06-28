@@ -43,7 +43,8 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         Parameters
         ----------
         variant : str, optional
-            Variant of FGR denoiser to be used. 
+            Variant of FGR denoiser to be used. Variant would supersede
+            the denoiser option passed in lower_level_args.
         use_model : bool
             Flag to choose to train a new model or infer from a
             previously trained model. By default it is None.
@@ -59,6 +60,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         self.use_model_flag = use_model
         self.input_model_path = input_model_path
         self.lower_level_args = lower_level_args
+        self.variant = variant
 
         self.it = None
         self.it_transforms = (
@@ -173,7 +175,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         generator : FeatureGeneratorBase
 
         """
-        # print(self.lower_level_args)
         if self.lower_level_args is not None:
             generator = self.lower_level_args["feature_generator"]["class"](
                 **self.lower_level_args["feature_generator"]["kwargs"]
@@ -191,13 +192,23 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         regressor : RegressorBase
 
         """
+        if self.variant:
+            regressors = {
+                "cb": CBRegressor,
+                "lgbm": LGBMRegressor,
+                "linear": LinearRegressor,
+                "perceptron": PerceptronRegressor,
+                "random_forest": RandomForestRegressor,
+                "support_vector": SupportVectorRegressor,
+            }
+            return regressors[self.variant]
 
-        if self.lower_level_args is not None:
+        if self.lower_level_args is None:
+            regressor = CBRegressor()
+        else:
             regressor = self.lower_level_args["regressor"]["class"](
                 **self.lower_level_args["regressor"]["kwargs"]
             )
-        else:
-            regressor = CBRegressor()
 
         return regressor
 
