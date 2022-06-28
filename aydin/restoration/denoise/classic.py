@@ -267,7 +267,10 @@ class Classic(DenoiseRestorationBase):
             )
             it = ImageTranslatorBase.load(self.input_model_path[:-4])
         else:
-            if self.lower_level_args is not None and  self.lower_level_args["variant"] is not None:
+            if (
+                self.lower_level_args is not None
+                and self.lower_level_args["variant"] is not None
+            ):
                 method = self.lower_level_args["variant"].split("-")[1]
 
                 it = ImageDenoiserClassic(
