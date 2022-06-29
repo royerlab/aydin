@@ -48,7 +48,6 @@ class UNetModel(Model):
         normalization: str = 'batch',  # None,  # 'instance',
         activation: str = 'ReLU',
         supervised: bool = False,
-        shiftconv: bool = True,
         nfilters: int = 8,
         learning_rate: float = 0.01,
         original_zdim: int = None,
@@ -105,7 +104,7 @@ class UNetModel(Model):
         self.num_lyr = nb_unet_levels
         self.normalization = normalization
         self.activation = activation
-        self.shiftconv = shiftconv
+        self.shiftconv = 'shiftconv' == self.training_architecture and not supervised
         self.nfilters = nfilters
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
@@ -129,7 +128,7 @@ class UNetModel(Model):
             else self.unet_core_3d()
         )
 
-        if not shiftconv and not supervised:
+        if not self.shiftconv and not supervised:
             input_msk = Input(input_layer_size, name='input_msk')
             x = Maskout(name='maskout')([x, input_msk])
             super().__init__([self.input_lyr, input_msk], x)

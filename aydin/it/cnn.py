@@ -433,17 +433,12 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         '2^(nb_unet_levels-1) as shiftconv mode involvs pixel shift. '
                     )
 
-            shiftconv = (
-                'shiftconv' == self.training_architecture and self.self_supervised
-            )
-
             unet_only_model_constructor_kwargs = {
                 "mini_batch_size": self.batch_size,
                 "nb_unet_levels": self.nb_unet_levels,
                 "normalization": self.batch_norm,
                 "activation": self.activation_fun,
                 "supervised": not self.self_supervised,
-                "shiftconv": shiftconv,
                 "training_architecture": self.training_architecture,
             } if self.model_architecture == "unet" else {}
 
@@ -626,7 +621,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 'nb_unet_levels': self.nb_unet_levels,
                 'normalization': self.batch_norm,
                 'activation': self.activation_fun,
-                'shiftconv': 'shiftconv' == self.training_architecture,
+                'training_architecture': self.training_architecture,
             }
 
             if len(input_image.shape[1:-1]) == 2:
