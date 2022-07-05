@@ -1,59 +1,58 @@
 import numpy
 
 from aydin.nn.util.data_util import random_sample_patches
+from aydin.nn.util.validation_generator import train_image_generator
 from aydin.util.log.log import lsection, lprint
 
 
-def tile_input_and_target_images(
+def tile_input_images(
     input_image,
-    target_image,
-    img_train,
-    img_val,
-    val_marker,
-    patch_size: int,
-    total_num_patches: int,
-    adoption_rate,
     create_patches_for_validation,
-    self_supervised,
+    input_patch_idx,
+    train_valid_ratio,
 ):
-    # Tile input and target image
-    if patch_size is not None:
-        with lsection('Random patch sampling...'):
-            lprint(f'Total number of patches: {total_num_patches}')
-            input_patch_idx = random_sample_patches(
-                input_image,
-                patch_size,
-                total_num_patches,
-                adoption_rate,
+    img_train_patch = []
+
+    if create_patches_for_validation:
+        with lsection(
+                f'Validation data will be created by monitoring {train_valid_ratio} of the patches/images in the input data.'
+        ):
+            for i in input_patch_idx:
+                img_train_patch.append(input_image[i])
+            img_train = numpy.vstack(img_train_patch)
+    else:
+        with lsection(
+                f'Validation data will be created by monitoring {train_valid_ratio} of the pixels in the input data.'
+        ):
+            img_train, img_val, val_marker = train_image_generator(
+                input_image, p=train_valid_ratio
             )
 
-            total_num_patches = len(input_patch_idx)
+            img_val_patch = []
+            marker_patch = []
+            for i in input_patch_idx:
+                img_train_patch.append(img_train[i])
+                img_val_patch.append(img_val[i])
+                marker_patch.append(val_marker[i])
+            img_train = numpy.vstack(img_train_patch)
+            img_val = numpy.vstack(img_val_patch)
+            val_marker = numpy.vstack(marker_patch)
 
-            img_train_patch = []
+    return img_train, img_val, val_marker
 
-            if create_patches_for_validation:
-                for i in input_patch_idx:
-                    img_train_patch.append(input_image[i])
-                img_train = numpy.vstack(img_train_patch)
-            else:
-                img_val_patch = []
-                marker_patch = []
-                for i in input_patch_idx:
-                    img_train_patch.append(img_train[i])
-                    img_val_patch.append(img_val[i])
-                    marker_patch.append(val_marker[i])
-                img_train = numpy.vstack(img_train_patch)
-                img_val = numpy.vstack(img_val_patch)
-                val_marker = numpy.vstack(marker_patch)
-                # validation_images = img_val
-                # validation_markers = val_marker
 
-            if not self_supervised:
-                target_patch = []
-                for i in input_patch_idx:
-                    target_patch.append(target_image[i])
-                target_image = numpy.vstack(target_patch)
-            else:
-                target_image = img_train
+def tile_target_images(
+        img_train,
+        target_image,
+        input_patch_idx,
+        self_supervised,
+):
+    if self_supervised:
+        target_image = img_train
+    else:
+        target_patch = []
+        for i in input_patch_idx:
+            target_patch.append(target_image[i])
+        target_image = numpy.vstack(target_patch)
 
-        # TODO: return
+    return target_image

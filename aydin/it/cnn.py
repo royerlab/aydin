@@ -12,6 +12,7 @@ from aydin.nn.models.jinet import JINetModel
 from aydin.nn.models.unet import UNetModel
 
 # from aydin.nn.models.utils.image_tile import tile_input_and_target_images
+from aydin.nn.models.utils.image_tile import tile_target_images, tile_input_images
 from aydin.nn.util.data_util import random_sample_patches
 from aydin.nn.models.utils.unet_patch_size import get_ideal_patch_size, post_tiling_patch_size_validation
 from aydin.nn.util.callbacks import (
@@ -20,8 +21,6 @@ from aydin.nn.util.callbacks import (
     StopCenterGradient2D,
     StopCenterGradient3D,
 )
-
-from aydin.nn.util.validation_generator import train_image_generator
 from aydin.regression.nn_utils.callbacks import ModelCheckpoint
 from aydin.util.log.log import lsection, lprint
 from aydin.util.tf.device import get_best_device_name, available_device_memory
@@ -352,7 +351,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Tile input and target image
             with lsection('Random patch sampling...'):
-                lprint(f'Total number of patches: {self.total_num_patches}')
                 input_patch_idx = random_sample_patches(
                     input_image,
                     self.patch_size,
@@ -361,43 +359,20 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 )
 
                 self.total_num_patches = len(input_patch_idx)
+                lprint(f'Total number of patches: {self.total_num_patches}')
 
-                img_train_patch = []
+                with lsection('Input image...'):
+                    img_train, self.validation_images, self.validation_markers = tile_input_images(
+                        input_image,
+                        self._create_patches_for_validation,
+                        input_patch_idx,
+                        train_valid_ratio,
+                    )
 
-                if self._create_patches_for_validation:
-                    with lsection(
-                            f'Validation data will be created by monitoring {train_valid_ratio} of the patches/images in the input data.'
-                    ):
-                        for i in input_patch_idx:
-                            img_train_patch.append(input_image[i])
-                        img_train = numpy.vstack(img_train_patch)
-                else:
-                    with lsection(
-                            f'Validation data will be created by monitoring {train_valid_ratio} of the pixels in the input data.'
-                    ):
-                        img_train, img_val, val_marker = train_image_generator(
-                            input_image, p=train_valid_ratio
-                        )
-
-                        img_val_patch = []
-                        marker_patch = []
-                        for i in input_patch_idx:
-                            img_train_patch.append(img_train[i])
-                            img_val_patch.append(img_val[i])
-                            marker_patch.append(val_marker[i])
-                        img_train = numpy.vstack(img_train_patch)
-                        img_val = numpy.vstack(img_val_patch)
-                        val_marker = numpy.vstack(marker_patch)
-                        self.validation_images = img_val
-                        self.validation_markers = val_marker
-
-                if not self.self_supervised:
-                    target_patch = []
-                    for i in input_patch_idx:
-                        target_patch.append(target_image[i])
-                    target_image = numpy.vstack(target_patch)
-                else:
-                    target_image = img_train
+                with lsection('Target image...'):
+                    target_image = tile_target_images(
+                        img_train, target_image, input_patch_idx, self.self_supervised
+                    )
 
             post_tiling_patch_size_validation(
                 img_train,
@@ -532,9 +507,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         batch_size=self.batch_size,
                         total_num_patches=self.total_num_patches,
                         img_val=self.validation_images,
+                        val_marker=self.validation_markers,
                         create_patches_for_validation=self._create_patches_for_validation,
                         train_valid_ratio=train_valid_ratio,
-                        val_marker=self.validation_markers,
                         random_mask_ratio=self.random_mask_ratio,
                         patch_size=self.patch_size,
                         mask_size=self.mask_size,

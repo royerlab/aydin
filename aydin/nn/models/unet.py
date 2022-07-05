@@ -479,9 +479,8 @@ class UNetModel(Model):
             batch_size=batch_size,
             random_mask_ratio=random_mask_ratio,
             img_val=img_val,
-            patch_size=patch_size,
-            mask_size=mask_size,
             val_marker=val_marker,
+            mask_size=mask_size,
             replace_by=replace_by,
         )
 
