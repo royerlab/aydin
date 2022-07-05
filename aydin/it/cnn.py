@@ -335,18 +335,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             lprint(f"Batch size for training: {self.batch_size}")
 
             # Decide whether to use validation pixels or patches
-            if 1024 > input_image.size / numpy.prod(self.patch_size):
-                with lsection(
-                    f'Validation data will be created by monitoring {train_valid_ratio} of the pixels in the input data.'
-                ):
-                    img_train, img_val, val_marker = train_image_generator(
-                        input_image, p=train_valid_ratio
-                    )
-            else:
-                with lsection(
-                    f'Validation data will be created by monitoring {train_valid_ratio} of the patches/images in the input data.'
-                ):
-                    self._create_patches_for_validation = True
+            self._create_patches_for_validation = 1024 <= input_image.size / numpy.prod(self.patch_size)
 
             # tile_input_and_target_images(
             #     input_image,
@@ -376,21 +365,31 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 img_train_patch = []
 
                 if self._create_patches_for_validation:
-                    for i in input_patch_idx:
-                        img_train_patch.append(input_image[i])
-                    img_train = numpy.vstack(img_train_patch)
+                    with lsection(
+                            f'Validation data will be created by monitoring {train_valid_ratio} of the patches/images in the input data.'
+                    ):
+                        for i in input_patch_idx:
+                            img_train_patch.append(input_image[i])
+                        img_train = numpy.vstack(img_train_patch)
                 else:
-                    img_val_patch = []
-                    marker_patch = []
-                    for i in input_patch_idx:
-                        img_train_patch.append(img_train[i])
-                        img_val_patch.append(img_val[i])
-                        marker_patch.append(val_marker[i])
-                    img_train = numpy.vstack(img_train_patch)
-                    img_val = numpy.vstack(img_val_patch)
-                    val_marker = numpy.vstack(marker_patch)
-                    self.validation_images = img_val
-                    self.validation_markers = val_marker
+                    with lsection(
+                            f'Validation data will be created by monitoring {train_valid_ratio} of the pixels in the input data.'
+                    ):
+                        img_train, img_val, val_marker = train_image_generator(
+                            input_image, p=train_valid_ratio
+                        )
+
+                        img_val_patch = []
+                        marker_patch = []
+                        for i in input_patch_idx:
+                            img_train_patch.append(img_train[i])
+                            img_val_patch.append(img_val[i])
+                            marker_patch.append(val_marker[i])
+                        img_train = numpy.vstack(img_train_patch)
+                        img_val = numpy.vstack(img_val_patch)
+                        val_marker = numpy.vstack(marker_patch)
+                        self.validation_images = img_val
+                        self.validation_markers = val_marker
 
                 if not self.self_supervised:
                     target_patch = []
