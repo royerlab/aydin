@@ -13,7 +13,7 @@ from aydin.nn.models.unet import UNetModel
 
 # from aydin.nn.models.utils.image_tile import tile_input_and_target_images
 from aydin.nn.util.data_util import random_sample_patches
-from aydin.nn.models.utils.unet_patch_size import get_ideal_patch_size
+from aydin.nn.models.utils.unet_patch_size import get_ideal_patch_size, post_tiling_patch_size_validation
 from aydin.nn.util.callbacks import (
     EarlyStopping,
     ReduceLROnPlateau,
@@ -400,42 +400,12 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 else:
                     target_image = img_train
 
-            # Last check of input size espetially for shiftconv
-            if 'shiftconv' == self.training_architecture and self.self_supervised:
-                # TODO: Hirofumi what is going on the conditional below <-- check input dim is compatible w/ shiftconv
-                if (
-                    numpy.mod(
-                        img_train.shape[1:][:-1],
-                        numpy.repeat(
-                            2**self.nb_unet_levels, len(img_train.shape[1:][:-1])
-                        ),
-                    )
-                    != 0
-                ).any():
-                    raise ValueError(
-                        'Each dimension of the input image has to be a multiple of 2^nb_unet_levels for shiftconv.'
-                    )
-                lprint(
-                    'Model will be generated for self-supervised learning with shift convolution scheme.'
-                )
-                if numpy.diff(img_train.shape[1:][:2]) != 0:
-                    raise ValueError(
-                        'Make sure the input image shape is cubic as shiftconv mode involves rotation.'
-                    )
-                if (
-                    numpy.mod(
-                        img_train.shape[1:][:-1],
-                        numpy.repeat(
-                            2 ** (self.nb_unet_levels - 1),
-                            len(img_train.shape[1:][:-1]),
-                        ),
-                    )
-                    != 0
-                ).any():
-                    raise ValueError(
-                        'Each dimension of the input image has to be a multiple of '
-                        '2^(nb_unet_levels-1) as shiftconv mode involvs pixel shift. '
-                    )
+            post_tiling_patch_size_validation(
+                img_train,
+                self.nb_unet_levels,
+                self.training_architecture,
+                self.self_supervised,
+            )
 
             unet_only_model_constructor_kwargs = (
                 {
