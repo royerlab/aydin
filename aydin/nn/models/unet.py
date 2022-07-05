@@ -138,9 +138,6 @@ class UNetModel(Model):
         self.compile(optimizer=Adam(lr=learning_rate), loss='mse')
         self.compile = True
 
-    def need_batch_size_one(self):
-        return 'shiftconv' in self.training_architecture
-
     def size(self):
         """Returns size of the model in bytes"""
         return self.count_params() * 4

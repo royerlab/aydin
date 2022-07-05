@@ -106,9 +106,6 @@ class JINetModel(Model):
         self.compile(optimizer=Adam(learning_rate=learning_rate), loss='mse')
         self.compiled = True
 
-    def need_batch_size_one(self):
-        return self.spacetime_ndim == 3
-
     def size(self):
         """Returns size of the model in bytes"""
         return self.count_params() * 4

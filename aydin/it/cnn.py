@@ -26,7 +26,7 @@ from aydin.nn.util.callbacks import (
 )
 from aydin.regression.nn_utils.callbacks import ModelCheckpoint
 from aydin.util.log.log import lsection, lprint
-from aydin.util.tf.device import get_best_device_name, available_device_memory
+from aydin.util.tf.device import get_best_device_name
 
 
 class ImageTranslatorCNN(ImageTranslatorBase):
@@ -283,27 +283,29 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             if self.model_architecture == "jinet" and self.spacetime_ndim == 3:
                 self.batch_size = 1
 
+            lprint(f"Batch size for training: {self.batch_size}")
+
             # Compute patch size from batch size
             if self.patch_size is None:
                 self.patch_size = get_ideal_patch_size(
                     self.nb_unet_levels, self.training_architecture
                 )
+            else:
+                # Check patch_size for unet models with passed patch_size values
+                if 'unet' in self.model_architecture:
+                    patch_size = numpy.array(self.patch_size)
+                    if (patch_size.max() / (2**self.nb_unet_levels) <= 0).any():
+                        raise ValueError(
+                            f'Tile size is too small. The largest dimension of tile size has to be >= {2 ** self.nb_unet_levels}.'
+                        )
+                    if (patch_size[-2:] % 2**self.nb_unet_levels != 0).any():
+                        raise ValueError(
+                            f'Tile sizes on XY plane have to be multiple of 2^{self.nb_unet_levels}'
+                        )
 
             # Adjust patch_size for given input shape
             if isinstance(self.patch_size, int):
                 self.patch_size = [self.patch_size] * self.spacetime_ndim
-
-            # Check patch_size for unet models
-            if 'unet' in self.model_architecture:
-                patch_size = numpy.array(self.patch_size)
-                if (patch_size.max() / (2**self.nb_unet_levels) <= 0).any():
-                    raise ValueError(
-                        f'Tile size is too small. The largest dimension of tile size has to be >= {2 ** self.nb_unet_levels}.'
-                    )
-                if (patch_size[-2:] % 2**self.nb_unet_levels != 0).any():
-                    raise ValueError(
-                        f'Tile sizes on XY plane have to be multiple of 2^{self.nb_unet_levels}'
-                    )
 
             # Check if the smallest dimension of input data >= patch_size
             if min(self.patch_size) > min(self.input_dim[:-1]):
@@ -332,9 +334,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     - (self.total_num_patches % self.batch_size)
                     + self.batch_size
                 )
-
-            lprint(f"Available mem: {available_device_memory()}")
-            lprint(f"Batch size for training: {self.batch_size}")
 
             # Decide whether to use validation pixels or patches
             self._create_patches_for_validation = 1024 <= input_image.size / numpy.prod(
