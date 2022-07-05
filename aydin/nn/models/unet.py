@@ -465,10 +465,10 @@ class UNetModel(Model):
         loss_history
 
         """
-        if create_patches_for_validation:
-            tv_ratio = train_valid_ratio
-        else:
-            tv_ratio = 0
+        # Convert mask_size to tuple
+        mask_size = (mask_size,) * (input_image.ndim - 2)
+
+        tv_ratio = train_valid_ratio if create_patches_for_validation else 0
 
         validation_data, validation_steps = get_unet_fit_args(
             train_method=self.training_architecture,

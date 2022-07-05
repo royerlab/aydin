@@ -459,8 +459,8 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             with lsection('CNN model summary:'):
                 lprint(f'Model architecture: {self.model_architecture}')
-                lprint(f'Train scheme: {self.training_architecture}')
                 if self.model_architecture == 'unet':
+                    lprint(f'Train scheme: {self.training_architecture}')
                     lprint(f'Number of layers: {self.nb_unet_levels}')
                 lprint(
                     f'Number of parameters in the model: {self.model.count_params()}'
@@ -538,9 +538,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         if 'jinet' in self.model_architecture and self.self_supervised
                         else callbacks
                     )
-
-                # Convert mask_size to tuple
-                self.mask_size = (self.mask_size,) * (input_image.ndim - 2)
 
                 lprint("Training now...")
                 if 'jinet' in self.model_architecture:
