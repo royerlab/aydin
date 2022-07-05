@@ -48,9 +48,18 @@ def post_tiling_patch_size_validation(
     training_architecture,
     self_supervised,
 ):
-    # Last check of input size espetially for shiftconv
+    """
+    Last check of input size especially for shiftconv
+
+    Parameters
+    ----------
+    img_train
+    nb_unet_levels
+    training_architecture
+    self_supervised
+
+    """
     if 'shiftconv' == training_architecture and self_supervised:
-        # TODO: Hirofumi what is going on the conditional below <-- check input dim is compatible w/ shiftconv
         if (
             numpy.mod(
                 img_train.shape[1:][:-1],
