@@ -5,11 +5,11 @@ from aydin.util.log.log import lprint
 
 def get_ideal_patch_size(nb_unet_levels, training_architecture):
     patch_size = (
-            get_receptive_field_radius(
-                nb_unet_levels,
-                shiftconv='shiftconv' == training_architecture,
-            )
-            * 2
+        get_receptive_field_radius(
+            nb_unet_levels,
+            shiftconv='shiftconv' == training_architecture,
+        )
+        * 2
     )
 
     patch_size -= patch_size % 2**nb_unet_levels
@@ -43,22 +43,20 @@ def get_receptive_field_radius(nb_unet_levels: int, shiftconv: bool = False) -> 
 
 
 def post_tiling_patch_size_validation(
-        img_train,
-        nb_unet_levels,
-        training_architecture,
-        self_supervised,
+    img_train,
+    nb_unet_levels,
+    training_architecture,
+    self_supervised,
 ):
     # Last check of input size espetially for shiftconv
     if 'shiftconv' == training_architecture and self_supervised:
         # TODO: Hirofumi what is going on the conditional below <-- check input dim is compatible w/ shiftconv
         if (
-                numpy.mod(
-                    img_train.shape[1:][:-1],
-                    numpy.repeat(
-                        2 ** nb_unet_levels, len(img_train.shape[1:][:-1])
-                    ),
-                )
-                != 0
+            numpy.mod(
+                img_train.shape[1:][:-1],
+                numpy.repeat(2**nb_unet_levels, len(img_train.shape[1:][:-1])),
+            )
+            != 0
         ).any():
             raise ValueError(
                 'Each dimension of the input image has to be a multiple of 2^nb_unet_levels for shiftconv.'
@@ -71,14 +69,14 @@ def post_tiling_patch_size_validation(
                 'Make sure the input image shape is cubic as shiftconv mode involves rotation.'
             )
         if (
-                numpy.mod(
-                    img_train.shape[1:][:-1],
-                    numpy.repeat(
-                        2 ** (nb_unet_levels - 1),
-                        len(img_train.shape[1:][:-1]),
-                    ),
-                )
-                != 0
+            numpy.mod(
+                img_train.shape[1:][:-1],
+                numpy.repeat(
+                    2 ** (nb_unet_levels - 1),
+                    len(img_train.shape[1:][:-1]),
+                ),
+            )
+            != 0
         ).any():
             raise ValueError(
                 'Each dimension of the input image has to be a multiple of '

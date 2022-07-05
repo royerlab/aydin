@@ -1,8 +1,7 @@
 import numpy
 
-from aydin.nn.util.data_util import random_sample_patches
 from aydin.nn.util.validation_generator import train_image_generator
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lsection
 
 
 def tile_input_images(
@@ -15,14 +14,14 @@ def tile_input_images(
 
     if create_patches_for_validation:
         with lsection(
-                f'Validation data will be created by monitoring {train_valid_ratio} of the patches/images in the input data.'
+            f'Validation data will be created by monitoring {train_valid_ratio} of the patches/images in the input data.'
         ):
             for i in input_patch_idx:
                 img_train_patch.append(input_image[i])
             img_train = numpy.vstack(img_train_patch)
     else:
         with lsection(
-                f'Validation data will be created by monitoring {train_valid_ratio} of the pixels in the input data.'
+            f'Validation data will be created by monitoring {train_valid_ratio} of the pixels in the input data.'
         ):
             img_train, img_val, val_marker = train_image_generator(
                 input_image, p=train_valid_ratio
@@ -42,10 +41,10 @@ def tile_input_images(
 
 
 def tile_target_images(
-        img_train,
-        target_image,
-        input_patch_idx,
-        self_supervised,
+    img_train,
+    target_image,
+    input_patch_idx,
+    self_supervised,
 ):
     if self_supervised:
         target_image = img_train

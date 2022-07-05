@@ -138,6 +138,13 @@ class UNetModel(Model):
         self.compile(optimizer=Adam(lr=learning_rate), loss='mse')
         self.compile = True
 
+    def need_batch_size_one(self):
+        return 'shiftconv' in self.training_architecture
+
+    def size(self):
+        """Returns size of the model in bytes"""
+        return self.count_params() * 4
+
     def unet_core_2d(self, input_lyr):
         """Unet Core method which actually populates the model"""
         # Rotation & stack of the input images
@@ -413,10 +420,6 @@ class UNetModel(Model):
         )(x)
 
         return x
-
-    def size(self):
-        """Returns size of the model in bytes"""
-        return self.count_params() * 4
 
     def fit(
         self,

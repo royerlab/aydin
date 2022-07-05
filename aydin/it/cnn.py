@@ -14,7 +14,10 @@ from aydin.nn.models.unet import UNetModel
 # from aydin.nn.models.utils.image_tile import tile_input_and_target_images
 from aydin.nn.models.utils.image_tile import tile_target_images, tile_input_images
 from aydin.nn.util.data_util import random_sample_patches
-from aydin.nn.models.utils.unet_patch_size import get_ideal_patch_size, post_tiling_patch_size_validation
+from aydin.nn.models.utils.unet_patch_size import (
+    get_ideal_patch_size,
+    post_tiling_patch_size_validation,
+)
 from aydin.nn.util.callbacks import (
     EarlyStopping,
     ReduceLROnPlateau,
@@ -267,6 +270,19 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             self.input_dim = input_image.shape[1:]
 
+            # batch_size check conditionals for unet and jinet
+            if (
+                self.model_architecture == "unet"
+                and 'shiftconv' in self.training_architecture
+            ):
+                self.batch_size = 1
+                lprint(
+                    'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
+                )
+
+            if self.model_architecture == "jinet" and self.spacetime_ndim == 3:
+                self.batch_size = 1
+
             # Compute patch size from batch size
             if self.patch_size is None:
                 self.patch_size = get_ideal_patch_size(
@@ -296,19 +312,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     smallest_dim // 2 * 2
                 )
 
-            # batch_size check conditionals for unet and jinet
-            if (
-                self.model_architecture == "unet"
-                and 'shiftconv' in self.training_architecture
-            ):
-                self.batch_size = 1
-                lprint(
-                    'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
-                )
-
-            if self.model_architecture == "jinet" and self.spacetime_ndim == 3:
-                self.batch_size = 1
-
             # Determine total number of patches
             if self.total_num_patches is None:
                 self.total_num_patches = min(
@@ -334,20 +337,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             lprint(f"Batch size for training: {self.batch_size}")
 
             # Decide whether to use validation pixels or patches
-            self._create_patches_for_validation = 1024 <= input_image.size / numpy.prod(self.patch_size)
-
-            # tile_input_and_target_images(
-            #     input_image,
-            #     target_image,
-            #     img_train,
-            #     img_val,
-            #     val_marker,
-            #     self.patch_size,
-            #     self.total_num_patches,
-            #     self.adoption_rate,
-            #     self._create_patches_for_validation,
-            #     self.self_supervised,
-            # )
+            self._create_patches_for_validation = 1024 <= input_image.size / numpy.prod(
+                self.patch_size
+            )
 
             # Tile input and target image
             with lsection('Random patch sampling...'):
@@ -362,7 +354,11 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 lprint(f'Total number of patches: {self.total_num_patches}')
 
                 with lsection('Input image...'):
-                    img_train, self.validation_images, self.validation_markers = tile_input_images(
+                    (
+                        img_train,
+                        self.validation_images,
+                        self.validation_markers,
+                    ) = tile_input_images(
                         input_image,
                         self._create_patches_for_validation,
                         input_patch_idx,
