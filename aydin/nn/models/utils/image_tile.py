@@ -45,8 +45,8 @@ def tile_input_and_target_images(
                 img_train = numpy.vstack(img_train_patch)
                 img_val = numpy.vstack(img_val_patch)
                 val_marker = numpy.vstack(marker_patch)
-                validation_images = img_val
-                validation_markers = val_marker
+                # validation_images = img_val
+                # validation_markers = val_marker
 
             if not self_supervised:
                 target_patch = []

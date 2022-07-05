@@ -10,7 +10,8 @@ from aydin.io.folders import get_temp_folder
 from aydin.it.base import ImageTranslatorBase
 from aydin.nn.models.jinet import JINetModel
 from aydin.nn.models.unet import UNetModel
-from aydin.nn.models.utils.image_tile import tile_input_and_target_images
+
+# from aydin.nn.models.utils.image_tile import tile_input_and_target_images
 from aydin.nn.util.data_util import random_sample_patches
 from aydin.nn.models.utils.unet_patch_size import get_ideal_patch_size
 from aydin.nn.util.callbacks import (
@@ -297,7 +298,10 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 )
 
             # batch_size check conditionals for unet and jinet
-            if self.model_architecture == "unet" and 'shiftconv' in self.training_architecture:
+            if (
+                self.model_architecture == "unet"
+                and 'shiftconv' in self.training_architecture
+            ):
                 self.batch_size = 1
                 lprint(
                     'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
@@ -433,14 +437,18 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         '2^(nb_unet_levels-1) as shiftconv mode involvs pixel shift. '
                     )
 
-            unet_only_model_constructor_kwargs = {
-                "mini_batch_size": self.batch_size,
-                "nb_unet_levels": self.nb_unet_levels,
-                "normalization": self.batch_norm,
-                "activation": self.activation_fun,
-                "supervised": not self.self_supervised,
-                "training_architecture": self.training_architecture,
-            } if self.model_architecture == "unet" else {}
+            unet_only_model_constructor_kwargs = (
+                {
+                    "mini_batch_size": self.batch_size,
+                    "nb_unet_levels": self.nb_unet_levels,
+                    "normalization": self.batch_norm,
+                    "activation": self.activation_fun,
+                    "supervised": not self.self_supervised,
+                    "training_architecture": self.training_architecture,
+                }
+                if self.model_architecture == "unet"
+                else {}
+            )
 
             self.model = self.model_class(
                 img_train.shape[1:],
