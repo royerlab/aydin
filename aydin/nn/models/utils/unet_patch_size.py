@@ -19,8 +19,9 @@ def get_ideal_patch_size(nb_unet_levels, training_architecture):
     return patch_size
 
 
-def get_receptive_field_radius(nb_unet_levels, shiftconv=False):
-    """TODO: add proper docstrings here
+def get_receptive_field_radius(nb_unet_levels: int, shiftconv: bool = False) -> int:
+    """Returns the radius of the anticipated receptive
+    field of the UNet of interest.
 
     Parameters
     ----------
