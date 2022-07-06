@@ -86,7 +86,7 @@ def lprint(*args, sep=' ', end='\n'):
 
     Parameters
     ----------
-    args : list
+    args : Sequence
     sep : str
     end : str
 
