@@ -8,19 +8,19 @@ from aydin.util.log.log import lsection, lprint
 
 
 class PercentileNormaliser(NormaliserBase):
-    """Percentile Normaliser
-
-    Parameters
-    ----------
-    percentile : float
-    kwargs : dict
-
-    """
+    """Percentile Normaliser"""
 
     percent: float
 
     def __init__(self, percentile: float = None, **kwargs):
-        """Constructs a normalisers"""
+        """Constructs a normalisers
+
+        Parameters
+        ----------
+        percentile : float
+        kwargs : dict
+
+        """
         super().__init__(**kwargs)
 
         self.percentile = percentile
@@ -30,7 +30,7 @@ class PercentileNormaliser(NormaliserBase):
 
         Parameters
         ----------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
 
         """
 

@@ -87,7 +87,7 @@ def random_sample_patches(input_img, patch_size, num_patch, adoption_rate=0.5):
     hist_ind_all = hist_ind_all[: int(num_patch), 1:].astype(int)
 
     # Create a slice list
-    patch_slice = []
+    patch_slices = []
     for ind in hist_ind_all:
         slice_list = (
             [slice(ind[0], ind[0] + 1, 1)]
@@ -97,7 +97,7 @@ def random_sample_patches(input_img, patch_size, num_patch, adoption_rate=0.5):
             ]
             + [slice(0, 1, 1)]
         )
-        patch_slice.append(tuple(slice_list))
+        patch_slices.append(tuple(slice_list))
 
     # Return a list of slice
-    return patch_slice
+    return patch_slices
