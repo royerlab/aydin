@@ -1,4 +1,5 @@
 # flake8: noqa
+
 # import math
 # from collections import OrderedDict
 # from itertools import chain
@@ -34,9 +35,8 @@ def test_supervised_2D():
     assert result.dtype == input_array.dtype
 
 
-# @pytest.mark.heavy
 def test_supervised_2D_n2t():
-    clean_image = normalise(camera())
+    clean_image = normalise(camera()[:128, :128])
     clean_image = numpy.expand_dims(clean_image, axis=0)
     clean_image = numpy.expand_dims(clean_image, axis=0)
 
@@ -45,17 +45,27 @@ def test_supervised_2D_n2t():
     noisy_image = torch.tensor(noisy_image)
     clean_image = torch.tensor(clean_image)
 
-    dataset = TorchDataset(noisy_image, clean_image, 64, self_supervised=False)
+    # learning_rate = 0.01
+    # training_noise = 0.001
+    # l2_weight_regularisation = 1e-9
+    # patience = 128
+    # patience_epsilon = 0.0
+    # reduce_lr_factor = 0.5
+    # reduce_lr_patience = patience // 2
+    # reload_best_model_period = 1024
+    # best_val_loss_value = math.inf
 
-    data_loader = DataLoader(
-        dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
-    )
+    # dataset = TorchDataset(input_image, clean_image, 64, self_supervised=False)
+
+    # data_loader = DataLoader(
+    #     dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
+    # )
 
     model = UNetModel(
         nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
     )
 
-    n2t_unet_train_loop(noisy_image, clean_image, model, data_loader)
+    n2t_unet_train_loop(noisy_image, clean_image, model)
     result = model(noisy_image)
 
     assert result.shape == noisy_image.shape
