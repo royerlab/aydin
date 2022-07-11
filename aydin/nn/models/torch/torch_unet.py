@@ -2,7 +2,6 @@ import math
 from collections import OrderedDict
 from itertools import chain
 
-# import napari
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -11,8 +10,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
 from aydin.nn.layers.pooling_down import PoolingDown
-
-# from aydin.nn.pytorch.it_ptcnn import to_numpy
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -139,8 +136,11 @@ class UNetModel(nn.Module):
 
         x = self.conv(x)
 
-        # if not self.supervised:
-        #     x = self.maskout(x)
+        print(f"shape: {x.shape}")
+        if not self.supervised:
+            pass
+            # TODO: figure out where to get the mask
+            # x = x * input_msk
 
         return x
 
