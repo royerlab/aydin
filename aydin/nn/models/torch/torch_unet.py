@@ -151,7 +151,7 @@ def n2t_unet_train_loop(
     model: UNetModel,
     learning_rate=0.01,
     training_noise=0.001,
-    l2_weight_regularisation=1e-9,
+    l2_weight_regularization=1e-9,
     patience=128,
     patience_epsilon=0.0,
     reduce_lr_factor=0.5,
@@ -169,7 +169,7 @@ def n2t_unet_train_loop(
         chain(model.parameters()),
         lr=learning_rate,
         start_noise_level=training_noise,
-        weight_decay=l2_weight_regularisation,
+        weight_decay=l2_weight_regularization,
     )
 
     scheduler = ReduceLROnPlateau(
@@ -180,7 +180,7 @@ def n2t_unet_train_loop(
         patience=reduce_lr_patience,
     )
 
-    loss_function = lambda u, v: torch.abs(u - v)
+    def loss_function(u, v): return torch.abs(u - v)
 
     for epoch in range(1024):
         train_loss_value = 0
