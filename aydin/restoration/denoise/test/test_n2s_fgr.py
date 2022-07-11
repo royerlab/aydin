@@ -13,24 +13,3 @@ def test_configure():
 
     implementations_description = Noise2SelfFGR().implementations_description
     pprint(implementations_description)
-
-
-#
-# def test_run_n2s_fgr():
-#     # Prepare the noisy classic_denoisers camera image
-#     image = camera().astype(np.float32)
-#     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
-#     noisy_image = add_noise(image)
-#
-#     # Call the Noise2Self restoration
-#     transforms = [
-#         {"class": RangeTransform, "kwargs": {}},
-#         {"class": PaddingTransform, "kwargs": {}},
-#     ]
-#     n2s = Noise2SelfFGR(variant="cb", it_transforms=transforms)
-#     n2s.train(noisy_image)
-#     denoised_image = n2s.denoise(noisy_image).clip(0, 1)
-#
-#     # Check if denoised image satisfies some checks
-#     assert psnr(denoised_image, image) >= 20.0
-#     assert ssim(denoised_image, image) >= 0.7
