@@ -190,7 +190,7 @@ def n2t_unet_train_loop(
         for i, (input_image, target_image) in enumerate(
             zip([input_images], [target_images])
         ):
-            print(f"index: {i}, shape:{input_images.shape}")
+            print(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
@@ -198,10 +198,10 @@ def n2t_unet_train_loop(
             # Forward pass:
             model.train()
 
-            translated_images = model(input_images)
+            translated_image = model(input_image)
 
             # translation loss (per voxel):
-            translation_loss = loss_function(translated_images, target_images)
+            translation_loss = loss_function(translated_image, target_image)
 
             # loss value (for all voxels):
             translation_loss_value = translation_loss.mean()
@@ -221,10 +221,10 @@ def n2t_unet_train_loop(
                 # Forward pass:
                 model.eval()
 
-                translated_images = model(input_images)
+                translated_image = model(input_image)
 
                 # translation loss (per voxel):
-                translation_loss = loss_function(translated_images, target_images)
+                translation_loss = loss_function(translated_image, target_image)
 
                 # loss values:
                 translation_loss_value = translation_loss.mean().cpu().item()
