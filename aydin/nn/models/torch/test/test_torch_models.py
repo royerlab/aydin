@@ -45,16 +45,6 @@ def test_supervised_2D_n2t():
     input_image = torch.tensor(input_image)
     lizard_image = torch.tensor(lizard_image)
 
-    # learning_rate = 0.01
-    # training_noise = 0.001
-    # l2_weight_regularisation = 1e-9
-    # patience = 128
-    # patience_epsilon = 0.0
-    # reduce_lr_factor = 0.5
-    # reduce_lr_patience = patience // 2
-    # reload_best_model_period = 1024
-    # best_val_loss_value = math.inf
-
     # dataset = TorchDataset(input_image, lizard_image, 64, self_supervised=False)
 
     # data_loader = DataLoader(
