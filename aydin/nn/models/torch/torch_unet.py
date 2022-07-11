@@ -113,14 +113,14 @@ class UNetModel(nn.Module):
             x = self.pooling_down(x)
 
             if layer_index != self.nb_unet_levels - 1:
-                print(f"skip layer added: x -> {x.shape}")
+                # print(f"skip layer added: x -> {x.shape}")
                 skip_layer.append(x)
 
-            print("down")
+            # print("down")
 
-        print("before bottom")
+        # print("before bottom")
         x = self.unet_bottom_conv_with_batch_norm(x)
-        print("after bottom")
+        # print("after bottom")
 
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
@@ -135,7 +135,7 @@ class UNetModel(nn.Module):
 
             x = self.conv_with_batch_norms_second_half[layer_index](x)
 
-            print("up")
+            # print("up")
 
         x = self.conv(x)
 
@@ -190,7 +190,7 @@ def n2t_unet_train_loop(
         for i, (input_image, target_image) in enumerate(
             zip([input_images], [target_images])
         ):
-            print(f"index: {i}, shape:{input_image.shape}")
+            # print(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
