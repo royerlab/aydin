@@ -146,10 +146,9 @@ class UNetModel(nn.Module):
 
 
 def n2t_unet_train_loop(
-    input_image,
-    lizard_image,
+    input_images,
+    target_images,
     model: UNetModel,
-    data_loader: DataLoader,
     learning_rate=0.01,
     training_noise=0.001,
     l2_weight_regularisation=1e-9,
@@ -187,8 +186,8 @@ def n2t_unet_train_loop(
         train_loss_value = 0
         val_loss_value = 0
         iteration = 0
-        for i, (input_images, target_images, validation_mask_images) in enumerate(
-            zip([input_image], [lizard_image], [lizard_image])
+        for i, (input_image, target_image) in enumerate(
+            zip([input_images], [target_images])
         ):
             print(f"index: {i}, shape:{input_images.shape}")
 
