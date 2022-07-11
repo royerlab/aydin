@@ -149,6 +149,7 @@ def n2t_unet_train_loop(
     input_images,
     target_images,
     model: UNetModel,
+    nb_epochs: int = 1024,
     learning_rate=0.01,
     training_noise=0.001,
     l2_weight_regularization=1e-9,
@@ -182,7 +183,7 @@ def n2t_unet_train_loop(
 
     def loss_function(u, v): return torch.abs(u - v)
 
-    for epoch in range(1024):
+    for epoch in range(nb_epochs):
         train_loss_value = 0
         val_loss_value = 0
         iteration = 0
