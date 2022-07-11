@@ -1,3 +1,5 @@
+# flake8: noqa
+
 # import math
 # from collections import OrderedDict
 # from itertools import chain

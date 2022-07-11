@@ -6,7 +6,6 @@ from itertools import chain
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
@@ -181,7 +180,8 @@ def n2t_unet_train_loop(
         patience=reduce_lr_patience,
     )
 
-    def loss_function(u, v): return torch.abs(u - v)
+    def loss_function(u, v):
+        return torch.abs(u - v)
 
     for epoch in range(nb_epochs):
         train_loss_value = 0
