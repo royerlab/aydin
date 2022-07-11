@@ -6,7 +6,7 @@ from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 
 def test_wavelet():
-    assert demo_wavelet(cropped_newyork(), display=False) >= 0.587 - 0.01
+    assert demo_wavelet(cropped_newyork(crop_amount=384), display=False) >= 0.587 - 0.01
 
 
 def test_wavelet_nd():
