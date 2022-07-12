@@ -96,7 +96,7 @@ class UNetModel(nn.Module):
 
         self.maskout = None  # TODO: assign correct maskout module
 
-    def forward(self, x):
+    def forward(self, x, input_msk):
 
         skip_layer = [x]
 
@@ -135,11 +135,9 @@ class UNetModel(nn.Module):
 
         x = self.conv(x)
 
-        print(f"shape: {x.shape}")
+        # print(f"shape: {x.shape}")
         if not self.supervised:
-            pass
-            # TODO: figure out where to get the mask
-            # x = x * input_msk
+            x *= input_msk
 
         return x
 
