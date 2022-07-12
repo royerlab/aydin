@@ -96,7 +96,7 @@ class UNetModel(nn.Module):
 
         self.maskout = None  # TODO: assign correct maskout module
 
-    def forward(self, x, input_msk):
+    def forward(self, x, input_msk=None):
 
         skip_layer = [x]
 
@@ -137,7 +137,10 @@ class UNetModel(nn.Module):
 
         # print(f"shape: {x.shape}")
         if not self.supervised:
-            x *= input_msk
+            if input_msk:
+                x *= input_msk
+            else:
+                raise ValueError("input_msk cannot be None for self-supervised training")
 
         return x
 
