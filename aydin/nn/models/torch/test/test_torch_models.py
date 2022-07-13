@@ -69,7 +69,7 @@ def test_masking_2D():
         supervised=False,
         spacetime_ndim=2,
     )
-    result = model2d(input_array)
+    result = model2d(input_array, torch.ones(input_array.shape))
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
 
@@ -103,7 +103,7 @@ def test_masking_3D():
         supervised=False,
         spacetime_ndim=3,
     )
-    result = model3d(input_array)
+    result = model3d(input_array, torch.ones(input_array.shape))
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
 

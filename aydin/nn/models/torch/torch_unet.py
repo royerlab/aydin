@@ -147,7 +147,7 @@ class UNetModel(nn.Module):
         x = self.conv(x)
 
         if not self.supervised:
-            if input_msk:
+            if input_msk is not None:
                 x *= input_msk
             else:
                 raise ValueError(
