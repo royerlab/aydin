@@ -94,9 +94,20 @@ class UNetModel(nn.Module):
         else:
             self.conv = nn.Conv3d(8, 1, 1)
 
-        self.maskout = None  # TODO: assign correct maskout module
-
     def forward(self, x, input_msk=None):
+        """
+        UNet forward method.
+
+        Parameters
+        ----------
+        x
+        input_msk : numpy.ArrayLike
+            A mask per image must be passed with self-supervised training.
+
+        Returns
+        -------
+
+        """
 
         skip_layer = [x]
 
