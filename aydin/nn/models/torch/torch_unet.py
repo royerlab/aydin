@@ -2,7 +2,6 @@ import math
 from collections import OrderedDict
 from itertools import chain
 
-# import napari
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -10,8 +9,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
 from aydin.nn.layers.pooling_down import PoolingDown
-
-# from aydin.nn.pytorch.it_ptcnn import to_numpy
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -97,9 +94,20 @@ class UNetModel(nn.Module):
         else:
             self.conv = nn.Conv3d(8, 1, 1)
 
-        self.maskout = None  # TODO: assign correct maskout module
+    def forward(self, x, input_msk=None):
+        """
+        UNet forward method.
 
-    def forward(self, x):
+        Parameters
+        ----------
+        x
+        input_msk : numpy.ArrayLike
+            A mask per image must be passed with self-supervised training.
+
+        Returns
+        -------
+
+        """
 
         skip_layer = [x]
 
@@ -138,8 +146,13 @@ class UNetModel(nn.Module):
 
         x = self.conv(x)
 
-        # if not self.supervised:
-        #     x = self.maskout(x)
+        if not self.supervised:
+            if input_msk is not None:
+                x *= input_msk
+            else:
+                raise ValueError(
+                    "input_msk cannot be None for self-supervised training"
+                )
 
         return x
 
