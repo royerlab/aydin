@@ -146,7 +146,6 @@ class UNetModel(nn.Module):
 
         x = self.conv(x)
 
-        # print(f"shape: {x.shape}")
         if not self.supervised:
             if input_msk:
                 x *= input_msk
