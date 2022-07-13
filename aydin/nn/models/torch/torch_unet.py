@@ -151,7 +151,9 @@ class UNetModel(nn.Module):
             if input_msk:
                 x *= input_msk
             else:
-                raise ValueError("input_msk cannot be None for self-supervised training")
+                raise ValueError(
+                    "input_msk cannot be None for self-supervised training"
+                )
 
         return x
 
