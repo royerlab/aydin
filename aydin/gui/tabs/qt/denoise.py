@@ -116,6 +116,12 @@ class DenoiseTab(QWidget):
 
         self.setLayout(self.tab_layout)
 
+        self.refresh_available_backends(
+            self.basic_backend_options, self.basic_backend_options_descriptions, advance_mode_enabled=False
+        )
+        self.refresh_pretrained_backends()
+
+        self.advance_enabled = False
         self.set_advanced_enabled(enable=False)  # to init the tab correctly
 
     def change_current_method(self, new_index):
@@ -141,10 +147,12 @@ class DenoiseTab(QWidget):
             options = self.basic_backend_options
             description_list = self.basic_backend_options_descriptions
 
-        self.refresh_available_backends(
-            options, description_list, advance_mode_enabled=enable
-        )
-        self.refresh_pretrained_backends()
+        if enable != self.advance_enabled:
+            self.refresh_available_backends(
+                options, description_list, advance_mode_enabled=enable
+            )
+            self.refresh_pretrained_backends()
+            self.advance_enabled = enable
 
     def load_pretrained_model(self, pretrained_model_files):
         """
