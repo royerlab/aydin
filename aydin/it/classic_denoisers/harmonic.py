@@ -1,6 +1,6 @@
 import math
 from functools import partial
-from typing import Optional
+from typing import Optional, List, Tuple
 
 import numpy
 from numpy.linalg import norm
@@ -23,10 +23,10 @@ from aydin.util.log.log import lprint
 def calibrate_denoise_harmonic(
     image: ArrayLike,
     rank: bool = False,
-    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_verylarge.value,
     optimiser: str = _defaults.default_optimiser.value,
     max_num_evaluations: int = _defaults.default_max_evals_hyperlow.value,
-    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot.value,
+    blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
     jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
     display_images: bool = False,
     display_crop: bool = False,
@@ -64,9 +64,12 @@ def calibrate_denoise_harmonic(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    enable_extended_blind_spot: bool
-        Set to True to enable extended blind-spot detection.
-        (advanced)
+    blind_spots: bool
+        List of voxel coordinates (relative to receptive field center) to
+        be included in the blind-spot. For example, you can give a list of
+        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
+        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)
+        (advanced) (hidden)
 
     jinv_interpolation_mode: str
         J-invariance interpolation mode for masking. Can be: 'median' or
@@ -74,11 +77,12 @@ def calibrate_denoise_harmonic(
         (advanced)
 
     display_images: bool
-        When True the denoised images encountered during optimisation are shown
+        When True the denoised images encountered during optimisation are shown.
+        (advanced) (hidden)
 
     display_crop: bool
         Displays crop, for debugging purposes...
-        (advanced)
+        (advanced) (hidden)
 
     other_fixed_parameters: dict
         Any other fixed parameters
@@ -118,8 +122,9 @@ def calibrate_denoise_harmonic(
             denoise_parameters=parameter_ranges,
             interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
-            blind_spots=enable_extended_blind_spot,
+            blind_spots=blind_spots,
             display_images=display_images,
+            loss_function='L2',
         )
         | other_fixed_parameters
     )
@@ -139,8 +144,9 @@ def calibrate_denoise_harmonic(
             denoise_parameters=parameter_ranges,
             interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
-            blind_spots=enable_extended_blind_spot,
+            blind_spots=blind_spots,
             display_images=display_images,
+            loss_function='L2',
         )
         | other_fixed_parameters
     )

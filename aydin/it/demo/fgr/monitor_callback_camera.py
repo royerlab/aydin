@@ -89,5 +89,6 @@ def demo(regressor):
         viewer.add_image(n(denoised), name='denoised')
 
 
-demo(PerceptronRegressor(max_epochs=10))
-demo(LGBMRegressor(max_num_estimators=400))
+if __name__ == "__main__":
+    demo(PerceptronRegressor(max_epochs=10))
+    demo(LGBMRegressor(max_num_estimators=400))

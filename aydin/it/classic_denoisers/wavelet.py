@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Optional
+from typing import Optional, List, Tuple
 
 import numpy
 import pywt
@@ -18,7 +18,7 @@ def calibrate_denoise_wavelet(
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
     optimiser: str = 'smart',  # using smart optimiser is important here!
     max_num_evaluations: int = _defaults.default_max_evals_normal.value,
-    enable_extended_blind_spot: bool = _defaults.default_enable_extended_blind_spot.value,
+    blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
     jinv_interpolation_mode: str = _defaults.default_jinv_interpolation_mode.value,
     display_images: bool = False,
     display_crop: bool = False,
@@ -29,7 +29,7 @@ def calibrate_denoise_wavelet(
     ">wavelet</a> denoiser for the given image and returns the optimal
     parameters obtained using the N2S loss.
 
-    Note: we use the scikt-image implementation of wavelet denoising.
+    Note: we use the scikit-image implementation of wavelet denoising.
 
     Parameters
     ----------
@@ -68,9 +68,12 @@ def calibrate_denoise_wavelet(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    enable_extended_blind_spot: bool
-        Set to True to enable extended blind-spot detection.
-        (advanced)
+    blind_spots: bool
+        List of voxel coordinates (relative to receptive field center) to
+        be included in the blind-spot. For example, you can give a list of
+        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
+        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)
+        (advanced) (hidden)
 
     jinv_interpolation_mode: str
         J-invariance interpolation mode for masking. Can be: 'median' or
@@ -78,11 +81,12 @@ def calibrate_denoise_wavelet(
         (advanced)
 
     display_images: bool
-        When True the denoised images encountered during optimisation are shown
+        When True the denoised images encountered during optimisation are shown.
+        (advanced) (hidden)
 
     display_crop: bool
         Displays crop, for debugging purposes...
-        (advanced)
+        (advanced) (hidden)
 
     other_fixed_parameters: dict
         Any other fixed parameters
@@ -161,7 +165,7 @@ def calibrate_denoise_wavelet(
             denoise_parameters=parameter_ranges,
             interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
-            blind_spots=enable_extended_blind_spot,
+            blind_spots=blind_spots,
             display_images=display_images,
         )
         | other_fixed_parameters
@@ -184,7 +188,7 @@ def calibrate_denoise_wavelet(
             denoise_parameters=parameter_ranges,
             interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
-            blind_spots=enable_extended_blind_spot,
+            blind_spots=blind_spots,
             display_images=display_images,
         )
         | other_fixed_parameters
@@ -220,12 +224,12 @@ def denoise_wavelet(
         The type of wavelet to perform and can be any of the options
         ``pywt.wavelist`` outputs. The default is `'db1'`. For example,
         ``wavelet`` can be any of ``{'db2', 'haar', 'sym9'}`` and many more
-          (see PyWavelets documentation).
+        (see PyWavelets documentation).
 
     sigma : float or list, optional
         The noise standard deviation used when computing the wavelet detail
         coefficient threshold(s). When None (default), the noise standard
-        deviation is estimated via the method in [2]_.
+        deviation is estimated via the method in (2)_.
 
     mode : {'soft', 'hard'}, optional
         An optional argument to choose the type of denoising performed. It
@@ -234,7 +238,7 @@ def denoise_wavelet(
 
     method : {'BayesShrink', 'VisuShrink'}, optional
         Thresholding method to be used. The currently supported methods are
-        "BayesShrink" [1]_ and "VisuShrink" [2]_. Defaults to "BayesShrink".
+        "BayesShrink" (1)_ and "VisuShrink" (2)_. Defaults to "BayesShrink".
 
     kwargs : dict
         Any other parameters to be passed to scikit-image implementations

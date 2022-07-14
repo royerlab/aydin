@@ -1,3 +1,4 @@
+# flake8: noqa
 import numpy
 
 from aydin.analysis.camera_simulation import simulate_camera_image
@@ -45,5 +46,6 @@ def demo_camera_simulation_video():
         viewer.add_image(noisy_video, name='noisy_video')
 
 
-demo_camera_simulation()
-demo_camera_simulation_video()
+if __name__ == "__main__":
+    demo_camera_simulation()
+    demo_camera_simulation_video()

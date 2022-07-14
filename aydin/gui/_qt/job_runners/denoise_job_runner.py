@@ -22,7 +22,7 @@ from aydin.util.log.log import Log, lprint
 
 class DenoiseJobRunner(QWidget):
     def __init__(self, parent, threadpool, start_button):
-        super(QWidget, self).__init__(parent)
+        super(DenoiseJobRunner, self).__init__(parent)
         self.parent = parent
         self.threadpool = threadpool
         self.start_button = start_button
@@ -72,7 +72,7 @@ class DenoiseJobRunner(QWidget):
                 results.append(denoised)
 
                 output_path, file_counter = get_output_image_path(
-                    image_path, output_folder=output_folder
+                    image_path, operation_type="denoised", output_folder=output_folder
                 )
 
                 imwrite(denoised, output_path)

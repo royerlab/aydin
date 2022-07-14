@@ -123,7 +123,8 @@ def demo_collect_feature_2d_image():
         viewer.add_image(features, name='features', colormap='plasma')
 
 
-demo_collect_feature_3d()
-demo_collect_feature_2d()
+if __name__ == "__main__":
+    demo_collect_feature_3d()
+    demo_collect_feature_2d()
 
-demo_collect_feature_2d_image()
+    demo_collect_feature_2d_image()

@@ -24,5 +24,6 @@ def demo_range(mode):
     assert numpy.abs(postprocessed - image).mean() < 1e-8
 
 
-demo_range("minmax")
-demo_range("percentile")
+if __name__ == "__main__":
+    demo_range("minmax")
+    demo_range("percentile")

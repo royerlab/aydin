@@ -12,8 +12,8 @@ class SystemSummaryWidget(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self, parent)
 
-        self.layout = QHBoxLayout()
-        self.layout.setAlignment(Qt.AlignCenter)
+        self.main_layout = QHBoxLayout()
+        self.main_layout.setAlignment(Qt.AlignCenter)
 
         # CPU summary
         self.cpu_group_box = QGroupBox("CPU Summary")
@@ -175,8 +175,8 @@ class SystemSummaryWidget(QWidget):
             else:
                 self.gpu_memory_free_label.setStyleSheet("QLabel {color: green;}")
 
-        self.layout.addWidget(self.cpu_group_box)
-        self.layout.addWidget(self.memory_group_box)
-        self.layout.addWidget(self.gpu_group_box)
+        self.main_layout.addWidget(self.cpu_group_box)
+        self.main_layout.addWidget(self.memory_group_box)
+        self.main_layout.addWidget(self.gpu_group_box)
 
-        self.setLayout(self.layout)
+        self.setLayout(self.main_layout)

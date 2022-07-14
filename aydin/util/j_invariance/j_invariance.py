@@ -1,6 +1,6 @@
 import math
 from functools import partial
-from typing import Callable, Dict, Union, Tuple, List, Any
+from typing import Callable, Dict, Union, Tuple, List, Any, Optional
 import numpy
 from scipy.optimize import minimize, shgo
 
@@ -19,13 +19,13 @@ def calibrate_denoiser(
     image,
     denoise_function: Callable,
     denoise_parameters: Dict[str, Union[Tuple[float, float], List[Any]]],
-    mode: str = 'fast',
+    mode: str = 'smart',
     max_num_evaluations: int = 128,
     patience: int = 64,
-    interpolation_mode: str = 'median',
+    interpolation_mode: str = 'gaussian',
     stride: int = 4,
-    loss_function: str = 'L2',
-    blind_spots: bool = True,
+    loss_function: str = 'L1',
+    blind_spots: Optional[List[Tuple[int]]] = None,
     display_images: bool = False,
     **other_fixed_parameters,
 ):
@@ -74,8 +74,10 @@ def calibrate_denoiser(
     loss_function: str
         Loss/Error function: Can be:  'L1', 'L2', 'SSIM'
 
-    blind_spots: bool
-        Set to True to enable extended blind-spot detection.
+    blind_spots: Optional[List[Tuple[int]]]
+        Set to None to enable automatic blind-spot detection.
+        Otherwise provide list of blindspots. For example:
+        [(0,0,0),(1,0,0),(-1,0,0)].
 
     display_images: bool
         If True the denoised images for each parameter tested are displayed.
@@ -113,14 +115,15 @@ def calibrate_denoiser(
         image = image.astype(dtype=numpy.float32, copy=False)
 
         # Generate mask:
-        mask = _generate_mask(image, stride, enable_extended_blind_spot=blind_spots)
+        mask = _generate_mask(image, stride, blind_spots=blind_spots)
 
         # Compute interpolated image:
-        interpolation = _interpolate_image(image, interpolation_mode)
+        interpolation = _interpolate_image(
+            image, mask, num_iterations=2 * stride, mode=interpolation_mode
+        )
 
-        # Masked input image (fixed over optimisation!):
-        masked_input_image = image.copy()
-        masked_input_image[mask] = interpolation[mask]
+        # Masked input image (fixed during optimisation!):
+        masked_input_image = interpolation.copy()
 
         # We backup the masked input image to make sure that it is unchanged after optimisation,
         # which would indicate a 'non-behaving' denoiser that ioperates 'in-place'...
@@ -266,19 +269,30 @@ def calibrate_denoiser(
                                 x0 = result.x
 
                                 # local optimisation using L-BFGS-B:
-                                result = minimize(
-                                    fun=__function,
-                                    x0=x0,
-                                    method='L-BFGS-B',
-                                    bounds=bounds,
-                                    options={
-                                        'maxfun': max_num_evaluations,
-                                        'eps': 1e-6,
-                                        'ftol': 1e-8,
-                                        'gtol': 1e-12,
-                                    },
-                                    callback=callback,
-                                )
+                                gtol = 1e-12
+                                eps = 1e-10
+                                for i in range(4):
+                                    result = minimize(
+                                        fun=__function,
+                                        x0=x0,
+                                        method='L-BFGS-B',
+                                        bounds=bounds,
+                                        options={
+                                            'maxfun': max_num_evaluations,
+                                            'eps': eps,
+                                            'ftol': 1e-8,
+                                            'gtol': gtol,
+                                        },
+                                        callback=callback,
+                                    )
+                                    if (
+                                        'NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
+                                        not in result.message
+                                    ):
+                                        break
+                                    x0 = result.x
+                                    eps *= 100
+
                                 lprint(f"Local optimisation success: {result.success}")
                                 lprint(
                                     f"Local optimisation convergence message: {result.message}"

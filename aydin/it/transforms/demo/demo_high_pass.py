@@ -125,4 +125,5 @@ def demo_high_pass_real():
         viewer.add_image(numpy.stack(low_pass_images), name='low_pass_images')
 
 
-demo_high_pass_real()
+if __name__ == "__main__":
+    demo_high_pass_real()

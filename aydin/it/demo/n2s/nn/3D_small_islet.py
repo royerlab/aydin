@@ -48,4 +48,5 @@ def demo():
         viewer.add_image(denoised, name='denoised')
 
 
-demo()
+if __name__ == "__main__":
+    demo()
