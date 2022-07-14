@@ -47,6 +47,20 @@ def unet_receptive_field_radius(
     nb_unet_levels,
     shiftconv,
 ):
+    """
+    Returns the required receptive field radius for a unet structure.
+
+    Parameters
+    ----------
+    nb_unet_levels: int
+    shiftconv: bool
+
+    Returns
+    -------
+    int
+        Required receptive field radius in voxels.
+
+    """
     if shiftconv:
         rf = 7 if nb_unet_levels == 0 else 36 * 2 ** (nb_unet_levels - 1) - 6
     else:

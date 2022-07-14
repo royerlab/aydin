@@ -56,7 +56,7 @@ def test_supervised_2D_n2t():
         nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
     )
 
-    n2t_unet_train_loop(input_image, lizard_image, model)
+    n2t_unet_train_loop(noisy_image, clean_image, model)
     result = model(noisy_image)
 
     assert result.shape == noisy_image.shape
