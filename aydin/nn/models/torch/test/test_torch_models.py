@@ -1,3 +1,5 @@
+# flake8: noqa
+
 # import math
 # from collections import OrderedDict
 # from itertools import chain
@@ -33,9 +35,8 @@ def test_supervised_2D():
     assert result.dtype == input_array.dtype
 
 
-@pytest.mark.heavy
 def test_supervised_2D_n2t():
-    lizard_image = normalise(camera())
+    lizard_image = normalise(camera()[:128, :128])
     lizard_image = numpy.expand_dims(lizard_image, axis=0)
     lizard_image = numpy.expand_dims(lizard_image, axis=0)
 
@@ -44,27 +45,17 @@ def test_supervised_2D_n2t():
     input_image = torch.tensor(input_image)
     lizard_image = torch.tensor(lizard_image)
 
-    # learning_rate = 0.01
-    # training_noise = 0.001
-    # l2_weight_regularisation = 1e-9
-    # patience = 128
-    # patience_epsilon = 0.0
-    # reduce_lr_factor = 0.5
-    # reduce_lr_patience = patience // 2
-    # reload_best_model_period = 1024
-    # best_val_loss_value = math.inf
+    # dataset = TorchDataset(input_image, lizard_image, 64, self_supervised=False)
 
-    dataset = TorchDataset(input_image, lizard_image, 64, self_supervised=False)
-
-    data_loader = DataLoader(
-        dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
-    )
+    # data_loader = DataLoader(
+    #     dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
+    # )
 
     model = UNetModel(
         nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
     )
 
-    n2t_unet_train_loop(input_image, lizard_image, model, data_loader)
+    n2t_unet_train_loop(input_image, lizard_image, model)
 
     # assert result.shape == input_image.shape
     # assert result.dtype == input_image.dtype
@@ -78,7 +69,7 @@ def test_masking_2D():
         supervised=False,
         spacetime_ndim=2,
     )
-    result = model2d(input_array)
+    result = model2d(input_array, torch.ones(input_array.shape))
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
 
@@ -112,7 +103,7 @@ def test_masking_3D():
         supervised=False,
         spacetime_ndim=3,
     )
-    result = model3d(input_array)
+    result = model3d(input_array, torch.ones(input_array.shape))
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
 
