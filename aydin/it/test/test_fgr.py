@@ -101,5 +101,3 @@ def do_it_fgr(regressor, min_psnr=22, min_ssim=0.75, supervised=False):
     # do not change the number below, but instead, fix the problem -- most likely a parameter.
 
     assert psnr_denoised > min_psnr and ssim_denoised > min_ssim
-
-
