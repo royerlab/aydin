@@ -64,6 +64,15 @@ class Log:
             if Log.gui_statusbar is not None:
                 Log.gui_statusbar.showMessage(result)
 
+    @staticmethod
+    @contextmanager
+    def test_context():
+        Log.override_test_exclusion = True
+        Log.force_click_echo = True
+        yield
+        Log.override_test_exclusion = False
+        Log.force_click_echo = False
+
     def set_log_elapsed_time(log_elapsed_time: bool):
         Log.log_elapsed_time = log_elapsed_time
 
@@ -77,7 +86,7 @@ def lprint(*args, sep=' ', end='\n'):
 
     Parameters
     ----------
-    args : list
+    args : Sequence
     sep : str
     end : str
 

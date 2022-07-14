@@ -2,6 +2,7 @@ import importlib
 import inspect
 import os
 import shutil
+from typing import Optional
 
 from aydin import regression
 from aydin.features.standard_features import StandardFeatureGenerator
@@ -11,16 +12,13 @@ from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.regression.cb import CBRegressor
+from aydin.regression.lgbm import LGBMRegressor
+from aydin.regression.linear import LinearRegressor
+from aydin.regression.perceptron import PerceptronRegressor
+from aydin.regression.random_forest import RandomForestRegressor
+from aydin.regression.support_vector import SupportVectorRegressor
 from aydin.restoration.denoise.base import DenoiseRestorationBase
 from aydin.util.log.log import lsection
-
-
-if os.getenv("BUNDLED_AYDIN") == "1":
-    from aydin.regression.lgbm import LGBMRegressor  # noqa: F401
-    from aydin.regression.linear import LinearRegressor  # noqa: F401
-    from aydin.regression.perceptron import PerceptronRegressor  # noqa: F401
-    from aydin.regression.random_forest import RandomForestRegressor  # noqa: F401
-    from aydin.regression.support_vector import SupportVectorRegressor  # noqa: F401
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):
@@ -33,6 +31,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
     def __init__(
         self,
         *,
+        variant: Optional[str] = None,
         use_model=None,
         input_model_path=None,
         lower_level_args=None,
@@ -41,6 +40,12 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         """
         Parameters
         ----------
+        variant : str, optional
+            Variant of FGR denoiser to be used. Variant would supersede
+            the denoiser option passed in lower_level_args. `implementations`
+            property would return a complete list of variants (with a prefix
+            of 'Noise2SelfFGR-`) that can be used
+            on a given installation. Example variants: `cb`, `lgbm`, ...
         use_model : bool
             Flag to choose to train a new model or infer from a
             previously trained model. By default it is None.
@@ -56,6 +61,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         self.use_model_flag = use_model
         self.input_model_path = input_model_path
         self.lower_level_args = lower_level_args
+        self.variant = variant
 
         self.it = None
         self.it_transforms = (
@@ -170,7 +176,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         generator : FeatureGeneratorBase
 
         """
-        # print(self.lower_level_args)
         if self.lower_level_args is not None:
             generator = self.lower_level_args["feature_generator"]["class"](
                 **self.lower_level_args["feature_generator"]["kwargs"]
@@ -188,13 +193,23 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         regressor : RegressorBase
 
         """
+        if self.variant:
+            regressors = {
+                "cb": CBRegressor,
+                "lgbm": LGBMRegressor,
+                "linear": LinearRegressor,
+                "perceptron": PerceptronRegressor,
+                "random_forest": RandomForestRegressor,
+                "support_vector": SupportVectorRegressor,
+            }
+            return regressors[self.variant]()
 
-        if self.lower_level_args is not None:
+        if self.lower_level_args is None:
+            regressor = CBRegressor()
+        else:
             regressor = self.lower_level_args["regressor"]["class"](
                 **self.lower_level_args["regressor"]["kwargs"]
             )
-        else:
-            regressor = CBRegressor()
 
         return regressor
 
@@ -326,7 +341,7 @@ def noise2self_fgr(noisy, *, batch_axes=None, chan_axes=None, variant=None):
 
     """
     # Run N2S and save the result
-    n2s = Noise2SelfFGR(variant=variant)
+    n2s = Noise2SelfFGR()
 
     # Train
     n2s.train(noisy, batch_axes=batch_axes, chan_axes=chan_axes)

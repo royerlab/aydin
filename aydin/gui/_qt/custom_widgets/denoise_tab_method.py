@@ -28,7 +28,7 @@ class DenoiseTabMethodWidget(QWidget):
         self.description = description
 
         # Widget layout
-        self.layout = QHBoxLayout()
+        self.main_layout = QHBoxLayout()
         self.tab_method_layout = QVBoxLayout()
         self.tab_method_layout.setAlignment(Qt.AlignTop)
 
@@ -107,11 +107,11 @@ class DenoiseTabMethodWidget(QWidget):
 
         self.right_side_vlayout.addWidget(self.scroll)
 
-        self.layout.addLayout(self.tab_method_layout, 35)
-        self.layout.addWidget(QVerticalLineBreakWidget(self))
-        self.layout.addLayout(self.right_side_vlayout, 50)
+        self.main_layout.addLayout(self.tab_method_layout, 35)
+        self.main_layout.addWidget(QVerticalLineBreakWidget(self))
+        self.main_layout.addLayout(self.right_side_vlayout, 50)
 
-        self.setLayout(self.layout)
+        self.setLayout(self.main_layout)
 
     def lower_level_args(self):
         args = {}

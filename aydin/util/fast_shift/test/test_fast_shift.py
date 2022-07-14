@@ -79,7 +79,7 @@ def test_fast_shift_filter_3d(_shift=(-1, 3, -7)):
 
 
 def test_fast_shift_filter_4d(_shift=(-1, 3, -7, +13)):
-    image = examples_single.hyman_hela.get_array().squeeze()
+    image = examples_single.maitre_mouse.get_array().squeeze()
     image = image[0:10, 0:10, 0:128, 0:128]
 
     shifted_image = fast_shift(image, shift=_shift)

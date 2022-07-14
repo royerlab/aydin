@@ -1,3 +1,5 @@
+import pytest
+
 from aydin.analysis.dimension_analysis import dimension_analysis_on_image
 from aydin.io.datasets import examples_single
 
@@ -43,6 +45,7 @@ def test_dimension_analysis_maitre(display: bool = False):
     assert 0 in batch_axes and 1 in batch_axes
 
 
+@pytest.mark.heavy
 def test_dimension_analysis_hela(display: bool = False):
 
     image = examples_single.hyman_hela.get_array()
