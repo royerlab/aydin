@@ -186,9 +186,18 @@ class ImageDenoiserClassic(ImageTranslatorBase):
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
         """Internal method that translates an input image on the basis of the trained model.
 
-        :param input_image: input image
-        :param batch_dims: batch dimensions
-        :return:
+        Parameters
+        ----------
+        input_image
+            input image
+        image_slice
+        whole_image_shape
+
+        Returns
+        -------
+        numpy.ArrayLike
+            translated image
+
         """
         shape = input_image.shape
         num_batches = shape[0]

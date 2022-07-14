@@ -24,7 +24,7 @@ def calibrate_denoise_spectral(
     axes: Optional[Tuple[int, ...]] = None,
     patch_size: Optional[Union[int, Tuple[int], str]] = None,
     try_dct: bool = True,
-    try_fft: bool = True,
+    try_fft: bool = False,
     try_dst: bool = False,
     max_order: float = 6.0,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
@@ -209,7 +209,7 @@ def denoise_spectral(
     \n\n
     Note: This seems like a lot of parameters, but thanks to our
     auto-tuning approach these parameters are all automatically
-     determined 😊.
+    determined 😊.
 
     Parameters
     ----------
@@ -397,7 +397,7 @@ def _compute_distance_image_for_dxt(freq_cutoff, shape, selected_axes):
     return f
 
 
-@jit(nopython=True, parallel=True)
+# @jit(nopython=True, parallel=True)
 def _compute_distance_image_for_fft(freq_cutoff, shape, selected_axes):
     f = numpy.zeros(shape=shape, dtype=numpy.float32)
     axis_grid = tuple(

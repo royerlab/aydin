@@ -16,7 +16,7 @@ def n(image):
 
 # Test with garder 3D image
 def test_random_sample_patch_3D():
-    image_path = examples_single.hyman_hela.get_path()
+    image_path = examples_single.maitre_mouse.get_path()
     image0, metadata = io.imread(image_path)
     print(image0.shape)
     image0 = n(image0.squeeze()[0:32, :, 200:300, 200:300])

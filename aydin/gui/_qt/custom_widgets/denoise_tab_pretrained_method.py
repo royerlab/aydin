@@ -15,7 +15,7 @@ from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
 
 class DenoiseTabPretrainedMethodWidget(QWidget):
     def __init__(self, parent, loaded_it):
-        super(QWidget, self).__init__(parent)
+        super(DenoiseTabPretrainedMethodWidget, self).__init__(parent)
 
         self.parent = parent
         self.loaded_it = loaded_it
@@ -23,7 +23,7 @@ class DenoiseTabPretrainedMethodWidget(QWidget):
         self.description = f"This is a pretrained model, namely uses the image translator: {loaded_it.__class__.__name__}, will not train anything new but will quickly infer on the images of your choice."
 
         # Widget layout
-        self.layout = QHBoxLayout()
+        self.main_layout = QHBoxLayout()
         self.tab_method_layout = QVBoxLayout()
         self.tab_method_layout.setAlignment(Qt.AlignTop)
 
@@ -63,8 +63,8 @@ class DenoiseTabPretrainedMethodWidget(QWidget):
 
         self.right_side_vlayout.addLayout(self.save_json_and_model_layout)
 
-        self.layout.addLayout(self.tab_method_layout, 35)
-        self.layout.addWidget(QVerticalLineBreakWidget(self))
-        self.layout.addLayout(self.right_side_vlayout, 50)
+        self.main_layout.addLayout(self.tab_method_layout, 35)
+        self.main_layout.addWidget(QVerticalLineBreakWidget(self))
+        self.main_layout.addLayout(self.right_side_vlayout, 50)
 
-        self.setLayout(self.layout)
+        self.setLayout(self.main_layout)

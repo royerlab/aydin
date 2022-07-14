@@ -30,7 +30,7 @@ class FilesTab(QWidget):
     """
 
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(FilesTab, self).__init__(parent)
         self.parent = parent
 
         self._hyperstack_last_fail_state_metadatas = None
