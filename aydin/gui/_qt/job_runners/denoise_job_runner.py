@@ -22,7 +22,7 @@ from aydin.util.log.log import Log, lprint
 
 class DenoiseJobRunner(QWidget):
     def __init__(self, parent, threadpool, start_button):
-        super(QWidget, self).__init__(parent)
+        super(DenoiseJobRunner, self).__init__(parent)
         self.parent = parent
         self.threadpool = threadpool
         self.start_button = start_button

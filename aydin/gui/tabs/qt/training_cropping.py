@@ -31,7 +31,7 @@ class TrainingCroppingTab(BaseCroppingTab):
     """
 
     def __init__(self, parent):
-        super().__init__(parent)
+        super(TrainingCroppingTab, self).__init__(parent)
         self.parent = parent
 
         self.use_same_crop_checkbox = QCheckBox("Use same cropping for denoising")

@@ -39,7 +39,7 @@ class TransformsTabItem(QWidget):
         self.transform_class = transform_class
         self.line_edits = []
 
-        self.layout = QHBoxLayout()
+        self.main_layout = QHBoxLayout()
 
         explanation_text_string = self.transform_class.__doc__
         explanation_text_string = break_text(explanation_text_string)
@@ -48,10 +48,10 @@ class TransformsTabItem(QWidget):
         self.explanation_text.setTextFormat(Qt.RichText)
         self.explanation_text.setOpenExternalLinks(True)
         self.explanation_text.setAlignment(Qt.AlignTop)
-        self.layout.addWidget(self.explanation_text, 45)
+        self.main_layout.addWidget(self.explanation_text, 45)
 
         # Vertical Line Break
-        self.layout.addWidget(QVerticalLineBreakWidget(self))
+        self.main_layout.addWidget(QVerticalLineBreakWidget(self))
 
         self.transform_details_layout = QVBoxLayout()
         self.transform_details_layout.setAlignment(Qt.AlignTop)
@@ -105,9 +105,9 @@ class TransformsTabItem(QWidget):
         self.scroll.setMinimumHeight(200)
         self.transform_details_layout.addWidget(self.scroll)
 
-        self.layout.addLayout(self.transform_details_layout, 45)
-        self.layout.setAlignment(Qt.AlignTop)
-        self.setLayout(self.layout)
+        self.main_layout.addLayout(self.transform_details_layout, 45)
+        self.main_layout.setAlignment(Qt.AlignTop)
+        self.setLayout(self.main_layout)
 
     def preprocess_chechbox_on_state_changed(self):
         self.postprocess_checkbox.setEnabled(self.preprocess_checkbox.isChecked())

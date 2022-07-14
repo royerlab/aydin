@@ -1,4 +1,5 @@
 # flake8: noqa
+
 # import math
 # from collections import OrderedDict
 # from itertools import chain
@@ -36,7 +37,7 @@ def test_supervised_2D():
 
 # @pytest.mark.heavy
 def test_supervised_2D_n2t():
-    clean_image = normalise(camera())
+    clean_image = normalise(camera()[:128, :128])
     clean_image = numpy.expand_dims(clean_image, axis=0)
     clean_image = numpy.expand_dims(clean_image, axis=0)
 
@@ -45,17 +46,17 @@ def test_supervised_2D_n2t():
     noisy_image = torch.tensor(noisy_image)
     clean_image = torch.tensor(clean_image)
 
-    dataset = TorchDataset(noisy_image, clean_image, 64, self_supervised=False)
+    # dataset = TorchDataset(input_image, lizard_image, 64, self_supervised=False)
 
-    data_loader = DataLoader(
-        dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
-    )
+    # data_loader = DataLoader(
+    #     dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
+    # )
 
     model = UNetModel(
         nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
     )
 
-    n2t_unet_train_loop(noisy_image, clean_image, model, data_loader)
+    n2t_unet_train_loop(input_image, lizard_image, model)
     result = model(noisy_image)
 
     assert result.shape == noisy_image.shape
@@ -70,7 +71,7 @@ def test_masking_2D():
         supervised=False,
         spacetime_ndim=2,
     )
-    result = model2d(input_array)
+    result = model2d(input_array, torch.ones(input_array.shape))
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
 
@@ -104,7 +105,7 @@ def test_masking_3D():
         supervised=False,
         spacetime_ndim=3,
     )
-    result = model3d(input_array)
+    result = model3d(input_array, torch.ones(input_array.shape))
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
 
