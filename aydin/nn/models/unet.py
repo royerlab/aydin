@@ -48,7 +48,6 @@ class UNetModel(Model):
         normalization: str = 'batch',  # None,  # 'instance',
         activation: str = 'ReLU',
         supervised: bool = False,
-        shiftconv: bool = True,
         nfilters: int = 8,
         learning_rate: float = 0.01,
         original_zdim: int = None,
@@ -105,7 +104,7 @@ class UNetModel(Model):
         self.num_lyr = nb_unet_levels
         self.normalization = normalization
         self.activation = activation
-        self.shiftconv = shiftconv
+        self.shiftconv = 'shiftconv' == self.training_architecture and not supervised
         self.nfilters = nfilters
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
@@ -129,7 +128,7 @@ class UNetModel(Model):
             else self.unet_core_3d()
         )
 
-        if not shiftconv and not supervised:
+        if not self.shiftconv and not supervised:
             input_msk = Input(input_layer_size, name='input_msk')
             x = Maskout(name='maskout')([x, input_msk])
             super().__init__([self.input_lyr, input_msk], x)
@@ -138,6 +137,10 @@ class UNetModel(Model):
 
         self.compile(optimizer=Adam(lr=learning_rate), loss='mse')
         self.compile = True
+
+    def size(self):
+        """Returns size of the model in bytes"""
+        return self.count_params() * 4
 
     def unet_core_2d(self, input_lyr):
         """Unet Core method which actually populates the model"""
@@ -415,10 +418,6 @@ class UNetModel(Model):
 
         return x
 
-    def size(self):
-        """Returns size of the model in bytes"""
-        return self.count_params() * 4
-
     def fit(
         self,
         input_image=None,
@@ -427,7 +426,6 @@ class UNetModel(Model):
         train_valid_ratio=None,
         img_val=None,
         val_marker=None,
-        training_architecture=None,
         create_patches_for_validation=None,
         total_num_patches=None,
         batch_size=None,
@@ -450,7 +448,6 @@ class UNetModel(Model):
         train_valid_ratio
         img_val
         val_marker
-        training_architecture
         create_patches_for_validation
         total_num_patches
         batch_size
@@ -468,13 +465,13 @@ class UNetModel(Model):
         loss_history
 
         """
-        if create_patches_for_validation:
-            tv_ratio = train_valid_ratio
-        else:
-            tv_ratio = 0
+        # Convert mask_size to tuple
+        mask_size = (mask_size,) * (input_image.ndim - 2)
+
+        tv_ratio = train_valid_ratio if create_patches_for_validation else 0
 
         validation_data, validation_steps = get_unet_fit_args(
-            train_method=training_architecture,
+            train_method=self.training_architecture,
             create_patches_for_validation=create_patches_for_validation,
             input_image=input_image,
             total_num_patches=total_num_patches,
@@ -482,13 +479,12 @@ class UNetModel(Model):
             batch_size=batch_size,
             random_mask_ratio=random_mask_ratio,
             img_val=img_val,
-            patch_size=patch_size,
-            mask_size=mask_size,
             val_marker=val_marker,
+            mask_size=mask_size,
             replace_by=replace_by,
         )
 
-        if 'shiftconv' in training_architecture:
+        if 'shiftconv' in self.training_architecture:
             loss_history = super().fit(
                 input_image,
                 target_image,
@@ -498,7 +494,7 @@ class UNetModel(Model):
                 batch_size=batch_size,
                 validation_data=validation_data,
             )
-        elif 'checkerbox' in training_architecture:
+        elif 'checkerbox' in self.training_architecture:
             loss_history = super().fit(
                 maskedgen(input_image, batch_size, mask_size, replace_by=replace_by),
                 epochs=max_epochs,
@@ -511,7 +507,7 @@ class UNetModel(Model):
                 validation_data=validation_data,
                 validation_steps=validation_steps,
             )
-        elif 'random' in training_architecture:
+        elif 'random' in self.training_architecture:
             loss_history = super().fit(
                 randmaskgen(
                     input_image,
@@ -529,7 +525,7 @@ class UNetModel(Model):
                 validation_data=validation_data,
                 validation_steps=validation_steps,
             )
-        elif 'checkran' in training_architecture:
+        elif 'checkran' in self.training_architecture:
             # train with checkerbox first
             lprint('Starting with checkerbox masking.')
             history_checkerbox = super().fit(

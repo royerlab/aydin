@@ -9,7 +9,6 @@ def test_supervised_2D():
     model2d = UNetModel(
         (64, 64, 1),
         nb_unet_levels=2,
-        shiftconv=False,
         supervised=True,
         spacetime_ndim=2,
     )
@@ -23,7 +22,7 @@ def test_shiftconv_2D():
     model2d = UNetModel(
         (64, 64, 1),
         nb_unet_levels=2,
-        shiftconv=True,
+        training_architecture='shiftconv',
         supervised=False,
         spacetime_ndim=2,
     )
@@ -37,7 +36,6 @@ def test_masking_2D():
     model2d = UNetModel(
         (64, 64, 1),
         nb_unet_levels=2,
-        shiftconv=False,
         supervised=False,
         spacetime_ndim=2,
     )
@@ -59,7 +57,6 @@ def test_supervised_3D():
     model3d = UNetModel(
         (64, 64, 64, 1),
         nb_unet_levels=2,
-        shiftconv=False,
         supervised=True,
         spacetime_ndim=3,
     )
@@ -73,7 +70,7 @@ def test_shiftconv_3D():
     model3d = UNetModel(
         (64, 64, 64, 1),
         nb_unet_levels=2,
-        shiftconv=True,
+        training_architecture='shiftconv',
         supervised=False,
         spacetime_ndim=3,
     )
@@ -87,7 +84,6 @@ def test_masking_3D():
     model3d = UNetModel(
         (64, 64, 64, 1),
         nb_unet_levels=2,
-        shiftconv=False,
         supervised=False,
         spacetime_ndim=3,
     )
@@ -103,7 +99,6 @@ def test_various_masking_3D():
         model3d = UNetModel(
             input_array.shape[1:],
             nb_unet_levels=4,
-            shiftconv=False,
             supervised=False,
             spacetime_ndim=3,
         )
@@ -119,7 +114,6 @@ def test_thin_masking_3D():
         model3d = UNetModel(
             input_array.shape[1:],
             nb_unet_levels=4,
-            shiftconv=False,
             supervised=False,
             spacetime_ndim=3,
         )

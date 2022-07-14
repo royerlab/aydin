@@ -1,7 +1,16 @@
 import sys
 import os
+from PyInstaller.utils.hooks import get_module_file_attribute, collect_data_files
 
-from build.osx.hooks.hook_utils import _my_collect_data_files
+
+def _my_collect_data_files(modname, flatten_dirs = False, **kwargs):
+    files = collect_data_files(modname, **kwargs)
+    if flatten_dirs:
+        # files = [(source, os.path.split(dest)[0])for source, dest in files]
+        files = [(source, ".") for source, dest in files]
+
+    return files
+
 
 sys.path.append(os.path.split(os.path.abspath(__file__))[0])
 # from hook_utils import _my_collect_data_files
@@ -12,10 +21,9 @@ datas = _my_collect_data_files("lightgbm", include_py_files = False)
 # print(datas)
 # print("\n"*5)
 #
-import os
 import glob
 from PyInstaller.compat import is_win
-from PyInstaller.utils.hooks import get_module_file_attribute
+
 
 # if we bundle the testing module, this will cause
 # `scipy` to be pulled in unintentionally but numpy imports

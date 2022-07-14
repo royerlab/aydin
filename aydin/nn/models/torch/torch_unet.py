@@ -2,17 +2,13 @@ import math
 from collections import OrderedDict
 from itertools import chain
 
-# import napari
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
 from aydin.nn.layers.pooling_down import PoolingDown
-
-# from aydin.nn.pytorch.it_ptcnn import to_numpy
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -98,9 +94,20 @@ class UNetModel(nn.Module):
         else:
             self.conv = nn.Conv3d(8, 1, 1)
 
-        self.maskout = None  # TODO: assign correct maskout module
+    def forward(self, x, input_msk=None):
+        """
+        UNet forward method.
 
-    def forward(self, x):
+        Parameters
+        ----------
+        x
+        input_msk : numpy.ArrayLike
+            A mask per image must be passed with self-supervised training.
+
+        Returns
+        -------
+
+        """
 
         skip_layer = [x]
 
@@ -113,14 +120,14 @@ class UNetModel(nn.Module):
             x = self.pooling_down(x)
 
             if layer_index != self.nb_unet_levels - 1:
-                print(f"skip layer added: x -> {x.shape}")
+                # print(f"skip layer added: x -> {x.shape}")
                 skip_layer.append(x)
 
-            print("down")
+            # print("down")
 
-        print("before bottom")
+        # print("before bottom")
         x = self.unet_bottom_conv_with_batch_norm(x)
-        print("after bottom")
+        # print("after bottom")
 
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
@@ -135,24 +142,29 @@ class UNetModel(nn.Module):
 
             x = self.conv_with_batch_norms_second_half[layer_index](x)
 
-            print("up")
+            # print("up")
 
         x = self.conv(x)
 
-        # if not self.supervised:
-        #     x = self.maskout(x)
+        if not self.supervised:
+            if input_msk is not None:
+                x *= input_msk
+            else:
+                raise ValueError(
+                    "input_msk cannot be None for self-supervised training"
+                )
 
         return x
 
 
 def n2t_unet_train_loop(
-    input_image,
-    lizard_image,
+    input_images,
+    target_images,
     model: UNetModel,
-    data_loader: DataLoader,
+    nb_epochs: int = 1024,
     learning_rate=0.01,
     training_noise=0.001,
-    l2_weight_regularisation=1e-9,
+    l2_weight_regularization=1e-9,
     patience=128,
     patience_epsilon=0.0,
     reduce_lr_factor=0.5,
@@ -170,7 +182,7 @@ def n2t_unet_train_loop(
         chain(model.parameters()),
         lr=learning_rate,
         start_noise_level=training_noise,
-        weight_decay=l2_weight_regularisation,
+        weight_decay=l2_weight_regularization,
     )
 
     scheduler = ReduceLROnPlateau(
@@ -181,16 +193,17 @@ def n2t_unet_train_loop(
         patience=reduce_lr_patience,
     )
 
-    loss_function = lambda u, v: torch.abs(u - v)
+    def loss_function(u, v):
+        return torch.abs(u - v)
 
-    for epoch in range(1024):
+    for epoch in range(nb_epochs):
         train_loss_value = 0
         val_loss_value = 0
         iteration = 0
-        for i, (input_images, target_images, validation_mask_images) in enumerate(
-            zip([input_image], [lizard_image], [lizard_image])
+        for i, (input_image, target_image) in enumerate(
+            zip([input_images], [target_images])
         ):
-            print(f"index: {i}, shape:{input_images.shape}")
+            # print(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
@@ -198,10 +211,10 @@ def n2t_unet_train_loop(
             # Forward pass:
             model.train()
 
-            translated_images = model(input_images)
+            translated_image = model(input_image)
 
             # translation loss (per voxel):
-            translation_loss = loss_function(translated_images, target_images)
+            translation_loss = loss_function(translated_image, target_image)
 
             # loss value (for all voxels):
             translation_loss_value = translation_loss.mean()
@@ -221,10 +234,10 @@ def n2t_unet_train_loop(
                 # Forward pass:
                 model.eval()
 
-                translated_images = model(input_images)
+                translated_image = model(input_image)
 
                 # translation loss (per voxel):
-                translation_loss = loss_function(translated_images, target_images)
+                translation_loss = loss_function(translated_image, target_image)
 
                 # loss values:
                 translation_loss_value = translation_loss.mean().cpu().item()
