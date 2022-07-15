@@ -7,7 +7,7 @@ from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 def est_bilateral():
     # TODO: bilateral filter in scikit image seems broken
-    assert demo_bilateral(cropped_newyork(), display=False) >= 0.40 - 0.1
+    assert demo_bilateral(cropped_newyork(crop_amount=384), display=False) >= 0.40 - 0.1
 
 
 def test_bilateral_nd():

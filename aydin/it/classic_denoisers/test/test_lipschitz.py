@@ -7,7 +7,9 @@ from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 
 def test_lipschitz():
-    assert demo_lipschitz(cropped_newyork(), display=False) >= 0.50 - 0.02
+    assert (
+        demo_lipschitz(cropped_newyork(crop_amount=384), display=False) >= 0.50 - 0.02
+    )
 
 
 def test_lipschitz_nd():
