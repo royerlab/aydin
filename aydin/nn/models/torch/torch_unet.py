@@ -203,7 +203,7 @@ def n2t_unet_train_loop(
         for i, (input_image, target_image) in enumerate(
             zip([input_images], [target_images])
         ):
-            # print(f"index: {i}, shape:{input_image.shape}")
+            lprint(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
