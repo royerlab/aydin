@@ -36,7 +36,6 @@ def test_forward_2D_unet():
     assert result.dtype == input_array.dtype
 
 
-@pytest.mark.heavy
 def test_supervised_2D_n2t():
     lizard_image = normalise(camera()[:128, :128])
     lizard_image = numpy.expand_dims(lizard_image, axis=0)
