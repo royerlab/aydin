@@ -4,16 +4,7 @@ import numpy
 
 
 class ShapeNormaliser(ABC):
-    """Shape Normaliser
-
-    Parameters
-    ----------
-    clip : bool
-    epsilon : float
-    shape_normalisation : bool
-    transform : str
-
-    """
+    """Shape Normaliser"""
 
     epsilon: float
     leave_as_float: bool
@@ -32,14 +23,14 @@ class ShapeNormaliser(ABC):
 
         Parameters
         ----------
-        array : numpy.ndarray
-            array to normalisers
+        array : numpy.ArrayLike
+            array to normalise
         batch_dims : list
         channel_dims : list
 
         Returns
         -------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
 
         """
         (
@@ -61,7 +52,7 @@ class ShapeNormaliser(ABC):
 
         Returns
         -------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
 
         """
 
@@ -81,7 +72,7 @@ class ShapeNormaliser(ABC):
 
         Parameters
         ----------
-        image : numpy.ndarray
+        image : numpy.ArrayLike
         batch_axes : list
         channel_axes : list
 
@@ -145,13 +136,13 @@ class ShapeNormaliser(ABC):
 
         Parameters
         ----------
-        image : numpy.ndarray
+        image : numpy.ArrayLike
         axes_permutation : array_like
         permutated_image_shape : tuple
 
         Returns
         -------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
 
         """
         spatiotemp_shape = image.shape[2:]

@@ -74,35 +74,43 @@ if os.getenv("BUNDLED_AYDIN") == "1":
 
 
 class Classic(DenoiseRestorationBase):
-    """Classic Image Denoising.
-
-    Parameters
-    ----------
-    variant : str
-        Opacity of the layer visual, between 0.0 and 1.0.
-    use_model : bool
-        Flag to choose to train a new model or infer from a
-        previously trained model. By default it is None.
-    input_model_path : string
-        Path to model that is desired to be used for inference.
-        By default it is None.
-    """
+    """Classic Image Denoising"""
 
     disabled_modules = ["bilateral", "bmnd", "_defaults"]
 
     def __init__(
         self,
         *,
-        variant: str = 'butterworth',
+        variant: str = None,
         use_model=None,
         input_model_path=None,
         lower_level_args=None,
         it_transforms=None,
     ):
+        """
+
+        Parameters
+        ----------
+        variant : str
+            Variant of the Classic denoiser to be used. Variant
+            would supersede the denoiser option passed in lower_level_args.
+            `implementations` property would return a complete list
+            of variants (with a prefix of 'Classic-`) that can be used
+            on a given installation. Example variants: `butterworth`,
+            `gaussian`, `lipschitz`, `nlm`, ...
+        use_model : bool
+            Flag to choose to train a new model or infer from a
+            previously trained model. By default it is None.
+        input_model_path : string
+            Path to model that is desired to be used for inference.
+            By default it is None.
+        lower_level_args
+        it_transforms
+        """
         super().__init__()
         self.lower_level_args = lower_level_args
 
-        self.backend = variant
+        self.variant = variant
 
         self.input_model_path = input_model_path
         self.use_model_flag = use_model
@@ -248,6 +256,9 @@ class Classic(DenoiseRestorationBase):
         it : ImageTranslatorBase
 
         """
+        if self.variant:
+            return ImageDenoiserClassic(method=self.variant)
+
         # Use a pre-saved model or train a new one from scratch and save it
         if self.use_model_flag:
             # Unarchive the model file and load its ImageTranslator object into self.it
@@ -256,19 +267,19 @@ class Classic(DenoiseRestorationBase):
             )
             it = ImageTranslatorBase.load(self.input_model_path[:-4])
         else:
-            if self.lower_level_args is not None:
-                method = (
-                    self.backend
-                    if self.lower_level_args["variant"] is None
-                    else self.lower_level_args["variant"].split("-")[1]
-                )
+            if (
+                self.lower_level_args is not None
+                and self.lower_level_args["variant"] is not None
+            ):
+                method = self.lower_level_args["variant"].split("-")[1]
+
                 it = ImageDenoiserClassic(
                     method=method,
                     calibration_kwargs=self.lower_level_args["calibration"]["kwargs"],
                     **self.lower_level_args["it"]["kwargs"],
                 )
             else:
-                it = ImageDenoiserClassic(method=self.backend)
+                it = ImageDenoiserClassic()
 
         return it
 
