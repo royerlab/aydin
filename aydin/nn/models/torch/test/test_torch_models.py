@@ -35,6 +35,7 @@ def test_supervised_2D():
     assert result.dtype == input_array.dtype
 
 
+# @pytest.mark.heavy
 def test_supervised_2D_n2t():
     clean_image = normalise(camera()[:128, :128])
     clean_image = numpy.expand_dims(clean_image, axis=0)
