@@ -193,8 +193,7 @@ def n2t_unet_train_loop(
         patience=reduce_lr_patience,
     )
 
-    def loss_function(u, v):
-        return torch.abs(u - v)
+    def loss_function(u, v): return torch.abs(u - v)
 
     for epoch in range(nb_epochs):
         train_loss_value = 0
@@ -247,10 +246,10 @@ def n2t_unet_train_loop(
                 iteration += 1
 
         train_loss_value /= iteration
-        lprint("Training loss value: {train_loss_value}")
+        lprint(f"Training loss value: {train_loss_value}")
 
         val_loss_value /= iteration
-        lprint("Validation loss value: {val_loss_value}")
+        lprint(f"Validation loss value: {val_loss_value}")
 
         writer.add_scalar("Loss/train", train_loss_value, epoch)
         writer.add_scalar("Loss/valid", val_loss_value, epoch)
