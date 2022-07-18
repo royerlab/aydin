@@ -1,6 +1,7 @@
 import time
 from os.path import join
 import numpy
+import pytest
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
@@ -17,39 +18,9 @@ from aydin.regression.random_forest import RandomForestRegressor
 from aydin.regression.support_vector import SupportVectorRegressor
 
 
-def test_linear_regressor():
-    regressor = LinearRegressor()
-    with_regressor(regressor, min_ssim=0.6)
-
-
-def test_rf_regressor():
-    regressor = RandomForestRegressor()
-    with_regressor(regressor, min_ssim=0.6)
-
-
-def test_svr_regressor():
-    regressor = SupportVectorRegressor()
-    with_regressor(regressor, min_ssim=0.65)
-
-
-def test_lgbm_regressor():
-    regressor = LGBMRegressor(max_num_estimators=600)
-    with_regressor(regressor, min_ssim=0.75)
-
-
-def test_cb_regressor():
-    regressor = CBRegressor(max_num_estimators=600)
-    with_regressor(regressor, min_ssim=0.75)
-
-
-def test_nn_regressor():
-    regressor = PerceptronRegressor(max_epochs=6, depth=6)
-    with_regressor(regressor, min_ssim=0.64)
-
-
-def with_regressor(regressor, min_ssim=0.8):
-
-    image = camera().astype(numpy.float32)
+@pytest.fixture(scope="session")
+def data():
+    image = camera()[:256, :256].astype(numpy.float32)
     image = normalise(image)
     noisy = add_noise(image)
 
@@ -62,6 +33,36 @@ def with_regressor(regressor, min_ssim=0.8):
 
     x = features.reshape(-1, features.shape[-1])
     y = noisy.reshape(-1)
+
+    return image, noisy, x, y
+
+
+def test_linear_regressor(data):
+    with_regressor(data, LinearRegressor(), min_ssim=0.6)
+
+
+def test_rf_regressor(data):
+    with_regressor(data, RandomForestRegressor(), min_ssim=0.6)
+
+
+def test_svr_regressor(data):
+    with_regressor(data, SupportVectorRegressor(), min_ssim=0.65)
+
+
+def test_lgbm_regressor(data):
+    with_regressor(data, LGBMRegressor(max_num_estimators=600), min_ssim=0.75)
+
+
+def test_cb_regressor(data):
+    with_regressor(data, CBRegressor(max_num_estimators=600), min_ssim=0.75)
+
+
+def test_nn_regressor(data):
+    with_regressor(data, PerceptronRegressor(max_epochs=6, depth=6), min_ssim=0.64)
+
+
+def with_regressor(data, regressor, min_ssim=0.8):
+    image, noisy, x, y = data
 
     regressor.fit(x, y)
 

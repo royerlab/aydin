@@ -2,7 +2,6 @@ import math
 from collections import OrderedDict
 from itertools import chain
 
-# import napari
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -10,8 +9,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
 from aydin.nn.layers.pooling_down import PoolingDown
-
-# from aydin.nn.pytorch.it_ptcnn import to_numpy
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -86,9 +83,20 @@ class UNetModel(nn.Module):
 
         self.conv = nn.Conv2d(8, 1, 1) if spacetime_ndim == 2 else nn.Conv3d(8, 1, 1)
 
-        self.maskout = None  # TODO: assign correct maskout module
+    def forward(self, x, input_msk=None):
+        """
+        UNet forward method.
 
-    def forward(self, x):
+        Parameters
+        ----------
+        x
+        input_msk : numpy.ArrayLike
+            A mask per image must be passed with self-supervised training.
+
+        Returns
+        -------
+
+        """
 
         skip_layer = [x]
 
@@ -127,8 +135,13 @@ class UNetModel(nn.Module):
 
         x = self.conv(x)
 
-        # if not self.supervised:
-        #     x = self.maskout(x)
+        if not self.supervised:
+            if input_msk is not None:
+                x *= input_msk
+            else:
+                raise ValueError(
+                    "input_msk cannot be None for self-supervised training"
+                )
 
         return x
 
@@ -179,7 +192,7 @@ def n2t_unet_train_loop(
         for i, (input_image, target_image) in enumerate(
             zip([input_images], [target_images])
         ):
-            # print(f"index: {i}, shape:{input_image.shape}")
+            lprint(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
@@ -223,10 +236,10 @@ def n2t_unet_train_loop(
                 iteration += 1
 
         train_loss_value /= iteration
-        lprint("Training loss value: {train_loss_value}")
+        lprint(f"Training loss value: {train_loss_value}")
 
         val_loss_value /= iteration
-        lprint("Validation loss value: {val_loss_value}")
+        lprint(f"Validation loss value: {val_loss_value}")
 
         writer.add_scalar("Loss/train", train_loss_value, epoch)
         writer.add_scalar("Loss/valid", val_loss_value, epoch)
@@ -259,11 +272,11 @@ def n2t_unet_train_loop(
 
             # No improvement:
             lprint(
-                "No improvement of validation losses, patience = {patience_counter}/{self.patience} "
+                f"No improvement of validation losses, patience = {patience_counter}/{patience} "
             )
             patience_counter += 1
 
-        lprint("## Best val loss: {best_val_loss_value}")
+        lprint(f"## Best val loss: {best_val_loss_value}")
 
         # if epoch % 512 == 0:
         #     print(epoch)
