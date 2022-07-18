@@ -202,7 +202,7 @@ def n2t_unet_train_loop(
         for i, (input_image, target_image) in enumerate(
             zip([input_images], [target_images])
         ):
-            # print(f"index: {i}, shape:{input_image.shape}")
+            lprint(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
@@ -282,11 +282,11 @@ def n2t_unet_train_loop(
 
             # No improvement:
             lprint(
-                "No improvement of validation losses, patience = {patience_counter}/{self.patience} "
+                f"No improvement of validation losses, patience = {patience_counter}/{patience} "
             )
             patience_counter += 1
 
-        lprint("## Best val loss: {best_val_loss_value}")
+        lprint(f"## Best val loss: {best_val_loss_value}")
 
         # if epoch % 512 == 0:
         #     print(epoch)
