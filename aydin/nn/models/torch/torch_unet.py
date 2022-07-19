@@ -150,7 +150,6 @@ class UNetModel(nn.Module):
 
 def n2s_train(
     input_images,
-    target_images,
     model: UNetModel,
     nb_epochs: int = 1024,
     learning_rate: float = 0.01,
@@ -168,7 +167,6 @@ def n2s_train(
     Parameters
     ----------
     input_images
-    target_images
     model : UNetModel
     nb_epochs : int
     learning_rate : float
@@ -208,9 +206,7 @@ def n2s_train(
         train_loss_value = 0
         val_loss_value = 0
         iteration = 0
-        for i, (input_image, target_image) in enumerate(
-                zip([input_images], [target_images])
-        ):
+        for i, input_image in enumerate([input_images]):
             lprint(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters
