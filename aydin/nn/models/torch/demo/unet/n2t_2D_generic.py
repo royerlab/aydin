@@ -6,7 +6,16 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 from torch.utils.data import DataLoader
 
-from aydin.io.datasets import normalise, add_noise, camera, newyork, lizard, pollen, dots, characters
+from aydin.io.datasets import (
+    normalise,
+    add_noise,
+    camera,
+    newyork,
+    lizard,
+    pollen,
+    dots,
+    characters,
+)
 from aydin.nn.models.torch.torch_unet import UNetModel, n2t_unet_train_loop
 from aydin.nn.models.utils.torch_dataset import TorchDataset
 from aydin.util.log.log import Log

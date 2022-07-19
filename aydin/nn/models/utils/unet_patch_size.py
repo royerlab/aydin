@@ -5,11 +5,11 @@ from aydin.util.log.log import lprint
 
 def get_ideal_patch_size(nb_unet_levels, training_architecture):
     patch_size = (
-            unet_receptive_field_radius(
+        unet_receptive_field_radius(
             nb_unet_levels,
             shiftconv='shiftconv' == training_architecture,
         )
-            * 2
+        * 2
     )
 
     patch_size -= patch_size % 2**nb_unet_levels

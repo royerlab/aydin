@@ -68,7 +68,9 @@ class UNetModel(nn.Module):
                 # Handle special case input dimensions for the first layer
                 input_channels = self.unet_bottom_conv_out_channels
             else:
-                input_channels = self.nb_filters * max((self.nb_unet_levels - layer_index - 1 - 2), 1)
+                input_channels = self.nb_filters * max(
+                    (self.nb_unet_levels - layer_index - 1 - 2), 1
+                )
 
             self.conv_with_batch_norms_second_half.append(
                 ConvWithBatchNorm(
