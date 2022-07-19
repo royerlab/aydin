@@ -132,7 +132,7 @@ class UNetModel(nn.Module):
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
 
-            x = torch.add(x, skip_layer.pop())
+            # x = torch.add(x, skip_layer.pop())
             if self.residual:
                 x = torch.add(x, skip_layer.pop())
             else:
