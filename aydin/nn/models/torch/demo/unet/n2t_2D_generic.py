@@ -16,7 +16,7 @@ from aydin.io.datasets import (
     dots,
     characters,
 )
-from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train_loop
+from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train
 from aydin.nn.models.utils.torch_dataset import TorchDataset
 from aydin.util.log.log import Log
 
@@ -49,7 +49,7 @@ def demo(image, do_add_noise=True):
     print("training starts")
 
     start = time.time()
-    n2t_train_loop(noisy, image, model, data_loader)
+    n2t_train(noisy, image, model, data_loader)
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 

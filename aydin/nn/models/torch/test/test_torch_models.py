@@ -13,7 +13,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from aydin.io.datasets import add_noise, camera, normalise
-from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train_loop
+from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train
 from aydin.nn.models.utils.torch_dataset import TorchDataset
 
 # from aydin.nn.pytorch.it_ptcnn import to_numpy
@@ -56,7 +56,7 @@ def test_supervised_2D_n2t():
         nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
     )
 
-    n2t_train_loop(noisy_image, clean_image, model)
+    n2t_train(noisy_image, clean_image, model)
     result = model(noisy_image)
 
     assert result.shape == noisy_image.shape

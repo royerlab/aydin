@@ -148,13 +148,13 @@ class UNetModel(nn.Module):
         return x
 
 
-def n2s_train_loop(
+def n2s_train(
     input_images,
     target_images,
     model: UNetModel,
     nb_epochs: int = 1024,
-    learning_rate=0.01,
-    training_noise=0.001,
+    learning_rate: float = 0.01,
+    training_noise: float = 0.001,
     l2_weight_regularization=1e-9,
     patience=128,
     patience_epsilon=0.0,
@@ -162,6 +162,25 @@ def n2s_train_loop(
     reload_best_model_period=1024,
     best_val_loss_value=None,
 ):
+    """
+    Noise2Self training method.
+
+    Parameters
+    ----------
+    input_images
+    target_images
+    model : UNetModel
+    nb_epochs : int
+    learning_rate : float
+    training_noise : float
+    l2_weight_regularization
+    patience
+    patience_epsilon
+    reduce_lr_factor
+    reload_best_model_period
+    best_val_loss_value
+
+    """
     writer = SummaryWriter()
 
     if best_val_loss_value is None:
@@ -186,15 +205,25 @@ def n2s_train_loop(
         return torch.abs(u - v)
 
     for epoch in range(nb_epochs):
-        pass
+        train_loss_value = 0
+        val_loss_value = 0
+        iteration = 0
+        for i, (input_image, target_image) in enumerate(
+                zip([input_images], [target_images])
+        ):
+            lprint(f"index: {i}, shape:{input_image.shape}")
 
-def n2t_train_loop(
+            # Clear gradients w.r.t. parameters
+            optimizer.zero_grad()
+
+
+def n2t_train(
     input_images,
     target_images,
     model: UNetModel,
     nb_epochs: int = 1024,
-    learning_rate=0.01,
-    training_noise=0.001,
+    learning_rate: float = 0.01,
+    training_noise: float = 0.001,
     l2_weight_regularization=1e-9,
     patience=128,
     patience_epsilon=0.0,
@@ -202,6 +231,26 @@ def n2t_train_loop(
     reload_best_model_period=1024,
     best_val_loss_value=None,
 ):
+    """
+    Noise2Truth training method.
+
+    Parameters
+    ----------
+    input_images
+    target_images
+    model : UNetModel
+    nb_epochs : int
+    learning_rate : float
+    training_noise : float
+
+    l2_weight_regularization
+    patience
+    patience_epsilon
+    reduce_lr_factor
+    reload_best_model_period
+    best_val_loss_value
+
+    """
     writer = SummaryWriter()
 
     reduce_lr_patience = patience // 2
