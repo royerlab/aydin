@@ -148,9 +148,45 @@ class UNetModel(nn.Module):
         return x
 
 
-def n2s_train_loop():
-    pass
+def n2s_train_loop(
+    input_images,
+    target_images,
+    model: UNetModel,
+    nb_epochs: int = 1024,
+    learning_rate=0.01,
+    training_noise=0.001,
+    l2_weight_regularization=1e-9,
+    patience=128,
+    patience_epsilon=0.0,
+    reduce_lr_factor=0.5,
+    reload_best_model_period=1024,
+    best_val_loss_value=None,
+):
+    writer = SummaryWriter()
 
+    if best_val_loss_value is None:
+        best_val_loss_value = math.inf
+
+    optimizer = ESAdam(
+        chain(model.parameters()),
+        lr=learning_rate,
+        start_noise_level=training_noise,
+        weight_decay=l2_weight_regularization,
+    )
+
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        'min',
+        factor=reduce_lr_factor,
+        verbose=True,
+        patience=reduce_lr_patience,
+    )
+
+    def loss_function(u, v):
+        return torch.abs(u - v)
+
+    for epoch in range(nb_epochs):
+        pass
 
 def n2t_train_loop(
     input_images,
