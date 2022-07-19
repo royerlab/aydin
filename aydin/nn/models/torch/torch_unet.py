@@ -148,7 +148,11 @@ class UNetModel(nn.Module):
         return x
 
 
-def n2t_unet_train_loop(
+def n2s_train_loop():
+    pass
+
+
+def n2t_train_loop(
     input_images,
     target_images,
     model: UNetModel,
