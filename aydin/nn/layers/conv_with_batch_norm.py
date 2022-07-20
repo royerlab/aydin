@@ -1,17 +1,17 @@
 from torch import nn
 
 
-class ConvWithBatchNorm(nn.Module):
+class ConvWithNorm(nn.Module):
     def __init__(
         self,
         in_channels,
         out_channels,
         spacetime_ndim,
         kernel_size=3,
-        normalization=None,  # "batch",
+        normalization="batch",
         activation="ReLU",
     ):
-        super(ConvWithBatchNorm, self).__init__()
+        super(ConvWithNorm, self).__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels

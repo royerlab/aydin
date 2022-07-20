@@ -7,7 +7,7 @@ from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.tensorboard import SummaryWriter
 
-from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
+from aydin.nn.layers.conv_with_batch_norm import ConvWithNorm
 from aydin.nn.layers.pooling_down import PoolingDown
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
@@ -32,7 +32,7 @@ class UNetModel(nn.Module):
         self.supervised = supervised
         self.residual = residual
 
-        self.conv_with_batch_norms_first_conv_for_first_level = ConvWithBatchNorm(
+        self.conv_with_batch_norms_first_conv_for_first_level = ConvWithNorm(
             1, self.nb_filters, spacetime_ndim
         )
 
@@ -42,11 +42,11 @@ class UNetModel(nn.Module):
                 layer_index == 0
             ):  # Handle special case input dimensions for the first layer
                 self.conv_with_batch_norms_first_half.append(
-                    ConvWithBatchNorm(self.nb_filters, self.nb_filters, spacetime_ndim)
+                    ConvWithNorm(self.nb_filters, self.nb_filters, spacetime_ndim)
                 )
             else:
                 self.conv_with_batch_norms_first_half.append(
-                    ConvWithBatchNorm(
+                    ConvWithNorm(
                         self.nb_filters * layer_index,
                         self.nb_filters * (layer_index + 1),
                         spacetime_ndim,
@@ -56,7 +56,7 @@ class UNetModel(nn.Module):
         # TODO: check if it is a bug to use this filter size on the bottom
         self.unet_bottom_conv_out_channels = self.nb_filters
 
-        self.unet_bottom_conv_with_batch_norm = ConvWithBatchNorm(
+        self.unet_bottom_conv_with_batch_norm = ConvWithNorm(
             self.conv_with_batch_norms_first_half[-1].out_channels,
             self.unet_bottom_conv_out_channels,
             spacetime_ndim,
@@ -68,7 +68,7 @@ class UNetModel(nn.Module):
                 layer_index == 0
             ):  # Handle special case input dimensions for the first layer
                 self.conv_with_batch_norms_second_half.append(
-                    ConvWithBatchNorm(
+                    ConvWithNorm(
                         self.unet_bottom_conv_out_channels,
                         self.nb_filters
                         * max((self.nb_unet_levels - layer_index - 2), 1),
@@ -77,7 +77,7 @@ class UNetModel(nn.Module):
                 )
             else:
                 self.conv_with_batch_norms_second_half.append(
-                    ConvWithBatchNorm(
+                    ConvWithNorm(
                         self.nb_filters
                         * max((self.nb_unet_levels - layer_index - 1 - 2), 1),
                         self.nb_filters
