@@ -35,10 +35,11 @@ def test_masking_2D():
     input_array = np.zeros((1, 64, 64, 1), dtype=np.float32)
     model2d = UNetModel(
         (64, 64, 1),
-        nb_unet_levels=2,
+        nb_unet_levels=3,
         supervised=False,
         spacetime_ndim=2,
     )
+    print(model2d.summary())
     result = model2d.predict([input_array, input_array])
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype

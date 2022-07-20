@@ -8,7 +8,7 @@ class ConvWithNorm(nn.Module):
         out_channels,
         spacetime_ndim,
         kernel_size=3,
-        normalization="batch",
+        normalization=None,
         activation="ReLU",
     ):
         super(ConvWithNorm, self).__init__()
@@ -40,6 +40,7 @@ class ConvWithNorm(nn.Module):
         }[self.activation]
 
     def forward(self, x):
+        print("in conv with batch norm: ", x.shape)
         x = self.conv(x)
 
         if self.normalization == 'instance':

@@ -25,7 +25,7 @@ def test_supervised_2D():
     input_array = torch.zeros((1, 1, 64, 64))
     model2d = UNetModel(
         # (64, 64, 1),
-        nb_unet_levels=2,
+        nb_unet_levels=3,
         supervised=True,
         spacetime_ndim=2,
         residual=True,
@@ -65,7 +65,7 @@ def test_masking_2D():
     input_array = torch.zeros((1, 1, 64, 64))
     model2d = UNetModel(
         # (64, 64, 1),
-        nb_unet_levels=2,
+        nb_unet_levels=3,
         supervised=False,
         spacetime_ndim=2,
     )

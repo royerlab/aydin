@@ -64,27 +64,48 @@ class UNetModel(nn.Module):
 
         self.conv_with_batch_norms_second_half = []
         for layer_index in range(self.nb_unet_levels):
-            if (
-                layer_index == 0
-            ):  # Handle special case input dimensions for the first layer
-                self.conv_with_batch_norms_second_half.append(
-                    ConvWithNorm(
-                        self.unet_bottom_conv_out_channels,
-                        self.nb_filters
-                        * max((self.nb_unet_levels - layer_index - 2), 1),
-                        spacetime_ndim,
-                    )
-                )
+            # if (
+            #     layer_index == 0
+            # ):  # Handle special case input dimensions for the first layer
+            #     self.conv_with_batch_norms_second_half.append(
+            #         ConvWithNorm(
+            #             self.unet_bottom_conv_out_channels,
+            #             self.nb_filters
+            #             * max((self.nb_unet_levels - layer_index - 2), 1),
+            #             spacetime_ndim,
+            #         )
+            #     )
+            # else:
+            #     self.conv_with_batch_norms_second_half.append(
+            #         ConvWithNorm(
+            #             self.nb_filters
+            #             * max((self.nb_unet_levels - layer_index - 1 - 2), 1),
+            #             self.nb_filters
+            #             * max((self.nb_unet_levels - layer_index - 2), 1),
+            #             spacetime_ndim,
+            #         )
+            #     )
+            if layer_index == self.nb_unet_levels - 1:
+                _nb_filters_in = self.nb_filters if self.residual else self.nb_filters + 1
             else:
-                self.conv_with_batch_norms_second_half.append(
-                    ConvWithNorm(
-                        self.nb_filters
-                        * max((self.nb_unet_levels - layer_index - 1 - 2), 1),
-                        self.nb_filters
-                        * max((self.nb_unet_levels - layer_index - 2), 1),
-                        spacetime_ndim,
-                    )
+                _nb_filters_in = self.nb_filters * (
+                    self.nb_unet_levels - layer_index - 1 if self.residual else self.nb_unet_levels - layer_index
                 )
+
+            consecutive_convs = nn.Sequential(
+                ConvWithNorm(
+                    _nb_filters_in,
+                    self.nb_filters,
+                    spacetime_ndim,
+                ),
+                ConvWithNorm(
+                    self.nb_filters,
+                    self.nb_filters,
+                    spacetime_ndim,
+                    normalization='batch',
+                )
+            )
+            self.conv_with_batch_norms_second_half.append(consecutive_convs)
 
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
@@ -108,14 +129,15 @@ class UNetModel(nn.Module):
         -------
 
         """
-
+        print(x.shape)
         skip_layer = [x]
 
         x = self.conv_with_batch_norms_first_conv_for_first_level(x)
-
+        print(x.shape)
         for layer_index in range(self.nb_unet_levels):
 
             x = self.conv_with_batch_norms_first_half[layer_index](x)
+            print(x.shape)
 
             x = self.pooling_down(x)
 
@@ -125,26 +147,35 @@ class UNetModel(nn.Module):
 
             # print("down")
 
-        # print("before bottom")
+        print("before bottom")
+        print(x.shape)
         x = self.unet_bottom_conv_with_batch_norm(x)
-        # print("after bottom")
+        print("after bottom")
+        print(x.shape)
 
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
 
             # x = torch.add(x, skip_layer.pop())
             if self.residual:
-                x = torch.add(x, skip_layer.pop())
+                skipo = skip_layer.pop()
+                print(x.shape, skipo.shape)
+                x = torch.add(x, skipo)
+                print(x.shape)
             else:
-                x = torch.cat([x, skip_layer.pop()], dim=1)
+                skipo = skip_layer.pop()
+                print(x.shape, skipo.shape)
+                x = torch.cat([x, skipo], dim=1)
+                print(x.shape)
 
             x = self.conv_with_batch_norms_second_half[layer_index](x)
-
-            x = self.conv_with_batch_norms_second_half[layer_index](x)
+            print(x.shape)
 
             # print("up")
 
+        print(x.shape)
         x = self.conv(x)
+        print(x.shape)
 
         if not self.supervised:
             if input_msk is not None:
