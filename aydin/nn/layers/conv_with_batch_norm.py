@@ -29,9 +29,11 @@ class ConvWithBatchNorm(nn.Module):
                 in_channels, out_channels, kernel_size, padding='same'
             )
 
-        self.relu = nn.ReLU()
-        self.swish = nn.SiLU()
-        self.leaky_relu = nn.LeakyReLU(0.1)
+        self.activation_function = {
+            "ReLU": nn.ReLU(),
+            "swish": nn.SiLU(),
+            "lrel": nn.LeakyReLU(0.1),
+        }[self.activation]
 
     def forward(self, x):
         x = self.conv(x)
@@ -41,11 +43,6 @@ class ConvWithBatchNorm(nn.Module):
         elif self.normalization == 'batch':
             x = self.batch_normalization(x)
 
-        if self.activation == 'ReLU':
-            x = self.relu(x)
-        elif self.activation == 'swish':
-            x = self.swish(x)
-        elif self.activation == 'lrel':
-            x = self.leaky_relu(x)
+        x = self.activation_function(x)
 
         return x
