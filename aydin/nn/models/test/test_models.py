@@ -35,7 +35,7 @@ def test_masking_2D():
     input_array = np.zeros((1, 64, 64, 1), dtype=np.float32)
     model2d = UNetModel(
         (64, 64, 1),
-        nb_unet_levels=3,
+        nb_unet_levels=2,
         supervised=False,
         spacetime_ndim=2,
     )

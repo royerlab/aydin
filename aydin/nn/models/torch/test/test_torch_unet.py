@@ -12,7 +12,7 @@ def test_supervised_2D():
     input_array = torch.zeros((1, 1, 64, 64))
     model2d = UNetModel(
         # (64, 64, 1),
-        nb_unet_levels=3,
+        nb_unet_levels=2,
         supervised=True,
         spacetime_ndim=2,
     )
