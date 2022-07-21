@@ -8,7 +8,6 @@ from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
 def test_masking_2D(nb_unet_levels):
     input_array = torch.zeros((1, 1, 1024, 1024))
     model2d = ResidualUNetModel(
-        # (64, 64, 1),
         nb_unet_levels=nb_unet_levels,
         supervised=False,
         spacetime_ndim=2,
@@ -22,7 +21,6 @@ def test_masking_2D(nb_unet_levels):
 def test_masking_3D(nb_unet_levels):
     input_array = torch.zeros((1, 1, 64, 64, 64))
     model3d = ResidualUNetModel(
-        # (64, 64, 64, 1),
         nb_unet_levels=nb_unet_levels,
         supervised=False,
         spacetime_ndim=3,
