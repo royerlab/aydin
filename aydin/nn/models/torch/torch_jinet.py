@@ -14,10 +14,10 @@ from aydin.util.log.log import lprint
 
 class JINetModel(nn.Module):
     def __init__(
-            self,
-            spacetime_ndim,
-            kernel_sizes=None,
-            num_features=None,
+        self,
+        spacetime_ndim,
+        kernel_sizes=None,
+        num_features=None,
     ):
         super(JINetModel, self).__init__()
 
@@ -69,7 +69,7 @@ class JINetModel(nn.Module):
                 padding=dilation * radius,
                 kernel_size=kernel_size,
                 dilation=dilation,
-                activation="lrel"
+                activation="lrel",
             )(x)
 
             total_nb_features += nb_features  # update the number of features until now

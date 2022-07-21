@@ -4,14 +4,14 @@ from torch.nn import ZeroPad2d
 
 class DilatedConv(nn.Module):
     def __init__(
-            self,
-            in_channels,
-            out_channels,
-            spacetime_ndim,
-            padding,
-            kernel_size,
-            dilation,
-            activation="ReLU",
+        self,
+        in_channels,
+        out_channels,
+        spacetime_ndim,
+        padding,
+        kernel_size,
+        dilation,
+        activation="ReLU",
     ):
         super(DilatedConv, self).__init__()
 
@@ -24,11 +24,19 @@ class DilatedConv(nn.Module):
 
         if spacetime_ndim == 2:
             self.conv = nn.Conv2d(
-                in_channels, out_channels, kernel_size, dilation=dilation,  padding='same'
+                in_channels,
+                out_channels,
+                kernel_size,
+                dilation=dilation,
+                padding='same',
             )
         elif spacetime_ndim == 3:
             self.conv = nn.Conv3d(
-                in_channels, out_channels, kernel_size, dilation=dilation, padding='same'
+                in_channels,
+                out_channels,
+                kernel_size,
+                dilation=dilation,
+                padding='same',
             )
         else:
             raise ValueError("spacetime_ndim parameter can only be 2 or 3...")
