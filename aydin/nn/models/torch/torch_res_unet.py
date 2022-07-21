@@ -59,32 +59,24 @@ class ResidualUNetModel(nn.Module):
 
         """
         skip_layer = []
-        print(x.shape)
 
         # Encoder
         for layer_index in range(self.nb_unet_levels):
             x = self.double_conv_blocks_encoder[layer_index](x)
-            print(x.shape)
             skip_layer.append(x)
             x = self.pooling_down(x)
 
         # Bottom
-        print(f"before bottom: {x.shape}")
         x = self.unet_bottom_conv_block(x)
-        print(f"after bottom: {x.shape}")
 
         # Decoder
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
-            skipo = skip_layer.pop()
-            print(x.shape, skipo.shape)
-            x = torch.add(x, skipo)
+            x = torch.add(x, skip_layer.pop())
             x = self.double_conv_blocks_decoder[layer_index](x)
-            print(x.shape)
 
         # Final convolution
         x = self.final_conv(x)
-        print(x.shape)
 
         # Masking for self-supervised training
         if not self.supervised:
@@ -123,13 +115,13 @@ class ResidualUNetModel(nn.Module):
     def _decoder_convolutions(self):
         convolutions = []
         for layer_index in range(self.nb_unet_levels):
+            nb_filters_in = self.nb_filters * (
+                    2 ** (self.nb_unet_levels - layer_index - 1)
+            )
+
             if layer_index == self.nb_unet_levels - 1:
-                nb_filters_in = self.nb_filters
                 nb_filters_inner = nb_filters_out = self.nb_filters
             else:
-                nb_filters_in = self.nb_filters * (
-                    2 ** (self.nb_unet_levels - layer_index - 1)
-                )
                 nb_filters_inner = nb_filters_out = nb_filters_in // 2
 
             convolutions.append(
