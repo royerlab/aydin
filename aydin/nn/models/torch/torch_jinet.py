@@ -7,6 +7,7 @@ from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.tensorboard import SummaryWriter
 
+from aydin.nn.layers.dilated_conv import DilatedConv
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -61,7 +62,15 @@ class JINetModel(nn.Module):
             radius = (kernel_size - 1) // 2
             dilation = 1 + current_receptive_field_radius
 
-            x = dilated_conv(x)
+            x = DilatedConv(
+                in_channels,
+                out_channels,
+                self.spacetime_ndim,
+                padding=dilation * radius,
+                kernel_size=kernel_size,
+                dilation=dilation,
+                activation="lrel"
+            )(x)
 
             total_nb_features += nb_features  # update the number of features until now
 
