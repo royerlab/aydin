@@ -7,7 +7,7 @@ from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.tensorboard import SummaryWriter
 
-from aydin.nn.layers.conv_with_batch_norm import ConvWithBatchNorm
+from aydin.nn.layers.custom_conv import CustomConv
 from aydin.nn.layers.pooling_down import PoolingDown
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
@@ -21,7 +21,6 @@ class UNetModel(nn.Module):
         nb_filters: int = 8,
         learning_rate=0.01,
         supervised: bool = False,
-        residual: bool = False,
         pooling_mode: str = 'max',
     ):
         super(UNetModel, self).__init__()
@@ -30,9 +29,8 @@ class UNetModel(nn.Module):
         self.nb_filters = nb_filters
         self.learning_rate = learning_rate
         self.supervised = supervised
-        self.residual = residual  # TODO: currently not implemented completely, not in use, worth to implement and test
 
-        self.conv_with_batch_norms_first_conv_for_first_level = ConvWithBatchNorm(
+        self.conv_with_batch_norms_first_conv_for_first_level = CustomConv(
             1, self.nb_filters, spacetime_ndim
         )
 
@@ -42,49 +40,46 @@ class UNetModel(nn.Module):
                 layer_index == 0
             ):  # Handle special case input dimensions for the first layer
                 self.conv_with_batch_norms_first_half.append(
-                    ConvWithBatchNorm(self.nb_filters, self.nb_filters, spacetime_ndim)
+                    CustomConv(self.nb_filters, self.nb_filters, spacetime_ndim)
                 )
             else:
                 self.conv_with_batch_norms_first_half.append(
-                    ConvWithBatchNorm(
+                    CustomConv(
                         self.nb_filters * layer_index,
                         self.nb_filters * (layer_index + 1),
                         spacetime_ndim,
                     )
                 )
 
-        # TODO: check if it is a bug to use this filter size on the bottom
-        self.unet_bottom_conv_out_channels = self.nb_filters
+        self.unet_bottom_conv_out_channels = self.conv_with_batch_norms_first_half[-1].out_channels
 
-        self.unet_bottom_conv_with_batch_norm = ConvWithBatchNorm(
-            self.conv_with_batch_norms_first_half[-1].out_channels,
+        self.unet_bottom_conv_with_batch_norm = CustomConv(
+            self.unet_bottom_conv_out_channels,
             self.unet_bottom_conv_out_channels,
             spacetime_ndim,
         )
 
         self.conv_with_batch_norms_second_half = []
         for layer_index in range(self.nb_unet_levels):
-            if (
-                layer_index == 0
-            ):  # Handle special case input dimensions for the first layer
-                self.conv_with_batch_norms_second_half.append(
-                    ConvWithBatchNorm(
-                        self.unet_bottom_conv_out_channels,
-                        self.nb_filters
-                        * max((self.nb_unet_levels - layer_index - 2), 1),
-                        spacetime_ndim,
-                    )
-                )
+            if layer_index == self.nb_unet_levels - 1:
+                _nb_filters_in = self.nb_filters + 1
             else:
-                self.conv_with_batch_norms_second_half.append(
-                    ConvWithBatchNorm(
-                        self.nb_filters
-                        * max((self.nb_unet_levels - layer_index - 1 - 2), 1),
-                        self.nb_filters
-                        * max((self.nb_unet_levels - layer_index - 2), 1),
-                        spacetime_ndim,
-                    )
+                _nb_filters_in = self.nb_unet_levels - layer_index
+
+            consecutive_convolutions = nn.Sequential(
+                CustomConv(
+                    _nb_filters_in,
+                    self.nb_filters,
+                    spacetime_ndim,
+                ),
+                CustomConv(
+                    self.nb_filters,
+                    self.nb_filters,
+                    spacetime_ndim,
+                    normalization='batch',
                 )
+            )
+            self.conv_with_batch_norms_second_half.append(consecutive_convolutions)
 
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
@@ -132,13 +127,7 @@ class UNetModel(nn.Module):
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
 
-            x = torch.add(x, skip_layer.pop())
-            # if self.residual:
-            #     x = torch.add(x, skip_layer.pop())
-            # else:
-            #     x = torch.cat([x, skip_layer.pop()], dim=1)
-
-            x = self.conv_with_batch_norms_second_half[layer_index](x)
+            x = torch.cat([x, skip_layer.pop()], dim=1)
 
             x = self.conv_with_batch_norms_second_half[layer_index](x)
 

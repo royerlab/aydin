@@ -28,7 +28,6 @@ def test_supervised_2D():
         nb_unet_levels=2,
         supervised=True,
         spacetime_ndim=2,
-        residual=True,
     )
     result = model2d(input_array)
     assert result.shape == input_array.shape
@@ -52,7 +51,7 @@ def test_supervised_2D_n2t():
     # )
 
     model = UNetModel(
-        nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
+        nb_unet_levels=2, supervised=True, spacetime_ndim=2
     )
 
     n2t_unet_train_loop(input_image, lizard_image, model)
@@ -65,7 +64,7 @@ def test_masking_2D():
     input_array = torch.zeros((1, 1, 64, 64))
     model2d = UNetModel(
         # (64, 64, 1),
-        nb_unet_levels=2,
+        nb_unet_levels=3,
         supervised=False,
         spacetime_ndim=2,
     )
