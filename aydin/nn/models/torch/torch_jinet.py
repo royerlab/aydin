@@ -1,32 +1,51 @@
 from collections import OrderedDict
+from itertools import chain
 
 import torch
 from torch import cat
 from torch import nn
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.tensorboard import SummaryWriter
 
+from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
 
 class JINetModel(nn.Module):
-    def __init__(self):
+    def __init__(
+            self,
+            spacetime_ndim,
+            kernel_sizes=None,
+            num_features=None,
+    ):
         super(JINetModel, self).__init__()
 
-        # These are the scales and associated kernel sizes and number of features
-        if kernel_sizes is None:
-            if self.spacetime_ndim == 2:
-                kernel_sizes = [7, 5, 3, 3, 3, 3, 3, 3]
-            elif self.spacetime_ndim == 3:
-                kernel_sizes = [7, 5, 3, 3]
-        if num_features is None:
-            if self.spacetime_ndim == 2:
-                num_features = [64, 32, 16, 8, 4, 2, 1, 1]
-            elif self.spacetime_ndim == 3:
-                num_features = [10, 8, 4, 2]
-        self.kernel_sizes = kernel_sizes
-        self.num_features = num_features
+        self.spacetime_ndim = spacetime_ndim
+        self._kernel_sizes = kernel_sizes
+        self._num_features = num_features
+
         if len(kernel_sizes) != len(num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
+
+    @property
+    def kernel_sizes(self):
+        if self._kernel_sizes is None:
+            if self.spacetime_ndim == 2:
+                self._kernel_sizes = [7, 5, 3, 3, 3, 3, 3, 3]
+            elif self.spacetime_ndim == 3:
+                self._kernel_sizes = [7, 5, 3, 3]
+
+        return self._kernel_sizes
+
+    @property
+    def num_features(self):
+        if self._num_features is None:
+            if self.spacetime_ndim == 2:
+                self._num_features = [64, 32, 16, 8, 4, 2, 1, 1]
+            elif self.spacetime_ndim == 3:
+                self._num_features = [10, 8, 4, 2]
+
+        return self._num_features
 
     def forward(self, x):
         dilated_conv_list = []
@@ -52,7 +71,7 @@ class JINetModel(nn.Module):
 
             dilated_conv_list.append(x)
 
-        x = cat()(dilated_conv_list)  #  TODO: pass axis as -1
+        x = cat()(dilated_conv_list)  # TODO: pass axis as -1
 
         if self.nb_channels is None:
             nb_channels = total_nb_features * 2
@@ -66,12 +85,12 @@ class JINetModel(nn.Module):
                 else nb_channels
             )
 
-            x = channelwise_dense_layer(x)  #  TODO: pass correct parameters
+            x = channelwise_dense_layer(x)  # TODO: pass correct parameters
             x = nn.LeakyReLU(negative_slope=0.01)(x)
 
             y = x if y is None else y + f * x
 
-        y = channelwise_dense_layer(y)  #  TODO: pass correct parameters
+        y = channelwise_dense_layer(y)  # TODO: pass correct parameters
 
         if self.final_relu:
             y = nn.ReLU()(y)
@@ -192,15 +211,15 @@ def n2t_jinet_train_loop(
     writer.close()
 
 
-def n2s_jinet_train_loop():
-    writer = SummaryWriter()
-
-    optimizer = ESAdam(
-        chain(model.parameters()),
-        lr=learning_rate,
-        start_noise_level=training_noise,
-        weight_decay=l2_weight_regularisation,
-    )
-
-    writer.flush()
-    writer.close()
+# def n2s_jinet_train_loop():
+#     writer = SummaryWriter()
+#
+#     optimizer = ESAdam(
+#         chain(model.parameters()),
+#         lr=learning_rate,
+#         start_noise_level=training_noise,
+#         weight_decay=l2_weight_regularisation,
+#     )
+#
+#     writer.flush()
+#     writer.close()
