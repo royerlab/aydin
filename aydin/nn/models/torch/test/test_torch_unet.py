@@ -1,24 +1,10 @@
 # flake8: noqa
-
-# import math
-# from collections import OrderedDict
-# from itertools import chain
-#
-# import napari
 import numpy
 import pytest
 import torch
 
-# from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.utils.data import DataLoader
-
 from aydin.io.datasets import add_noise, camera, normalise
 from aydin.nn.models.torch.torch_unet import UNetModel, n2t_unet_train_loop
-from aydin.nn.models.utils.torch_dataset import TorchDataset
-
-# from aydin.nn.pytorch.it_ptcnn import to_numpy
-# from aydin.nn.pytorch.optimizers.esadam import ESAdam
-# from aydin.util.log.log import lprint
 from aydin.nn.pytorch.it_ptcnn import to_numpy
 
 
@@ -66,25 +52,20 @@ def test_supervised_2D_n2t():
     # assert result.dtype == input_image.dtype
 
 
-def test_masking_2D():
-    input_array = torch.zeros((1, 1, 64, 64))
+@pytest.mark.parametrize(
+    "nb_unet_levels,spacetime_ndim", [(2, 2), (3, 2), (5, 2), (8, 2)]
+)
+def test_masking_2D(nb_unet_levels, spacetime_ndim):
+    input_array = torch.zeros((1, 1, 1024, 1024))
     model2d = UNetModel(
         # (64, 64, 1),
-        nb_unet_levels=3,
+        nb_unet_levels=nb_unet_levels,
         supervised=False,
-        spacetime_ndim=2,
+        spacetime_ndim=spacetime_ndim,
     )
     result = model2d(input_array, torch.ones(input_array.shape))
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
-
-
-# def test_jinet_2D():
-#     input_array = torch.zeros((1, 1, 64, 64))
-#     model2d = JINetModel((64, 64, 1), spacetime_ndim=2)
-#     result = model2d.predict([input_array])
-#     assert result.shape == input_array.shape
-#     assert result.dtype == input_array.dtype
 
 
 def test_supervised_3D():
