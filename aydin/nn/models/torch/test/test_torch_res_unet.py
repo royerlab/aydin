@@ -30,4 +30,3 @@ def test_masking_3D(nb_unet_levels):
     result = model3d(input_array, torch.ones(input_array.shape))
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
-
