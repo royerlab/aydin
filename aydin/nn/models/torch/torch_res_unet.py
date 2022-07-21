@@ -116,7 +116,7 @@ class ResidualUNetModel(nn.Module):
         convolutions = []
         for layer_index in range(self.nb_unet_levels):
             nb_filters_in = self.nb_filters * (
-                    2 ** (self.nb_unet_levels - layer_index - 1)
+                2 ** (self.nb_unet_levels - layer_index - 1)
             )
 
             if layer_index == self.nb_unet_levels - 1:
