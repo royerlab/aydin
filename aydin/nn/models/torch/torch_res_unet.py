@@ -72,7 +72,7 @@ class ResidualUNetModel(nn.Module):
         # Decoder
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
-            x = torch.cat([x, skip_layer.pop()], dim=1)
+            x = torch.add(x, skip_layer.pop())
             x = self.double_conv_blocks_decoder[layer_index](x)
 
         # Final convolution
