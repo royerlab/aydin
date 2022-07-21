@@ -46,19 +46,25 @@ class JINetModel(nn.Module):
 
             total_nb_features += nb_features  # update the number of features until now
 
-            current_receptive_field_radius += dilation * radius  # update receptive field radius
+            current_receptive_field_radius += (
+                dilation * radius
+            )  # update receptive field radius
 
             dilated_conv_list.append(x)
 
         x = cat()(dilated_conv_list)  #  TODO: pass axis as -1
-        
+
         if self.nb_channels is None:
             nb_channels = total_nb_features * 2
-            
+
         y = None
         f = 1
         for level_index in range(self.nb_dense_layers):
-            nb_out = self.nb_out_channels if level_index == (self.nb_dense_layers - 1) else nb_channels
+            nb_out = (
+                self.nb_out_channels
+                if level_index == (self.nb_dense_layers - 1)
+                else nb_channels
+            )
 
             x = channelwise_dense_layer(x)  #  TODO: pass correct parameters
             x = nn.LeakyReLU(negative_slope=0.01)(x)
@@ -74,18 +80,18 @@ class JINetModel(nn.Module):
 
 
 def n2t_jinet_train_loop(
-        input_images,
-        target_images,
-        model: JINetModel,
-        nb_epochs: int = 1024,
-        learning_rate=0.01,
-        training_noise=0.001,
-        l2_weight_regularization=1e-9,
-        patience=128,
-        patience_epsilon=0.0,
-        reduce_lr_factor=0.5,
-        reload_best_model_period=1024,
-        best_val_loss_value=None,
+    input_images,
+    target_images,
+    model: JINetModel,
+    nb_epochs: int = 1024,
+    learning_rate=0.01,
+    training_noise=0.001,
+    l2_weight_regularization=1e-9,
+    patience=128,
+    patience_epsilon=0.0,
+    reduce_lr_factor=0.5,
+    reload_best_model_period=1024,
+    best_val_loss_value=None,
 ):
     writer = SummaryWriter()
 
@@ -104,7 +110,8 @@ def n2t_jinet_train_loop(
         patience=reduce_lr_patience,
     )
 
-    def loss_function(u, v): return torch.abs(u - v)
+    def loss_function(u, v):
+        return torch.abs(u - v)
 
     for epoch in range(nb_epochs):
         train_loss_value = 0

@@ -182,7 +182,8 @@ def n2t_unet_train_loop(
         patience=reduce_lr_patience,
     )
 
-    def loss_function(u, v): return torch.abs(u - v)
+    def loss_function(u, v):
+        return torch.abs(u - v)
 
     for epoch in range(nb_epochs):
         train_loss_value = 0
