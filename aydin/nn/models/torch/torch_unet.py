@@ -51,7 +51,9 @@ class UNetModel(nn.Module):
                     )
                 )
 
-        self.unet_bottom_conv_out_channels = self.conv_with_batch_norms_first_half[-1].out_channels
+        self.unet_bottom_conv_out_channels = self.conv_with_batch_norms_first_half[
+            -1
+        ].out_channels
 
         self.unet_bottom_conv_with_batch_norm = CustomConv(
             self.unet_bottom_conv_out_channels,
@@ -77,7 +79,7 @@ class UNetModel(nn.Module):
                     self.nb_filters,
                     spacetime_ndim,
                     normalization='batch',
-                )
+                ),
             )
             self.conv_with_batch_norms_second_half.append(consecutive_convolutions)
 

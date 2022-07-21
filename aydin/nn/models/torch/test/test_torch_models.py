@@ -50,9 +50,7 @@ def test_supervised_2D_n2t():
     #     dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
     # )
 
-    model = UNetModel(
-        nb_unet_levels=2, supervised=True, spacetime_ndim=2
-    )
+    model = UNetModel(nb_unet_levels=2, supervised=True, spacetime_ndim=2)
 
     n2t_unet_train_loop(input_image, lizard_image, model)
 
