@@ -50,3 +50,26 @@ class CustomConv(nn.Module):
         x = self.activation_function(x)
 
         return x
+
+
+def double_conv_block(
+    nb_filters_in,
+    nb_filters_inner,
+    nb_filters_out,
+    spacetime_ndim,
+    normalizations=(None, None),
+):
+    return nn.Sequential(
+        CustomConv(
+            nb_filters_in,
+            nb_filters_inner,
+            spacetime_ndim,
+            normalization=normalizations[0],
+        ),
+        CustomConv(
+            nb_filters_inner,
+            nb_filters_out,
+            spacetime_ndim,
+            normalization=normalizations[1],
+        ),
+    )

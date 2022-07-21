@@ -7,7 +7,7 @@ from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.tensorboard import SummaryWriter
 
-from aydin.nn.layers.custom_conv import CustomConv
+from aydin.nn.layers.custom_conv import double_conv_block
 from aydin.nn.layers.pooling_down import PoolingDown
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
@@ -29,67 +29,65 @@ class UNetModel(nn.Module):
         self.nb_filters = nb_filters
         self.learning_rate = learning_rate
         self.supervised = supervised
+        self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
+        self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
-        self.conv_with_batch_norms_first_conv_for_first_level = CustomConv(
-            1, self.nb_filters, spacetime_ndim
-        )
-
-        self.conv_with_batch_norms_first_half = []
+        self.double_conv_blocks_encoder = []
         for layer_index in range(self.nb_unet_levels):
-            if (
-                layer_index == 0
-            ):  # Handle special case input dimensions for the first layer
-                self.conv_with_batch_norms_first_half.append(
-                    CustomConv(self.nb_filters, self.nb_filters, spacetime_ndim)
-                )
+            if layer_index == 0:
+                nb_filters_in = 1
+                nb_filters_inner = self.nb_filters
+                nb_filters_out = self.nb_filters
             else:
-                self.conv_with_batch_norms_first_half.append(
-                    CustomConv(
-                        self.nb_filters * layer_index,
-                        self.nb_filters * (layer_index + 1),
-                        spacetime_ndim,
-                    )
+                nb_filters_in = self.nb_filters * (2 ** (layer_index - 1))
+                nb_filters_inner = self.nb_filters * (2**layer_index)
+                nb_filters_out = self.nb_filters * (2**layer_index)
+
+            self.double_conv_blocks_encoder.append(
+                double_conv_block(
+                    nb_filters_in,
+                    nb_filters_inner,
+                    nb_filters_out,
+                    spacetime_ndim,
                 )
+            )
 
-        self.unet_bottom_conv_out_channels = self.conv_with_batch_norms_first_half[
-            -1
-        ].out_channels
-
-        self.unet_bottom_conv_with_batch_norm = CustomConv(
+        self.unet_bottom_conv_out_channels = self.nb_filters * (
+            2 ** (self.nb_unet_levels - 1)
+        )
+        self.unet_bottom_conv_block = double_conv_block(
             self.unet_bottom_conv_out_channels,
+            self.unet_bottom_conv_out_channels * 2,
             self.unet_bottom_conv_out_channels,
             spacetime_ndim,
         )
 
-        self.conv_with_batch_norms_second_half = []
+        self.double_conv_blocks_decoder = []
         for layer_index in range(self.nb_unet_levels):
             if layer_index == self.nb_unet_levels - 1:
-                _nb_filters_in = self.nb_filters + 1
+                nb_filters_in = self.nb_filters * 2
+                nb_filters_inner = nb_filters_out = self.nb_filters
             else:
-                _nb_filters_in = self.nb_unet_levels - layer_index
+                nb_filters_in = self.nb_filters * (
+                    2 ** (self.nb_unet_levels - layer_index)
+                )
+                nb_filters_inner = nb_filters_in // 2
+                nb_filters_out = nb_filters_in // 4
 
-            consecutive_convolutions = nn.Sequential(
-                CustomConv(
-                    _nb_filters_in,
-                    self.nb_filters,
-                    spacetime_ndim,
-                ),
-                CustomConv(
-                    self.nb_filters,
-                    self.nb_filters,
-                    spacetime_ndim,
-                    normalization='batch',
-                ),
+            self.double_conv_blocks_decoder.append(
+                double_conv_block(
+                    nb_filters_in,
+                    nb_filters_inner,
+                    nb_filters_out,
+                    spacetime_ndim=spacetime_ndim,
+                    normalizations=(None, "batch"),
+                )
             )
-            self.conv_with_batch_norms_second_half.append(consecutive_convolutions)
-
-        self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
-        self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
         if spacetime_ndim == 2:
-            self.conv = nn.Conv2d(8, 1, 1)
+            self.final_conv = nn.Conv2d(self.nb_filters, 1, 1)
         else:
-            self.conv = nn.Conv3d(8, 1, 1)
+            self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
     def forward(self, x, input_msk=None):
         """
@@ -105,38 +103,27 @@ class UNetModel(nn.Module):
         -------
 
         """
+        skip_layer = []
 
-        skip_layer = [x]
-
-        x = self.conv_with_batch_norms_first_conv_for_first_level(x)
-
+        # Encoder
         for layer_index in range(self.nb_unet_levels):
-
-            x = self.conv_with_batch_norms_first_half[layer_index](x)
-
+            x = self.double_conv_blocks_encoder[layer_index](x)
+            skip_layer.append(x)
             x = self.pooling_down(x)
 
-            if layer_index != self.nb_unet_levels - 1:
-                # print(f"skip layer added: x -> {x.shape}")
-                skip_layer.append(x)
+        # Bottom
+        x = self.unet_bottom_conv_block(x)
 
-            # print("down")
-
-        # print("before bottom")
-        x = self.unet_bottom_conv_with_batch_norm(x)
-        # print("after bottom")
-
+        # Decoder
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
-
             x = torch.cat([x, skip_layer.pop()], dim=1)
+            x = self.double_conv_blocks_decoder[layer_index](x)
 
-            x = self.conv_with_batch_norms_second_half[layer_index](x)
+        # Final convolution
+        x = self.final_conv(x)
 
-            # print("up")
-
-        x = self.conv(x)
-
+        # Masking for self-supervised training
         if not self.supervised:
             if input_msk is not None:
                 x *= input_msk
