@@ -40,8 +40,8 @@ class JINetModel(nn.Module):
 
             self.dilated_conv_functions.append(
                 DilatedConv(
-                    in_channels,
-                    out_channels,
+                    1,
+                    1,
                     self.spacetime_ndim,
                     padding=dilation * radius,
                     kernel_size=kernel_size,
@@ -55,16 +55,16 @@ class JINetModel(nn.Module):
 
         if spacetime_ndim == 2:
             self.channelwise_dense_conv = nn.Conv2d(
-                in_channels,
-                out_channels,
-                kernel_size=1,
+                1,
+                1,
+                kernel_size=(1, 1),
                 padding_mode="same",
             )
         elif spacetime_ndim == 3:
             self.channelwise_dense_conv = nn.Conv3d(
-                in_channels,
-                out_channels,
-                kernel_size=1,
+                1,
+                1,
+                kernel_size=(1, 1, 1),
                 padding_mode="same",
             )
         else:
