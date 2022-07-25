@@ -28,6 +28,26 @@ class JINetModel(nn.Module):
         if len(kernel_sizes) != len(num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
 
+        if spacetime_ndim == 2:
+            self.channelwise_dense_conv = nn.Conv2d(
+                in_channels,
+                out_channels,
+                kernel_size=1,
+                padding_mode="same",
+            )
+        elif spacetime_ndim == 3:
+            self.channelwise_dense_conv = nn.Conv3d(
+                in_channels,
+                out_channels,
+                kernel_size=1,
+                padding_mode="same",
+            )
+        else:
+            raise ValueError("spacetime_ndim can not be anything other than 2 or 3...")
+
+        self.relu = nn.ReLU()
+        self.lrelu = nn.LeakyReLU(negative_slope=0.01)
+
     @property
     def kernel_sizes(self):
         if self._kernel_sizes is None:
@@ -94,15 +114,15 @@ class JINetModel(nn.Module):
                 else nb_channels
             )
 
-            x = channelwise_dense_layer(x)  # TODO: pass correct parameters
-            x = nn.LeakyReLU(negative_slope=0.01)(x)
+            x = self.channelwise_dense_conv(x)
+            x = self.lrelu(x)
 
             y = x if y is None else y + f * x
 
-        y = channelwise_dense_layer(y)  # TODO: pass correct parameters
+        y = self.channelwise_dense_conv(y)
 
         if self.final_relu:
-            y = nn.ReLU()(y)
+            y = self.relu(y)
 
         return y
 
