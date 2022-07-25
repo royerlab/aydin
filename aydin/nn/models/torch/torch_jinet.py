@@ -47,7 +47,7 @@ class JINetModel(nn.Module):
 
             self.dilated_conv_functions.append(
                 DilatedConv(
-                    1,
+                    1 if scale_index == 0 else self.num_features[scale_index - 1],
                     self.num_features[scale_index],
                     self.spacetime_ndim,
                     padding=dilation * radius,
@@ -129,7 +129,7 @@ class JINetModel(nn.Module):
             pprint(x.shape)
 
         # Concat the results
-        x = torch.cat(dilated_conv_list)  # TODO: pass axis as -1
+        x = torch.cat(dilated_conv_list, dim=1)
 
         # First kernel size one conv
         x = self.kernel_one_conv_functions[0](x)
