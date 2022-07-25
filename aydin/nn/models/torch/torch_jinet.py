@@ -80,7 +80,7 @@ class JINetModel(nn.Module):
 
             dilated_conv_list.append(x)
 
-        x = cat()(dilated_conv_list)  # TODO: pass axis as -1
+        x = torch.cat(dilated_conv_list, dim=-1)  # TODO: pass axis as -1
 
         if self.nb_channels is None:
             nb_channels = total_nb_features * 2
@@ -127,7 +127,7 @@ def n2t_jinet_train_loop(
         chain(model.parameters()),
         lr=learning_rate,
         start_noise_level=training_noise,
-        weight_decay=l2_weight_regularisation,
+        weight_decay=l2_weight_regularization,
     )
 
     scheduler = ReduceLROnPlateau(
