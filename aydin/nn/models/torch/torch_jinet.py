@@ -131,14 +131,16 @@ class JINetModel(nn.Module):
         x = self.lrelu(x)
         y = x
 
-        # Rest of the kernel size one convs
+        # Rest of the kernel size one convolutions
         for index in range(1, self.nb_dense_layers + 1):
             x = self.kernel_one_conv_functions[index](x)
             x = self.lrelu(x)
             y += self.f * x
 
+        # Final kernel size one convolution
         y = self.final_kernel_one_conv(y)
 
+        # Final ReLU
         if self.final_relu:
             y = self.relu(y)
 
