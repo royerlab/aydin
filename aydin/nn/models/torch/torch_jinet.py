@@ -2,7 +2,6 @@ from collections import OrderedDict
 from itertools import chain
 
 import torch
-from torch import cat
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.tensorboard import SummaryWriter
@@ -65,7 +64,7 @@ class JINetModel(nn.Module):
             raise ValueError("spacetime_ndim can not be anything other than 2 or 3...")
 
         if self.nb_channels is None:
-            nb_channels = sum(self.num_features) * 2
+            self.nb_channels = sum(self.num_features) * 2
 
         nb_out = 1
         self.kernel_one_conv_functions = []
@@ -74,7 +73,7 @@ class JINetModel(nn.Module):
             nb_out = (
                 self.nb_out_channels
                 if index == (self.nb_dense_layers - 1)
-                else nb_channels
+                else self.nb_channels
             )
 
             self.kernel_one_conv_functions.append(
@@ -82,12 +81,12 @@ class JINetModel(nn.Module):
                     nb_in,
                     nb_out,
                     kernel_size=1,
-                    padding="valid"
+                    padding="valid",
                 )
             )
 
         self.final_kernel_one_conv = self.conv(
-            in_channels,
+            nb_out,
             self.nb_output_ch,
             kernel_size=(1,) * spacetime_ndim,
             padding_mode="same",
@@ -119,20 +118,24 @@ class JINetModel(nn.Module):
     def forward(self, x):
         dilated_conv_list = []
 
+        # Calculate dilated convolutions
         for index in range(len(self.kernel_sizes)):
             x = self.dilated_conv_functions[index](x)
             dilated_conv_list.append(x)
 
+        # Concat the results
         x = torch.cat(dilated_conv_list, dim=-1)  # TODO: pass axis as -1
 
-        y = None
+        # First kernel size one conv
+        x = self.kernel_one_conv_functions[0](x)
+        x = self.lrelu(x)
+        y = x
 
-        for level_index in range(self.nb_dense_layers):
-
-            x = self.channelwise_dense_conv(x)
+        # Rest of the kernel size one convs
+        for index in range(1, self.nb_dense_layers + 1):
+            x = self.kernel_one_conv_functions[index](x)
             x = self.lrelu(x)
-
-            y = x if y is None else y + self.f * x
+            y += self.f * x
 
         y = self.final_kernel_one_conv(y)
 
