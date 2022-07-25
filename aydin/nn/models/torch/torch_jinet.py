@@ -16,14 +16,18 @@ class JINetModel(nn.Module):
     def __init__(
         self,
         spacetime_ndim,
+        nb_output_ch: int = 1,
         kernel_sizes=None,
         num_features=None,
     ):
         super(JINetModel, self).__init__()
 
         self.spacetime_ndim = spacetime_ndim
+        self.nb_output_ch = nb_output_ch
         self._kernel_sizes = kernel_sizes
         self._num_features = num_features
+
+        self.f = 1
 
         if len(kernel_sizes) != len(num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
@@ -54,21 +58,40 @@ class JINetModel(nn.Module):
             current_receptive_field_radius += dilation * radius
 
         if spacetime_ndim == 2:
-            self.channelwise_dense_conv = nn.Conv2d(
-                1,
-                1,
-                kernel_size=(1, 1),
-                padding_mode="same",
-            )
+            self.conv = nn.Conv2d
         elif spacetime_ndim == 3:
-            self.channelwise_dense_conv = nn.Conv3d(
-                1,
-                1,
-                kernel_size=(1, 1, 1),
-                padding_mode="same",
-            )
+            self.conv = nn.Conv3d
         else:
             raise ValueError("spacetime_ndim can not be anything other than 2 or 3...")
+
+        if self.nb_channels is None:
+            nb_channels = sum(self.num_features) * 2
+
+        nb_out = 1
+        self.kernel_one_conv_functions = []
+        for index in range(len(self.kernel_sizes)):
+            nb_in = nb_out
+            nb_out = (
+                self.nb_out_channels
+                if index == (self.nb_dense_layers - 1)
+                else nb_channels
+            )
+
+            self.kernel_one_conv_functions.append(
+                self.conv(
+                    nb_in,
+                    nb_out,
+                    kernel_size=1,
+                    padding="valid"
+                )
+            )
+
+        self.final_kernel_one_conv = self.conv(
+            in_channels,
+            self.nb_output_ch,
+            kernel_size=(1,) * spacetime_ndim,
+            padding_mode="same",
+        )
 
         self.relu = nn.ReLU()
         self.lrelu = nn.LeakyReLU(negative_slope=0.01)
@@ -102,24 +125,16 @@ class JINetModel(nn.Module):
 
         x = torch.cat(dilated_conv_list, dim=-1)  # TODO: pass axis as -1
 
-        if self.nb_channels is None:
-            nb_channels = sum(self.num_features) * 2
-
         y = None
-        f = 1
+
         for level_index in range(self.nb_dense_layers):
-            nb_out = (
-                self.nb_out_channels
-                if level_index == (self.nb_dense_layers - 1)
-                else nb_channels
-            )
 
             x = self.channelwise_dense_conv(x)
             x = self.lrelu(x)
 
-            y = x if y is None else y + f * x
+            y = x if y is None else y + self.f * x
 
-        y = self.channelwise_dense_conv(y)
+        y = self.final_kernel_one_conv(y)
 
         if self.final_relu:
             y = self.relu(y)
