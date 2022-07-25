@@ -28,7 +28,7 @@ class JINetModel(nn.Module):
 
         self.f = 1
 
-        if len(kernel_sizes) != len(num_features):
+        if len(self.kernel_sizes) != len(self.num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
 
         self.dilated_conv_functions = []
