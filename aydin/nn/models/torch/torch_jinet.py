@@ -28,6 +28,31 @@ class JINetModel(nn.Module):
         if len(kernel_sizes) != len(num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
 
+        self.dilated_conv_functions = []
+        current_receptive_field_radius = 0
+        for scale_index in range(len(self.kernel_sizes)):
+            # Get kernel size and number of features:
+            kernel_size = self.kernel_sizes[scale_index]
+
+            # radius and dilation:
+            radius = (kernel_size - 1) // 2
+            dilation = 1 + current_receptive_field_radius
+
+            self.dilated_conv_functions.append(
+                DilatedConv(
+                    in_channels,
+                    out_channels,
+                    self.spacetime_ndim,
+                    padding=dilation * radius,
+                    kernel_size=kernel_size,
+                    dilation=dilation,
+                    activation="lrel",
+                )
+            )
+
+            # update receptive field radius
+            current_receptive_field_radius += dilation * radius
+
         if spacetime_ndim == 2:
             self.channelwise_dense_conv = nn.Conv2d(
                 in_channels,
@@ -70,40 +95,15 @@ class JINetModel(nn.Module):
 
     def forward(self, x):
         dilated_conv_list = []
-        total_nb_features = 0
-        current_receptive_field_radius = 0
 
-        for scale_index in range(len(self.kernel_sizes)):
-            # Get kernel size and number of features:
-            kernel_size = self.kernel_sizes[scale_index]
-            nb_features = self.num_features[scale_index]
-
-            # radius and dilation:
-            radius = (kernel_size - 1) // 2
-            dilation = 1 + current_receptive_field_radius
-
-            x = DilatedConv(
-                in_channels,
-                out_channels,
-                self.spacetime_ndim,
-                padding=dilation * radius,
-                kernel_size=kernel_size,
-                dilation=dilation,
-                activation="lrel",
-            )(x)
-
-            total_nb_features += nb_features  # update the number of features until now
-
-            current_receptive_field_radius += (
-                dilation * radius
-            )  # update receptive field radius
-
+        for index in range(len(self.kernel_sizes)):
+            x = self.dilated_conv_functions[index](x)
             dilated_conv_list.append(x)
 
         x = torch.cat(dilated_conv_list, dim=-1)  # TODO: pass axis as -1
 
         if self.nb_channels is None:
-            nb_channels = total_nb_features * 2
+            nb_channels = sum(self.num_features) * 2
 
         y = None
         f = 1
