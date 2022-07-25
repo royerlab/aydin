@@ -15,16 +15,20 @@ class JINetModel(nn.Module):
     def __init__(
         self,
         spacetime_ndim,
-        nb_output_ch: int = 1,
+        nb_out_channels: int = 1,
         kernel_sizes=None,
         num_features=None,
+        nb_dense_layers: int = 3,
+        nb_channels: int = None,
     ):
         super(JINetModel, self).__init__()
 
         self.spacetime_ndim = spacetime_ndim
-        self.nb_output_ch = nb_output_ch
+        self.nb_out_channels = nb_out_channels
         self._kernel_sizes = kernel_sizes
         self._num_features = num_features
+        self.nb_dense_layers = nb_dense_layers
+        self.nb_channels = nb_channels
 
         self.f = 1
 
@@ -44,7 +48,7 @@ class JINetModel(nn.Module):
             self.dilated_conv_functions.append(
                 DilatedConv(
                     1,
-                    1,
+                    self.num_features[scale_index],
                     self.spacetime_ndim,
                     padding=dilation * radius,
                     kernel_size=kernel_size,
@@ -80,16 +84,14 @@ class JINetModel(nn.Module):
                 self.conv(
                     nb_in,
                     nb_out,
-                    kernel_size=1,
-                    padding="valid",
+                    kernel_size=(1,) * spacetime_ndim,
                 )
             )
 
         self.final_kernel_one_conv = self.conv(
             nb_out,
-            self.nb_output_ch,
+            self.nb_out_channels,
             kernel_size=(1,) * spacetime_ndim,
-            padding_mode="same",
         )
 
         self.relu = nn.ReLU()
@@ -123,8 +125,11 @@ class JINetModel(nn.Module):
             x = self.dilated_conv_functions[index](x)
             dilated_conv_list.append(x)
 
+            from pprint import pprint
+            pprint(x.shape)
+
         # Concat the results
-        x = torch.cat(dilated_conv_list, dim=-1)  # TODO: pass axis as -1
+        x = torch.cat(dilated_conv_list)  # TODO: pass axis as -1
 
         # First kernel size one conv
         x = self.kernel_one_conv_functions[0](x)
