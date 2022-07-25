@@ -4,14 +4,14 @@ from torch.nn import ZeroPad2d
 
 class DilatedConv(nn.Module):
     def __init__(
-            self,
-            in_channels,
-            out_channels,
-            spacetime_ndim,
-            padding,
-            kernel_size,
-            dilation,
-            activation="ReLU",
+        self,
+        in_channels,
+        out_channels,
+        spacetime_ndim,
+        padding,
+        kernel_size,
+        dilation,
+        activation="ReLU",
     ):
         super(DilatedConv, self).__init__()
 
@@ -35,7 +35,7 @@ class DilatedConv(nn.Module):
             kernel_size,
             dilation=dilation,
             padding='valid',
-            stride=(1,) * spacetime_ndim
+            stride=(1,) * spacetime_ndim,
         )
 
         self.activation_function = {

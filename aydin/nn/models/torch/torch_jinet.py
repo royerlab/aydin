@@ -124,6 +124,7 @@ class JINetModel(nn.Module):
             dilated_conv_list.append(x)
 
             from pprint import pprint
+
             pprint(x.shape)
 
         # Concat the results
@@ -178,7 +179,7 @@ def n2t_jinet_train_loop(
         'min',
         factor=reduce_lr_factor,
         verbose=True,
-        patience=reduce_lr_patience,
+        # patience=reduce_lr_patience,  TODO: enable this parameter
     )
 
     def loss_function(u, v):
