@@ -30,8 +30,6 @@ class JINetModel(nn.Module):
         self.nb_dense_layers = nb_dense_layers
         self.nb_channels = nb_channels
 
-        self.f = 1
-
         if len(self.kernel_sizes) != len(self.num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
 
@@ -140,7 +138,7 @@ class JINetModel(nn.Module):
         for index in range(1, self.nb_dense_layers + 1):
             x = self.kernel_one_conv_functions[index](x)
             x = self.lrelu(x)
-            y += self.f * x
+            y += x
 
         # Final kernel size one convolution
         y = self.final_kernel_one_conv(y)
