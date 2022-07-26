@@ -15,6 +15,7 @@ class JINetModel(nn.Module):
     def __init__(
         self,
         spacetime_ndim,
+        nb_in_channels: int = 1,
         nb_out_channels: int = 1,
         kernel_sizes=None,
         num_features=None,
@@ -26,6 +27,7 @@ class JINetModel(nn.Module):
         super(JINetModel, self).__init__()
 
         self.spacetime_ndim = spacetime_ndim
+        self.nb_in_channels = nb_in_channels
         self.nb_out_channels = nb_out_channels
         self._kernel_sizes = kernel_sizes
         self._num_features = num_features
@@ -49,7 +51,7 @@ class JINetModel(nn.Module):
 
             self.dilated_conv_functions.append(
                 DilatedConv(
-                    1 if scale_index == 0 else self.num_features[scale_index - 1],
+                    self.nb_in_channels if scale_index == 0 else self.num_features[scale_index - 1],
                     self.num_features[scale_index],
                     self.spacetime_ndim,
                     padding=dilation * radius,
@@ -81,7 +83,6 @@ class JINetModel(nn.Module):
                 if index == (self.nb_dense_layers - 1)
                 else self.nb_channels
             )
-            print(index, nb_in, nb_out)
 
             self.kernel_one_conv_functions.append(
                 self.conv(
