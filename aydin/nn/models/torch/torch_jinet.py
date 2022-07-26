@@ -169,6 +169,8 @@ def n2t_jinet_train_loop(
 ):
     writer = SummaryWriter()
 
+    reduce_lr_patience = patience // 2
+
     optimizer = ESAdam(
         chain(model.parameters()),
         lr=learning_rate,
@@ -181,7 +183,7 @@ def n2t_jinet_train_loop(
         'min',
         factor=reduce_lr_factor,
         verbose=True,
-        # patience=reduce_lr_patience,  TODO: enable this parameter
+        patience=reduce_lr_patience,
     )
 
     def loss_function(u, v):
