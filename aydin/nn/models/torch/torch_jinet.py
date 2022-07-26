@@ -21,6 +21,7 @@ class JINetModel(nn.Module):
         nb_dense_layers: int = 3,
         nb_channels: int = None,
         final_relu: bool = False,
+        degressive_residuals: bool = False,  # TODO: check what happens when this is True
     ):
         super(JINetModel, self).__init__()
 
@@ -31,6 +32,7 @@ class JINetModel(nn.Module):
         self.nb_dense_layers = nb_dense_layers
         self.nb_channels = nb_channels
         self.final_relu = final_relu
+        self.degressive_residuals = degressive_residuals
 
         if len(self.kernel_sizes) != len(self.num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
@@ -136,12 +138,16 @@ class JINetModel(nn.Module):
         print(f"after first kernel one conv: {x.shape}")
         x = self.lrelu(x)
         y = x
+        f = 1
 
         # Rest of the kernel size one convolutions
         for index in range(1, self.nb_dense_layers):
             x = self.kernel_one_conv_functions[index](x)
             x = self.lrelu(x)
-            y += x
+            y += f * x
+
+            if self.degressive_residuals:
+                f *= 0.5
 
         # Final kernel size one convolution
         y = self.final_kernel_one_conv(y)
