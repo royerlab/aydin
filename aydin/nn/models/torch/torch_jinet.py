@@ -70,13 +70,14 @@ class JINetModel(nn.Module):
 
         nb_out = 1
         self.kernel_one_conv_functions = []
-        for index in range(len(self.kernel_sizes)):
+        for index in range(self.nb_dense_layers):
             nb_in = nb_out
             nb_out = (
                 self.nb_out_channels
                 if index == (self.nb_dense_layers - 1)
                 else self.nb_channels
             )
+            print(index, nb_in, nb_out)
 
             self.kernel_one_conv_functions.append(
                 self.conv(
@@ -128,11 +129,15 @@ class JINetModel(nn.Module):
             pprint(x.shape)
 
         # Concat the results
+
         x = torch.cat(dilated_conv_list, dim=1)
+        print(f"after cat: {x.shape}")
 
         # First kernel size one conv
         x = self.kernel_one_conv_functions[0](x)
+        print(f"after first kernel one conv: {x.shape}")
         x = self.lrelu(x)
+        print(f"after relu: {x.shape}")
         y = x
 
         # Rest of the kernel size one convolutions
