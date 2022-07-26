@@ -238,6 +238,7 @@ class JINetModel(Model):
         # stack all features into one tensor:
         x = Concatenate(axis=-1)(dilated_conv_list)
 
+        print("after concat", x.shape)
         # We keep the number of features:
         self.total_num_features = total_num_features
 

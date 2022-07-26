@@ -20,6 +20,7 @@ class JINetModel(nn.Module):
         num_features=None,
         nb_dense_layers: int = 3,
         nb_channels: int = None,
+        final_relu: bool = False,
     ):
         super(JINetModel, self).__init__()
 
@@ -29,6 +30,7 @@ class JINetModel(nn.Module):
         self._num_features = num_features
         self.nb_dense_layers = nb_dense_layers
         self.nb_channels = nb_channels
+        self.final_relu = final_relu
 
         if len(self.kernel_sizes) != len(self.num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
@@ -66,9 +68,9 @@ class JINetModel(nn.Module):
             raise ValueError("spacetime_ndim can not be anything other than 2 or 3...")
 
         if self.nb_channels is None:
-            self.nb_channels = sum(self.num_features) * 2
+            self.nb_channels = sum(self.num_features)  # * 2
 
-        nb_out = 1
+        nb_out = self.nb_channels
         self.kernel_one_conv_functions = []
         for index in range(self.nb_dense_layers):
             nb_in = nb_out
@@ -81,15 +83,15 @@ class JINetModel(nn.Module):
 
             self.kernel_one_conv_functions.append(
                 self.conv(
-                    nb_in,
-                    nb_out,
+                    in_channels=nb_in,
+                    out_channels=nb_out,
                     kernel_size=(1,) * spacetime_ndim,
                 )
             )
 
         self.final_kernel_one_conv = self.conv(
-            nb_out,
-            self.nb_out_channels,
+            in_channels=self.nb_channels,
+            out_channels=1,
             kernel_size=(1,) * spacetime_ndim,
         )
 
@@ -123,13 +125,9 @@ class JINetModel(nn.Module):
         for index in range(len(self.kernel_sizes)):
             x = self.dilated_conv_functions[index](x)
             dilated_conv_list.append(x)
-
-            from pprint import pprint
-
-            pprint(x.shape)
+            print(x.shape)
 
         # Concat the results
-
         x = torch.cat(dilated_conv_list, dim=1)
         print(f"after cat: {x.shape}")
 
@@ -137,11 +135,10 @@ class JINetModel(nn.Module):
         x = self.kernel_one_conv_functions[0](x)
         print(f"after first kernel one conv: {x.shape}")
         x = self.lrelu(x)
-        print(f"after relu: {x.shape}")
         y = x
 
         # Rest of the kernel size one convolutions
-        for index in range(1, self.nb_dense_layers + 1):
+        for index in range(1, self.nb_dense_layers):
             x = self.kernel_one_conv_functions[index](x)
             x = self.lrelu(x)
             y += x

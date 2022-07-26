@@ -30,12 +30,11 @@ class DilatedConv(nn.Module):
             raise ValueError("spacetime_ndim parameter can only be 2 or 3...")
 
         self.conv = self.conv_class(
-            in_channels,
-            out_channels,
-            kernel_size,
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
             dilation=dilation,
             padding='valid',
-            stride=(1,) * spacetime_ndim,
         )
 
         self.activation_function = {
