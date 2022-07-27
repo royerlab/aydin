@@ -2,6 +2,7 @@ import math
 from collections import OrderedDict
 from itertools import chain
 
+import numpy
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -9,8 +10,11 @@ from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.custom_conv import double_conv_block
 from aydin.nn.layers.pooling_down import PoolingDown
+from aydin.nn.models.utils.image_tile import tile_target_images, tile_input_images
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
-from aydin.util.log.log import lprint
+from aydin.nn.util.data_util import random_sample_patches
+from aydin.nn.util.validation_generator import train_image_generator
+from aydin.util.log.log import lprint, lsection
 
 
 class UNetModel(nn.Module):
@@ -209,6 +213,44 @@ def n2s_train(
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
+
+            # Forward pass:
+            model.train()
+
+            translated_image = model(input_image)
+
+            # translation loss (per voxel):
+            translation_loss = loss_function(translated_image, input_image)
+
+            # loss value (for all voxels):
+            translation_loss_value = translation_loss.mean()
+
+            # backpropagation:
+            translation_loss_value.backward()
+
+            # Updating parameters
+            optimizer.step()
+
+            # update training loss_deconvolution for whole image:
+            train_loss_value += translation_loss_value.item()
+            iteration += 1
+
+            # Validation:
+            with torch.no_grad():
+                # Forward pass:
+                model.eval()
+
+                translated_image = model(input_image)
+
+                # translation loss (per voxel):
+                translation_loss = loss_function(translated_image, target_image)
+
+                # loss values:
+                translation_loss_value = translation_loss.mean().cpu().item()
+
+                # update validation loss_deconvolution for whole image:
+                val_loss_value += translation_loss_value
+                iteration += 1
 
 
 def n2t_train(
