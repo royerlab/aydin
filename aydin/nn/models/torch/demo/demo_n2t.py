@@ -3,6 +3,7 @@ import numpy
 import torch
 
 from aydin.io.datasets import add_noise, normalise, camera
+from aydin.nn.models.torch.torch_linear_scaling_unet import LinearScalingUNetModel
 from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
 from aydin.nn.models.torch.torch_unet import n2t_unet_train_loop, UNetModel
 from aydin.nn.pytorch.it_ptcnn import to_numpy
@@ -42,5 +43,6 @@ def demo_supervised_2D_n2t(model_class):
 if __name__ == '__main__':
     model_class = UNetModel
     # model_class = ResidualUNetModel
+    # model_class = LinearScalingUNetModel
 
     demo_supervised_2D_n2t(model_class)
