@@ -6,13 +6,13 @@ from aydin.nn.layers.pooling_down import PoolingDown
 
 class LinearScalingUNetModel(nn.Module):
     def __init__(
-            self,
-            spacetime_ndim,
-            nb_unet_levels: int = 4,
-            nb_filters: int = 8,
-            learning_rate=0.01,
-            supervised: bool = False,
-            pooling_mode: str = 'max',
+        self,
+        spacetime_ndim,
+        nb_unet_levels: int = 4,
+        nb_filters: int = 8,
+        learning_rate=0.01,
+        supervised: bool = False,
+        pooling_mode: str = 'max',
     ):
         super(LinearScalingUNetModel, self).__init__()
 
