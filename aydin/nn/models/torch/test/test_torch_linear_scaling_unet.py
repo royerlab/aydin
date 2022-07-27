@@ -1,14 +1,13 @@
-# flake8: noqa
 import pytest
 import torch
 
-from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
+from aydin.nn.models.torch.torch_linear_scaling_unet import LinearScalingUNetModel
 
 
 @pytest.mark.parametrize("nb_unet_levels", [2, 3, 5, 8])
 def test_masking_2D(nb_unet_levels):
     input_array = torch.zeros((1, 1, 1024, 1024))
-    model2d = ResidualUNetModel(
+    model2d = LinearScalingUNetModel(
         nb_unet_levels=nb_unet_levels,
         supervised=False,
         spacetime_ndim=2,
@@ -21,7 +20,7 @@ def test_masking_2D(nb_unet_levels):
 @pytest.mark.parametrize("nb_unet_levels", [2, 3, 5])
 def test_masking_3D(nb_unet_levels):
     input_array = torch.zeros((1, 1, 64, 64, 64))
-    model3d = ResidualUNetModel(
+    model3d = LinearScalingUNetModel(
         nb_unet_levels=nb_unet_levels,
         supervised=False,
         spacetime_ndim=3,

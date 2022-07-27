@@ -52,14 +52,14 @@ class UNetModel(nn.Module):
         else:
             self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
-    def forward(self, x, input_msk=None):
+    def forward(self, x, input_mask=None):
         """
         UNet forward method.
 
         Parameters
         ----------
         x
-        input_msk : numpy.ArrayLike
+        input_mask : numpy.ArrayLike
             A mask per image must be passed with self-supervised training.
 
         Returns
@@ -88,8 +88,8 @@ class UNetModel(nn.Module):
 
         # Masking for self-supervised training
         if not self.supervised:
-            if input_msk is not None:
-                x *= input_msk
+            if input_mask is not None:
+                x *= input_mask
             else:
                 raise ValueError(
                     "input_msk cannot be None for self-supervised training"

@@ -1,11 +1,8 @@
 # flake8: noqa
-import numpy
 import pytest
 import torch
 
-from aydin.io.datasets import add_noise, camera, normalise
-from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train
-from aydin.nn.pytorch.it_ptcnn import to_numpy
+from aydin.nn.models.torch.torch_unet import UNetModel
 
 
 def test_supervised_2D():
@@ -19,38 +16,6 @@ def test_supervised_2D():
     result = model2d(input_array)
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
-
-
-# @pytest.mark.heavy
-def test_supervised_2D_n2t():
-    visualize = False
-    lizard_image = normalise(camera()[:256, :256])
-    lizard_image = numpy.expand_dims(lizard_image, axis=0)
-    lizard_image = numpy.expand_dims(lizard_image, axis=0)
-
-    noisy_image = add_noise(lizard_image)
-
-    noisy_image = torch.tensor(noisy_image)
-    clean_image = torch.tensor(lizard_image)
-
-    model = UNetModel(nb_unet_levels=2, supervised=True, spacetime_ndim=2)
-
-    n2t_train(noisy_image, clean_image, model)
-
-    denoised = model(noisy_image)
-
-    if visualize:
-        import napari
-
-        viewer = napari.Viewer()
-        viewer.add_image(to_numpy(lizard_image), name="groundtruth")
-        viewer.add_image(to_numpy(noisy_image), name="noisy")
-        viewer.add_image(to_numpy(denoised), name="denoised")
-
-        napari.run()
-
-    assert denoised.shape == noisy_image.shape
-    assert denoised.dtype == noisy_image.dtype
 
 
 @pytest.mark.parametrize("nb_unet_levels", [2, 3, 5, 8])
