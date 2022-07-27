@@ -26,6 +26,11 @@ class LinearScalingUNetModel(nn.Module):
 
         self.unet_bottom_conv_out_channels = self.nb_filters * (self.nb_unet_levels - 1)
 
+        if spacetime_ndim == 2:
+            self.final_conv = nn.Conv2d(self.nb_filters, 1, 1)
+        else:
+            self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
+
     def forward(self, x, input_mask):
         skip_layer = []
 
