@@ -1,7 +1,11 @@
+import numpy
 import pytest
 import torch
 
+from aydin.io.datasets import normalise, camera, add_noise
 from aydin.nn.models.torch.torch_linear_scaling_unet import LinearScalingUNetModel
+from aydin.nn.models.torch.torch_unet import n2t_unet_train_loop
+from aydin.nn.pytorch.it_ptcnn import to_numpy
 
 
 @pytest.mark.parametrize("nb_unet_levels", [2, 3, 5, 8])
@@ -28,3 +32,31 @@ def test_masking_3D(nb_unet_levels):
     result = model3d(input_array, torch.ones(input_array.shape))
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
+
+
+def test_supervised_2D_n2t():
+    visualize = False
+    lizard_image = normalise(camera()[:256, :256])
+    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+
+    input_image = add_noise(lizard_image)
+
+    input_image = torch.tensor(input_image)
+    lizard_image = torch.tensor(lizard_image)
+
+    model = LinearScalingUNetModel(nb_unet_levels=2, supervised=True, spacetime_ndim=2)
+
+    n2t_unet_train_loop(input_image, lizard_image, model)
+
+    denoised = model(input_image)
+
+    if visualize:
+        import napari
+
+        viewer = napari.Viewer()
+        viewer.add_image(to_numpy(lizard_image), name="groundtruth")
+        viewer.add_image(to_numpy(input_image), name="noisy")
+        viewer.add_image(to_numpy(denoised), name="denoised")
+
+        napari.run()

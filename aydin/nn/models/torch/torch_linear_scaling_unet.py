@@ -42,7 +42,7 @@ class LinearScalingUNetModel(nn.Module):
         else:
             self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
-    def forward(self, x, input_mask):
+    def forward(self, x, input_mask=None):
         skip_layer = []
 
         # Encoder
