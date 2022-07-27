@@ -1,11 +1,7 @@
-import numpy
 import pytest
 import torch
 
-from aydin.io.datasets import normalise, camera, add_noise
 from aydin.nn.models.torch.torch_linear_scaling_unet import LinearScalingUNetModel
-from aydin.nn.models.torch.torch_unet import n2t_unet_train_loop
-from aydin.nn.pytorch.it_ptcnn import to_numpy
 
 
 @pytest.mark.parametrize("nb_unet_levels", [2, 3, 5, 8])
