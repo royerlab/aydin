@@ -104,9 +104,15 @@ class LinearScalingUNetModel(nn.Module):
                 nb_filters_in = self.nb_filters * 2
                 nb_filters_inner = nb_filters_out = self.nb_filters
             else:
-                nb_filters_in = self.nb_filters * (self.nb_unet_levels - layer_index) * 2
-                nb_filters_inner = self.nb_filters * (self.nb_unet_levels - layer_index - 1)
-                nb_filters_out = self.nb_filters * (self.nb_unet_levels - layer_index - 1)
+                nb_filters_in = (
+                    self.nb_filters * (self.nb_unet_levels - layer_index) * 2
+                )
+                nb_filters_inner = self.nb_filters * (
+                    self.nb_unet_levels - layer_index - 1
+                )
+                nb_filters_out = self.nb_filters * (
+                    self.nb_unet_levels - layer_index - 1
+                )
 
             convolutions.append(
                 double_conv_block(
