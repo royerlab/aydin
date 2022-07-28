@@ -34,7 +34,7 @@ def test_identity_saveload():
 def saveload(normaliser):
     input_path = examples_single.maitre_mouse.get_path()
     array, metadata = imread(input_path)
-    assert array.dtype == numpy.uint16
+    assert array.dtype == numpy.uint8
 
     normaliser.calibrate(array)
     print(f"Before normalisation: min,max = {(array.min(), array.max())}")
@@ -58,7 +58,7 @@ def saveload(normaliser):
     print(
         f"After denormalisation: min,max = {(denormalised_array.min(), denormalised_array.max())}"
     )
-    assert denormalised_array.dtype == numpy.uint16
+    assert denormalised_array.dtype == numpy.uint8
 
     assert (
         abs(array.min() - denormalised_array.min()) < 5
