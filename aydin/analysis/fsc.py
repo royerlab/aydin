@@ -44,8 +44,8 @@ def shell_sum(image):
     r = numpy.arange(len_x) - numpy.floor(len_x / 2)
     c = numpy.arange(len_y) - numpy.floor(len_y / 2)
     [R, C] = numpy.meshgrid(r, c)
-    map_floor = numpy.floor(numpy.sqrt(R ** 2 + C ** 2))
-    map_ceil = numpy.ceil(numpy.sqrt(R ** 2 + C ** 2))
+    map_floor = numpy.floor(numpy.sqrt(R**2 + C**2))
+    map_ceil = numpy.ceil(numpy.sqrt(R**2 + C**2))
 
     nb_shells = int(numpy.max(map_ceil))
 
@@ -53,7 +53,9 @@ def shell_sum(image):
     indices_from_ceil_map = [numpy.where(map_ceil == i) for i in range(nb_shells)]
 
     output = [
-        (sum(image[indices_from_floor_map[i]]) + sum(image[indices_from_ceil_map[i]])) / 2 for i in range(nb_shells)
+        (sum(image[indices_from_floor_map[i]]) + sum(image[indices_from_ceil_map[i]]))
+        / 2
+        for i in range(nb_shells)
     ]
 
     return output

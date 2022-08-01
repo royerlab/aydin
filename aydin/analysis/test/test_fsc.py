@@ -1,4 +1,4 @@
-import pytest
+# import pytest
 
 from aydin.analysis.fsc import shell_sum, fsc
 
@@ -14,4 +14,3 @@ def test_fsc(image1, image2):
     correlations = fsc(image1, image2)
 
     assert correlations.shape == image1.shape == image2.shape
-
