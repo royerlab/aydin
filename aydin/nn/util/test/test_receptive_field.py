@@ -21,7 +21,6 @@ def test_receptive_field_masking():
         nb_unet_levels=num_lyrs,
         normalization=batch_norm,
         supervised=supervised,
-        shiftconv=shiftconv,
         spacetime_ndim=2,
     )
     # Predict test 0-image
