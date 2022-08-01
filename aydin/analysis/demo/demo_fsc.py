@@ -1,10 +1,11 @@
 # flake8: noqa
 # import pytest
 import pytest
+import matplotlib.pyplot as plt
 from numpy.random.mtrand import normal
 
 from aydin.analysis.fsc import fsc
-from aydin.io.datasets import camera, normalise,
+from aydin.io.datasets import camera, normalise
 from aydin.util.log.log import lprint, Log
 
 
@@ -13,12 +14,17 @@ def demo_fsc(display: bool = True):
 
     clean_image = normalise(camera())
 
-    noise = normal(size=clean_image.size).reshape(*clean_image.shape)
+    noise1 = normal(size=clean_image.size).reshape(*clean_image.shape)
+    noise2 = normal(size=clean_image.size).reshape(*clean_image.shape)
 
-    noisy_image_1 = clean_image + 10 * noise
-    noisy_image_2 = clean_image + noise
+    noisy_image_1 = clean_image + noise1
+    noisy_image_2 = clean_image + noise2
 
     correlations = fsc(noisy_image_1, noisy_image_2)
+
+    plt.plot(correlations)
+    plt.title('noisy1, noisy2')
+    plt.show()
 
     if display:
         import napari
