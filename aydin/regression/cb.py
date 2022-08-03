@@ -140,9 +140,7 @@ class CBRegressor(RegressorBase):
         """
         return int(40e6 if self.gpu else 1e6)
 
-    def _get_params(
-        self, num_samples, learning_rate, use_gpu, train_folder
-    ):
+    def _get_params(self, num_samples, learning_rate, use_gpu, train_folder):
 
         # Setting min data in leaf:
         min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
