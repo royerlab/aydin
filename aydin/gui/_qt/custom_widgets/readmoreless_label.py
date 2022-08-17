@@ -1,5 +1,4 @@
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QMouseEvent
 from qtpy.QtWidgets import QWidget, QHBoxLayout, QLabel
 
 from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
