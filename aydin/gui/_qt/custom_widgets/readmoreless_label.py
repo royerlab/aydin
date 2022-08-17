@@ -52,7 +52,7 @@ class QReadMoreLessLabel(QWidget):
 
         self.setLayout(self.explanation_layout)
 
-    def state_toggle(self, a0: QMouseEvent) -> None:
+    def state_toggle(self, *args) -> None:
 
         if self.readmore_text is not None and self.readmore_right.strip() != "":
             self.readmore = not self.readmore
