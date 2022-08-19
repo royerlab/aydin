@@ -246,7 +246,7 @@ class CBRegressor(RegressorBase):
                 # Keep this for later:
                 x_train_shape = x_train.shape
                 y_train_shape = y_train.shape
-                x_train_dtype = x_train.dtype
+                # x_train_dtype = x_train.dtype
 
                 # Give a chance to reclaim this memory if needed:
                 x_train, y_train = None, None
