@@ -140,9 +140,7 @@ class CBRegressor(RegressorBase):
         """
         return int(40e6 if self.gpu else 1e6)
 
-    def _get_params(
-        self, num_samples, num_features, learning_rate, dtype, use_gpu, train_folder
-    ):
+    def _get_params(self, num_samples, learning_rate, use_gpu, train_folder):
 
         # Setting min data in leaf:
         min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
@@ -206,7 +204,7 @@ class CBRegressor(RegressorBase):
             "learning_rate": learning_rate,
         }
 
-        # Note: we could add optional automatic meta-parameter tunning by using cross val:
+        # Note: we could add optional automatic meta-parameter tuning by using cross val:
         # https://effectiveml.com/using-grid-search-to-optimise-catboost-parameters.html
 
         return params
@@ -253,8 +251,9 @@ class CBRegressor(RegressorBase):
                 # Give a chance to reclaim this memory if needed:
                 x_train, y_train = None, None
 
-                # CatBoost fails (best_iter == 0 or too small) sometimes to train if learning rate is too high, this loops
-                # tries increasingly smaller learning rates until training succeeds (best_iter>min_n_estimators)
+                # CatBoost fails (best_iter == 0 or too small) sometimes to train
+                # if learning rate is too high, this loops tries increasingly smaller
+                # learning rates until training succeeds (best_iter>min_n_estimators)
                 learning_rate = self.learning_rate
 
                 # Default min num of estimators:
@@ -409,7 +408,7 @@ class _CBModel:
             with lsection("CatBoost prediction now"):
                 prediction = _predict('CPU')
 
-                # Unfirtunately this does not work yet, please keep code for when it does...
+                # Unfortunately this does not work yet, please keep code for when it does...
                 # try:
                 #     lprint("Trying GPU inference...")
                 #     prediction = _predict('GPU')
