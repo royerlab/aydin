@@ -52,7 +52,7 @@ class AnalysisTab(QWidget):
         self.noise_floor_viewers_layout.addWidget(self.viewer_qt2)
 
         self.tab_layout.addLayout(self.noise_floor_viewers_layout)
-        
+
         self.tab_layout.addWidget(QHorizontalLineBreakWidget(self))
 
         self.tab_layout.setAlignment(Qt.AlignTop)
