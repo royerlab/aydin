@@ -4,15 +4,18 @@ from numpy.random.mtrand import normal
 from aydin.analysis.fsc import shell_sum, fsc
 from aydin.io.datasets import camera, normalise, newyork
 
+camera_image = camera()
+newyork_image = newyork()
 
-@pytest.mark.parametrize("image, length", [(camera(), 363), (newyork(), 725)])
+
+@pytest.mark.parametrize("image, length", [(camera_image, 363), (newyork_image, 725)])
 def test_shell_sum(image, length):
     result = shell_sum(image)
 
     assert len(result) == length
 
 
-@pytest.mark.parametrize("clean_image", [camera(), newyork()])
+@pytest.mark.parametrize("clean_image", [camera_image, newyork_image])
 def test_fsc(clean_image):
     clean_image = normalise(clean_image)
     noise1 = normal(size=clean_image.size).reshape(*clean_image.shape)
