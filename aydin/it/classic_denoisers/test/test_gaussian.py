@@ -6,7 +6,9 @@ from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 
 def test_gaussian():
-    assert demo_gaussian(cropped_newyork(), display=False) >= 0.600 - 0.02
+    assert (
+        demo_gaussian(cropped_newyork(crop_amount=384), display=False) >= 0.600 - 0.02
+    )
 
 
 def test_gaussian_nd():

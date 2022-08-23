@@ -71,11 +71,11 @@ class memoize_last(object):
 
         return self.value
 
-    def __get__(self, obj, objtype):
-        "Support instance methods."
+    def __get__(self, obj, *args):
+        """Support instance methods."""
         self._callable_is_method = True
         return functools.partial(self.__call__, obj)
 
     def __repr__(self):
-        "Return the wrapped function or method's docstring."
+        """Return the wrapped function or method's docstring."""
         return self.method.__doc__
