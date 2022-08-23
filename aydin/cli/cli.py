@@ -16,7 +16,6 @@ from skimage.metrics import (
 from aydin.gui.gui import run
 from aydin.io.datasets import normalise
 from aydin.it.base import ImageTranslatorBase
-from aydin.restoration.deconvolve.lr import LucyRichardson
 from aydin.io.io import imwrite, imread
 from aydin.io.utils import (
     get_output_image_path,
@@ -182,44 +181,6 @@ def denoise(files, **kwargs):
 
         imwrite(denoised, output_path)
         lprint("DONE")
-
-
-@cli.command()
-@click.argument('files', nargs=-1, required=True)
-@click.argument('psf_path', nargs=1, required=True)
-@click.option('-s', '--slicing', default='', type=str)
-@click.option('-b', '--backend', default=None)
-@click.option('--output-folder', default='')
-def lucyrichardson(files, psf_path, **kwargs):
-    """lucyrichardson command
-
-    Parameters
-    ----------
-    files
-    psf_kernel
-    kwargs : dict
-
-    """
-
-    psf_kernel = imread(psf_path)[0]
-    psf_kernel = psf_kernel.astype(numpy.float32, copy=False)
-    psf_kernel /= psf_kernel.sum()
-
-    filepaths, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
-    for filepath, input_image in zip(filepaths, image_arrays):
-        lr = LucyRichardson(
-            psf_kernel=psf_kernel, max_num_iterations=20, backend=kwargs['backend']
-        )
-
-        lr.train(input_image, input_image)
-        deconvolved = lr.deconvolve(input_image)
-
-        path, index_counter = get_output_image_path(
-            filepath,
-            operation_type="deconvolved",
-            output_folder=kwargs["output_folder"],
-        )
-        imwrite(deconvolved, path)
 
 
 @cli.command()

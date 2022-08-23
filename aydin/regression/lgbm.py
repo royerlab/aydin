@@ -88,11 +88,10 @@ class LGBMRegressor(RegressorBase):
             (advanced)
 
         inference_mode : str
-            Choses inference mode: can be 'opencl' for an OpenCL backend,
-            'lleaves' for the very fast lleaves library (only OSX and Linux),
-            'lgbm' for the standard lightGBM inference engine, and 'auto' (or None)
-            tries the best/fastest options first and fallback to lightGBM default
-            inference.
+            Choses inference mode: can be 'lleaves' for the very fast lleaves
+            library (only OSX and Linux), 'lgbm' for the standard lightGBM
+            inference engine, and 'auto' (or None) tries the best/fastest
+            options first and fallback to lightGBM default inference.
             (advanced)
 
         compute_training_loss : bool
@@ -116,8 +115,6 @@ class LGBMRegressor(RegressorBase):
         self.compute_load = compute_load
         self.inference_mode = 'auto' if inference_mode is None else inference_mode
         self.compute_training_loss = compute_training_loss  # This can be expensive
-
-        self.opencl_predictor = None
 
         with lsection("LGBM Regressor"):
             lprint(f"learning rate: {self.learning_rate}")
@@ -297,14 +294,6 @@ class _LGBMModel:
                     self.inference_mode = 'lgbm'
 
             lprint("GBM regressor predicting now...")
-            if self.inference_mode == 'opencl' and find_spec('pyopencl'):
-                try:
-                    return self._predict_opencl(x)
-                except Exception:
-                    # printing stack trace
-                    # traceback.print_exc()
-                    lprint("Failed OpenCL-based regression!")
-
             if self.inference_mode == 'lleaves' and find_spec('lleaves'):
                 try:
                     return self._predict_lleaves(x)
@@ -337,20 +326,6 @@ class _LGBMModel:
 
             prediction = llvm_model.predict(x)
 
-        return prediction
-
-    def _predict_opencl(self, x):
-        with lsection("Attempting lleaves-based regression."):
-            from aydin.regression.gbm_utils.opencl_prediction import GBMOpenCLPrediction
-
-            if self.opencl_predictor is None:
-                self.opencl_predictor = GBMOpenCLPrediction()
-            prediction = self.opencl_predictor.predict(
-                self.model, x, num_iteration=self.model.best_iteration
-            )
-            # We clear the OpenCL ressources:
-            del self.opencl_predictor
-            self.opencl_predictor = None
         return prediction
 
     def _predict_lgbm(self, x):
