@@ -97,7 +97,6 @@ class UNetModel(Model):
             (advanced)
         pooling_mode : str
         """
-        self.compiled = False
 
         self.training_architecture = training_architecture
         self.rot_batch_size = mini_batch_size
@@ -136,7 +135,6 @@ class UNetModel(Model):
             super().__init__(self.input_lyr, x)
 
         self.compile(optimizer=Adam(lr=learning_rate), loss='mse')
-        self.compile = True
 
     def size(self):
         """Returns size of the model in bytes"""
@@ -608,11 +606,6 @@ class UNetModel(Model):
         x,
         batch_size=None,
         verbose=0,
-        steps=None,
-        callbacks=None,
-        max_queue_size=10,
-        workers=1,
-        use_multiprocessing=False,
     ):
         """Overwritten model predict method.
 
@@ -621,11 +614,6 @@ class UNetModel(Model):
         x
         batch_size
         verbose
-        steps
-        callbacks
-        max_queue_size
-        workers
-        use_multiprocessing
 
         Returns
         -------
