@@ -1,12 +1,10 @@
 # flake8: noqa
-# import pytest
-import pytest
 import matplotlib.pyplot as plt
 from numpy.random.mtrand import normal
 
 from aydin.analysis.fsc import fsc
 from aydin.io.datasets import camera, normalise
-from aydin.util.log.log import lprint, Log
+from aydin.util.log.log import Log
 
 
 def demo_fsc(display: bool = True):

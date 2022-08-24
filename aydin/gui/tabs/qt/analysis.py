@@ -6,6 +6,7 @@ from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
+from aydin.gui._qt.custom_widgets.matplotlib_widget import MatplotlibWidget
 
 
 class AnalysisTab(QWidget):
@@ -37,6 +38,16 @@ class AnalysisTab(QWidget):
 
         self.tab_layout.addWidget(QHorizontalLineBreakWidget(self))
 
+        # FSC section
+        self.fsc_label = QLabel("Fourier Shell Correlations: ")
+        self.tab_layout.addWidget(self.fsc_label)
+
+        self.matplotlib_widget = MatplotlibWidget(self, width=5, height=40, dpi=100)
+
+        self.tab_layout.addWidget(self.matplotlib_widget)
+
+        self.tab_layout.addWidget(QHorizontalLineBreakWidget(self))
+
         # Noise Floor section
         self.noise_floor_label = QLabel("calculated noise floor: ")
         self.tab_layout.addWidget(self.noise_floor_label)
@@ -52,8 +63,6 @@ class AnalysisTab(QWidget):
         self.noise_floor_viewers_layout.addWidget(self.viewer_qt2)
 
         self.tab_layout.addLayout(self.noise_floor_viewers_layout)
-
-        self.tab_layout.addWidget(QHorizontalLineBreakWidget(self))
 
         self.tab_layout.setAlignment(Qt.AlignTop)
         self.setLayout(self.tab_layout)
