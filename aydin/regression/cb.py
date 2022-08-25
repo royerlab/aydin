@@ -101,7 +101,7 @@ class CBRegressor(RegressorBase):
             (advanced)
 
         gpu_use_pinned_ram : Optional[bool]
-            True forces the usage of CPU pinned memory bythe GPU which can be a
+            True forces the usage of CPU pinned memory byte GPU which can be a
             bit slower but also can accommodate larger dataset. By default the
             usage, or not, of CPU pinned memory is determined automatically
             based on size of data and GPU VRAM size. You can override this
@@ -132,7 +132,7 @@ class CBRegressor(RegressorBase):
             self.max_num_estimators = max_num_estimators
 
         # Default min number of estimators:
-        if self.min_num_estimators is None:
+        if min_num_estimators is None:
             self.min_num_estimators = 1024 if gpu else 512
         else:
             self.min_num_estimators = min_num_estimators
@@ -173,7 +173,6 @@ class CBRegressor(RegressorBase):
 
         """
         return int(40e6 if self.gpu else 1e6)
-
 
     def _get_params(self, num_samples, learning_rate, use_gpu, train_folder):
 
