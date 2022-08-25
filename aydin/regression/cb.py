@@ -111,6 +111,7 @@ class CBRegressor(RegressorBase):
         self.force_verbose_eval = False
         self.stop_training_callback = CatBoostStopTrainingCallback()
 
+        # Default value for number of leaves:
         self.num_leaves = 512 if num_leaves is None else num_leaves
 
         # Default max number of estimators:
@@ -129,10 +130,16 @@ class CBRegressor(RegressorBase):
         self.max_num_estimators = max(self.min_num_estimators, self.max_num_estimators)
         self.min_num_estimators = min(self.min_num_estimators, self.max_num_estimators)
 
+        # max iterations should not be above 15k in any case:
+        self.max_num_estimators = min(self.max_num_estimators, 15000)
+
+        # max bin defaults:
         if max_bin is None:
             self.max_bin = 254 if gpu else 512
         else:
             self.max_bin = max_bin
+
+        # other parameters:
         self.learning_rate = learning_rate
         self.metric = loss
         self.early_stopping_rounds = patience
