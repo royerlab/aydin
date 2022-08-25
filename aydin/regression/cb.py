@@ -38,6 +38,7 @@ class CBRegressor(RegressorBase):
         patience: int = 32,
         compute_load: float = 0.95,
         gpu: bool = True,
+        gpu_use_pinned_ram: Optional[bool] = None,
         gpu_devices: Optional[Sequence[int]] = None,
     ):
         """Constructs a CatBoost regressor.
@@ -99,12 +100,22 @@ class CBRegressor(RegressorBase):
             fails for any reason.
             (advanced)
 
+        gpu_use_pinned_ram : Optional[bool]
+            True forces the usage of CPU pinned memory bythe GPU which can be a
+            bit slower but also can accommodate larger dataset. By default the
+            usage, or not, of CPU pinned memory is determined automatically
+            based on size of data and GPU VRAM size. You can override this
+            automatic default.
+            (advanced)
+
         gpu_devices : Optional[Sequence[int]]
             List of GPU device indices to be used by CatBoost. For example,
             to use GPUs of index 0 and 1, set to '0:1'. For a range of devices
             set to '0-3' for example for all devices 0,1,2,3. It is recommended
             to only use together similar or ideally identical GPU devices.
             (advanced)
+
+
         """
         super().__init__()
 
@@ -146,6 +157,7 @@ class CBRegressor(RegressorBase):
         self.compute_load = compute_load
 
         self.gpu = gpu
+        self.gpu_use_pinned_ram = gpu_use_pinned_ram
         self.gpu_devices = gpu_devices
 
         with lsection("CB Regressor"):
@@ -189,7 +201,10 @@ class CBRegressor(RegressorBase):
         lprint(f'max_depth: {max_depth}')
 
         # If the dataset is really big we want to switch to pinned memeory:
-        gpu_ram_type = 'CpuPinnedMemory' if num_samples > 10e6 else 'GpuRam'
+        if self.gpu_use_pinned_ram is None:
+            gpu_ram_type = 'CpuPinnedMemory' if num_samples > 10e6 else 'GpuRam'
+        else:
+            gpu_ram_type = 'CpuPinnedMemory' if self.gpu_use_pinned_ram else 'GpuRam'
         lprint(f'gpu_ram_type: {gpu_ram_type}')
 
         # Setting max number of iterations:
