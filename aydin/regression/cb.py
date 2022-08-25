@@ -38,6 +38,7 @@ class CBRegressor(RegressorBase):
         patience: int = 32,
         compute_load: float = 0.95,
         gpu: bool = True,
+        gpu_use_pinned_ram: Optional[bool] = None,
         gpu_devices: Optional[Sequence[int]] = None,
     ):
         """Constructs a CatBoost regressor.
@@ -95,8 +96,16 @@ class CBRegressor(RegressorBase):
             (advanced)
 
         gpu : bool
-            True enables GPU acceleration if available. Fallsback to CPU if it
+            True enables GPU acceleration if available. Falls back to CPU if it
             fails for any reason.
+            (advanced)
+
+        gpu_use_pinned_ram : Optional[bool]
+            True forces the usage of CPU pinned memory byte GPU which can be a
+            bit slower but also can accommodate larger dataset. By default the
+            usage, or not, of CPU pinned memory is determined automatically
+            based on size of data and GPU VRAM size. You can override this
+            automatic default.
             (advanced)
 
         gpu_devices : Optional[Sequence[int]]
@@ -105,25 +114,50 @@ class CBRegressor(RegressorBase):
             set to '0-3' for example for all devices 0,1,2,3. It is recommended
             to only use together similar or ideally identical GPU devices.
             (advanced)
+
+
         """
         super().__init__()
 
         self.force_verbose_eval = False
         self.stop_training_callback = CatBoostStopTrainingCallback()
 
+        # Default value for number of leaves:
         self.num_leaves = 512 if num_leaves is None else num_leaves
-        self.max_num_estimators = max_num_estimators
-        self.min_num_estimators = min_num_estimators
+
+        # Default max number of estimators:
+        if max_num_estimators is None:
+            self.max_num_estimators = 4096 if gpu else 2048
+        else:
+            self.max_num_estimators = max_num_estimators
+
+        # Default min number of estimators:
+        if min_num_estimators is None:
+            self.min_num_estimators = 1024 if gpu else 512
+        else:
+            self.min_num_estimators = min_num_estimators
+
+        # Ensure min is below or equal to max:
+        self.max_num_estimators = max(self.min_num_estimators, self.max_num_estimators)
+        self.min_num_estimators = min(self.min_num_estimators, self.max_num_estimators)
+
+        # max iterations should not be above 15k in any case:
+        self.max_num_estimators = min(self.max_num_estimators, 15000)
+
+        # max bin defaults:
         if max_bin is None:
             self.max_bin = 254 if gpu else 512
         else:
             self.max_bin = max_bin
+
+        # other parameters:
         self.learning_rate = learning_rate
         self.metric = loss
         self.early_stopping_rounds = patience
         self.compute_load = compute_load
 
         self.gpu = gpu
+        self.gpu_use_pinned_ram = gpu_use_pinned_ram
         self.gpu_devices = gpu_devices
 
         with lsection("CB Regressor"):
@@ -166,14 +200,14 @@ class CBRegressor(RegressorBase):
         lprint(f'max_depth: {max_depth}')
 
         # If the dataset is really big we want to switch to pinned memeory:
-        gpu_ram_type = 'CpuPinnedMemory' if num_samples > 10e6 else 'GpuRam'
+        if self.gpu_use_pinned_ram is None:
+            gpu_ram_type = 'CpuPinnedMemory' if num_samples > 10e6 else 'GpuRam'
+        else:
+            gpu_ram_type = 'CpuPinnedMemory' if self.gpu_use_pinned_ram else 'GpuRam'
         lprint(f'gpu_ram_type: {gpu_ram_type}')
 
         # Setting max number of iterations:
-        if self.max_num_estimators is None:
-            iterations = 4096 if use_gpu else 2048
-        else:
-            iterations = self.max_num_estimators
+        iterations = self.max_num_estimators
         lprint(f'max_num_estimators: {iterations}')
 
         params = {
@@ -256,12 +290,6 @@ class CBRegressor(RegressorBase):
                 # learning rates until training succeeds (best_iter>min_n_estimators)
                 learning_rate = self.learning_rate
 
-                # Default min num of estimators:
-                if self.min_num_estimators is None:
-                    min_num_estimators = 1024 if self.gpu else 512
-                else:
-                    min_num_estimators = self.min_num_estimators
-
                 for i in range(10):
                     if not self.stop_training_callback.continue_training:
                         break
@@ -316,7 +344,7 @@ class CBRegressor(RegressorBase):
                     # best_iteration_ might be None if there is no validation data provided...
                     if (
                         model.best_iteration_ is None
-                        or model.best_iteration_ > min_num_estimators
+                        or model.best_iteration_ > self.min_num_estimators
                     ):
                         self.learning_rate = learning_rate
                         lprint(
