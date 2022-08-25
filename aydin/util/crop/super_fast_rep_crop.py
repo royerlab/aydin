@@ -22,7 +22,29 @@ def super_fast_representative_crop(
 
     Parameters
     ----------
-    Same parameters as 'representative_crop' with the addition of:
+    image : ArrayLike
+        Image to extract representative crop from
+
+    mode : str
+        Metric for picking crop. Can be : 'contrast' (fastest), 'sobel', 'sobelmin',
+        'sobelmax' We recommend 'contrast'.
+
+    crop_size : int
+        Crop size in voxels. Default (None) is 32000.
+
+    min_length : int
+        Crop axis lengths cannot be smaller than this number.
+
+    search_mode: bool
+        Search mode for best crops. Can be 'random' or 'systematic'. In
+        random mode we pick random crops, in systematic mode we check every
+        possible strided crop.
+
+    granularity_factor: int
+        Granularity of search. higher values correspond to more overlap between candidate crops.
+
+    return_slice : bool
+        If True the slice is returned too:
 
     min_scaling_factor: int
         Minimal downscaling factor per axis.

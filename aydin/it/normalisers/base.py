@@ -11,16 +11,7 @@ from aydin.util.log.log import lprint
 
 
 class NormaliserBase(ABC):
-    """Normaliser base class
-
-    Parameters
-    ----------
-    clip : bool
-    epsilon : float
-    shape_normalisation : bool
-    transform : str
-
-    """
+    """Normaliser base class"""
 
     epsilon: float
     leave_as_float: bool
@@ -56,7 +47,7 @@ class NormaliserBase(ABC):
         Returns
         -------
         json
-            frozen
+            frozen json
         """
         os.makedirs(path, exist_ok=True)
 
@@ -98,12 +89,12 @@ class NormaliserBase(ABC):
 
         Parameters
         ----------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
             array to use for calibration
 
         Returns
         -------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
 
         """
         raise NotImplementedError()
@@ -113,14 +104,14 @@ class NormaliserBase(ABC):
 
         Parameters
         ----------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
             array to normalise
         batch_dims : list
         channel_dims : list
 
         Returns
         -------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
 
         """
         array = array.astype(numpy.float32, copy=True)
@@ -160,14 +151,14 @@ class NormaliserBase(ABC):
 
         Parameters
         ----------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
         denormalise_values : bool
         leave_as_float : bool
         clip : bool
 
         Returns
         -------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
 
         """
 

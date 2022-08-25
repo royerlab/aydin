@@ -17,7 +17,7 @@ class MinMaxNormaliser(NormaliserBase):
 
         Parameters
         ----------
-        array : numpy.ndarray
+        array : numpy.ArrayLike
 
         """
         with lsection("Calibrating array using minmax method"):

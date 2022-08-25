@@ -52,7 +52,6 @@ def get_unet_fit_args(
     batch_size=None,
     random_mask_ratio=None,
     img_val=None,
-    patch_size=None,
     mask_size=None,
     val_marker=None,
     replace_by=None,
@@ -69,7 +68,6 @@ def get_unet_fit_args(
     batch_size
     random_mask_ratio
     img_val
-    patch_size
     mask_size
     val_marker
     replace_by

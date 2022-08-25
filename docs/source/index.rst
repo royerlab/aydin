@@ -54,7 +54,7 @@ Aydin is support only on Python 3.9 currently. You can install Aydin with the fo
 
 Requirements
 ~~~~~~~~~~~~~
-While aydin works even on tiny laptops, it will run faster and better if you have
+While Aydin works even on tiny laptops, it will run faster and better if you have
 a Nvidia graphics card. We also recommend at least 16GB of RAM but more is better
 especially for very large gigabyte-sized images. In the absence of a GPU,
 the more CPU cores the better, obviously. Different algorithms have different performance
@@ -96,8 +96,12 @@ If you find Aydin useful and use it in your work, please kindly consider to cite
 
    Introduction <use_cases/introduction.rst>
    Denoising Basics with Aydin <use_cases/basics.rst>
-   Denoising Spinning-Disk Confocal Microscopy Images with Aydin <use_cases/confocal.rst>
-   Denoising OpenCell Images with Aydin <use_cases/opencell.rst>
+   Noisy ‘New York’ Test Image <use_cases/newyork.rst>
+   Spinning-Disk Confocal Images of Zebrafish Embryos <use_cases/confocal_royer.rst>
+   Spinning-Disk Confocal Microscopy Images of Mouse Embryos <use_cases/confocal_maitre.rst>
+   OpenCell Images <use_cases/opencell.rst>
+   Chicken Embryos LSM 780 Images <use_cases/pourquie.rst>
+
 
 .. toctree::
    :maxdepth: 1
