@@ -127,7 +127,7 @@ If you find Aydin useful and use it in your work, please kindly consider to cite
    IO <api/io>
    NN <api/nn>
    Options JSON <api/options_json>
-   Example Dataset Gallery <api/dataset_gallery>
+   Example Images Gallery <api/example_images_gallery>
 
 .. toctree::
    :maxdepth: 1

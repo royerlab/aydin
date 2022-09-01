@@ -1,8 +1,8 @@
 ==========================
-Example Datasets Gallery
+Example Images Gallery
 ==========================
 
-Aydin comes with handful of example datasets. Along with some datasets that
+Aydin comes with handful of example images. Along with some datasets that
 we generated at Chan Zuckerberg Biohub, we have many datasets from our
 collaborators.
 
