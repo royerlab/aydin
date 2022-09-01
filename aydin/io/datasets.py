@@ -216,6 +216,11 @@ class examples_single(Enum):
         'Royer_confocal_dragonfly_hcr_drerio_30somite_crop.tif',
     )
 
+    machado_drosophile_egg_chamber = (
+        '1msjf1pVAGsy61QMtxvVoxxk5WZCofdN2',
+        'C2-DrosophilaEggChamber-small.tif',
+    )
+
     # 2D+t
     cognet_nanotube1 = (
         '1SmrBheUc6p5qTgtIEzedCwbN87HOW_O_',

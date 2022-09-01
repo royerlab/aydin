@@ -24,7 +24,7 @@ class Maskout(Layer):
         assert isinstance(input_shape, list)
         super(Maskout, self).build(input_shape)
 
-    def call(self, x, training=None):
+    def call(self, x, **kwargs):
         """
 
         Parameters

@@ -45,6 +45,7 @@ class QProgramFlowDiagramWidget(QWidget):
             "Blastocyst Fracking (Maitre)": examples_single.maitre_mouse,
             "OpenCell ARHGAP21 (Leonetti)": examples_single.leonetti_arhgap21,
             "OpenCell ANKRD11  (Leonetti)": examples_single.leonetti_ankrd11,
+            "Drosophila Egg Chamber (Machado et al.)": examples_single.machado_drosophile_egg_chamber,
         }
         for item in menu_items.keys():
             action = menu.addAction(item)
