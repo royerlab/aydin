@@ -52,7 +52,6 @@ class UNetModel(nn.Module):
         else:
             self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
-
     def forward(self, x, input_mask=None):
         """
         UNet forward method.
@@ -147,13 +146,12 @@ class UNetModel(nn.Module):
         return convolutions
 
 
-def n2t_unet_train_loop(
+def n2s_train(
     input_images,
-    target_images,
     model: UNetModel,
     nb_epochs: int = 1024,
-    learning_rate=0.01,
-    training_noise=0.001,
+    learning_rate: float = 0.01,
+    training_noise: float = 0.001,
     l2_weight_regularization=1e-9,
     patience=128,
     patience_epsilon=0.0,
@@ -161,6 +159,145 @@ def n2t_unet_train_loop(
     reload_best_model_period=1024,
     best_val_loss_value=None,
 ):
+    """
+    Noise2Self training method.
+
+    Parameters
+    ----------
+    input_images
+    model : UNetModel
+    nb_epochs : int
+    learning_rate : float
+    training_noise : float
+    l2_weight_regularization
+    patience
+    patience_epsilon
+    reduce_lr_factor
+    reload_best_model_period
+    best_val_loss_value
+
+    """
+    writer = SummaryWriter()
+
+    reduce_lr_patience = patience // 2
+
+    if best_val_loss_value is None:
+        best_val_loss_value = math.inf
+
+    optimizer = ESAdam(
+        chain(model.parameters()),
+        lr=learning_rate,
+        start_noise_level=training_noise,
+        weight_decay=l2_weight_regularization,
+    )
+
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        'min',
+        factor=reduce_lr_factor,
+        verbose=True,
+        patience=reduce_lr_patience,
+    )
+
+    def loss_function(u, v):
+        return torch.abs(u - v)
+
+    for epoch in range(nb_epochs):
+        train_loss_value = 0
+        val_loss_value = 0
+        iteration = 0
+        for i, input_image in enumerate([input_images]):
+            lprint(f"index: {i}, shape:{input_image.shape}")
+
+            # Clear gradients w.r.t. parameters
+            optimizer.zero_grad()
+
+            # Forward pass:
+            model.train()
+
+            translated_image = model(input_image)
+
+            # translation loss (per voxel):
+            translation_loss = loss_function(translated_image, input_image)
+
+            # loss value (for all voxels):
+            translation_loss_value = translation_loss.mean()
+
+            # backpropagation:
+            translation_loss_value.backward()
+
+            # Updating parameters
+            optimizer.step()
+
+            # update training loss_deconvolution for whole image:
+            train_loss_value += translation_loss_value.item()
+            iteration += 1
+
+            # Validation:
+            with torch.no_grad():
+                # Forward pass:
+                model.eval()
+
+                translated_image = model(input_image)
+
+                # translation loss (per voxel):
+                # TODO: replace input_image with target_image, or implement masking here
+                translation_loss = loss_function(translated_image, input_image)
+
+                # loss values:
+                translation_loss_value = translation_loss.mean().cpu().item()
+
+                # update validation loss_deconvolution for whole image:
+                val_loss_value += translation_loss_value
+                iteration += 1
+
+        train_loss_value /= iteration
+        lprint(f"Training loss value: {train_loss_value}")
+
+        val_loss_value /= iteration
+        lprint(f"Validation loss value: {val_loss_value}")
+
+        writer.add_scalar("Loss/train", train_loss_value, epoch)
+        writer.add_scalar("Loss/valid", val_loss_value, epoch)
+
+        # Learning rate schedule:
+        scheduler.step(val_loss_value)
+
+
+def n2t_train(
+    input_images,
+    target_images,
+    model: UNetModel,
+    nb_epochs: int = 1024,
+    learning_rate: float = 0.01,
+    training_noise: float = 0.001,
+    l2_weight_regularization=1e-9,
+    patience=128,
+    patience_epsilon=0.0,
+    reduce_lr_factor=0.5,
+    reload_best_model_period=1024,
+    best_val_loss_value=None,
+):
+    """
+    Noise2Truth training method.
+
+    Parameters
+    ----------
+    input_images
+    target_images
+    model : UNetModel
+    nb_epochs : int
+    learning_rate : float
+    training_noise : float
+
+    l2_weight_regularization
+    patience
+    patience_epsilon
+    reduce_lr_factor
+    reload_best_model_period
+    best_val_loss_value
+
+    """
     writer = SummaryWriter()
 
     reduce_lr_patience = patience // 2

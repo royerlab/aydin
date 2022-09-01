@@ -6,8 +6,17 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 from torch.utils.data import DataLoader
 
-from aydin.io.datasets import normalise, add_noise, camera, newyork, lizard, pollen, dots, characters
-from aydin.nn.models.torch.torch_unet import UNetModel, n2t_unet_train_loop
+from aydin.io.datasets import (
+    normalise,
+    add_noise,
+    camera,
+    newyork,
+    lizard,
+    pollen,
+    dots,
+    characters,
+)
+from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train
 from aydin.nn.models.utils.torch_dataset import TorchDataset
 from aydin.util.log.log import Log
 
@@ -40,7 +49,7 @@ def demo(image, do_add_noise=True):
     print("training starts")
 
     start = time.time()
-    n2t_unet_train_loop(noisy, image, model, data_loader)
+    n2t_train(noisy, image, model, data_loader)
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 
