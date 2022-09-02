@@ -72,21 +72,41 @@ def test_random_sample_patch_2D():
     assert ent_ratio >= 1.01
 
 
-def test_random_sample_patch_2D_1patch():
+def test_random_sample_patch_2D_20patch():
     """
     Test whether random_sample_patches generates 1 image when patch size is same as input size.
     """
-    image0 = camera().astype(numpy.float32)
-    image0 = numpy.expand_dims(numpy.expand_dims(n(image0), -1), 0)
+    image = numpy.stack([camera()] * 20)
+    print(image.shape)
+    image0 = numpy.expand_dims(image, -1)
+    print(image0.shape)
     patch_size = (512, 512)
     num_patch = 500
     adoption_rate = 0.5
     input_data = random_sample_patches(image0, patch_size, num_patch, adoption_rate)
+    print(len(input_data))
+    assert len(input_data) == 20
 
-    # Extract patched images
-    img_patch = []
-    for i in input_data:
-        img_patch.append(image0[i])
-    img_patch = numpy.vstack(img_patch)
+    # Extract patched image (which is the image)
+    img_patch = image0[input_data[0]]
 
     assert img_patch.shape == image0.shape
+
+def test_random_sample_patch_2D_1patch():
+    """
+    Test whether random_sample_patches generates 1 image when patch size is same as input size.
+    """
+    image0 = numpy.expand_dims(numpy.expand_dims(camera(), 0), -1)
+    patch_size = (512, 512)
+    num_patch = 500
+    adoption_rate = 0.5
+    input_data = random_sample_patches(image0, patch_size, num_patch, adoption_rate)
+    assert len(input_data) == 1
+
+    # Extract patched image (which is the image)
+    img_patch = image0[input_data[0]]
+
+    assert img_patch.shape == image0.shape
+
+if __name__ == '__main__':
+    test_random_sample_patch_2D_1patch()
