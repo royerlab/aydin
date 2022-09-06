@@ -22,10 +22,23 @@ def random_sample_patches(image, patch_size: int, nb_patches_per_image: int, ado
     """
     list_of_slice_objects = []
 
-    # nb_patches_per_image = min(nb_patches_per_image, )
+    # Calculate total number of possible patches for given image and patch_size
+    nb_possible_patches_per_image = numpy.prod(numpy.asarray(image.shape[1:-1]) - patch_size + 1)
 
-    # for b in image.shape[0]:
-    #     patches_for_current_b =
+    # Validate nb_patches_per_image, adoption_rate combination is valid, if not generate all possible patches
+    nb_patches_per_image = min(int(nb_patches_per_image/adoption_rate), nb_possible_patches_per_image)
+
+    for b in image.shape[0]:
+        histograms = []
+        patch_indices_for_current_b = []
+
+        while len(histograms) < nb_patches_per_image:
+
+            # current_patch =
+
+            # Calculate histogram and entropy
+            hist, _ = numpy.histogram(current_patch, range=(0, 1), bins=255, density=True)
+            histograms.append(entropy(hist))
 
     response = numpy.vstack(list_of_slice_objects)
     return response
