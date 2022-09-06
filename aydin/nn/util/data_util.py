@@ -2,7 +2,7 @@ import numpy
 from scipy.stats import entropy
 
 
-def random_sample_patches(input_img, patch_size, num_patch, adoption_rate=0.5):
+def legacy_random_sample_patches(input_img, patch_size, num_patch, adoption_rate=0.5):
     """
     This function outputs a list of slices that crops a part of the input_img (i.e. patch).
     Only patches with higher entropy in their intensity histogram are selected.
