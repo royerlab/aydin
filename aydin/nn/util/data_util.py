@@ -63,10 +63,16 @@ def random_sample_patches(
             entropies.append(entropy(hist))
 
         # Sort patches
+        sorted_indices = numpy.asarray(entropies).argsort()
+        sorted_slice_objects = slice_objects_for_current_b[sorted_indices]
 
         # Filter patches according to adoption_rate
+        sorted_slice_objects = sorted_slice_objects[
+                               len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1):
+        ]
 
         # Append the new patch slices to list_of_slice_objects
+        list_of_slice_objects.append(sorted_slice_objects)
 
     response = numpy.vstack(list_of_slice_objects)
     return response
