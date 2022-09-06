@@ -24,6 +24,7 @@ def random_sample_patches(
 
     """
     list_of_slice_objects = []
+    print(image.shape, patch_size, nb_patches_per_image, adoption_rate)
 
     # Calculate total number of possible patches for given image and patch_size
     possible_positions = numpy.asarray(image.shape[1:-1]) - patch_size + 1
@@ -38,14 +39,19 @@ def random_sample_patches(
         entropies = []
         patch_indices_for_current_b = []
 
-        # Generate patches and
+        # Generate patches and entropy values
         while len(patch_indices_for_current_b) < nb_patches_per_image:
-            indices_for_current_patch = [b] + [
-                int(numpy.random.choice(s, 1)) for s in possible_positions
-            ]
+            indices_for_current_patch = (
+                [b] + [int(numpy.random.choice(s, 1)) for s in possible_positions] + [0]
+            )
             patch_indices_for_current_b.append(indices_for_current_patch)
             slicing_for_current_patch = tuple(
-                slice(x) for x in indices_for_current_patch
+                slice(
+                    x,
+                    x + (1 if idx == 0 or idx == len(image.shape) - 1 else patch_size),
+                    1,
+                )
+                for idx, x in enumerate(indices_for_current_patch)
             )
 
             current_patch = image[slicing_for_current_patch]
@@ -55,8 +61,6 @@ def random_sample_patches(
                 current_patch, range=(0, 1), bins=255, density=True
             )
             entropies.append(entropy(hist))
-
-        print(entropies, patch_indices_for_current_b)
 
     response = numpy.vstack(list_of_slice_objects)
     return response
