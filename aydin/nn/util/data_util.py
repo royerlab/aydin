@@ -3,6 +3,16 @@ from deprecated import deprecated
 from scipy.stats import entropy
 
 
+def random_sample_patches(image, patch_size, nb_patches_per_image, adoption_rate=0.5):
+    list_of_slice_objects = []
+
+    # for b in image.shape[0]:
+    #     patches_for_current_b =
+
+    response = numpy.vstack(list_of_slice_objects)
+    return response
+
+
 @deprecated(
     version='0.1.14', reason="You should use random_sample_patches function instead"
 )
