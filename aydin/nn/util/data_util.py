@@ -37,14 +37,13 @@ def random_sample_patches(
 
     for b in range(image.shape[0]):  # b is a single element across batch dimension
         entropies = []
-        patch_indices_for_current_b = []
+        slice_objects_for_current_b = []
 
         # Generate patches and entropy values
-        while len(patch_indices_for_current_b) < nb_patches_per_image:
+        while len(slice_objects_for_current_b) < nb_patches_per_image:
             indices_for_current_patch = (
                 [b] + [int(numpy.random.choice(s, 1)) for s in possible_positions] + [0]
             )
-            patch_indices_for_current_b.append(indices_for_current_patch)
             slicing_for_current_patch = tuple(
                 slice(
                     x,
@@ -53,6 +52,7 @@ def random_sample_patches(
                 )
                 for idx, x in enumerate(indices_for_current_patch)
             )
+            slice_objects_for_current_b.append(slicing_for_current_patch)
 
             current_patch = image[slicing_for_current_patch]
 
@@ -61,6 +61,12 @@ def random_sample_patches(
                 current_patch, range=(0, 1), bins=255, density=True
             )
             entropies.append(entropy(hist))
+
+        # Sort patches
+
+        # Filter patches according to adoption_rate
+
+        # Append the new patch slices to list_of_slice_objects
 
     response = numpy.vstack(list_of_slice_objects)
     return response
