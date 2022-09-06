@@ -25,7 +25,9 @@ def test_random_sample_patch_3D():
     tile_size = (32, 32, 32)
     num_tile = 100
     adoption_rate = 0.2
-    input_data = legacy_random_sample_patches(image0, tile_size, num_tile, adoption_rate)
+    input_data = legacy_random_sample_patches(
+        image0, tile_size, num_tile, adoption_rate
+    )
 
     # Extract patched images
     img_patch = []
@@ -52,7 +54,9 @@ def test_random_sample_patch_2D():
     patch_size = (64, 64)
     num_patch = 500
     adoption_rate = 0.5
-    input_data = legacy_random_sample_patches(image0, patch_size, num_patch, adoption_rate)
+    input_data = legacy_random_sample_patches(
+        image0, patch_size, num_patch, adoption_rate
+    )
 
     # Extract patched images
     img_patch = []
@@ -83,7 +87,9 @@ def test_random_sample_patch_2D_20patch():
     patch_size = (512, 512)
     num_patch = 500
     adoption_rate = 0.5
-    input_data = legacy_random_sample_patches(image0, patch_size, num_patch, adoption_rate)
+    input_data = legacy_random_sample_patches(
+        image0, patch_size, num_patch, adoption_rate
+    )
     print(len(input_data))
     assert len(input_data) == 20
 
@@ -91,6 +97,7 @@ def test_random_sample_patch_2D_20patch():
     img_patch = image0[input_data[0]]
 
     assert img_patch.shape == image0.shape
+
 
 def test_random_sample_patch_2D_1patch():
     """
@@ -100,13 +107,16 @@ def test_random_sample_patch_2D_1patch():
     patch_size = (512, 512)
     num_patch = 500
     adoption_rate = 0.5
-    input_data = legacy_random_sample_patches(image0, patch_size, num_patch, adoption_rate)
+    input_data = legacy_random_sample_patches(
+        image0, patch_size, num_patch, adoption_rate
+    )
     assert len(input_data) == 1
 
     # Extract patched image (which is the image)
     img_patch = image0[input_data[0]]
 
     assert img_patch.shape == image0.shape
+
 
 if __name__ == '__main__':
     test_random_sample_patch_2D_1patch()
