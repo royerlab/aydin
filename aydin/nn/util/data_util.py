@@ -3,8 +3,26 @@ from deprecated import deprecated
 from scipy.stats import entropy
 
 
-def random_sample_patches(image, patch_size, nb_patches_per_image, adoption_rate=0.5):
+def random_sample_patches(image, patch_size: int, nb_patches_per_image: int, adoption_rate: float = 0.5):
+    """
+    This functions returns list of slice objects that crops a part of the image
+    which we call patch. Also sorts the patches, and makes sure only patches with
+    higher entropy in the intensity histogram are selected.
+
+    Parameters
+    ----------
+    image
+    patch_size : int
+    nb_patches_per_image : int
+    adoption_rate : float
+
+    Returns
+    -------
+
+    """
     list_of_slice_objects = []
+
+    # nb_patches_per_image = min(nb_patches_per_image, )
 
     # for b in image.shape[0]:
     #     patches_for_current_b =
