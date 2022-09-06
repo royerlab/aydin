@@ -1,7 +1,9 @@
 import numpy
+from deprecated import deprecated
 from scipy.stats import entropy
 
 
+@deprecated(version='0.1.14', reason="You should use random_sample_patches function instead")
 def legacy_random_sample_patches(input_img, patch_size, num_patch, adoption_rate=0.5):
     """
     This function outputs a list of slices that crops a part of the input_img (i.e. patch).
