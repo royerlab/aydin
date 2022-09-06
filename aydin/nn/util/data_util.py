@@ -3,7 +3,9 @@ from deprecated import deprecated
 from scipy.stats import entropy
 
 
-def random_sample_patches(image, patch_size: int, nb_patches_per_image: int, adoption_rate: float = 0.5):
+def random_sample_patches(
+    image, patch_size: int, nb_patches_per_image: int, adoption_rate: float = 0.5
+):
     """
     This functions returns list of slice objects that crops a part of the image
     which we call patch. Also sorts the patches, and makes sure only patches with
@@ -28,9 +30,11 @@ def random_sample_patches(image, patch_size: int, nb_patches_per_image: int, ado
     nb_possible_patches_per_image = numpy.prod(possible_positions)
 
     # Validate nb_patches_per_image, adoption_rate combination is valid, if not generate all possible patches
-    nb_patches_per_image = min(int(nb_patches_per_image/adoption_rate), nb_possible_patches_per_image)
+    nb_patches_per_image = min(
+        int(nb_patches_per_image / adoption_rate), nb_possible_patches_per_image
+    )
 
-    for b in image.shape[0]:  # b is a single element across batch dimension
+    for b in range(image.shape[0]):  # b is a single element across batch dimension
         entropies = []
         patch_indices_for_current_b = []
 
@@ -39,14 +43,20 @@ def random_sample_patches(image, patch_size: int, nb_patches_per_image: int, ado
             indices_for_current_patch = [b] + [
                 int(numpy.random.choice(s, 1)) for s in possible_positions
             ]
-            
             patch_indices_for_current_b.append(indices_for_current_patch)
+            slicing_for_current_patch = tuple(
+                slice(x) for x in indices_for_current_patch
+            )
 
-            current_patch = image[tuple(indices_for_current_patch)]
+            current_patch = image[slicing_for_current_patch]
 
             # Calculate histogram and entropy
-            hist, _ = numpy.histogram(current_patch, range=(0, 1), bins=255, density=True)
+            hist, _ = numpy.histogram(
+                current_patch, range=(0, 1), bins=255, density=True
+            )
             entropies.append(entropy(hist))
+
+        print(entropies, patch_indices_for_current_b)
 
     response = numpy.vstack(list_of_slice_objects)
     return response
