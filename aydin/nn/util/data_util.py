@@ -54,7 +54,7 @@ def random_sample_patches(
                     )
                     for idx, x in enumerate(indices_for_current_patch)
                 ],
-                slice(0, 1, 1)
+                slice(0, 1, 1),
             ]
             slicing_for_current_patch = tuple(slicing_for_current_patch)
             slice_objects_for_current_b.append(slicing_for_current_patch)
