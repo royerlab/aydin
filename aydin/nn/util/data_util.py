@@ -41,17 +41,22 @@ def random_sample_patches(
 
         # Generate patches and entropy values
         while len(slice_objects_for_current_b) < nb_patches_per_image:
-            indices_for_current_patch = (
-                [b] + [int(numpy.random.choice(s, 1)) for s in possible_positions] + [0]
-            )
-            slicing_for_current_patch = tuple(
-                slice(
-                    x,
-                    x + (1 if idx == 0 or idx == len(image.shape) - 1 else patch_size),
-                    1,
-                )
-                for idx, x in enumerate(indices_for_current_patch)
-            )
+            indices_for_current_patch = [
+                int(numpy.random.choice(s, 1)) for s in possible_positions
+            ]
+            slicing_for_current_patch = [
+                slice(b, b + 1, 1),
+                *[
+                    slice(
+                        x,
+                        x + patch_size,
+                        1,
+                    )
+                    for idx, x in enumerate(indices_for_current_patch)
+                ],
+                slice(0, 1, 1)
+            ]
+            slicing_for_current_patch = tuple(slicing_for_current_patch)
             slice_objects_for_current_b.append(slicing_for_current_patch)
 
             current_patch = image[slicing_for_current_patch]
@@ -71,11 +76,12 @@ def random_sample_patches(
             len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1) :
         ]
 
+        sorted_slice_objects = [elem[0] for elem in sorted_slice_objects]
+
         # Append the new patch slices to list_of_slice_objects
         list_of_slice_objects.append(sorted_slice_objects)
 
-    response = numpy.vstack(list_of_slice_objects)
-    return response
+    return list_of_slice_objects
 
 
 @deprecated(

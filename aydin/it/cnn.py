@@ -13,7 +13,7 @@ from aydin.nn.models.unet import UNetModel
 
 # from aydin.nn.models.utils.image_tile import tile_input_and_target_images
 from aydin.nn.models.utils.image_tile import tile_target_images, tile_input_images
-from aydin.nn.util.data_util import legacy_random_sample_patches
+from aydin.nn.util.data_util import random_sample_patches
 from aydin.nn.models.utils.unet_patch_size import (
     get_ideal_patch_size,
     post_tiling_patch_size_validation,
@@ -342,9 +342,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             # Tile input and target image
             with lsection('Random patch sampling...'):
-                input_patch_idx = legacy_random_sample_patches(
+                input_patch_idx = random_sample_patches(
                     input_image,
-                    self.patch_size,
+                    self.patch_size[0],
                     self.total_num_patches,
                     self.adoption_rate,
                 )

@@ -86,6 +86,7 @@ def test_random_sample_patch_2D_20patch():
     num_patch = 500
     adoption_rate = 0.5
     input_data = random_sample_patches(image0, patch_size, num_patch, adoption_rate)
+    print(input_data[0])
     assert len(input_data) == 20
 
     # Extract patched image (which is the image)
