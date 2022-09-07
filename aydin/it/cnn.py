@@ -344,7 +344,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             with lsection('Random patch sampling...'):
                 input_patch_idx = random_sample_patches(
                     input_image,
-                    self.patch_size,
+                    self.patch_size[0],
                     self.total_num_patches,
                     self.adoption_rate,
                 )
