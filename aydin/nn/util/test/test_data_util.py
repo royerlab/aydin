@@ -50,10 +50,10 @@ def test_random_sample_patch_3D():
 def test_random_sample_patch_2D():
     image0 = camera().astype(numpy.float32)
     image0 = numpy.expand_dims(numpy.expand_dims(n(image0), -1), 0)
-    patch_size = (64, 64)
+    patch_size = 64
     num_patch = 500
     adoption_rate = 0.5
-    input_data = legacy_random_sample_patches(
+    input_data = random_sample_patches(
         image0, patch_size, num_patch, adoption_rate
     )
 
@@ -99,10 +99,10 @@ def test_random_sample_patch_2D_1patch():
     Test whether random_sample_patches generates 1 image when patch size is same as input size.
     """
     image0 = numpy.expand_dims(numpy.expand_dims(camera(), 0), -1)
-    patch_size = (512, 512)
+    patch_size = 512
     num_patch = 500
     adoption_rate = 0.5
-    input_data = legacy_random_sample_patches(
+    input_data = random_sample_patches(
         image0, patch_size, num_patch, adoption_rate
     )
     assert len(input_data) == 1
@@ -111,7 +111,3 @@ def test_random_sample_patch_2D_1patch():
     img_patch = image0[input_data[0]]
 
     assert img_patch.shape == image0.shape
-
-
-if __name__ == '__main__':
-    test_random_sample_patch_2D_1patch()

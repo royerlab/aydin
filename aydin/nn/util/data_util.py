@@ -25,7 +25,7 @@ def random_sample_patches(
     """
     list_of_slice_objects = []
 
-    # Calculate total number of possible patches for given image and patch_size
+    # Calculate total number of possible patches for a given image and patch_size
     possible_positions = numpy.asarray(image.shape[1:-1]) - patch_size + 1
     nb_possible_patches_per_image = numpy.prod(possible_positions)
 
