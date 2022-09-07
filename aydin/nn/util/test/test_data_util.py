@@ -5,7 +5,7 @@ from scipy.stats import entropy
 
 from aydin.io import io
 from aydin.io.datasets import examples_single
-from aydin.nn.util.data_util import legacy_random_sample_patches, random_sample_patches
+from aydin.nn.util.data_util import random_sample_patches
 
 
 def n(image):
@@ -53,9 +53,7 @@ def test_random_sample_patch_2D():
     patch_size = 64
     num_patch = 500
     adoption_rate = 0.5
-    input_data = random_sample_patches(
-        image0, patch_size, num_patch, adoption_rate
-    )
+    input_data = random_sample_patches(image0, patch_size, num_patch, adoption_rate)
 
     # Extract patched images
     img_patch = []
@@ -102,9 +100,7 @@ def test_random_sample_patch_2D_1patch():
     patch_size = 512
     num_patch = 500
     adoption_rate = 0.5
-    input_data = random_sample_patches(
-        image0, patch_size, num_patch, adoption_rate
-    )
+    input_data = random_sample_patches(image0, patch_size, num_patch, adoption_rate)
     assert len(input_data) == 1
 
     # Extract patched image (which is the image)
