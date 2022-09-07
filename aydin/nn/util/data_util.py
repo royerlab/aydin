@@ -1,8 +1,94 @@
 import numpy
+from deprecated import deprecated
 from scipy.stats import entropy
 
 
-def random_sample_patches(input_img, patch_size, num_patch, adoption_rate=0.5):
+def random_sample_patches(
+    image, patch_size: int, nb_patches_per_image: int, adoption_rate: float = 0.5
+):
+    """
+    This functions returns list of slice objects that crops a part of the image
+    which we call patch. Also sorts the patches, and makes sure only patches with
+    higher entropy in the intensity histogram are selected.
+
+    Parameters
+    ----------
+    image : numpy.ArrayLike
+        This function assumes the axis order BXY(Z)C.
+    patch_size : int
+    nb_patches_per_image : int
+    adoption_rate : float
+
+    Returns
+    -------
+
+    """
+    list_of_slice_objects = []
+
+    # Calculate total number of possible patches for a given image and patch_size
+    possible_positions = numpy.asarray(image.shape[1:-1]) - patch_size + 1
+    nb_possible_patches_per_image = numpy.prod(possible_positions)
+
+    # Validate nb_patches_per_image, adoption_rate combination is valid, if not generate all possible patches
+    nb_patches_per_image = min(
+        int(nb_patches_per_image / adoption_rate), nb_possible_patches_per_image
+    )
+
+    for b in range(image.shape[0]):  # b is a single element across batch dimension
+        entropies = []
+        slice_objects_for_current_b = []
+
+        # Generate patches and entropy values
+        while len(slice_objects_for_current_b) < nb_patches_per_image:
+            indices_for_current_patch = [
+                int(numpy.random.choice(s, 1)) for s in possible_positions
+            ]
+            slicing_for_current_patch = tuple(
+                [
+                    slice(b, b + 1, 1),
+                    *[
+                        slice(
+                            x,
+                            x + patch_size,
+                            1,
+                        )
+                        for idx, x in enumerate(indices_for_current_patch)
+                    ],
+                    slice(0, 1, 1),
+                ]
+            )
+            slice_objects_for_current_b.append(slicing_for_current_patch)
+
+            current_patch = image[slicing_for_current_patch]
+
+            # Calculate histogram and entropy
+            hist, _ = numpy.histogram(
+                current_patch, range=(0, 1), bins=255, density=True
+            )
+            entropies.append(entropy(hist))
+
+        # Sort patches
+        sorted_indices = numpy.array(entropies).argsort()
+        sorted_slice_objects = numpy.array(slice_objects_for_current_b)[sorted_indices]
+
+        # Filter patches according to adoption_rate
+        sorted_slice_objects = sorted_slice_objects[
+            len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1) :
+        ]
+
+        # Have to convert each element to a tuple again so they can be passed directly for slicing
+        sorted_slice_objects = [tuple(elem) for elem in sorted_slice_objects]
+
+        # Append the new patch slices to list_of_slice_objects
+        list_of_slice_objects += sorted_slice_objects
+
+    return list_of_slice_objects
+
+
+@deprecated(
+    version='0.1.14', reason="You should use random_sample_patches function instead"
+)
+def legacy_random_sample_patches(input_img, patch_size, num_patch, adoption_rate=0.5):
     """
     This function outputs a list of slices that crops a part of the input_img (i.e. patch).
     Only patches with higher entropy in their intensity histogram are selected.
