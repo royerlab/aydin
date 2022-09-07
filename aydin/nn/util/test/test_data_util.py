@@ -14,7 +14,7 @@ def n(image):
     )
 
 
-# Test with garder 3D image
+# Test with maitre 3D image
 def test_random_sample_patch_3D():
     image_path = examples_single.maitre_mouse.get_path()
     image0, metadata = io.imread(image_path)
@@ -22,12 +22,13 @@ def test_random_sample_patch_3D():
     image0 = n(image0.squeeze()[0:32, :, 200:300, 200:300])
 
     image0 = numpy.expand_dims(image0[1:2], -1)
-    tile_size = (32, 32, 32)
+    tile_size = 8
     num_tile = 100
     adoption_rate = 0.2
-    input_data = legacy_random_sample_patches(
+    input_data = random_sample_patches(
         image0, tile_size, num_tile, adoption_rate
     )
+    print(f"input data: {input_data}")
 
     # Extract patched images
     img_patch = []

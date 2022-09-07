@@ -2,6 +2,7 @@ from os.path import join
 import time
 
 import numpy
+import pytest
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
@@ -28,6 +29,7 @@ def test_saveload_classic_gaussian():
     )
 
 
+@pytest.mark.heavy
 def test_saveload_noise2selffgr():
     saveload(
         Noise2SelfFGR(variant="cb", it_transforms=transforms),
@@ -66,7 +68,7 @@ def saveload(denoiser, min_psnr=22, min_ssim=0.75):
 
     # Check if denoised image satisfies some checks
     assert psnr_denoised >= 20.0
-    assert ssim_denoised >= 0.7
+    assert ssim_denoised >= 0.67
 
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
