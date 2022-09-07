@@ -44,18 +44,20 @@ def random_sample_patches(
             indices_for_current_patch = [
                 int(numpy.random.choice(s, 1)) for s in possible_positions
             ]
-            slicing_for_current_patch = tuple([
-                slice(b, b + 1, 1),
-                *[
-                    slice(
-                        x,
-                        x + patch_size,
-                        1,
-                    )
-                    for idx, x in enumerate(indices_for_current_patch)
-                ],
-                slice(0, 1, 1),
-            ])
+            slicing_for_current_patch = tuple(
+                [
+                    slice(b, b + 1, 1),
+                    *[
+                        slice(
+                            x,
+                            x + patch_size,
+                            1,
+                        )
+                        for idx, x in enumerate(indices_for_current_patch)
+                    ],
+                    slice(0, 1, 1),
+                ]
+            )
             slice_objects_for_current_b.append(slicing_for_current_patch)
 
             current_patch = image[slicing_for_current_patch]
@@ -72,7 +74,7 @@ def random_sample_patches(
 
         # Filter patches according to adoption_rate
         sorted_slice_objects = sorted_slice_objects[
-            len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1):
+            len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1) :
         ]
 
         # Have to convert each element to a tuple again so they can be passed directly for slicing
