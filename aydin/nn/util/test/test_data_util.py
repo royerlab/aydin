@@ -25,9 +25,7 @@ def test_random_sample_patch_3D():
     tile_size = 8
     num_tile = 100
     adoption_rate = 0.2
-    input_data = random_sample_patches(
-        image0, tile_size, num_tile, adoption_rate
-    )
+    input_data = random_sample_patches(image0, tile_size, num_tile, adoption_rate)
     print(f"input data: {input_data}")
 
     # Extract patched images
