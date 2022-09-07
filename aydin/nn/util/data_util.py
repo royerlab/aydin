@@ -68,7 +68,7 @@ def random_sample_patches(
 
         # Filter patches according to adoption_rate
         sorted_slice_objects = sorted_slice_objects[
-                               len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1):
+            len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1) :
         ]
 
         # Append the new patch slices to list_of_slice_objects
