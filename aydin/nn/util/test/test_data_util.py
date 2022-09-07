@@ -80,21 +80,18 @@ def test_random_sample_patch_2D_20patch():
     """
     Test whether random_sample_patches generates 1 image when patch size is same as input size.
     """
-    image = numpy.stack([camera()] * 2)
-    # print(image.shape)
+    image = numpy.stack([camera()] * 20)
     image0 = numpy.expand_dims(image, -1)
-    # print(image0.shape)
-    patch_size = 500
+    patch_size = 512
     num_patch = 500
     adoption_rate = 0.5
     input_data = random_sample_patches(image0, patch_size, num_patch, adoption_rate)
-    print(len(input_data))
     assert len(input_data) == 20
 
     # Extract patched image (which is the image)
-    img_patch = image0[input_data[0]]
+    img_patch = image0[tuple(input_data[0])]
 
-    assert img_patch.shape == image0.shape
+    assert img_patch.shape == image0[0:1, ...].shape
 
 
 def test_random_sample_patch_2D_1patch():
