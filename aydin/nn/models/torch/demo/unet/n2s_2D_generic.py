@@ -30,13 +30,14 @@ def demo(image, do_add_noise=True):
 
     image = normalise(image)
     image = numpy.expand_dims(image, axis=0)
-    image = numpy.expand_dims(image, axis=0)
+    image = numpy.expand_dims(image, axis=-1)
     noisy = add_noise(image) if do_add_noise else image
+    print(noisy.shape)
 
-    noisy = torch.tensor(noisy)
+    # noisy = torch.tensor(noisy)
     image = torch.tensor(image)
 
-    dataset = N2SDataset(noisy, image, 64, self_supervised=False)
+    dataset = N2SDataset(noisy, 32)
 
     data_loader = DataLoader(
         dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
@@ -82,16 +83,17 @@ def demo(image, do_add_noise=True):
     napari.run()
 
 
-# newyork_image = newyork()
-# demo(newyork_image, "newyork")
-# lizard_image = lizard()
-# demo(lizard_image, "lizard")
-# characters_image = characters()
-# demo(characters_image, "characters")
+if __name__ == '__main__':
+    # newyork_image = newyork()
+    # demo(newyork_image, "newyork")
+    # lizard_image = lizard()
+    # demo(lizard_image, "lizard")
+    # characters_image = characters()
+    # demo(characters_image, "characters")
 
-# camera_image = camera()
-# demo(camera_image, "camera")
-# pollen_image = pollen()
-# demo(pollen_image, "pollen")
-dots_image = dots()
-demo(dots_image, "dots")
+    camera_image = camera()
+    demo(camera_image, "camera")
+    # pollen_image = pollen()
+    # demo(pollen_image, "pollen")
+    # dots_image = dots()
+    # demo(dots_image, "dots")

@@ -4,11 +4,15 @@ from itertools import chain
 
 import torch
 from torch import nn
+from torch.nn import MSELoss
+from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.custom_conv import double_conv_block
 from aydin.nn.layers.pooling_down import PoolingDown
+from aydin.nn.models.utils.n2s_dataset import N2SDataset
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -147,121 +151,53 @@ class UNetModel(nn.Module):
 
 
 def n2s_train(
-    input_images,
+    image,
     model: UNetModel,
     nb_epochs: int = 1024,
-    learning_rate: float = 0.01,
-    training_noise: float = 0.001,
-    l2_weight_regularization=1e-9,
-    patience=128,
-    patience_epsilon=0.0,
-    reduce_lr_factor=0.5,
-    reload_best_model_period=1024,
-    best_val_loss_value=None,
+    learning_rate: float = 0.001,
+    patch_size: int = 32,
 ):
     """
     Noise2Self training method.
 
     Parameters
     ----------
-    input_images
+    image
     model : UNetModel
     nb_epochs : int
     learning_rate : float
-    training_noise : float
-    l2_weight_regularization
-    patience
-    patience_epsilon
-    reduce_lr_factor
-    reload_best_model_period
-    best_val_loss_value
+    patch_size : int
 
     """
-    writer = SummaryWriter()
-
-    reduce_lr_patience = patience // 2
-
-    if best_val_loss_value is None:
-        best_val_loss_value = math.inf
-
-    optimizer = ESAdam(
-        chain(model.parameters()),
-        lr=learning_rate,
-        start_noise_level=training_noise,
-        weight_decay=l2_weight_regularization,
-    )
-
-    scheduler = ReduceLROnPlateau(
-        optimizer,
-        'min',
-        factor=reduce_lr_factor,
-        verbose=True,
-        patience=reduce_lr_patience,
-    )
+    nb_epochs = 1
+    optimizer = Adam(model.parameters(), lr=learning_rate)
 
     def loss_function(u, v):
         return torch.abs(u - v)
 
-    for epoch in range(nb_epochs):
-        train_loss_value = 0
-        val_loss_value = 0
-        iteration = 0
-        for i, input_image in enumerate([input_images]):
-            lprint(f"index: {i}, shape:{input_image.shape}")
+    dataset = N2SDataset(image, patch_size=patch_size)
+    data_loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
-            # Clear gradients w.r.t. parameters
+    for epoch in range(nb_epochs):
+
+        for i, batch in enumerate(data_loader):
+            original_patch, net_input, mask = batch
+
+            net_output = model(net_input)
+
+            loss = loss_function(net_output * mask, original_patch * mask)
+
             optimizer.zero_grad()
 
-            # Forward pass:
-            model.train()
+            loss.backward()
 
-            translated_image = model(input_image)
-
-            # translation loss (per voxel):
-            translation_loss = loss_function(translated_image, input_image)
-
-            # loss value (for all voxels):
-            translation_loss_value = translation_loss.mean()
-
-            # backpropagation:
-            translation_loss_value.backward()
-
-            # Updating parameters
             optimizer.step()
 
-            # update training loss_deconvolution for whole image:
-            train_loss_value += translation_loss_value.item()
-            iteration += 1
+            if i % 10 == 0:
+                print("Loss (", i, "): \t", round(loss.item(), 4))
 
-            # Validation:
-            with torch.no_grad():
-                # Forward pass:
-                model.eval()
-
-                translated_image = model(input_image)
-
-                # translation loss (per voxel):
-                # TODO: replace input_image with target_image, or implement masking here
-                translation_loss = loss_function(translated_image, input_image)
-
-                # loss values:
-                translation_loss_value = translation_loss.mean().cpu().item()
-
-                # update validation loss_deconvolution for whole image:
-                val_loss_value += translation_loss_value
-                iteration += 1
-
-        train_loss_value /= iteration
-        lprint(f"Training loss value: {train_loss_value}")
-
-        val_loss_value /= iteration
-        lprint(f"Validation loss value: {val_loss_value}")
-
-        writer.add_scalar("Loss/train", train_loss_value, epoch)
-        writer.add_scalar("Loss/valid", val_loss_value, epoch)
-
-        # Learning rate schedule:
-        scheduler.step(val_loss_value)
+            # if i == 100:
+            #     break
 
 
 def n2t_train(
