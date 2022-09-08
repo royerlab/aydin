@@ -11,6 +11,11 @@ def random_sample_patches(
     which we call patch. Also sorts the patches, and makes sure only patches with
     higher entropy in the intensity histogram are selected.
 
+    To be able to work with any adoption_rate between 0 and 1, we accordingly
+    generate more patches per image during patch generation. After sorting, we
+    are able to apply the adoption rate to the total number of patches we generated
+    for each image.
+
     Parameters
     ----------
     image : numpy.ArrayLike
@@ -21,6 +26,7 @@ def random_sample_patches(
 
     Returns
     -------
+    List of Tuples of Slicing Objects
 
     """
     list_of_slice_objects = []
