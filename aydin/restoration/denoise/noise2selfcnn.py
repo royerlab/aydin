@@ -184,7 +184,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
 
         """
         with lsection("Noise2Self train is starting..."):
-            if any(chan_axes):
+            if chan_axes:
                 return
 
             self.it = self.get_translator()
