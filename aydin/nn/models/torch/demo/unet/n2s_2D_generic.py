@@ -37,23 +37,22 @@ def demo(image, do_add_noise=True):
     # noisy = torch.tensor(noisy)
     image = torch.tensor(image)
 
-    dataset = N2SDataset(noisy, 32)
-
-    data_loader = DataLoader(
-        dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
-    )
-
     model = UNetModel(
-        nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
+        nb_unet_levels=2, supervised=False, spacetime_ndim=2,
     )
 
     print("training starts")
 
     start = time.time()
-    n2s_train(noisy, image, model, data_loader)
+    n2s_train(noisy, model)
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 
+    noisy = torch.tensor(noisy)
+    noisy = torch.movedim(noisy, -1, 1)
+    model.supervised = True
+    model.eval()
+    print(f"noisy tensor shape: {noisy.shape}")
     # in case of batching we have to do this:
     start = time.time()
     denoised = model(noisy)
@@ -67,12 +66,12 @@ def demo(image, do_add_noise=True):
     image = numpy.clip(image, 0, 1)
     noisy = numpy.clip(noisy, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
-    psnr_noisy = psnr(image, noisy)
-    ssim_noisy = ssim(image, noisy)
-    psnr_denoised = psnr(image, denoised)
-    ssim_denoised = ssim(image, denoised)
-    print("noisy   :", psnr_noisy, ssim_noisy)
-    print("denoised:", psnr_denoised, ssim_denoised)
+    # psnr_noisy = psnr(image, noisy)
+    # ssim_noisy = ssim(image, noisy)
+    # psnr_denoised = psnr(image, denoised)
+    # ssim_denoised = ssim(image, denoised)
+    # print("noisy   :", psnr_noisy, ssim_noisy)
+    # print("denoised:", psnr_denoised, ssim_denoised)
 
     import napari
 

@@ -153,7 +153,7 @@ class UNetModel(nn.Module):
 def n2s_train(
     image,
     model: UNetModel,
-    nb_epochs: int = 1024,
+    nb_epochs: int = 512,
     learning_rate: float = 0.001,
     patch_size: int = 32,
 ):
@@ -169,13 +169,15 @@ def n2s_train(
     patch_size : int
 
     """
-    nb_epochs = 1
+    # nb_epochs = 1
     optimizer = Adam(model.parameters(), lr=learning_rate)
 
+    loss_function1 = MSELoss()
     def loss_function(u, v):
         return torch.abs(u - v)
 
     dataset = N2SDataset(image, patch_size=patch_size)
+    print(f"dataset length: {len(dataset)}")
     data_loader = DataLoader(dataset, batch_size=32, shuffle=True)
 
     for epoch in range(nb_epochs):
@@ -183,9 +185,17 @@ def n2s_train(
         for i, batch in enumerate(data_loader):
             original_patch, net_input, mask = batch
 
-            net_output = model(net_input)
+            original_patch = torch.movedim(original_patch, -1, 1)
+            net_input = torch.movedim(net_input, -1, 1)
+            mask = torch.movedim(mask, -1, 1)
 
-            loss = loss_function(net_output * mask, original_patch * mask)
+            # print(original_patch.shape, net_input.shape, mask.shape)
+
+            net_output = model(net_input, input_mask=mask)
+
+            loss = loss_function1(net_output * mask, original_patch * mask)
+            # loss = loss_function(net_output * mask, original_patch * mask)
+            # loss = loss.mean()
 
             optimizer.zero_grad()
 
@@ -193,8 +203,7 @@ def n2s_train(
 
             optimizer.step()
 
-            if i % 10 == 0:
-                print("Loss (", i, "): \t", round(loss.item(), 4))
+        print("Loss (", epoch, "): \t", round(loss.item(), 4))
 
             # if i == 100:
             #     break

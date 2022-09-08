@@ -9,7 +9,7 @@ class N2SDataset(Dataset):
             self,
             image,
             patch_size,
-            nb_patches_per_image: int = 8,
+            nb_patches_per_image: int = 256,
             adoption_rate: float = 0.5
     ):
         """
@@ -34,24 +34,24 @@ class N2SDataset(Dataset):
         return len(self.crop_slicers)
 
     def get_mask(self, i):
-        phase = i % self.grid_size
-        shape = self.image[self.crop_slicers[0]].shape
+        phase = i % 4
+        shape = self.image[self.crop_slicers[1]].shape
         patch_size = 4
 
-        A = torch.zeros(self.image.shape[1:-1])
+        A = torch.zeros(shape)
 
         if len(self.image.shape) == 4:
             for i in range(shape[-3]):
                 for j in range(shape[-2]):
                     if i % patch_size == phase and j % patch_size == phase:
-                        A[i, j] = 1
+                        A[:, i, j, :] = 1
 
         elif len(self.image.shape) == 5:
             for i in range(shape[-4]):
                 for j in range(shape[-3]):
                     for k in range(shape[-2]):
                         if i % patch_size == phase and j % patch_size == phase and k % patch_size == phase:
-                            A[i, j, k] = 1
+                            A[:, i, j, k, :] = 1
 
         return torch.Tensor(A)
 
@@ -62,4 +62,4 @@ class N2SDataset(Dataset):
 
         input_patch = original_patch * mask_inv
 
-        return original_patch, input_patch, mask
+        return original_patch[0], input_patch[0], mask[0]
