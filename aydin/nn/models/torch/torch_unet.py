@@ -153,7 +153,7 @@ class UNetModel(nn.Module):
 def n2s_train(
     image,
     model: UNetModel,
-    nb_epochs: int = 512,
+    nb_epochs: int = 256,
     learning_rate: float = 0.001,
     patch_size: int = 32,
 ):
@@ -178,17 +178,22 @@ def n2s_train(
 
     dataset = N2SDataset(image, patch_size=patch_size)
     print(f"dataset length: {len(dataset)}")
-    data_loader = DataLoader(dataset, batch_size=32, shuffle=True)
+    data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
+
+    model.train()
 
     for epoch in range(nb_epochs):
-
         for i, batch in enumerate(data_loader):
             original_patch, net_input, mask = batch
 
-            original_patch = torch.movedim(original_patch, -1, 1)
-            net_input = torch.movedim(net_input, -1, 1)
-            mask = torch.movedim(mask, -1, 1)
+            if epoch < 1:
+                import napari
 
+                viewer = napari.Viewer()  # no prior setup needed
+                viewer.add_image(original_patch.numpy(), name='original_patch')
+                viewer.add_image(net_input.numpy(), name='net_input')
+                viewer.add_image(mask.numpy(), name='mask')
+                napari.run()
             # print(original_patch.shape, net_input.shape, mask.shape)
 
             net_output = model(net_input, input_mask=mask)

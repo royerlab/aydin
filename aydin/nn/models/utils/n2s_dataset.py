@@ -9,8 +9,8 @@ class N2SDataset(Dataset):
             self,
             image,
             patch_size,
-            nb_patches_per_image: int = 256,
-            adoption_rate: float = 0.5
+            nb_patches_per_image: int = 64,
+            adoption_rate: float = 0.2
     ):
         """
 
@@ -34,9 +34,9 @@ class N2SDataset(Dataset):
         return len(self.crop_slicers)
 
     def get_mask(self, i):
-        phase = i % 4
+        phase = i % 8
         shape = self.image[self.crop_slicers[1]].shape
-        patch_size = 4
+        patch_size = 8
 
         A = torch.zeros(shape)
 
@@ -57,9 +57,14 @@ class N2SDataset(Dataset):
 
     def __getitem__(self, index):
         original_patch = self.image[self.crop_slicers[index]]
-        mask = self.get_mask(0)
+        mask = self.get_mask(2)
         mask_inv = torch.ones(mask.shape).to(original_patch.device) - mask
 
         input_patch = original_patch * mask_inv
+
+        # TODO: remove after removing tensorflow and refactor where needed
+        original_patch = torch.movedim(original_patch, -1, 1)
+        input_patch = torch.movedim(input_patch, -1, 1)
+        mask = torch.movedim(mask, -1, 1)
 
         return original_patch[0], input_patch[0], mask[0]
