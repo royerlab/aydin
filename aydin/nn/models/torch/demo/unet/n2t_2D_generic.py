@@ -16,8 +16,9 @@ from aydin.io.datasets import (
     dots,
     characters,
 )
+from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
 from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train
-from aydin.nn.models.utils.torch_dataset import TorchDataset
+from aydin.nn.models.utils.n2s_dataset import N2SDataset
 from aydin.util.log.log import Log
 
 
@@ -36,20 +37,14 @@ def demo(image, do_add_noise=True):
     noisy = torch.tensor(noisy)
     image = torch.tensor(image)
 
-    dataset = TorchDataset(noisy, image, 64, self_supervised=False)
-
-    data_loader = DataLoader(
-        dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
-    )
-
-    model = UNetModel(
-        nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
+    model = ResidualUNetModel(
+        nb_unet_levels=2, supervised=True, spacetime_ndim=2
     )
 
     print("training starts")
 
     start = time.time()
-    n2t_train(noisy, image, model, data_loader)
+    n2t_train(noisy, image, model)
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 
