@@ -7,7 +7,7 @@ from aydin.util.fast_uniform_filter.numba_cpu_uf import numba_cpu_uniform_filter
 from aydin.util.fast_uniform_filter.numba_gpu_uf import numba_gpu_uniform_filter
 from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
 from aydin.util.fast_uniform_filter.scipy_uf import scipy_uniform_filter
-from aydin.io.datasets import newyork, examples_single
+from aydin.io.datasets import newyork, examples_single, small_newyork
 
 
 def test_uniform_filter_type_support():
@@ -72,7 +72,7 @@ def _normalise(image):
 
 
 def _test_compute_uniform_filter_type_support(_fun_):
-    image = newyork()
+    image = small_newyork()
 
     _run_test_for_type(_fun_, image.astype(dtype=numpy.float32))
     _run_test_for_type(_fun_, image.astype(dtype=numpy.float16), decimal=1)
@@ -130,8 +130,8 @@ def _test_compute_uniform_filter_2d(_fun_, size=3):
 
 
 def _test_compute_uniform_filter_3d(_fun_, size=3):
-    islet = examples_single.royerlab_hcr.get_array().squeeze()
-    image = islet[2, :60, 0 : 0 + 1524, 0 : 0 + 1524]
+    hcr = examples_single.royerlab_hcr.get_array().squeeze()
+    image = hcr[2, :60, 0 : 0 + 1524, 0 : 0 + 1524]
 
     filtered_image = _fun_(image, size=size)
     scipy_filtered_image = uniform_filter(image, size=size, mode="nearest")

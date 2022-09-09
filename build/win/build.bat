@@ -6,7 +6,7 @@ del -rf dist
 pip uninstall imagecodecs
 pip uninstall enum34
 
-pyinstaller.exe -w -D -y --clean aydin.spec
+pyinstaller.exe -y --clean aydin.spec
 
 copy run_aydin.bat dist\run_aydin.bat
 mkdir -p dist\aydin\numba\experimental\jitclass

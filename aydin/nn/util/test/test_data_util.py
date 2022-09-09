@@ -14,18 +14,19 @@ def n(image):
     )
 
 
-# Test with garder 3D image
+# Test with maitre 3D image
 def test_random_sample_patch_3D():
-    image_path = examples_single.hyman_hela.get_path()
+    image_path = examples_single.maitre_mouse.get_path()
     image0, metadata = io.imread(image_path)
     print(image0.shape)
     image0 = n(image0.squeeze()[0:32, :, 200:300, 200:300])
 
     image0 = numpy.expand_dims(image0[1:2], -1)
-    tile_size = (32, 32, 32)
+    tile_size = 8
     num_tile = 100
     adoption_rate = 0.2
     input_data = random_sample_patches(image0, tile_size, num_tile, adoption_rate)
+    print(f"input data: {input_data}")
 
     # Extract patched images
     img_patch = []
@@ -49,7 +50,7 @@ def test_random_sample_patch_3D():
 def test_random_sample_patch_2D():
     image0 = camera().astype(numpy.float32)
     image0 = numpy.expand_dims(numpy.expand_dims(n(image0), -1), 0)
-    patch_size = (64, 64)
+    patch_size = 64
     num_patch = 500
     adoption_rate = 0.5
     input_data = random_sample_patches(image0, patch_size, num_patch, adoption_rate)
@@ -72,21 +73,37 @@ def test_random_sample_patch_2D():
     assert ent_ratio >= 1.01
 
 
+def test_random_sample_patch_2D_20patch():
+    """
+    Test whether random_sample_patches generates 1 image when patch size is same as input size.
+    """
+    image = numpy.stack([camera()] * 20)
+    image0 = numpy.expand_dims(image, -1)
+    patch_size = 512
+    num_patch = 500
+    adoption_rate = 0.5
+    input_data = random_sample_patches(image0, patch_size, num_patch, adoption_rate)
+    print(input_data[0])
+    assert len(input_data) == 20
+
+    # Extract patched image (which is the image)
+    img_patch = image0[tuple(input_data[0])]
+
+    assert img_patch.shape == image0[0:1, ...].shape
+
+
 def test_random_sample_patch_2D_1patch():
     """
     Test whether random_sample_patches generates 1 image when patch size is same as input size.
     """
-    image0 = camera().astype(numpy.float32)
-    image0 = numpy.expand_dims(numpy.expand_dims(n(image0), -1), 0)
-    patch_size = (512, 512)
+    image0 = numpy.expand_dims(numpy.expand_dims(camera(), 0), -1)
+    patch_size = 512
     num_patch = 500
     adoption_rate = 0.5
     input_data = random_sample_patches(image0, patch_size, num_patch, adoption_rate)
+    assert len(input_data) == 1
 
-    # Extract patched images
-    img_patch = []
-    for i in input_data:
-        img_patch.append(image0[i])
-    img_patch = numpy.vstack(img_patch)
+    # Extract patched image (which is the image)
+    img_patch = image0[input_data[0]]
 
     assert img_patch.shape == image0.shape

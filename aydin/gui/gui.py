@@ -13,7 +13,7 @@ class App(QMainWindow):
     """GUI app"""
 
     def __init__(self, ver):
-        super(QMainWindow, self).__init__()
+        super(App, self).__init__()
 
         self.version = ver
 
@@ -89,6 +89,13 @@ class App(QMainWindow):
             lambda: self.main_widget.save_options_json()
         )
         runMenu.addAction(saveOptionsJSONButton)
+
+        loadPretrainedModelButton = QAction('Load Pretrained Model', self)
+        loadPretrainedModelButton.setStatusTip('Load Pretrained Model')
+        loadPretrainedModelButton.triggered.connect(
+            lambda: self.main_widget.load_pretrained_model()
+        )
+        runMenu.addAction(loadPretrainedModelButton)
 
         # Preferences Menu
         self.basicModeButton = QAction('Basic mode', self)

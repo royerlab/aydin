@@ -57,7 +57,7 @@ class RangeTransform(ImageTransformBase):
         mode : str
             Range normalisation mode: 'minmax' or 'percentile'
         percentile : Optional[float]
-            Percentile value for the 'percentile' mode.
+            Percentile value within [0, 1] for the 'percentile' mode.
             If None the percentile value is automatically chosen
             based on the number of voxels in the image.
         force_float_datatype: bool

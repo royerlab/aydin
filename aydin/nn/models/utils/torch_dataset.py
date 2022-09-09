@@ -13,10 +13,7 @@ class TorchDataset(Dataset):
 
         def extract(image):
             return extract_tiles(
-                image,
-                tile_size=tilesize,
-                extraction_step=tilesize,
-                flatten=True,
+                image, tile_size=tilesize, extraction_step=tilesize, flatten=True
             )
 
         bc_flat_input_image = input_image.reshape(-1, *input_image.shape[2:])

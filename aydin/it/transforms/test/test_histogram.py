@@ -22,4 +22,9 @@ def test_histogram():
 
     assert postprocessed.dtype == image.dtype
     assert postprocessed.shape == image.shape
-    assert numpy.abs(postprocessed - image).mean() < 1e-3
+    assert (
+        numpy.abs(
+            postprocessed.astype(numpy.float32) - image.astype(numpy.float32)
+        ).mean()
+        < 2
+    )

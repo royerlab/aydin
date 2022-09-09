@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QWidget,
@@ -8,10 +11,14 @@ from qtpy.QtWidgets import (
 )
 
 from aydin.gui._qt.custom_widgets.denoise_tab_method import DenoiseTabMethodWidget
+from aydin.gui._qt.custom_widgets.denoise_tab_pretrained_method import (
+    DenoiseTabPretrainedMethodWidget,
+)
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
 from aydin.gui._qt.custom_widgets.readmoreless_label import QReadMoreLessLabel
+from aydin.it.base import ImageTranslatorBase
 from aydin.restoration.denoise.util.denoise_utils import (
     get_list_of_denoiser_implementations,
 )
@@ -34,12 +41,12 @@ class DenoiseTab(QWidget):
     longer, as do in general patch and dictionary based methods.
     <split>
     Our own favourite is a novel variant on the Noise2Self theme which relies on carefully crafted features and
-    gradient boosting (N2S-FGR-cb or -lgbm). CNN-based Noise2Self denoising is also available but is currently on of
+    gradient boosting (N2S-FGR-cb or -lgbm). CNN-based Noise2Self denoising is also available but is currently one of
     our least favourites because of its propensity to hallucinate detail, slowness, and overall worse performance. In
-    fine, there is no silver bullet, there is not a single denoising algorithm that can tackle all denoising
-    challenges, instead you need to choose and play with a variety of algorithms to find the one that will fit you
-    needs both in terms of processing speed, visual appearance, and downstream analysis constraints. Denoising is a
-    form of image analysis that consists in separating signal from noise, with the definition of signal and noise
+    the end, there is no silver bullet, there is not a single denoising algorithm that can tackle all denoising
+    challenges, instead you need to choose and play with a variety of algorithms to find the one that will fit your
+    needs both in terms of processing speed, visual appearance, and downstream analysis constraints and validations.
+    Denoising is a form of image analysis that consists in separating signal from noise, with the definition of signal and noise
     being to some extent, subjective and context dependent.
     """
 
@@ -56,6 +63,9 @@ class DenoiseTab(QWidget):
         self.tab_layout.addWidget(QHorizontalLineBreakWidget(self))
 
         self.leftlist = QListWidget()
+
+        self.disable_spatial_features = False
+        self.loaded_backends = []
 
         (
             backend_options,
@@ -79,27 +89,20 @@ class DenoiseTab(QWidget):
             'Noise2SelfFGR-random_forest',
         ]
 
-        self.basic_backend_options_descriptions = []
+        self.basic_backend_options_descriptions = [
+            description
+            for option, description in zip(
+                self.backend_options, self.backend_options_descriptions
+            )
+            if option in self.basic_backend_options
+        ]
 
         self.stacked_widget = QStackedWidget(self)
 
         default_option_index = 0
-        for idx, (backend_option, description) in enumerate(
-            zip(self.backend_options, self.backend_options_descriptions)
-        ):
-            if backend_option in self.basic_backend_options:
-                self.basic_backend_options_descriptions.append(description)
-
-                self.leftlist.insertItem(idx, backend_option)
-
-                self.stacked_widget.addWidget(
-                    DenoiseTabMethodWidget(
-                        self, name=backend_option, description=description
-                    )
-                )
-
-                if backend_option == "Classic-butterworth":
-                    default_option_index = idx
+        self.refresh_available_backends(
+            self.backend_options, self.backend_options_descriptions
+        )
 
         self.leftlist.item(default_option_index).setSelected(True)
         self.change_current_method(default_option_index)
@@ -113,7 +116,14 @@ class DenoiseTab(QWidget):
 
         self.setLayout(self.tab_layout)
 
-        self.set_advanced_enabled(enable=False)  # to init the tab correctly
+        self.refresh_available_backends(
+            self.basic_backend_options,
+            self.basic_backend_options_descriptions,
+            advance_mode_enabled=False,
+        )
+        self.refresh_pretrained_backends()
+
+        self.advance_enabled = False
 
     def change_current_method(self, new_index):
         self.stacked_widget.setCurrentIndex(new_index)
@@ -131,11 +141,6 @@ class DenoiseTab(QWidget):
         return self.stacked_widget.currentWidget().lower_level_args()
 
     def set_advanced_enabled(self, enable: bool = False):
-        self.leftlist.clear()
-
-        while self.stacked_widget.count():
-            self.stacked_widget.removeWidget(self.stacked_widget.widget(0))
-
         if enable:
             options = self.backend_options
             description_list = self.backend_options_descriptions
@@ -143,17 +148,72 @@ class DenoiseTab(QWidget):
             options = self.basic_backend_options
             description_list = self.basic_backend_options_descriptions
 
+        if enable != self.advance_enabled:
+            self.refresh_available_backends(
+                options, description_list, advance_mode_enabled=enable
+            )
+            self.refresh_pretrained_backends()
+            self.advance_enabled = enable
+
+    def load_pretrained_model(self, pretrained_model_files):
+        """
+
+        Parameters
+        ----------
+        pretrained_model_files : list
+            list of paths to the loaded pretrained model files
+
+        """
+        for file in pretrained_model_files:
+            shutil.unpack_archive(file, os.path.dirname(file), "zip")
+            self.loaded_backends.append(ImageTranslatorBase.load(file[:-4]))
+            shutil.rmtree(file[:-4])
+
+        self.refresh_pretrained_backends()
+
+    def refresh_available_backends(
+        self, options, description_list, advance_mode_enabled=False
+    ):
+        # Clear existing entries
+        self.leftlist.clear()
+
+        while self.stacked_widget.count():
+            self.stacked_widget.removeWidget(self.stacked_widget.widget(0))
+
+        # Populate entries
         for index, backend_option in enumerate(options):
             self.leftlist.insertItem(index, backend_option)
 
             self.stacked_widget.addWidget(
                 DenoiseTabMethodWidget(
-                    self, name=backend_option, description=description_list[index]
+                    self,
+                    name=backend_option,
+                    description=description_list[index],
+                    disable_spatial_features=self.disable_spatial_features,
                 )
             )
 
+        # Handle toggling between basic and advanced arguments
         for widget_index in range(self.stacked_widget.count()):
             for key, constructor_arguments_widget in self.stacked_widget.widget(
                 widget_index
             ).constructor_arguments_widget_dict.items():
-                constructor_arguments_widget.set_advanced_enabled(enable=enable)
+                constructor_arguments_widget.set_advanced_enabled(
+                    enable=advance_mode_enabled
+                )
+
+    def refresh_pretrained_backends(self):
+
+        for index in range(self.leftlist.count() - 1, -1, -1):
+            if "pretrained" in self.leftlist.item(index).text():
+                self.leftlist.takeItem(index)
+                self.stacked_widget.removeWidget(self.stacked_widget.widget(index))
+
+        for index, option in enumerate(self.loaded_backends):
+            self.leftlist.insertItem(
+                self.leftlist.count() + index, f"pretrained-{index}"
+            )
+
+            self.stacked_widget.addWidget(
+                DenoiseTabPretrainedMethodWidget(self, option)
+            )

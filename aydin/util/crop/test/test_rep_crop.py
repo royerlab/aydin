@@ -1,14 +1,15 @@
 # flake8: noqa
-import numpy
-import numpy as np
-from skimage.data import camera
 
-from aydin.io.datasets import normalise, add_noise, dots, lizard, pollen, newyork
+from aydin.io.datasets import newyork
 from aydin.util.crop.demo.demo_rep_crop import demo_representative_crop
-from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.log.log import Log
+from aydin.util.crop.demo.demo_sf_rep_crop import demo_super_fast_representative_crop
 
 
 def test_representative_crop():
     newyork_image = newyork()
     demo_representative_crop(newyork_image, display=False)
+
+
+def test_super_fast_representative_crop():
+    newyork_image = newyork()
+    demo_super_fast_representative_crop(newyork_image, display=False)

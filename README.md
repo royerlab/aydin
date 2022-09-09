@@ -4,6 +4,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![codecov](https://codecov.io/gl/aydinorg/aydin/branch/master/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gl/aydinorg/aydin)
 [![DOI](https://zenodo.org/badge/188953977.svg)](https://zenodo.org/badge/latestdoi/188953977)
+[![Downloads](https://pepy.tech/badge/aydin)](https://pepy.tech/project/aydin)
 
 *Aydin* is a user-friendly, feature-rich, and fast **image denoising tool** that provides
 a number of **self-supervised, auto-tuned, and unsupervised** image denoising algorithms.
@@ -14,6 +15,7 @@ It comes with *Aydin Studio* a [graphical user interface](https://royerlab.githu
 to easily experiment with all the different algorithms and parameters available,
 a [command line interface](https://royerlab.github.io/aydin/tutorials/cli_tutorials.html) to run large jobs on the terminal possibly on powerfull remote machines, 
 and an [API](https://royerlab.github.io/aydin/tutorials/api_tutorials.html) for custom coding and integration into your scripts and applications.
+More details and exhaustive explanations can be found in Aydin's [documentation](https://royerlab.github.io/aydin/).
 
 And, of course, a simplified [napari](napari.org) plugin is in the works! 
 Notebooks for running on Collab are also planned. 
@@ -30,7 +32,13 @@ In the [Noise2Self paper](https://deepai.org/publication/noise2self-blind-denois
 we show that it is possible to calibrate any parameterised denoising algorithm, 
 from the few parameters of a classical algorithm to the millions of weights of a deep neural 
 network. We leverage and extend these ideas in *Aydin* to provide a variety of auto-tuned 
-and trained high-quality image denoisers. 
+and trained high-quality image denoisers. What this means is that for example, we can discover automatically 
+the optimal parameters for non-local-means (NLM) denoising, or the best cut-off frequencies for a low-pass denoiser. 
+These parameters are difficult to determine 'by-hand' but when auto-tuned we show (see [use-cases](https://royerlab.github.io/aydin/use_cases/introduction.html#))
+that you can get remarkable results even with simple 'classic' denoisers, and even be competitive against more complex and slower
+approaches such as deep-learning based denoisers that can also be prone to hallucination and 'copy-paste' effects. 
+Importantly, our experience denoising many different kinds of images has shown that tehre is not a single 'silver-bullet' 
+denoiser, different kinds of datasets require different approaches.  
 Here is the list of currently available methods: 
 
 - **Low-pass filtering based algorithms:**
@@ -55,7 +63,7 @@ Here is the list of currently available methods:
   - Noise2Self-CNN: Noise2Self denoising via Convolutional Neural Networks (CNN). This is the original approach of Noise2Self. In our experience this is typically slower to train, and more prone to hallucination and residual noise than FGR.  
  
 - **Other:**
-  - Lipschitz continuity denoising   
+  - Lipschitz continuity denoising.     
 
 Some methods actually do combine multiple ideas and so the classification above is not strict.
 We recommend trying first a good baseline denoiser such as the *Butterworth denoiser*. 
@@ -63,6 +71,9 @@ If unsatisfied with the result, and you have a powerful computer with a recent N
 graphics card, then we recommend you try the Noise2Self-FGR-cb denoiser. 
 For detailed use-cases check [here](https://royerlab.github.io/aydin/use_cases/introduction.html#).  
 
+We regularly come up with new approaches and ideas, there is just not enough time to write papers about all these ideas.
+This means that the best 'publication' for some of these novel algorithms is this repo itself, and so please be so kind as to
+cite this repo (see below) for any ideas that you would use or reuse.
 We have a long todo list of existing, modified, as well as original algorithms that we plan to add to *Aydin* in the next weeks and months. We will do so progressively as time allows. Stay tuned!
 
 ## Documentation
@@ -75,11 +86,11 @@ We recommend that users that are not familiar with python start with our user-fr
 Download it for your operating system here:
 
 [<img src="https://user-images.githubusercontent.com/1870994/140653991-fb570f5a-bc6f-4afd-95b6-e36d05d1382d.png" width="200" >
-](https://github.com/royerlab/aydin/releases/download/v0.1.12/aydin_0.1.12_linux.zip) 
+](https://github.com/royerlab/aydin/releases/download/v0.1.13/aydin_0.1.13_linux.zip) 
 [<img src="https://user-images.githubusercontent.com/1870994/140653995-5055e607-5226-4b76-8cc4-04de17d2811f.png" width="200" >
-](https://github.com/royerlab/aydin/releases/download/v0.1.12/aydin_0.1.12_win.zip) 
+](https://github.com/royerlab/aydin/releases/download/v0.1.13/aydin_0.1.13_win.zip) 
 [<img src="https://user-images.githubusercontent.com/1870994/140653999-5f6368d9-3e82-4d10-9283-2359aa1464fa.png" width="200" >
-](https://github.com/royerlab/aydin/releases/download/v0.1.12/aydin_0.1.12_osx.pkg)
+](https://github.com/royerlab/aydin/releases/download/v0.1.13/aydin_0.1.13_osx.pkg)
 
 The latest releases and standalone executables can be found [here](https://github.com/royerlab/aydin/releases) 
 and detailed installation instructions of *Aydin Studio* for all three operating systems can be found 
@@ -121,6 +132,15 @@ brew install libomp
 
 You can install *Brew* by following the instructions [here](https://brew.sh/).
 
+### Ubuntu/Linux specific dependencies:
+
+If you encounter problems running Aydin in Ubuntu/linux,
+please install the following package:
+
+```bash
+sudo apt install libqt5x11extras5
+```
+
 ## How to run ?
 
 Assuming that you have installed *Aydin* in an environment, you can:
@@ -161,10 +181,12 @@ Here are some issues that are being actively addressed and will be addressed asa
 
   - On Ubuntu and perhaps other Linux systems, high-dpi modes tend to mess with font and ui element rendering.
 
+  - M1 Macs are not yet supported, we depend on libraries that have not yet made the move, yet! Hopefully we will soon be able to run Aydin on M1 Macs!
+
 ## Road Map:
 
 Planned features:
-  - Toggling between 'Advanced' and 'Basic' modes to show and hide advanced algorithms.
+  - ~~Toggling between 'Advanced' and 'Basic' modes to show and hide advanced algorithms.~~ :white_check_mark:
   - Loading of denoising model and configurations (JSON) on *Aydin Studio*
   - Pytorch backend
 

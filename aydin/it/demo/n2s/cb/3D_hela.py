@@ -19,10 +19,15 @@ def demo():
     print(image.shape)
     image = rescale_intensity(image, in_range='image', out_range=(0, 1))
 
-    generator = StandardFeatureGenerator(max_level=7)
+    generator = StandardFeatureGenerator(max_level=7, include_spatial_features=True)
     regressor = CBRegressor()
 
-    it = ImageTranslatorFGR(generator, regressor)
+    it = ImageTranslatorFGR(
+        generator,
+        regressor,
+        balance_training_data=True,
+        max_voxels_for_training=10_000_000,
+    )
 
     batch_dims = (True, False, False, False)
 
@@ -47,4 +52,5 @@ def demo():
         viewer.add_image(denoised, name='denoised')
 
 
-demo()
+if __name__ == "__main__":
+    demo()

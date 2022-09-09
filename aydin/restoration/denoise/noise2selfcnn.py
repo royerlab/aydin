@@ -2,6 +2,7 @@ import importlib
 import inspect
 import os
 import shutil
+from typing import Optional
 
 from aydin.it.base import ImageTranslatorBase
 from aydin.it.cnn import ImageTranslatorCNN
@@ -14,12 +15,16 @@ from aydin.util.log.log import lsection
 
 
 class Noise2SelfCNN(DenoiseRestorationBase):
-    """Noise2Self image denoising using "Convolutional Neural Networks" (CNN)"""
+    """
+    Noise2Self image denoising using the "Convolutional Neural Networks" (
+    CNN) approach. Follows from the theory exposed in the <a
+    href="https://arxiv.org/abs/1901.11365">Noise2Self paper</a>.
+    """
 
     def __init__(
         self,
         *,
-        variant: str = 'cnn-jinet',
+        variant: Optional[str] = None,
         use_model=None,
         input_model_path=None,
         lower_level_args=None,
@@ -30,8 +35,10 @@ class Noise2SelfCNN(DenoiseRestorationBase):
 
         Parameters
         ----------
-        variant : str
-            Variant of N2S CNN denoising
+        variant : str, optional
+            Variant of CNN denoiser to be used. Variant would supersede
+            the denoiser option passed in lower_level_args. Currently, we
+            support only two variants: `unet` and `jinet`.
         use_model : bool
             Flag to choose to train a new model or infer from a
             previously trained model. By default it is None.
@@ -40,14 +47,10 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             By default it is None.
         """
         super().__init__()
-        self.lower_level_args = lower_level_args
-        self.backend_it, self.backend_or_model = (
-            ("cnn", "jinet") if variant is None else variant.split("-")
-        )
-
-        self.input_model_path = input_model_path
+        self.variant = variant
         self.use_model_flag = use_model
-        self.model_folder_path = None
+        self.input_model_path = input_model_path
+        self.lower_level_args = lower_level_args
 
         self.it = None
         self.it_transforms = (
@@ -117,11 +120,12 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             ]  # class name
 
             elem_class = response.__getattribute__(elem)
-            descriptions.append(
-                cnn_description
-                + "<br><br>"
-                + elem_class.__doc__.replace("\n\n", "<br><br>")
-            )
+            # model_name = elem_class.__name__
+            model_description = elem_class.__doc__.replace("\n\n", "<br><br>")
+
+            descriptions.append(cnn_description + f"<br><br>{model_description}")
+
+            # elem_class = response.__getattribute__(elem)
 
         return descriptions
 
@@ -137,6 +141,9 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         it : ImageTranslatorBase
 
         """
+        if self.variant:
+            return ImageTranslatorCNN(model_architecture=self.variant)
+
         # Use a pre-saved model or train a new one from scratch and save it
         if self.use_model_flag:
             # Unarchive the model file and load its ImageTranslator object into self.it
@@ -160,27 +167,24 @@ class Noise2SelfCNN(DenoiseRestorationBase):
                 transform_kwargs = transform["kwargs"]
                 self.it.add_transform(transform_class(**transform_kwargs))
 
-    def train(
-        self, noisy_image, *, batch_axes=None, chan_axes=None, image_path=None, **kwargs
-    ):
+    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to run Noise2Self CNN training.
 
         Parameters
         ----------
-        noisy_image : numpy.ndarray
+        noisy_image : numpy.ArrayLike
         batch_axes : array_like, optional
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-        image_path : str
 
         Returns
         -------
-        response : numpy.ndarray
+        response : numpy.ArrayLike
 
         """
         with lsection("Noise2Self train is starting..."):
-            if any(chan_axes):
+            if chan_axes:
                 return
 
             self.it = self.get_translator()
@@ -201,9 +205,6 @@ class Noise2SelfCNN(DenoiseRestorationBase):
                 else 3,
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
-
-            # Save the trained model
-            # self.save_model(image_path)  # TODO:  fix the problems here
 
     def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to denoise an image with trained Noise2Self.

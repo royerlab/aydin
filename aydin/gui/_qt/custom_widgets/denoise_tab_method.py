@@ -18,15 +18,17 @@ from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_inst
 
 
 class DenoiseTabMethodWidget(QWidget):
-    def __init__(self, parent, name=None, description=None):
-        super(QWidget, self).__init__(parent)
+    def __init__(
+        self, parent, name=None, description=None, disable_spatial_features=False
+    ):
+        super(DenoiseTabMethodWidget, self).__init__(parent)
 
         self.parent = parent
         self.name = name
         self.description = description
 
         # Widget layout
-        self.layout = QHBoxLayout()
+        self.main_layout = QHBoxLayout()
         self.tab_method_layout = QVBoxLayout()
         self.tab_method_layout.setAlignment(Qt.AlignTop)
 
@@ -94,6 +96,7 @@ class DenoiseTabMethodWidget(QWidget):
                 arg_defaults=sub_dict["defaults"],
                 arg_annotations=sub_dict["annotations"],
                 reference_class=sub_dict["reference_class"],
+                disable_spatial_features=disable_spatial_features,
             )
             self.constructor_arguments_widget_dict[
                 component
@@ -104,11 +107,11 @@ class DenoiseTabMethodWidget(QWidget):
 
         self.right_side_vlayout.addWidget(self.scroll)
 
-        self.layout.addLayout(self.tab_method_layout, 35)
-        self.layout.addWidget(QVerticalLineBreakWidget(self))
-        self.layout.addLayout(self.right_side_vlayout, 50)
+        self.main_layout.addLayout(self.tab_method_layout, 35)
+        self.main_layout.addWidget(QVerticalLineBreakWidget(self))
+        self.main_layout.addLayout(self.right_side_vlayout, 50)
 
-        self.setLayout(self.layout)
+        self.setLayout(self.main_layout)
 
     def lower_level_args(self):
         args = {}

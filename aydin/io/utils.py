@@ -101,7 +101,7 @@ def get_output_image_path(
     ----------
     path : str
     operation_type : str
-        Currently supported values: 'denoised', 'deconvolved', 'hyperstacked'.
+        Currently supported values: 'denoised', 'hyperstacked'.
     output_folder : str
 
     Returns
@@ -110,6 +110,10 @@ def get_output_image_path(
         (Correct output path, counter).
 
     """
+    if operation_type not in ["denoised", "hyperstacked"]:
+        raise ValueError(
+            f"invalud value for operation_type parameter: {operation_type}"
+        )
 
     if output_folder:
         path = os.path.join(output_folder, Path(path).name)

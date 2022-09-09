@@ -2,6 +2,7 @@ import numpy
 
 from aydin.features.extensible_features import ExtensibleFeatureGenerator
 from aydin.features.groups.dct import DCTFeatures
+from aydin.features.groups.lowpass import LowPassFeatures
 from aydin.features.groups.median import MedianFeatures
 from aydin.features.groups.random import RandomFeatures
 from aydin.features.groups.spatial import SpatialFeatures
@@ -10,7 +11,13 @@ from aydin.util.log.log import lprint
 
 
 class StandardFeatureGenerator(ExtensibleFeatureGenerator):
-    """Standard Feature Generator"""
+    """
+    The standard feature generator provides the following set of features:
+    multiscale integral(uniform) features of different shapes, spatial
+    features, median features, dct features, deterministic random
+    convolutional features.
+
+    """
 
     def __init__(
         self,
@@ -30,6 +37,8 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
         spatial_features_coarsening: int = 2,
         num_sinusoidal_features: int = 0,
         include_median_features: bool = False,
+        include_lowpass_features: bool = True,
+        num_lowpass_features: int = 8,
         include_dct_features: bool = False,
         dct_max_freq: float = 0.5,
         include_random_conv_features: bool = False,
@@ -41,56 +50,122 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
         ----------
         kernel_widths : numpy.typing.ArrayLike
             ArrayLike of kernel widths.
+
         kernel_scales : numpy.typing.ArrayLike
             ArrayLike of kernel scales.
+
         kernel_shapes : numpy.typing.ArrayLike
             ArrayLike of kernel shapes.
+
         min_level : int
-            Minimum level of features to include
+            Minimum scale level of features to include
+            (advanced)
+
         max_level : int
-            Maximum level of features to include
+            Maximum scale level of features to include
+
         scale_one_width : int
-            Width of the scale one features
+            Width of the scale one features.
+            (advanced)
+
         include_scale_one : bool
-            True or False, argument to set decision
-            on inclusion of scale-one-features
+            When True scale-one-features are included. Uniform scale-one
+            features consist in simply passing the intensity values of pixels
+            in direct proximity to the center pixel. These features encode
+            high-frequency information that might be heavily contaminated by
+            noise, so use with caution. We recommend using this only for
+            moderate noise levels, or for images where strong high-frequency
+            signal is present and needs to be recovered.
+
         include_fine_features : bool
-            True or False, argument to set decision
-            on inclusion of fine features
+            When True fine features are included. Uniform fine features
+            consist in summing up pixel values over small groups of 2 or 3
+            pixels surrounding the center pixel. These features encode higher
+            frequency information than other features (only scale-one feature
+            are even higher frequency).
+
         include_corner_features : bool
-            True or False, argument to set decision
-            on inclusion of corner features
+            When True corner features are included. Corner features are
+            uniform features that consists in summing the intensity values of
+            groups of pixels along the corners of the typical default
+            multi-scale features.
+
         include_line_features : bool
-            True or False, argument to set decision
-            on inclusion of line features
+            When True line features are included. Line features are another
+            flavour of uniform features that consist in summing up the pixel
+            intensity values along one-pixel-wide lines around the center
+            pixel.
+            (advanced)
+
         decimate_large_scale_features : bool
-            True or False, argument to set decision
-            on decimation of large scale features
+            When True large scale features are decimated. To reduce the number
+            of features it can be advantageous to reduce the number of
+            large-scale (low-freq) features by decimating them. This is done
+            by removing center features that overlap with already covered
+            features at lower scales.
+            (advanced)
+
         extend_large_scale_features : bool
-            True or False, argument to set decision
-            on extension of large scale features.
+            When True large scale features are extended. Extending large
+            scale features makes these feature cover more pixels by
+            overlapping pixels at the center of the receptive field.
+            (advanced)
+
         include_spatial_features : bool
-            True or False, argument to set decision
-            on inclusion of spatial features
+            When True spatial features are included. Spatial features are simply
+            the shifted, scaled, and possibly quantised coordinates of the voxels
+            themselves. This should only be used if you train on the whole image
+            that you intend to process. If applied on other images than the one
+            trained on, ensure that any spatial bias learned such as the position
+            of certain image structures or degradation over space is consistent
+            between the image you trained on and the images you process.
+
         spatial_features_coarsening : int
             Degree of coarsening to apply on spatial features
-            to prevent identification of individual pixel values
+            to prevent identification of individual pixel values.
+            (advanced)
+
         num_sinusoidal_features : int
-            Number of sinusoidal features
+            Number of sinusoidal features to include. Sinusoidal features are
+            spatial features that are sinusoidal.
+            (advanced)
+
         include_median_features : bool
-            True or False, argument to set decision
-            on inclusion of median features
+            When True median features are included. Median features consist
+            in the median-filtered image
+            with kernels of sizes 3^n, 5^n and 7^n.
+            (advanced)
+
+        include_lowpass_features : bool
+            Includes lowpass image features that are computed by applying
+            Butterworth filters at regular frequency intervals. Highly effective
+            for images for which Butterworth denoising also works well. However,
+            for large dimensions with many dimensions feature generation can be
+            slow.
+
+        num_lowpass_features : int
+            Number of lowpass features to include.
+            (advanced)
+
         include_dct_features : bool
-            True or False, argument to set decision
-            on inclusion of dct features
+            When True DCT features computed on per-voxel-centered image patches
+            are included.
+            (advanced)
+
         dct_max_freq : float
-            Maximum included frequency during
-            dct features computation.
+            Maximum included frequency during dct features computation.
+            Should be a number within [0, 1]
+            (advanced)
+
         include_random_conv_features : bool
-            True or False, argument to set decision
-            on inclusion of random convolutional features
+            When True random convolutional features are included.
+            This is experimental and of academic interest only.
+            (advanced)
+
+
         dtype
             Datatype of the features
+            (advanced)
         """
         super().__init__()
 
@@ -119,7 +194,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             self.add_feature_group(spatial)
 
         if num_sinusoidal_features > 0:
-            periods = list([1 / 2 ** i for i in range(num_sinusoidal_features)])
+            periods = list([1 / 2**i for i in range(num_sinusoidal_features)])
             for period in periods:
                 spatial = SpatialFeatures(period=period)
                 self.add_feature_group(spatial)
@@ -144,3 +219,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             self.add_feature_group(rnd3)
             self.add_feature_group(rnd5)
             self.add_feature_group(rnd7)
+
+        if include_lowpass_features:
+            lowpass = LowPassFeatures(num_features=num_lowpass_features)
+            self.add_feature_group(lowpass)

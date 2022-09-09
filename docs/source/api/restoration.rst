@@ -10,5 +10,4 @@ restoration API calls Aydin provides.
    :maxdepth: 1
 
    Denoise <restorations/denoise_restoration>
-   Deconvolve <restorations/deconvolve_restoration>
 

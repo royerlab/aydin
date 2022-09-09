@@ -1,18 +1,25 @@
-from typing import Optional
+from typing import Optional, Tuple, List
+
 import numpy
+from numpy.typing import ArrayLike
 from scipy.ndimage import median_filter, gaussian_filter
 from scipy.signal import medfilt2d
 
+from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.j_invariance.j_invariant_smart import calibrate_denoiser_smart
+from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 
 def calibrate_denoise_gm(
-    image,
+    image: ArrayLike,
     max_filter_size: int = 3,
-    crop_size_in_voxels: Optional[int] = 128000,
-    max_num_evaluations: int = 256,
+    crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
+    optimiser: str = _defaults.default_optimiser.value,
+    max_num_evaluations: int = _defaults.default_max_evals_normal.value,
+    blind_spots: Optional[List[Tuple[int]]] = _defaults.default_blind_spots.value,
+    jinv_interpolation_mode: str = 'median',
     display_images: bool = False,
+    display_crop: bool = False,
     **other_fixed_parameters,
 ):
     """
@@ -30,14 +37,41 @@ def calibrate_denoise_gm(
 
     crop_size_in_voxels: int or None for default
         Number of voxels for crop used to calibrate denoiser.
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory -- this can be important for very noisy images.
+        Values to try are: 65000, 128000, 256000, 320000.
+        We do not recommend values higher than 512000.
+
+    optimiser: str
+        Optimiser to use for finding the best denoising
+        parameters. Can be: 'smart' (default), or 'fast' for a mix of SHGO
+        followed by L-BFGS-B.
         (advanced)
 
     max_num_evaluations: int
         Maximum number of evaluations for finding the optimal parameters.
+        Increase this number by factors of two if denoising quality is
+        unsatisfactory.
+
+    blind_spots: bool
+        List of voxel coordinates (relative to receptive field center) to
+        be included in the blind-spot. For example, you can give a list of
+        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
+        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)
+        (advanced) (hidden)
+
+    jinv_interpolation_mode: str
+        J-invariance interpolation mode for masking. Can be: 'median' or
+        'gaussian'.
         (advanced)
 
     display_images: bool
-        When True the denoised images encountered during optimisation are shown
+        When True the denoised images encountered during optimisation are shown.
+        (advanced) (hidden)
+
+    display_crop: bool
+        Displays crop, for debugging purposes...
+        (advanced) (hidden)
 
     other_fixed_parameters: dict
         Any other fixed parameters
@@ -52,7 +86,9 @@ def calibrate_denoise_gm(
     image = image.astype(dtype=numpy.float32, copy=False)
 
     # obtain representative crop, to speed things up...
-    crop = representative_crop(image, crop_size=crop_size_in_voxels)
+    crop = representative_crop(
+        image, crop_size=crop_size_in_voxels, display_crop=display_crop
+    )
 
     # Size range:
     filter_size_range = [3, 5, 7]
@@ -81,12 +117,15 @@ def calibrate_denoise_gm(
 
     # Calibrate denoiser
     best_parameters = (
-        calibrate_denoiser_smart(
+        calibrate_denoiser(
             crop,
             denoise_gm,
+            mode=optimiser,
             denoise_parameters=parameter_ranges,
-            display_images=display_images,
+            interpolation_mode=jinv_interpolation_mode,
             max_num_evaluations=max_num_evaluations,
+            blind_spots=blind_spots,
+            display_images=display_images,
         )
         | other_fixed_parameters
     )
@@ -98,7 +137,7 @@ def calibrate_denoise_gm(
 
 
 def denoise_gm(
-    image,
+    image: ArrayLike,
     sigma: float = 0.5,
     size: int = 3,
     factor: float = 2,

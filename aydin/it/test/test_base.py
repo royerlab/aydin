@@ -217,3 +217,46 @@ def test_transform_sorting():
         for j, t2 in enumerate(it.transforms_list):
             if i < j:
                 assert t1.priority < t2.priority
+
+
+def test_blindspot_shorthand_notation():
+    it = ImageTranslatorFGR()
+
+    def _get_blindspot_parsed(blind_spots):
+        return it._parse_blind_spot_shorthand_notation(blind_spots, st_ndim=2)
+
+    blind_spots = _get_blindspot_parsed('0#2')
+    print(blind_spots)
+    assert blind_spots == [(0, 0), (2, 0), (-2, 0), (-1, 0), (1, 0)]
+
+    blind_spots = _get_blindspot_parsed('y#2')
+    print(blind_spots)
+    assert blind_spots == [(0, 0), (2, 0), (-2, 0), (-1, 0), (1, 0)]
+
+    blind_spots = _get_blindspot_parsed('1#2')
+    print(blind_spots)
+    assert blind_spots == [(0, 1), (0, 0), (0, -1), (0, 2), (0, -2)]
+
+    blind_spots = _get_blindspot_parsed('x#2')
+    print(blind_spots)
+    assert blind_spots == [(0, 1), (0, 0), (0, -1), (0, 2), (0, -2)]
+
+    blind_spots = _get_blindspot_parsed('x#0')
+    print(blind_spots)
+    assert blind_spots == [(0, 0)]
+
+    blind_spots = _get_blindspot_parsed('x#5')
+    print(blind_spots)
+    assert blind_spots == [
+        (0, 1),
+        (0, -3),
+        (0, 4),
+        (0, 0),
+        (0, 3),
+        (0, -1),
+        (0, -4),
+        (0, 2),
+        (0, 5),
+        (0, -5),
+        (0, -2),
+    ]

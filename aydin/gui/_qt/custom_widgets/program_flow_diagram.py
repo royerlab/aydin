@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QMenu
 from qtpy.QtWidgets import (
     QHBoxLayout,
     QWidget,
+    QMenu,
     QPushButton,
     QToolButton,
     QStyle,
@@ -15,15 +15,12 @@ from aydin.io.datasets import examples_single
 
 class QProgramFlowDiagramWidget(QWidget):
     def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
+        super(QProgramFlowDiagramWidget, self).__init__(parent)
         self.parent = parent
         self.highlightable_buttons = []
 
-        self.layout = QHBoxLayout()
-
-        # self.main_group_box = QGroupBox("Program Flow")
-        self.layout = QHBoxLayout()
-        self.layout.setSpacing(5)
+        self.main_layout = QHBoxLayout()
+        self.main_layout.setSpacing(5)
 
         self.load_data_group_box = QGroupBox("Load data")
         self.load_data_group_box_layout = QHBoxLayout()
@@ -38,13 +35,17 @@ class QProgramFlowDiagramWidget(QWidget):
         self.load_sample_image_button = QPushButton("Load example")
         menu = QMenu()
         menu_items = {
-            "Fountain": examples_single.fountain,
-            "Mona Lisa": examples_single.monalisa,
-            "Gauss": examples_single.gauss_noisy,
+            "New York (Royer)": examples_single.noisy_newyork,
+            "Fountain": examples_single.noisy_fountain,
+            "Mona Lisa": examples_single.noisy_monalisa,
+            "Gauss": examples_single.noisy_gauss,
             "Periodic": examples_single.periodic_noise,
-            "Chessboard": examples_single.brown_chessboard_gray,
+            "Chessboard": examples_single.noisy_brown_chessboard,
             "HCR (Royer)": examples_single.royerlab_hcr,
             "Blastocyst Fracking (Maitre)": examples_single.maitre_mouse,
+            "OpenCell ARHGAP21 (Leonetti)": examples_single.leonetti_arhgap21,
+            "OpenCell ANKRD11  (Leonetti)": examples_single.leonetti_ankrd11,
+            "Drosophila Egg Chamber (Machado et al.)": examples_single.machado_drosophile_egg_chamber,
         }
         for item in menu_items.keys():
             action = menu.addAction(item)
@@ -57,9 +58,9 @@ class QProgramFlowDiagramWidget(QWidget):
         self.load_data_group_box_layout.addWidget(self.load_sample_image_button)
 
         self.load_data_group_box.setLayout(self.load_data_group_box_layout)
-        self.layout.addWidget(self.load_data_group_box)
+        self.main_layout.addWidget(self.load_data_group_box)
 
-        self.layout.addWidget(self.forward_button())
+        self.main_layout.addWidget(self.forward_button())
 
         # choose image options
         self.choose_image_options_group_box = QGroupBox("Choose image options")
@@ -91,9 +92,9 @@ class QProgramFlowDiagramWidget(QWidget):
             self.choose_image_options_group_box_layout
         )
 
-        self.layout.addWidget(self.choose_image_options_group_box)
+        self.main_layout.addWidget(self.choose_image_options_group_box)
 
-        self.layout.addWidget(self.forward_button())
+        self.main_layout.addWidget(self.forward_button())
 
         self.processing_group_box = QGroupBox("Process")
         self.processing_group_box_layout = QHBoxLayout()
@@ -118,11 +119,11 @@ class QProgramFlowDiagramWidget(QWidget):
 
         self.processing_group_box.setLayout(self.processing_group_box_layout)
 
-        self.layout.addWidget(self.processing_group_box)
+        self.main_layout.addWidget(self.processing_group_box)
 
-        self.layout.setAlignment(Qt.AlignHCenter)
+        self.main_layout.setAlignment(Qt.AlignHCenter)
 
-        self.setLayout(self.layout)
+        self.setLayout(self.main_layout)
 
     def highlight_button(self, current_tab_name):
         self.reset_buttons()

@@ -1,4 +1,4 @@
-from tensorflow.python.keras.api.keras import (
+from tensorflow.keras import (
     initializers,
     regularizers,
     constraints,
@@ -138,7 +138,7 @@ class InstanceNormalization(Layer):
             self.beta = None
         self.built = True
 
-    def call(self, inputs, training=None):
+    def call(self, inputs, **kwargs):
         """
 
         Parameters
