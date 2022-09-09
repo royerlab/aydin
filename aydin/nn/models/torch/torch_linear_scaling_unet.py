@@ -42,7 +42,7 @@ class LinearScalingUNetModel(nn.Module):
         else:
             self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
-    def forward(self, x, input_mask=None):
+    def forward(self, x):
         skip_layer = []
 
         # Encoder
@@ -62,15 +62,6 @@ class LinearScalingUNetModel(nn.Module):
 
         # Final convolution
         x = self.final_conv(x)
-
-        # Masking for self-supervised training
-        if not self.supervised:
-            if input_mask is not None:
-                x *= input_mask
-            else:
-                raise ValueError(
-                    "input_msk cannot be None for self-supervised training"
-                )
 
         return x
 

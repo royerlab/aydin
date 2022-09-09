@@ -44,7 +44,7 @@ class ResidualUNetModel(nn.Module):
         else:
             self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
-    def forward(self, x, input_msk=None):
+    def forward(self, x):
         """
         UNet forward method.
 
@@ -77,15 +77,6 @@ class ResidualUNetModel(nn.Module):
 
         # Final convolution
         x = self.final_conv(x)
-
-        # Masking for self-supervised training
-        if not self.supervised:
-            if input_msk is not None:
-                x *= input_msk
-            else:
-                raise ValueError(
-                    "input_msk cannot be None for self-supervised training"
-                )
 
         return x
 
