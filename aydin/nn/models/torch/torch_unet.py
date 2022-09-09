@@ -56,7 +56,7 @@ class UNetModel(nn.Module):
         else:
             self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
-    def forward(self, x, input_mask=None):
+    def forward(self, x):
         """
         UNet forward method.
 
@@ -89,15 +89,6 @@ class UNetModel(nn.Module):
 
         # Final convolution
         x = self.final_conv(x)
-
-        # Masking for self-supervised training
-        if not self.supervised:
-            if input_mask is not None:
-                x *= input_mask
-            else:
-                raise ValueError(
-                    "input_msk cannot be None for self-supervised training"
-                )
 
         return x
 
@@ -196,7 +187,7 @@ def n2s_train(
                 napari.run()
             # print(original_patch.shape, net_input.shape, mask.shape)
 
-            net_output = model(net_input, input_mask=mask)
+            net_output = model(net_input)
 
             loss = loss_function1(net_output * mask, original_patch * mask)
             # loss = loss_function(net_output * mask, original_patch * mask)

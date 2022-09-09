@@ -50,7 +50,6 @@ def demo(image, do_add_noise=True):
 
     noisy = torch.tensor(noisy)
     noisy = torch.movedim(noisy, -1, 1)
-    model.supervised = True
     model.eval()
     print(f"noisy tensor shape: {noisy.shape}")
     # in case of batching we have to do this:
