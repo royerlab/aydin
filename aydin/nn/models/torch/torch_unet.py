@@ -164,6 +164,7 @@ def n2s_train(
     optimizer = Adam(model.parameters(), lr=learning_rate)
 
     loss_function1 = MSELoss()
+
     def loss_function(u, v):
         return torch.abs(u - v)
 
@@ -201,8 +202,8 @@ def n2s_train(
 
         print("Loss (", epoch, "): \t", round(loss.item(), 4))
 
-            # if i == 100:
-            #     break
+        # if i == 100:
+        #     break
 
 
 def n2t_train(

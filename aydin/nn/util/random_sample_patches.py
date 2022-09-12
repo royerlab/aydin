@@ -4,7 +4,11 @@ from scipy.stats import entropy
 
 
 def random_sample_patches(
-    image, patch_size: int, nb_patches_per_image: int, adoption_rate: float = 0.5, backend="tensorflow",
+    image,
+    patch_size: int,
+    nb_patches_per_image: int,
+    adoption_rate: float = 0.5,
+    backend="tensorflow",
 ):
     """
     This functions returns list of slice objects that crops a part of the image
@@ -80,7 +84,9 @@ def random_sample_patches(
                     ]
                 )
             else:
-                raise ValueError(f"backend values cannot be {backend}, has to be either 'tensorflow' or 'torch'.")
+                raise ValueError(
+                    f"backend values cannot be {backend}, has to be either 'tensorflow' or 'torch'."
+                )
             slice_objects_for_current_b.append(slicing_for_current_patch)
 
             current_patch = image[slicing_for_current_patch]

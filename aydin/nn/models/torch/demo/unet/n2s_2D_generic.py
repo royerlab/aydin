@@ -38,7 +38,9 @@ def demo(image, do_add_noise=True):
     image = torch.tensor(image)
 
     model = UNetModel(
-        nb_unet_levels=2, supervised=False, spacetime_ndim=2,
+        nb_unet_levels=2,
+        supervised=False,
+        spacetime_ndim=2,
     )
 
     print("training starts")

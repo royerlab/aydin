@@ -37,9 +37,7 @@ def demo(image, do_add_noise=True):
     noisy = torch.tensor(noisy)
     image = torch.tensor(image)
 
-    model = ResidualUNetModel(
-        nb_unet_levels=2, supervised=True, spacetime_ndim=2
-    )
+    model = ResidualUNetModel(nb_unet_levels=2, supervised=True, spacetime_ndim=2)
 
     print("training starts")
 

@@ -6,11 +6,11 @@ from aydin.nn.util.random_sample_patches import random_sample_patches
 
 class N2SDataset(Dataset):
     def __init__(
-            self,
-            image,
-            patch_size,
-            nb_patches_per_image: int = 64,
-            adoption_rate: float = 0.2
+        self,
+        image,
+        patch_size,
+        nb_patches_per_image: int = 64,
+        adoption_rate: float = 0.2,
     ):
         """
 
@@ -50,7 +50,11 @@ class N2SDataset(Dataset):
             for i in range(shape[-4]):
                 for j in range(shape[-3]):
                     for k in range(shape[-2]):
-                        if i % patch_size == phase and j % patch_size == phase and k % patch_size == phase:
+                        if (
+                            i % patch_size == phase
+                            and j % patch_size == phase
+                            and k % patch_size == phase
+                        ):
                             A[:, i, j, k, :] = 1
 
         return torch.Tensor(A)
