@@ -203,8 +203,12 @@ def n2s_train(
 
             if epoch == 255:
                 import napari
+
                 viewer = napari.Viewer()
-                viewer.add_image(model(original_patch.to(device)).detach().cpu().numpy(), name=f"{epoch}")
+                viewer.add_image(
+                    model(original_patch.to(device)).detach().cpu().numpy(),
+                    name=f"{epoch}",
+                )
                 napari.run()
 
             loss = loss_function1(net_output * mask, original_patch * mask)

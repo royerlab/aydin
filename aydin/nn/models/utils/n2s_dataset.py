@@ -1,7 +1,7 @@
+import numpy
 import torch
 from torch.utils.data import Dataset
 
-from aydin.nn.models.torch.demo.unet.original_n2s import interpolate_mask
 from aydin.nn.util.random_sample_patches import random_sample_patches
 
 
@@ -63,6 +63,22 @@ class N2SDataset(Dataset):
 
         return torch.Tensor(A)
 
+    def interpolate_mask(self, tensor, mask, mask_inv):
+        device = tensor.device
+
+        mask = mask.to(device)
+
+        kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], (0.5, 1.0, 0.5)])
+        kernel = kernel[numpy.newaxis, numpy.newaxis, :, :]
+        kernel = torch.Tensor(kernel).to(device)
+        kernel = kernel / kernel.sum()
+
+        filtered_tensor = torch.nn.functional.conv2d(
+            tensor, kernel, stride=1, padding=1
+        )
+
+        return filtered_tensor * mask + tensor * mask_inv
+
     def __getitem__(self, index):
         # original_patch = self.image[self.crop_slicers[index]]
         original_patch = self.image
@@ -70,6 +86,6 @@ class N2SDataset(Dataset):
         mask_inv = torch.ones(mask.shape) - mask
 
         # input_patch = original_patch * mask_inv
-        input_patch = interpolate_mask(original_patch, mask, mask_inv)
+        input_patch = self.interpolate_mask(original_patch, mask, mask_inv)
 
         return original_patch[0], input_patch[0], mask[0]
