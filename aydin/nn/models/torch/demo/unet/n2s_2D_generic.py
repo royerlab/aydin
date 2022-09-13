@@ -39,19 +39,19 @@ def demo(image, do_add_noise=True):
 
     model = UNetModel(
         nb_unet_levels=2,
-        supervised=False,
         spacetime_ndim=2,
     )
 
     print("training starts")
 
     start = time.time()
-    n2s_train(noisy, model)
+    n2s_train(noisy, model, nb_epochs=128)
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 
     noisy = torch.tensor(noisy)
     model.eval()
+    model = model.cpu()
     print(f"noisy tensor shape: {noisy.shape}")
     # in case of batching we have to do this:
     start = time.time()

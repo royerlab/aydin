@@ -22,6 +22,7 @@ class N2SDataset(Dataset):
         nb_patches_per_image
         adoption_rate
         """
+
         self.image = torch.tensor(image)
 
         self.crop_slicers = random_sample_patches(
@@ -33,12 +34,13 @@ class N2SDataset(Dataset):
         )
 
     def __len__(self):
-        return len(self.crop_slicers)
+        return 4  # len(self.crop_slicers)
 
     def get_mask(self, i):
-        phase = i % 8
-        shape = self.image[self.crop_slicers[1]].shape
-        patch_size = 8
+        phase = i % 4
+        # shape = self.image[self.crop_slicers[1]].shape
+        shape = self.image.shape
+        patch_size = 4
 
         A = torch.zeros(shape)
 
@@ -62,9 +64,10 @@ class N2SDataset(Dataset):
         return torch.Tensor(A)
 
     def __getitem__(self, index):
-        original_patch = self.image[self.crop_slicers[index]]
-        mask = self.get_mask(2)
-        mask_inv = torch.ones(mask.shape).to(original_patch.device) - mask
+        # original_patch = self.image[self.crop_slicers[index]]
+        original_patch = self.image
+        mask = self.get_mask(index)
+        mask_inv = torch.ones(mask.shape) - mask
 
         # input_patch = original_patch * mask_inv
         input_patch = interpolate_mask(original_patch, mask, mask_inv)

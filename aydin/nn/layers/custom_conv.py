@@ -22,13 +22,13 @@ class CustomConv(nn.Module):
 
         if spacetime_ndim == 2:
             self.conv = nn.Conv2d(
-                in_channels, out_channels, kernel_size, padding='same'
+                in_channels, out_channels, (kernel_size,) * 2, padding='same'
             )
             self.instance_normalization = nn.InstanceNorm2d(out_channels)
             self.batch_normalization = nn.BatchNorm2d(out_channels, affine=False)
         else:
             self.conv = nn.Conv3d(
-                in_channels, out_channels, kernel_size, padding='same'
+                in_channels, out_channels, (kernel_size,) * 3, padding='same'
             )
             self.instance_normalization = nn.InstanceNorm3d(out_channels)
             self.batch_normalization = nn.BatchNorm3d(out_channels, affine=False)

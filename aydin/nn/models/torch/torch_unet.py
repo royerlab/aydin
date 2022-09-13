@@ -24,7 +24,6 @@ class UNetModel(nn.Module):
         nb_unet_levels: int = 4,
         nb_filters: int = 8,
         learning_rate=0.01,
-        supervised: bool = False,
         pooling_mode: str = 'max',
     ):
         super(UNetModel, self).__init__()
@@ -33,7 +32,6 @@ class UNetModel(nn.Module):
         self.nb_unet_levels = nb_unet_levels
         self.nb_filters = nb_filters
         self.learning_rate = learning_rate
-        self.supervised = supervised
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
@@ -93,7 +91,7 @@ class UNetModel(nn.Module):
         return x
 
     def _encoder_convolutions(self):
-        convolution = []
+        convolution = nn.ModuleList()
         for layer_index in range(self.nb_unet_levels):
             if layer_index == 0:
                 nb_filters_in = 1
@@ -116,7 +114,7 @@ class UNetModel(nn.Module):
         return convolution
 
     def _decoder_convolutions(self):
-        convolutions = []
+        convolutions = nn.ModuleList()
         for layer_index in range(self.nb_unet_levels):
             if layer_index == self.nb_unet_levels - 1:
                 nb_filters_in = self.nb_filters * 2
@@ -144,7 +142,7 @@ class UNetModel(nn.Module):
 def n2s_train(
     image,
     model: UNetModel,
-    nb_epochs: int = 256,
+    nb_epochs: int = 128,
     learning_rate: float = 0.001,
     patch_size: int = 32,
 ):
@@ -160,6 +158,15 @@ def n2s_train(
     patch_size : int
 
     """
+    if torch.cuda.is_available():
+        dev = "cuda:0"
+    else:
+        dev = "cpu"
+    device = torch.device(dev)
+
+    model = model.to(device)
+    print(f"device {device}")
+
     # nb_epochs = 1
     optimizer = Adam(model.parameters(), lr=learning_rate)
 
@@ -178,17 +185,27 @@ def n2s_train(
         for i, batch in enumerate(data_loader):
             original_patch, net_input, mask = batch
 
-            if epoch < 1:
-                import napari
+            original_patch = original_patch.to(device)
+            net_input = net_input.to(device)
+            mask = mask.to(device)
 
-                viewer = napari.Viewer()  # no prior setup needed
-                viewer.add_image(original_patch.numpy(), name='original_patch')
-                viewer.add_image(net_input.numpy(), name='net_input')
-                viewer.add_image(mask.numpy(), name='mask')
-                napari.run()
+            # if epoch < 1:
+            #     import napari
+            #
+            #     viewer = napari.Viewer()  # no prior setup needed
+            #     viewer.add_image(original_patch.numpy(), name='original_patch')
+            #     viewer.add_image(net_input.numpy(), name='net_input')
+            #     viewer.add_image(mask.numpy(), name='mask')
+            #     napari.run()
             # print(original_patch.shape, net_input.shape, mask.shape)
 
             net_output = model(net_input)
+
+            if epoch == 255:
+                import napari
+                viewer = napari.Viewer()
+                viewer.add_image(model(original_patch.to(device)).detach().cpu().numpy(), name=f"{epoch}")
+                napari.run()
 
             loss = loss_function1(net_output * mask, original_patch * mask)
             # loss = loss_function(net_output * mask, original_patch * mask)
@@ -200,7 +217,7 @@ def n2s_train(
 
             optimizer.step()
 
-        print("Loss (", epoch, "): \t", round(loss.item(), 4))
+        print("Loss (", epoch, "): \t", round(loss.item(), 8))
 
         # if i == 100:
         #     break
@@ -357,154 +374,6 @@ def n2t_train(
             patience_counter += 1
 
         lprint(f"## Best val loss: {best_val_loss_value}")
-
-        # if epoch % 512 == 0:
-        #     print(epoch)
-        #     result = model(input_image)
-        #
-        #     with napari.gui_qt():
-        #         viewer = napari.Viewer()
-        #
-        #         viewer.add_image(to_numpy(lizard_image), name='groundtruth')
-        #         viewer.add_image(to_numpy(result), name=f'result-{epoch}')
-        #         viewer.add_image(to_numpy(input_image), name='input')
-        #
-        #         viewer.grid.enabled = True
-
-    writer.flush()
-    writer.close()
-
-
-def n2s_unet_train_loop(
-    input_image,
-    lizard_image,
-    model: UNetModel,
-    data_loader: DataLoader,
-    learning_rate=0.01,
-    training_noise=0.001,
-    l2_weight_regularisation=1e-9,
-    patience=128,
-    patience_epsilon=0.0,
-    reduce_lr_factor=0.5,
-    reload_best_model_period=1024,
-    best_val_loss_value=None,
-):
-    writer = SummaryWriter()
-
-    reduce_lr_patience = patience // 2
-
-    if best_val_loss_value is None:
-        best_val_loss_value = math.inf
-
-    optimizer = ESAdam(
-        chain(model.parameters()),
-        lr=learning_rate,
-        start_noise_level=training_noise,
-        weight_decay=l2_weight_regularisation,
-    )
-
-    scheduler = ReduceLROnPlateau(
-        optimizer,
-        'min',
-        factor=reduce_lr_factor,
-        verbose=True,
-        patience=reduce_lr_patience,
-    )
-
-    loss_function = lambda u, v: torch.abs(u - v)
-
-    for epoch in range(1024):
-        train_loss_value = 0
-        val_loss_value = 0
-        iteration = 0
-        for i, (input_images, target_images, validation_mask_images) in enumerate(
-            zip([input_image], [lizard_image], [lizard_image])
-        ):
-            print(f"index: {i}, shape:{input_images.shape}")
-
-            # Clear gradients w.r.t. parameters
-            optimizer.zero_grad()
-
-            # Forward pass:
-            model.train()
-
-            translated_images = model(input_images)
-
-            # translation loss (per voxel):
-            translation_loss = loss_function(translated_images, target_images)
-
-            # loss value (for all voxels):
-            translation_loss_value = translation_loss.mean()
-
-            # backpropagation:
-            translation_loss_value.backward()
-
-            # Updating parameters
-            optimizer.step()
-
-            # update training loss_deconvolution for whole image:
-            train_loss_value += translation_loss_value.item()
-            iteration += 1
-
-            # Validation:
-            with torch.no_grad():
-                # Forward pass:
-                model.eval()
-
-                translated_images = model(input_images)
-
-                # translation loss (per voxel):
-                translation_loss = loss_function(translated_images, target_images)
-
-                # loss values:
-                translation_loss_value = translation_loss.mean().cpu().item()
-
-                # update validation loss_deconvolution for whole image:
-                val_loss_value += translation_loss_value
-                iteration += 1
-
-        train_loss_value /= iteration
-        lprint("Training loss value: {train_loss_value}")
-
-        val_loss_value /= iteration
-        lprint("Validation loss value: {val_loss_value}")
-
-        writer.add_scalar("Loss/train", train_loss_value, epoch)
-        writer.add_scalar("Loss/valid", val_loss_value, epoch)
-
-        # Learning rate schedule:
-        scheduler.step(val_loss_value)
-
-        if val_loss_value < best_val_loss_value:
-            lprint("## New best val loss!")
-            if val_loss_value < best_val_loss_value - patience_epsilon:
-                lprint("## Good enough to reset patience!")
-                patience_counter = 0
-
-            # Update best val loss value:
-            best_val_loss_value = val_loss_value
-
-            # Save model:
-            best_model_state_dict = OrderedDict(
-                {k: v.to('cpu') for k, v in model.state_dict().items()}
-            )
-
-        else:
-            if epoch % max(1, reload_best_model_period) == 0 and best_model_state_dict:
-                lprint("Reloading best models to date!")
-                model.load_state_dict(best_model_state_dict)
-
-            if patience_counter > patience:
-                lprint("Early stopping!")
-                break
-
-            # No improvement:
-            lprint(
-                "No improvement of validation losses, patience = {patience_counter}/{self.patience} "
-            )
-            patience_counter += 1
-
-        lprint("## Best val loss: {best_val_loss_value}")
 
         # if epoch % 512 == 0:
         #     print(epoch)
