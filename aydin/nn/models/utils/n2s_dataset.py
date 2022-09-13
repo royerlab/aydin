@@ -2,43 +2,26 @@ import numpy
 import torch
 from torch.utils.data import Dataset
 
-from aydin.nn.util.random_sample_patches import random_sample_patches
-
 
 class N2SDataset(Dataset):
     def __init__(
         self,
         image,
-        patch_size,
-        nb_patches_per_image: int = 64,
-        adoption_rate: float = 0.2,
     ):
         """
 
         Parameters
         ----------
         image
-        patch_size
-        nb_patches_per_image
-        adoption_rate
         """
 
         self.image = torch.tensor(image)
 
-        self.crop_slicers = random_sample_patches(
-            image,
-            patch_size=patch_size,
-            nb_patches_per_image=nb_patches_per_image,
-            adoption_rate=adoption_rate,
-            backend="torch",
-        )
-
     def __len__(self):
-        return 4  # len(self.crop_slicers)
+        return 4
 
     def get_mask(self, i):
         phase = i % 4
-        # shape = self.image[self.crop_slicers[1]].shape
         shape = self.image.shape
         patch_size = 4
 
@@ -80,7 +63,6 @@ class N2SDataset(Dataset):
         return filtered_tensor * mask + tensor * mask_inv
 
     def __getitem__(self, index):
-        # original_patch = self.image[self.crop_slicers[index]]
         original_patch = self.image
         mask = self.get_mask(index)
         mask_inv = torch.ones(mask.shape) - mask

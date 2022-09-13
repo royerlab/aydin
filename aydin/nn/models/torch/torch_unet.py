@@ -144,7 +144,7 @@ def n2s_train(
     model: UNetModel,
     nb_epochs: int = 128,
     learning_rate: float = 0.001,
-    patch_size: int = 32,
+    # patch_size: int = 32,
 ):
     """
     Noise2Self training method.
@@ -167,15 +167,11 @@ def n2s_train(
     model = model.to(device)
     print(f"device {device}")
 
-    # nb_epochs = 1
     optimizer = Adam(model.parameters(), lr=learning_rate)
 
     loss_function1 = MSELoss()
 
-    def loss_function(u, v):
-        return torch.abs(u - v)
-
-    dataset = N2SDataset(image, patch_size=patch_size)
+    dataset = N2SDataset(image)
     print(f"dataset length: {len(dataset)}")
     data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
 
@@ -188,16 +184,6 @@ def n2s_train(
             original_patch = original_patch.to(device)
             net_input = net_input.to(device)
             mask = mask.to(device)
-
-            # if epoch < 1:
-            #     import napari
-            #
-            #     viewer = napari.Viewer()  # no prior setup needed
-            #     viewer.add_image(original_patch.numpy(), name='original_patch')
-            #     viewer.add_image(net_input.numpy(), name='net_input')
-            #     viewer.add_image(mask.numpy(), name='mask')
-            #     napari.run()
-            # print(original_patch.shape, net_input.shape, mask.shape)
 
             net_output = model(net_input)
 
@@ -212,8 +198,6 @@ def n2s_train(
                 napari.run()
 
             loss = loss_function1(net_output * mask, original_patch * mask)
-            # loss = loss_function(net_output * mask, original_patch * mask)
-            # loss = loss.mean()
 
             optimizer.zero_grad()
 
@@ -222,9 +206,6 @@ def n2s_train(
             optimizer.step()
 
         print("Loss (", epoch, "): \t", round(loss.item(), 8))
-
-        # if i == 100:
-        #     break
 
 
 def n2t_train(
