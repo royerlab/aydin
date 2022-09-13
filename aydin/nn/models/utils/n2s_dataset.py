@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 
+from aydin.nn.models.torch.demo.unet.original_n2s import interpolate_mask
 from aydin.nn.util.random_sample_patches import random_sample_patches
 
 
@@ -28,6 +29,7 @@ class N2SDataset(Dataset):
             patch_size=patch_size,
             nb_patches_per_image=nb_patches_per_image,
             adoption_rate=adoption_rate,
+            backend="torch",
         )
 
     def __len__(self):
@@ -41,21 +43,21 @@ class N2SDataset(Dataset):
         A = torch.zeros(shape)
 
         if len(self.image.shape) == 4:
-            for i in range(shape[-3]):
-                for j in range(shape[-2]):
+            for i in range(shape[-2]):
+                for j in range(shape[-1]):
                     if i % patch_size == phase and j % patch_size == phase:
-                        A[:, i, j, :] = 1
+                        A[:, :, i, j] = 1
 
         elif len(self.image.shape) == 5:
-            for i in range(shape[-4]):
-                for j in range(shape[-3]):
-                    for k in range(shape[-2]):
+            for i in range(shape[-3]):
+                for j in range(shape[-2]):
+                    for k in range(shape[-1]):
                         if (
                             i % patch_size == phase
                             and j % patch_size == phase
                             and k % patch_size == phase
                         ):
-                            A[:, i, j, k, :] = 1
+                            A[:, :, i, j, k] = 1
 
         return torch.Tensor(A)
 
@@ -64,11 +66,7 @@ class N2SDataset(Dataset):
         mask = self.get_mask(2)
         mask_inv = torch.ones(mask.shape).to(original_patch.device) - mask
 
-        input_patch = original_patch * mask_inv
-
-        # TODO: remove after removing tensorflow and refactor where needed
-        original_patch = torch.movedim(original_patch, -1, 1)
-        input_patch = torch.movedim(input_patch, -1, 1)
-        mask = torch.movedim(mask, -1, 1)
+        # input_patch = original_patch * mask_inv
+        input_patch = interpolate_mask(original_patch, mask, mask_inv)
 
         return original_patch[0], input_patch[0], mask[0]

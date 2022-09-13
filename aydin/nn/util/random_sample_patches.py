@@ -27,6 +27,8 @@ def random_sample_patches(
     patch_size : int
     nb_patches_per_image : int
     adoption_rate : float
+    backend : str
+        Option to choose axes convention for different backends, valid values: tensorflow, torch
 
     Returns
     -------
@@ -36,7 +38,14 @@ def random_sample_patches(
     list_of_slice_objects = []
 
     # Calculate total number of possible patches for a given image and patch_size
-    possible_positions = numpy.asarray(image.shape[1:-1]) - patch_size + 1
+    if backend == "tensorflow":
+        possible_positions = numpy.asarray(image.shape[1:-1]) - patch_size + 1
+    elif backend == "torch":
+        possible_positions = numpy.asarray(image.shape[2:]) - patch_size + 1
+    else:
+        raise ValueError(
+            f"backend values cannot be {backend}, has to be either 'tensorflow' or 'torch'."
+        )
     nb_possible_patches_per_image = numpy.prod(possible_positions)
 
     # Validate nb_patches_per_image, adoption_rate combination is valid, if not generate all possible patches

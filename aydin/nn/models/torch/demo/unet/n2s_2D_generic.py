@@ -30,7 +30,7 @@ def demo(image, do_add_noise=True):
 
     image = normalise(image)
     image = numpy.expand_dims(image, axis=0)
-    image = numpy.expand_dims(image, axis=-1)
+    image = numpy.expand_dims(image, axis=0)
     noisy = add_noise(image) if do_add_noise else image
     print(noisy.shape)
 
@@ -51,7 +51,6 @@ def demo(image, do_add_noise=True):
     print(f"Training: elapsed time:  {stop - start} ")
 
     noisy = torch.tensor(noisy)
-    noisy = torch.movedim(noisy, -1, 1)
     model.eval()
     print(f"noisy tensor shape: {noisy.shape}")
     # in case of batching we have to do this:
