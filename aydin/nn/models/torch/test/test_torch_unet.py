@@ -10,7 +10,6 @@ def test_supervised_2D():
     model2d = UNetModel(
         # (64, 64, 1),
         nb_unet_levels=2,
-        supervised=True,
         spacetime_ndim=2,
     )
     result = model2d(input_array)
@@ -24,7 +23,6 @@ def test_masking_2D(nb_unet_levels):
     model2d = UNetModel(
         # (64, 64, 1),
         nb_unet_levels=nb_unet_levels,
-        supervised=False,
         spacetime_ndim=2,
     )
     result = model2d(input_array, torch.ones(input_array.shape))
@@ -37,7 +35,6 @@ def test_supervised_3D():
     model3d = UNetModel(
         # (64, 64, 64, 1),
         nb_unet_levels=2,
-        supervised=True,
         spacetime_ndim=3,
     )
     result = model3d(input_array)
@@ -51,7 +48,6 @@ def test_masking_3D(nb_unet_levels):
     model3d = UNetModel(
         # (64, 64, 64, 1),
         nb_unet_levels=nb_unet_levels,
-        supervised=False,
         spacetime_ndim=3,
     )
     result = model3d(input_array, torch.ones(input_array.shape))

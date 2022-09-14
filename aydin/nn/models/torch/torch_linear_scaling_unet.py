@@ -12,7 +12,6 @@ class LinearScalingUNetModel(nn.Module):
         nb_unet_levels: int = 4,
         nb_filters: int = 8,
         learning_rate=0.01,
-        supervised: bool = False,
         pooling_mode: str = 'max',
     ):
         super(LinearScalingUNetModel, self).__init__()
@@ -21,7 +20,6 @@ class LinearScalingUNetModel(nn.Module):
         self.nb_unet_levels = nb_unet_levels
         self.nb_filters = nb_filters
         self.learning_rate = learning_rate
-        self.supervised = supervised
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
