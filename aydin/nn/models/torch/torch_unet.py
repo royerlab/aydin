@@ -4,11 +4,15 @@ from itertools import chain
 
 import torch
 from torch import nn
+from torch.nn import MSELoss
+from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.custom_conv import double_conv_block
 from aydin.nn.layers.pooling_down import PoolingDown
+from aydin.nn.models.utils.n2s_dataset import N2SDataset
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -20,7 +24,6 @@ class UNetModel(nn.Module):
         nb_unet_levels: int = 4,
         nb_filters: int = 8,
         learning_rate=0.01,
-        supervised: bool = False,
         pooling_mode: str = 'max',
     ):
         super(UNetModel, self).__init__()
@@ -29,7 +32,6 @@ class UNetModel(nn.Module):
         self.nb_unet_levels = nb_unet_levels
         self.nb_filters = nb_filters
         self.learning_rate = learning_rate
-        self.supervised = supervised
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
@@ -52,7 +54,7 @@ class UNetModel(nn.Module):
         else:
             self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
-    def forward(self, x, input_mask=None):
+    def forward(self, x):
         """
         UNet forward method.
 
@@ -86,19 +88,10 @@ class UNetModel(nn.Module):
         # Final convolution
         x = self.final_conv(x)
 
-        # Masking for self-supervised training
-        if not self.supervised:
-            if input_mask is not None:
-                x *= input_mask
-            else:
-                raise ValueError(
-                    "input_msk cannot be None for self-supervised training"
-                )
-
         return x
 
     def _encoder_convolutions(self):
-        convolution = []
+        convolution = nn.ModuleList()
         for layer_index in range(self.nb_unet_levels):
             if layer_index == 0:
                 nb_filters_in = 1
@@ -121,7 +114,7 @@ class UNetModel(nn.Module):
         return convolution
 
     def _decoder_convolutions(self):
-        convolutions = []
+        convolutions = nn.ModuleList()
         for layer_index in range(self.nb_unet_levels):
             if layer_index == self.nb_unet_levels - 1:
                 nb_filters_in = self.nb_filters * 2
@@ -146,13 +139,82 @@ class UNetModel(nn.Module):
         return convolutions
 
 
-def n2t_unet_train_loop(
+def n2s_train(
+    image,
+    model: UNetModel,
+    nb_epochs: int = 128,
+    learning_rate: float = 0.001,
+    # patch_size: int = 32,
+):
+    """
+    Noise2Self training method.
+
+    Parameters
+    ----------
+    image
+    model : UNetModel
+    nb_epochs : int
+    learning_rate : float
+    patch_size : int
+
+    """
+    if torch.cuda.is_available():
+        dev = "cuda:0"
+    else:
+        dev = "cpu"
+    device = torch.device(dev)
+
+    model = model.to(device)
+    print(f"device {device}")
+
+    optimizer = Adam(model.parameters(), lr=learning_rate)
+
+    loss_function1 = MSELoss()
+
+    dataset = N2SDataset(image)
+    print(f"dataset length: {len(dataset)}")
+    data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
+
+    model.train()
+
+    for epoch in range(nb_epochs):
+        for i, batch in enumerate(data_loader):
+            original_patch, net_input, mask = batch
+
+            original_patch = original_patch.to(device)
+            net_input = net_input.to(device)
+            mask = mask.to(device)
+
+            net_output = model(net_input)
+
+            if epoch == 255:
+                import napari
+
+                viewer = napari.Viewer()
+                viewer.add_image(
+                    model(original_patch.to(device)).detach().cpu().numpy(),
+                    name=f"{epoch}",
+                )
+                napari.run()
+
+            loss = loss_function1(net_output * mask, original_patch * mask)
+
+            optimizer.zero_grad()
+
+            loss.backward()
+
+            optimizer.step()
+
+        print("Loss (", epoch, "): \t", round(loss.item(), 8))
+
+
+def n2t_train(
     input_images,
     target_images,
     model: UNetModel,
     nb_epochs: int = 1024,
-    learning_rate=0.01,
-    training_noise=0.001,
+    learning_rate: float = 0.01,
+    training_noise: float = 0.001,
     l2_weight_regularization=1e-9,
     patience=128,
     patience_epsilon=0.0,
@@ -160,6 +222,26 @@ def n2t_unet_train_loop(
     reload_best_model_period=1024,
     best_val_loss_value=None,
 ):
+    """
+    Noise2Truth training method.
+
+    Parameters
+    ----------
+    input_images
+    target_images
+    model : UNetModel
+    nb_epochs : int
+    learning_rate : float
+    training_noise : float
+
+    l2_weight_regularization
+    patience
+    patience_epsilon
+    reduce_lr_factor
+    reload_best_model_period
+    best_val_loss_value
+
+    """
     writer = SummaryWriter()
 
     reduce_lr_patience = patience // 2

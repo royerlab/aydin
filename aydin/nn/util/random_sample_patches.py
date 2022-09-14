@@ -4,7 +4,11 @@ from scipy.stats import entropy
 
 
 def random_sample_patches(
-    image, patch_size: int, nb_patches_per_image: int, adoption_rate: float = 0.5
+    image,
+    patch_size: int,
+    nb_patches_per_image: int,
+    adoption_rate: float = 0.5,
+    backend="tensorflow",
 ):
     """
     This functions returns list of slice objects that crops a part of the image
@@ -23,6 +27,8 @@ def random_sample_patches(
     patch_size : int
     nb_patches_per_image : int
     adoption_rate : float
+    backend : str
+        Option to choose axes convention for different backends, valid values: tensorflow, torch
 
     Returns
     -------
@@ -32,7 +38,14 @@ def random_sample_patches(
     list_of_slice_objects = []
 
     # Calculate total number of possible patches for a given image and patch_size
-    possible_positions = numpy.asarray(image.shape[1:-1]) - patch_size + 1
+    if backend == "tensorflow":
+        possible_positions = numpy.asarray(image.shape[1:-1]) - patch_size + 1
+    elif backend == "torch":
+        possible_positions = numpy.asarray(image.shape[2:]) - patch_size + 1
+    else:
+        raise ValueError(
+            f"backend values cannot be {backend}, has to be either 'tensorflow' or 'torch'."
+        )
     nb_possible_patches_per_image = numpy.prod(possible_positions)
 
     # Validate nb_patches_per_image, adoption_rate combination is valid, if not generate all possible patches
@@ -49,20 +62,40 @@ def random_sample_patches(
             indices_for_current_patch = [
                 int(numpy.random.choice(s, 1)) for s in possible_positions
             ]
-            slicing_for_current_patch = tuple(
-                [
-                    slice(b, b + 1, 1),
-                    *[
-                        slice(
-                            x,
-                            x + patch_size,
-                            1,
-                        )
-                        for idx, x in enumerate(indices_for_current_patch)
-                    ],
-                    slice(0, 1, 1),
-                ]
-            )
+            if backend == "tensorflow":
+                slicing_for_current_patch = tuple(
+                    [
+                        slice(b, b + 1, 1),
+                        *[
+                            slice(
+                                x,
+                                x + patch_size,
+                                1,
+                            )
+                            for idx, x in enumerate(indices_for_current_patch)
+                        ],
+                        slice(0, 1, 1),
+                    ]
+                )
+            elif backend == "torch":
+                slicing_for_current_patch = tuple(
+                    [
+                        slice(b, b + 1, 1),
+                        slice(0, 1, 1),
+                        *[
+                            slice(
+                                x,
+                                x + patch_size,
+                                1,
+                            )
+                            for idx, x in enumerate(indices_for_current_patch)
+                        ],
+                    ]
+                )
+            else:
+                raise ValueError(
+                    f"backend values cannot be {backend}, has to be either 'tensorflow' or 'torch'."
+                )
             slice_objects_for_current_b.append(slicing_for_current_patch)
 
             current_patch = image[slicing_for_current_patch]

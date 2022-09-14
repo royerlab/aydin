@@ -12,7 +12,6 @@ class ResidualUNetModel(nn.Module):
         nb_unet_levels: int = 4,
         nb_filters: int = 8,
         learning_rate=0.01,
-        supervised: bool = False,
         pooling_mode: str = 'max',
     ):
         super(ResidualUNetModel, self).__init__()
@@ -21,7 +20,6 @@ class ResidualUNetModel(nn.Module):
         self.nb_unet_levels = nb_unet_levels
         self.nb_filters = nb_filters
         self.learning_rate = learning_rate
-        self.supervised = supervised
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
@@ -44,7 +42,7 @@ class ResidualUNetModel(nn.Module):
         else:
             self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
-    def forward(self, x, input_msk=None):
+    def forward(self, x):
         """
         UNet forward method.
 
@@ -77,15 +75,6 @@ class ResidualUNetModel(nn.Module):
 
         # Final convolution
         x = self.final_conv(x)
-
-        # Masking for self-supervised training
-        if not self.supervised:
-            if input_msk is not None:
-                x *= input_msk
-            else:
-                raise ValueError(
-                    "input_msk cannot be None for self-supervised training"
-                )
 
         return x
 

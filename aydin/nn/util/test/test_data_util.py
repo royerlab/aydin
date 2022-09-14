@@ -5,7 +5,7 @@ from scipy.stats import entropy
 
 from aydin.io import io
 from aydin.io.datasets import examples_single
-from aydin.nn.util.data_util import random_sample_patches
+from aydin.nn.util.random_sample_patches import random_sample_patches
 
 
 def n(image):
