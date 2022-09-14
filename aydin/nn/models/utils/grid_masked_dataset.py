@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-class N2SDataset(Dataset):
+class GridMaskedDataset(Dataset):
     def __init__(
         self,
         image,

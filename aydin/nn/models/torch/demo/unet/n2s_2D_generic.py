@@ -17,7 +17,7 @@ from aydin.io.datasets import (
     characters,
 )
 from aydin.nn.models.torch.torch_unet import UNetModel, n2s_train
-from aydin.nn.models.utils.n2s_dataset import N2SDataset
+from aydin.nn.models.utils.grid_masked_dataset import GridMaskedDataset
 from aydin.util.log.log import Log
 
 

@@ -18,7 +18,7 @@ from aydin.io.datasets import (
 )
 from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
 from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train
-from aydin.nn.models.utils.n2s_dataset import N2SDataset
+from aydin.nn.models.utils.grid_masked_dataset import GridMaskedDataset
 from aydin.util.log.log import Log
 
 
