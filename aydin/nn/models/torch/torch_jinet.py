@@ -51,7 +51,9 @@ class JINetModel(nn.Module):
 
             self.dilated_conv_functions.append(
                 DilatedConv(
-                    self.nb_in_channels if scale_index == 0 else self.num_features[scale_index - 1],
+                    self.nb_in_channels
+                    if scale_index == 0
+                    else self.num_features[scale_index - 1],
                     self.num_features[scale_index],
                     self.spacetime_ndim,
                     padding=dilation * radius,
