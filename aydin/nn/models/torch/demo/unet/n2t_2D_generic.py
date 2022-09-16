@@ -4,21 +4,14 @@ import numpy
 import torch
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
-from torch.utils.data import DataLoader
 
 from aydin.io.datasets import (
     normalise,
     add_noise,
-    camera,
-    newyork,
-    lizard,
-    pollen,
     dots,
-    characters,
 )
 from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
-from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train
-from aydin.nn.models.utils.grid_masked_dataset import GridMaskedDataset
+from aydin.nn.models.torch.torch_unet import n2t_train
 from aydin.util.log.log import Log
 
 

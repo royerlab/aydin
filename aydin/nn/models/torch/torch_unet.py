@@ -12,7 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.custom_conv import double_conv_block
 from aydin.nn.layers.pooling_down import PoolingDown
-from aydin.nn.models.utils.grid_masked_dataset import GridMaskedDataset
+from aydin.nn.models.utils.masking.grid_masked_dataset import GridMaskedDataset
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
