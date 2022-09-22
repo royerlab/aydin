@@ -10,18 +10,23 @@ from aydin.io.folders import get_temp_folder
 from aydin.it.base import ImageTranslatorBase
 from aydin.nn.models.jinet import JINetModel
 from aydin.nn.models.unet import UNetModel
-from aydin.nn.models.utils.unet_patch_size import get_ideal_patch_size
+
+# from aydin.nn.models.utils.image_tile import tile_input_and_target_images
+from aydin.nn.models.utils.image_tile import tile_target_images, tile_input_images
+from aydin.nn.util.random_sample_patches import random_sample_patches
+from aydin.nn.models.utils.unet_patch_size import (
+    get_ideal_patch_size,
+    post_tiling_patch_size_validation,
+)
 from aydin.nn.util.callbacks import (
     EarlyStopping,
     ReduceLROnPlateau,
     StopCenterGradient2D,
     StopCenterGradient3D,
 )
-from aydin.nn.util.data_util import random_sample_patches
-from aydin.nn.util.validation_generator import train_image_generator
 from aydin.regression.nn_utils.callbacks import ModelCheckpoint
 from aydin.util.log.log import lsection, lprint
-from aydin.util.tf.device import get_best_device_name, available_device_memory
+from aydin.util.tf.device import get_best_device_name
 
 
 class ImageTranslatorCNN(ImageTranslatorBase):
@@ -265,42 +270,48 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
             self.input_dim = input_image.shape[1:]
 
+            # batch_size check conditionals for unet and jinet
+            if (
+                self.model_architecture == "unet"
+                and 'shiftconv' in self.training_architecture
+            ):
+                self.batch_size = 1
+                lprint(
+                    'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
+                )
+
+            if self.model_architecture == "jinet" and self.spacetime_ndim == 3:
+                self.batch_size = 1
+
+            lprint(f"Batch size for training: {self.batch_size}")
+
             # Compute patch size from batch size
             if self.patch_size is None:
                 self.patch_size = get_ideal_patch_size(
                     self.nb_unet_levels, self.training_architecture
                 )
+            else:
+                # Check patch_size for unet models with passed patch_size values
+                if 'unet' in self.model_architecture:
+                    patch_size = numpy.array(self.patch_size)
+                    if (patch_size.max() / (2**self.nb_unet_levels) <= 0).any():
+                        raise ValueError(
+                            f'Tile size is too small. The largest dimension of tile size has to be >= {2 ** self.nb_unet_levels}.'
+                        )
+                    if (patch_size[-2:] % 2**self.nb_unet_levels != 0).any():
+                        raise ValueError(
+                            f'Tile sizes on XY plane have to be multiple of 2^{self.nb_unet_levels}'
+                        )
 
             # Adjust patch_size for given input shape
             if isinstance(self.patch_size, int):
                 self.patch_size = [self.patch_size] * self.spacetime_ndim
-
-            # Check patch_size for unet models
-            if 'unet' in self.model_architecture:
-                patch_size = numpy.array(self.patch_size)
-                if (patch_size.max() / (2**self.nb_unet_levels) <= 0).any():
-                    raise ValueError(
-                        f'Tile size is too small. The largest dimension of tile size has to be >= {2 ** self.nb_unet_levels}.'
-                    )
-                if (patch_size[-2:] % 2**self.nb_unet_levels != 0).any():
-                    raise ValueError(
-                        f'Tile sizes on XY plane have to be multiple of 2^{self.nb_unet_levels}'
-                    )
 
             # Check if the smallest dimension of input data >= patch_size
             if min(self.patch_size) > min(self.input_dim[:-1]):
                 smallest_dim = min(self.input_dim[:-1])
                 self.patch_size[numpy.argsort(self.input_dim[:-1])[0]] = (
                     smallest_dim // 2 * 2
-                )
-
-            # TODO: Do we need to have one if statement to automatically convert self.batch_size = 1 for shiftconv?
-            if 'shiftconv' in self.training_architecture or (
-                self.model_architecture == "jinet" and self.spacetime_ndim == 3
-            ):
-                self.batch_size = 1
-                lprint(
-                    'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
                 )
 
             # Determine total number of patches
@@ -324,120 +335,71 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     + self.batch_size
                 )
 
-            lprint(f"Available mem: {available_device_memory()}")
-            lprint(f"Batch size for training: {self.batch_size}")
-
             # Decide whether to use validation pixels or patches
-            if 1024 > input_image.size / numpy.prod(self.patch_size):
-                with lsection(
-                    f'Validation data will be created by monitoring {train_valid_ratio} of the pixels in the input data.'
-                ):
-                    img_train, img_val, val_marker = train_image_generator(
-                        input_image, p=train_valid_ratio
-                    )
-            else:
-                with lsection(
-                    f'Validation data will be created by monitoring {train_valid_ratio} of the patches/images in the input data.'
-                ):
-                    self._create_patches_for_validation = True
+            self._create_patches_for_validation = 1024 <= input_image.size / numpy.prod(
+                self.patch_size
+            )
 
             # Tile input and target image
-            if self.patch_size is not None:
-                with lsection('Random patch sampling...'):
-                    lprint(f'Total number of patches: {self.total_num_patches}')
-                    input_patch_idx = random_sample_patches(
-                        input_image,
-                        self.patch_size,
-                        self.total_num_patches,
-                        self.adoption_rate,
-                    )
-
-                    self.total_num_patches = len(input_patch_idx)
-
-                    img_train_patch = []
-
-                    if self._create_patches_for_validation:
-                        for i in input_patch_idx:
-                            img_train_patch.append(input_image[i])
-                        img_train = numpy.vstack(img_train_patch)
-                    else:
-                        img_val_patch = []
-                        marker_patch = []
-                        for i in input_patch_idx:
-                            img_train_patch.append(img_train[i])
-                            img_val_patch.append(img_val[i])
-                            marker_patch.append(val_marker[i])
-                        img_train = numpy.vstack(img_train_patch)
-                        img_val = numpy.vstack(img_val_patch)
-                        val_marker = numpy.vstack(marker_patch)
-                        self.validation_images = img_val
-                        self.validation_markers = val_marker
-
-                    if not self.self_supervised:
-                        target_patch = []
-                        for i in input_patch_idx:
-                            target_patch.append(target_image[i])
-                        target_image = numpy.vstack(target_patch)
-                    else:
-                        target_image = img_train
-
-            # Last check of input size espetially for shiftconv
-            if 'shiftconv' == self.training_architecture and self.self_supervised:
-                # TODO: Hirofumi what is going on the conditional below <-- check input dim is compatible w/ shiftconv
-                if (
-                    numpy.mod(
-                        img_train.shape[1:][:-1],
-                        numpy.repeat(
-                            2**self.nb_unet_levels, len(img_train.shape[1:][:-1])
-                        ),
-                    )
-                    != 0
-                ).any():
-                    raise ValueError(
-                        'Each dimension of the input image has to be a multiple of 2^nb_unet_levels for shiftconv.'
-                    )
-                lprint(
-                    'Model will be generated for self-supervised learning with shift convolution scheme.'
+            with lsection('Random patch sampling...'):
+                input_patch_idx = random_sample_patches(
+                    input_image,
+                    self.patch_size[0],
+                    self.total_num_patches,
+                    self.adoption_rate,
                 )
-                if numpy.diff(img_train.shape[1:][:2]) != 0:
-                    raise ValueError(
-                        'Make sure the input image shape is cubic as shiftconv mode involves rotation.'
-                    )
-                if (
-                    numpy.mod(
-                        img_train.shape[1:][:-1],
-                        numpy.repeat(
-                            2 ** (self.nb_unet_levels - 1),
-                            len(img_train.shape[1:][:-1]),
-                        ),
-                    )
-                    != 0
-                ).any():
-                    raise ValueError(
-                        'Each dimension of the input image has to be a multiple of '
-                        '2^(nb_unet_levels-1) as shiftconv mode involvs pixel shift. '
+
+                self.total_num_patches = len(input_patch_idx)
+                lprint(f'Total number of patches: {self.total_num_patches}')
+
+                with lsection('Input image...'):
+                    (
+                        img_train,
+                        self.validation_images,
+                        self.validation_markers,
+                    ) = tile_input_images(
+                        input_image,
+                        self._create_patches_for_validation,
+                        input_patch_idx,
+                        train_valid_ratio,
                     )
 
-            shiftconv = (
-                'shiftconv' == self.training_architecture and self.self_supervised
+                with lsection('Target image...'):
+                    target_image = tile_target_images(
+                        img_train, target_image, input_patch_idx, self.self_supervised
+                    )
+
+            post_tiling_patch_size_validation(
+                img_train,
+                self.nb_unet_levels,
+                self.training_architecture,
+                self.self_supervised,
+            )
+
+            unet_only_model_constructor_kwargs = (
+                {
+                    "mini_batch_size": self.batch_size,
+                    "nb_unet_levels": self.nb_unet_levels,
+                    "normalization": self.batch_norm,
+                    "activation": self.activation_fun,
+                    "supervised": not self.self_supervised,
+                    "training_architecture": self.training_architecture,
+                }
+                if self.model_architecture == "unet"
+                else {}
             )
 
             self.model = self.model_class(
                 img_train.shape[1:],
                 spacetime_ndim=self.spacetime_ndim,
-                mini_batch_size=self.batch_size,
-                nb_unet_levels=self.nb_unet_levels,
-                normalization=self.batch_norm,
-                activation=self.activation_fun,
-                supervised=not self.self_supervised,
-                shiftconv=shiftconv,
                 learning_rate=self.learn_rate,
+                **unet_only_model_constructor_kwargs,
             )
 
             with lsection('CNN model summary:'):
                 lprint(f'Model architecture: {self.model_architecture}')
-                lprint(f'Train scheme: {self.training_architecture}')
                 if self.model_architecture == 'unet':
+                    lprint(f'Train scheme: {self.training_architecture}')
                     lprint(f'Number of layers: {self.nb_unet_levels}')
                 lprint(
                     f'Number of parameters in the model: {self.model.count_params()}'
@@ -516,9 +478,6 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         else callbacks
                     )
 
-                # Convert mask_size to tuple
-                self.mask_size = (self.mask_size,) * (input_image.ndim - 2)
-
                 lprint("Training now...")
                 if 'jinet' in self.model_architecture:
                     self.loss_history = self.model.fit(
@@ -543,10 +502,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         batch_size=self.batch_size,
                         total_num_patches=self.total_num_patches,
                         img_val=self.validation_images,
+                        val_marker=self.validation_markers,
                         create_patches_for_validation=self._create_patches_for_validation,
                         train_valid_ratio=train_valid_ratio,
-                        val_marker=self.validation_markers,
-                        training_architecture=self.training_architecture,
                         random_mask_ratio=self.random_mask_ratio,
                         patch_size=self.patch_size,
                         mask_size=self.mask_size,
@@ -607,7 +565,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 'nb_unet_levels': self.nb_unet_levels,
                 'normalization': self.batch_norm,
                 'activation': self.activation_fun,
-                'shiftconv': 'shiftconv' == self.training_architecture,
+                'training_architecture': self.training_architecture,
             }
 
             if len(input_image.shape[1:-1]) == 2:

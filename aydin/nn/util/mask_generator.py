@@ -12,7 +12,7 @@ def masker(batch_vol, i=None, mask_shape=None, p=None):
     Parameters
     ----------
     batch_vol
-        batch volume, desn't include batch and ch dimensions
+        batch volume, doesn't include batch and ch dimensions
     i
     mask_shape
         mask shape e.g. (3, 3)
