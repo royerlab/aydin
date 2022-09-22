@@ -12,7 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn.layers.custom_conv import double_conv_block
 from aydin.nn.layers.pooling_down import PoolingDown
-from aydin.nn.models.utils.n2s_dataset import N2SDataset
+from aydin.nn.models.utils.masking.grid_masked_dataset import GridMaskedDataset
 from aydin.nn.pytorch.optimizers.esadam import ESAdam
 from aydin.util.log.log import lprint
 
@@ -163,6 +163,7 @@ def n2s_train(
     else:
         dev = "cpu"
     device = torch.device(dev)
+    print(dev)
 
     model = model.to(device)
     print(f"device {device}")
@@ -171,7 +172,7 @@ def n2s_train(
 
     loss_function1 = MSELoss()
 
-    dataset = N2SDataset(image)
+    dataset = GridMaskedDataset(image)
     print(f"dataset length: {len(dataset)}")
     data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
 

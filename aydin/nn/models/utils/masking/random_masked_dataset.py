@@ -3,10 +3,12 @@ import torch
 from torch.utils.data import Dataset
 
 
-class N2SDataset(Dataset):
+class RandomMaskedDataset(Dataset):
     def __init__(
         self,
         image,
+        nb_masks=4,
+        pixel_masking_probability: float = 0.3,
     ):
         """
 
@@ -16,40 +18,27 @@ class N2SDataset(Dataset):
         """
 
         self.image = torch.tensor(image)
+        self.nb_masks = nb_masks
+        self.p = pixel_masking_probability
 
     def __len__(self):
-        return 4
+        return self.nb_masks
 
-    def get_mask(self, i):
-        phase = i % 4
+    def get_mask(self):
         shape = self.image.shape
-        patch_size = 4
 
-        A = torch.zeros(shape)
+        mask = torch.rand(shape)
+        mask[mask > self.p] = 1
+        mask[mask <= self.p] = 0
+        mask = mask.bool()
 
-        if len(self.image.shape) == 4:
-            for i in range(shape[-2]):
-                for j in range(shape[-1]):
-                    if i % patch_size == phase and j % patch_size == phase:
-                        A[:, :, i, j] = 1
-
-        elif len(self.image.shape) == 5:
-            for i in range(shape[-3]):
-                for j in range(shape[-2]):
-                    for k in range(shape[-1]):
-                        if (
-                            i % patch_size == phase
-                            and j % patch_size == phase
-                            and k % patch_size == phase
-                        ):
-                            A[:, :, i, j, k] = 1
-
-        return torch.Tensor(A)
+        return mask
 
     def interpolate_mask(self, tensor, mask, mask_inv):
         device = tensor.device
 
         mask = mask.to(device)
+        mask_inv = mask_inv.to(device)
 
         kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], (0.5, 1.0, 0.5)])
         kernel = kernel[numpy.newaxis, numpy.newaxis, :, :]
@@ -64,7 +53,7 @@ class N2SDataset(Dataset):
 
     def __getitem__(self, index):
         original_patch = self.image
-        mask = self.get_mask(index)
+        mask = self.get_mask()
         mask_inv = torch.ones(mask.shape) - mask
 
         # input_patch = original_patch * mask_inv
