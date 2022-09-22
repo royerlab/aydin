@@ -135,9 +135,7 @@ def imread(input_path):
 
         try:
             if is_zarr:
-                g = zarr.open(
-                    input_path, mode='r'
-                )
+                g = zarr.open(input_path, mode='r')
                 if isinstance(g, zarr.Array):
                     lprint(f"Reading file {input_path} as ZARR array")
 
