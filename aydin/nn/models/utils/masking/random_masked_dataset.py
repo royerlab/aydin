@@ -24,7 +24,7 @@ class RandomMaskedDataset(Dataset):
     def __len__(self):
         return self.nb_masks
 
-    def get_mask(self, i):
+    def get_mask(self):
         shape = self.image.shape
 
         mask = torch.rand(shape)
@@ -37,7 +37,9 @@ class RandomMaskedDataset(Dataset):
     def interpolate_mask(self, tensor, mask, mask_inv):
         device = tensor.device
 
+        tensor = tensor.to(device)
         mask = mask.to(device)
+        mask_inv = mask_inv.to(device)
 
         kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], (0.5, 1.0, 0.5)])
         kernel = kernel[numpy.newaxis, numpy.newaxis, :, :]
@@ -52,7 +54,7 @@ class RandomMaskedDataset(Dataset):
 
     def __getitem__(self, index):
         original_patch = self.image
-        mask = self.get_mask(index)
+        mask = self.get_mask()
         mask_inv = torch.ones(mask.shape) - mask
 
         # input_patch = original_patch * mask_inv
