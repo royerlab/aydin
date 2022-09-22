@@ -163,6 +163,7 @@ def n2s_train(
     else:
         dev = "cpu"
     device = torch.device(dev)
+    print(dev)
 
     model = model.to(device)
     print(f"device {device}")

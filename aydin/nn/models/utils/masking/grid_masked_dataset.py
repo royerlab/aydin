@@ -50,6 +50,7 @@ class GridMaskedDataset(Dataset):
         device = tensor.device
 
         mask = mask.to(device)
+        mask_inv = mask_inv.to(device)
 
         kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], (0.5, 1.0, 0.5)])
         kernel = kernel[numpy.newaxis, numpy.newaxis, :, :]

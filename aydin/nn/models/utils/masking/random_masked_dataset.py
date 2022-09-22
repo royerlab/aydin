@@ -37,7 +37,6 @@ class RandomMaskedDataset(Dataset):
     def interpolate_mask(self, tensor, mask, mask_inv):
         device = tensor.device
 
-        tensor = tensor.to(device)
         mask = mask.to(device)
         mask_inv = mask_inv.to(device)
 
