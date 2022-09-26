@@ -1,31 +1,7 @@
-import sys
 from urllib.request import urlretrieve
 from pathlib import Path
 import os
 import zipfile
-
-
-def resource_path(relative_path):
-    """
-    Method to get resource path from bundle
-
-    Parameters
-    ----------
-    relative_path : str
-
-    Returns
-    -------
-    resource path : str
-
-    """
-    try:
-        base_path = sys._MEIPASS
-
-        return os.path.join(base_path, os.path.basename(relative_path))
-    except Exception:
-        base_path = os.path.abspath("..")
-
-    return os.path.join(base_path, relative_path)
 
 
 def download_and_extract_zipresource(url, targetdir='.'):
