@@ -39,7 +39,7 @@ class JINetModel(nn.Module):
         if len(self.kernel_sizes) != len(self.num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
 
-        self.dilated_conv_functions = []
+        self.dilated_conv_functions = nn.ModuleList()
         current_receptive_field_radius = 0
         for scale_index in range(len(self.kernel_sizes)):
             # Get kernel size and number of features:
