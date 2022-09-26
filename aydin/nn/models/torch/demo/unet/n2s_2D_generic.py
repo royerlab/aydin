@@ -8,11 +8,13 @@ from aydin.io.datasets import (
     add_noise,
     camera,
 )
+from aydin.nn.models.torch.torch_linear_scaling_unet import LinearScalingUNetModel
+from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
 from aydin.nn.models.torch.torch_unet import UNetModel, n2s_train
 from aydin.util.log.log import Log
 
 
-def demo(image, do_add_noise=True):
+def demo(image, model_class, do_add_noise=True):
     """
     Demo for self-supervised denoising using camera image with synthetic noise
     """
@@ -28,7 +30,7 @@ def demo(image, do_add_noise=True):
     # noisy = torch.tensor(noisy)
     image = torch.tensor(image)
 
-    model = UNetModel(
+    model = model_class(
         nb_unet_levels=2,
         spacetime_ndim=2,
     )
@@ -74,16 +76,15 @@ def demo(image, do_add_noise=True):
 
 
 if __name__ == '__main__':
-    # newyork_image = newyork()
-    # demo(newyork_image, "newyork")
-    # lizard_image = lizard()
-    # demo(lizard_image, "lizard")
-    # characters_image = characters()
-    # demo(characters_image, "characters")
+    # image = newyork()
+    # image = lizard()
+    # image = characters()
+    image = camera()
+    # image = pollen()
+    # image = dots()
 
-    camera_image = camera()
-    demo(camera_image, "camera")
-    # pollen_image = pollen()
-    # demo(pollen_image, "pollen")
-    # dots_image = dots()
-    # demo(dots_image, "dots")
+    model_class = UNetModel
+    # model_class = ResidualUNetModel
+    # model_class = LinearScalingUNetModel
+
+    demo(image, model_class)
