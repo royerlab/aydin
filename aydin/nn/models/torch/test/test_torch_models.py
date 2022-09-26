@@ -54,9 +54,7 @@ def test_2D_n2s_unet():
 
 
 def test_2D_n2s_jinet():
-    run_2D_n2s(
-        JINetModel(spacetime_ndim=2)
-    )
+    run_2D_n2s(JINetModel(spacetime_ndim=2))
 
 
 def run_2D_n2s(model):
@@ -75,9 +73,7 @@ def run_2D_n2s(model):
     denoised = denoised.detach().numpy()[0, 0, :, :]
 
     _, _, ssim_noisy, ssim_denoised = calculate_print_psnr_ssim(
-        clean_image=camera_image,
-        noisy_image=noisy_image,
-        denoised_image=denoised
+        clean_image=camera_image, noisy_image=noisy_image, denoised_image=denoised
     )
 
     assert ssim_denoised > ssim_noisy
