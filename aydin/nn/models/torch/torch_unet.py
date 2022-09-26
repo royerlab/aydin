@@ -155,7 +155,6 @@ def n2s_train(
     model : UNetModel
     nb_epochs : int
     learning_rate : float
-    patch_size : int
 
     """
     if torch.cuda.is_available():
@@ -164,6 +163,8 @@ def n2s_train(
         dev = "cpu"
     device = torch.device(dev)
     print(dev)
+
+    torch.autograd.set_detect_anomaly(True)
 
     model = model.to(device)
     print(f"device {device}")

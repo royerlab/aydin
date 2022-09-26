@@ -1,10 +1,11 @@
 # flake8: noqa
 import numpy
-from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+
 import torch
 
+from aydin.analysis.image_metrics import calculate_print_psnr_ssim
 from aydin.io.datasets import lizard, add_noise, camera, normalise
+from aydin.nn.models.torch.torch_jinet import JINetModel
 from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
 from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train, n2s_train
 
@@ -43,19 +44,27 @@ def test_supervised_2D_n2t():
     assert result.dtype == input_image.dtype
 
 
-def test_supervised_2D_n2s_unet():
+def test_2D_n2s_unet():
+    run_2D_n2s(
+        UNetModel(
+            nb_unet_levels=2,
+            spacetime_ndim=2,
+        )
+    )
+
+
+def test_2D_n2s_jinet():
+    run_2D_n2s(
+        JINetModel(spacetime_ndim=2)
+    )
+
+
+def run_2D_n2s(model):
     camera_image = normalise(camera())
     camera_image = numpy.expand_dims(camera_image, axis=0)
     camera_image = numpy.expand_dims(camera_image, axis=0)
-
     noisy_image = add_noise(camera_image)
-
     noisy_image = torch.tensor(noisy_image)
-
-    model = UNetModel(
-        nb_unet_levels=2,
-        spacetime_ndim=2,
-    )
 
     n2s_train(noisy_image, model, nb_epochs=20)
     model.cpu()
@@ -65,35 +74,14 @@ def test_supervised_2D_n2s_unet():
     noisy_image = noisy_image.detach().numpy()[0, 0, :, :]
     denoised = denoised.detach().numpy()[0, 0, :, :]
 
-    psnr_noisy = psnr(camera_image, noisy_image)
-    ssim_noisy = ssim(camera_image, noisy_image)
-    psnr_denoised = psnr(camera_image, denoised)
-    ssim_denoised = ssim(camera_image, denoised)
-    print("noisy   :", psnr_noisy, ssim_noisy)
-    print("denoised:", psnr_denoised, ssim_denoised)
+    _, _, ssim_noisy, ssim_denoised = calculate_print_psnr_ssim(
+        clean_image=camera_image,
+        noisy_image=noisy_image,
+        denoised_image=denoised
+    )
 
     assert ssim_denoised > ssim_noisy
     assert ssim_denoised > 0.46
-
-
-def test_masking_2D():
-    input_array = torch.zeros((1, 1, 64, 64))
-    model2d = UNetModel(
-        # (64, 64, 1),
-        nb_unet_levels=2,
-        spacetime_ndim=2,
-    )
-    result = model2d(input_array)
-    assert result.shape == input_array.shape
-    assert result.dtype == input_array.dtype
-
-
-# def test_jinet_2D():
-#     input_array = torch.zeros((1, 1, 64, 64))
-#     model2d = JINetModel((64, 64, 1), spacetime_ndim=2)
-#     result = model2d.predict([input_array])
-#     assert result.shape == input_array.shape
-#     assert result.dtype == input_array.dtype
 
 
 def test_supervised_3D():
