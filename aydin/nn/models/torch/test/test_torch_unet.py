@@ -5,7 +5,7 @@ import torch
 from aydin.nn.models.torch.torch_unet import UNetModel
 
 
-def test_supervised_2D():
+def test_forward_2D():
     input_array = torch.zeros((1, 1, 64, 64))
     model2d = UNetModel(
         # (64, 64, 1),
