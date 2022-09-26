@@ -1,5 +1,7 @@
 # flake8: noqa
 import numpy
+from skimage.metrics import peak_signal_noise_ratio as psnr
+from skimage.metrics import structural_similarity as ssim
 import torch
 
 from aydin.io.datasets import lizard, add_noise, camera, normalise
@@ -41,26 +43,37 @@ def test_supervised_2D_n2t():
     assert result.dtype == input_image.dtype
 
 
-def test_supervised_2D_n2s():
-    lizard_image = normalise(camera())
-    lizard_image = numpy.expand_dims(lizard_image, axis=0)
-    lizard_image = numpy.expand_dims(lizard_image, axis=0)
+def test_supervised_2D_n2s_unet():
+    camera_image = normalise(camera())
+    camera_image = numpy.expand_dims(camera_image, axis=0)
+    camera_image = numpy.expand_dims(camera_image, axis=0)
 
-    input_image = add_noise(lizard_image)
+    noisy_image = add_noise(camera_image)
 
-    input_image = torch.tensor(input_image)
+    noisy_image = torch.tensor(noisy_image)
 
     model = UNetModel(
         nb_unet_levels=2,
         spacetime_ndim=2,
     )
 
-    n2s_train(input_image, model, nb_epochs=2)
+    n2s_train(noisy_image, model, nb_epochs=20)
     model.cpu()
-    result = model(input_image)
+    denoised = model(noisy_image)
 
-    assert result.shape == input_image.shape
-    assert result.dtype == input_image.dtype
+    camera_image = camera_image[0, 0, :, :]
+    noisy_image = noisy_image.detach().numpy()[0, 0, :, :]
+    denoised = denoised.detach().numpy()[0, 0, :, :]
+
+    psnr_noisy = psnr(camera_image, noisy_image)
+    ssim_noisy = ssim(camera_image, noisy_image)
+    psnr_denoised = psnr(camera_image, denoised)
+    ssim_denoised = ssim(camera_image, denoised)
+    print("noisy   :", psnr_noisy, ssim_noisy)
+    print("denoised:", psnr_denoised, ssim_denoised)
+
+    assert ssim_denoised > ssim_noisy
+    assert ssim_denoised > 0.46
 
 
 def test_masking_2D():
