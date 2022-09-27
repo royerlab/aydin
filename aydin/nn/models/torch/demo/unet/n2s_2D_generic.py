@@ -6,7 +6,8 @@ import torch
 from aydin.io.datasets import (
     normalise,
     add_noise,
-    camera, newyork,
+    camera,
+    newyork,
 )
 from aydin.nn.models.torch.torch_linear_scaling_unet import LinearScalingUNetModel
 from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
@@ -76,7 +77,7 @@ def demo(image, model_class, do_add_noise=True):
 
 
 if __name__ == '__main__':
-    image = newyork()[512:, :512]
+    image = newyork()[256 : 256 + 512, 256 : 256 + 512]
     # image = lizard()
     # image = characters()
     # image = camera()

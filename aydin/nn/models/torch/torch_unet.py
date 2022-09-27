@@ -5,7 +5,7 @@ from itertools import chain
 import torch
 from torch import nn
 from torch.nn import MSELoss
-from torch.optim import Adam, AdamW
+from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -145,7 +145,7 @@ def n2s_train(
     nb_epochs: int = 128,
     learning_rate: float = 0.001,
     # patch_size: int = 32,
-    patience: int = 128
+    patience: int = 128,
 ):
     """
     Noise2Self training method.
