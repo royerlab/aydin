@@ -6,7 +6,7 @@ import torch
 from aydin.io.datasets import (
     normalise,
     add_noise,
-    camera,
+    camera, newyork,
 )
 from aydin.nn.models.torch.torch_linear_scaling_unet import LinearScalingUNetModel
 from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
@@ -38,7 +38,7 @@ def demo(image, model_class, do_add_noise=True):
     print("training starts")
 
     start = time.time()
-    n2s_train(noisy, model, nb_epochs=128)
+    n2s_train(noisy, model, nb_epochs=256)
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 
@@ -76,10 +76,10 @@ def demo(image, model_class, do_add_noise=True):
 
 
 if __name__ == '__main__':
-    # image = newyork()
+    image = newyork()[512:, :512]
     # image = lizard()
     # image = characters()
-    image = camera()
+    # image = camera()
     # image = pollen()
     # image = dots()
 

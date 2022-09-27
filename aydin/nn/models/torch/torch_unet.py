@@ -5,7 +5,7 @@ from itertools import chain
 import torch
 from torch import nn
 from torch.nn import MSELoss
-from torch.optim import Adam
+from torch.optim import Adam, AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -145,6 +145,7 @@ def n2s_train(
     nb_epochs: int = 128,
     learning_rate: float = 0.001,
     # patch_size: int = 32,
+    patience: int = 128
 ):
     """
     Noise2Self training method.
@@ -156,6 +157,7 @@ def n2s_train(
     nb_epochs : int
     learning_rate : float
     patch_size : int
+    patience : int
 
     """
     if torch.cuda.is_available():
@@ -168,7 +170,21 @@ def n2s_train(
     model = model.to(device)
     print(f"device {device}")
 
-    optimizer = Adam(model.parameters(), lr=learning_rate)
+    optimizer = AdamW(model.parameters(), lr=learning_rate)
+
+    # optimizer = ESAdam(
+    #     chain(model.parameters()),
+    #     lr=learning_rate,
+    #     start_noise_level=0.001,
+    #     weight_decay=1e-9,
+    # )
+
+    scheduler = ReduceLROnPlateau(
+        optimizer,
+        'min',
+        verbose=True,
+        patience=patience // 8,
+    )
 
     loss_function1 = MSELoss()
 
@@ -179,6 +195,7 @@ def n2s_train(
     model.train()
 
     for epoch in range(nb_epochs):
+        loss = 0
         for i, batch in enumerate(data_loader):
             original_patch, net_input, mask = batch
 
@@ -205,6 +222,8 @@ def n2s_train(
             loss.backward()
 
             optimizer.step()
+
+        scheduler.step(loss)
 
         print("Loss (", epoch, "): \t", round(loss.item(), 8))
 
