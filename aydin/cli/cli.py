@@ -347,6 +347,30 @@ def mse(files, **kwargs):
     )
 
 
+@cli.command()
+@click.argument('files', nargs=2)
+@click.option('-s', '--slicing', default='', type=str)
+def fsc(files, **kwargs):
+    """aydin fourier shell correlation command.
+    Saves the FSC plot and the cut-off freq.
+
+    Parameters
+    ----------
+    files
+    kwargs : dict
+
+    """
+    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
+
+    correlations = fsc(normalise(image_arrays[0]), normalise(image_arrays[1]))
+
+    import matplotlib.pyplot as plt
+
+    plt.plot(correlations)
+    plt.title('image1, image2')
+    plt.savefig("fsc.png")
+
+
 def handle_files(files, slicing):
     """Handle files
 
