@@ -5,7 +5,6 @@ import sys
 from copy import deepcopy
 from glob import glob
 import click
-import matplotlib.pyplot as plt
 import numpy
 import napari
 from skimage.metrics import (
