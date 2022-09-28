@@ -21,7 +21,8 @@ if sys.version_info < (3, 9):
 # REQUIRES = []
 
 setup(
-    use_scm_version={"write_to": "aydin/_version.py"},
-    setup_requires=['setuptools_scm'],
+    # use_scm_version={"write_to": "aydin/_version.py"},
+    # setup_requires=['setuptools_scm'],
+    version="0.1.14",
     entry_points={'console_scripts': ['aydin=aydin.cli.cli:cli']},
 )

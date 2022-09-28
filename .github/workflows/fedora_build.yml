@@ -1,0 +1,33 @@
+name: Fedora-build
+
+on: [push]
+
+jobs:
+  fedora-build:
+    runs-on: ubuntu-latest
+    container: fedora:35
+    steps:
+      - name: Install Git
+        run: |
+          sudo dnf -y install git
+          git --version
+      - uses: actions/checkout@v2
+      - name: Install Python
+        run: |
+          git --version
+          sudo dnf install curl -y
+          curl --output anaconda.sh https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh
+          chmod +x anaconda.sh
+          bash anaconda.sh -b
+          eval "$(/github/home/anaconda3/bin/conda shell.bash hook)"
+          conda init
+          conda info --envs
+          conda create -y -n ay39 python=3.9
+          conda activate ay39
+          python -V
+          export SETUPTOOLS_SCM_DEBUG=1
+          python -c "import setuptools; print(setuptools.__version__)"
+          ls -lh
+          pip install -e .
+          pip install -r requirements/development.txt
+          sh build/linux/build.sh
