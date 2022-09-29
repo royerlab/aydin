@@ -39,7 +39,7 @@ class JINetModel(nn.Module):
         if len(self.kernel_sizes) != len(self.num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
 
-        self.dilated_conv_functions = []
+        self.dilated_conv_functions = nn.ModuleList()
         current_receptive_field_radius = 0
         for scale_index in range(len(self.kernel_sizes)):
             # Get kernel size and number of features:
@@ -77,7 +77,7 @@ class JINetModel(nn.Module):
             self.nb_channels = sum(self.num_features)  # * 2
 
         nb_out = self.nb_channels
-        self.kernel_one_conv_functions = []
+        self.kernel_one_conv_functions = nn.ModuleList()
         for index in range(self.nb_dense_layers):
             nb_in = nb_out
             nb_out = (
@@ -130,15 +130,15 @@ class JINetModel(nn.Module):
         for index in range(len(self.kernel_sizes)):
             x = self.dilated_conv_functions[index](x)
             dilated_conv_list.append(x)
-            print(x.shape)
+            # print(x.shape)
 
         # Concat the results
         x = torch.cat(dilated_conv_list, dim=1)
-        print(f"after cat: {x.shape}")
+        # print(f"after cat: {x.shape}")
 
         # First kernel size one conv
         x = self.kernel_one_conv_functions[0](x)
-        print(f"after first kernel one conv: {x.shape}")
+        # print(f"after first kernel one conv: {x.shape}")
         x = self.lrelu(x)
         y = x
         f = 1
@@ -147,10 +147,10 @@ class JINetModel(nn.Module):
         for index in range(1, self.nb_dense_layers):
             x = self.kernel_one_conv_functions[index](x)
             x = self.lrelu(x)
-            y += f * x
+            y = y + f * x
 
             if self.degressive_residuals:
-                f *= 0.5
+                f = f * 0.5
 
         # Final kernel size one convolution
         y = self.final_kernel_one_conv(y)

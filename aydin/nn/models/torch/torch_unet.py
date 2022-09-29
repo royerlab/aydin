@@ -167,6 +167,8 @@ def n2s_train(
     device = torch.device(dev)
     print(dev)
 
+    torch.autograd.set_detect_anomaly(True)
+
     model = model.to(device)
     print(f"device {device}")
 
