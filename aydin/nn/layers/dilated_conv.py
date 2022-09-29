@@ -1,5 +1,5 @@
 from torch import nn
-from torch.nn import ZeroPad2d
+from torch.nn import ConstantPad2d, ConstantPad3d
 
 
 class DilatedConv(nn.Module):
@@ -20,12 +20,12 @@ class DilatedConv(nn.Module):
         self.spacetime_ndim = spacetime_ndim
         self.activation = activation
 
-        self.zero_padding = ZeroPad2d(padding)
-
         if spacetime_ndim == 2:
             self.conv_class = nn.Conv2d
+            self.zero_padding = ConstantPad2d(padding, value=0)
         elif spacetime_ndim == 3:
             self.conv_class = nn.Conv3d
+            self.zero_padding = ConstantPad3d(padding, value=0)
         else:
             raise ValueError("spacetime_ndim parameter can only be 2 or 3...")
 
