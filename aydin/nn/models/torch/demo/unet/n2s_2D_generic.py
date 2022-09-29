@@ -40,7 +40,7 @@ def demo(image, model_class, do_add_noise=True):
     print("training starts")
 
     start = time.time()
-    n2s_train(noisy, model, nb_epochs=256)
+    n2s_train(noisy, model, nb_epochs=256, verbose=False)
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 
@@ -62,15 +62,15 @@ def demo(image, model_class, do_add_noise=True):
     noisy = numpy.clip(noisy, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
 
-    calculate_print_psnr_ssim(image, noisy, denoised)
+    return calculate_print_psnr_ssim(image, noisy, denoised)
 
-    import napari
-
-    viewer = napari.Viewer()  # no prior setup needed
-    viewer.add_image(image, name='image')
-    viewer.add_image(noisy, name='noisy')
-    viewer.add_image(denoised, name='denoised')
-    napari.run()
+    # import napari
+    #
+    # viewer = napari.Viewer()  # no prior setup needed
+    # viewer.add_image(image, name='image')
+    # viewer.add_image(noisy, name='noisy')
+    # viewer.add_image(denoised, name='denoised')
+    # napari.run()
 
 
 if __name__ == '__main__':
@@ -81,8 +81,9 @@ if __name__ == '__main__':
     # image = pollen()
     # image = dots()
 
-    model_class = UNetModel
+    # model_class = UNetModel
     # model_class = ResidualUNetModel
-    # model_class = LinearScalingUNetModel
+    model_class = LinearScalingUNetModel
 
-    demo(image, model_class)
+    for _ in range(5):
+        print(demo(image, model_class))

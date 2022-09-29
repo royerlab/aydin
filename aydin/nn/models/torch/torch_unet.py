@@ -146,6 +146,7 @@ def n2s_train(
     learning_rate: float = 0.001,
     # patch_size: int = 32,
     patience: int = 128,
+    verbose: bool = True
 ):
     """
     Noise2Self training method.
@@ -207,7 +208,7 @@ def n2s_train(
 
             net_output = model(net_input)
 
-            if epoch == 255:
+            if epoch == 25555:
                 import napari
 
                 viewer = napari.Viewer()
@@ -227,7 +228,8 @@ def n2s_train(
 
         scheduler.step(loss)
 
-        print("Loss (", epoch, "): \t", round(loss.item(), 8))
+        if verbose:
+            print("Loss (", epoch, "): \t", round(loss.item(), 8))
 
 
 def n2t_train(
