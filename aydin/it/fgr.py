@@ -232,10 +232,20 @@ class ImageTranslatorFGR(ImageTranslatorBase):
     ):
         """Internal function that computes features for a given image.
 
-        :param image: image
-        :param exclude_center_feature: exclude center feature
-        :param exclude_center_value: exclude center value
-        :return: returns flattened array of features
+        Parameters
+        ----------
+        image
+        exclude_center_feature
+        exclude_center_value
+        features_last : bool
+        num_reserved_features : int
+        image_slice
+        whole_image_shape
+
+        Returns
+        -------
+        flattened array of features
+
         """
 
         with lsection(f"Computing features for image of shape {image.shape}:"):
@@ -689,9 +699,16 @@ class ImageTranslatorFGR(ImageTranslatorBase):
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
         """Internal method that translates an input image on the basis of the trained model.
 
-        :param input_image: input image
-        :param batch_dims: batch dimensions
-        :return:
+        Parameters
+        ----------
+        input_image
+        image_slice
+        whole_image_shape
+
+        Returns
+        -------
+        inferred image
+
         """
         shape = input_image.shape
         num_batches = shape[0]

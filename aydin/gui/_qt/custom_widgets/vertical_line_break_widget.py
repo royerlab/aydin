@@ -7,11 +7,11 @@ class QVerticalLineBreakWidget(QWidget):
         super(QVerticalLineBreakWidget, self).__init__(parent)
         self.parent = parent
 
-        self.layout = QHBoxLayout()
+        self.main_layout = QHBoxLayout()
 
         self.vertical_line_break = QFrame(
             frameShape=QFrame.VLine, frameShadow=QFrame.Sunken
         )
-        self.layout.addWidget(self.vertical_line_break)
-        self.layout.setAlignment(Qt.AlignLeft)
-        self.setLayout(self.layout)
+        self.main_layout.addWidget(self.vertical_line_break)
+        self.main_layout.setAlignment(Qt.AlignLeft)
+        self.setLayout(self.main_layout)

@@ -140,3 +140,14 @@ with their choice of computational backend.
 
    $ aydin denoise image.tif --backend="noise2selffgr-nn"
    $ aydin lucyrichardson image.tif --backend="cupy"
+
+
+Generating Fourier Shell Correlations(FSC) Plot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use the following line to call `fsc` command of Aydin CLI with
+which you can calculate Fourier Shell Correlations between two images.
+
+.. code-block:: bash
+
+   $ aydin fsc image1.tif image2.tif

@@ -8,7 +8,9 @@ from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 
 def test_butterworth():
-    ssim_denoised, parameters = demo_butterworth(cropped_newyork(), display=False)
+    ssim_denoised, parameters = demo_butterworth(
+        cropped_newyork(crop_amount=384), display=False
+    )
     assert ssim_denoised >= 0.608 - 0.035
 
 

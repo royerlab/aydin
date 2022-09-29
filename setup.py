@@ -20,9 +20,6 @@ if sys.version_info < (3, 9):
 # INSTALL_REQUIRES = default_requirements
 # REQUIRES = []
 
-# Handle pyopencl
-# os.system("pip install -r " + os.path.join('requirements', 'pyopencl.txt'))
-
 setup(
     use_scm_version={"write_to": "aydin/_version.py"},
     setup_requires=['setuptools_scm'],

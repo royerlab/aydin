@@ -169,11 +169,9 @@ class JINetModel(Model):
         x,
         batch_size=None,
         verbose=0,
-        steps=None,
         callbacks=None,
-        max_queue_size=10,
         workers=1,
-        use_multiprocessing=False,
+        **kwargs,
     ):
         """Overwritten model predict method.
 
@@ -182,11 +180,8 @@ class JINetModel(Model):
         x
         batch_size
         verbose
-        steps
         callbacks
-        max_queue_size
         workers
-        use_multiprocessing
 
         Returns
         -------
@@ -238,6 +233,7 @@ class JINetModel(Model):
         # stack all features into one tensor:
         x = Concatenate(axis=-1)(dilated_conv_list)
 
+        print("after concat", x.shape)
         # We keep the number of features:
         self.total_num_features = total_num_features
 

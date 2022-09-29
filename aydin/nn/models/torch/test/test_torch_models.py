@@ -1,39 +1,27 @@
-# import math
-# from collections import OrderedDict
-# from itertools import chain
-#
-# import napari
+# flake8: noqa
 import numpy
-import pytest
+
 import torch
 
-# from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.utils.data import DataLoader
-
-from aydin.io.datasets import add_noise, camera, normalise
-from aydin.nn.models.torch.torch_unet import UNetModel, n2t_unet_train_loop
-from aydin.nn.models.utils.torch_dataset import TorchDataset
-
-# from aydin.nn.pytorch.it_ptcnn import to_numpy
-# from aydin.nn.pytorch.optimizers.esadam import ESAdam
-# from aydin.util.log.log import lprint
+from aydin.analysis.image_metrics import calculate_print_psnr_ssim
+from aydin.io.datasets import lizard, add_noise, camera, normalise
+from aydin.nn.models.torch.torch_jinet import JINetModel
+from aydin.nn.models.torch.torch_res_unet import ResidualUNetModel
+from aydin.nn.models.torch.torch_unet import UNetModel, n2t_train, n2s_train
 
 
 def test_supervised_2D():
     input_array = torch.zeros((1, 1, 64, 64))
-    model2d = UNetModel(
+    model2d = ResidualUNetModel(
         # (64, 64, 1),
         nb_unet_levels=2,
-        supervised=True,
         spacetime_ndim=2,
-        residual=True,
     )
     result = model2d(input_array)
     assert result.shape == input_array.shape
     assert result.dtype == input_array.dtype
 
 
-@pytest.mark.heavy
 def test_supervised_2D_n2t():
     lizard_image = normalise(camera())
     lizard_image = numpy.expand_dims(lizard_image, axis=0)
@@ -44,51 +32,52 @@ def test_supervised_2D_n2t():
     input_image = torch.tensor(input_image)
     lizard_image = torch.tensor(lizard_image)
 
-    # learning_rate = 0.01
-    # training_noise = 0.001
-    # l2_weight_regularisation = 1e-9
-    # patience = 128
-    # patience_epsilon = 0.0
-    # reduce_lr_factor = 0.5
-    # reduce_lr_patience = patience // 2
-    # reload_best_model_period = 1024
-    # best_val_loss_value = math.inf
-
-    dataset = TorchDataset(input_image, lizard_image, 64, self_supervised=False)
-
-    data_loader = DataLoader(
-        dataset, batch_size=1, shuffle=True, num_workers=0, pin_memory=True
-    )
-
-    model = UNetModel(
-        nb_unet_levels=2, supervised=True, spacetime_ndim=2, residual=True
-    )
-
-    n2t_unet_train_loop(input_image, lizard_image, model, data_loader)
-
-    # assert result.shape == input_image.shape
-    # assert result.dtype == input_image.dtype
-
-
-def test_masking_2D():
-    input_array = torch.zeros((1, 1, 64, 64))
-    model2d = UNetModel(
-        # (64, 64, 1),
+    model = ResidualUNetModel(
         nb_unet_levels=2,
-        supervised=False,
         spacetime_ndim=2,
     )
-    result = model2d(input_array)
-    assert result.shape == input_array.shape
-    assert result.dtype == input_array.dtype
+
+    n2t_train(input_image, lizard_image, model, nb_epochs=2)
+    result = model(input_image)
+
+    assert result.shape == input_image.shape
+    assert result.dtype == input_image.dtype
 
 
-# def test_jinet_2D():
-#     input_array = torch.zeros((1, 1, 64, 64))
-#     model2d = JINetModel((64, 64, 1), spacetime_ndim=2)
-#     result = model2d.predict([input_array])
-#     assert result.shape == input_array.shape
-#     assert result.dtype == input_array.dtype
+def test_2D_n2s_unet():
+    run_2D_n2s(
+        UNetModel(
+            nb_unet_levels=2,
+            spacetime_ndim=2,
+        )
+    )
+
+
+def test_2D_n2s_jinet():
+    run_2D_n2s(JINetModel(spacetime_ndim=2))
+
+
+def run_2D_n2s(model):
+    camera_image = normalise(camera())
+    camera_image = numpy.expand_dims(camera_image, axis=0)
+    camera_image = numpy.expand_dims(camera_image, axis=0)
+    noisy_image = add_noise(camera_image)
+    noisy_image = torch.tensor(noisy_image)
+
+    n2s_train(noisy_image, model, nb_epochs=20)
+    model.cpu()
+    denoised = model(noisy_image)
+
+    camera_image = camera_image[0, 0, :, :]
+    noisy_image = noisy_image.detach().numpy()[0, 0, :, :]
+    denoised = denoised.detach().numpy()[0, 0, :, :]
+
+    _, _, ssim_noisy, ssim_denoised = calculate_print_psnr_ssim(
+        clean_image=camera_image, noisy_image=noisy_image, denoised_image=denoised
+    )
+
+    assert ssim_denoised > ssim_noisy
+    assert ssim_denoised > 0.46
 
 
 def test_supervised_3D():
@@ -96,7 +85,6 @@ def test_supervised_3D():
     model3d = UNetModel(
         # (64, 64, 64, 1),
         nb_unet_levels=2,
-        supervised=True,
         spacetime_ndim=3,
     )
     result = model3d(input_array)
@@ -109,7 +97,6 @@ def test_masking_3D():
     model3d = UNetModel(
         # (64, 64, 64, 1),
         nb_unet_levels=2,
-        supervised=False,
         spacetime_ndim=3,
     )
     result = model3d(input_array)
