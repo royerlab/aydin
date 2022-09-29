@@ -3,6 +3,7 @@ import time
 import numpy
 import torch
 
+from aydin.analysis.image_metrics import calculate_print_psnr_ssim
 from aydin.io.datasets import (
     normalise,
     add_noise,
@@ -59,12 +60,8 @@ def demo(image, model_class, do_add_noise=True):
     image = numpy.clip(image, 0, 1)
     noisy = numpy.clip(noisy, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
-    # psnr_noisy = psnr(image, noisy)
-    # ssim_noisy = ssim(image, noisy)
-    # psnr_denoised = psnr(image, denoised)
-    # ssim_denoised = ssim(image, denoised)
-    # print("noisy   :", psnr_noisy, ssim_noisy)
-    # print("denoised:", psnr_denoised, ssim_denoised)
+
+    return calculate_print_psnr_ssim(image, noisy, denoised)
 
     import napari
 

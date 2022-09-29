@@ -3,10 +3,12 @@ import time
 import numpy
 import torch
 
+from aydin.analysis.image_metrics import calculate_print_psnr_ssim
 from aydin.io.datasets import (
     normalise,
     add_noise,
     camera,
+    newyork,
 )
 from aydin.nn.models.torch.torch_jinet import JINetModel
 from aydin.nn.models.torch.torch_unet import n2s_train
@@ -29,15 +31,12 @@ def demo(image, model_class, do_add_noise=True):
     # noisy = torch.tensor(noisy)
     image = torch.tensor(image)
 
-    model = model_class(
-        nb_unet_levels=2,
-        spacetime_ndim=2,
-    )
+    model = model_class(spacetime_ndim=2)
 
     print("training starts")
 
     start = time.time()
-    n2s_train(noisy, model, nb_epochs=128)
+    n2s_train(noisy, model, nb_epochs=128, verbose=False)
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 
@@ -58,30 +57,27 @@ def demo(image, model_class, do_add_noise=True):
     image = numpy.clip(image, 0, 1)
     noisy = numpy.clip(noisy, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
-    # psnr_noisy = psnr(image, noisy)
-    # ssim_noisy = ssim(image, noisy)
-    # psnr_denoised = psnr(image, denoised)
-    # ssim_denoised = ssim(image, denoised)
-    # print("noisy   :", psnr_noisy, ssim_noisy)
-    # print("denoised:", psnr_denoised, ssim_denoised)
 
-    import napari
+    return calculate_print_psnr_ssim(image, noisy, denoised)
 
-    viewer = napari.Viewer()  # no prior setup needed
-    viewer.add_image(image, name='image')
-    viewer.add_image(noisy, name='noisy')
-    viewer.add_image(denoised, name='denoised')
-    napari.run()
+    # import napari
+    #
+    # viewer = napari.Viewer()  # no prior setup needed
+    # viewer.add_image(image, name='image')
+    # viewer.add_image(noisy, name='noisy')
+    # viewer.add_image(denoised, name='denoised')
+    # napari.run()
 
 
 if __name__ == '__main__':
-    # image = newyork()
+    image = newyork()[256 : 256 + 512, 256 : 256 + 512]
     # image = lizard()
     # image = characters()
-    image = camera()
+    # image = camera()
     # image = pollen()
     # image = dots()
 
     model_class = JINetModel
 
-    demo(image, model_class)
+    for _ in range(5):
+        print(demo(image, model_class))

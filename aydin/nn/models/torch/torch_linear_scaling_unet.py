@@ -64,7 +64,7 @@ class LinearScalingUNetModel(nn.Module):
         return x
 
     def _encoder_convolutions(self):
-        convolution = []
+        convolution = nn.ModuleList()
         for layer_index in range(self.nb_unet_levels):
             if layer_index == 0:
                 nb_filters_in = 1
@@ -87,7 +87,7 @@ class LinearScalingUNetModel(nn.Module):
         return convolution
 
     def _decoder_convolutions(self):
-        convolutions = []
+        convolutions = nn.ModuleList()
         for layer_index in range(self.nb_unet_levels):
             if layer_index == self.nb_unet_levels - 1:
                 nb_filters_in = self.nb_filters * 2
