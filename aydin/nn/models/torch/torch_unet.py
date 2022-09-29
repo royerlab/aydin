@@ -146,7 +146,7 @@ def n2s_train(
     learning_rate: float = 0.001,
     # patch_size: int = 32,
     patience: int = 128,
-    verbose: bool = True
+    verbose: bool = True,
 ):
     """
     Noise2Self training method.
