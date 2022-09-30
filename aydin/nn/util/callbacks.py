@@ -1,3 +1,4 @@
+from deprecated import deprecated
 import warnings
 import numpy as np
 from tensorflow.python.keras import backend
@@ -6,6 +7,9 @@ from tensorflow.python.keras.callbacks import Callback
 from aydin.util.log.log import lprint
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class CNNCallback(Callback):
     """
     tensorflow.keras Callback to linkup to the it callback machinery
@@ -53,6 +57,9 @@ class CNNCallback(Callback):
         return monitor_value
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class EarlyStopping(Callback):
     """
     Stop training when a monitored quantity has stopped improving.
@@ -186,6 +193,9 @@ class EarlyStopping(Callback):
         return monitor_value
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class ReduceLROnPlateau(Callback):
     """
     Reduce learning rate when a metric has stopped improving.
@@ -332,6 +342,9 @@ class ReduceLROnPlateau(Callback):
         return self.cooldown_counter > 0
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class ModelCheckpoint(Callback):
     """
     Save the model after every epoch.
@@ -455,6 +468,9 @@ class ModelCheckpoint(Callback):
                     self.model.save(filepath, overwrite=True)
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class StopCenterGradient2D(Callback):
     """
     Reset the weights of the center pixels after each training batch.
@@ -634,6 +650,9 @@ class StopCenterGradient2D(Callback):
                 count += 1
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class StopCenterGradient3D(Callback):
     """
     Reset the weights of the center pixels after each training batch.

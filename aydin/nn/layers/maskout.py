@@ -1,7 +1,11 @@
+from deprecated import deprecated
 from tensorflow.python.keras.engine.base_layer import Layer
 from tensorflow.python.keras.layers import multiply
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class Maskout(Layer):
     """
     A layer that mutiply mask with image. This is for masking architecture.

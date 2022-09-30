@@ -1,9 +1,13 @@
+from deprecated import deprecated
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras import backend
 from tensorflow.python.keras.layers import Lambda
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 def Split(
     x, idx, batchsize=1, lyrname=None
 ):  # TODO: refactor into a class or a util function
@@ -34,6 +38,9 @@ def Split(
     )
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 def Swish(name=None):
     """
     Swish Layer
@@ -50,6 +57,9 @@ def Swish(name=None):
     return Lambda(tf.nn.swish, name=name)
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 def Rot90(xx, kk=1, lyrname=None):
     """
     Rotate tensor by 90 degrees for 2D, 3D images. Only for shift convolution architecture.
