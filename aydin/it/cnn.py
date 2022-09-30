@@ -9,17 +9,17 @@ from tensorflow.python.eager.context import device
 
 from aydin.io.folders import get_temp_folder
 from aydin.it.base import ImageTranslatorBase
-from aydin.nn.models.jinet import JINetModel
-from aydin.nn.models.unet import UNetModel
+from aydin.nn.tf.models.jinet import JINetModel
+from aydin.nn.tf.models.unet import UNetModel
 
 # from aydin.nn.models.utils.image_tile import tile_input_and_target_images
-from aydin.nn.models.utils.image_tile import tile_target_images, tile_input_images
-from aydin.nn.util.random_sample_patches import random_sample_patches
-from aydin.nn.models.utils.unet_patch_size import (
+from aydin.nn.tf.models.utils.image_tile import tile_target_images, tile_input_images
+from aydin.nn.tf.util import random_sample_patches
+from aydin.nn.tf.models.utils import (
     get_ideal_patch_size,
     post_tiling_patch_size_validation,
 )
-from aydin.nn.util.callbacks import (
+from aydin.nn.tf.util import (
     EarlyStopping,
     ReduceLROnPlateau,
     StopCenterGradient2D,
