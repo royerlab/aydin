@@ -1,3 +1,4 @@
+from deprecated import deprecated
 from tensorflow.python.keras import Input
 from tensorflow.python.keras.layers import (
     Concatenate,
@@ -13,6 +14,9 @@ from aydin.nn.models.utils.conv_block import conv2d_torch, conv3d_torch
 from aydin.nn.models.utils.training_architectures import get_jinet_fit_args
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class JINetModel(Model):
     """
     The JINet model is a hybrid CNN-perceptron model that leverages dilated

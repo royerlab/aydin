@@ -2,6 +2,7 @@ import random
 from os.path import join
 from typing import Optional, Union, List, Tuple
 
+from deprecated import deprecated
 import keras.models
 import numpy
 from tensorflow.python.eager.context import device
@@ -29,6 +30,9 @@ from aydin.util.log.log import lsection, lprint
 from aydin.util.tf.device import get_best_device_name
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class ImageTranslatorCNN(ImageTranslatorBase):
     """
     Convolutional Neural Network (CNN) based Image Translator<br>

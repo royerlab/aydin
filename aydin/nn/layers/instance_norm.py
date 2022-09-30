@@ -1,3 +1,4 @@
+from deprecated import deprecated
 from tensorflow.keras import (
     initializers,
     regularizers,
@@ -8,6 +9,9 @@ from tensorflow.python.keras.engine.base_layer import Layer
 from tensorflow.python.keras.engine.input_spec import InputSpec
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class InstanceNormalization(Layer):
     """
     Instance normalization layer.
