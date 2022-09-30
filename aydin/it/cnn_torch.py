@@ -1,3 +1,4 @@
+from torch import nn
 from typing import Optional, Union, List, Tuple
 
 from aydin.it.base import ImageTranslatorBase
@@ -7,6 +8,9 @@ from aydin.util.log.log import lsection, lprint
 class ImageTranslatorCNNTorch(ImageTranslatorBase):
     def __init__(
         self,
+        model: Union[str, nn.Module] = "jinet",
+        patch_size: int = None,
+        max_epochs: int = 256,
         blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
