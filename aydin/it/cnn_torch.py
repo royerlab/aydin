@@ -99,7 +99,9 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         jinv,
     ):
         if not self.training_method:
-            self.training_method = n2s_train if input_image == target_image else n2t_train
+            self.training_method = (
+                n2s_train if input_image == target_image else n2t_train
+            )
 
         training_method_args = {
             "input_image": input_image,
