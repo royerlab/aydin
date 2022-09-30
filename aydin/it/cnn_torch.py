@@ -6,12 +6,12 @@ from aydin.util.log.log import lsection, lprint
 
 class ImageTranslatorCNNTorch(ImageTranslatorBase):
     def __init__(
-            self,
-            blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
-            tile_min_margin: int = 8,
-            tile_max_margin: Optional[int] = None,
-            max_memory_usage_ratio: float = 0.9,
-            max_tiling_overhead: float = 0.1,
+        self,
+        blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
+        tile_min_margin: int = 8,
+        tile_max_margin: Optional[int] = None,
+        max_memory_usage_ratio: float = 0.9,
+        max_tiling_overhead: float = 0.1,
     ):
         super().__init__(
             blind_spots=blind_spots,
@@ -77,19 +77,14 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         raise NotImplementedError()
 
     def _train(
-            self,
-            input_image,
-            target_image,
-            train_valid_ratio,  # TODO: should this parameter be here?
-            callback_period,
-            jinv
+        self,
+        input_image,
+        target_image,
+        train_valid_ratio,  # TODO: should this parameter be here?
+        callback_period,
+        jinv,
     ):
         raise NotImplementedError()
 
-    def _translate(
-            self,
-            input_image,
-            image_slice=None,
-            whole_image_shape=None
-    ):
+    def _translate(self, input_image, image_slice=None, whole_image_shape=None):
         raise NotImplementedError()
