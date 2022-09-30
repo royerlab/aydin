@@ -1,3 +1,4 @@
+from deprecated import deprecated
 from tensorflow.python.keras.layers import (
     ZeroPadding2D,
     Conv2D,
@@ -19,6 +20,9 @@ from aydin.nn.layers.instance_norm import InstanceNormalization
 from aydin.nn.layers.util import Swish
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 def conv2d_torch(
     x,
     out_channels,
