@@ -1,7 +1,9 @@
 from torch import nn
-from typing import Optional, Union, List, Tuple
+from typing import Optional, Union, List, Tuple, Callable
 
 from aydin.it.base import ImageTranslatorBase
+from aydin.nn.training_methods.n2s import n2s_train
+from aydin.nn.training_methods.n2t import n2t_train
 from aydin.util.log.log import lsection, lprint
 
 
@@ -9,8 +11,11 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
     def __init__(
         self,
         model: Union[str, nn.Module] = "jinet",
+        training_method: Callable = None,
         patch_size: int = None,
-        max_epochs: int = 256,
+        nb_epochs: int = 256,
+        lr: float = 0.01,
+        patience: int = 4,
         blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
@@ -26,6 +31,11 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         )
 
         self.model = None
+        self.training_method = training_method
+        self.patch_size = patch_size
+        self.nb_epochs = nb_epochs
+        self.lr = lr
+        self.patience = patience
 
     def save(self, path: str):
         """
@@ -88,7 +98,19 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         callback_period,
         jinv,
     ):
-        raise NotImplementedError()
+        if not self.training_method:
+            self.training_method = n2s_train if input_image == target_image else n2t_train
+
+        training_method_args = {
+            "input_image": input_image,
+            "target_image": target_image,
+            "model": self.model,
+            "nb_epochs": self.nb_epochs,
+            "lr": self.lr,
+            "patience": self.patience,
+        }
+
+        self.training_method(**training_method_args)
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
         raise NotImplementedError()
