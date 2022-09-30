@@ -1,3 +1,4 @@
+from deprecated import deprecated
 import numpy
 import tensorflow as tf
 from tensorflow.python.keras import Input
@@ -31,6 +32,9 @@ from aydin.nn.util.validation_generator import val_data_generator
 from aydin.util.log.log import lprint
 
 
+@deprecated(
+    "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
+)
 class UNetModel(Model):
     """
     Standard UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:

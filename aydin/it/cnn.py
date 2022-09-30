@@ -2,7 +2,7 @@ import random
 from os.path import join
 from typing import Optional, Union, List, Tuple
 
-import deprecated
+from deprecated import deprecated
 import keras.models
 import numpy
 from tensorflow.python.eager.context import device
