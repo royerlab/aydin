@@ -5,6 +5,7 @@ from typing import Tuple
 import jsonpickle
 import numexpr
 import numpy
+from numba import jit, prange
 
 from aydin.util.misc.json import encode_indent
 from aydin.util.log.log import lprint
@@ -122,11 +123,12 @@ class NormaliserBase(ABC):
             epsilon = numpy.float32(self.epsilon)
 
             try:
-                # We perform operation in-place with numexpr if possible:
-                numexpr.evaluate(
-                    "((array - min_value) / ( max_value - min_value + epsilon ))",
-                    out=array,
-                )
+                self.normalize_numba(array, min_value, max_value, epsilon)
+                # # We perform operation in-place with numexpr if possible:
+                # numexpr.evaluate(
+                #     "((array - min_value) / ( max_value - min_value + epsilon ))",
+                #     out=array,
+                # )
                 if self.clip:
                     numexpr.evaluate(
                         "where(array<0,0,where(array>1,1,array))", out=array
@@ -207,3 +209,33 @@ class NormaliserBase(ABC):
                 array = array.astype(self.original_dtype)
 
         return array
+
+    @jit(parallel=True, error_model='numpy')
+    def normalize_numba(self, array, min_value, max_value, epsilon):
+        # Pythonic switch case to find the correct loop function
+        loop_function = {
+            1: self._numba_cpu_normalise_1d_loop,
+            2: self._numba_cpu_normalise_2d_loop,
+            3: self._numba_cpu_normalise_3d_loop
+        }[len(array.shape)]
+
+        # Call the adequate function
+        loop_function(array, min_value, max_value, epsilon, len(array))
+
+    @jit(parallel=True, error_model='numpy')
+    def _numba_cpu_normalise_1d_loop(self, array, min_value, max_value, epsilon, size):
+        for idx in prange(size):
+            array[idx] -= min_value
+            array[idx] /= max_value - min_value + epsilon
+
+    @jit(parallel=True, error_model='numpy')
+    def _numba_cpu_normalise_2d_loop(self, array, min_value, max_value, epsilon, size):
+        for idx in prange(size * size):
+            array[idx // size][idx % size] -= min_value
+            array[idx // size][idx % size] /= max_value - min_value + epsilon
+
+    @jit(parallel=True, error_model='numpy')
+    def _numba_cpu_normalise_3d_loop(self, array, min_value, max_value, epsilon, size):
+        for idx in prange(size * size * size):
+            array[idx // (size ** 2)][idx // size][idx % size] -= min_value
+            array[idx // (size ** 2)][idx // size][idx % size] /= max_value - min_value + epsilon
