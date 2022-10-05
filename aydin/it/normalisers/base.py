@@ -216,7 +216,7 @@ class NormaliserBase(ABC):
         loop_function = {
             1: self._numba_cpu_normalise_1d_loop,
             2: self._numba_cpu_normalise_2d_loop,
-            3: self._numba_cpu_normalise_3d_loop
+            3: self._numba_cpu_normalise_3d_loop,
         }[len(array.shape)]
 
         # Call the adequate function
@@ -237,5 +237,7 @@ class NormaliserBase(ABC):
     @jit(parallel=True, error_model='numpy')
     def _numba_cpu_normalise_3d_loop(self, array, min_value, max_value, epsilon, size):
         for idx in prange(size * size * size):
-            array[idx // (size ** 2)][idx // size][idx % size] -= min_value
-            array[idx // (size ** 2)][idx // size][idx % size] /= max_value - min_value + epsilon
+            array[idx // (size**2)][idx // size][idx % size] -= min_value
+            array[idx // (size**2)][idx // size][idx % size] /= (
+                max_value - min_value + epsilon
+            )
