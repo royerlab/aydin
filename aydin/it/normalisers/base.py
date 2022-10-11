@@ -184,11 +184,12 @@ class NormaliserBase(ABC):
                             casting='unsafe',
                         )
 
-                    numexpr.evaluate(
-                        "array * (max_value - min_value + epsilon) + min_value ",
-                        out=array,
-                        casting='unsafe',
-                    )
+                    self.denormalize_numba(array, min_value, max_value, epsilon)
+                    # numexpr.evaluate(
+                    #     "array * (max_value - min_value + epsilon) + min_value ",
+                    #     out=array,
+                    #     casting='unsafe',
+                    # )
 
                 except ValueError:
                     if self.clip and clip:
@@ -215,3 +216,9 @@ class NormaliserBase(ABC):
         for _ in prange(numpy.prod(array.shape)):
             array.flat[_] -= min_value
             array.flat[_] /= max_value - min_value + epsilon
+
+    @jit(parallel=True, error_model='numpy')
+    def denormalize_numba(self, array, min_value, max_value, epsilon):
+        for _ in prange(numpy.prod(array.shape)):
+            array.flat[_] *= max_value - min_value + epsilon
+            array.flat[_] += min_value
