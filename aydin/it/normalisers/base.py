@@ -212,32 +212,6 @@ class NormaliserBase(ABC):
 
     @jit(parallel=True, error_model='numpy')
     def normalize_numba(self, array, min_value, max_value, epsilon):
-        # Pythonic switch case to find the correct loop function
-        loop_function = {
-            1: self._normalize_1d_loop,
-            2: self._normalize_2d_loop,
-            3: self._normalize_3d_loop,
-        }[len(array.shape)]
-
-        # Call the adequate function
-        loop_function(array, min_value, max_value, epsilon, len(array))
-
-    @jit(parallel=True, error_model='numpy')
-    def _normalize_1d_loop(self, array, min_value, max_value, epsilon, size):
-        for idx in prange(size):
-            array[idx] -= min_value
-            array[idx] /= max_value - min_value + epsilon
-
-    @jit(parallel=True, error_model='numpy')
-    def _normalize_2d_loop(self, array, min_value, max_value, epsilon, size):
-        for idx in prange(size * size):
-            array[idx // size][idx % size] -= min_value
-            array[idx // size][idx % size] /= max_value - min_value + epsilon
-
-    @jit(parallel=True, error_model='numpy')
-    def _normalize_3d_loop(self, array, min_value, max_value, epsilon, size):
-        for idx in prange(size * size * size):
-            array[idx // (size**2)][idx // size][idx % size] -= min_value
-            array[idx // (size**2)][idx // size][idx % size] /= (
-                max_value - min_value + epsilon
-            )
+        for _ in prange(numpy.prod(array.shape)):
+            array.flat[_] -= min_value
+            array.flat[_] /= max_value - min_value + epsilon
