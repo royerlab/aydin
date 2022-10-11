@@ -2,7 +2,6 @@ from functools import reduce
 from operator import mul
 from typing import Tuple, Union, Sequence
 
-import numexpr
 import numpy
 from numba import jit, cuda
 from numba.cuda import CudaSupportError
@@ -617,9 +616,8 @@ def _apply_correction(
         alpha = footprint_volume / (footprint_volume - excluded_count)
         beta = -alpha / footprint_volume  # noqa: F841
 
-        numexpr.evaluate(
-            "alpha*feature + beta*excluded_values_sum", out=feature, casting='unsafe'
-        )
+        feature *= alpha
+        feature += beta * excluded_values_sum
     else:
         _apply_correction_numba(
             feature, excluded_values_sum, footprint_volume, excluded_count
