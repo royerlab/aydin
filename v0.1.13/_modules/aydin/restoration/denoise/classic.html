@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.restoration.denoise.classic &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.restoration.denoise.classic</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.restoration.denoise.classic</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it</span> <span class="kn">import</span> <span class="n">classic_denoisers</span>
+<span class="kn">from</span> <span class="nn">aydin.it.base</span> <span class="kn">import</span> <span class="n">ImageTranslatorBase</span>
+<span class="kn">from</span> <span class="nn">aydin.it.classic</span> <span class="kn">import</span> <span class="n">ImageDenoiserClassic</span>
+<span class="kn">from</span> <span class="nn">aydin.it.transforms.padding</span> <span class="kn">import</span> <span class="n">PaddingTransform</span>
+<span class="kn">from</span> <span class="nn">aydin.it.transforms.range</span> <span class="kn">import</span> <span class="n">RangeTransform</span>
+<span class="kn">from</span> <span class="nn">aydin.it.transforms.variance_stabilisation</span> <span class="kn">import</span> <span class="n">VarianceStabilisationTransform</span>
+<span class="kn">from</span> <span class="nn">aydin.restoration.denoise.base</span> <span class="kn">import</span> <span class="n">DenoiseRestorationBase</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span>
+
+
+<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;BUNDLED_AYDIN&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.bilateral</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_bilateral</span><span class="p">,</span>
+        <span class="n">denoise_bilateral</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.bmnd</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_bmnd</span><span class="p">,</span>
+        <span class="n">denoise_bmnd</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.butterworth</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_butterworth</span><span class="p">,</span>
+        <span class="n">denoise_butterworth</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.dictionary_fixed</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_dictionary_fixed</span><span class="p">,</span>
+        <span class="n">denoise_dictionary_fixed</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.dictionary_learned</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_dictionary_learned</span><span class="p">,</span>
+        <span class="n">denoise_dictionary_learned</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.gaussian</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_gaussian</span><span class="p">,</span>
+        <span class="n">denoise_gaussian</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.gm</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_gm</span><span class="p">,</span>
+        <span class="n">denoise_gm</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.harmonic</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_harmonic</span><span class="p">,</span>
+        <span class="n">denoise_harmonic</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.lipschitz</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_lipschitz</span><span class="p">,</span>
+        <span class="n">denoise_lipschitz</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.nlm</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_nlm</span><span class="p">,</span>
+        <span class="n">denoise_nlm</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.pca</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_pca</span><span class="p">,</span>
+        <span class="n">denoise_pca</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.spectral</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_spectral</span><span class="p">,</span>
+        <span class="n">denoise_spectral</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.tv</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_tv</span><span class="p">,</span>
+        <span class="n">denoise_tv</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.wavelet</span> <span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+        <span class="n">calibrate_denoise_wavelet</span><span class="p">,</span>
+        <span class="n">denoise_wavelet</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<div class="viewcode-block" id="Classic"><a class="viewcode-back" href="../../../../api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic">[docs]</a><span class="k">class</span> <span class="nc">Classic</span><span class="p">(</span><span class="n">DenoiseRestorationBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Classic Image Denoising.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    variant : str</span>
+<span class="sd">        Opacity of the layer visual, between 0.0 and 1.0.</span>
+<span class="sd">    use_model : bool</span>
+<span class="sd">        Flag to choose to train a new model or infer from a</span>
+<span class="sd">        previously trained model. By default it is None.</span>
+<span class="sd">    input_model_path : string</span>
+<span class="sd">        Path to model that is desired to be used for inference.</span>
+<span class="sd">        By default it is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">disabled_modules</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;bilateral&quot;</span><span class="p">,</span> <span class="s2">&quot;bmnd&quot;</span><span class="p">,</span> <span class="s2">&quot;_defaults&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">variant</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;butterworth&#39;</span><span class="p">,</span>
+        <span class="n">use_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">input_model_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_level_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">it_transforms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_level_args</span> <span class="o">=</span> <span class="n">lower_level_args</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">variant</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_model_path</span> <span class="o">=</span> <span class="n">input_model_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_model_flag</span> <span class="o">=</span> <span class="n">use_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_folder_path</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">it</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">it_transforms</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">RangeTransform</span><span class="p">,</span> <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{}},</span>
+                <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">PaddingTransform</span><span class="p">,</span> <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{}},</span>
+                <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">VarianceStabilisationTransform</span><span class="p">,</span> <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{}},</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">it_transforms</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">it_transforms</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_less_than_one_million_voxels</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_less_than_one_trillion_voxels</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_dims</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">configurable_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the configurable arguments that will be exposed</span>
+<span class="sd">        on GUI and CLI.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">arguments</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># IT Classic</span>
+        <span class="n">it</span> <span class="o">=</span> <span class="n">ImageDenoiserClassic</span>
+
+        <span class="n">fullargspec3</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">ImageDenoiserClassic</span><span class="o">.</span><span class="fm">__init__</span><span class="p">)</span>
+
+        <span class="n">it_args</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;arguments&quot;</span><span class="p">:</span> <span class="n">fullargspec3</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span>
+            <span class="s2">&quot;defaults&quot;</span><span class="p">:</span> <span class="n">fullargspec3</span><span class="o">.</span><span class="n">defaults</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span>
+            <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="n">fullargspec3</span><span class="o">.</span><span class="n">annotations</span><span class="p">,</span>
+            <span class="s2">&quot;reference_class&quot;</span><span class="p">:</span> <span class="n">it</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Methods</span>
+        <span class="n">method_modules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_implementations_in_a_module</span><span class="p">(</span><span class="n">classic_denoisers</span><span class="p">)</span>
+
+        <span class="c1"># Remove the disabled modules</span>
+        <span class="n">method_modules</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">module</span>
+            <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">method_modules</span>
+            <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">disabled_modules</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">method_modules</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;spectral&quot;</span><span class="p">,</span> <span class="s2">&quot;dictionary_learned&quot;</span><span class="p">]:</span>
+                    <span class="n">method_modules</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">method_modules</span><span class="p">:</span>
+            <span class="n">calibration_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_function_implementation_kwonlyargs</span><span class="p">(</span>
+                <span class="n">classic_denoisers</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="s2">&quot;calibrate_denoise_&quot;</span> <span class="o">+</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">arg_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">calibration_args</span><span class="p">[</span><span class="s2">&quot;arguments&quot;</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">arg_name</span> <span class="o">==</span> <span class="s2">&quot;display_images&quot;</span><span class="p">:</span>
+                    <span class="n">calibration_args</span><span class="p">[</span><span class="s2">&quot;arguments&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">arg_name</span><span class="p">)</span>
+                    <span class="n">calibration_args</span><span class="p">[</span><span class="s2">&quot;defaults&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                        <span class="n">x</span>
+                        <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">calibration_args</span><span class="p">[</span><span class="s2">&quot;defaults&quot;</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="nb">id</span> <span class="o">!=</span> <span class="n">idx</span>
+                    <span class="p">)</span>
+                    <span class="k">del</span> <span class="n">calibration_args</span><span class="p">[</span><span class="s2">&quot;annotations&quot;</span><span class="p">][</span><span class="n">arg_name</span><span class="p">]</span>
+
+            <span class="n">calibration_args</span><span class="p">[</span><span class="s2">&quot;backend&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">arguments</span><span class="p">[</span><span class="s2">&quot;Classic-&quot;</span> <span class="o">+</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;calibration&quot;</span><span class="p">:</span> <span class="n">calibration_args</span><span class="p">,</span>
+                <span class="s2">&quot;it&quot;</span><span class="p">:</span> <span class="n">it_args</span><span class="p">,</span>
+            <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">arguments</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">implementations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the list of discovered implementations for given method.&quot;&quot;&quot;</span>
+        <span class="n">method_modules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_implementations_in_a_module</span><span class="p">(</span><span class="n">classic_denoisers</span><span class="p">)</span>
+
+        <span class="c1"># Remove the disabled modules</span>
+        <span class="n">method_modules</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">module</span>
+            <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">method_modules</span>
+            <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">disabled_modules</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">method_modules</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;spectral&quot;</span><span class="p">,</span> <span class="s2">&quot;dictionary_learned&quot;</span><span class="p">]:</span>
+                    <span class="n">method_modules</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;Classic-&quot;</span> <span class="o">+</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">method_modules</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">implementations_description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">it_classic_description</span> <span class="o">=</span> <span class="n">ImageDenoiserClassic</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="n">descriptions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">method_modules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_implementations_in_a_module</span><span class="p">(</span><span class="n">classic_denoisers</span><span class="p">)</span>
+
+        <span class="c1"># Remove the disabled modules</span>
+        <span class="n">method_modules</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">module</span>
+            <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">method_modules</span>
+            <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">disabled_modules</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">method_modules</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;spectral&quot;</span><span class="p">,</span> <span class="s2">&quot;dictionary_learned&quot;</span><span class="p">]:</span>
+                    <span class="n">method_modules</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="n">method_modules</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span>
+                <span class="n">classic_denoisers</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">)</span>
+
+            <span class="n">elem</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="s2">&quot;denoise_&quot;</span> <span class="o">+</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">descriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">it_classic_description</span>
+                <span class="o">+</span> <span class="s2">&quot;: &quot;</span>
+                <span class="o">+</span> <span class="n">module</span><span class="o">.</span><span class="n">name</span>
+                <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                <span class="o">+</span> <span class="n">elem</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">[:</span> <span class="n">elem</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;Parameters&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;br&gt;&lt;br&gt;&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">descriptions</span>
+
+<div class="viewcode-block" id="Classic.stop_running"><a class="viewcode-back" href="../../../../api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.stop_running">[docs]</a>    <span class="k">def</span> <span class="nf">stop_running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to stop running N2S instance&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">it</span><span class="o">.</span><span class="n">stop_training</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Classic.set_image_metrics"><a class="viewcode-back" href="../../../../api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.set_image_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">set_image_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets several image metric parameters used internally.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        image_shape : tuple</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_of_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_shape</span><span class="p">)</span>
+        <span class="n">number_of_voxels</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">image_shape</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_less_than_one_million_voxels</span> <span class="o">=</span> <span class="n">number_of_voxels</span> <span class="o">&lt;</span> <span class="mi">1000000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">has_less_than_one_trillion_voxels</span> <span class="o">=</span> <span class="n">number_of_voxels</span> <span class="o">&lt;</span> <span class="mi">1000000000000</span></div>
+
+<div class="viewcode-block" id="Classic.get_translator"><a class="viewcode-back" href="../../../../api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.get_translator">[docs]</a>    <span class="k">def</span> <span class="nf">get_translator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the corresponding translator instance for given selections.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        feature_generator : FeatureGeneratorBase</span>
+<span class="sd">        regressor : RegressorBase</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        it : ImageTranslatorBase</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Use a pre-saved model or train a new one from scratch and save it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_model_flag</span><span class="p">:</span>
+            <span class="c1"># Unarchive the model file and load its ImageTranslator object into self.it</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_model_path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_model_path</span><span class="p">),</span> <span class="s2">&quot;zip&quot;</span>
+            <span class="p">)</span>
+            <span class="n">it</span> <span class="o">=</span> <span class="n">ImageTranslatorBase</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_model_path</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_level_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">backend</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_level_args</span><span class="p">[</span><span class="s2">&quot;variant&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_level_args</span><span class="p">[</span><span class="s2">&quot;variant&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">it</span> <span class="o">=</span> <span class="n">ImageDenoiserClassic</span><span class="p">(</span>
+                    <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                    <span class="n">calibration_kwargs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_level_args</span><span class="p">[</span><span class="s2">&quot;calibration&quot;</span><span class="p">][</span><span class="s2">&quot;kwargs&quot;</span><span class="p">],</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_level_args</span><span class="p">[</span><span class="s2">&quot;it&quot;</span><span class="p">][</span><span class="s2">&quot;kwargs&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">it</span> <span class="o">=</span> <span class="n">ImageDenoiserClassic</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">backend</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">it</span></div>
+
+    <span class="k">def</span> <span class="nf">add_transforms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">it_transforms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">transform</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">it_transforms</span><span class="p">:</span>
+                <span class="n">transform_class</span> <span class="o">=</span> <span class="n">transform</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">]</span>
+                <span class="n">transform_kwargs</span> <span class="o">=</span> <span class="n">transform</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">it</span><span class="o">.</span><span class="n">add_transform</span><span class="p">(</span><span class="n">transform_class</span><span class="p">(</span><span class="o">**</span><span class="n">transform_kwargs</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Classic.train"><a class="viewcode-back" href="../../../../api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">noisy_image</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">batch_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chan_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">image_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to run training for Noise2Self FGR.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        noisy_image : numpy.ndarray</span>
+<span class="sd">        batch_axes : array_like, optional</span>
+<span class="sd">            Indices of batch axes.</span>
+<span class="sd">        chan_axes : array_like, optional</span>
+<span class="sd">            Indices of channel axes.</span>
+<span class="sd">        image_path : str</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        response : numpy.ndarray</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Noise2Self train is starting...&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_image_metrics</span><span class="p">(</span><span class="n">noisy_image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">it</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_translator</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_transforms</span><span class="p">()</span>
+
+            <span class="c1"># Train a new model</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">it</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
+                <span class="n">noisy_image</span><span class="p">,</span>
+                <span class="n">noisy_image</span><span class="p">,</span>
+                <span class="n">batch_axes</span><span class="o">=</span><span class="n">batch_axes</span><span class="p">,</span>
+                <span class="n">channel_axes</span><span class="o">=</span><span class="n">chan_axes</span><span class="p">,</span>
+                <span class="n">train_valid_ratio</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;train_valid_ratio&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s1">&#39;train_valid_ratio&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+                <span class="k">else</span> <span class="mf">0.1</span><span class="p">,</span>
+                <span class="n">callback_period</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;callback_period&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s1">&#39;callback_period&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span>
+                <span class="k">else</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="n">jinv</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;jinv&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;jinv&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+            <span class="c1"># Save the trained model</span>
+            <span class="c1"># self.save_model(image_path)  # TODO:  fix the problems here</span>
+
+<div class="viewcode-block" id="Classic.denoise"><a class="viewcode-back" href="../../../../api/restorations/denoise_restoration.html#aydin.restoration.denoise.classic.Classic.denoise">[docs]</a>    <span class="k">def</span> <span class="nf">denoise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">noisy_image</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">batch_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chan_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to denoise an image with trained Noise2Self FGR.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        batch_axes : array_like, optional</span>
+<span class="sd">            Indices of batch axes.</span>
+<span class="sd">        chan_axes : array_like, optional</span>
+<span class="sd">            Indices of channel axes.</span>
+<span class="sd">        noisy_image : numpy.ndarray</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        response : numpy.ndarray</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Noise2Self denoise is starting...&quot;</span><span class="p">):</span>
+
+            <span class="c1"># Predict the resulting image</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">it</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span>
+                <span class="n">noisy_image</span><span class="p">,</span>
+                <span class="n">batch_axes</span><span class="o">=</span><span class="n">batch_axes</span><span class="p">,</span>
+                <span class="n">channel_axes</span><span class="o">=</span><span class="n">chan_axes</span><span class="p">,</span>
+                <span class="n">tile_size</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;tile_size&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;tile_size&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">response</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">noisy_image</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">response</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">classic_denoise</span><span class="p">(</span><span class="n">noisy</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">batch_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chan_axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Method to denoise an image with Classic denoising restoration module.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    noisy : numpy.ndarray</span>
+<span class="sd">        Image to denoise</span>
+<span class="sd">    batch_axes : array_like, optional</span>
+<span class="sd">        Indices of batch axes.</span>
+<span class="sd">    chan_axes : array_like, optional</span>
+<span class="sd">        Indices of channel axes.</span>
+<span class="sd">    variant : str</span>
+<span class="sd">        Algorithm variant.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoised image : numpy.ndarray</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Run and save the result</span>
+    <span class="n">classic</span> <span class="o">=</span> <span class="n">Classic</span><span class="p">(</span><span class="n">variant</span><span class="o">=</span><span class="n">variant</span><span class="p">)</span>
+
+    <span class="c1"># Train</span>
+    <span class="n">classic</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">noisy</span><span class="p">,</span> <span class="n">batch_axes</span><span class="o">=</span><span class="n">batch_axes</span><span class="p">,</span> <span class="n">chan_axes</span><span class="o">=</span><span class="n">chan_axes</span><span class="p">)</span>
+
+    <span class="c1"># Denoise</span>
+    <span class="n">denoised</span> <span class="o">=</span> <span class="n">classic</span><span class="o">.</span><span class="n">denoise</span><span class="p">(</span><span class="n">noisy</span><span class="p">,</span> <span class="n">batch_axes</span><span class="o">=</span><span class="n">batch_axes</span><span class="p">,</span> <span class="n">chan_axes</span><span class="o">=</span><span class="n">chan_axes</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">denoised</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.13
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="classic.html">v0.1.13</a></dd>
+      <dd><a href="../../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

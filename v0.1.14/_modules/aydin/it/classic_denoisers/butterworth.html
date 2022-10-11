@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.classic_denoisers.butterworth &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.classic_denoisers.butterworth</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.classic_denoisers.butterworth</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">jit</span>
+<span class="kn">from</span> <span class="nn">numpy.fft</span> <span class="kn">import</span> <span class="n">fftshift</span><span class="p">,</span> <span class="n">ifftshift</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">scipy.fft</span> <span class="kn">import</span> <span class="n">fftn</span><span class="p">,</span> <span class="n">ifftn</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">eval_chebyt</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers</span> <span class="kn">import</span> <span class="n">_defaults</span>
+<span class="kn">from</span> <span class="nn">aydin.util.crop.rep_crop</span> <span class="kn">import</span> <span class="n">representative_crop</span>
+<span class="kn">from</span> <span class="nn">aydin.util.j_invariance.j_invariance</span> <span class="kn">import</span> <span class="n">calibrate_denoiser</span>
+
+<span class="n">__fastmath</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;contract&#39;</span><span class="p">,</span> <span class="s1">&#39;afn&#39;</span><span class="p">,</span> <span class="s1">&#39;reassoc&#39;</span><span class="p">}</span>
+<span class="n">__error_model</span> <span class="o">=</span> <span class="s1">&#39;numpy&#39;</span>
+
+
+<div class="viewcode-block" id="calibrate_denoise_butterworth"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.butterworth.calibrate_denoise_butterworth">[docs]</a><span class="k">def</span> <span class="nf">calibrate_denoise_butterworth</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;full&#39;</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">other_filters</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">min_padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">max_padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="n">min_freq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-9</span><span class="p">,</span>
+    <span class="n">max_freq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">frequency_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">min_order</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">max_order</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">8.0</span><span class="p">,</span>
+    <span class="n">crop_size_in_voxels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_crop_size_superlarge</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">optimiser</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_optimiser</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">max_num_evaluations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_max_evals_normal</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">blind_spots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_blind_spots</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">jinv_interpolation_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_jinv_interpolation_mode</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">multi_core</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">display_images</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">display_crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">other_fixed_parameters</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calibrates the Butterworth denoiser for the given image and returns the optimal</span>
+<span class="sd">    parameters obtained using the N2S loss.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image: ArrayLike</span>
+<span class="sd">        Image to calibrate Butterworth denoiser for.</span>
+
+<span class="sd">    mode: str</span>
+<span class="sd">        Possible modes are: &#39;isotropic&#39; for isotropic, meaning only one</span>
+<span class="sd">        frequency cut-off is calibrated for all axes , &#39;z-yx&#39; (or &#39;xy-z&#39;) for 3D</span>
+<span class="sd">        stacks where the cut-off frequency for the x and y axes is the same but</span>
+<span class="sd">        different for the z axis, &#39;t-z-yx&#39; (or &#39;xy-z-t&#39;) for 3D+t</span>
+<span class="sd">        timelapse where the cut-off frequency for the x and y axes is the same but</span>
+<span class="sd">        different for the z and t axis, and &#39;full&#39; for which all frequency cut-offs are</span>
+<span class="sd">        different. Use &#39;z-yx&#39; or &#39;t-z-yx&#39; for axes are ordered as: t, z, y and then x which is the default.</span>
+<span class="sd">        If for some reason the axis order is reversed you can use &#39;xy-z&#39; or &#39;xy-z-t&#39;.</span>
+<span class="sd">        Note: for 2D+t timelapses where the resolution over x and y are expected to be the same,</span>
+<span class="sd">        simply use: &#39;z-yx&#39; (or &#39;xy-z&#39;).</span>
+
+<span class="sd">    axes: Optional[Tuple[int,...]]</span>
+<span class="sd">        Axes over which to apply low-pass filtering.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    other_filters: bool</span>
+<span class="sd">        if True other filters similar to Butterworth are tried such as Type II</span>
+<span class="sd">        Chebyshev filter.</span>
+
+<span class="sd">    min_padding: int</span>
+<span class="sd">        Minimum amount of padding to be added to avoid edge effects.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    max_padding: int</span>
+<span class="sd">        Maximum amount of padding to be added to avoid edge effects.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    min_freq: float</span>
+<span class="sd">        Minimum cutoff frequency to use for calibration. Must be within [0,1],</span>
+<span class="sd">        typically close to zero.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    max_freq: float</span>
+<span class="sd">        Maximum cutoff frequency to use for calibration. Must be within [0,1],</span>
+<span class="sd">        typically close to one.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    frequency_tolerance: float</span>
+<span class="sd">        Frequency tolerance within [-1,1]. A positive value lets more</span>
+<span class="sd">        high-frequencies to go through the low-pass, negative values bring</span>
+<span class="sd">        down the cut-off frequencies, zero has no effect. Positive values</span>
+<span class="sd">        reduces the effect of denoising but also lead to conservative</span>
+<span class="sd">        filtering that avoids removing potentially important information at</span>
+<span class="sd">        the boundary (in frequency space) between signal and noise. This can</span>
+<span class="sd">        also improve the appearance of the images by avoiding the impression</span>
+<span class="sd">        that the images have been &#39;over-blurred&#39;. Increase this value by</span>
+<span class="sd">        small steps of 0.05 to reduce blurring if the image seems too fuzzy.</span>
+
+
+<span class="sd">    min_order: float</span>
+<span class="sd">        Minimal order for the Butterworth filter to use for calibration.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    max_order: float</span>
+<span class="sd">        Maximal order for the Butterworth filter to use for calibration.</span>
+<span class="sd">        If min_order==max_order then no search is performed for the filter&#39;s order.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    crop_size_in_voxels: int or None for default</span>
+<span class="sd">        Number of voxels for crop used to calibrate denoiser.</span>
+<span class="sd">        Increase this number by factors of two if denoising quality is</span>
+<span class="sd">        unsatisfactory -- this can be important for very noisy images.</span>
+<span class="sd">        Values to try are: 256000, 320000, 1&#39;000&#39;000, 2&#39;000&#39;000.</span>
+<span class="sd">        We do not recommend values higher than 3000000.</span>
+
+<span class="sd">    optimiser: str</span>
+<span class="sd">        Optimiser to use for finding the best denoising</span>
+<span class="sd">        parameters. Can be: &#39;smart&#39; (default), or &#39;fast&#39; for a mix of SHGO</span>
+<span class="sd">        followed by L-BFGS-B.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    max_num_evaluations: int</span>
+<span class="sd">        Maximum number of evaluations for finding the optimal parameters.</span>
+<span class="sd">        Increase this number by factors of two if denoising quality is</span>
+<span class="sd">        unsatisfactory.</span>
+
+<span class="sd">    blind_spots: Optional[List[Tuple[int]]]</span>
+<span class="sd">        List of voxel coordinates (relative to receptive field center) to</span>
+<span class="sd">        be included in the blind-spot. For example, you can give a list of</span>
+<span class="sd">        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot</span>
+<span class="sd">        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    jinv_interpolation_mode: str</span>
+<span class="sd">        J-invariance interpolation mode for masking. Can be: &#39;median&#39; or</span>
+<span class="sd">        &#39;gaussian&#39;.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    multi_core: bool</span>
+<span class="sd">        Use all CPU cores during calibration.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    display_images: bool</span>
+<span class="sd">        When True the denoised images encountered during optimisation are shown.</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    display_crop: bool</span>
+<span class="sd">        Displays crop, for debugging purposes...</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    other_fixed_parameters: dict</span>
+<span class="sd">        Any other fixed parameters. (advanced)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoising function, dictionary containing optimal parameters,</span>
+<span class="sd">    and free memory needed in bytes for computation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># obtain representative crop, to speed things up...</span>
+    <span class="n">crop</span> <span class="o">=</span> <span class="n">representative_crop</span><span class="p">(</span>
+        <span class="n">image</span><span class="p">,</span> <span class="n">crop_size</span><span class="o">=</span><span class="n">crop_size_in_voxels</span><span class="p">,</span> <span class="n">display_crop</span><span class="o">=</span><span class="n">display_crop</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Default axes:</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+
+    <span class="c1"># ranges:</span>
+    <span class="n">freq_cutoff_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_freq</span><span class="p">,</span> <span class="n">max_freq</span><span class="p">)</span>
+    <span class="c1"># order_range = (min_order, max_order)</span>
+
+    <span class="c1"># Combine fixed parameters:</span>
+    <span class="n">other_fixed_parameters</span> <span class="o">=</span> <span class="n">other_fixed_parameters</span> <span class="o">|</span> <span class="p">{</span>
+        <span class="s1">&#39;min_padding&#39;</span><span class="p">:</span> <span class="n">min_padding</span><span class="p">,</span>
+        <span class="s1">&#39;max_padding&#39;</span><span class="p">:</span> <span class="n">max_padding</span><span class="p">,</span>
+        <span class="s1">&#39;axes&#39;</span><span class="p">:</span> <span class="n">axes</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;isotropic&#39;</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Partial function:</span>
+        <span class="n">_denoise_butterworth</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+            <span class="n">denoise_butterworth</span><span class="p">,</span> <span class="o">**</span><span class="p">(</span><span class="n">other_fixed_parameters</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;multi_core&#39;</span><span class="p">:</span> <span class="n">multi_core</span><span class="p">})</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Parameters to test when calibrating the denoising algorithm</span>
+        <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">}</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;z-yx&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># Partial function with parameter impedance match:</span>
+        <span class="k">def</span> <span class="nf">_denoise_butterworth</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">freq_cutoff_xy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_xy&#39;</span><span class="p">)</span>
+            <span class="n">freq_cutoff_z</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;z-yx&#39;</span><span class="p">:</span>
+                <span class="n">_freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_z</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z&#39;</span><span class="p">:</span>
+                <span class="n">_freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_z</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">denoise_butterworth</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">freq_cutoff</span><span class="o">=</span><span class="n">_freq_cutoff</span><span class="p">,</span>
+                <span class="o">**</span><span class="p">(</span><span class="n">kwargs</span> <span class="o">|</span> <span class="n">other_fixed_parameters</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;multi_core&#39;</span><span class="p">:</span> <span class="n">multi_core</span><span class="p">}),</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Parameters to test when calibrating the denoising algorithm</span>
+        <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;freq_cutoff_xy&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">,</span>
+            <span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z-t&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;t-z-yx&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="c1"># Partial function with parameter impedance match:</span>
+        <span class="k">def</span> <span class="nf">_denoise_butterworth</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">freq_cutoff_xy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_xy&#39;</span><span class="p">)</span>
+            <span class="n">freq_cutoff_z</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">)</span>
+            <span class="n">freq_cutoff_t</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_t&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;t-z-yx&#39;</span><span class="p">:</span>
+                <span class="n">_freq_cutoff</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">freq_cutoff_t</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_z</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_xy</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_xy</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z-t&#39;</span><span class="p">:</span>
+                <span class="n">_freq_cutoff</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">freq_cutoff_xy</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_xy</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_z</span><span class="p">,</span>
+                    <span class="n">freq_cutoff_t</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">denoise_butterworth</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">freq_cutoff</span><span class="o">=</span><span class="n">_freq_cutoff</span><span class="p">,</span>
+                <span class="o">**</span><span class="p">(</span><span class="n">kwargs</span> <span class="o">|</span> <span class="n">other_fixed_parameters</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;multi_core&#39;</span><span class="p">:</span> <span class="n">multi_core</span><span class="p">}),</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Parameters to test when calibrating the denoising algorithm</span>
+        <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;freq_cutoff_xy&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">,</span>
+            <span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">,</span>
+            <span class="s1">&#39;freq_cutoff_t&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
+        <span class="c1"># Partial function with parameter impedance match:</span>
+        <span class="k">def</span> <span class="nf">_denoise_butterworth</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">_freq_cutoff</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;freq_cutoff_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">denoise_butterworth</span><span class="p">(</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                <span class="n">freq_cutoff</span><span class="o">=</span><span class="n">_freq_cutoff</span><span class="p">,</span>
+                <span class="o">**</span><span class="p">(</span><span class="n">kwargs</span> <span class="o">|</span> <span class="n">other_fixed_parameters</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;multi_core&#39;</span><span class="p">:</span> <span class="n">multi_core</span><span class="p">}),</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Parameters to test when calibrating the denoising algorithm</span>
+        <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sa">f</span><span class="s1">&#39;freq_cutoff_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">freq_cutoff_range</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unsupported mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2"> for image of dimension: </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># This is the code that needs to be uncommented if reverting to single pass:</span>
+    <span class="c1"># if max_order &gt; min_order:</span>
+    <span class="c1">#     parameter_ranges |= {&#39;order&#39;: order_range}</span>
+    <span class="c1"># elif max_order == min_order:</span>
+    <span class="c1">#     other_fixed_parameters |= {&#39;order&#39;: min_order}</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     raise ValueError(f&quot;Invalid order range: {min_order} &gt; {max_order}&quot;)</span>
+
+    <span class="k">if</span> <span class="n">max_order</span> <span class="o">==</span> <span class="n">min_order</span><span class="p">:</span>
+        <span class="n">other_fixed_parameters</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="n">min_order</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">max_order</span> <span class="o">&lt;</span> <span class="n">min_order</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid order range: </span><span class="si">{</span><span class="n">min_order</span><span class="si">}</span><span class="s2"> &gt; </span><span class="si">{</span><span class="n">max_order</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">other_filters</span><span class="p">:</span>
+        <span class="n">parameter_ranges</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;filter_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;butterworth&#39;</span><span class="p">,</span> <span class="s1">&#39;chebyshev2&#39;</span><span class="p">]}</span>  <span class="c1">#</span>
+
+    <span class="c1"># # First optimisation pass:</span>
+
+    <span class="c1"># If we only have a single parameter to optimise, we can go for a brute-force approach:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameter_ranges</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">parameter_ranges</span> <span class="o">|=</span> <span class="p">{</span>
+            <span class="s1">&#39;freq_cutoff&#39;</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                <span class="n">min_freq</span><span class="p">,</span> <span class="n">max_freq</span><span class="p">,</span> <span class="n">max_num_evaluations</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="c1"># Calibrate denoiser using classic calibrator:</span>
+        <span class="n">best_parameters</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">calibrate_denoiser</span><span class="p">(</span>
+                <span class="n">crop</span><span class="p">,</span>
+                <span class="n">_denoise_butterworth</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="n">optimiser</span><span class="p">,</span>
+                <span class="n">denoise_parameters</span><span class="o">=</span><span class="n">parameter_ranges</span><span class="p">,</span>
+                <span class="n">interpolation_mode</span><span class="o">=</span><span class="n">jinv_interpolation_mode</span><span class="p">,</span>
+                <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+                <span class="n">display_images</span><span class="o">=</span><span class="n">display_images</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">|</span> <span class="n">other_fixed_parameters</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Calibrate denoiser using smart approach:</span>
+        <span class="n">best_parameters</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">calibrate_denoiser</span><span class="p">(</span>
+                <span class="n">crop</span><span class="p">,</span>
+                <span class="n">_denoise_butterworth</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="n">optimiser</span><span class="p">,</span>
+                <span class="n">denoise_parameters</span><span class="o">=</span><span class="n">parameter_ranges</span><span class="p">,</span>
+                <span class="n">max_num_evaluations</span><span class="o">=</span><span class="n">max_num_evaluations</span><span class="p">,</span>
+                <span class="n">interpolation_mode</span><span class="o">=</span><span class="n">jinv_interpolation_mode</span><span class="p">,</span>
+                <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+                <span class="n">display_images</span><span class="o">=</span><span class="n">display_images</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">|</span> <span class="n">other_fixed_parameters</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Second optimisation pass, for the order, if not fixed:</span>
+    <span class="k">if</span> <span class="n">max_order</span> <span class="o">&gt;</span> <span class="n">min_order</span><span class="p">:</span>
+        <span class="n">order_list</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_order</span><span class="p">,</span> <span class="n">max_order</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="n">order_list</span><span class="p">}</span> <span class="o">|</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="n">best_parameters</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">calibrate_denoiser</span><span class="p">(</span>
+                <span class="n">crop</span><span class="p">,</span>
+                <span class="n">_denoise_butterworth</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="n">optimiser</span><span class="p">,</span>
+                <span class="n">denoise_parameters</span><span class="o">=</span><span class="n">parameter_ranges</span><span class="p">,</span>
+                <span class="n">max_num_evaluations</span><span class="o">=</span><span class="n">max_num_evaluations</span><span class="p">,</span>
+                <span class="n">interpolation_mode</span><span class="o">=</span><span class="n">jinv_interpolation_mode</span><span class="p">,</span>
+                <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+                <span class="n">display_images</span><span class="o">=</span><span class="n">display_images</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">|</span> <span class="n">other_fixed_parameters</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Below we adjust the parameters because denoise_butterworth function (without underscore)</span>
+    <span class="c1"># uses a different set of parameters...</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;isotropic&#39;</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;z-yx&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="c1"># We need to adjust a bit the type of parameters passed to the denoising function:</span>
+        <span class="n">freq_cutoff_xy</span> <span class="o">=</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_xy&#39;</span><span class="p">)</span>
+        <span class="n">freq_cutoff_z</span> <span class="o">=</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;z-yx&#39;</span><span class="p">:</span>
+            <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_z</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z&#39;</span><span class="p">:</span>
+            <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_z</span><span class="p">)</span>
+
+        <span class="n">best_parameters</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">:</span> <span class="n">freq_cutoff</span><span class="p">}</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z-t&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;t-z-yx&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="c1"># We need to adjust a bit the type of parameters passed to the denoising function:</span>
+        <span class="n">freq_cutoff_xy</span> <span class="o">=</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_xy&#39;</span><span class="p">)</span>
+        <span class="n">freq_cutoff_z</span> <span class="o">=</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_z&#39;</span><span class="p">)</span>
+        <span class="n">freq_cutoff_t</span> <span class="o">=</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;freq_cutoff_t&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;t-z-yx&#39;</span><span class="p">:</span>
+            <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_t</span><span class="p">,</span> <span class="n">freq_cutoff_z</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;xy-z-t&#39;</span><span class="p">:</span>
+            <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="p">(</span><span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_xy</span><span class="p">,</span> <span class="n">freq_cutoff_z</span><span class="p">,</span> <span class="n">freq_cutoff_t</span><span class="p">)</span>
+
+        <span class="n">best_parameters</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">:</span> <span class="n">freq_cutoff</span><span class="p">}</span>
+
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
+        <span class="c1"># We need to adjust a bit the type of parameters passed to the denoising function:</span>
+        <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;freq_cutoff_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">best_parameters</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">:</span> <span class="n">freq_cutoff</span><span class="p">}</span>
+
+    <span class="c1"># function to add freq. tol.:</span>
+    <span class="k">def</span> <span class="nf">_add_freq_tol</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">f</span> <span class="o">+</span> <span class="n">frequency_tolerance</span><span class="p">))</span>
+
+    <span class="c1"># Add frequency_tolerance to all cutoff frequencies:</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">best_parameters</span><span class="p">[</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="c1"># If single float we add to freq:</span>
+        <span class="n">best_parameters</span><span class="p">[</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_add_freq_tol</span><span class="p">(</span><span class="n">best_parameters</span><span class="p">[</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># If tuple float we add to all freqs:</span>
+        <span class="n">best_parameters</span><span class="p">[</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">_add_freq_tol</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">best_parameters</span><span class="p">[</span><span class="s1">&#39;freq_cutoff&#39;</span><span class="p">])</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Memory needed:</span>
+    <span class="n">memory_needed</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">nbytes</span>  <span class="c1"># complex numbers and more</span>
+
+    <span class="k">return</span> <span class="n">denoise_butterworth</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">,</span> <span class="n">memory_needed</span></div>
+
+
+<div class="viewcode-block" id="denoise_butterworth"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.butterworth.denoise_butterworth">[docs]</a><span class="k">def</span> <span class="nf">denoise_butterworth</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filter_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;butterworth&#39;</span><span class="p">,</span>
+    <span class="n">freq_cutoff</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">order</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">min_padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">max_padding</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="n">multi_core</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Denoises the given image by applying a configurable &lt;a</span>
+<span class="sd">    href=&quot;https://en.wikipedia.org/wiki/Butterworth_filter&quot;&gt;Butterworth</span>
+<span class="sd">    lowpass filter&lt;/a&gt;. Remarkably good when your signal</span>
+<span class="sd">    does not have high-frequencies beyond a certain cutoff frequency.</span>
+<span class="sd">    This is probably the first algorithm that should be tried of all</span>
+<span class="sd">    currently available in Aydin. It is actually quite impressive how</span>
+<span class="sd">    well this performs in practice. If the signal in your images is</span>
+<span class="sd">    band-limited as is often the case for microscopy images, this</span>
+<span class="sd">    denoiser will work great.</span>
+<span class="sd">    \n\n</span>
+<span class="sd">    Note: We recommend applying a variance stabilisation transform</span>
+<span class="sd">    to improve results for images with non-Gaussian noise.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image: ArrayLike</span>
+<span class="sd">        Image to be denoised</span>
+
+<span class="sd">    axes: Optional[Tuple[int,...]]</span>
+<span class="sd">        Axes over which to apply lowpass filtering.</span>
+
+<span class="sd">    filter_type: str</span>
+<span class="sd">        Type of filter. The default is &#39;butterworth&#39; but we have now introduced</span>
+<span class="sd">        another filter type: &#39;chebyshev2&#39; which is a Type II Chebyshev filter</span>
+<span class="sd">        with a steeper cut-off than Butterworth at the cost of some ripples</span>
+<span class="sd">        in the rejected high frequencies.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    freq_cutoff: Union[float, Sequence[float]]</span>
+<span class="sd">        Single or sequence cutoff frequency, must be within [0, 1]</span>
+
+<span class="sd">    order: float</span>
+<span class="sd">        Filter order, typically an integer above 1.</span>
+
+<span class="sd">    min_padding: int</span>
+<span class="sd">        Minimum amount of padding to be added to avoid edge effects.</span>
+
+<span class="sd">    max_padding: int</span>
+<span class="sd">        Maximum amount of padding to be added to avoid edge effects.</span>
+
+<span class="sd">    multi_core: bool</span>
+<span class="sd">        By default we use as many cores as possible, in some cases, for small</span>
+<span class="sd">        (test) images, it might be faster to run on a single core instead of</span>
+<span class="sd">        starting the whole parallelization machinery.</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoised image</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Default axes:</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+
+    <span class="c1"># Selected axes:</span>
+    <span class="n">selected_axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">a</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+
+    <span class="c1"># Normalise freq_cutoff argument to tuple:</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">freq_cutoff</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="n">freq_cutoff</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">freq_cutoff</span> <span class="k">if</span> <span class="n">s</span> <span class="k">else</span> <span class="mf">1.0</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">selected_axes</span><span class="p">)</span>
+
+    <span class="c1"># Number of workers:</span>
+    <span class="n">workers</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">multi_core</span> <span class="k">else</span> <span class="mi">1</span>
+
+    <span class="c1"># First we need to pad the image.</span>
+    <span class="c1"># By how much? this depends on how much low filtering we need to do:</span>
+    <span class="n">pad_width</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">_apw</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">min_padding</span><span class="p">,</span> <span class="n">max_padding</span><span class="p">),</span>
+                <span class="n">_apw</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">min_padding</span><span class="p">,</span> <span class="n">max_padding</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">sa</span>
+            <span class="k">else</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">sa</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">selected_axes</span><span class="p">,</span> <span class="n">freq_cutoff</span><span class="p">,</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># pad image:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="n">pad_width</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;reflect&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Move to frequency space:</span>
+    <span class="n">image_f</span> <span class="o">=</span> <span class="n">fftn</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+
+    <span class="c1"># Center frequencies:</span>
+    <span class="n">image_f</span> <span class="o">=</span> <span class="n">fftshift</span><span class="p">(</span><span class="n">image_f</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+
+    <span class="c1"># Compute squared distance image:</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_compute_distance_image</span><span class="p">(</span><span class="n">freq_cutoff</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">selected_axes</span><span class="p">)</span>
+
+    <span class="c1"># Choose filter type:</span>
+    <span class="k">if</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;butterworth&#39;</span><span class="p">:</span>
+        <span class="c1"># Prepare filter:</span>
+        <span class="n">_filter</span> <span class="o">=</span> <span class="n">_filter_butterworth</span>
+        <span class="nb">filter</span> <span class="o">=</span> <span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="n">multi_core</span><span class="p">)(</span><span class="n">_filter</span><span class="p">)</span>
+
+        <span class="c1"># Apply filter:</span>
+        <span class="n">image_f</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="n">image_f</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">filter_type</span> <span class="o">==</span> <span class="s1">&#39;chebyshev2&#39;</span><span class="p">:</span>
+        <span class="c1"># Prepare filter:</span>
+        <span class="n">_filter</span> <span class="o">=</span> <span class="n">_filter_chebyshev</span>
+        <span class="nb">filter</span> <span class="o">=</span> <span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="n">multi_core</span><span class="p">)(</span><span class="n">_filter</span><span class="p">)</span>
+
+        <span class="c1"># Apply filter:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">order</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">chebyshev</span> <span class="o">=</span> <span class="n">eval_chebyt</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">image_f</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="n">image_f</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">chebyshev</span><span class="p">)</span>
+
+    <span class="c1"># Shift back:</span>
+    <span class="n">image_f</span> <span class="o">=</span> <span class="n">ifftshift</span><span class="p">(</span><span class="n">image_f</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+
+    <span class="c1"># Back in real space:</span>
+    <span class="n">denoised</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">ifftn</span><span class="p">(</span><span class="n">image_f</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">))</span>
+
+    <span class="c1"># Crop to remove padding:</span>
+    <span class="n">denoised</span> <span class="o">=</span> <span class="n">denoised</span><span class="p">[</span>
+        <span class="nb">tuple</span><span class="p">(</span>
+            <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="o">-</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">u</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">v</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pad_width</span>
+        <span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">denoised</span></div>
+
+
+<span class="c1"># Todo: write a jitted version of this!</span>
+<span class="c1"># @jit(nopython=True, parallel=True)</span>
+<span class="k">def</span> <span class="nf">_compute_distance_image</span><span class="p">(</span><span class="n">freq_cutoff</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">selected_axes</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">axis_grid</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="k">if</span> <span class="n">sa</span> <span class="k">else</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">s</span><span class="p">,)))</span>
+        <span class="k">for</span> <span class="n">sa</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">selected_axes</span><span class="p">,</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">fc</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">freq_cutoff</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="o">*</span><span class="n">axis_grid</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">)):</span>
+        <span class="n">f</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="n">fc</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+
+<span class="k">def</span> <span class="nf">_apw</span><span class="p">(</span><span class="n">dim_size</span><span class="p">,</span> <span class="n">freq_cutoff</span><span class="p">,</span> <span class="n">min_padding</span><span class="p">,</span> <span class="n">max_padding</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span>
+        <span class="n">dim_size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="nb">min</span><span class="p">(</span><span class="n">max_padding</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_padding</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1e-10</span> <span class="o">+</span> <span class="n">freq_cutoff</span><span class="p">)))),</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_filter_chebyshev</span><span class="p">(</span><span class="n">image_f</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">chebyshev</span><span class="p">):</span>
+    <span class="n">image_f</span> <span class="o">/=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">((</span><span class="n">epsilon</span> <span class="o">*</span> <span class="n">chebyshev</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">image_f</span>
+
+
+<span class="k">def</span> <span class="nf">_filter_butterworth</span><span class="p">(</span><span class="n">image_f</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+    <span class="n">image_f</span> <span class="o">/=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">f</span><span class="o">**</span><span class="n">order</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">image_f</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.14
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="butterworth.html">v0.1.14</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

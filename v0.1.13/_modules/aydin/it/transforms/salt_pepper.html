@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.transforms.salt_pepper &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.transforms.salt_pepper</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.transforms.salt_pepper</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sort</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">uniform_filter</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers.lipschitz</span> <span class="kn">import</span> <span class="n">denoise_lipschitz</span>
+<span class="kn">from</span> <span class="nn">aydin.it.transforms.base</span> <span class="kn">import</span> <span class="n">ImageTransformBase</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span><span class="p">,</span> <span class="n">lprint</span>
+
+
+<div class="viewcode-block" id="SaltPepperTransform"><a class="viewcode-back" href="../../../../api/transforms.html#aydin.it.transforms.salt_pepper.SaltPepperTransform">[docs]</a><span class="k">class</span> <span class="nc">SaltPepperTransform</span><span class="p">(</span><span class="n">ImageTransformBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Salt And Pepper Correction</span>
+
+<span class="sd">    Detectors such as cameras have &#39;broken&#39; pixels that blink, are very dim,</span>
+<span class="sd">    or very bright. Other phenomena cause voxels to have very different</span>
+<span class="sd">    values from their neighbors, this is often called &#39;impulse&#39; or</span>
+<span class="sd">    &#39;salt-and-pepper&#39; noise. While self-supervised denoising can solve many of</span>
+<span class="sd">    these issues, there is no reason to not to alleviate the task, especially</span>
+<span class="sd">    when there are simple and fast approaches that can tackle this kind of</span>
+<span class="sd">    noise. This preprocessing replaces voxels with the median of its</span>
+<span class="sd">    neighbors if the voxel value is too different from its neighbors. This</span>
+<span class="sd">    difference is proportional to the local second-derivative of the image.</span>
+<span class="sd">    Increase the threshold parameter to tolerate more variation, decrease it</span>
+<span class="sd">    to be more aggressive in removing salt &amp; pepper noise. The algorithm is</span>
+<span class="sd">    iterative, starting with the most offending pixels, until no pixels are</span>
+<span class="sd">    corrected. You can set the max proportion of pixels that are allowed to</span>
+<span class="sd">    be corrected if you can give a good estimate for that.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">preprocess_description</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Salt and pepper pixels correction&quot;</span> <span class="o">+</span> <span class="n">ImageTransformBase</span><span class="o">.</span><span class="n">preprocess_description</span>
+    <span class="p">)</span>
+    <span class="n">postprocess_description</span> <span class="o">=</span> <span class="s2">&quot;Not supported (why would anyone want to do that? ☺)&quot;</span>
+    <span class="n">postprocess_supported</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">postprocess_recommended</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fix_repeated</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">max_repeated</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">fix_lipschitz</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">lipschitz</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">percentile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
+        <span class="n">priority</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.08</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a Salt And Pepper Transform</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        fix_repeated: bool</span>
+<span class="sd">             Removes Salt &amp; pepper by finding highly repeated values.</span>
+<span class="sd">             These values are then considered as erroneous and are fixed</span>
+<span class="sd">             by interpolation.</span>
+
+<span class="sd">        max_repeated: int</span>
+<span class="sd">            Max number of repeated values to fix.</span>
+
+<span class="sd">        fix_lipschitz: bool</span>
+<span class="sd">            Removes Salt &amp; pepper by enforcing Lipschitz continuity.</span>
+
+<span class="sd">        lipschitz : float</span>
+<span class="sd">            Lipschitz threshold. Increase to tolerate more variation, decrease to be</span>
+<span class="sd">            more aggressive in removing impulse/salt&amp;pepper noise.</span>
+
+<span class="sd">        percentile : float</span>
+<span class="sd">            Percentile value used to determine the threshold</span>
+<span class="sd">            for choosing the worst offending voxels per iteration</span>
+<span class="sd">            according to the Lipschitz threshold.</span>
+
+<span class="sd">        num_iterations : int</span>
+<span class="sd">            Number of iterations for enforcing Lipschitz continuity.</span>
+
+<span class="sd">        priority : float</span>
+<span class="sd">            The priority is a value within [0,1] used to determine the order in</span>
+<span class="sd">            which to apply the pre- and post-processing transforms. Transforms</span>
+<span class="sd">            are sorted and applied in ascending order during preprocesing and in</span>
+<span class="sd">            the reverse, descending, order during post-processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fix_lipschitz</span> <span class="o">=</span> <span class="n">fix_lipschitz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_iterations</span> <span class="o">=</span> <span class="n">num_iterations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correction_percentile</span> <span class="o">=</span> <span class="n">percentile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lipschitz</span> <span class="o">=</span> <span class="n">lipschitz</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fix_repeated</span> <span class="o">=</span> <span class="n">fix_repeated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_repeated</span> <span class="o">=</span> <span class="n">max_repeated</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instanciating: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># We exclude certain fields from saving:</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_original_dtype&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> (fix_lipschitz=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fix_lipschitz</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; num_iterations=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">num_iterations</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; correction_percentile=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">correction_percentile</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; lipschitz=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lipschitz</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; fix_repeated=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fix_repeated</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; max_repeated=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_repeated</span><span class="si">}</span><span class="s1"> )&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Broken Pixels Correction for array of shape: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and dtype: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">:&quot;</span>
+        <span class="p">):</span>
+            <span class="c1"># We save the original dtype:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span>
+
+            <span class="c1"># If needed, we convert to float32:</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># First we look at over represented voxel values -- a sign of problematic voxels,</span>
+            <span class="c1"># and try to fix them:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_repeated</span><span class="p">:</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_repeated_value_method</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+            <span class="c1"># Then we enforce Lipschitz continuity:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_lipschitz</span><span class="p">:</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lipschitz_method</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">array</span>
+
+    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
+        <span class="c1"># undoing this transform is unpractical and unlikely to be usefull</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">array</span>
+
+    <span class="k">def</span> <span class="nf">_repeated_value_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="s2">&quot;Correcting for wrong pixels values using the &#39;repeated-value&#39; approach:&quot;</span>
+        <span class="p">):</span>
+            <span class="n">unique</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># How many unique values in image?</span>
+            <span class="n">num_unique_values</span> <span class="o">=</span> <span class="n">unique</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of unique values in image: </span><span class="si">{</span><span class="n">num_unique_values</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Most occuring value</span>
+            <span class="n">most_occuring_value</span> <span class="o">=</span> <span class="n">unique</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">counts</span><span class="p">)]</span>
+            <span class="n">highest_count</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Most occurring value in array: </span><span class="si">{</span><span class="n">most_occuring_value</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">highest_count</span><span class="si">}</span><span class="s2"> times.&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Assuming a uniform distribution we would expect each value to be used at most:</span>
+            <span class="n">average_count</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">size</span> <span class="o">//</span> <span class="n">num_unique_values</span>
+            <span class="n">lprint</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Average number of occurences of a value assuming uniform distribution: </span><span class="si">{</span><span class="n">average_count</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="c1"># We fix at most n over-represented values:</span>
+            <span class="n">selected_counts</span> <span class="o">=</span> <span class="n">sort</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+
+            <span class="c1"># First we ignore counts below a certain thresholds:</span>
+            <span class="n">selected_counts</span> <span class="o">=</span> <span class="n">selected_counts</span><span class="p">[</span><span class="n">selected_counts</span> <span class="o">&gt;</span> <span class="n">average_count</span><span class="p">]</span>
+
+            <span class="c1"># use Otsu split to clean up remaining values:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">_otsu_split</span><span class="p">(</span><span class="n">selected_counts</span><span class="p">)</span>
+            <span class="n">selected_counts</span> <span class="o">=</span> <span class="n">selected_counts</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+            <span class="c1"># Maximum number of repeated values to remove:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_repeated</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected_counts</span><span class="p">))</span>
+            <span class="n">max_tolerated_count</span> <span class="o">=</span> <span class="n">selected_counts</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">]</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Maximum tolerated count per value: </span><span class="si">{</span><span class="n">max_tolerated_count</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># If a voxel value appears over more than 0.1% of voxels, then it is a problematic value:</span>
+            <span class="n">problematic_counts_mask</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">&gt;</span> <span class="n">max_tolerated_count</span>
+            <span class="n">problematic_counts</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="n">problematic_counts_mask</span><span class="p">]</span>
+            <span class="n">problematic_values</span> <span class="o">=</span> <span class="n">unique</span><span class="p">[</span><span class="n">problematic_counts_mask</span><span class="p">]</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problematic values: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">problematic_values</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Problematic counts: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">problematic_counts</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># We construct the mask of good values:</span>
+            <span class="n">good_values_mask</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">bool_</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">problematic_value</span> <span class="ow">in</span> <span class="n">problematic_values</span><span class="p">:</span>
+                <span class="n">good_values_mask</span> <span class="o">&amp;=</span> <span class="n">array</span> <span class="o">!=</span> <span class="n">problematic_value</span>
+
+            <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Correcting voxels with values: </span><span class="si">{</span><span class="n">problematic_values</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">):</span>
+
+                <span class="c1"># We save the good values (copy!):</span>
+                <span class="n">good_values</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">good_values_mask</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+                <span class="c1"># We compute the number of iterations:</span>
+                <span class="n">num_bad_values</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">good_values</span><span class="p">)</span>
+                <span class="n">num_iterations</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">num_bad_values</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span>
+                <span class="p">)</span>
+
+                <span class="c1"># We solve the harmonic equation:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iterations</span><span class="p">):</span>
+                    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Iteration </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="c1"># We compute the median:</span>
+                    <span class="n">array</span> <span class="o">=</span> <span class="n">uniform_filter</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="c1"># We use the median to correct pixels:</span>
+                    <span class="n">array</span><span class="p">[</span><span class="n">good_values_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">good_values</span>
+
+                <span class="c1"># count number of corrections for this round:</span>
+                <span class="n">num_corrections</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of corrections: </span><span class="si">{</span><span class="n">num_corrections</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">array</span>
+
+    <span class="k">def</span> <span class="nf">_lipschitz_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+        <span class="c1"># Iterations:</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="s2">&quot;Correcting for wrong pixels values using the Lipschitz approach:&quot;</span>
+        <span class="p">):</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">denoise_lipschitz</span><span class="p">(</span>
+                <span class="n">array</span><span class="p">,</span>
+                <span class="n">lipschitz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lipschitz</span><span class="p">,</span>
+                <span class="n">percentile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">correction_percentile</span><span class="p">,</span>
+                <span class="n">max_num_iterations</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_iterations</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">array</span>
+
+            <span class="c1"># OLD METHOD KEEP!</span>
+            <span class="c1"># for i in range(self.num_iterations):</span>
+            <span class="c1">#     lprint(f&quot;Iteration {i}&quot;)</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # Compute median:</span>
+            <span class="c1">#     median = median_filter(array, size=3)</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # We scale the lipschitz threshold to the image std at &#39;3 sigma&#39; :</span>
+            <span class="c1">#     lipschitz = self.lipschitz * 3 * median.std()</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # We compute the &#39;error&#39;:</span>
+            <span class="c1">#     median, error = self._compute_error(</span>
+            <span class="c1">#         array, median=median, lipschitz=lipschitz</span>
+            <span class="c1">#     )</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # We compute the threshold on the basis of the errors,</span>
+            <span class="c1">#     # we first tackle the most offending voxels:</span>
+            <span class="c1">#     threshold = numpy.percentile(</span>
+            <span class="c1">#         error, q=100 * (1 - self.correction_percentile)</span>
+            <span class="c1">#     )</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # We compute the mask:</span>
+            <span class="c1">#     mask = error &gt; threshold</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # count number of corrections for this round:</span>
+            <span class="c1">#     num_corrections = numpy.sum(mask)</span>
+            <span class="c1">#     lprint(f&quot;Number of corrections: {num_corrections}&quot;)</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # if no corrections made we stop iterating:</span>
+            <span class="c1">#     if num_corrections == 0:</span>
+            <span class="c1">#         break</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # We keep track of the proportion of voxels corrected:</span>
+            <span class="c1">#     proportion = (</span>
+            <span class="c1">#         num_corrections + total_number_of_corrections</span>
+            <span class="c1">#     ) / array.size</span>
+            <span class="c1">#     lprint(</span>
+            <span class="c1">#         f&quot;Proportion of corrected pixels: {int(proportion * 100)}% (up to now), versus maximum: {int(self.max_proportion_corrected * 100)}%) &quot;</span>
+            <span class="c1">#     )</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # If too many voxels have been corrected we stop:</span>
+            <span class="c1">#     if proportion &gt; self.max_proportion_corrected:</span>
+            <span class="c1">#         break</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # We use the median to correct pixels:</span>
+            <span class="c1">#     array[mask] = median[mask]</span>
+            <span class="c1">#</span>
+            <span class="c1">#     # increment total number of corrections:</span>
+            <span class="c1">#     total_number_of_corrections += num_corrections</span>
+
+    <span class="k">def</span> <span class="nf">_compute_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">median</span><span class="p">,</span> <span class="n">lipschitz</span><span class="p">):</span>
+        <span class="c1"># we compute the error map:</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">median</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">error</span> <span class="o">-=</span> <span class="n">array</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">error</span><span class="p">)</span>
+        <span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">lipschitz</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">error</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">-=</span> <span class="n">lipschitz</span>
+        <span class="k">return</span> <span class="n">median</span><span class="p">,</span> <span class="n">error</span></div>
+
+
+<span class="k">def</span> <span class="nf">_otsu_split</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
+    <span class="c1"># Flatten array:</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">mean_weigth</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">array</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">his</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">final_thresh</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">final_value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">Wb</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">his</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">mean_weigth</span>
+        <span class="n">Wf</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">his</span><span class="p">[</span><span class="n">i</span><span class="p">:])</span> <span class="o">*</span> <span class="n">mean_weigth</span>
+
+        <span class="n">mub</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">his</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">muf</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">his</span><span class="p">[</span><span class="n">i</span><span class="p">:])</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="n">Wb</span> <span class="o">*</span> <span class="n">Wf</span> <span class="o">*</span> <span class="p">(</span><span class="n">mub</span> <span class="o">-</span> <span class="n">muf</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+        <span class="c1"># print(&quot;Wb&quot;, Wb, &quot;Wf&quot;, Wf)</span>
+        <span class="c1"># print(&quot;t&quot;, i, &quot;value&quot;, value)</span>
+
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">final_value</span><span class="p">:</span>
+            <span class="n">final_thresh</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">bins</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="n">final_value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">array</span> <span class="o">&gt;</span> <span class="n">final_thresh</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">mask</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.13
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="salt_pepper.html">v0.1.13</a></dd>
+      <dd><a href="../../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

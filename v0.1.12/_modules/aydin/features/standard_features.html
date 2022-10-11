@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.features.standard_features &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.features.standard_features</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.features.standard_features</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">aydin.features.extensible_features</span> <span class="kn">import</span> <span class="n">ExtensibleFeatureGenerator</span>
+<span class="kn">from</span> <span class="nn">aydin.features.groups.dct</span> <span class="kn">import</span> <span class="n">DCTFeatures</span>
+<span class="kn">from</span> <span class="nn">aydin.features.groups.median</span> <span class="kn">import</span> <span class="n">MedianFeatures</span>
+<span class="kn">from</span> <span class="nn">aydin.features.groups.random</span> <span class="kn">import</span> <span class="n">RandomFeatures</span>
+<span class="kn">from</span> <span class="nn">aydin.features.groups.spatial</span> <span class="kn">import</span> <span class="n">SpatialFeatures</span>
+<span class="kn">from</span> <span class="nn">aydin.features.groups.uniform</span> <span class="kn">import</span> <span class="n">UniformFeatures</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lprint</span>
+
+
+<div class="viewcode-block" id="StandardFeatureGenerator"><a class="viewcode-back" href="../../../api/feature_generator.html#aydin.features.standard_features.StandardFeatureGenerator">[docs]</a><span class="k">class</span> <span class="nc">StandardFeatureGenerator</span><span class="p">(</span><span class="n">ExtensibleFeatureGenerator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Standard Feature Generator&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">kernel_widths</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_scales</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_shapes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">13</span><span class="p">,</span>
+        <span class="n">scale_one_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">include_scale_one</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">include_fine_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">include_corner_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">include_line_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">decimate_large_scale_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">extend_large_scale_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">include_spatial_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">spatial_features_coarsening</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">num_sinusoidal_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">include_median_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">include_dct_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">dct_max_freq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">include_random_conv_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructs a standard feature generator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        kernel_widths : numpy.typing.ArrayLike</span>
+<span class="sd">            ArrayLike of kernel widths.</span>
+<span class="sd">        kernel_scales : numpy.typing.ArrayLike</span>
+<span class="sd">            ArrayLike of kernel scales.</span>
+<span class="sd">        kernel_shapes : numpy.typing.ArrayLike</span>
+<span class="sd">            ArrayLike of kernel shapes.</span>
+<span class="sd">        min_level : int</span>
+<span class="sd">            Minimum level of features to include</span>
+<span class="sd">        max_level : int</span>
+<span class="sd">            Maximum level of features to include</span>
+<span class="sd">        scale_one_width : int</span>
+<span class="sd">            Width of the scale one features</span>
+<span class="sd">        include_scale_one : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on inclusion of scale-one-features</span>
+<span class="sd">        include_fine_features : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on inclusion of fine features</span>
+<span class="sd">        include_corner_features : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on inclusion of corner features</span>
+<span class="sd">        include_line_features : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on inclusion of line features</span>
+<span class="sd">        decimate_large_scale_features : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on decimation of large scale features</span>
+<span class="sd">        extend_large_scale_features : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on extension of large scale features.</span>
+<span class="sd">        include_spatial_features : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on inclusion of spatial features</span>
+<span class="sd">        spatial_features_coarsening : int</span>
+<span class="sd">            Degree of coarsening to apply on spatial features</span>
+<span class="sd">            to prevent identification of individual pixel values</span>
+<span class="sd">        num_sinusoidal_features : int</span>
+<span class="sd">            Number of sinusoidal features</span>
+<span class="sd">        include_median_features : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on inclusion of median features</span>
+<span class="sd">        include_dct_features : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on inclusion of dct features</span>
+<span class="sd">        dct_max_freq : float</span>
+<span class="sd">            Maximum included frequency during</span>
+<span class="sd">            dct features computation.</span>
+<span class="sd">        include_random_conv_features : bool</span>
+<span class="sd">            True or False, argument to set decision</span>
+<span class="sd">            on inclusion of random convolutional features</span>
+<span class="sd">        dtype</span>
+<span class="sd">            Datatype of the features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">dtype</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Features will be computed using dtype: </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">uniform</span> <span class="o">=</span> <span class="n">UniformFeatures</span><span class="p">(</span>
+            <span class="n">kernel_widths</span><span class="o">=</span><span class="n">kernel_widths</span><span class="p">,</span>
+            <span class="n">kernel_scales</span><span class="o">=</span><span class="n">kernel_scales</span><span class="p">,</span>
+            <span class="n">kernel_shapes</span><span class="o">=</span><span class="n">kernel_shapes</span><span class="p">,</span>
+            <span class="n">min_level</span><span class="o">=</span><span class="n">min_level</span><span class="p">,</span>
+            <span class="n">max_level</span><span class="o">=</span><span class="n">max_level</span><span class="p">,</span>
+            <span class="n">include_scale_one</span><span class="o">=</span><span class="n">include_scale_one</span><span class="p">,</span>
+            <span class="n">include_fine_features</span><span class="o">=</span><span class="n">include_fine_features</span><span class="p">,</span>
+            <span class="n">include_corner_features</span><span class="o">=</span><span class="n">include_corner_features</span><span class="p">,</span>
+            <span class="n">include_line_features</span><span class="o">=</span><span class="n">include_line_features</span><span class="p">,</span>
+            <span class="n">decimate_large_scale_features</span><span class="o">=</span><span class="n">decimate_large_scale_features</span><span class="p">,</span>
+            <span class="n">extend_large_scale_features</span><span class="o">=</span><span class="n">extend_large_scale_features</span><span class="p">,</span>
+            <span class="n">scale_one_width</span><span class="o">=</span><span class="n">scale_one_width</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">uniform</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">include_spatial_features</span><span class="p">:</span>
+            <span class="n">spatial</span> <span class="o">=</span> <span class="n">SpatialFeatures</span><span class="p">(</span><span class="n">coarsening</span><span class="o">=</span><span class="n">spatial_features_coarsening</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">spatial</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">num_sinusoidal_features</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">periods</span> <span class="o">=</span> <span class="nb">list</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sinusoidal_features</span><span class="p">)])</span>
+            <span class="k">for</span> <span class="n">period</span> <span class="ow">in</span> <span class="n">periods</span><span class="p">:</span>
+                <span class="n">spatial</span> <span class="o">=</span> <span class="n">SpatialFeatures</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">spatial</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">include_median_features</span><span class="p">:</span>
+            <span class="n">radii</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="n">medians</span> <span class="o">=</span> <span class="n">MedianFeatures</span><span class="p">(</span><span class="n">radii</span><span class="o">=</span><span class="n">radii</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">medians</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">include_dct_features</span><span class="p">:</span>
+            <span class="n">dct3</span> <span class="o">=</span> <span class="n">DCTFeatures</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_freq</span><span class="o">=</span><span class="n">dct_max_freq</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">dct5</span> <span class="o">=</span> <span class="n">DCTFeatures</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_freq</span><span class="o">=</span><span class="n">dct_max_freq</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">dct7</span> <span class="o">=</span> <span class="n">DCTFeatures</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">max_freq</span><span class="o">=</span><span class="n">dct_max_freq</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">dct3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">dct5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">dct7</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">include_random_conv_features</span><span class="p">:</span>
+            <span class="n">rnd3</span> <span class="o">=</span> <span class="n">RandomFeatures</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_features</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">rnd5</span> <span class="o">=</span> <span class="n">RandomFeatures</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_features</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="n">rnd7</span> <span class="o">=</span> <span class="n">RandomFeatures</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">num_features</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">rnd3</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">rnd5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_feature_group</span><span class="p">(</span><span class="n">rnd7</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.12
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="standard_features.html">v0.1.12</a></dd>
+      <dd><a href="../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

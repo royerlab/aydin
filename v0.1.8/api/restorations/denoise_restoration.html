@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Denoise Restoration &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Deconvolve Restoration" href="deconvolve_restoration.html" />
+    <link rel="prev" title="Restoration" href="../restoration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html">
+            <img src="../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../restoration.html">Restoration</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Denoise</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#classic">Classic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#noise2selffgr">Noise2SelfFGR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#noise2selfcnn">Noise2SelfCNN</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deconvolve_restoration.html">Deconvolve</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contact_us/github.html">On Github</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../restoration.html">Restoration</a> &raquo;</li>
+      <li>Denoise Restoration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/restorations/denoise_restoration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="denoise-restoration">
+<h1>Denoise Restoration<a class="headerlink" href="#denoise-restoration" title="Permalink to this headline"></a></h1>
+<section id="classic">
+<h2>Classic<a class="headerlink" href="#classic" title="Permalink to this headline"></a></h2>
+<dl>
+<dt>Procedural API:</dt><dd></dd>
+<dt>Object-Oriented API:</dt><dd><dl class="py class">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.restoration.denoise.classic.</span></span><span class="sig-name descname"><span class="pre">Classic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'butterworth'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_level_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">it_transforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/classic.html#Classic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic" title="Permalink to this definition"></a></dt>
+<dd><p>Classic Image Denoising.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>variant</strong><span class="classifier">str</span></dt><dd><p>Opacity of the layer visual, between 0.0 and 1.0.</p>
+</dd>
+<dt><strong>use_model</strong><span class="classifier">bool</span></dt><dd><p>Flag to choose to train a new model or infer from a
+previously trained model. By default it is None.</p>
+</dd>
+<dt><strong>input_model_path</strong><span class="classifier">string</span></dt><dd><p>Path to model that is desired to be used for inference.
+By default it is None.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.archive_model">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">archive_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.archive_model" title="Permalink to this definition"></a></dt>
+<dd><p>Archives the model to given destination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>source</strong><span class="classifier">str</span></dt><dd></dd>
+<dt><strong>destination</strong><span class="classifier">str</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.clean_model_folder">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">clean_model_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.clean_model_folder" title="Permalink to this definition"></a></dt>
+<dd><p>Method to clean model folder created</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.configurable_arguments">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">configurable_arguments</span></span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.configurable_arguments" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the configurable arguments that will be exposed
+on GUI and CLI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.denoise">
+<span class="sig-name descname"><span class="pre">denoise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noisy_image</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chan_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/classic.html#Classic.denoise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.denoise" title="Permalink to this definition"></a></dt>
+<dd><p>Method to denoise an image with trained Noise2Self FGR.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>batch_axes</strong><span class="classifier">array_like, optional</span></dt><dd><p>Indices of batch axes.</p>
+</dd>
+<dt><strong>chan_axes</strong><span class="classifier">array_like, optional</span></dt><dd><p>Indices of channel axes.</p>
+</dd>
+<dt><strong>noisy_image</strong><span class="classifier">numpy.ndarray</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>response</strong><span class="classifier">numpy.ndarray</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.get_translator">
+<span class="sig-name descname"><span class="pre">get_translator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/classic.html#Classic.get_translator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.get_translator" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the corresponding translator instance for given selections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>feature_generator</strong><span class="classifier">FeatureGeneratorBase</span></dt><dd></dd>
+<dt><strong>regressor</strong><span class="classifier">RegressorBase</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>it</strong><span class="classifier">ImageTranslatorBase</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.implementations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">implementations</span></span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.implementations" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the list of discovered implementations for given method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.save_model">
+<span class="sig-name descname"><span class="pre">save_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.save_model" title="Permalink to this definition"></a></dt>
+<dd><p>Saves the latest trained model next to the input image file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model_path</strong><span class="classifier">str</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.set_image_metrics">
+<span class="sig-name descname"><span class="pre">set_image_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/classic.html#Classic.set_image_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.set_image_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>Sets several image metric parameters used internally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>image_shape</strong><span class="classifier">tuple</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.stop_running">
+<span class="sig-name descname"><span class="pre">stop_running</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/classic.html#Classic.stop_running"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.stop_running" title="Permalink to this definition"></a></dt>
+<dd><p>Method to stop running N2S instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.classic.Classic.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noisy_image</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chan_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/classic.html#Classic.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.classic.Classic.train" title="Permalink to this definition"></a></dt>
+<dd><p>Method to run training for Noise2Self FGR.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>noisy_image</strong><span class="classifier">numpy.ndarray</span></dt><dd></dd>
+<dt><strong>batch_axes</strong><span class="classifier">array_like, optional</span></dt><dd><p>Indices of batch axes.</p>
+</dd>
+<dt><strong>chan_axes</strong><span class="classifier">array_like, optional</span></dt><dd><p>Indices of channel axes.</p>
+</dd>
+<dt><strong>image_path</strong><span class="classifier">str</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>response</strong><span class="classifier">numpy.ndarray</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</dd>
+</dl>
+</section>
+<section id="noise2selffgr">
+<h2>Noise2SelfFGR<a class="headerlink" href="#noise2selffgr" title="Permalink to this headline"></a></h2>
+<dl>
+<dt>Procedural API:</dt><dd></dd>
+<dt>Object-Oriented API:</dt><dd><dl class="py class">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.restoration.denoise.noise2selffgr.</span></span><span class="sig-name descname"><span class="pre">Noise2SelfFGR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'fgr-cb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_model_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_level_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">it_transforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/noise2selffgr.html#Noise2SelfFGR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR" title="Permalink to this definition"></a></dt>
+<dd><p>Noise2Self image denoising “Feature Generation &amp; Regression” (FGR)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive_model">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">archive_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.archive_model" title="Permalink to this definition"></a></dt>
+<dd><p>Archives the model to given destination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>source</strong><span class="classifier">str</span></dt><dd></dd>
+<dt><strong>destination</strong><span class="classifier">str</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.clean_model_folder">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">clean_model_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.clean_model_folder" title="Permalink to this definition"></a></dt>
+<dd><p>Method to clean model folder created</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.configurable_arguments">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">configurable_arguments</span></span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.configurable_arguments" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the configurable arguments that will be exposed
+on GUI and CLI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.denoise">
+<span class="sig-name descname"><span class="pre">denoise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noisy_image</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chan_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/noise2selffgr.html#Noise2SelfFGR.denoise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.denoise" title="Permalink to this definition"></a></dt>
+<dd><p>Method to denoise an image with trained Noise2Self FGR.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>batch_axes</strong><span class="classifier">array_like, optional</span></dt><dd><p>Indices of batch axes.</p>
+</dd>
+<dt><strong>chan_axes</strong><span class="classifier">array_like, optional</span></dt><dd><p>Indices of channel axes.</p>
+</dd>
+<dt><strong>noisy_image</strong><span class="classifier">numpy.ndarray</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>response</strong><span class="classifier">numpy.ndarray</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.get_generator">
+<span class="sig-name descname"><span class="pre">get_generator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/noise2selffgr.html#Noise2SelfFGR.get_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.get_generator" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the corresponding generator instance for given selections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>generator</strong><span class="classifier">FeatureGeneratorBase</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.get_regressor">
+<span class="sig-name descname"><span class="pre">get_regressor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/noise2selffgr.html#Noise2SelfFGR.get_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.get_regressor" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the corresponding regressor instance for given selections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>regressor</strong><span class="classifier">RegressorBase</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.get_translator">
+<span class="sig-name descname"><span class="pre">get_translator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_generator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regressor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/noise2selffgr.html#Noise2SelfFGR.get_translator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.get_translator" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the corresponding translator instance for given selections.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>feature_generator</strong><span class="classifier">FeatureGeneratorBase</span></dt><dd></dd>
+<dt><strong>regressor</strong><span class="classifier">RegressorBase</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>it</strong><span class="classifier">ImageTranslatorBase</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.implementations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">implementations</span></span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.implementations" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the list of discovered implementations for given method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save_model">
+<span class="sig-name descname"><span class="pre">save_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.save_model" title="Permalink to this definition"></a></dt>
+<dd><p>Saves the latest trained model next to the input image file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>model_path</strong><span class="classifier">str</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.set_image_metrics">
+<span class="sig-name descname"><span class="pre">set_image_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/noise2selffgr.html#Noise2SelfFGR.set_image_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.set_image_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>Sets several image metric parameters used internally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>image_shape</strong><span class="classifier">tuple</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.stop_running">
+<span class="sig-name descname"><span class="pre">stop_running</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/noise2selffgr.html#Noise2SelfFGR.stop_running"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.stop_running" title="Permalink to this definition"></a></dt>
+<dd><p>Method to stop running N2S instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noisy_image</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chan_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/restoration/denoise/noise2selffgr.html#Noise2SelfFGR.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR.train" title="Permalink to this definition"></a></dt>
+<dd><p>Method to run training for Noise2Self FGR.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>noisy_image</strong><span class="classifier">numpy.ndarray</span></dt><dd></dd>
+<dt><strong>batch_axes</strong><span class="classifier">array_like, optional</span></dt><dd><p>Indices of batch axes.</p>
+</dd>
+<dt><strong>chan_axes</strong><span class="classifier">array_like, optional</span></dt><dd><p>Indices of channel axes.</p>
+</dd>
+<dt><strong>image_path</strong><span class="classifier">str</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>response</strong><span class="classifier">numpy.ndarray</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</dd>
+</dl>
+</section>
+<section id="noise2selfcnn">
+<h2>Noise2SelfCNN<a class="headerlink" href="#noise2selfcnn" title="Permalink to this headline"></a></h2>
+<dl class="simple">
+<dt>Procedural API:</dt><dd></dd>
+<dt>Object-Oriented API:</dt><dd></dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../restoration.html" class="btn btn-neutral float-left" title="Restoration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deconvolve_restoration.html" class="btn btn-neutral float-right" title="Deconvolve Restoration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.8
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../v0.1.11/api/restorations/denoise_restoration.html">v0.1.11</a></dd>
+      <dd><a href="../../../v0.1.12/api/restorations/denoise_restoration.html">v0.1.12</a></dd>
+      <dd><a href="../../../v0.1.13/api/restorations/denoise_restoration.html">v0.1.13</a></dd>
+      <dd><a href="../../../v0.1.14/api/restorations/denoise_restoration.html">v0.1.14</a></dd>
+      <dd><a href="denoise_restoration.html">v0.1.8</a></dd>
+      <dd><a href="../../../v0.1.9/api/restorations/denoise_restoration.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

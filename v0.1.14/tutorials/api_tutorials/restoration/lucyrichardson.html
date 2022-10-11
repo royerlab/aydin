@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deconvolving an image using aydin API &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Denoising an image using ImageDenoiserClassic" href="../image_translator/classic.html" />
+    <link rel="prev" title="Denoising an image using Noise2SelfCNN restoration API" href="noise2self_cnn.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api_tutorials.html">Aydin API Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="classic.html">Denoise an image using Classic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise2self_fgr.html">Denoise an image using Noise2SelfFGR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="noise2self_cnn.html">Denoise an image using Noise2SelfCNN</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Deconvolving an image using aydin API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../image_translator/classic.html">Denoise an image using ImageDenoiserClassic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../image_translator/fgr.html">Denoise an image using ImageTranslatorFGR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../image_translator/cnn.html">Denoise an image using ImageTranslatorCNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../image_translator/noise2noise.html">How to implement Noise2Noise using ImageTranslatorFGR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../image_translator/supervised.html">How to implement supervised denoising using image translators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/attenuation.html">Apply attenuation transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/deskew.html">Apply deskew transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/fixed_pattern.html">Apply fixed pattern transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/highpass.html">Apply high-pass transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/histogram.html">Apply histogram equalisation transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/motion.html">Apply motion stabilisation transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/padding.html">Apply padding transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/periodic.html">Apply periodic noise suppression transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/range.html">Apply range transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/salt_pepper.html">Apply salt-pepper transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../transforms/variance_stabilisation.html">Apply variance stabilisation transform</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../api_tutorials.html">API Tutorials</a> &raquo;</li>
+      <li>Deconvolving an image using aydin API</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/tutorials/api_tutorials/restoration/lucyrichardson.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="deconvolving-an-image-using-aydin-api">
+<h1>Deconvolving an image using aydin API<a class="headerlink" href="#deconvolving-an-image-using-aydin-api" title="Permalink to this headline"></a></h1>
+<p>One can use the following lines to deconvolve a single image with default
+options using our Object-Oriented denoising API.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aydin.restoration.deconvolve.lr</span> <span class="kn">import</span> <span class="n">LucyRichardson</span>
+
+<span class="n">lr</span> <span class="o">=</span> <span class="n">LucyRichardson</span><span class="p">(</span>
+     <span class="n">psf_kernel</span><span class="o">=</span><span class="n">psf_kernel</span><span class="p">,</span> <span class="n">max_num_iterations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s1">&#39;scipy-cupy&#39;</span>
+ <span class="p">)</span>
+
+<span class="n">lr</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">noisy_and_blurred_image</span><span class="p">,</span> <span class="n">noisy_and_blurred_image</span><span class="p">)</span>
+
+<span class="n">lr_deconvolved_image</span> <span class="o">=</span> <span class="n">lr</span><span class="o">.</span><span class="n">deconvolve</span><span class="p">(</span><span class="n">noisy_and_blurred_image</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>One can also use the following lines to deconvolve a single image with default
+options using our procedural deconvolving endpoint.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aydin.restoration.deconvolve.lr</span> <span class="kn">import</span> <span class="n">lucyrichardson</span>
+
+<span class="n">lr_deconvolved_image</span> <span class="o">=</span> <span class="n">lucyrichardson</span><span class="p">(</span><span class="n">noisy_and_blurred_image</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="noise2self_cnn.html" class="btn btn-neutral float-left" title="Denoising an image using Noise2SelfCNN restoration API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../image_translator/classic.html" class="btn btn-neutral float-right" title="Denoising an image using ImageDenoiserClassic" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.14
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../v0.1.11/tutorials/api_tutorials/restoration/lucyrichardson.html">v0.1.11</a></dd>
+      <dd><a href="../../../../v0.1.12/tutorials/api_tutorials/restoration/lucyrichardson.html">v0.1.12</a></dd>
+      <dd><a href="../../../../v0.1.13/tutorials/api_tutorials/restoration/lucyrichardson.html">v0.1.13</a></dd>
+      <dd><a href="lucyrichardson.html">v0.1.14</a></dd>
+      <dd><a href="../../../../v0.1.8/tutorials/api_tutorials/restoration/lucyrichardson.html">v0.1.8</a></dd>
+      <dd><a href="../../../../v0.1.9/tutorials/api_tutorials/restoration/lucyrichardson.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

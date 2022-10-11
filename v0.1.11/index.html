@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting started, with bundles: &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Install Aydin" href="getting_started/install.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#">
+            <img src="_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>Getting started, with bundles:</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <a class="reference internal image-reference" href="_images/aydin_logo_grad_black.png"><img alt="Logo text" src="_images/aydin_logo_grad_black.png" style="width: 400px;" /></a>
+<p><em>Image denoising, but chill…</em></p>
+<p>Aydin is a user-friendly, feature-rich, and fast image denoising tool that provides
+a number of self-supervised, auto-tuned, and unsupervised image denoising algorithms.
+Aydin handles from the get-go n-dimensional array-structured images with an arbitrary number
+of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal dimensions.</p>
+<p>It comes with <cite>Aydin Studio</cite> a <a class="reference external" href="https://royerlab.github.io/aydin/tutorials/gui_tutorials.html">graphical user interface</a>
+to easily experiment with all the different algorithms and parameters available,
+a <a class="reference external" href="https://royerlab.github.io/aydin/tutorials/cli_tutorials.html">command line interface</a>
+to run large jobs offline, and an
+<a class="reference external" href="https://royerlab.github.io/aydin/api/introduction.html">API</a> for
+custom coding and integration into other packages.</p>
+<p>Our GitHub repository can be found <a class="reference external" href="https://github.com/royerlab/aydin">here</a>. You can
+<a class="reference external" href="https://github.com/royerlab/aydin/issues">open issues</a> to communicate bug reports and
+feature requests and find <a class="reference external" href="https://github.com/royerlab/aydin/releases">our releases</a>.</p>
+<section id="getting-started-with-bundles">
+<h1>Getting started, with bundles:<a class="headerlink" href="#getting-started-with-bundles" title="Permalink to this headline"></a></h1>
+<p>To get started with Aydin, please download and install Aydin on your machine.</p>
+<div style="text-align: center; margin-left: 10%; margin-right: 10%">
+   <a href='https://github.com/royerlab/aydin/releases/download/v0.1.9/aydin_0.1.9_linux.zip'><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Tux.svg/249px-Tux.svg.png" style="max-height:100px; max-width:100px; overflow: hidden; float: left"></a>
+   <a href='https://github.com/royerlab/aydin/releases/download/v0.1.9/aydin_0.1.9_win.zip'><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Windows_logo_-_2012_%28dark_blue%29.svg/1280px-Windows_logo_-_2012_%28dark_blue%29.svg.png" style="max-height:100px; max-width:100px; overflow: hidden; float: center"></a>
+   <a href='https://github.com/royerlab/aydin/releases/download/v0.1.9/aydin_0.1.9_osx.pkg'><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/505px-Apple_logo_black.svg.png" style="max-height:100px; max-width:100px; overflow: hidden; float: right"></a>
+</div>
+<br>
+<br></section>
+<section id="getting-started-with-pip">
+<h1>Getting started, with pip:<a class="headerlink" href="#getting-started-with-pip" title="Permalink to this headline"></a></h1>
+<p>Aydin is support only on Python 3.9 currently. You can install Aydin with the following line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install aydin
+</pre></div>
+</div>
+</section>
+<section id="requirements">
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"></a></h1>
+<p>While aydin works even on tiny laptops, it will run faster and better if you have
+a Nvidia graphics card. We also recommend at least 16GB of RAM but more is better
+especially for very large gigabyte-sized images. In the absence of a GPU,
+the more CPU cores the better, obviously. Different algorithms have different performance
+profiles, some of our best algorithms can easily run on modest machines, but you will need
+patience.</p>
+</section>
+<section id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline"></a></h1>
+<p>Tutorials can be found <a class="reference external" href="https://royerlab.github.io/aydin/tutorials/tutorials_home.html">here</a>
+for an exhaustive tour of features and parameters for both
+the graphical interface (Aydin Studio), command line interface (CLI), and
+Python programming interface (API). To better understand how to tune parameters
+for a given image, please check our <a class="reference external" href="https://royerlab.github.io/aydin/use_cases/introduction.html">use cases</a>
+where we go through.</p>
+</section>
+<section id="how-to-cite">
+<h1>How to cite?<a class="headerlink" href="#how-to-cite" title="Permalink to this headline"></a></h1>
+<p>If you find Aydin useful and use it in your work, please kindly consider to cite us:</p>
+<a class="reference external image-reference" href="https://zenodo.org/badge/latestdoi/188953977"><img alt="https://zenodo.org/badge/188953977.svg" src="https://zenodo.org/badge/188953977.svg" /></a>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started/install.html" class="btn btn-neutral float-right" title="Install Aydin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.11
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="index.html">v0.1.11</a></dd>
+      <dd><a href="../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

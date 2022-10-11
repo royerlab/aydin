@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.transforms.variance_stabilisation &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.transforms.variance_stabilisation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.transforms.variance_stabilisation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">jit</span>
+
+<span class="c1"># from numpy.typing import ArrayLike</span>
+<span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">TransformerMixin</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PowerTransformer</span><span class="p">,</span> <span class="n">QuantileTransformer</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.transforms.base</span> <span class="kn">import</span> <span class="n">ImageTransformBase</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span><span class="p">,</span> <span class="n">lprint</span>
+
+
+<div class="viewcode-block" id="VarianceStabilisationTransform"><a class="viewcode-back" href="../../../../api/transforms.html#aydin.it.transforms.variance_stabilisation.VarianceStabilisationTransform">[docs]</a><span class="k">class</span> <span class="nc">VarianceStabilisationTransform</span><span class="p">(</span><span class="n">ImageTransformBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Variance Stabilization Transform (VST)</span>
+<span class="sd">    and other range compression functions.</span>
+
+<span class="sd">    Applies either the Yeo-Johnson, Box-Cox, Anscomb or some other VST</span>
+<span class="sd">    transform to the image. Variance stabilization turns an image with</span>
+<span class="sd">    Poisson or in general non-Gaussian noise into an image with approximately</span>
+<span class="sd">    Gaussian noise, which often facilitates denoising.</span>
+<span class="sd">    Also, in general for images with very skewed histograms with for example</span>
+<span class="sd">    dark regions of large extent and only a few very bright regions,</span>
+<span class="sd">    it is often beneficial to apply a sqrt or log transformation before</span>
+<span class="sd">    denoising.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">preprocess_description</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Apply transform&quot;</span> <span class="o">+</span> <span class="n">ImageTransformBase</span><span class="o">.</span><span class="n">preprocess_description</span>
+    <span class="p">)</span>
+    <span class="n">postprocess_description</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Undo transform&quot;</span> <span class="o">+</span> <span class="n">ImageTransformBase</span><span class="o">.</span><span class="n">postprocess_description</span>
+    <span class="p">)</span>
+    <span class="n">postprocess_supported</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">postprocess_recommended</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;anscomb&#39;</span><span class="p">,</span>
+        <span class="n">leave_as_float</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">priority</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.11</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a Variance Stabilisation Transform</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        mode : str</span>
+<span class="sd">            Variance stabilisation mode: &#39;yeo-johnson&#39;, &#39;box-cox&#39;,</span>
+<span class="sd">            &#39;quantile&#39;, &#39;anscomb&#39;, &#39;log&#39;, &#39;sqrt&#39; and &#39;identity&#39;.</span>
+<span class="sd">            Our tests show that Anscomb seems to work best for</span>
+<span class="sd">            typical microscopy images. However, your mileage may</span>
+<span class="sd">            vary. Images with strong contrast and very little</span>
+<span class="sd">            noise might not need variance stabilisation, but could</span>
+<span class="sd">            still benefit from value compression (log or sqrt).</span>
+<span class="sd">            The advantage of the Yeo-Johnson and Box-Cox transforms</span>
+<span class="sd">            is that they are adaptive, the transform is adjusted</span>
+<span class="sd">            to match the input distribution.</span>
+
+<span class="sd">        leave_as_float : bool</span>
+<span class="sd">            Does not attempt to cast back to original non-flloat data</span>
+<span class="sd">            type (8, 16, 32 bit integer), but instead leaves as 32 bit float.</span>
+
+<span class="sd">        priority : float</span>
+<span class="sd">            The priority is a value within [0,1] used to determine the order in</span>
+<span class="sd">            which to apply the pre- and post-processing transforms. Transforms</span>
+<span class="sd">            are sorted and applied in ascending order during preprocesing and in</span>
+<span class="sd">            the reverse, descending, order during post-processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leave_as_float</span> <span class="o">=</span> <span class="n">leave_as_float</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="p">:</span> <span class="n">TransformerMixin</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instanciating: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># We exclude certain fields from saving:</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_original_dtype&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_min&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_max&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_transform&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; (mode=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s1">)&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Stabilising variance (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">) for array of shape: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and dtype: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">):</span>
+            <span class="c1"># Let&#39;s ensure we are working with floats:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;identity&#39;</span><span class="p">:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">:</span>
+                <span class="n">min_value</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">_f_sqrt</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">min_value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span> <span class="o">=</span> <span class="n">min_value</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span><span class="p">:</span>
+                <span class="n">min_value</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">_f_log</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">min_value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span> <span class="o">=</span> <span class="n">min_value</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;anscomb&#39;</span><span class="p">:</span>
+                <span class="n">min_value</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">_f_anscomb</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">min_value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span> <span class="o">=</span> <span class="n">min_value</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;yeo-johnson&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;box-cox&#39;</span><span class="p">:</span>
+
+                <span class="c1"># If the image has negative values, or too small variance, we fallback to yeo-johnson:</span>
+                <span class="n">mode</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s1">&#39;yeo-johnson&#39;</span>
+                    <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span> <span class="o">&lt;</span> <span class="mf">1e-6</span>
+                    <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span>
+                <span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Actual mode used: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+
+                <span class="c1"># We prepare array to make it compatible to sklearn API and save shape:</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">ravel</span><span class="p">()[:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Instantiate sklearn power transform:</span>
+                    <span class="n">power_transform</span> <span class="o">=</span> <span class="n">PowerTransformer</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">standardize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                    <span class="n">numpy</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="nb">all</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">)</span>
+                    <span class="c1"># Fit tranform:</span>
+                    <span class="n">power_transform</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">Warning</span><span class="p">,</span> <span class="ne">FloatingPointError</span><span class="p">):</span>
+                    <span class="n">lprint</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;VST </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2"> failed for some numerical reasons, falling back to yeo-johnson.&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;yeo-johnson&#39;</span>
+
+                    <span class="c1"># Instantiate sklearn power transform:</span>
+                    <span class="n">power_transform</span> <span class="o">=</span> <span class="n">PowerTransformer</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">standardize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+                    <span class="c1"># Fit tranform:</span>
+                    <span class="n">power_transform</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+                <span class="c1"># Apply transform:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">power_transform</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+                <span class="c1"># Reshape array:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_array</span><span class="p">,</span> <span class="n">newshape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+
+                <span class="c1"># Save transform:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">power_transform</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;quantile&#39;</span><span class="p">:</span>
+
+                <span class="c1"># We prepare array to make it compatible to sklearn API and save shape:</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">ravel</span><span class="p">()[:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+                <span class="c1"># Instantiate sklearn quantile transform:</span>
+                <span class="n">power_transform</span> <span class="o">=</span> <span class="n">QuantileTransformer</span><span class="p">(</span>
+                    <span class="n">n_quantiles</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">output_distribution</span><span class="o">=</span><span class="s1">&#39;normal&#39;</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Fit tranform:</span>
+                <span class="n">power_transform</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+                <span class="c1"># Apply transform:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">power_transform</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+                <span class="c1"># Reshape array:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_array</span><span class="p">,</span> <span class="n">newshape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+
+                <span class="c1"># Save transform:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">power_transform</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported or incompatible VST mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">new_array</span>
+
+    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_postprocess</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Applying inverse variance stabilisation transform (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">) for array of shape: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and dtype: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">):</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;identity&#39;</span><span class="p">:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">_i_sqrt</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span><span class="p">:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">_i_log</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;anscomb&#39;</span><span class="p">:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">_i_anscomb</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;yeo-johnson&#39;</span>
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;box-cox&#39;</span>
+                <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;quantile&#39;</span>
+            <span class="p">):</span>
+
+                <span class="c1"># We prepare array to make it compatible to sklearn API and save shape:</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">ravel</span><span class="p">()[:,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+
+                <span class="c1"># Apply inverse transform:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+
+                <span class="c1"># Reshape array:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">new_array</span><span class="p">,</span> <span class="n">newshape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+
+                <span class="c1"># reset transform:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported VST mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">leave_as_float</span><span class="p">:</span>
+                <span class="c1"># convert back to original dtype:</span>
+                <span class="n">new_array</span> <span class="o">=</span> <span class="n">new_array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">new_array</span></div>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_model</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_f_sqrt</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">min_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">image</span> <span class="o">-</span> <span class="n">min_value</span><span class="p">)</span>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_model</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_i_sqrt</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">min_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">image</span> <span class="o">**</span> <span class="n">_F</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">min_value</span>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_model</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_f_log</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">min_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">image</span> <span class="o">-</span> <span class="n">min_value</span><span class="p">)</span>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_model</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_i_log</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">min_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="o">-</span> <span class="n">_F</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">min_value</span>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_model</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_f_anscomb</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">min_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_F</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">image</span> <span class="o">-</span> <span class="n">min_value</span> <span class="o">+</span> <span class="n">_F</span><span class="p">(</span><span class="mf">0.375</span><span class="p">))</span>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_model</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_i_anscomb</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">min_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">image</span> <span class="o">/</span> <span class="n">_F</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="n">_F</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="n">min_value</span> <span class="o">-</span> <span class="n">_F</span><span class="p">(</span><span class="mf">0.375</span><span class="p">)</span>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_model</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_F</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.11
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="variance_stabilisation.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="../../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

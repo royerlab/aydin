@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.classic &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.classic</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.classic</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it</span> <span class="kn">import</span> <span class="n">classic_denoisers</span>
+<span class="kn">from</span> <span class="nn">aydin.it.base</span> <span class="kn">import</span> <span class="n">ImageTranslatorBase</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span><span class="p">,</span> <span class="n">lprint</span>
+
+
+<div class="viewcode-block" id="ImageDenoiserClassic"><a class="viewcode-back" href="../../../api/image_translators/classic.html#aydin.it.classic.ImageDenoiserClassic">[docs]</a><span class="k">class</span> <span class="nc">ImageDenoiserClassic</span><span class="p">(</span><span class="n">ImageTranslatorBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Classic Image Denoiser</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;butterworth&quot;</span><span class="p">,</span>
+        <span class="n">main_channel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_voxels_for_training</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">calibration_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">blind_spots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tile_min_margin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">tile_max_margin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_memory_usage_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">max_tiling_overhead</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructs a Classic image denoiser.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        method: str</span>
+<span class="sd">            Name of classical denoising method.</span>
+
+<span class="sd">        main_channel: optional int</span>
+<span class="sd">            By default the denoiser is calibrated per channel.</span>
+<span class="sd">            To speed up denoising you can pick one channel index</span>
+<span class="sd">            to use during calibration and used to denoise all channels.</span>
+
+<span class="sd">        max_voxels_for_training : int, optional</span>
+<span class="sd">            Maximum number of the voxels that can be</span>
+<span class="sd">            used for training.</span>
+
+<span class="sd">        calibration_kwargs : Optional[dict]</span>
+<span class="sd">            Depending on the classic denoising algorithm you can use this parameter</span>
+<span class="sd">            to pass the calibration parameters. (advanced) (hidden)</span>
+
+<span class="sd">        blind_spots : Optional[Union[str,List[Tuple[int]]]]</span>
+<span class="sd">            List of voxel coordinates (relative to receptive field center) to</span>
+<span class="sd">            be included in the blind-spot. For example, you can enter:</span>
+<span class="sd">            &#39;&lt;axis&gt;#&lt;radius&gt;&#39; to extend the blindspot along a given axis by a</span>
+<span class="sd">            certain radius. For example, for an image of dimension 3, &#39;x#1&#39;</span>
+<span class="sd">            extends the blind spot to cover voxels of relative coordinates:</span>
+<span class="sd">            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,</span>
+<span class="sd">            enter: &#39;x#1,y#1&#39; by comma separating between axis. To specify the</span>
+<span class="sd">            axis you can use integer indices, or &#39;x&#39;, &#39;y&#39;, &#39;z&#39;, and &#39;t&#39;</span>
+<span class="sd">            (dimension order is tzyx with x being always the last dimension).</span>
+<span class="sd">            If None is passed then the blindspots are automatically discovered</span>
+<span class="sd">            from the image content. If &#39;center&#39; is passed then no additional</span>
+<span class="sd">            blindspots to the center pixel are considered.  If &#39;center&#39; is passed</span>
+<span class="sd">            then only the default single center voxel blind-spot is used.</span>
+
+<span class="sd">        tile_min_margin : int</span>
+<span class="sd">            Minimal width of tile margin in voxels.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        tile_max_margin : Optional[int]</span>
+<span class="sd">            Maximal width of tile margin in voxels.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        max_memory_usage_ratio : float</span>
+<span class="sd">            Maximum allowed memory load, value must be within [0, 1]. Default is 90%.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        max_tiling_overhead : float</span>
+<span class="sd">            Maximum allowed margin overhead during tiling. Default is 10%.</span>
+<span class="sd">            (advanced)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+            <span class="n">tile_min_margin</span><span class="o">=</span><span class="n">tile_min_margin</span><span class="p">,</span>
+            <span class="n">tile_max_margin</span><span class="o">=</span><span class="n">tile_max_margin</span><span class="p">,</span>
+            <span class="n">max_memory_usage_ratio</span><span class="o">=</span><span class="n">max_memory_usage_ratio</span><span class="p">,</span>
+            <span class="n">max_tiling_overhead</span><span class="o">=</span><span class="n">max_tiling_overhead</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">calibration_kwargs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">{}</span> <span class="k">if</span> <span class="n">calibration_kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">calibration_kwargs</span>
+        <span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">classic_denoisers</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">method</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">calibration_function</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span>
+            <span class="s2">&quot;calibrate_denoise_&quot;</span> <span class="o">+</span> <span class="n">method</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_voxels_for_training</span> <span class="o">=</span> <span class="n">max_voxels_for_training</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_memory_needed</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_channel</span> <span class="o">=</span> <span class="n">main_channel</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Classic image translator&quot;</span><span class="p">):</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;method: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;main channel: </span><span class="si">{</span><span class="n">main_channel</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ImageDenoiserClassic.save"><a class="viewcode-back" href="../../../api/image_translators/classic.html#aydin.it.classic.ImageDenoiserClassic.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Saves a &#39;all-batteries-included&#39; image translation model at a given path (folder).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : str</span>
+<span class="sd">            path to save to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        frozen</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving &#39;classic&#39; image denoiser to </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+            <span class="n">frozen</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">frozen</span></div>
+
+    <span class="k">def</span> <span class="nf">_load_internals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading &#39;classic&#39; image denoiser from </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># We exclude certain fields from saving:</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">_train</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="n">target_image</span><span class="p">,</span> <span class="n">train_valid_ratio</span><span class="p">,</span> <span class="n">callback_period</span><span class="p">,</span> <span class="n">jinv</span>
+    <span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Training image translator from image of shape </span><span class="si">{</span><span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">:&quot;</span>
+        <span class="p">):</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">input_image</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">num_channels</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_parameters</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">denoising_functions</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># We calibrate per channel</span>
+            <span class="k">for</span> <span class="n">channel_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_channels</span><span class="p">):</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Calibrating denoiser on channel </span><span class="si">{</span><span class="n">channel_index</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">channel_image</span> <span class="o">=</span> <span class="n">input_image</span><span class="p">[:,</span> <span class="n">channel_index</span><span class="p">]</span>
+
+                <span class="c1"># for a given channel we find the best batch to use:</span>
+                <span class="c1"># We pick the batch with highest variance:</span>
+                <span class="n">variance_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">channel_image</span><span class="p">]</span>
+                <span class="n">batch_index</span> <span class="o">=</span> <span class="n">variance_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">variance_list</span><span class="p">))</span>
+
+                <span class="c1"># We pick that batch image:</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">channel_image</span><span class="p">[</span><span class="n">batch_index</span><span class="p">]</span>
+
+                <span class="p">(</span>
+                    <span class="n">denoising_function</span><span class="p">,</span>
+                    <span class="n">best_parameters</span><span class="p">,</span>
+                    <span class="n">memory_requirements</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calibration_function</span><span class="p">(</span>
+                    <span class="n">image</span><span class="p">,</span> <span class="n">blind_spots</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">calibration_kwargs</span>
+                <span class="p">)</span>
+
+                <span class="c1"># Add obtained best parameters to the list per channel:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">denoising_functions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">denoising_function</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">best_parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_parameters</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_memory_needed</span> <span class="o">=</span> <span class="n">memory_requirements</span>
+
+    <span class="k">def</span> <span class="nf">_estimate_memory_needed_and_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        image</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">available</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_estimate_memory_needed_and_available</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_memory_needed</span><span class="p">,</span> <span class="n">available</span>
+
+    <span class="k">def</span> <span class="nf">_translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="n">image_slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">whole_image_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Internal method that translates an input image on the basis of the trained model.</span>
+
+<span class="sd">        :param input_image: input image</span>
+<span class="sd">        :param batch_dims: batch dimensions</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">input_image</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">num_batches</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">num_channels</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">denoised_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">input_image</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">batch_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_batches</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">channel_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_channels</span><span class="p">):</span>
+                <span class="n">lprint</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Denoising image for batch: </span><span class="si">{</span><span class="n">batch_index</span><span class="si">}</span><span class="s1"> and channel: </span><span class="si">{</span><span class="n">channel_index</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+                <span class="n">best_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">best_parameters</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span>
+                <span class="n">denoising_function</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">denoising_functions</span><span class="p">[</span><span class="n">channel_index</span><span class="p">]</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">input_image</span><span class="p">[</span><span class="n">batch_index</span><span class="p">,</span> <span class="n">channel_index</span><span class="p">]</span>
+                <span class="n">denoised_image</span><span class="p">[</span><span class="n">batch_index</span><span class="p">,</span> <span class="n">channel_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">denoising_function</span><span class="p">(</span>
+                    <span class="n">image</span><span class="p">,</span> <span class="o">**</span><span class="n">best_parameters</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">denoised_image</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.13
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="classic.html">v0.1.13</a></dd>
+      <dd><a href="../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

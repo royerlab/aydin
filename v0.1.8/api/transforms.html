@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transforms &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Feature Generator" href="feature_generator.html" />
+    <link rel="prev" title="ImageTranslatorCNN - Convolutional Neural Network" href="image_translators/cnn.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_translator.html">Image Translator</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Transforms</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#attenuationtransform">AttenuationTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deskewtransform">DeskewTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fixedpatterntransform">FixedPatternTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#highpasstransform">HighpassTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#histogramequalisationtransform">HistogramEqualisationTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#motionstabilisationtransform">MotionStabilisationTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#paddingtransform">PaddingTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#periodicnoisesuppressiontransform">PeriodicNoiseSuppressionTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rangetransform">RangeTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saltandpeppertransform">SaltAndPepperTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#variancestabilisationtransform">VarianceStabilisationTransform</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contact_us/github.html">On Github</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Transforms</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/transforms.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="transforms">
+<h1>Transforms<a class="headerlink" href="#transforms" title="Permalink to this headline"></a></h1>
+<section id="attenuationtransform">
+<h2>AttenuationTransform<a class="headerlink" href="#attenuationtransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.attenuation.AttenuationTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.attenuation.</span></span><span class="sig-name descname"><span class="pre">AttenuationTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.321</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/attenuation.html#AttenuationTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.attenuation.AttenuationTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Axis-aligned attenuation correction</p>
+<p>Corrects intensity attenuation of an image along a given list of axis.
+This is usefull to correct for signal attenuation over time or along
+space. Currently only linear attenuation is supported. More modes on the
+way.</p>
+</dd></dl>
+
+</section>
+<section id="deskewtransform">
+<h2>DeskewTransform<a class="headerlink" href="#deskewtransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.deskew.DeskewTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.deskew.</span></span><span class="sig-name descname"><span class="pre">DeskewTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_axis</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skew_axis</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/deskew.html#DeskewTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.deskew.DeskewTransform" title="Permalink to this definition"></a></dt>
+<dd><p>(Integral) Stack Deskewer</p>
+<p>Denoising is more effective if voxels carrying correlated signal are close to each other. When a stack is skewed
+– as resulting in some imaging modalities – correlated voxels that should be close in space are far from each
+other. Thus, deskewing the image before denoising is highly recommended. Importantly, the deskewing must be
+‘integral’, meaning that it must not interpolate voxel values, which is a unadvised lossy operation. Integral
+stack deskewing consists in applying an integral shear transformation to a stack. Two axes need to be specified:
+the ‘z’-axis and the ‘skew’-axis along which shifting happens. The delta parameter controls the amount of shift
+per plane - must be an integer. We automatically snap the delta value to the closest integer. Padding is supported.</p>
+<p>Note: this only works for images with at least 3 dimensions. Does nothing
+on images with less than 3 dimensions.</p>
+</dd></dl>
+
+</section>
+<section id="fixedpatterntransform">
+<h2>FixedPatternTransform<a class="headerlink" href="#fixedpatterntransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.fixedpattern.FixedPatternTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.fixedpattern.</span></span><span class="sig-name descname"><span class="pre">FixedPatternTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.09</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/fixedpattern.html#FixedPatternTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.fixedpattern.FixedPatternTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Fixed Axis-Aligned Pattern Suppression</p>
+<p>Suppresses fixed, axis aligned, offset patterns along any combination of
+axis. Given a list of lists of axis that defines axis-aligned volumes,
+intensity fluctuations of these volumes are stabilised. You can suppress
+intensity fluctuation over time, suppress fixed offsets per pixel over
+time, suppress intensity fluctuations per row, per column, and more…</p>
+<p>For example, assume an image with dimensions tyx (t+2D), and you want to
+suppress fluctuations of intensity along the t axis, then you provide:
+axes=[[0]] (or simply 0 or [0]) which means that the average intensity
+for all planes along t (axis=0) will be stabilised. If instead you want
+to suppress some fixed background offset over xy planes, then you do:
+axes=[[1,2]]. If you want to do both, then you use: axes=[[0], [1,
+2]]. Please note that these corrections are applied in the order
+specified by the list of axis combinations. It is not recommended to
+reapply the pattern after denoising, unless the pattern itself is of
+value and is not considered noise.</p>
+</dd></dl>
+
+</section>
+<section id="highpasstransform">
+<h2>HighpassTransform<a class="headerlink" href="#highpasstransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.highpass.HighpassTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.highpass.</span></span><span class="sig-name descname"><span class="pre">HighpassTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">median_filtering</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/highpass.html#HighpassTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.highpass.HighpassTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Highpass Image Simplification</p>
+<p>For images with little noise, applying a high-pass filter can help denoise the image by removing some of the
+image complexity. The low-frequency parts of the image do not need to be denoised because sometimes the challenge
+is disentangling the (high-frequency) noise from the high-frequencies in the image. The scale parameter must be
+chosen with care. The lesser the noise, the smaller the value. Values around 1 work well but must be tuned
+depending on the image. If the scale parameter is too low, some noise might be left untouched. The best is to
+keep the parameter as low as possible while still achieving good denoising performance. It is also possible to
+apply median filtering when computing the low-pass image which helps reducing the impact of outlier voxel values,
+for example salt&amp;pepper noise. Note: when median filtering is on, larger values of sigma (e.g. &gt;= 1) are
+recommended, unless when the level of noise is very low in which case a sigma of 0 (no Gaussian blur) may be
+advantageous. To recover the original denoised image the filtering is undone during post-processing. Note: this
+is ideal for treating &lt;a href=’<a class="reference external" href="https://en.wikipedia.org/wiki/Colors_of_noise'">https://en.wikipedia.org/wiki/Colors_of_noise’</a>&gt;’blue’ noise&lt;/a&gt; that is
+characterised by a high-frequency support.</p>
+</dd></dl>
+
+</section>
+<section id="histogramequalisationtransform">
+<h2>HistogramEqualisationTransform<a class="headerlink" href="#histogramequalisationtransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.histogram.HistogramEqualisationTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.histogram.</span></span><span class="sig-name descname"><span class="pre">HistogramEqualisationTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'equalize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.125</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.12</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/histogram.html#HistogramEqualisationTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.histogram.HistogramEqualisationTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Histogram Equalisation</p>
+<p>For some images with extremely unbalanced histograms, applying histogram
+equalisation will improve results. Two modes are supported: ‘equalize’,
+and ‘clahe’.</p>
+</dd></dl>
+
+</section>
+<section id="motionstabilisationtransform">
+<h2>MotionStabilisationTransform<a class="headerlink" href="#motionstabilisationtransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.motion.MotionStabilisationTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.motion.</span></span><span class="sig-name descname"><span class="pre">MotionStabilisationTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'min_constant'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_pixel_shift</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_index</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.45</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/motion.html#MotionStabilisationTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.motion.MotionStabilisationTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Motion Stabilisation</p>
+<p>Denoising is more effective if signal-correlated voxels are close to each
+other. When a 2D+t or 3D+t timelapse has shifts between time points,
+pixels that should be close to each other from one time point to the next
+are now further away from each other. Worse, this relative placement
+often varies over time. This complicates denoising and typically leads to
+more blurry denoised images. Thus, stabilizing a timelapse before
+denoising is recommended to improve denoising performance. Currently,
+we assume that all frames can be registered to a common reference frame,
+and thus that all images have a common background that can be used for
+registration. For completeness, multiple axis can be specified and the
+correction is applied along each in sequence.</p>
+</dd></dl>
+
+</section>
+<section id="paddingtransform">
+<h2>PaddingTransform<a class="headerlink" href="#paddingtransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.padding.PaddingTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.padding.</span></span><span class="sig-name descname"><span class="pre">PaddingTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pad_width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_length_to_pad</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/padding.html#PaddingTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.padding.PaddingTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Padding (and then Cropping)</p>
+<p>Adds a border to the image before denoising and then removes that border
+from the denoised image. This reduces border artifacts when denoising
+certain images. In the case of self-supervised blind-spot based denoisers
+(e.g. N2S) padding must be carefully chosen because the added pixels
+should not ‘give away’ the value of their neighbors. Thus, not all
+padding modes are recommended. ‘symmetric’ is the recommended default.</p>
+<p>Other supported modes: ‘constant’: Pads with a constant value of 0,
+‘linear_ramp’: Pads with the linear ramp between end_value and the array
+edge value, ‘maximum’: Pads with the maximum value of all or part of the
+vector along each axis, ‘mean’: Pads with the mean value of all or part
+of the vector along each axis, ‘median’: Pads with the median value of
+all or part of the vector along each axis, ‘minimum’: Pads with the
+minimum value of all or part of the vector along each axis.</p>
+</dd></dl>
+
+</section>
+<section id="periodicnoisesuppressiontransform">
+<h2>PeriodicNoiseSuppressionTransform<a class="headerlink" href="#periodicnoisesuppressiontransform" title="Permalink to this headline"></a></h2>
+</section>
+<section id="rangetransform">
+<h2>RangeTransform<a class="headerlink" href="#rangetransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.range.RangeTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.range.</span></span><span class="sig-name descname"><span class="pre">RangeTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'minmax'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_float_datatype</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/range.html#RangeTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.range.RangeTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Range Normalisation</p>
+<p>Images come in all sorts of formats, and pixels can be represented as 8,
+16, 32 bit integers as well as 16, 32, 64 bit floats. More crucially,
+the actual range of values can vary potentially causing difficulties for
+denoising algorithms. For these reasons and more, it is almost always
+recommended to normalise images to a range within [0, 1] and represented
+as 32 bit floats (sufficient for most cases and ideal for aydin).
+Finally, there are two different normalisation modes. The first ‘minmax’
+simply finds the min and max values in the image and uses that to rescale
+to [0, 1]. However, there are sometimes outlier values that are isolated
+and completely out of context which would skew the normalisation.
+Therefore, we also have a ‘percentile’ mode that uses percentiles to
+determine the range – typically 1% for min value and 99% for max value.
+Optionally, the image can be left as float after denormalisation,
+and values can be clipped to the range during both normalisation and
+denormalisation.</p>
+</dd></dl>
+
+</section>
+<section id="saltandpeppertransform">
+<h2>SaltAndPepperTransform<a class="headerlink" href="#saltandpeppertransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.salt_pepper.SaltPepperTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.salt_pepper.</span></span><span class="sig-name descname"><span class="pre">SaltPepperTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fix_repeated</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_repeated</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fix_lipschitz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lipschitz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_iterations</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/salt_pepper.html#SaltPepperTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.salt_pepper.SaltPepperTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Salt And Pepper Correction</p>
+<p>Detectors such as cameras have ‘broken’ pixels that blink, are very dim,
+or very bright. Other phenomena cause voxels to have very different
+values from their neighbors, this is often called ‘impulse’ or
+salt-and-pepper’ noise. While self-supervised denoising can solve many of
+these issues, there is no reason to not to alleviate the task, especially
+when there are simple and fast approaches that can tackle this kind of
+noise. This preprocessing replaces voxels with the median of its
+neighbors if the voxel value is too different from its neighbors. This
+difference is proportional to the local second-derivative of the image.
+Increase the threshold parameter to tolerate more variation, decrease it
+to be more aggressive in removing salt &amp; pepper noise. The algorithm is
+iterative, starting with the most offending pixels, until no pixels are
+corrected. You can set the max proportion of pixels that are allowed to
+be corrected if you can give a good estimate for that.</p>
+</dd></dl>
+
+</section>
+<section id="variancestabilisationtransform">
+<h2>VarianceStabilisationTransform<a class="headerlink" href="#variancestabilisationtransform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.it.transforms.variance_stabilisation.VarianceStabilisationTransform">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.variance_stabilisation.</span></span><span class="sig-name descname"><span class="pre">VarianceStabilisationTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'anscomb'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">leave_as_float</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.11</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/variance_stabilisation.html#VarianceStabilisationTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.variance_stabilisation.VarianceStabilisationTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Variance Stabilization Transform (VST)
+and other range compression functions.</p>
+<p>Applies either the Yeo-Johnson, Box-Cox, Anscomb or some other VST
+transform to the image. Variance stabilization turns an image with
+Poisson or in general non-Gaussian noise into an image with approximately
+Gaussian noise, which often facilitates denoising.
+Also, in general for images with very skewed histograms with for example
+dark regions of large extent and only a few very bright regions,
+it is often beneficial to apply a sqrt or log transformation before
+denoising.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="image_translators/cnn.html" class="btn btn-neutral float-left" title="ImageTranslatorCNN - Convolutional Neural Network" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="feature_generator.html" class="btn btn-neutral float-right" title="Feature Generator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.8
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../v0.1.11/api/transforms.html">v0.1.11</a></dd>
+      <dd><a href="../../v0.1.12/api/transforms.html">v0.1.12</a></dd>
+      <dd><a href="../../v0.1.13/api/transforms.html">v0.1.13</a></dd>
+      <dd><a href="../../v0.1.14/api/transforms.html">v0.1.14</a></dd>
+      <dd><a href="transforms.html">v0.1.8</a></dd>
+      <dd><a href="../../v0.1.9/api/transforms.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

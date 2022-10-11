@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.transforms.motion &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.transforms.motion</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.transforms.motion</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">gaussian_filter</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.transforms.base</span> <span class="kn">import</span> <span class="n">ImageTransformBase</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lprint</span><span class="p">,</span> <span class="n">lsection</span>
+
+
+<div class="viewcode-block" id="MotionStabilisationTransform"><a class="viewcode-back" href="../../../../api/transforms.html#aydin.it.transforms.motion.MotionStabilisationTransform">[docs]</a><span class="k">class</span> <span class="nc">MotionStabilisationTransform</span><span class="p">(</span><span class="n">ImageTransformBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Motion Stabilisation</span>
+
+<span class="sd">    Denoising is more effective if signal-correlated voxels are close to each</span>
+<span class="sd">    other. When a 2D+t or 3D+t timelapse has shifts between time points,</span>
+<span class="sd">    pixels that should be close to each other from one time point to the next</span>
+<span class="sd">    are now further away from each other. Worse, this relative placement</span>
+<span class="sd">    often varies over time. This complicates denoising and typically leads to</span>
+<span class="sd">    more blurry denoised images. Thus, stabilizing a timelapse before</span>
+<span class="sd">    denoising is recommended to improve denoising performance. Currently,</span>
+<span class="sd">    we assume that all frames can be registered to a common reference frame,</span>
+<span class="sd">    and thus that all images have a common background that can be used for</span>
+<span class="sd">    registration. For completeness, multiple axis can be specified and the</span>
+<span class="sd">    correction is applied along each in sequence.(advanced)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">preprocess_description</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Stabilise motion&quot;</span> <span class="o">+</span> <span class="n">ImageTransformBase</span><span class="o">.</span><span class="n">preprocess_description</span>
+    <span class="p">)</span>
+    <span class="n">postprocess_description</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Reapply motion&quot;</span> <span class="o">+</span> <span class="n">ImageTransformBase</span><span class="o">.</span><span class="n">postprocess_description</span>
+    <span class="p">)</span>
+    <span class="n">postprocess_supported</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">postprocess_recommended</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">axes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">pad</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">pad_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;min_constant&#39;</span><span class="p">,</span>
+        <span class="n">max_pixel_shift</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">reference_index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">priority</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.45</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a Motion Corrector</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        axes : Union[None, int, Sequence[int]]</span>
+<span class="sd">            Index of time axis. If None the axes</span>
+<span class="sd">            are determined automatically.</span>
+<span class="sd">        sigma : float</span>
+<span class="sd">            Sigma for Gaussian filtering used to</span>
+<span class="sd">            facilitate registration.</span>
+<span class="sd">        pad : bool</span>
+<span class="sd">            Pads image before applying stabilisation,</span>
+<span class="sd">            default value is True.</span>
+<span class="sd">        crop : bool</span>
+<span class="sd">            Crops image after undoing stabilisation,</span>
+<span class="sd">            default value is True</span>
+<span class="sd">        pad_mode : str</span>
+<span class="sd">            Padding mode. Can be: &#39;mean_constant&#39;,</span>
+<span class="sd">            &#39;min_constant&#39;, &#39;max_constant&#39;, &#39;wrap&#39;.</span>
+<span class="sd">            Default is &#39;wrap&#39;.</span>
+<span class="sd">        max_pixel_shift : Optional[int]</span>
+<span class="sd">            Maximum correctable motion in pixels.</span>
+<span class="sd">            If None the maximum shift is automatically</span>
+<span class="sd">            determined.</span>
+<span class="sd">        reference_index : Optional[int]</span>
+<span class="sd">            Index of image used as reference to register</span>
+<span class="sd">            all others. If None the reference image is</span>
+<span class="sd">            automatically determined.</span>
+<span class="sd">        priority : float</span>
+<span class="sd">            The priority is a value within [0,1] used to determine the order in</span>
+<span class="sd">            which to apply the pre- and post-processing transforms. Transforms</span>
+<span class="sd">            are sorted and applied in ascending order during preprocesing and in</span>
+<span class="sd">            the reverse, descending, order during post-processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">None</span> <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">((</span><span class="n">axes</span><span class="p">,)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">axes</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span> <span class="o">=</span> <span class="n">pad_mode</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pad</span> <span class="o">=</span> <span class="n">pad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crop</span> <span class="o">=</span> <span class="n">crop</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_pixel_shift</span> <span class="o">=</span> <span class="n">max_pixel_shift</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reference_index</span> <span class="o">=</span> <span class="n">reference_index</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shifts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instanciating: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># We exclude certain fields from saving:</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_shifts&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_original_dtype&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; (pad_mode=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; pad=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pad</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; crop=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">crop</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; center=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; max_pixel_shift=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_pixel_shift</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; reference_index=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_index</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Motion-correcting array of shape: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">):</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span>
+
+            <span class="c1"># We need a copy because the shift-transfrom is in-place</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">axes</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shifts</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Correcting along axis: </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permutate</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+                <span class="n">shifts</span><span class="p">,</span> <span class="n">mean_shift</span> <span class="o">=</span> <span class="n">_measure_shifts</span><span class="p">(</span>
+                    <span class="n">array</span><span class="p">,</span>
+                    <span class="n">reference_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reference_index</span><span class="p">,</span>
+                    <span class="n">center</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span>
+                    <span class="n">max_pixel_shift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_pixel_shift</span><span class="p">,</span>
+                    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;com&#39;</span><span class="p">,</span>
+                    <span class="n">sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mean shift: </span><span class="si">{</span><span class="n">mean_shift</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">_shift_transform</span><span class="p">(</span>
+                    <span class="n">array</span><span class="p">,</span> <span class="o">-</span><span class="n">shifts</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pad</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_mode</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_shifts</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">=</span> <span class="n">shifts</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_depermutate</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">array</span>
+
+    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_postprocess</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Undoing motion-correction for array of shape: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">):</span>
+
+            <span class="c1"># We need a copy because the shift-transfrom is in-place</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">axes</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span>
+
+            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">axes</span><span class="p">):</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Correcting along axis: </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permutate</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+                <span class="n">shifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shifts</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">_shift_transform</span><span class="p">(</span>
+                    <span class="n">array</span><span class="p">,</span> <span class="n">shifts</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">crop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crop</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+                <span class="p">)</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_depermutate</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+
+            <span class="c1"># cast back to original dtype:</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">array</span>
+
+    <span class="k">def</span> <span class="nf">_permutate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">permutation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_permutation</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">permutation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">array</span>
+
+    <span class="k">def</span> <span class="nf">_depermutate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">permutation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_permutation</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">permutation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">array</span>
+
+    <span class="k">def</span> <span class="nf">_get_permutation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">permutation</span> <span class="o">=</span> <span class="p">(</span><span class="n">axis</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">ndim</span><span class="p">)</span> <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="n">axis</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inverse</span><span class="p">:</span>
+            <span class="n">permutation</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">permutation</span></div>
+
+
+<span class="k">def</span> <span class="nf">_shift_transform</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">shifts</span><span class="p">,</span> <span class="n">pad</span><span class="p">,</span> <span class="n">crop</span><span class="p">,</span> <span class="n">pad_mode</span><span class="o">=</span><span class="s1">&#39;wrap&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+
+    <span class="n">min_shift</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">shifts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">max_shift</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">shifts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;min_shift: </span><span class="si">{</span><span class="n">min_shift</span><span class="si">}</span><span class="s2">, max_shift: </span><span class="si">{</span><span class="n">max_shift</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">pad</span><span class="p">:</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">mi</span><span class="p">,</span> <span class="n">ma</span><span class="p">)</span> <span class="k">for</span> <span class="n">mi</span><span class="p">,</span> <span class="n">ma</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">min_shift</span><span class="p">,</span> <span class="n">max_shift</span><span class="p">))</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Padding: </span><span class="si">{</span><span class="n">padding</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">if</span> <span class="n">pad_mode</span> <span class="o">==</span> <span class="s1">&#39;mean_constant&#39;</span> <span class="k">else</span> <span class="n">value</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">if</span> <span class="n">pad_mode</span> <span class="o">==</span> <span class="s1">&#39;min_constant&#39;</span> <span class="k">else</span> <span class="n">value</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">array</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">if</span> <span class="n">pad_mode</span> <span class="o">==</span> <span class="s1">&#39;max_constant&#39;</span> <span class="k">else</span> <span class="n">value</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;constant_values&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span> <span class="k">if</span> <span class="s1">&#39;constant&#39;</span> <span class="ow">in</span> <span class="n">pad_mode</span> <span class="k">else</span> <span class="p">{}</span>
+
+        <span class="n">pad_mode</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span> <span class="k">if</span> <span class="s1">&#39;constant&#39;</span> <span class="ow">in</span> <span class="n">pad_mode</span> <span class="k">else</span> <span class="n">pad_mode</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),)</span> <span class="o">+</span> <span class="n">padding</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">pad_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ti</span><span class="p">,</span> <span class="n">shift</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">shifts</span><span class="p">):</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Motion correcting </span><span class="si">{</span><span class="n">ti</span><span class="si">}</span><span class="s2"> by </span><span class="si">{</span><span class="n">shift</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">array</span><span class="p">[</span><span class="n">ti</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span>
+            <span class="n">array</span><span class="p">[</span><span class="n">ti</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">crop</span><span class="p">:</span>
+        <span class="n">crop_slice</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">),)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">slice</span><span class="p">(</span><span class="n">ma</span><span class="p">,</span> <span class="n">s</span> <span class="o">-</span> <span class="n">mi</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">mi</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">min_shift</span><span class="p">,</span> <span class="n">max_shift</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="p">)</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">crop_slice</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">array</span>
+
+
+<span class="k">def</span> <span class="nf">_measure_shifts</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">reference_index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">center</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">max_pixel_shift</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;com&#39;</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">shifts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">correlations</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">reference_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">reference_index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">reference_index</span>
+    <span class="n">max_pixel_shift</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">max</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">//</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">max_pixel_shift</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">max_pixel_shift</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)):</span>
+        <span class="n">image</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">reference_index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">reference_image</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="n">reference_index</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">reference_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">reference_image</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">reference_index</span><span class="p">)]</span>
+
+        <span class="n">shift</span><span class="p">,</span> <span class="n">correlation</span> <span class="o">=</span> <span class="n">_find_shift</span><span class="p">(</span>
+            <span class="n">image</span><span class="p">,</span>
+            <span class="n">reference_image</span><span class="p">,</span>
+            <span class="n">max_pixel_shift</span><span class="o">=</span><span class="n">max_pixel_shift</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+            <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">shifts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+        <span class="n">correlations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">correlation</span><span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Measured shift of </span><span class="si">{</span><span class="n">shift</span><span class="si">}</span><span class="s2"> for image </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="n">shifts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">shifts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reference_index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">shifts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># correlations = numpy.stack(correlations)</span>
+    <span class="c1"># import napari</span>
+    <span class="c1"># with napari.gui_qt():</span>
+    <span class="c1">#     viewer = napari.Viewer()</span>
+    <span class="c1">#     viewer.add_image(array, name=&#39;array&#39;)</span>
+    <span class="c1">#     viewer.add_image(correlations, name=&#39;correlations&#39;)</span>
+
+    <span class="c1"># Center shifts:</span>
+    <span class="k">if</span> <span class="n">center</span><span class="p">:</span>
+        <span class="n">mean_shift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">shifts</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">mean_shift</span> <span class="o">=</span> <span class="n">mean_shift</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+        <span class="n">shifts</span> <span class="o">=</span> <span class="n">shifts</span> <span class="o">-</span> <span class="n">mean_shift</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mean_shift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># Convert to int:</span>
+    <span class="n">shifts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">shifts</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">shifts</span><span class="p">,</span> <span class="n">mean_shift</span>
+
+
+<span class="k">def</span> <span class="nf">_find_shift</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">max_pixel_shift</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;com&#39;</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">7</span><span class="p">):</span>
+    <span class="c1"># Basic idea: We just need to low-pass filter the heck of it, and it works.</span>
+    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;max_pixel_shift: </span><span class="si">{</span><span class="n">max_pixel_shift</span><span class="si">}</span><span class="s2">, mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">, sigma: </span><span class="si">{</span><span class="n">sigma</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># First we blur the input images:</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">_fast_denoise</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">_fast_denoise</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+
+    <span class="c1"># We compute the phas correlation:</span>
+    <span class="n">raw_correlation</span> <span class="o">=</span> <span class="n">_phase_correlation</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+    <span class="c1"># We denoise the correlogram itself again:</span>
+    <span class="n">correlation</span> <span class="o">=</span> <span class="n">_fast_denoise</span><span class="p">(</span><span class="n">raw_correlation</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+    <span class="c1"># correlation = raw_correlation</span>
+
+    <span class="c1"># We estimate the noise floor of the correlation:</span>
+    <span class="n">empty_region</span> <span class="o">=</span> <span class="n">correlation</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">empty_region_slice</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="nb">slice</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">s</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">max_pixel_shift</span><span class="p">),</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">s</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">max_pixel_shift</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">correlation</span><span class="o">.</span><span class="n">shape</span>
+    <span class="p">)</span>
+    <span class="n">empty_region</span> <span class="o">=</span> <span class="n">empty_region</span><span class="p">[</span><span class="n">empty_region_slice</span><span class="p">]</span>
+    <span class="n">noise_floor_level</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">empty_region</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">99.9</span><span class="p">)</span>
+
+    <span class="c1"># we use that floor to clip anything below:</span>
+    <span class="n">correlation</span> <span class="o">=</span> <span class="n">correlation</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">noise_floor_level</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">-</span> <span class="n">noise_floor_level</span>
+
+    <span class="c1"># We roll the array and crop it to restrict ourself to the search region:</span>
+    <span class="n">correlation</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span>
+        <span class="n">correlation</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">max_pixel_shift</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">correlation</span> <span class="o">=</span> <span class="n">correlation</span><span class="p">[(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">max_pixel_shift</span><span class="p">),)</span> <span class="o">*</span> <span class="n">a</span><span class="o">.</span><span class="n">ndim</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;gfit&#39;</span><span class="p">:</span>
+
+        <span class="c1"># This looks fancy and shit but is just bad.</span>
+
+        <span class="k">def</span> <span class="nf">gaussian</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">*</span> <span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">sx</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">max_pixel_shift</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">max_pixel_shift</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">xdata</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ydata</span> <span class="o">=</span> <span class="n">correlation</span><span class="p">[</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span>
+            <span class="n">gaussian</span><span class="p">,</span>
+            <span class="n">xdata</span><span class="p">,</span>
+            <span class="n">ydata</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;trf&#39;</span><span class="p">,</span>
+            <span class="n">p0</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">bounds</span><span class="o">=</span><span class="p">(</span>
+                <span class="p">[</span><span class="o">-</span><span class="n">max_pixel_shift</span><span class="p">,</span> <span class="o">-</span><span class="n">max_pixel_shift</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="p">[</span><span class="o">+</span><span class="n">max_pixel_shift</span><span class="p">,</span> <span class="o">+</span><span class="n">max_pixel_shift</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">shift</span> <span class="o">=</span> <span class="n">popt</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;com&#39;</span><span class="p">:</span>
+
+        <span class="c1"># This is simple, and works brilliantly, even with tons of noise.</span>
+
+        <span class="c1"># We use the max as quickly computed proxy for the real center:</span>
+        <span class="n">rough_shift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">unravel_index</span><span class="p">(</span>
+            <span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">correlation</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span> <span class="n">correlation</span><span class="o">.</span><span class="n">shape</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We crop further to facilitate center-of-mass estimation:</span>
+        <span class="n">fine_window_radius</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">sigma</span>
+        <span class="n">cropped_correlation_slice</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">slice</span><span class="p">(</span>
+                <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">rs</span> <span class="o">-</span> <span class="n">fine_window_radius</span><span class="p">)),</span>
+                <span class="nb">min</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">rs</span> <span class="o">+</span> <span class="n">fine_window_radius</span><span class="p">)),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">rs</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rough_shift</span><span class="p">,</span> <span class="n">correlation</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cropped correlation: </span><span class="si">{</span><span class="n">cropped_correlation_slice</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">cropped_correlation</span> <span class="o">=</span> <span class="n">correlation</span><span class="p">[</span><span class="n">cropped_correlation_slice</span><span class="p">]</span>
+
+        <span class="c1"># We compute the signed rough shift</span>
+        <span class="n">signed_rough_shift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rough_shift</span><span class="p">)</span> <span class="o">-</span> <span class="n">max_pixel_shift</span>
+
+        <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">cropped_correlation</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="c1"># No mass:</span>
+            <span class="n">signed_com_shift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">signed_rough_shift</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We compute the center of mass:</span>
+            <span class="c1"># We take the square to squash small values far from the maximum that are likely noisy...</span>
+            <span class="n">signed_com_shift</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">ndimage</span><span class="o">.</span><span class="n">center_of_mass</span><span class="p">(</span><span class="n">cropped_correlation</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="o">-</span> <span class="n">fine_window_radius</span>
+            <span class="p">)</span>
+
+        <span class="c1"># The final shift is the sum of the rough sight plus the fine center of mass shift:</span>
+        <span class="n">shift</span> <span class="o">=</span> <span class="n">signed_rough_shift</span> <span class="o">+</span> <span class="n">signed_com_shift</span>
+
+    <span class="c1">#</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">shift</span><span class="p">,</span> <span class="n">correlation</span>
+
+
+<span class="k">def</span> <span class="nf">_fast_denoise</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+    <span class="n">denoised</span> <span class="o">=</span> <span class="n">gaussian_filter</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wrap&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">denoised</span>
+
+
+<span class="k">def</span> <span class="nf">_phase_correlation</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">):</span>
+    <span class="n">G_a</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">workers</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">G_b</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">reference_image</span><span class="p">,</span> <span class="n">workers</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">conj_b</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">G_b</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">G_a</span> <span class="o">*</span> <span class="n">conj_b</span>
+    <span class="n">R</span> <span class="o">/=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">workers</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+    <span class="k">return</span> <span class="n">r</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.12
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="motion.html">v0.1.12</a></dd>
+      <dd><a href="../../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="../../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

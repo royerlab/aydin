@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.nn.models.jinet &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.nn.models.jinet</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.nn.models.jinet</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">tensorflow.python.keras</span> <span class="kn">import</span> <span class="n">Input</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.keras.layers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Concatenate</span><span class="p">,</span>
+    <span class="n">Conv2D</span><span class="p">,</span>
+    <span class="n">Conv3D</span><span class="p">,</span>
+    <span class="n">LeakyReLU</span><span class="p">,</span>
+    <span class="n">Activation</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.keras.optimizer_v2.adam</span> <span class="kn">import</span> <span class="n">Adam</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.keras.models</span> <span class="kn">import</span> <span class="n">Model</span>
+
+<span class="kn">from</span> <span class="nn">aydin.nn.models.utils.conv_block</span> <span class="kn">import</span> <span class="n">conv2d_torch</span><span class="p">,</span> <span class="n">conv3d_torch</span>
+<span class="kn">from</span> <span class="nn">aydin.nn.models.utils.training_architectures</span> <span class="kn">import</span> <span class="n">get_jinet_fit_args</span>
+
+
+<div class="viewcode-block" id="JINetModel"><a class="viewcode-back" href="../../../../api/nn/jinet.html#aydin.nn.models.jinet.JINetModel">[docs]</a><span class="k">class</span> <span class="nc">JINetModel</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The JINet model is a hybrid CNN-perceptron model that leverages dilated</span>
+<span class="sd">    convolutions to incorporate a built-in &#39;blind-spot&#39; as required for N2S</span>
+<span class="sd">    denoising. Supports both 2D and 3D images.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_layer_size</span><span class="p">,</span>
+        <span class="n">spacetime_ndim</span><span class="p">,</span>
+        <span class="n">num_output_channels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">kernel_sizes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_dense_layers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">num_channels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">final_relu</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">degressive_residuals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_layer_size :</span>
+<span class="sd">            TODO: missing!</span>
+<span class="sd">        spacetime_ndim :</span>
+<span class="sd">            TODO: missing!</span>
+<span class="sd">        num_output_channels : int</span>
+<span class="sd">            number of output channels</span>
+<span class="sd">            (advanced)</span>
+<span class="sd">        kernel_sizes : int</span>
+<span class="sd">            a list of kernel sizes; corresponding to num_features</span>
+<span class="sd">            (advanced)</span>
+<span class="sd">        num_features : int</span>
+<span class="sd">            a list of number of channels; corresponding to kernel_sizes</span>
+<span class="sd">            (advanced)</span>
+<span class="sd">        num_dense_layers : int</span>
+<span class="sd">            number of dense layers after feature extraction</span>
+<span class="sd">            (advanced)</span>
+<span class="sd">        num_channels : int</span>
+<span class="sd">            number of channels in the dense layer</span>
+<span class="sd">            (advanced)</span>
+<span class="sd">        final_relu : bool</span>
+<span class="sd">            whether having the final ReLU or not</span>
+<span class="sd">            (advanced)</span>
+<span class="sd">        degressive_residuals : bool</span>
+<span class="sd">            whether having weight decay in the dense layers</span>
+<span class="sd">            (advanced)</span>
+<span class="sd">        learning_rate : float</span>
+<span class="sd">            TODO: missing!</span>
+<span class="sd">            (advanced)</span>
+<span class="sd">        kwargs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">spacetime_ndim</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">spacetime_ndim</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Currently only JINet2D and JINet3D is supported.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">=</span> <span class="n">spacetime_ndim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_dense_layers</span> <span class="o">=</span> <span class="n">num_dense_layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span> <span class="o">=</span> <span class="n">num_channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_output_channels</span> <span class="o">=</span> <span class="n">num_output_channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_relu</span> <span class="o">=</span> <span class="n">final_relu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">degressive_residuals</span> <span class="o">=</span> <span class="n">degressive_residuals</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">input_layer_size</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">input_layer_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_layer_size</span><span class="p">,)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
+
+        <span class="c1"># These are the scales and associated kernel sizes and number of features</span>
+        <span class="k">if</span> <span class="n">kernel_sizes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">kernel_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">kernel_sizes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">num_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">num_features</span> <span class="o">=</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">num_features</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_sizes</span> <span class="o">=</span> <span class="n">kernel_sizes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span> <span class="o">=</span> <span class="n">num_features</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kernel_sizes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_features</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of kernel sizes and features does not match.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Construct a model</span>
+        <span class="n">input_lyr</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">input_layer_size</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;input&#39;</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">jinet_core</span><span class="p">(</span><span class="n">input_lyr</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">input_lyr</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Compile the model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">Adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="s1">&#39;mse&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="JINetModel.size"><a class="viewcode-back" href="../../../../api/nn/jinet.html#aydin.nn.models.jinet.JINetModel.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns size of the model in bytes&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">count_params</span><span class="p">()</span> <span class="o">*</span> <span class="mi">4</span></div>
+
+<div class="viewcode-block" id="JINetModel.fit"><a class="viewcode-back" href="../../../../api/nn/jinet.html#aydin.nn.models.jinet.JINetModel.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_image</span><span class="p">,</span>
+        <span class="n">target_image</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">,</span>
+        <span class="n">callbacks</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_epochs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">total_num_patches</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">img_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">create_patches_for_validation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">train_valid_ratio</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_image</span>
+<span class="sd">        target_image</span>
+<span class="sd">        batch_size</span>
+<span class="sd">        callbacks</span>
+<span class="sd">        verbose</span>
+<span class="sd">        max_epochs</span>
+<span class="sd">        total_num_patches</span>
+<span class="sd">        img_val</span>
+<span class="sd">        create_patches_for_validation</span>
+<span class="sd">        train_valid_ratio</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        loss_history</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">validation_data</span> <span class="o">=</span> <span class="n">get_jinet_fit_args</span><span class="p">(</span>
+            <span class="n">input_image</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">total_num_patches</span><span class="p">,</span>
+            <span class="n">img_val</span><span class="p">,</span>
+            <span class="n">create_patches_for_validation</span><span class="p">,</span>
+            <span class="n">train_valid_ratio</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">loss_history</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">input_image</span><span class="p">,</span>
+            <span class="n">target_image</span><span class="p">,</span>
+            <span class="n">epochs</span><span class="o">=</span><span class="n">max_epochs</span><span class="p">,</span>
+            <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">validation_data</span><span class="o">=</span><span class="n">validation_data</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">loss_history</span></div>
+
+<div class="viewcode-block" id="JINetModel.predict"><a class="viewcode-back" href="../../../../api/nn/jinet.html#aydin.nn.models.jinet.JINetModel.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_queue_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">workers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">use_multiprocessing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Overwritten model predict method.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x</span>
+<span class="sd">        batch_size</span>
+<span class="sd">        verbose</span>
+<span class="sd">        steps</span>
+<span class="sd">        callbacks</span>
+<span class="sd">        max_queue_size</span>
+<span class="sd">        workers</span>
+<span class="sd">        use_multiprocessing</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: move as much as you can from it cnn _translate</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">jinet_core</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_lyr</span><span class="p">):</span>
+        <span class="n">dilated_conv_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">total_num_features</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">current_receptive_field_radius</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">input_lyr</span>
+        <span class="k">for</span> <span class="n">scale_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_sizes</span><span class="p">)):</span>
+            <span class="c1"># Get kernel size and number of features:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_sizes</span><span class="p">[</span><span class="n">scale_index</span><span class="p">]</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_features</span><span class="p">[</span><span class="n">scale_index</span><span class="p">]</span>
+
+            <span class="c1"># radius and dilation:</span>
+            <span class="n">radius</span> <span class="o">=</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+            <span class="n">dilation</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">current_receptive_field_radius</span>
+
+            <span class="c1"># Setup dilated convolution:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">dilated_conv_method</span> <span class="o">=</span> <span class="n">conv2d_torch</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">dilated_conv_method</span> <span class="o">=</span> <span class="n">conv3d_torch</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">dilated_conv_method</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span>  <span class="c1"># current_num_channels,  # channel_in</span>
+                <span class="n">num</span><span class="p">,</span>  <span class="c1"># number of filters: channel_out</span>
+                <span class="n">kernel_size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                <span class="n">padding</span><span class="o">=</span><span class="n">dilation</span> <span class="o">*</span> <span class="n">radius</span><span class="p">,</span>
+                <span class="n">dilation_rate</span><span class="o">=</span><span class="n">dilation</span><span class="p">,</span>
+                <span class="n">lyrname</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;dilcv</span><span class="si">{</span><span class="n">scale_index</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="n">act</span><span class="o">=</span><span class="s1">&#39;lrel&#39;</span><span class="p">,</span>
+                <span class="n">leaky_alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># We keep track of the total number of features until now:</span>
+            <span class="n">total_num_features</span> <span class="o">+=</span> <span class="n">num</span>
+
+            <span class="c1"># we update the current receptive field radius:</span>
+            <span class="n">current_receptive_field_radius</span> <span class="o">+=</span> <span class="n">dilation</span> <span class="o">*</span> <span class="n">radius</span>
+
+            <span class="c1"># append convolution ton the list:</span>
+            <span class="n">dilated_conv_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># stack all features into one tensor:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)(</span><span class="n">dilated_conv_list</span><span class="p">)</span>
+
+        <span class="c1"># We keep the number of features:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total_num_features</span> <span class="o">=</span> <span class="n">total_num_features</span>
+
+        <span class="c1"># By default the number of channels for the deep layers is the total number of spatial features generated</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_channels</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">total_num_features</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">level_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_dense_layers</span><span class="p">):</span>
+            <span class="c1"># number of input and output channels:</span>
+            <span class="c1"># num_in = total_num_features if level == 0 else num_channels</span>
+            <span class="n">num_out</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">num_output_channels</span>
+                <span class="k">if</span> <span class="n">level_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_dense_layers</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="k">else</span> <span class="n">num_channels</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Setup of channel-wise dense layer (1x1 convolution)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">channel_wise_dense_layer_type</span> <span class="o">=</span> <span class="n">Conv2D</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">spacetime_ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">channel_wise_dense_layer_type</span> <span class="o">=</span> <span class="n">Conv3D</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="n">channel_wise_dense_layer_type</span><span class="p">(</span>
+                <span class="n">num_out</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;valid&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;dense_cv</span><span class="si">{</span><span class="n">level_index</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">LeakyReLU</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="n">f</span> <span class="o">*</span> <span class="n">x</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">channel_wise_dense_layer_type</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_output_channels</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;final_cv&#39;</span>
+        <span class="p">)(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_relu</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;final_relu&#39;</span><span class="p">)(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.14
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="jinet.html">v0.1.14</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

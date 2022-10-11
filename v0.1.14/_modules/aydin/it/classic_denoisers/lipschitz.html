@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.classic_denoisers.lipschitz &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.classic_denoisers.lipschitz</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.classic_denoisers.lipschitz</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">jit</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">median_filter</span><span class="p">,</span> <span class="n">uniform_filter</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers</span> <span class="kn">import</span> <span class="n">_defaults</span>
+
+<span class="n">__fastmath</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;contract&#39;</span><span class="p">,</span> <span class="s1">&#39;afn&#39;</span><span class="p">,</span> <span class="s1">&#39;reassoc&#39;</span><span class="p">}</span>
+<span class="n">__error_model</span> <span class="o">=</span> <span class="s1">&#39;numpy&#39;</span>
+
+
+<div class="viewcode-block" id="calibrate_denoise_lipschitz"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.lipschitz.calibrate_denoise_lipschitz">[docs]</a><span class="k">def</span> <span class="nf">calibrate_denoise_lipschitz</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">lipschitz</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">percentile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">max_num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_max_evals_normal</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">blind_spots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_blind_spots</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">other_fixed_parameters</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calibrates the Lipschitz denoiser for the given image and returns the</span>
+<span class="sd">    optimal parameters obtained using the N2S loss.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image: ArrayLike</span>
+<span class="sd">        Image to calibrate Sobolev denoiser for.</span>
+
+<span class="sd">    lipschitz : float</span>
+<span class="sd">        Increase to tolerate more variation, decrease to be</span>
+<span class="sd">        more aggressive in removing salt &amp; pepper noise.</span>
+
+<span class="sd">    percentile : float</span>
+<span class="sd">        Percentile value used to determine the threshold</span>
+<span class="sd">        for choosing the worst offending voxels per iteration.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    alpha : float</span>
+<span class="sd">        This constant controls the amount of correction per iteration.</span>
+<span class="sd">        Should be a number within[0, 1]. (advanced)</span>
+
+<span class="sd">    max_num_iterations: int</span>
+<span class="sd">        Maximum number of Lipschitz correction iterations to run. (advanced)</span>
+
+<span class="sd">    blind_spots: bool</span>
+<span class="sd">        List of voxel coordinates (relative to receptive field center) to</span>
+<span class="sd">        be included in the blind-spot. For example, you can give a list of</span>
+<span class="sd">        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot</span>
+<span class="sd">        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    other_fixed_parameters: dict</span>
+<span class="sd">        Any other fixed parameters. (advanced)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoising function, dictionary containing optimal parameters,</span>
+<span class="sd">    and free memory needed in bytes for computation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Combine fixed parameters:</span>
+    <span class="n">other_fixed_parameters</span> <span class="o">=</span> <span class="n">other_fixed_parameters</span> <span class="o">|</span> <span class="p">{</span>
+        <span class="s1">&#39;lipschitz&#39;</span><span class="p">:</span> <span class="n">lipschitz</span><span class="p">,</span>
+        <span class="s1">&#39;percentile&#39;</span><span class="p">:</span> <span class="n">percentile</span><span class="p">,</span>
+        <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="n">alpha</span><span class="p">,</span>
+        <span class="s1">&#39;max_num_iterations&#39;</span><span class="p">:</span> <span class="n">max_num_iterations</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">best_parameters</span> <span class="o">=</span> <span class="n">other_fixed_parameters</span>
+
+    <span class="c1"># Memory needed:</span>
+    <span class="n">memory_needed</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">nbytes</span>  <span class="c1"># complex numbers and more</span>
+
+    <span class="k">return</span> <span class="n">denoise_lipschitz</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">,</span> <span class="n">memory_needed</span></div>
+
+
+<div class="viewcode-block" id="denoise_lipschitz"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.lipschitz.denoise_lipschitz">[docs]</a><span class="k">def</span> <span class="nf">denoise_lipschitz</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">lipschitz</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">percentile</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">max_num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+    <span class="n">multi_core</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Denoises the given image by correcting voxel values that violate</span>
+<span class="sd">    &lt;a href=&quot;https://en.wikipedia.org/wiki/Lipschitz_continuity&quot;&gt;Lipschitz</span>
+<span class="sd">    continuity&lt;/a&gt; criterion. These voxels get replaced</span>
+<span class="sd">    iteratively replaced by the median. This is repeated for a number</span>
+<span class="sd">    of iterations (max_num_iterations), until no more changes to</span>
+<span class="sd">    the image occurs, and making sure that the proportion of</span>
+<span class="sd">    corrected voxels remains below a given level (max_corrections argument).</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image: ArrayLike</span>
+<span class="sd">        Image to be denoised</span>
+
+<span class="sd">    lipschitz : float</span>
+<span class="sd">        Increase to tolerate more variation, decrease to be</span>
+<span class="sd">        more aggressive in removing impulse/salt&amp;pepper noise.</span>
+
+<span class="sd">    percentile : float</span>
+<span class="sd">        Percentile value used to determine the threshold</span>
+<span class="sd">        for choosing the worst offending voxels per iteration.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    alpha : float</span>
+<span class="sd">        This constant controls the amount of correction per ietartion.</span>
+<span class="sd">        Should be a number within[0, 1]. (advanced)</span>
+
+<span class="sd">    max_num_iterations: int</span>
+<span class="sd">        Maximum number of Lipschitz correction iterations to run. (advanced)</span>
+
+<span class="sd">    multi_core: bool</span>
+<span class="sd">        By default we use as many cores as possible, in some cases, for small</span>
+<span class="sd">        (test) images, it might be faster to run on a single core instead of</span>
+<span class="sd">        starting the whole parallelization machinery. (advanced)</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoised image</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Compute median:</span>
+    <span class="n">median_ref</span> <span class="o">=</span> <span class="n">median_filter</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># Wrap compute_error function:</span>
+    <span class="n">wrapped_compute_error</span> <span class="o">=</span> <span class="n">jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="n">multi_core</span><span class="p">)(</span><span class="n">_compute_error</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_num_iterations</span><span class="p">):</span>
+        <span class="c1"># lprint(f&quot;Iteration {i}&quot;)</span>
+
+        <span class="c1"># Compute median:</span>
+        <span class="n">median</span> <span class="o">=</span> <span class="n">uniform_filter</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+        <span class="c1"># We scale the lipschitz threshold to the image std at &#39;3 sigma&#39; :</span>
+        <span class="n">_lipschitz</span> <span class="o">=</span> <span class="n">lipschitz</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+        <span class="c1"># We compute the &#39;error&#39;:</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">wrapped_compute_error</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">median</span><span class="o">=</span><span class="n">median</span><span class="p">,</span> <span class="n">lipschitz</span><span class="o">=</span><span class="n">_lipschitz</span><span class="p">)</span>
+
+        <span class="c1"># We compute the threshold on the basis of the errors,</span>
+        <span class="c1"># we first tackle the most offending voxels:</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">percentile</span><span class="p">))</span>
+
+        <span class="c1"># We compute the mask:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">error</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+
+        <span class="c1"># count number of corrections for this round:</span>
+        <span class="n">num_corrections</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+        <span class="c1"># lprint(f&quot;Number of corrections: {num_corrections}&quot;)</span>
+
+        <span class="c1"># if no corrections made we stop iterating:</span>
+        <span class="k">if</span> <span class="n">num_corrections</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="c1"># We use the median to correct pixels:</span>
+        <span class="n">image</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">image</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">median_ref</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">image</span></div>
+
+
+<span class="k">def</span> <span class="nf">_compute_error</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">median</span><span class="p">,</span> <span class="n">lipschitz</span><span class="p">):</span>
+    <span class="c1"># we compute the error map:</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="n">median</span> <span class="o">-</span> <span class="n">array</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">lipschitz</span><span class="p">)</span>
+    <span class="n">error</span> <span class="o">-=</span> <span class="n">lipschitz</span>
+    <span class="k">return</span> <span class="n">error</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.14
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="lipschitz.html">v0.1.14</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

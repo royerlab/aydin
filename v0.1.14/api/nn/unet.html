@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNetModel &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="JINetModel" href="jinet.html" />
+    <link rel="prev" title="NN" href="../nn.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html">
+            <img src="../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../io.html">IO</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../nn.html">NN</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">UNetModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jinet.html">JINetModel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../nn.html">NN</a> &raquo;</li>
+      <li>UNetModel</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/nn/unet.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="unetmodel">
+<h1>UNetModel<a class="headerlink" href="#unetmodel" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.nn.models.unet.UNetModel">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.nn.models.unet.</span></span><span class="sig-name descname"><span class="pre">UNetModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/unet.html#UNetModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.unet.UNetModel" title="Permalink to this definition"></a></dt>
+<dd><p>Standard UNet model. Three training modes are available: supervised: noisy and clean images are required, shiftconv:
+self-supervised learning with shift and conv scheme non-shiftconv: self-supervised learning by masking pixels at
+each iteration</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.nn.models.unet.UNetModel.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_valid_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training_architecture</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_patches_for_validation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_mask_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replace_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'zero'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ReduceLR_patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce_lr_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/unet.html#UNetModel.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.unet.UNetModel.fit" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_image</strong></dt><dd></dd>
+<dt><strong>target_image</strong></dt><dd></dd>
+<dt><strong>callbacks</strong></dt><dd></dd>
+<dt><strong>train_valid_ratio</strong></dt><dd></dd>
+<dt><strong>img_val</strong></dt><dd></dd>
+<dt><strong>val_marker</strong></dt><dd></dd>
+<dt><strong>training_architecture</strong></dt><dd></dd>
+<dt><strong>create_patches_for_validation</strong></dt><dd></dd>
+<dt><strong>total_num_patches</strong></dt><dd></dd>
+<dt><strong>batch_size</strong></dt><dd></dd>
+<dt><strong>random_mask_ratio</strong></dt><dd></dd>
+<dt><strong>patch_size</strong></dt><dd></dd>
+<dt><strong>mask_size</strong></dt><dd></dd>
+<dt><strong>replace_by</strong></dt><dd></dd>
+<dt><strong>verbose</strong></dt><dd></dd>
+<dt><strong>max_epochs</strong></dt><dd></dd>
+<dt><strong>ReduceLR_patience</strong></dt><dd></dd>
+<dt><strong>reduce_lr_factor</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>loss_history</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.nn.models.unet.UNetModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_queue_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_multiprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/unet.html#UNetModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.unet.UNetModel.predict" title="Permalink to this definition"></a></dt>
+<dd><p>Overwritten model predict method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>x</strong></dt><dd></dd>
+<dt><strong>batch_size</strong></dt><dd></dd>
+<dt><strong>verbose</strong></dt><dd></dd>
+<dt><strong>steps</strong></dt><dd></dd>
+<dt><strong>callbacks</strong></dt><dd></dd>
+<dt><strong>max_queue_size</strong></dt><dd></dd>
+<dt><strong>workers</strong></dt><dd></dd>
+<dt><strong>use_multiprocessing</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.nn.models.unet.UNetModel.size">
+<span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/unet.html#UNetModel.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.unet.UNetModel.size" title="Permalink to this definition"></a></dt>
+<dd><p>Returns size of the model in bytes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.nn.models.unet.UNetModel.unet_core_2d">
+<span class="sig-name descname"><span class="pre">unet_core_2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_lyr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/unet.html#UNetModel.unet_core_2d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.unet.UNetModel.unet_core_2d" title="Permalink to this definition"></a></dt>
+<dd><p>Unet Core method which actually populates the model</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="aydin.nn.models.unet.UNetModel.unet_core_3d">
+<span class="sig-name descname"><span class="pre">unet_core_3d</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/unet.html#UNetModel.unet_core_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.unet.UNetModel.unet_core_3d" title="Permalink to this definition"></a></dt>
+<dd><p>Unet Core method which actually populates the model</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../nn.html" class="btn btn-neutral float-left" title="NN" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jinet.html" class="btn btn-neutral float-right" title="JINetModel" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.14
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../v0.1.11/api/nn/unet.html">v0.1.11</a></dd>
+      <dd><a href="../../../v0.1.12/api/nn/unet.html">v0.1.12</a></dd>
+      <dd><a href="../../../v0.1.13/api/nn/unet.html">v0.1.13</a></dd>
+      <dd><a href="unet.html">v0.1.14</a></dd>
+      <dd><a href="../../../v0.1.8/api/nn/unet.html">v0.1.8</a></dd>
+      <dd><a href="../../../v0.1.9/api/nn/unet.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

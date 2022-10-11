@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Install Aydin &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Hardware Requirements" href="hardware_requirements.html" />
+    <link rel="prev" title="Getting started, with bundles:" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-aydin-bundle-on-mac-osx">Install Aydin bundle on Mac OSX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-aydin-bundle-on-windows">Install Aydin bundle on Windows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-aydin-bundle-on-linux">Install Aydin bundle on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-aydin-in-a-conda-environment-with-cuda-support">Install Aydin in a Conda environment with CUDA support</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Install Aydin</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/getting_started/install.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="install-aydin">
+<h1>Install Aydin<a class="headerlink" href="#install-aydin" title="Permalink to this headline"></a></h1>
+<p>You can install Aydin in two different ways.</p>
+<p>The first approach is to download the operating system specific ‘app bundles’ that we have prepared.
+This approach requires zero command-line interactions. It is as simple as downloading the bundle,
+then installing/unzipping the bundle, and finally double-clicking on the Aydin app to start it.</p>
+<p>The second approach is to install Aydin via <code class="docutils literal notranslate"><span class="pre">pip</span></code>. With this approach, you will have a more
+more flexible installation. This can help to set certain GPU-using dependencies, but als requires
+more familiarity with Python package managers.</p>
+<p>Below, we provide detailed, step-by-step installation guides, to help you install Aydin on your computer.</p>
+<section id="install-aydin-bundle-on-mac-osx">
+<h2>Install Aydin bundle on Mac OSX<a class="headerlink" href="#install-aydin-bundle-on-mac-osx" title="Permalink to this headline"></a></h2>
+<p>Download the <a class="reference external" href="https://royerlab.github.io/aydin/">OSX bundle</a> to start. Then right-click and open the Aydin installer as shown
+below:</p>
+<img alt="../_images/right_click_open.png" src="../_images/right_click_open.png" />
+<p>You will be welcomed by the opening page of the installer, click on <cite>Continue</cite> button:</p>
+<img alt="../_images/first_installer_tab.png" src="../_images/first_installer_tab.png" />
+<p>You can then choose the destination in which Aydin will be installed. On this step please
+choose the partition that has your <code class="docutils literal notranslate"><span class="pre">home</span></code> folder, so that we can install Aydin into
+your <code class="docutils literal notranslate"><span class="pre">home</span></code> folder for your convenience:</p>
+<img alt="../_images/rename_select_a_destination.png" src="../_images/rename_select_a_destination.png" />
+<p>You are ready to start the installation, just click on <cite>Install</cite> button:</p>
+<img alt="../_images/click_install.png" src="../_images/click_install.png" />
+<p>Installer will run and show you its progress as shown below:</p>
+<img alt="../_images/wait_install.png" src="../_images/wait_install.png" />
+<p>Once the installation is done, you can close the installer:</p>
+<img alt="../_images/close_installer.png" src="../_images/close_installer.png" />
+<p>After a successful installation, you can find <code class="docutils literal notranslate"><span class="pre">Aydin</span></code> in your <code class="docutils literal notranslate"><span class="pre">Applications</span></code>
+folder as shown below:</p>
+<img alt="../_images/find_aydin_in_applications.png" src="../_images/find_aydin_in_applications.png" />
+</section>
+<section id="install-aydin-bundle-on-windows">
+<h2>Install Aydin bundle on Windows<a class="headerlink" href="#install-aydin-bundle-on-windows" title="Permalink to this headline"></a></h2>
+<p>Download the <a class="reference external" href="https://royerlab.github.io/aydin/">Windows bundle</a> to start. Then extract the compressed
+Aydin bundle, you should be able to see the see extracted folder as shown
+below:</p>
+<img alt="../_images/unzip_and_open_the_folder.png" src="../_images/unzip_and_open_the_folder.png" />
+<p>You can open the folder and double-click on the <code class="docutils literal notranslate"><span class="pre">run-aydin</span></code> file to start Aydin:</p>
+<img alt="../_images/double_click_on_run_aydin.png" src="../_images/double_click_on_run_aydin.png" />
+</section>
+<section id="install-aydin-bundle-on-linux">
+<h2>Install Aydin bundle on Linux<a class="headerlink" href="#install-aydin-bundle-on-linux" title="Permalink to this headline"></a></h2>
+<p>Download the <a class="reference external" href="https://royerlab.github.io/aydin/">Linux bundle</a>  to start. Then extract the Aydin bundle
+from the compressed file. You should be able to see the see extracted folder as shown below:</p>
+<img alt="../_images/unzip_bundle.png" src="../_images/unzip_bundle.png" />
+<p>You can open the folder and run the <code class="docutils literal notranslate"><span class="pre">run-aydin.sh</span></code> script from terminal to start Aydin:</p>
+<img alt="../_images/inside_the_folder.png" src="../_images/inside_the_folder.png" />
+<p>or you can get into <code class="docutils literal notranslate"><span class="pre">aydin</span></code> folder and double-click on the executable named <code class="docutils literal notranslate"><span class="pre">aydin</span></code>:</p>
+<img alt="../_images/aydin_executable.png" src="../_images/aydin_executable.png" />
+</section>
+<section id="install-aydin-in-a-conda-environment-with-cuda-support">
+<h2>Install Aydin in a Conda environment with CUDA support<a class="headerlink" href="#install-aydin-in-a-conda-environment-with-cuda-support" title="Permalink to this headline"></a></h2>
+<p>If you are an OSX user please first make sure to install <code class="docutils literal notranslate"><span class="pre">libomp</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ brew install libomp
+</pre></div>
+</div>
+<p>Then you can install Aydin with CUDA support:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ conda create -y -n aydin_env <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9
+$ conda activate aydin_env
+$ pip install aydin
+$ conda install cudatoolkit
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Getting started, with bundles:" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hardware_requirements.html" class="btn btn-neutral float-right" title="Hardware Requirements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.12
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../v0.1.11/getting_started/install.html">v0.1.11</a></dd>
+      <dd><a href="install.html">v0.1.12</a></dd>
+      <dd><a href="../../v0.1.13/getting_started/install.html">v0.1.13</a></dd>
+      <dd><a href="../../v0.1.14/getting_started/install.html">v0.1.14</a></dd>
+      <dd><a href="../../v0.1.8/getting_started/install.html">v0.1.8</a></dd>
+      <dd><a href="../../v0.1.9/getting_started/install.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

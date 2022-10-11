@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IO &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="folders" href="folders.html" />
+    <link rel="prev" title="IO" href="../io.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html">
+            <img src="../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../use_cases/confocal.html">Denoising Spinning-Disk Confocal Microscopy Images with Aydin</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../regressors.html">Regressors</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../io.html">IO</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">IO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="folders.html">folders</a></li>
+<li class="toctree-l2"><a class="reference internal" href="datasets.html">datasets</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../nn.html">NN</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contact_us/github.html">On Github</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../io.html">IO</a> &raquo;</li>
+      <li>IO</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/api/io/io.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="io">
+<h1>IO<a class="headerlink" href="#io" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="aydin.io.io.is_batch">
+<span class="sig-prename descclassname"><span class="pre">aydin.io.io.</span></span><span class="sig-name descname"><span class="pre">is_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/io/io.html#is_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.io.io.is_batch" title="Permalink to this definition"></a></dt>
+<dd><p>Method to check if given axis code belongs to a batch dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>code</strong><span class="classifier">str</span></dt><dd></dd>
+<dt><strong>shape</strong><span class="classifier">tuple</span></dt><dd></dd>
+<dt><strong>axes</strong><span class="classifier">str</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>bool</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aydin.io.io.is_channel">
+<span class="sig-prename descclassname"><span class="pre">aydin.io.io.</span></span><span class="sig-name descname"><span class="pre">is_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/io/io.html#is_channel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.io.io.is_channel" title="Permalink to this definition"></a></dt>
+<dd><p>Method to check if given axis code belongs to channel dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>code :</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>bool</dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="aydin.io.io.FileMetadata">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.io.io.</span></span><span class="sig-name descname"><span class="pre">FileMetadata</span></span><a class="reference internal" href="../../_modules/aydin/io/io.html#FileMetadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.io.io.FileMetadata" title="Permalink to this definition"></a></dt>
+<dd><p>Metadata class used across aydin package.</p>
+<p># TODO: make this docstring more detailed</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aydin.io.io.imread">
+<span class="sig-prename descclassname"><span class="pre">aydin.io.io.</span></span><span class="sig-name descname"><span class="pre">imread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/io/io.html#imread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.io.io.imread" title="Permalink to this definition"></a></dt>
+<dd><p>Image reading method.</p>
+<p>Method takes the image path as a string argument. Upon certain
+checks and decisions it returns the image array and its
+corresponding metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>input_path</strong><span class="classifier">str</span></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>tuple(numpy.typing.ArrayLike, FileMetadata)</dt><dd><p>Returns tuple of (array, metadata).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="aydin.io.io.imwrite">
+<span class="sig-prename descclassname"><span class="pre">aydin.io.io.</span></span><span class="sig-name descname"><span class="pre">imwrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/io/io.html#imwrite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.io.io.imwrite" title="Permalink to this definition"></a></dt>
+<dd><p>Image writing method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>array</strong><span class="classifier">numpy.typing.ArrayLike</span></dt><dd></dd>
+<dt><strong>output_path</strong><span class="classifier">str</span></dt><dd></dd>
+<dt><strong>metadata</strong><span class="classifier">FileMetadata</span></dt><dd></dd>
+<dt><strong>overwrite</strong><span class="classifier">bool</span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../io.html" class="btn btn-neutral float-left" title="IO" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="folders.html" class="btn btn-neutral float-right" title="folders" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.8
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../v0.1.11/api/io/io.html">v0.1.11</a></dd>
+      <dd><a href="../../../v0.1.12/api/io/io.html">v0.1.12</a></dd>
+      <dd><a href="../../../v0.1.13/api/io/io.html">v0.1.13</a></dd>
+      <dd><a href="../../../v0.1.14/api/io/io.html">v0.1.14</a></dd>
+      <dd><a href="io.html">v0.1.8</a></dd>
+      <dd><a href="../../../v0.1.9/api/io/io.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

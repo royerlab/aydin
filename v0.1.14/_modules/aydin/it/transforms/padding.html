@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.transforms.padding &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.transforms.padding</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.transforms.padding</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.transforms.base</span> <span class="kn">import</span> <span class="n">ImageTransformBase</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span><span class="p">,</span> <span class="n">lprint</span>
+
+
+<div class="viewcode-block" id="PaddingTransform"><a class="viewcode-back" href="../../../../api/transforms.html#aydin.it.transforms.padding.PaddingTransform">[docs]</a><span class="k">class</span> <span class="nc">PaddingTransform</span><span class="p">(</span><span class="n">ImageTransformBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Padding (and then Cropping)</span>
+
+<span class="sd">    Adds a border to the image before denoising and then removes that border</span>
+<span class="sd">    from the denoised image. This reduces border artifacts when denoising</span>
+<span class="sd">    certain images. In the case of self-supervised blind-spot based denoisers</span>
+<span class="sd">    (e.g. N2S) padding must be carefully chosen because the added pixels</span>
+<span class="sd">    should not &#39;give away&#39; the value of their neighbors. Thus, not all</span>
+<span class="sd">    padding modes are recommended. &#39;symmetric&#39; is the recommended default.</span>
+
+<span class="sd">    Other supported modes: &#39;constant&#39;: Pads with a constant value of 0,</span>
+<span class="sd">    &#39;linear_ramp&#39;: Pads with the linear ramp between end_value and the array</span>
+<span class="sd">    edge value, &#39;maximum&#39;: Pads with the maximum value of all or part of the</span>
+<span class="sd">    vector along each axis, &#39;mean&#39;: Pads with the mean value of all or part</span>
+<span class="sd">    of the vector along each axis, &#39;median&#39;: Pads with the median value of</span>
+<span class="sd">    all or part of the vector along each axis, &#39;minimum&#39;: Pads with the</span>
+<span class="sd">    minimum value of all or part of the vector along each axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">preprocess_description</span> <span class="o">=</span> <span class="s2">&quot;Pads image&quot;</span> <span class="o">+</span> <span class="n">ImageTransformBase</span><span class="o">.</span><span class="n">preprocess_description</span>
+    <span class="n">postprocess_description</span> <span class="o">=</span> <span class="s2">&quot;Crops image&quot;</span> <span class="o">+</span> <span class="n">ImageTransformBase</span><span class="o">.</span><span class="n">postprocess_description</span>
+    <span class="n">postprocess_supported</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">postprocess_recommended</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pad_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;reflect&#39;</span><span class="p">,</span>
+        <span class="n">min_length_to_pad</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">priority</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a Padding Transform</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pad_width : int</span>
+<span class="sd">            Amount of padding on all sides of the array</span>
+<span class="sd">        mode : str</span>
+<span class="sd">            Padding mode, may be: &#39;constant&#39;, &#39;linear_ramp&#39;, &#39;maximum&#39;,</span>
+<span class="sd">            &#39;mean&#39;, &#39;median&#39;, &#39;minimum&#39;, &#39;symmetric&#39;, &#39;reflect&#39;</span>
+<span class="sd">        min_length_to_pad : int</span>
+<span class="sd">            Minimal dimension length to pad. This avoids padding for &#39;channel-like&#39;</span>
+<span class="sd">            dimensions for which it does not make sense to pad.</span>
+<span class="sd">        priority : float</span>
+<span class="sd">            The priority is a value within [0,1] used to determine the order in</span>
+<span class="sd">            which to apply the pre- and post-processing transforms. Transforms</span>
+<span class="sd">            are sorted and applied in ascending order during preprocesing and in</span>
+<span class="sd">            the reverse, descending, order during post-processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">priority</span><span class="o">=</span><span class="n">priority</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pad_width</span> <span class="o">=</span> <span class="n">pad_width</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_length_to_pad</span> <span class="o">=</span> <span class="n">min_length_to_pad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pad_width</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Instanciating: </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># We exclude certain fields from saving:</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;_pad_width&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; (pad_width=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_width</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; min_length_to_pad=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">min_length_to_pad</span><span class="si">}</span><span class="s1">,&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; mode=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Padding array of shape: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_width</span><span class="si">}</span><span class="s2"> voxels and mode: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">:&quot;</span>
+        <span class="p">):</span>
+            <span class="n">padded_array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pad_width</span> <span class="o">=</span> <span class="n">_pad</span><span class="p">(</span>
+                <span class="n">array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_length_to_pad</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">padded_array</span>
+
+    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_postprocess</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cropping array of shape: </span><span class="si">{</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> by removing padding of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_width</span><span class="si">}</span><span class="s2"> voxels:&quot;</span>
+        <span class="p">):</span>
+            <span class="n">new_array</span> <span class="o">=</span> <span class="n">_unpad</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pad_width</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new_array</span></div>
+
+
+<span class="k">def</span> <span class="nf">_pad</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">pad_width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">min_length_to_pad</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+    <span class="c1"># Compute pad width:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pad_width</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">pad_width</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">pad_width</span><span class="p">,</span> <span class="n">pad_width</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="n">min_length_to_pad</span> <span class="k">else</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unsupported padding value, must be positive integer, was: </span><span class="si">{</span><span class="n">pad_width</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Do padding:</span>
+    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Effective padding widths: </span><span class="si">{</span><span class="n">pad_width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">padded_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">pad_width</span><span class="o">=</span><span class="n">pad_width</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">padded_array</span><span class="p">,</span> <span class="n">pad_width</span>
+
+
+<span class="k">def</span> <span class="nf">_unpad</span><span class="p">(</span><span class="n">array</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">pad_width</span><span class="p">):</span>
+
+    <span class="c1"># Compute slice:</span>
+    <span class="n">slices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">before</span><span class="p">,</span> <span class="n">after</span> <span class="ow">in</span> <span class="n">pad_width</span><span class="p">:</span>
+        <span class="n">after</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">after</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">after</span>
+        <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">after</span><span class="p">))</span>
+
+    <span class="c1"># Crop to &#39;unpad&#39;:</span>
+    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Effective cropping widths: </span><span class="si">{</span><span class="n">pad_width</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">cropped_array</span> <span class="o">=</span> <span class="n">array</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">)]</span>
+
+    <span class="k">return</span> <span class="n">cropped_array</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.14
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="padding.html">v0.1.14</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>
