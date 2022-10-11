@@ -59,6 +59,7 @@ html_sidebars = {
 
 # Disabling generation of docs on different branches to use tags only
 smv_branch_whitelist = None
+smv_tag_whitelist = r'^v\d+\.\d+\.\d+$'
 
 # The suffix of source filenames.
 source_suffix = ".rst"
