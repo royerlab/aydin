@@ -9,8 +9,8 @@ def main():
   <head>
     <title>Redirecting to master branch</title>
     <meta charset="utf-8">
-    <meta http-equiv="refresh" content="0; url=./{version_str}/index.html">
-    <link rel="canonical" href="./{version_str}/index.html">
+    <meta http-equiv="refresh" content="0; url={version_str}/index.html">
+    <link rel="canonical" href="{version_str}/index.html">
   </head>
 </html>"""
 
