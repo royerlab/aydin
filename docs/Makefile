@@ -1,7 +1,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
+SPHINXBUILD   = sphinx-multiversion  # sphinx-build
 BUILDDIR      = build
 
 # Internal variables.
@@ -21,6 +21,7 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 
 html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+# 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	sphinx-multiversion source build/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
