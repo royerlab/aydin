@@ -1,7 +1,7 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = sphinx-multiversion  # sphinx-build
+SPHINXBUILD   = sphinx-build
 BUILDDIR      = build
 
 # Internal variables.
