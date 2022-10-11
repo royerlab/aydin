@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from os.path import join
 from typing import Tuple
 import jsonpickle
-import numexpr
 import numpy
 from numba import jit, prange
 
@@ -124,15 +123,9 @@ class NormaliserBase(ABC):
 
             try:
                 self.normalize_numba(array, min_value, max_value, epsilon)
-                # # We perform operation in-place with numexpr if possible:
-                # numexpr.evaluate(
-                #     "((array - min_value) / ( max_value - min_value + epsilon ))",
-                #     out=array,
-                # )
+
                 if self.clip:
-                    numexpr.evaluate(
-                        "where(array<0,0,where(array>1,1,array))", out=array
-                    )
+                    array = numpy.where(array < 0, 0, numpy.where(array > 1, 1, array))
 
             except ValueError:
                 array -= min_value
@@ -175,21 +168,12 @@ class NormaliserBase(ABC):
                 epsilon = numpy.float32(self.epsilon)
 
                 try:
-                    # We perform operation in-place with numexpr if possible:
-
                     if self.clip and clip:
-                        numexpr.evaluate(
-                            "where(array<0,0,where(array>1,1,array))",
-                            out=array,
-                            casting='unsafe',
+                        array = numpy.where(
+                            array < 0, 0, numpy.where(array > 1, 1, array)
                         )
 
                     self.denormalize_numba(array, min_value, max_value, epsilon)
-                    # numexpr.evaluate(
-                    #     "array * (max_value - min_value + epsilon) + min_value ",
-                    #     out=array,
-                    #     casting='unsafe',
-                    # )
 
                 except ValueError:
                     if self.clip and clip:
