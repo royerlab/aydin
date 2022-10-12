@@ -9,8 +9,8 @@ from aydin.io.datasets import (
     add_noise,
     newyork,
 )
-from aydin.nn.models.torch_linear_scaling_unet import LinearScalingUNetModel
-from aydin.nn.models.torch_unet import n2s_train
+from aydin.nn.models.linear_scaling_unet import LinearScalingUNetModel
+from aydin.nn.models.unet import n2s_train
 from aydin.util.log.log import Log
 
 

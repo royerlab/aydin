@@ -5,9 +5,9 @@ import torch
 
 from aydin.analysis.image_metrics import calculate_print_psnr_ssim
 from aydin.io.datasets import add_noise, camera, normalise
-from aydin.nn.models.torch_jinet import JINetModel
-from aydin.nn.models.torch_res_unet import ResidualUNetModel
-from aydin.nn.models.torch_unet import UNetModel
+from aydin.nn.models.jinet import JINetModel
+from aydin.nn.models.res_unet import ResidualUNetModel
+from aydin.nn.models.unet import UNetModel
 from aydin.nn.training_methods.n2s import n2s_train
 from aydin.nn.training_methods.n2t import n2t_train
 

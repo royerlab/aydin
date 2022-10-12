@@ -1,9 +1,12 @@
+import importlib
 import inspect
+import pkgutil
 
 from torch import nn
 from typing import Optional, Union, List, Tuple, Callable
 
 from aydin.it.base import ImageTranslatorBase
+import aydin.nn.models as nnmodels
 from aydin.nn.training_methods.n2s import n2s_train
 from aydin.nn.training_methods.n2t import n2t_train
 from aydin.util.log.log import lsection, lprint
@@ -32,7 +35,17 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             max_tiling_overhead=max_tiling_overhead,
         )
 
-        self.model = None
+        # Check if a model instance passed
+        if isinstance(model, nn.Module):
+            self.model, self.model_class = model, model.__class__
+        else:
+            self.model = None
+
+            # If desired model name is passed as a string
+            self.model_class = self._get_model_class_from_string(
+                model if isinstance(model, str) else "jinet"
+            )
+
         self.training_method = training_method
         self.patch_size = patch_size
         self.nb_epochs = nb_epochs
@@ -93,6 +106,25 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         raise NotImplementedError()
 
     @staticmethod
+    def _get_model_class_from_string(model_name):
+        model_modules = [
+            x
+            for x in pkgutil.iter_modules(tuple(nnmodels.__path__))
+            if not x.ispkg and x.name != 'base'
+        ]
+        module_of_interest = [
+            module for module in model_modules if module.name == model_name
+        ][0]
+
+        response = importlib.import_module("aydin.nn.models"+'.'+module_of_interest.name)
+
+        class_name = [x for x in dir(response) if model_name+"model" in x.lower()][0]
+
+        model_class = response.__getattribute__(class_name)
+
+        return model_class
+
+    @staticmethod
     def _get_function_args(function):
         """Returns name of arguments of a given function.
 
@@ -117,10 +149,15 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         callback_period,
         jinv,
     ):
+        # Little heuristic to decide on training method if it is not specified
         if not self.training_method:
             self.training_method = (
                 n2s_train if input_image is target_image else n2t_train
             )
+
+        # If a model instance is not passed, create one
+        if not self.model:
+            self.model = self.model_class(model_args)
 
         # Generate a dict of all arguments we can pass
         training_method_args = {
@@ -139,6 +176,7 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             if key in self._get_function_args(self.training_method)
         }
 
+        # Start training
         self.training_method(**filtered_training_method_args)
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):

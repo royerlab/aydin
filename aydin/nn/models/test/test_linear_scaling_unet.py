@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from aydin.nn.models.torch_linear_scaling_unet import LinearScalingUNetModel
+from aydin.nn.models.linear_scaling_unet import LinearScalingUNetModel
 
 
 @pytest.mark.parametrize("nb_unet_levels", [2])  # , 3, 5, 8])

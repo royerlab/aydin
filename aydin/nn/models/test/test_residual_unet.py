@@ -2,7 +2,7 @@
 import pytest
 import torch
 
-from aydin.nn.models.torch_res_unet import ResidualUNetModel
+from aydin.nn.models.res_unet import ResidualUNetModel
 
 
 @pytest.mark.parametrize("nb_unet_levels", [2, 3, 5, 8])

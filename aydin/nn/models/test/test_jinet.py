@@ -2,7 +2,7 @@ import numpy
 import torch
 
 from aydin.io.datasets import add_noise, normalise, camera
-from aydin.nn.models.torch_jinet import JINetModel, n2t_jinet_train_loop
+from aydin.nn.models.jinet import JINetModel, n2t_jinet_train_loop
 from aydin.nn._legacy_pytorch.it_ptcnn import to_numpy
 
 

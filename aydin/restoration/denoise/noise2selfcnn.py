@@ -87,7 +87,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         arguments = {}
 
         for module in model_modules:
-            model_args = self.get_class_implementation_kwonlyargs(
+            model_args = self.get_class_implementation_kwargs(
                 models, module, module.name + "Model"
             )
             arguments["Noise2SelfCNN-" + module.name] = {

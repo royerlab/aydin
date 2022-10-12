@@ -9,7 +9,7 @@ from aydin.io.datasets import (
     add_noise,
     camera,
 )
-from aydin.nn.models.torch_jinet import JINetModel
+from aydin.nn.models.jinet import JINetModel
 from aydin.nn.training_methods.n2t import n2t_train
 from aydin.util.log.log import Log
 
