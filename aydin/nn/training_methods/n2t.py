@@ -32,7 +32,7 @@ def n2t_train(
     ----------
     input_images
     target_images
-    model : UNetModel
+    model : nn.Module
     nb_epochs : int
     lr : float
     training_noise : float

@@ -26,10 +26,9 @@ def n2s_train(
     Parameters
     ----------
     input_image
-    model : UNetModel
+    model : nn.Module
     nb_epochs : int
     lr : float
-    patch_size : int
     patience : int
     verbose : bool
 

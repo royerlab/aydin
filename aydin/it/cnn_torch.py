@@ -1,3 +1,5 @@
+import inspect
+
 from torch import nn
 from typing import Optional, Union, List, Tuple, Callable
 
@@ -90,6 +92,23 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         # self.stop_fitting = True
         raise NotImplementedError()
 
+    @staticmethod
+    def _get_function_args(function):
+        """Returns name of arguments of a given function.
+
+        Parameters
+        ----------
+        function : Callable
+            The function of interest.
+
+        Returns
+        -------
+        List[str]
+            List of argument names for given function
+
+        """
+        return [param.name for param in inspect.signature(function).parameters.values()]
+
     def _train(
         self,
         input_image,
@@ -99,7 +118,9 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         jinv,
     ):
         if not self.training_method:
-            self.training_method = n2s_train if input_image is target_image else n2t_train
+            self.training_method = (
+                n2s_train if input_image is target_image else n2t_train
+            )
 
         # Generate a dict of all arguments we can pass
         training_method_args = {
@@ -113,7 +134,9 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
 
         # Filter the arguments for specific training_method
         filtered_training_method_args = {
-            key: value for key, value in training_method_args.items()
+            key: value
+            for key, value in training_method_args.items()
+            if key in self._get_function_args(self.training_method)
         }
 
         self.training_method(**filtered_training_method_args)
