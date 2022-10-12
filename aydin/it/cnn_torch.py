@@ -116,9 +116,11 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             module for module in model_modules if module.name == model_name
         ][0]
 
-        response = importlib.import_module("aydin.nn.models"+'.'+module_of_interest.name)
+        response = importlib.import_module(
+            "aydin.nn.models" + '.' + module_of_interest.name
+        )
 
-        class_name = [x for x in dir(response) if model_name+"model" in x.lower()][0]
+        class_name = [x for x in dir(response) if model_name + "model" in x.lower()][0]
 
         model_class = response.__getattribute__(class_name)
 
@@ -141,6 +143,15 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         """
         return [param.name for param in inspect.signature(function).parameters.values()]
 
+    def _get_model_args(self, input_image):
+        self.spacetime_ndim = input_image.ndim - 2
+        if self.spacetime_ndim not in [2, 3]:
+            raise ValueError("Number of spacetime dimensions have to be either 2 or 3.")
+
+        args = {"spacetime_ndim": self.spacetime_ndim}
+
+        return args
+
     def _train(
         self,
         input_image,
@@ -157,7 +168,7 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
 
         # If a model instance is not passed, create one
         if not self.model:
-            self.model = self.model_class(model_args)
+            self.model = self.model_class(**self._get_model_args(input_image))
 
         # Generate a dict of all arguments we can pass
         training_method_args = {
