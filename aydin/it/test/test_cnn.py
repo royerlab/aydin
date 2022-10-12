@@ -21,7 +21,7 @@ def train_and_evaluate_cnn(input_image):
     noisy = add_noise(image)
 
     it = ImageTranslatorCNNTorch(
-        model='jinet', patch_size=image_width, nb_epochs=max_epochs
+        model='jinet',
     )
     it.train(noisy, noisy)
     denoised = it.translate(noisy, tile_size=image_width)

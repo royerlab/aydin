@@ -3,7 +3,7 @@ import inspect
 import pkgutil
 
 from torch import nn
-from typing import Optional, Union, List, Tuple, Callable
+from typing import Union, List, Callable, Dict, Optional, Tuple
 
 from aydin.it.base import ImageTranslatorBase
 import aydin.nn.models as nnmodels
@@ -16,11 +16,9 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
     def __init__(
         self,
         model: Union[str, nn.Module] = "jinet",
+        model_kwargs: Dict = None,
         training_method: Callable = None,
-        patch_size: int = None,
-        nb_epochs: int = 256,
-        lr: float = 0.01,
-        patience: int = 4,
+        training_method_kwargs: Dict = None,
         blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
@@ -46,11 +44,9 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
                 model if isinstance(model, str) else "jinet"
             )
 
+        self.model_kwargs = model_kwargs
         self.training_method = training_method
-        self.patch_size = patch_size
-        self.nb_epochs = nb_epochs
-        self.lr = lr
-        self.patience = patience
+        self.training_method_kwargs = training_method_kwargs
 
     def save(self, path: str):
         """
@@ -149,6 +145,8 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             raise ValueError("Number of spacetime dimensions have to be either 2 or 3.")
 
         args = {"spacetime_ndim": self.spacetime_ndim}
+        if self.model_kwargs:
+            args |= self.model_kwargs
 
         return args
 
@@ -175,10 +173,9 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             "input_image": input_image,
             "target_image": target_image,
             "model": self.model,
-            "nb_epochs": self.nb_epochs,
-            "lr": self.lr,
-            "patience": self.patience,
         }
+        if self.training_method_kwargs:
+            training_method_args |= self.training_method_kwargs
 
         # Filter the arguments for specific training_method
         filtered_training_method_args = {
