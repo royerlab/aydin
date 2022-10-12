@@ -13,7 +13,7 @@ def train_and_evaluate_cnn(input_image):
     """
     Demo for self-supervised denoising using camera image with synthetic noise
     """
-    max_epochs = 30
+    # max_epochs = 30
     image_width = 100
     image = normalise(input_image)
     H0, W0 = (numpy.array(image.shape) - image_width) // 2
