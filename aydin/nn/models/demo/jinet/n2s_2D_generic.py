@@ -10,7 +10,7 @@ from aydin.io.datasets import (
     newyork,
 )
 from aydin.nn.models.torch_jinet import JINetModel
-from aydin.nn.models.torch_unet import n2s_train
+from aydin.nn.training_methods.n2s import n2s_train
 from aydin.util.log.log import Log
 
 
