@@ -42,6 +42,7 @@ extensions = [
     "sphinx_copybutton",
     "numpydoc",
     "sphinx_rtd_theme",
+    "sphinx_multiversion",
     # "sphinx_click.ext",
 ]
 
@@ -49,6 +50,16 @@ numpydoc_show_class_members = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
+
+html_sidebars = {
+    '**': [
+        'versions.html',
+    ],
+}
+
+# Disabling generation of docs on different branches to use tags only
+smv_branch_whitelist = None
+smv_tag_whitelist = r'^v\d+\.\d+\.\d+$'
 
 # The suffix of source filenames.
 source_suffix = ".rst"

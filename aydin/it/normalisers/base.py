@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 from os.path import join
 from typing import Tuple
 import jsonpickle
-import numexpr
 import numpy
+from numba import jit, prange
 
 from aydin.util.misc.json import encode_indent
 from aydin.util.log.log import lprint
@@ -122,15 +122,10 @@ class NormaliserBase(ABC):
             epsilon = numpy.float32(self.epsilon)
 
             try:
-                # We perform operation in-place with numexpr if possible:
-                numexpr.evaluate(
-                    "((array - min_value) / ( max_value - min_value + epsilon ))",
-                    out=array,
-                )
+                self.normalize_numba(array, min_value, max_value, epsilon)
+
                 if self.clip:
-                    numexpr.evaluate(
-                        "where(array<0,0,where(array>1,1,array))", out=array
-                    )
+                    array = numpy.where(array < 0, 0, numpy.where(array > 1, 1, array))
 
             except ValueError:
                 array -= min_value
@@ -173,20 +168,12 @@ class NormaliserBase(ABC):
                 epsilon = numpy.float32(self.epsilon)
 
                 try:
-                    # We perform operation in-place with numexpr if possible:
-
                     if self.clip and clip:
-                        numexpr.evaluate(
-                            "where(array<0,0,where(array>1,1,array))",
-                            out=array,
-                            casting='unsafe',
+                        array = numpy.where(
+                            array < 0, 0, numpy.where(array > 1, 1, array)
                         )
 
-                    numexpr.evaluate(
-                        "array * (max_value - min_value + epsilon) + min_value ",
-                        out=array,
-                        casting='unsafe',
-                    )
+                    self.denormalize_numba(array, min_value, max_value, epsilon)
 
                 except ValueError:
                     if self.clip and clip:
@@ -207,3 +194,15 @@ class NormaliserBase(ABC):
                 array = array.astype(self.original_dtype)
 
         return array
+
+    @jit(parallel=True, error_model='numpy')
+    def normalize_numba(self, array, min_value, max_value, epsilon):
+        for _ in prange(numpy.prod(array.shape)):
+            array.flat[_] -= min_value
+            array.flat[_] /= max_value - min_value + epsilon
+
+    @jit(parallel=True, error_model='numpy')
+    def denormalize_numba(self, array, min_value, max_value, epsilon):
+        for _ in prange(numpy.prod(array.shape)):
+            array.flat[_] *= max_value - min_value + epsilon
+            array.flat[_] += min_value
