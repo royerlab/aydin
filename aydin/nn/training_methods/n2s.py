@@ -11,8 +11,9 @@ from aydin.nn.tf.models.utils.masking.grid_masked_dataset import GridMaskedDatas
 
 
 def n2s_train(
-    image,
+    input_image,
     model: nn.Module,
+    *,
     nb_epochs: int = 128,
     lr: float = 0.001,
     # patch_size: int = 32,
@@ -24,12 +25,13 @@ def n2s_train(
 
     Parameters
     ----------
-    image
+    input_image
     model : UNetModel
     nb_epochs : int
     lr : float
     patch_size : int
     patience : int
+    verbose : bool
 
     """
     if torch.cuda.is_available():
@@ -62,7 +64,7 @@ def n2s_train(
 
     loss_function1 = MSELoss()
 
-    dataset = GridMaskedDataset(image)
+    dataset = GridMaskedDataset(input_image)
     print(f"dataset length: {len(dataset)}")
     data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
 

@@ -14,6 +14,7 @@ def n2t_train(
     input_images,
     target_images,
     model: nn.Module,
+    *,
     nb_epochs: int = 1024,
     lr: float = 0.01,
     training_noise: float = 0.001,

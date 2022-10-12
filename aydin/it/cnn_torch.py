@@ -99,10 +99,9 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         jinv,
     ):
         if not self.training_method:
-            self.training_method = (
-                n2s_train if input_image == target_image else n2t_train
-            )
+            self.training_method = n2s_train if input_image is target_image else n2t_train
 
+        # Generate a dict of all arguments we can pass
         training_method_args = {
             "input_image": input_image,
             "target_image": target_image,
@@ -112,7 +111,12 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             "patience": self.patience,
         }
 
-        self.training_method(**training_method_args)
+        # Filter the arguments for specific training_method
+        filtered_training_method_args = {
+            key: value for key, value in training_method_args.items()
+        }
+
+        self.training_method(**filtered_training_method_args)
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
         raise NotImplementedError()
