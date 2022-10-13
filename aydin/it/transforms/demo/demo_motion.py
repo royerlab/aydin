@@ -83,4 +83,5 @@ def add_noise(image, intensity=4, variance=0.4):
     return noisy
 
 
-demo_motion()
+if __name__ == "__main__":
+    demo_motion()

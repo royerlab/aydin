@@ -51,8 +51,13 @@ def calibrate_denoise_butterworth(
         Possible modes are: 'isotropic' for isotropic, meaning only one
         frequency cut-off is calibrated for all axes , 'z-yx' (or 'xy-z') for 3D
         stacks where the cut-off frequency for the x and y axes is the same but
-        different for the z axis, and 'full' for which all frequency cut-offs are
-        different. Use 'z-yx' for axes are ordered as: z, y and then x (default).
+        different for the z axis, 't-z-yx' (or 'xy-z-t') for 3D+t
+        timelapse where the cut-off frequency for the x and y axes is the same but
+        different for the z and t axis, and 'full' for which all frequency cut-offs are
+        different. Use 'z-yx' or 't-z-yx' for axes are ordered as: t, z, y and then x which is the default.
+        If for some reason the axis order is reversed you can use 'xy-z' or 'xy-z-t'.
+        Note: for 2D+t timelapses where the resolution over x and y are expected to be the same,
+        simply use: 'z-yx' (or 'xy-z').
 
     axes: Optional[Tuple[int,...]]
         Axes over which to apply low-pass filtering.
@@ -207,6 +212,41 @@ def calibrate_denoise_butterworth(
             'freq_cutoff_z': freq_cutoff_range,
         }
 
+    elif (mode == 'xy-z-t' or mode == 't-z-yx') and image.ndim == 4:
+        # Partial function with parameter impedance match:
+        def _denoise_butterworth(*args, **kwargs):
+            freq_cutoff_xy = kwargs.pop('freq_cutoff_xy')
+            freq_cutoff_z = kwargs.pop('freq_cutoff_z')
+            freq_cutoff_t = kwargs.pop('freq_cutoff_t')
+
+            if mode == 't-z-yx':
+                _freq_cutoff = (
+                    freq_cutoff_t,
+                    freq_cutoff_z,
+                    freq_cutoff_xy,
+                    freq_cutoff_xy,
+                )
+            elif mode == 'xy-z-t':
+                _freq_cutoff = (
+                    freq_cutoff_xy,
+                    freq_cutoff_xy,
+                    freq_cutoff_z,
+                    freq_cutoff_t,
+                )
+
+            return denoise_butterworth(
+                *args,
+                freq_cutoff=_freq_cutoff,
+                **(kwargs | other_fixed_parameters | {'multi_core': multi_core}),
+            )
+
+        # Parameters to test when calibrating the denoising algorithm
+        parameter_ranges = {
+            'freq_cutoff_xy': freq_cutoff_range,
+            'freq_cutoff_z': freq_cutoff_range,
+            'freq_cutoff_t': freq_cutoff_range,
+        }
+
     elif mode == 'full':
         # Partial function with parameter impedance match:
         def _denoise_butterworth(*args, **kwargs):
@@ -323,6 +363,19 @@ def calibrate_denoise_butterworth(
 
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
+    elif (mode == 'xy-z-t' or mode == 't-z-yx') and image.ndim == 4:
+        # We need to adjust a bit the type of parameters passed to the denoising function:
+        freq_cutoff_xy = best_parameters.pop('freq_cutoff_xy')
+        freq_cutoff_z = best_parameters.pop('freq_cutoff_z')
+        freq_cutoff_t = best_parameters.pop('freq_cutoff_t')
+
+        if mode == 't-z-yx':
+            freq_cutoff = (freq_cutoff_t, freq_cutoff_z, freq_cutoff_xy, freq_cutoff_xy)
+        elif mode == 'xy-z-t':
+            freq_cutoff = (freq_cutoff_xy, freq_cutoff_xy, freq_cutoff_z, freq_cutoff_t)
+
+        best_parameters |= {'freq_cutoff': freq_cutoff}
+
     elif mode == 'full':
         # We need to adjust a bit the type of parameters passed to the denoising function:
         freq_cutoff = tuple(
@@ -330,17 +383,18 @@ def calibrate_denoise_butterworth(
         )
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
-    # We apply the frequency tolerance:
+    # function to add freq. tol.:
+    def _add_freq_tol(f):
+        return min(1.0, max(0.0, f + frequency_tolerance))
+
+    # Add frequency_tolerance to all cutoff frequencies:
     if type(best_parameters['freq_cutoff']) is float:
-        best_parameters['freq_cutoff'] = min(
-            1.0, max(0.0, best_parameters['freq_cutoff'] + frequency_tolerance)
-        )
+        # If single float we add to freq:
+        best_parameters['freq_cutoff'] = _add_freq_tol(best_parameters['freq_cutoff'])
     else:
+        # If tuple float we add to all freqs:
         best_parameters['freq_cutoff'] = tuple(
-            (
-                min(1.0, max(0.0, f + frequency_tolerance))
-                for f in best_parameters['freq_cutoff']
-            )
+            (_add_freq_tol(f) for f in best_parameters['freq_cutoff'])
         )
 
     # Memory needed:

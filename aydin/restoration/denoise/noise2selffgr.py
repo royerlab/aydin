@@ -2,7 +2,7 @@ import importlib
 import inspect
 import os
 import shutil
-import numpy
+from typing import Optional
 
 from aydin import regression
 from aydin.features.standard_features import StandardFeatureGenerator
@@ -12,16 +12,13 @@ from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.regression.cb import CBRegressor
+from aydin.regression.lgbm import LGBMRegressor
+from aydin.regression.linear import LinearRegressor
+from aydin.regression.perceptron import PerceptronRegressor
+from aydin.regression.random_forest import RandomForestRegressor
+from aydin.regression.support_vector import SupportVectorRegressor
 from aydin.restoration.denoise.base import DenoiseRestorationBase
 from aydin.util.log.log import lsection
-
-
-if os.getenv("BUNDLED_AYDIN") == "1":
-    from aydin.regression.lgbm import LGBMRegressor  # noqa: F401
-    from aydin.regression.linear import LinearRegressor  # noqa: F401
-    from aydin.regression.perceptron import PerceptronRegressor  # noqa: F401
-    from aydin.regression.random_forest import RandomForestRegressor  # noqa: F401
-    from aydin.regression.support_vector import SupportVectorRegressor  # noqa: F401
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):
@@ -34,7 +31,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
     def __init__(
         self,
         *,
-        variant: str = 'fgr-cb',
+        variant: Optional[str] = None,
         use_model=None,
         input_model_path=None,
         lower_level_args=None,
@@ -43,8 +40,12 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         """
         Parameters
         ----------
-        variant : str
-            Variant of N2S FGR denoising
+        variant : str, optional
+            Variant of FGR denoiser to be used. Variant would supersede
+            the denoiser option passed in lower_level_args. `implementations`
+            property would return a complete list of variants (with a prefix
+            of 'Noise2SelfFGR-`) that can be used
+            on a given installation. Example variants: `cb`, `lgbm`, ...
         use_model : bool
             Flag to choose to train a new model or infer from a
             previously trained model. By default it is None.
@@ -56,17 +57,11 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         it_transforms :
             Transforms to be applied.
         """
-
         super().__init__()
-        self.lower_level_args = lower_level_args
-
-        self.backend_it, self.backend_regressor = (
-            variant.split("-") if variant is not None else ("fgr", "cb")
-        )
-
-        self.input_model_path = input_model_path
         self.use_model_flag = use_model
-        self.model_folder_path = None
+        self.input_model_path = input_model_path
+        self.lower_level_args = lower_level_args
+        self.variant = variant
 
         self.it = None
         self.it_transforms = (
@@ -78,10 +73,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             if it_transforms is None
             else it_transforms
         )
-
-        self.has_less_than_one_million_voxels = False
-        self.has_less_than_one_trillion_voxels = True
-        self.number_of_dims = -1
 
     @property
     def configurable_arguments(self):
@@ -119,7 +110,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         )
 
         for module in regression_modules:
-            regressor_args = self.get_class_implementation_kwonlyargs(
+            regressor_args = self.get_class_implementation_kwargs(
                 regression, module, module.name.replace("_", "") + "Regressor"
             )
 
@@ -177,19 +168,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         """Method to stop running N2S instance"""
         self.it.stop_training()
 
-    def set_image_metrics(self, image_shape):
-        """Sets several image metric parameters used internally.
-
-        Parameters
-        ----------
-        image_shape : tuple
-
-        """
-        self.number_of_dims = len(image_shape)
-        number_of_voxels = numpy.prod(numpy.array(image_shape))
-        self.has_less_than_one_million_voxels = number_of_voxels < 1000000
-        self.has_less_than_one_trillion_voxels = number_of_voxels < 1000000000000
-
     def get_generator(self):
         """Returns the corresponding generator instance for given selections.
 
@@ -198,7 +176,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         generator : FeatureGeneratorBase
 
         """
-        # print(self.lower_level_args)
         if self.lower_level_args is not None:
             generator = self.lower_level_args["feature_generator"]["class"](
                 **self.lower_level_args["feature_generator"]["kwargs"]
@@ -216,13 +193,23 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         regressor : RegressorBase
 
         """
+        if self.variant:
+            regressors = {
+                "cb": CBRegressor,
+                "lgbm": LGBMRegressor,
+                "linear": LinearRegressor,
+                "perceptron": PerceptronRegressor,
+                "random_forest": RandomForestRegressor,
+                "support_vector": SupportVectorRegressor,
+            }
+            return regressors[self.variant]()
 
-        if self.lower_level_args is not None:
+        if self.lower_level_args is None:
+            regressor = CBRegressor()
+        else:
             regressor = self.lower_level_args["regressor"]["class"](
                 **self.lower_level_args["regressor"]["kwargs"]
             )
-        else:
-            regressor = CBRegressor()
 
         return regressor
 
@@ -264,9 +251,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
                 transform_kwargs = transform["kwargs"]
                 self.it.add_transform(transform_class(**transform_kwargs))
 
-    def train(
-        self, noisy_image, *, batch_axes=None, chan_axes=None, image_path=None, **kwargs
-    ):
+    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to run training for Noise2Self FGR.
 
         Parameters
@@ -276,7 +261,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-        image_path : str
 
         Returns
         -------
@@ -284,7 +268,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
         """
         with lsection("Noise2Self train is starting..."):
-            self.set_image_metrics(noisy_image.shape)
 
             self.it = self.get_translator(
                 feature_generator=self.get_generator(), regressor=self.get_regressor()
@@ -306,9 +289,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
                 else 3,
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
-
-            # Save the trained model
-            # self.save_model(image_path)  # TODO:  fix the problems here
 
     def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to denoise an image with trained Noise2Self FGR.
@@ -361,7 +341,7 @@ def noise2self_fgr(noisy, *, batch_axes=None, chan_axes=None, variant=None):
 
     """
     # Run N2S and save the result
-    n2s = Noise2SelfFGR(variant=variant)
+    n2s = Noise2SelfFGR()
 
     # Train
     n2s.train(noisy, batch_axes=batch_axes, chan_axes=chan_axes)

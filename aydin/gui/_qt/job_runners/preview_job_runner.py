@@ -7,7 +7,7 @@ from aydin.util.log.log import Log, lprint
 
 class PreviewJobRunner(QWidget):
     def __init__(self, parent, threadpool):
-        super(QWidget, self).__init__(parent)
+        super(PreviewJobRunner, self).__init__(parent)
         self.parent = parent
         self.threadpool = threadpool
 

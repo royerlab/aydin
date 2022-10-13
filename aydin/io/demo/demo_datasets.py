@@ -41,4 +41,5 @@ def demo_examples():
             viewer.add_image(array, name='image')
 
 
-demo_examples()
+if __name__ == "__main__":
+    demo_examples()

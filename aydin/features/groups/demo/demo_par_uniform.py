@@ -2,8 +2,8 @@
 import numpy
 from scipy.ndimage import uniform_filter
 
-from aydin.util.fast_uniform_filter import parallel_uniform_filter
-from aydin.io.datasets import fibsem, examples_single
+from aydin.io.datasets import examples_single, newyork
+from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
 from aydin.util.log.log import lsection, Log
 
 
@@ -41,11 +41,12 @@ def demo_par_uniform(image_name: str, image, repeats=32):
     )
 
 
-image = fibsem(full=True).astype(numpy.float32)
-demo_par_uniform("fibsem 2D", image)
+if __name__ == "__main__":
+    image = newyork().astype(numpy.float32)
+    demo_par_uniform("fibsem 2D", image)
 
-image = examples_single.royerlab_hcr.get_array().squeeze()  # [0, ..., :320]
-demo_par_uniform("islet 3D", image, repeats=10)
+    image = examples_single.royerlab_hcr.get_array().squeeze()  # [0, ..., :320]
+    demo_par_uniform("islet 3D", image, repeats=10)
 
-image = examples_single.hyman_hela.get_array().squeeze()
-demo_par_uniform("hela 4D", image, repeats=1)
+    image = examples_single.hyman_hela.get_array().squeeze()
+    demo_par_uniform("hela 4D", image, repeats=1)

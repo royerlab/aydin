@@ -13,7 +13,7 @@ class App(QMainWindow):
     """GUI app"""
 
     def __init__(self, ver):
-        super(QMainWindow, self).__init__()
+        super(App, self).__init__()
 
         self.version = ver
 

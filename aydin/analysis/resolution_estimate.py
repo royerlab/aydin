@@ -8,7 +8,7 @@ from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 
-def resolution_estimate(image, precision: float = 0.01, display_images: bool = False):
+def resolution_estimate(image, precision: int = 2, display_images: bool = False):
     """Estimation of isotropic resolution in normalised frequency (within [0, 1]).
     Work best
 
@@ -16,8 +16,8 @@ def resolution_estimate(image, precision: float = 0.01, display_images: bool = F
     ----------
     image : numpy.typing.ArrayLike
         Image to estimate (isotropic) resolution from
-    precision: float
-        Precision of the search
+    precision: int
+        Precision in decimal digits
     display_images: bool
         Display image, for debugging purposes.
 
@@ -31,33 +31,54 @@ def resolution_estimate(image, precision: float = 0.01, display_images: bool = F
     """
 
     # obtain representative crop, to speed things up...
-    crop = representative_crop(image, crop_size=128000, equal_sides=True)
+    crop_original = representative_crop(image, crop_size=256000, equal_sides=True)
 
     # Convert image to float if needed:
-    crop = crop.astype(dtype=numpy.float32, copy=False)
+    crop_original = crop_original.astype(dtype=numpy.float32, copy=False)
 
-    # We need to add noise for this to work:
-    sigma = 0.01 * numpy.std(crop)
-    crop += random.normal(scale=sigma, size=crop.shape)
+    # We need to add a bit of noise for this to work:
+    sigma = 1e-9 * numpy.std(crop_original)
+    crop = crop_original + random.normal(scale=sigma, size=crop_original.shape)
 
-    # ranges:
-    freq_cutoff_range = list(numpy.arange(0.001, 1.0, precision))
+    step = 0.1
+    frequency = 0.5
 
-    # Parameters to test when calibrating the denoising algorithm
-    parameter_ranges = {'freq_cutoff': freq_cutoff_range}
+    for i in range(precision):
 
-    # Partial function:
-    _denoise_sobolev = partial(denoise_butterworth, multi_core=False, order=2)
+        # Start and stop of range:
+        start = max(0.0001, frequency - 5 * step)
+        stop = min(1.0, frequency + 5 * step)
 
-    # Calibrate denoiser
-    best_parameters = calibrate_denoiser(
-        crop,
-        _denoise_sobolev,
-        denoise_parameters=parameter_ranges,
-        display_images=display_images,
-        interpolation_mode='gaussian',
-    )
+        # ranges:
+        freq_cutoff_range = list(numpy.arange(start, stop, step))
 
-    norm_frequency = best_parameters.pop('freq_cutoff')
+        # Parameters to test when calibrating the denoising algorithm
+        parameter_ranges = {'freq_cutoff': freq_cutoff_range}
 
-    return norm_frequency, crop
+        # Partial function:
+        _denoise_function = partial(denoise_butterworth, multi_core=True, order=5)
+
+        # import napari
+        # viewer = napari.Viewer()
+        # viewer.add_image(image, name='image')
+        # viewer.add_image(crop_original, name='crop_original')
+        # viewer.add_image(crop, name='crop')
+        # napari.run()
+
+        # Calibrate denoiser
+        best_parameters = calibrate_denoiser(
+            crop,
+            _denoise_function,
+            denoise_parameters=parameter_ranges,
+            display_images=display_images,
+            max_num_evaluations=256,
+            patience=64,
+            loss_function='L1',
+            interpolation_mode='gaussian',
+            blind_spots=[],
+        )
+
+        frequency = best_parameters.pop('freq_cutoff')
+        step *= 0.1
+
+    return frequency, crop_original

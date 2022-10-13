@@ -34,9 +34,7 @@ class DenoiseRestorationBase(ABC):
         NotImplementedError()
 
     @abstractmethod
-    def train(
-        self, noisy_image, *, batch_axes=None, chan_axes=None, image_path=None, **kwargs
-    ):
+    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
         """Method to run training.
 
         Parameters
@@ -83,7 +81,7 @@ class DenoiseRestorationBase(ABC):
         ]
 
     @staticmethod
-    def get_class_implementation_kwonlyargs(package, module, implementation_class_name):
+    def get_class_implementation_kwargs(package, module, implementation_class_name):
         response = importlib.import_module(package.__name__ + '.' + module.name)
         elem = [
             x for x in dir(response) if implementation_class_name.lower() in x.lower()
@@ -106,7 +104,7 @@ class DenoiseRestorationBase(ABC):
         return args
 
     @staticmethod
-    def get_function_implementation_kwonlyargs(
+    def get_function_implementation_kwargs(
         package, module, implementation_function_name
     ):
         response = importlib.import_module(package.__name__ + '.' + module.name)
