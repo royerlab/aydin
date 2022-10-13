@@ -1,3 +1,4 @@
+# flake8: noqa
 from aydin.analysis.noise_floor_delta import noise_floor_delta
 from aydin.io.datasets import examples_single
 

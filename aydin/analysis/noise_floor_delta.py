@@ -1,5 +1,6 @@
 import numpy
 
+
 def noise_floor_delta(noisy_array, denoised_array, axis: int) -> float:
     """
     This method calculates the noise floor level difference on spectra
@@ -26,8 +27,6 @@ def noise_floor_delta(noisy_array, denoised_array, axis: int) -> float:
     #     numpy.newaxis(denoised_array, 0)
 
     numpy.swapaxes(denoised_array, 0, axis)
-
-    
 
     noisy_array
     delta = 0
