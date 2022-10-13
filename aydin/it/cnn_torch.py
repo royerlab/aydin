@@ -190,9 +190,15 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
         if self.model:
-            return self.model(torch.Tensor(input_image).to(
-                next(self.model.parameters()).device)  # Trick to get the model device
-            ).cpu().detach().numpy()
+            return (
+                self.model(
+                    torch.Tensor(input_image).to(
+                        next(self.model.parameters()).device
+                    )  # Trick to get the model device
+                )
+                .cpu()
+                .detach()
+                .numpy()
+            )
         else:
             raise ValueError("A model is needed to infer on...")
-
