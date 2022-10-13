@@ -9,4 +9,5 @@ def demo_noise_floor_delta():
     noise_floor_delta = noise_floor_delta(denoised_image, noisy_image, axis=0)
 
 
-demo_noise_floor_delta()
+if __name__ == '__main__':
+    demo_noise_floor_delta()
