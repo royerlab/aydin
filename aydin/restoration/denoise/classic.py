@@ -161,7 +161,7 @@ class Classic(DenoiseRestorationBase):
                     method_modules.remove(module)
 
         for module in method_modules:
-            calibration_args = self.get_function_implementation_kwonlyargs(
+            calibration_args = self.get_function_implementation_kwargs(
                 classic_denoisers, module, "calibrate_denoise_" + module.name
             )
             for idx, arg_name in enumerate(calibration_args["arguments"]):
