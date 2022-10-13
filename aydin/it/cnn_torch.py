@@ -2,6 +2,7 @@ import importlib
 import inspect
 import pkgutil
 
+import torch
 from torch import nn
 from typing import Union, List, Callable, Dict, Optional, Tuple
 
@@ -188,4 +189,10 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         self.training_method(**filtered_training_method_args)
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
-        raise NotImplementedError()
+        if self.model:
+            return self.model(torch.Tensor(input_image).to(
+                next(self.model.parameters()).device)  # Trick to get the model device
+            ).cpu().detach().numpy()
+        else:
+            raise ValueError("A model is needed to infer on...")
+
