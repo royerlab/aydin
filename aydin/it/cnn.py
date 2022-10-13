@@ -16,7 +16,6 @@ from aydin.nn.tf.models.utils.unet_patch_size import (
     get_ideal_patch_size,
     post_tiling_patch_size_validation,
 )
-from aydin.nn.tf.util import random_sample_patches
 from aydin.nn.tf.util.callbacks import (
     EarlyStopping,
     ReduceLROnPlateau,
@@ -24,6 +23,7 @@ from aydin.nn.tf.util.callbacks import (
     StopCenterGradient2D,
     ModelCheckpoint,
 )
+from aydin.nn.tf.util.random_sample_patches import random_sample_patches
 from aydin.util.log.log import lsection, lprint
 from aydin.util.tf.device import get_best_device_name
 
