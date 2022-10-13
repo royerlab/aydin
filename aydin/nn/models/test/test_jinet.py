@@ -1,11 +1,6 @@
-import numpy
 import torch
 
-from aydin.analysis.image_metrics import calculate_print_psnr_ssim
-from aydin.io.datasets import add_noise, normalise, camera
 from aydin.nn.models.jinet import JINetModel
-from aydin.nn._legacy_pytorch.it_ptcnn import to_numpy
-from aydin.nn.training_methods.n2t import n2t_train
 
 
 def test_forward_2D():

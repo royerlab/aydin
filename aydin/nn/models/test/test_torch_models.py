@@ -17,7 +17,7 @@ def test_2D_n2s_unet():
             nb_unet_levels=2,
             spacetime_ndim=2,
         ),
-        n2s_train
+        n2s_train,
     )
 
 
@@ -31,7 +31,7 @@ def test_2D_n2t_unet():
             nb_unet_levels=2,
             spacetime_ndim=2,
         ),
-        n2t_train
+        n2t_train,
     )
 
 

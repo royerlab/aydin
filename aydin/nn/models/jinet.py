@@ -1,14 +1,6 @@
-from collections import OrderedDict
-from itertools import chain
-
 import torch
 from torch import nn
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.utils.tensorboard import SummaryWriter
-
 from aydin.nn.layers.dilated_conv import DilatedConv
-from aydin.nn._legacy_pytorch.optimizers.esadam import ESAdam
-from aydin.util.log.log import lprint
 
 
 class JINetModel(nn.Module):
