@@ -1,0 +1,8 @@
+documentation:
+  - 'docs'
+
+cli:
+  - 'aydin/cli'
+
+gui:
+  - 'aydin/gui'
