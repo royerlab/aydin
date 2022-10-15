@@ -110,7 +110,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         )
 
         for module in regression_modules:
-            regressor_args = self.get_class_implementation_kwonlyargs(
+            regressor_args = self.get_class_implementation_kwargs(
                 regression, module, module.name.replace("_", "") + "Regressor"
             )
 
