@@ -4,10 +4,13 @@ from itertools import chain
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from aydin.nn._legacy_pytorch.optimizers.esadam import ESAdam
+from aydin.nn.datasets.noisy_gt_dataset import NoisyGroundtruthDataset
 
 from aydin.util.log.log import lprint
+from aydin.util.torch.device import get_torch_device
 
 
 def n2t_train(
@@ -47,6 +50,12 @@ def n2t_train(
     """
     writer = SummaryWriter()
 
+    device = get_torch_device()
+
+    torch.autograd.set_detect_anomaly(True)
+
+    model = model.to(device)
+
     reduce_lr_patience = patience // 2
 
     if best_val_loss_value is None:
@@ -70,13 +79,19 @@ def n2t_train(
     def loss_function(u, v):
         return torch.abs(u - v)
 
+    dataset = NoisyGroundtruthDataset([input_images], [target_images], device=device)
+    print(f"dataset length: {len(dataset)}")
+    data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
+
     for epoch in range(nb_epochs):
         train_loss_value = 0
         val_loss_value = 0
         iteration = 0
-        for i, (input_image, target_image) in enumerate(
-            zip([input_images], [target_images])
-        ):
+        for i, batch in enumerate(data_loader):
+            input_image, target_image = batch
+            input_image = input_image.to(device)
+            target_image = target_image.to(device)
+
             lprint(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters

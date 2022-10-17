@@ -5,9 +5,8 @@ from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
-# from torch.utils.tensorboard import SummaryWriter
-
-from aydin.nn.tf.models.utils.masking.grid_masked_dataset import GridMaskedDataset
+from aydin.nn.datasets.grid_masked_dataset import GridMaskedDataset
+from aydin.util.torch.device import get_torch_device
 
 
 def n2s_train(
@@ -33,12 +32,7 @@ def n2s_train(
     verbose : bool
 
     """
-    if torch.cuda.is_available():
-        dev = "cuda:0"
-    else:
-        dev = "cpu"
-    device = torch.device(dev)
-    print(dev)
+    device = get_torch_device()
 
     torch.autograd.set_detect_anomaly(True)
 
