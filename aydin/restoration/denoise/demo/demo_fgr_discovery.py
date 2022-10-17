@@ -3,7 +3,7 @@ from pprint import pprint
 from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
 
 
-def test_configure():
+def demo_fgr_discovery():
 
     implementations = Noise2SelfFGR().implementations
     pprint(implementations)
@@ -13,3 +13,7 @@ def test_configure():
 
     implementations_description = Noise2SelfFGR().implementations_description
     pprint(implementations_description)
+
+
+if __name__ == '__main__':
+    demo_fgr_discovery()
