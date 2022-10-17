@@ -1,9 +1,7 @@
-import numpy
-
-from aydin.analysis.fsc import fsc
+from aydin.analysis.fsc import fsc, halfbit_curve
 
 
-def noise_floor_delta(noisy_array, denoised_array1, denoised_array2, axis: int) -> float:
+def noise_floor_delta(noisy_array, denoised_array1, denoised_array2) -> float:
     """
     This method calculates the noise floor level difference on spectra
     of a noisy and a denoised array (does NOT require groundtruth).
@@ -14,9 +12,6 @@ def noise_floor_delta(noisy_array, denoised_array1, denoised_array2, axis: int) 
         Denoised nD array of interest
     noisy_array : numpy.typing.ArrayLike
         Noisy(original) nD array of interest
-    axis : int
-        Index of the axis to compute the noise floor delta along.
-        One can pass -1 to do the computation on all axes.
 
     Returns
     -------

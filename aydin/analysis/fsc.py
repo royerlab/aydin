@@ -61,5 +61,6 @@ def shell_sum(image):
 
     return output
 
+
 def halfbit_curve(correlations):
-    
+    raise NotImplementedError()
