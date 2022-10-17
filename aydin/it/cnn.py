@@ -220,9 +220,13 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         if self.model is not None:
             # serialize model to JSON:
             self.model.save(join(path, "tf_model"))
-            self.infmodel.save(join(path, "tf_inf_model"))
         else:
             lprint("There is no model to save yet.")
+
+        if self.infmodel is not None:
+            self.infmodel.save(join(path, "tf_inf_model"))
+        else:
+            lprint("self.infmodel is None, no inference model will be saved.")
 
     def __getstate__(self):
         state = self.__dict__.copy()
