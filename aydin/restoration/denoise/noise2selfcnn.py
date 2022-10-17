@@ -5,7 +5,9 @@ import shutil
 from typing import Optional
 
 from aydin.it.base import ImageTranslatorBase
-from aydin.it.cnn_torch import ImageTranslatorCNNTorch
+
+# from aydin.it.cnn_torch import ImageTranslatorCNNTorch
+from aydin.it.cnn import ImageTranslatorCNN
 from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
@@ -70,9 +72,9 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         """
 
         # IT CNN
-        it = ImageTranslatorCNNTorch
+        it = ImageTranslatorCNN
 
-        fullargspec3 = inspect.getfullargspec(ImageTranslatorCNNTorch.__init__)
+        fullargspec3 = inspect.getfullargspec(ImageTranslatorCNN.__init__)
 
         it_args = {
             "arguments": fullargspec3.args[1:],
@@ -142,7 +144,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
 
         """
         if self.variant:
-            return ImageTranslatorCNNTorch(model_architecture=self.variant)
+            return ImageTranslatorCNN(model_architecture=self.variant)
 
         # Use a pre-saved model or train a new one from scratch and save it
         if self.use_model_flag:
@@ -152,7 +154,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             )
             it = ImageTranslatorBase.load(self.input_model_path[:-4])
         else:
-            it = ImageTranslatorCNNTorch(
+            it = ImageTranslatorCNN(
                 **self.lower_level_args["it"]["kwargs"]
                 if self.lower_level_args is not None
                 else {}

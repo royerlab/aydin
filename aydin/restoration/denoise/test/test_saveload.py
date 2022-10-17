@@ -39,7 +39,7 @@ def test_saveload_noise2selffgr():
     )
 
 
-@pytest.mark.heavy
+# @pytest.mark.heavy
 def test_saveload_noise2selfcnn():
     saveload(
         Noise2SelfCNN(it_transforms=transforms),
