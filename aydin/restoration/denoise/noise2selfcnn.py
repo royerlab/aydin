@@ -9,7 +9,7 @@ from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
-from aydin.nn import models
+from aydin.nn.tf import models
 from aydin.restoration.denoise.base import DenoiseRestorationBase
 from aydin.util.log.log import lsection
 
