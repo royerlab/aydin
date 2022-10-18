@@ -195,14 +195,16 @@ class NormaliserBase(ABC):
 
         return array
 
-    @jit(parallel=True, error_model='numpy')
-    def normalize_numba(self, array, min_value, max_value, epsilon):
-        for _ in prange(numpy.prod(array.shape)):
+    @staticmethod
+    @jit(nopython=True, parallel=True, error_model='numpy')
+    def normalize_numba(array, min_value, max_value, epsilon):
+        for _ in prange(numpy.prod(numpy.array(array.shape))):
             array.flat[_] -= min_value
             array.flat[_] /= max_value - min_value + epsilon
 
-    @jit(parallel=True, error_model='numpy')
-    def denormalize_numba(self, array, min_value, max_value, epsilon):
-        for _ in prange(numpy.prod(array.shape)):
+    @staticmethod
+    @jit(nopython=True, parallel=True, error_model='numpy')
+    def denormalize_numba(array, min_value, max_value, epsilon):
+        for _ in prange(numpy.prod(numpy.array(array.shape))):
             array.flat[_] *= max_value - min_value + epsilon
             array.flat[_] += min_value
