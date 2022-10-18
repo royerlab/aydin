@@ -32,6 +32,11 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "heavy" in item.keywords:
                 item.add_marker(skip_heavy)
+    else:
+        skip_heavy = pytest.mark.skip(reason="need --runheavy option to run")
+        for item in items:
+            if "heavy" not in item.keywords:
+                item.add_marker(skip_heavy)
 
     if not config.getoption("--rungpu"):
         skip_gpu = pytest.mark.skip(reason="need --rungpu option to run")
