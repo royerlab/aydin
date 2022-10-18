@@ -1,4 +1,3 @@
-import math
 import os
 from abc import ABC, abstractmethod
 from os.path import join
