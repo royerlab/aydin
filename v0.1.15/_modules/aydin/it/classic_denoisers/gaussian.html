@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.classic_denoisers.gaussian &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/example_images_gallery.html">Example Images Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.classic_denoisers.gaussian</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.classic_denoisers.gaussian</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">gaussian_filter</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers</span> <span class="kn">import</span> <span class="n">_defaults</span>
+<span class="kn">from</span> <span class="nn">aydin.util.crop.rep_crop</span> <span class="kn">import</span> <span class="n">representative_crop</span>
+<span class="kn">from</span> <span class="nn">aydin.util.j_invariance.j_invariance</span> <span class="kn">import</span> <span class="n">calibrate_denoiser</span>
+
+
+<div class="viewcode-block" id="calibrate_denoise_gaussian"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.gaussian.calibrate_denoise_gaussian">[docs]</a><span class="k">def</span> <span class="nf">calibrate_denoise_gaussian</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+    <span class="n">max_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">crop_size_in_voxels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_crop_size_large</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">optimiser</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;fast&#39;</span><span class="p">,</span>
+    <span class="n">max_num_evaluations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_max_evals_high</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">blind_spots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_blind_spots</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">jinv_interpolation_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;median&#39;</span><span class="p">,</span>
+    <span class="n">display_images</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">display_crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">other_fixed_parameters</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calibrates the Gaussian denoiser for the given image and returns the optimal</span>
+<span class="sd">    parameters obtained using the N2S loss.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image: ArrayLike</span>
+<span class="sd">        Image to calibrate denoiser for.</span>
+
+<span class="sd">    axes: Optional[Tuple[int,...]]</span>
+<span class="sd">        Axes over which to apply low-pass filtering.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    min_sigma: float</span>
+<span class="sd">        Minimum sigma for Gaussian filter.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    max_sigma: float</span>
+<span class="sd">        Maximum sigma for Gaussian filter.</span>
+
+<span class="sd">    crop_size_in_voxels: int or None for default</span>
+<span class="sd">        Number of voxels for crop used to calibrate denoiser.</span>
+<span class="sd">        Increase this number by factors of two if denoising quality is</span>
+<span class="sd">        unsatisfactory -- this can be important for very noisy images.</span>
+<span class="sd">        Values to try are: 65000, 128000, 256000, 320000.</span>
+<span class="sd">        We do not recommend values higher than 512000.</span>
+
+<span class="sd">    optimiser: str</span>
+<span class="sd">        Optimiser to use for finding the best denoising</span>
+<span class="sd">        parameters. Can be: &#39;smart&#39; (default), or &#39;fast&#39; for a mix of SHGO</span>
+<span class="sd">        followed by L-BFGS-B.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    max_num_evaluations: int</span>
+<span class="sd">        Maximum number of evaluations for finding</span>
+<span class="sd">        the optimal parameters.</span>
+<span class="sd">        Increase this number by factors of two if denoising quality is</span>
+<span class="sd">        unsatisfactory.</span>
+
+<span class="sd">    blind_spots: bool</span>
+<span class="sd">        List of voxel coordinates (relative to receptive field center) to</span>
+<span class="sd">        be included in the blind-spot. For example, you can give a list of</span>
+<span class="sd">        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot</span>
+<span class="sd">        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    jinv_interpolation_mode: str</span>
+<span class="sd">        J-invariance interpolation mode for masking. Can be: &#39;median&#39; or</span>
+<span class="sd">        &#39;gaussian&#39;.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    display_images: bool</span>
+<span class="sd">        When True the denoised images encountered</span>
+<span class="sd">        during optimisation are shown</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    display_crop: bool</span>
+<span class="sd">        Displays crop, for debugging purposes...</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    other_fixed_parameters: dict</span>
+<span class="sd">        Any other fixed parameters</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoising function, dictionary containing optimal parameters,</span>
+<span class="sd">    and free memory needed in bytes for computation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># obtain representative crop, to speed things up...</span>
+    <span class="n">crop</span> <span class="o">=</span> <span class="n">representative_crop</span><span class="p">(</span>
+        <span class="n">image</span><span class="p">,</span> <span class="n">crop_size</span><span class="o">=</span><span class="n">crop_size_in_voxels</span><span class="p">,</span> <span class="n">display_crop</span><span class="o">=</span><span class="n">display_crop</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Default axes:</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+
+    <span class="c1"># Size range:</span>
+    <span class="n">sigma_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_sigma</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_sigma</span><span class="p">,</span> <span class="n">max_sigma</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-9</span><span class="p">)</span>
+
+    <span class="c1"># Combine fixed parameters:</span>
+    <span class="n">other_fixed_parameters</span> <span class="o">=</span> <span class="n">other_fixed_parameters</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;axes&#39;</span><span class="p">:</span> <span class="n">axes</span><span class="p">}</span>
+
+    <span class="c1"># Parameters to test when calibrating the denoising algorithm</span>
+    <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="n">sigma_range</span><span class="p">}</span>
+
+    <span class="c1"># Partial function:</span>
+    <span class="n">_denoise_gaussian</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">denoise_gaussian</span><span class="p">,</span> <span class="o">**</span><span class="n">other_fixed_parameters</span><span class="p">)</span>
+
+    <span class="c1"># Calibrate denoiser</span>
+    <span class="n">best_parameters</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">calibrate_denoiser</span><span class="p">(</span>
+            <span class="n">crop</span><span class="p">,</span>
+            <span class="n">_denoise_gaussian</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">optimiser</span><span class="p">,</span>
+            <span class="n">denoise_parameters</span><span class="o">=</span><span class="n">parameter_ranges</span><span class="p">,</span>
+            <span class="n">interpolation_mode</span><span class="o">=</span><span class="n">jinv_interpolation_mode</span><span class="p">,</span>
+            <span class="n">max_num_evaluations</span><span class="o">=</span><span class="n">max_num_evaluations</span><span class="p">,</span>
+            <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+            <span class="n">display_images</span><span class="o">=</span><span class="n">display_images</span><span class="p">,</span>
+            <span class="n">loss_function</span><span class="o">=</span><span class="s1">&#39;L1&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">|</span> <span class="n">other_fixed_parameters</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Memory needed:</span>
+    <span class="n">memory_needed</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">nbytes</span>
+
+    <span class="k">return</span> <span class="n">denoise_gaussian</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">,</span> <span class="n">memory_needed</span></div>
+
+
+<div class="viewcode-block" id="denoise_gaussian"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.gaussian.denoise_gaussian">[docs]</a><span class="k">def</span> <span class="nf">denoise_gaussian</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">axes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">truncate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Denoises the given image using a simple Gaussian filter.</span>
+<span class="sd">    Difficult to beat in terms of speed and often provides</span>
+<span class="sd">    sufficient although not superb denoising performance. You</span>
+<span class="sd">    should always try simple and fast denoisers first, and see</span>
+<span class="sd">    if that works for you. If it works and is sufficient for</span>
+<span class="sd">    your needs, why go for slower and more complex and slower</span>
+<span class="sd">    approach? The only weakness of gaussian filtering is that it</span>
+<span class="sd">    affects all frequencies. In contrast, the auto-tuned Butterworth</span>
+<span class="sd">    denoiser will not blur within the estimated band-pass of</span>
+<span class="sd">    the signal. Thus we recommend you use the Butterworth denoiser</span>
+<span class="sd">    instead unless you have a good reason to use this one.</span>
+<span class="sd">    \n\n</span>
+<span class="sd">    Note: We recommend applying a variance stabilisation transform</span>
+<span class="sd">    to improve results for images with non-Gaussian noise.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image: ArrayLike</span>
+<span class="sd">        nD image to denoise</span>
+
+<span class="sd">    axes: Optional[Tuple[int,...]]</span>
+<span class="sd">        Axes over which to apply low-pass filtering.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    sigma: float</span>
+<span class="sd">        Standard deviation for Gaussian kernel.</span>
+
+<span class="sd">    truncate: float</span>
+<span class="sd">         Truncate the filter at this many standard deviations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoised image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Default axes:</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># populate sigma tuple according to axes:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">sigma</span> <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+
+    <span class="c1"># Gaussian filtering:</span>
+    <span class="k">return</span> <span class="n">gaussian_filter</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">truncate</span><span class="o">=</span><span class="n">truncate</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.15
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="../../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="gaussian.html">v0.1.15</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aydin Studio Tutorials &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Aydin CLI Tutorials" href="cli_tutorials.html" />
+    <link rel="prev" title="Tutorials Home" href="tutorials_home.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Aydin Studio (GUI) Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#let-s-start-aydin-studio">Let’s start <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loading-image-files">Loading image files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hyperstacking">Hyperstacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#split-channels">Split channels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#choosing-images-to-denoise">Choosing images to denoise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-output-folder-to-a-specific-image">Setting output folder to a specific image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setting-output-folder-to-all-loaded-images">Setting output folder to all loaded images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dimensions-tab">Dimensions tab</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cropping-selection">Cropping selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pre-and-post-processing">Pre and post processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#processing-preview-and-preview-all">Processing preview and preview all</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#denoising-options">Denoising options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saving-denoising-options-and-trained-model">Saving denoising options and trained model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/options_json.html">Options JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/example_images_gallery.html">Example Images Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Aydin Studio Tutorials</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/gui_tutorials.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="aydin-studio-tutorials">
+<h1>Aydin Studio Tutorials<a class="headerlink" href="#aydin-studio-tutorials" title="Permalink to this headline"></a></h1>
+<p>To make Aydin accessible to more users, we designed and implemented a
+user-friendly GUI. We call our GUI, <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code>. We intended to have a self-explanatory
+GUI but also added detailed explanations on each part and tooltips on most of the elements
+of the GUI.</p>
+<p>Before we dive into tutorials, please make sure to have <code class="docutils literal notranslate"><span class="pre">Aydin</span></code> <a class="reference internal" href="../getting_started/install.html"><span class="doc">installed</span></a> on your computer.</p>
+<p>Below we explain how to use fundamental features of the <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code>.</p>
+<section id="let-s-start-aydin-studio">
+<h2>Let’s start <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code><a class="headerlink" href="#let-s-start-aydin-studio" title="Permalink to this headline"></a></h2>
+<p>To start <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code>, if you have the bundle installation just double-click on its icon. If
+you have the <code class="docutils literal notranslate"><span class="pre">pip</span></code> installation, you can call <code class="docutils literal notranslate"><span class="pre">aydin</span></code> on your terminal without passing any arguments,
+this will boot up <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code>. Once loading is done, a screen as shown below will be
+welcoming you:</p>
+<img alt="../_images/aydin_welcome_screen.png" src="../_images/aydin_welcome_screen.png" />
+<p>Using <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> is pretty easy. First you load your image(s). You can hyperstack
+multiple images if feasible or you can split channels of a multi-channel image into separate images.
+Then you can tell Aydin how to interpret dimensions with the help of the dimensions tab. You can configure
+image cropping for training and denoising independently with help of training crop and denoising crop tabs.
+If you like to use the same cropping for both training and denoising, that is also possible. You just need to
+select the checbox on the top right in the <code class="docutils literal notranslate"><span class="pre">Training</span> <span class="pre">Crop</span></code> tab. Finally, you have the pre and post processing
+settings, and then you can choose which algorithm to use for denoising and tune the corresponding parameters.
+You are set to start denoising! By clicking the <code class="docutils literal notranslate"><span class="pre">Start</span></code> button located on the top right part of the window,
+you can start denoising your images and results will show up once it is done.</p>
+<img alt="../_images/aydin_flow_navbar.png" src="../_images/aydin_flow_navbar.png" />
+</section>
+<section id="loading-image-files">
+<h2>Loading image files<a class="headerlink" href="#loading-image-files" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_load_image.png" src="../_images/aydin_load_image.png" />
+<p>Loading images to Aydin is easy. You can drag and drop image files of your
+choice to anywhere on the Aydin window(except napari canvases on the cropping tabs) or
+you can click to <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">File(s)</span></code> button on the top left part of the screen and open your files
+with the help of file dialog.</p>
+</section>
+<section id="hyperstacking">
+<h2>Hyperstacking<a class="headerlink" href="#hyperstacking" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_hyperstack.png" src="../_images/aydin_hyperstack.png" />
+<p>It is common to have a folder full of images where each image file is only a single z-slice
+or a single time point of your dataset. As explained in the previous section, it is fairly
+easy to load all those files to Aydin Studio. To make <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> interpret the dataset
+correctly, users might like to create a hyperstack out of the files they’ve loaded. We’ve
+considered such a need in our design process and included a checkbox on the <code class="docutils literal notranslate"><span class="pre">File(s)</span></code> tab that
+let’s you create a hyperstack from the images you loaded if all loaded images have the same shape.</p>
+</section>
+<section id="split-channels">
+<h2>Split channels<a class="headerlink" href="#split-channels" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_splitchannels.png" src="../_images/aydin_splitchannels.png" />
+<p>Having multi-channel images is cool, being able to split channels of a n-dimensional stack
+and process each channel separately might be cooler. At least we believe so, hence we
+give our users a checkbox that lets them split each channel of a multi-channel stack into
+separate images.</p>
+</section>
+<section id="choosing-images-to-denoise">
+<h2>Choosing images to denoise<a class="headerlink" href="#choosing-images-to-denoise" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_images_tab_choose_to_denoise.png" src="../_images/aydin_images_tab_choose_to_denoise.png" />
+<p>We provide details on how we interpret each image loaded to <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> on the <code class="docutils literal notranslate"><span class="pre">Image(s)</span></code> tab.
+Also this is the last place to decide, which of the loaded images you want to denoise. For each loaded
+image, you can decide to denoise or not with the help of checkbox provided on the denoise column.</p>
+</section>
+<section id="setting-output-folder-to-a-specific-image">
+<h2>Setting output folder to a specific image<a class="headerlink" href="#setting-output-folder-to-a-specific-image" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_images_tab_single_file_output_folder.png" src="../_images/aydin_images_tab_single_file_output_folder.png" />
+<p>By default, <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> tries to write the result image and related files to the same exact
+folder of the input image file. This comes handy, when you like to find the input/output images
+together, however, we understand that this might not be always the case for all of our users and
+let our users to specify output folder for each loaded image by double-clicking to the last column
+of each image entry on the <code class="docutils literal notranslate"><span class="pre">Image(s)</span></code> tab.</p>
+</section>
+<section id="setting-output-folder-to-all-loaded-images">
+<h2>Setting output folder to all loaded images<a class="headerlink" href="#setting-output-folder-to-all-loaded-images" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_images_tab_all_files_output_folder.png" src="../_images/aydin_images_tab_all_files_output_folder.png" />
+<p>It is also possible to set output folder to all loaded images to <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code>. You can select the
+image row with your desired output folder for all images then click the <code class="docutils literal notranslate"><span class="pre">output</span> <span class="pre">folder</span></code> header (highlighted
+on the screenshot) to set same output folder to the all loaded images.</p>
+</section>
+<section id="dimensions-tab">
+<h2>Dimensions tab<a class="headerlink" href="#dimensions-tab" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_dims_tab_simple.png" src="../_images/aydin_dims_tab_simple.png" />
+<p><code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> tries to read images and interpret their metadata correctly.
+There are numerous different file formats out there with specific metadata formats and conventions.
+<code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> supports most of the common image file formats such as zarr, tif, czi, png, and so on.
+In the Dimensions tab you can see how <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> interprets each dimension of your image.
+If you feel the need to make a correction, you can make adjustments with the help of checkboxes provided
+for each given dimension. If you observe a mistake about the number of dimensions detected please open an
+issue and let us know about it in detail.</p>
+<img alt="../_images/aydin_dims_tab_complex.png" src="../_images/aydin_dims_tab_complex.png" />
+</section>
+<section id="cropping-selection">
+<h2>Cropping selection<a class="headerlink" href="#cropping-selection" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_crop_tab.png" src="../_images/aydin_crop_tab.png" />
+<p>Cropping your image before passing to train a model can shorten your training duration significantly.
+To address this need, we built two cropping tabs: one for training crop and one for inference crop
+respectively. Currently, we are only supporting cropping across X, Y, Z and T dimensions. Looking
+forward to support cropping over Z in near future as well.</p>
+</section>
+<section id="pre-and-post-processing">
+<h2>Pre and post processing<a class="headerlink" href="#pre-and-post-processing" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_processing_tab.png" src="../_images/aydin_processing_tab.png" />
+<p>Different imaging modalities and different imaging setups bring different artifacts and
+imperfections to the acquired images. Oftentimes, addressing those imperfections before
+denoising the image helps to improve denoising performance. While handling these
+imperfections before denoising via preprocessing, inevitably one ends up changing certain
+characteristics of the image as well. If users want to revert the changes applied by certain
+pre-processing algorithm back after denoising, we provide a post-processing option.</p>
+</section>
+<section id="processing-preview-and-preview-all">
+<h2>Processing preview and preview all<a class="headerlink" href="#processing-preview-and-preview-all" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_preview_buttons.png" src="../_images/aydin_preview_buttons.png" />
+<p>We provide a <code class="docutils literal notranslate"><span class="pre">Preview</span></code> button on each subtab of the <code class="docutils literal notranslate"><span class="pre">Pre/Post-Processing</span></code> tab. With the help of the
+<code class="docutils literal notranslate"><span class="pre">Preview</span></code> button one can see the preprocessed(image that would be passed to denoising if it
+is applied) and postprocessed(resulting image of applying postprocessing to preprocessed
+image(without denoising)) images.</p>
+<p>Also, we provide the <code class="docutils literal notranslate"><span class="pre">Preview</span> <span class="pre">all</span></code> button in the <code class="docutils literal notranslate"><span class="pre">Pre/Post-Processing</span></code> tab and one can use that button
+to observe cumulative effect of chosen preprocessing and postprocessing transforms.</p>
+</section>
+<section id="denoising-options">
+<h2>Denoising options<a class="headerlink" href="#denoising-options" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_denoise_tab.png" src="../_images/aydin_denoise_tab.png" />
+<p>We implemented numerous denoising algorithms using different computation libraries and models.
+We refer to those different implementations as variants. We expose an extensive list of arguments
+for each provided variant. Users can find default value and a small explanation for each argument
+in the list.</p>
+</section>
+<section id="saving-denoising-options-and-trained-model">
+<h2>Saving denoising options and trained model<a class="headerlink" href="#saving-denoising-options-and-trained-model" title="Permalink to this headline"></a></h2>
+<img alt="../_images/aydin_run_menubar.png" src="../_images/aydin_run_menubar.png" />
+<p>You can save your option selections for the selected variant with the help of <code class="docutils literal notranslate"><span class="pre">Save</span> <span class="pre">Options</span> <span class="pre">JSON</span></code>
+button in <code class="docutils literal notranslate"><span class="pre">Run</span></code> menubar located on the top part of <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> window. You can pass the
+saved JSON file to <a class="reference internal" href="cli_tutorials.html"><span class="doc">Aydin CLI</span></a>  to train new models for new images
+and denoise them. Worth to mention that <code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code>  saves the options JSON next to the resulting
+image by default on each run.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Aydin</span> <span class="pre">Studio</span></code> also saves the trained model next to the resulting image by default. You can
+pass such trained model file to <a class="reference internal" href="cli_tutorials.html"><span class="doc">Aydin CLI</span></a> to denoise more images
+without training a model again. Basically this provides possibility to fine tune parameters and train
+a model for one of your images from a dataset and rapidly denoise(infer) on the rest of the images
+in your dataset.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorials_home.html" class="btn btn-neutral float-left" title="Tutorials Home" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cli_tutorials.html" class="btn btn-neutral float-right" title="Aydin CLI Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.15
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../v0.1.11/tutorials/gui_tutorials.html">v0.1.11</a></dd>
+      <dd><a href="../../v0.1.12/tutorials/gui_tutorials.html">v0.1.12</a></dd>
+      <dd><a href="../../v0.1.13/tutorials/gui_tutorials.html">v0.1.13</a></dd>
+      <dd><a href="../../v0.1.14/tutorials/gui_tutorials.html">v0.1.14</a></dd>
+      <dd><a href="gui_tutorials.html">v0.1.15</a></dd>
+      <dd><a href="../../v0.1.8/tutorials/gui_tutorials.html">v0.1.8</a></dd>
+      <dd><a href="../../v0.1.9/tutorials/gui_tutorials.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

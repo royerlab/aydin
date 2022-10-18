@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.fgr &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/clipboard.min.js"></script>
+        <script src="../../../_static/copybutton.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/options_json.html">Options JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/example_images_gallery.html">Example Images Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.fgr</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.fgr</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">aydin.features.base</span> <span class="kn">import</span> <span class="n">FeatureGeneratorBase</span>
+<span class="kn">from</span> <span class="nn">aydin.features.standard_features</span> <span class="kn">import</span> <span class="n">StandardFeatureGenerator</span>
+<span class="kn">from</span> <span class="nn">aydin.it.balancing.data_histogram_balancer</span> <span class="kn">import</span> <span class="n">DataHistogramBalancer</span>
+<span class="kn">from</span> <span class="nn">aydin.it.base</span> <span class="kn">import</span> <span class="n">ImageTranslatorBase</span>
+<span class="kn">from</span> <span class="nn">aydin.regression.base</span> <span class="kn">import</span> <span class="n">RegressorBase</span>
+<span class="kn">from</span> <span class="nn">aydin.regression.cb</span> <span class="kn">import</span> <span class="n">CBRegressor</span>
+<span class="kn">from</span> <span class="nn">aydin.util.array.nd</span> <span class="kn">import</span> <span class="n">nd_split_slices</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lprint</span><span class="p">,</span> <span class="n">lsection</span>
+<span class="kn">from</span> <span class="nn">aydin.util.offcore.offcore</span> <span class="kn">import</span> <span class="n">offcore_array</span>
+
+
+<div class="viewcode-block" id="ImageTranslatorFGR"><a class="viewcode-back" href="../../../api/image_translators/fgr.html#aydin.it.fgr.ImageTranslatorFGR">[docs]</a><span class="k">class</span> <span class="nc">ImageTranslatorFGR</span><span class="p">(</span><span class="n">ImageTranslatorBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Feature Generation &amp; Regression (FGR) based Image TranslatorFGR Image Translator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">feature_generator</span><span class="p">:</span> <span class="n">FeatureGeneratorBase</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_generator</span><span class="p">:</span> <span class="n">FeatureGeneratorBase</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">regressor</span><span class="p">:</span> <span class="n">RegressorBase</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">balance_training_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">voxel_keep_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_voxels_for_training</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">favour_bright_pixels</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">blind_spots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tile_min_margin</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">tile_max_margin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_memory_usage_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">max_tiling_overhead</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructs a FGR image translator. FGR image translators use</span>
+<span class="sd">        feature generation and regression learning to acheive image</span>
+<span class="sd">        translation. Typically used to denoise images using the Noise 2Self</span>
+<span class="sd">        principle.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        feature_generator : FeatureGeneratorBase</span>
+<span class="sd">            Feature generator.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        regressor : RegressorBase</span>
+<span class="sd">            Regressor.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        balance_training_data : bool</span>
+<span class="sd">            Balancing the training data improves image denoising performance</span>
+<span class="sd">            by avoiding the over-representation of certain pixel intensities</span>
+<span class="sd">            in the training data. For example, for images that are very dark</span>
+<span class="sd">            with mostly dark background and only few bright regions,</span>
+<span class="sd">            the brightness histogram will be is very skewed. In that case</span>
+<span class="sd">            you want to turn on balancing so that the training data better</span>
+<span class="sd">            represents the pixel values at all brightness levels.</span>
+
+<span class="sd">        voxel_keep_ratio : float</span>
+<span class="sd">            Ratio of the voxels to keep for training. Reduce this number to</span>
+<span class="sd">            speed up denoising or if the images are extremely large and</span>
+<span class="sd">            repetitive. (advanced)</span>
+
+<span class="sd">        max_voxels_for_training : int, optional</span>
+<span class="sd">            Maximum number of the voxels that can be used for training. This</span>
+<span class="sd">            option limits the amount of training data and thus also limits</span>
+<span class="sd">            the time required for training. In our experience we don&#39;t</span>
+<span class="sd">            necessarily need more than several million voxels to train an</span>
+<span class="sd">            effective denoiser. Different regressors (lgbm, cb, ...) can</span>
+<span class="sd">            handle varying sizes of training data. We recommend at least a</span>
+<span class="sd">            million (1e6) and at most 40 million if you have a powerfull</span>
+<span class="sd">            machine with GPU and if you are armed with patience. (advanced)</span>
+
+<span class="sd">        favour_bright_pixels : float</span>
+<span class="sd">            Value within [-1.0, 1.0] that controls whether to favour bright</span>
+<span class="sd">            or dark pixels during training data balancing. By default (0) all</span>
+<span class="sd">            pixel intensities are treated equally. Positive values favour</span>
+<span class="sd">            bright pixels, negative values favour dark pixels.</span>
+
+<span class="sd">        blind_spots : Optional[Union[str,List[Tuple[int]]]]</span>
+<span class="sd">            List of voxel coordinates (relative to receptive field center) to</span>
+<span class="sd">            be included in the blind-spot. For example, you can enter:</span>
+<span class="sd">            &#39;&lt;axis&gt;#&lt;radius&gt;&#39; to extend the blindspot along a given axis by a</span>
+<span class="sd">            certain radius. For example, for an image of dimension 3, &#39;x#1&#39;</span>
+<span class="sd">            extends the blind spot to cover voxels of relative coordinates:</span>
+<span class="sd">            (0,0,0),(0,1,0), and (0,-1,0). If you want to extend both in x and y,</span>
+<span class="sd">            enter: &#39;x#1,y#1&#39; by comma separating between axis. To specify the</span>
+<span class="sd">            axis you can use integer indices, or &#39;x&#39;, &#39;y&#39;, &#39;z&#39;, and &#39;t&#39;</span>
+<span class="sd">            (dimension order is tzyx with x being always the last dimension).</span>
+<span class="sd">            If None is passed then the blindspots are automatically discovered</span>
+<span class="sd">            from the image content. If &#39;center&#39; is passed then no additional</span>
+<span class="sd">            blindspots to the center pixel are considered.  If &#39;center&#39; is passed</span>
+<span class="sd">            then only the default single center voxel blind-spot is used.</span>
+
+<span class="sd">        tile_min_margin : int</span>
+<span class="sd">            Minimal width of tile margin in voxels.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        tile_max_margin : Optional[int]</span>
+<span class="sd">            Maximal width of tile margin in voxels.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        max_memory_usage_ratio : float</span>
+<span class="sd">            Maximum allowed memory load, value must be within [0, 1]. Default is 90%.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        max_tiling_overhead : float</span>
+<span class="sd">            Maximum allowed margin overhead during tiling. Default is 10%.</span>
+<span class="sd">            (advanced)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+            <span class="n">tile_min_margin</span><span class="o">=</span><span class="n">tile_min_margin</span><span class="p">,</span>
+            <span class="n">tile_max_margin</span><span class="o">=</span><span class="n">tile_max_margin</span><span class="p">,</span>
+            <span class="n">max_memory_usage_ratio</span><span class="o">=</span><span class="n">max_memory_usage_ratio</span><span class="p">,</span>
+            <span class="n">max_tiling_overhead</span><span class="o">=</span><span class="n">max_tiling_overhead</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">voxel_keep_ratio</span> <span class="o">=</span> <span class="n">voxel_keep_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">balance_training_data</span> <span class="o">=</span> <span class="n">balance_training_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">favour_bright_pixels</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_generator</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">StandardFeatureGenerator</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">feature_generator</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">feature_generator</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span> <span class="o">=</span> <span class="n">CBRegressor</span><span class="p">()</span> <span class="k">if</span> <span class="n">regressor</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">regressor</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_voxels_for_training</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">recommended_max_num_datapoints</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">max_voxels_for_training</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">max_voxels_for_training</span>
+        <span class="p">)</span>
+
+        <span class="c1"># It seems empirically that excluding the central feature incurs no cost in quality,</span>
+        <span class="c1"># simply because for every scale the next scale already partly covers these pixels.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclude_center_feature</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Option to exclude the center value during translation. Set to True by default.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exclude_center_value_when_translating</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Advanced private functionality:</span>
+        <span class="c1"># This field gives the opportunity to specify which channels must be &#39;passed-through&#39;</span>
+        <span class="c1"># directly as features. This is not intended to be used directly by users.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_passthrough_channels</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;FGR image translator&quot;</span><span class="p">):</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;balance training data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">balance_training_data</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ImageTranslatorFGR.save"><a class="viewcode-back" href="../../../api/image_translators/fgr.html#aydin.it.fgr.ImageTranslatorFGR.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Saves a &#39;all-batteries-included&#39; image translation model at a given path (folder).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : str</span>
+<span class="sd">            path to save to</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        frozen</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving &#39;fgr&#39; image translator to </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+            <span class="n">frozen</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">frozen</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_generator</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">frozen</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="k">return</span> <span class="n">frozen</span></div>
+
+    <span class="k">def</span> <span class="nf">_load_internals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading &#39;fgr&#39; image translator from </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_generator</span> <span class="o">=</span> <span class="n">FeatureGeneratorBase</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span> <span class="o">=</span> <span class="n">RegressorBase</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="c1"># We exclude certain fields from saving:</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;feature_generator&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;regressor&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+<div class="viewcode-block" id="ImageTranslatorFGR.stop_training"><a class="viewcode-back" href="../../../api/image_translators/fgr.html#aydin.it.fgr.ImageTranslatorFGR.stop_training">[docs]</a>    <span class="k">def</span> <span class="nf">stop_training</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stops currently running training within the instance by calling</span>
+<span class="sd">        the corresponding `stop_fit()` method on the regressor.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">stop_fit</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_estimate_memory_needed_and_available</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="s2">&quot;Estimating the amount of memory needed to store feature arrays:&quot;</span>
+        <span class="p">):</span>
+            <span class="n">num_spatio_temp_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="n">dummy_image</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span><span class="p">,)</span> <span class="o">*</span> <span class="n">num_spatio_temp_dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span>
+            <span class="p">)</span>
+
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_features</span><span class="p">(</span>
+                <span class="n">dummy_image</span><span class="p">,</span>
+                <span class="n">exclude_center_feature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_center_feature</span><span class="p">,</span>
+                <span class="n">exclude_center_value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">num_features</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">feature_dtype</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span>
+
+            <span class="p">(</span>
+                <span class="n">memory_needed</span><span class="p">,</span>
+                <span class="n">memory_available</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_estimate_memory_needed_and_available</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+            <span class="sd">&quot;&quot;&quot;Here, 1.3 correction factor is chosen to have a bigger safety margin as we use</span>
+<span class="sd">            more memory while generating features(namely uniform features) than the amount</span>
+<span class="sd">            of memory we need after feature computations.&quot;&quot;&quot;</span>
+            <span class="n">memory_needed</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                <span class="n">memory_needed</span><span class="p">,</span> <span class="mf">1.3</span> <span class="o">*</span> <span class="n">num_features</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="n">feature_dtype</span><span class="o">.</span><span class="n">itemsize</span>
+            <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">memory_needed</span><span class="p">,</span> <span class="n">memory_available</span>
+
+    <span class="k">def</span> <span class="nf">_compute_features</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">image</span><span class="p">,</span>
+        <span class="n">exclude_center_feature</span><span class="p">,</span>
+        <span class="n">exclude_center_value</span><span class="p">,</span>
+        <span class="n">features_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_reserved_features</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">image_slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">whole_image_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Internal function that computes features for a given image.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        image</span>
+<span class="sd">        exclude_center_feature</span>
+<span class="sd">        exclude_center_value</span>
+<span class="sd">        features_last : bool</span>
+<span class="sd">        num_reserved_features : int</span>
+<span class="sd">        image_slice</span>
+<span class="sd">        whole_image_shape</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        flattened array of features</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Computing features for image of shape </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">):</span>
+            <span class="n">excluded_voxels</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="s1">&#39;center&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span>
+                <span class="k">else</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">coordinate</span>
+                        <span class="k">for</span> <span class="n">coordinate</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blind_spots</span>
+                        <span class="k">if</span> <span class="n">coordinate</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span> <span class="o">*</span> <span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exclude_center_feature = </span><span class="si">{</span><span class="n">exclude_center_feature</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exclude_center_value   = </span><span class="si">{</span><span class="n">exclude_center_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;excluded_voxels        = </span><span class="si">{</span><span class="n">excluded_voxels</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># If this is a part of a larger image, we can figure out what are the offsets and scales for the spatial features:</span>
+            <span class="n">spatial_feature_scale</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">whole_image_shape</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">whole_image_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="p">)</span>
+            <span class="n">spatial_feature_offset</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="kc">None</span> <span class="k">if</span> <span class="n">image_slice</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">start</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">image_slice</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;spatial_feature_scale     = </span><span class="si">{</span><span class="n">spatial_feature_scale</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;spatial_feature_offset    = </span><span class="si">{</span><span class="n">spatial_feature_offset</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_generator</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span>
+                <span class="n">image</span><span class="p">,</span>
+                <span class="n">exclude_center_feature</span><span class="o">=</span><span class="n">exclude_center_feature</span><span class="p">,</span>
+                <span class="n">exclude_center_value</span><span class="o">=</span><span class="n">exclude_center_value</span><span class="p">,</span>
+                <span class="n">num_reserved_features</span><span class="o">=</span><span class="n">num_reserved_features</span><span class="p">,</span>
+                <span class="n">passthrough_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_passthrough_channels</span><span class="p">,</span>
+                <span class="n">feature_last_dim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">excluded_voxels</span><span class="o">=</span><span class="n">excluded_voxels</span><span class="p">,</span>
+                <span class="n">spatial_feature_offset</span><span class="o">=</span><span class="n">spatial_feature_offset</span><span class="p">,</span>
+                <span class="n">spatial_feature_scale</span><span class="o">=</span><span class="n">spatial_feature_scale</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">num_features</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num_features</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">features_last</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">x</span>
+
+    <span class="k">def</span> <span class="nf">_train</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="n">target_image</span><span class="p">,</span> <span class="n">train_valid_ratio</span><span class="p">,</span> <span class="n">callback_period</span><span class="p">,</span> <span class="n">jinv</span>
+    <span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Training image translator from image of shape </span><span class="si">{</span><span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> to image of shape </span><span class="si">{</span><span class="n">target_image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">:&quot;</span>
+        <span class="p">):</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">prepare_monitoring_images</span><span class="p">()</span>
+
+            <span class="n">num_input_channels</span> <span class="o">=</span> <span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">num_target_channels</span> <span class="o">=</span> <span class="n">target_image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">normalised_input_shape</span> <span class="o">=</span> <span class="n">input_image</span><span class="o">.</span><span class="n">shape</span>
+
+            <span class="c1"># Deal with jinv parameter;</span>
+            <span class="k">if</span> <span class="n">jinv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">exclude_center_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_supervised</span>
+            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">jinv</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
+                <span class="n">exclude_center_value</span> <span class="o">=</span> <span class="n">jinv</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">exclude_center_value</span> <span class="o">=</span> <span class="n">jinv</span>
+
+            <span class="c1"># Prepare the splitting of train from valid data as well as balancing and decimation...</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_split_train_val</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">target_image</span><span class="p">)</span>
+
+            <span class="c1"># Tilling strategy is determined here:</span>
+            <span class="n">tilling_strategy</span><span class="p">,</span> <span class="n">margins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_tilling_strategy_and_margins</span><span class="p">(</span>
+                <span class="n">input_image</span><span class="p">,</span>
+                <span class="n">max_voxels_per_tile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_voxels_per_tile</span><span class="p">,</span>
+                <span class="n">min_margin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tile_min_margin</span><span class="p">,</span>
+                <span class="n">max_margin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tile_max_margin</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tilling strategy (just batches): </span><span class="si">{</span><span class="n">tilling_strategy</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Margins for tiles: </span><span class="si">{</span><span class="n">margins</span><span class="si">}</span><span class="s2"> .&quot;</span><span class="p">)</span>
+
+            <span class="c1"># tile slice objects with margins:</span>
+            <span class="n">tile_slices_margins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">nd_split_slices</span><span class="p">(</span>
+                    <span class="n">normalised_input_shape</span><span class="p">,</span> <span class="n">nb_slices</span><span class="o">=</span><span class="n">tilling_strategy</span><span class="p">,</span> <span class="n">margins</span><span class="o">=</span><span class="n">margins</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Number of tiles:</span>
+            <span class="n">number_of_tiles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tile_slices_margins</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of tiles (slices): </span><span class="si">{</span><span class="n">number_of_tiles</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># We initialise the arrays:</span>
+            <span class="n">x_train</span><span class="p">,</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_valid</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">4</span>
+
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">slice_margin_tuple</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tile_slices_margins</span><span class="p">):</span>
+                <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Current tile: </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">number_of_tiles</span><span class="si">}</span><span class="s2">, slice: </span><span class="si">{</span><span class="n">slice_margin_tuple</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="p">):</span>
+
+                    <span class="c1"># We first extract the tile image:</span>
+                    <span class="n">input_image_tile</span> <span class="o">=</span> <span class="n">input_image</span><span class="p">[</span><span class="n">slice_margin_tuple</span><span class="p">]</span>
+                    <span class="n">target_image_tile</span> <span class="o">=</span> <span class="n">target_image</span><span class="p">[</span><span class="n">slice_margin_tuple</span><span class="p">]</span>
+
+                    <span class="n">x_tile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_features</span><span class="p">(</span>
+                        <span class="n">input_image_tile</span><span class="p">,</span>
+                        <span class="n">exclude_center_feature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_center_feature</span><span class="p">,</span>
+                        <span class="n">exclude_center_value</span><span class="o">=</span><span class="n">exclude_center_value</span><span class="p">,</span>
+                        <span class="n">num_reserved_features</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">features_last</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">image_slice</span><span class="o">=</span><span class="n">slice_margin_tuple</span><span class="p">,</span>
+                        <span class="n">whole_image_shape</span><span class="o">=</span><span class="n">input_image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">y_tile</span> <span class="o">=</span> <span class="n">target_image_tile</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num_target_channels</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="n">num_features_tile</span> <span class="o">=</span> <span class="n">x_tile</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">num_entries_tile</span> <span class="o">=</span> <span class="n">y_tile</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">lprint</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Number of entries: </span><span class="si">{</span><span class="n">num_entries_tile</span><span class="si">}</span><span class="s2">, features: </span><span class="si">{</span><span class="n">num_features_tile</span><span class="si">}</span><span class="s2">, input channels: </span><span class="si">{</span><span class="n">num_input_channels</span><span class="si">}</span><span class="s2">, target channels: </span><span class="si">{</span><span class="n">num_target_channels</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># We split this tile&#39;s data into train and valid sets:</span>
+                    <span class="p">(</span>
+                        <span class="n">x_train_tile</span><span class="p">,</span>
+                        <span class="n">x_valid_tile</span><span class="p">,</span>
+                        <span class="n">y_train_tile</span><span class="p">,</span>
+                        <span class="n">y_valid_tile</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_split_train_val</span><span class="p">(</span>
+                        <span class="n">num_target_channels</span><span class="p">,</span> <span class="n">train_valid_ratio</span><span class="p">,</span> <span class="n">x_tile</span><span class="p">,</span> <span class="n">y_tile</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># We get rid of x and y to free memory:</span>
+                    <span class="k">del</span> <span class="n">x_tile</span><span class="p">,</span> <span class="n">y_tile</span>
+                    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+
+                    <span class="c1"># We now put the feature dimension to the back:</span>
+                    <span class="n">x_train_tile</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">x_train_tile</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">x_valid_tile</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">x_valid_tile</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">x_train</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">x_valid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">x_train</span><span class="p">,</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_valid</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">x_train_tile</span><span class="p">,</span>
+                            <span class="n">x_valid_tile</span><span class="p">,</span>
+                            <span class="n">y_train_tile</span><span class="p">,</span>
+                            <span class="n">y_valid_tile</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">x_train</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">x_train_tile</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="n">x_valid</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_valid</span><span class="p">,</span> <span class="n">x_valid_tile</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="n">y_train</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="n">y_train_tile</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">y_valid</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_valid</span><span class="p">,</span> <span class="n">y_valid_tile</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Training now...&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="n">x_train</span><span class="o">=</span><span class="n">x_train</span><span class="p">,</span>
+                <span class="n">y_train</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span>
+                <span class="n">x_valid</span><span class="o">=</span><span class="n">x_valid</span><span class="p">,</span>
+                <span class="n">y_valid</span><span class="o">=</span><span class="n">y_valid</span><span class="p">,</span>
+                <span class="n">regressor_callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_callback</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">loss_history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">loss_history</span>
+
+    <span class="k">def</span> <span class="nf">prepare_monitoring_images</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Compute features for monitoring images:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitoring_images</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Normalise monitoring images:</span>
+            <span class="n">normalised_monitoring_images</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shape_normaliser</span><span class="o">.</span><span class="n">normalise</span><span class="p">(</span>
+                    <span class="n">monitoring_image</span><span class="p">,</span> <span class="n">batch_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">channel_dims</span><span class="o">=</span><span class="kc">None</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">monitoring_image</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitoring_images</span>
+            <span class="p">]</span>
+
+            <span class="c1"># compute features proper:</span>
+            <span class="n">monitoring_images_features</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_compute_features</span><span class="p">(</span>
+                    <span class="n">monitoring_image</span><span class="p">,</span>
+                    <span class="n">exclude_center_feature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_center_feature</span><span class="p">,</span>
+                    <span class="n">exclude_center_value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">features_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">monitoring_image</span> <span class="ow">in</span> <span class="n">normalised_monitoring_images</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">monitoring_images_features</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># We keep these features handy...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_datasets</span> <span class="o">=</span> <span class="n">monitoring_images_features</span>
+
+    <span class="k">def</span> <span class="nf">get_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Regressor callback:</span>
+        <span class="k">def</span> <span class="nf">regressor_callback</span><span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">val_loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span>
+
+            <span class="n">current_time_sec</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+            <span class="c1"># Correct for dtype range:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_generator</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint8</span><span class="p">:</span>
+                <span class="n">val_loss</span> <span class="o">/=</span> <span class="mi">255</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_generator</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">numpy</span><span class="o">.</span><span class="n">uint16</span><span class="p">:</span>
+                <span class="n">val_loss</span> <span class="o">/=</span> <span class="mi">255</span> <span class="o">*</span> <span class="mi">255</span>
+
+            <span class="k">if</span> <span class="n">current_time_sec</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_callback_time_sec</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback_period</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_datasets</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="p">:</span>
+                    <span class="n">predicted_monitoring_datasets</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x_m</span><span class="p">,</span> <span class="n">models_to_use</span><span class="o">=</span><span class="p">[</span><span class="n">model</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">x_m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitoring_datasets</span>
+                    <span class="p">]</span>
+                    <span class="n">inferred_images</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">y_m</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">y_m</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitoring_images</span><span class="p">,</span>
+                            <span class="n">predicted_monitoring_datasets</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">]</span>
+
+                    <span class="c1"># for image in inferred_images:</span>
+                    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inferred_images</span><span class="p">)):</span>
+                        <span class="p">(</span>
+                            <span class="n">inferred_images</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                            <span class="n">_</span><span class="p">,</span>
+                            <span class="n">_</span><span class="p">,</span>
+                        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape_normaliser</span><span class="o">.</span><span class="n">shape_normalize</span><span class="p">(</span>
+                            <span class="n">inferred_images</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                        <span class="p">)</span>
+
+                    <span class="n">denormalised_inferred_images</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">target_shape_normaliser</span><span class="o">.</span><span class="n">denormalise</span><span class="p">(</span><span class="n">inferred_image</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">inferred_image</span> <span class="ow">in</span> <span class="n">inferred_images</span>
+                    <span class="p">]</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">iteration</span><span class="p">,</span>
+                        <span class="n">val_loss</span><span class="p">,</span>
+                        <span class="n">denormalised_inferred_images</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">(</span><span class="n">iteration</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">last_callback_time_sec</span> <span class="o">=</span> <span class="n">current_time_sec</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+                <span class="c1"># print(f&quot;Iteration={iteration} metric value: {eval_metric_value} &quot;)</span>
+
+        <span class="k">return</span> <span class="n">regressor_callback</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_split_train_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="n">target_image</span><span class="p">):</span>
+        <span class="c1"># the number of voxels:</span>
+        <span class="n">num_of_voxels</span> <span class="o">=</span> <span class="n">input_image</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">lprint</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Image has: </span><span class="si">{</span><span class="n">num_of_voxels</span><span class="si">}</span><span class="s2"> voxels, at most: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_voxels_for_training</span><span class="si">}</span><span class="s2"> voxels will be used for training or validation.&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># This is the ratio of pixels to keep:</span>
+        <span class="n">max_voxels_keep_ratio</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_voxels_for_training</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_of_voxels</span>
+        <span class="n">effective_keep_ratio</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel_keep_ratio</span><span class="p">,</span> <span class="n">max_voxels_keep_ratio</span><span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Given train ratio is: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">voxel_keep_ratio</span><span class="si">}</span><span class="s2">, max_voxels induced keep-ratio is: </span><span class="si">{</span><span class="n">max_voxels_keep_ratio</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># For small images it is not worth having any limit or balance anything:</span>
+        <span class="n">num_voxels_in_small_image</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="mf">1e6</span>
+        <span class="n">effective_keep_ratio</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mf">1.0</span> <span class="k">if</span> <span class="n">num_of_voxels</span> <span class="o">&lt;</span> <span class="n">num_voxels_in_small_image</span> <span class="k">else</span> <span class="n">effective_keep_ratio</span>
+        <span class="p">)</span>
+        <span class="n">balance_training_data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">num_of_voxels</span> <span class="o">&lt;</span> <span class="n">num_voxels_in_small_image</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_training_data</span>
+        <span class="p">)</span>
+
+        <span class="n">lprint</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Data histogram balancer is: </span><span class="si">{</span><span class="s1">&#39;active&#39;</span> <span class="k">if</span> <span class="n">balance_training_data</span> <span class="k">else</span> <span class="s1">&#39;inactive&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Effective keep-ratio is: </span><span class="si">{</span><span class="n">effective_keep_ratio</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Favouring bright pixels: </span><span class="si">{</span><span class="s1">&#39;yes&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;no&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">lprint</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Favouring bright pixels by a linear slope of: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># We decide on a &#39;batch&#39; length that will be used to shuffle, select and then copy the training data...</span>
+        <span class="n">num_of_voxels_per_stack</span> <span class="o">=</span> <span class="n">input_image</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">batch_length</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="mi">16</span>
+            <span class="k">if</span> <span class="n">num_of_voxels_per_stack</span> <span class="o">&lt;</span> <span class="mf">1e5</span>
+            <span class="k">else</span> <span class="p">(</span>
+                <span class="mi">32</span>
+                <span class="k">if</span> <span class="n">num_of_voxels_per_stack</span> <span class="o">&lt;</span> <span class="mf">1e6</span>
+                <span class="k">else</span> <span class="p">(</span>
+                    <span class="mi">128</span>
+                    <span class="k">if</span> <span class="n">num_of_voxels_per_stack</span> <span class="o">&lt;</span> <span class="mf">1e7</span>
+                    <span class="k">else</span> <span class="p">(</span><span class="mi">512</span> <span class="k">if</span> <span class="n">num_of_voxels_per_stack</span> <span class="o">&lt;</span> <span class="mf">1e8</span> <span class="k">else</span> <span class="mi">4096</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using contiguous batches of length: </span><span class="si">{</span><span class="n">batch_length</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+        <span class="c1"># We create a balancer common to all tiles:</span>
+        <span class="n">balancer</span> <span class="o">=</span> <span class="n">DataHistogramBalancer</span><span class="p">(</span>
+            <span class="n">balance</span><span class="o">=</span><span class="n">balance_training_data</span><span class="p">,</span>
+            <span class="n">keep_ratio</span><span class="o">=</span><span class="n">effective_keep_ratio</span><span class="p">,</span>
+            <span class="n">favour_bright_pixels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">favour_bright_pixels</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Calibration of the balancer is done on the entire image:</span>
+        <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Calibrating balancer...&quot;</span><span class="p">)</span>
+        <span class="n">balancer</span><span class="o">.</span><span class="n">calibrate</span><span class="p">(</span><span class="n">target_image</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">batch_length</span><span class="p">)</span>
+
+        <span class="c1"># Keep both balancer and batch length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_val_split_balancer</span> <span class="o">=</span> <span class="n">balancer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_val_split_batch_length</span> <span class="o">=</span> <span class="n">batch_length</span>
+
+    <span class="k">def</span> <span class="nf">_do_split_train_val</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">num_target_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">train_valid_ratio</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+    <span class="p">):</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Splitting train and test sets (train_test_ratio=</span><span class="si">{</span><span class="n">train_valid_ratio</span><span class="si">}</span><span class="s2">) &quot;</span>
+        <span class="p">):</span>
+            <span class="n">balancer</span><span class="p">:</span> <span class="n">DataHistogramBalancer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_val_split_balancer</span>
+            <span class="n">batch_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_val_split_batch_length</span>
+
+            <span class="n">nb_features</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">nb_entries</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">nb_split_batches</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">nb_entries</span> <span class="o">//</span> <span class="n">batch_length</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+            <span class="n">lprint</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Creating random indices for train/val split (nb_split_batches=</span><span class="si">{</span><span class="n">nb_split_batches</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+
+            <span class="n">nb_split_batches_valid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">train_valid_ratio</span> <span class="o">*</span> <span class="n">nb_split_batches</span><span class="p">)</span>
+            <span class="n">nb_split_batches_train</span> <span class="o">=</span> <span class="n">nb_split_batches</span> <span class="o">-</span> <span class="n">nb_split_batches_valid</span>
+            <span class="n">is_train_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">nb_split_batches</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="n">is_train_array</span><span class="p">[</span><span class="n">nb_split_batches_valid</span><span class="p">:]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;train/valid bool array created (length=</span><span class="si">{</span><span class="n">is_train_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Shuffling train/valid bool array...&quot;</span><span class="p">)</span>
+            <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">is_train_array</span><span class="p">)</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Calculating number of entries for train and validation...&quot;</span><span class="p">)</span>
+            <span class="n">nb_entries_per_split_batch</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nb_entries</span> <span class="o">//</span> <span class="n">nb_split_batches</span><span class="p">)</span>
+            <span class="n">nb_entries_train</span> <span class="o">=</span> <span class="n">nb_split_batches_train</span> <span class="o">*</span> <span class="n">nb_entries_per_split_batch</span>
+            <span class="n">nb_entries_valid</span> <span class="o">=</span> <span class="n">nb_split_batches_valid</span> <span class="o">*</span> <span class="n">nb_entries_per_split_batch</span>
+
+            <span class="n">lprint</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Number of entries for training: </span><span class="si">{</span><span class="n">nb_entries_train</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">nb_split_batches_train</span><span class="si">}</span><span class="s2">*</span><span class="si">{</span><span class="n">nb_entries_per_split_batch</span><span class="si">}</span><span class="s2">, validation: </span><span class="si">{</span><span class="n">nb_entries_valid</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">nb_split_batches_valid</span><span class="si">}</span><span class="s2"> * </span><span class="si">{</span><span class="n">nb_entries_per_split_batch</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Allocating arrays...&quot;</span><span class="p">)</span>
+            <span class="n">x_train</span> <span class="o">=</span> <span class="n">offcore_array</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">nb_features</span><span class="p">,</span> <span class="n">nb_entries_train</span><span class="p">),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="n">max_memory_usage_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_memory_usage_ratio</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">y_train</span> <span class="o">=</span> <span class="n">offcore_array</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">num_target_channels</span><span class="p">,</span> <span class="n">nb_entries_train</span><span class="p">),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="n">max_memory_usage_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_memory_usage_ratio</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">x_valid</span> <span class="o">=</span> <span class="n">offcore_array</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">nb_features</span><span class="p">,</span> <span class="n">nb_entries_valid</span><span class="p">),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="n">max_memory_usage_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_memory_usage_ratio</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">y_valid</span> <span class="o">=</span> <span class="n">offcore_array</span><span class="p">(</span>
+                <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">num_target_channels</span><span class="p">,</span> <span class="n">nb_entries_valid</span><span class="p">),</span>
+                <span class="n">dtype</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+                <span class="n">max_memory_usage_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_memory_usage_ratio</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Copying data for training and validation sets...&quot;</span><span class="p">):</span>
+
+                <span class="c1"># We use a random permutation to avoid having the balancer drop only from the &#39;end&#39; of the image</span>
+                <span class="n">permutation</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">nb_split_batches</span><span class="p">)</span>
+
+                <span class="n">i</span><span class="p">,</span> <span class="n">jt</span><span class="p">,</span> <span class="n">jv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+                <span class="n">dst_stop_train</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">dst_stop_valid</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="n">balancer</span><span class="o">.</span><span class="n">initialise</span><span class="p">(</span><span class="n">nb_split_batches</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">is_train</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">is_train_array</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="p">(</span><span class="n">nb_split_batches</span> <span class="o">//</span> <span class="mi">64</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">lprint</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Copying section [</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="nb">min</span><span class="p">(</span><span class="n">nb_split_batches</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">nb_split_batches</span> <span class="o">//</span> <span class="mi">64</span><span class="p">)</span><span class="si">}</span><span class="s2">]&quot;</span>
+                        <span class="p">)</span>
+
+                    <span class="n">permutated_i</span> <span class="o">=</span> <span class="n">permutation</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">src_start</span> <span class="o">=</span> <span class="n">permutated_i</span> <span class="o">*</span> <span class="n">nb_entries_per_split_batch</span>
+                    <span class="n">src_stop</span> <span class="o">=</span> <span class="n">src_start</span> <span class="o">+</span> <span class="n">nb_entries_per_split_batch</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="n">xsrc</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">src_start</span><span class="p">:</span><span class="n">src_stop</span><span class="p">]</span>
+                    <span class="n">ysrc</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">src_start</span><span class="p">:</span><span class="n">src_stop</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">balancer</span><span class="o">.</span><span class="n">add_entry</span><span class="p">(</span><span class="n">ysrc</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">is_train</span><span class="p">:</span>
+                            <span class="n">dst_start_train</span> <span class="o">=</span> <span class="n">jt</span> <span class="o">*</span> <span class="n">nb_entries_per_split_batch</span>
+                            <span class="n">dst_stop_train</span> <span class="o">=</span> <span class="p">(</span><span class="n">jt</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nb_entries_per_split_batch</span>
+
+                            <span class="n">jt</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                            <span class="n">xdst</span> <span class="o">=</span> <span class="n">x_train</span><span class="p">[:,</span> <span class="n">dst_start_train</span><span class="p">:</span><span class="n">dst_stop_train</span><span class="p">]</span>
+                            <span class="n">ydst</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[:,</span> <span class="n">dst_start_train</span><span class="p">:</span><span class="n">dst_stop_train</span><span class="p">]</span>
+
+                            <span class="n">numpy</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">xdst</span><span class="p">,</span> <span class="n">xsrc</span><span class="p">)</span>
+                            <span class="n">numpy</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">ydst</span><span class="p">,</span> <span class="n">ysrc</span><span class="p">)</span>
+
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">dst_start_valid</span> <span class="o">=</span> <span class="n">jv</span> <span class="o">*</span> <span class="n">nb_entries_per_split_batch</span>
+                            <span class="n">dst_stop_valid</span> <span class="o">=</span> <span class="p">(</span><span class="n">jv</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nb_entries_per_split_batch</span>
+
+                            <span class="n">jv</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                            <span class="n">xdst</span> <span class="o">=</span> <span class="n">x_valid</span><span class="p">[:,</span> <span class="n">dst_start_valid</span><span class="p">:</span><span class="n">dst_stop_valid</span><span class="p">]</span>
+                            <span class="n">ydst</span> <span class="o">=</span> <span class="n">y_valid</span><span class="p">[:,</span> <span class="n">dst_start_valid</span><span class="p">:</span><span class="n">dst_stop_valid</span><span class="p">]</span>
+
+                            <span class="n">numpy</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">xdst</span><span class="p">,</span> <span class="n">xsrc</span><span class="p">)</span>
+                            <span class="n">numpy</span><span class="o">.</span><span class="n">copyto</span><span class="p">(</span><span class="n">ydst</span><span class="p">,</span> <span class="n">ysrc</span><span class="p">)</span>
+
+                <span class="c1"># Now we actually truncate out all the zeros at the end of the arrays:</span>
+                <span class="n">x_train</span> <span class="o">=</span> <span class="n">x_train</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">dst_stop_train</span><span class="p">]</span>
+                <span class="n">y_train</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">dst_stop_train</span><span class="p">]</span>
+                <span class="n">x_valid</span> <span class="o">=</span> <span class="n">x_valid</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">dst_stop_valid</span><span class="p">]</span>
+                <span class="n">y_valid</span> <span class="o">=</span> <span class="n">y_valid</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">dst_stop_valid</span><span class="p">]</span>
+
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Histogram all    : </span><span class="si">{</span><span class="n">balancer</span><span class="o">.</span><span class="n">get_histogram_all_as_string</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Histogram kept   : </span><span class="si">{</span><span class="n">balancer</span><span class="o">.</span><span class="n">get_histogram_kept_as_string</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Histogram dropped: </span><span class="si">{</span><span class="n">balancer</span><span class="o">.</span><span class="n">get_histogram_dropped_as_string</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Number of entries kept: </span><span class="si">{</span><span class="n">balancer</span><span class="o">.</span><span class="n">total_kept</span><span class="p">()</span><span class="si">}</span><span class="s2"> out of </span><span class="si">{</span><span class="n">balancer</span><span class="o">.</span><span class="n">total_entries</span><span class="si">}</span><span class="s2"> total&quot;</span>
+                <span class="p">)</span>
+                <span class="n">lprint</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Percentage of data kept: </span><span class="si">{</span><span class="mi">100</span> <span class="o">*</span> <span class="n">balancer</span><span class="o">.</span><span class="n">percentage_kept</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">% (train_data_ratio=</span><span class="si">{</span><span class="n">balancer</span><span class="o">.</span><span class="n">keep_ratio</span><span class="si">}</span><span class="s2">) &quot;</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">balancer</span><span class="o">.</span><span class="n">keep_ratio</span> <span class="o">&gt;=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">balancer</span><span class="o">.</span><span class="n">percentage_kept</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">lprint</span><span class="p">(</span>
+                        <span class="s2">&quot;Note: balancer has dropped entries that fell on over-represented histogram bins&quot;</span>
+                    <span class="p">)</span>
+        <span class="k">return</span> <span class="n">x_train</span><span class="p">,</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_valid</span>
+
+    <span class="k">def</span> <span class="nf">_translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="n">image_slice</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">whole_image_shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Internal method that translates an input image on the basis of the trained model.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_image</span>
+<span class="sd">        image_slice</span>
+<span class="sd">        whole_image_shape</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        inferred image</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="n">input_image</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">num_batches</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_features</span><span class="p">(</span>
+            <span class="n">input_image</span><span class="p">,</span>
+            <span class="n">exclude_center_feature</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_center_feature</span><span class="p">,</span>
+            <span class="n">exclude_center_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude_center_value_when_translating</span><span class="p">,</span>
+            <span class="n">num_reserved_features</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">features_last</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">image_slice</span><span class="o">=</span><span class="n">image_slice</span><span class="p">,</span>
+            <span class="n">whole_image_shape</span><span class="o">=</span><span class="n">whole_image_shape</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Predict from feature vector of dimension </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and dtype: </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">:&quot;</span>
+        <span class="p">):</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="s2">&quot;Predicting... &quot;</span><span class="p">)</span>
+            <span class="c1"># Predict using regressor:</span>
+            <span class="n">yp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="c1"># We make sure that we have the result in float type, but make _sure_ to avoid copying data:</span>
+            <span class="k">if</span> <span class="n">yp</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float32</span> <span class="ow">and</span> <span class="n">yp</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+                <span class="n">yp</span> <span class="o">=</span> <span class="n">yp</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># We reshape the array:</span>
+            <span class="n">num_target_channels</span> <span class="o">=</span> <span class="n">yp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">translated_image_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_batches</span><span class="p">,</span> <span class="n">num_target_channels</span><span class="p">)</span> <span class="o">+</span> <span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+            <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reshaping array to </span><span class="si">{</span><span class="n">translated_image_shape</span><span class="si">}</span><span class="s2">... &quot;</span><span class="p">)</span>
+            <span class="n">inferred_image</span> <span class="o">=</span> <span class="n">yp</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">translated_image_shape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">inferred_image</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.15
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="fgr.html">v0.1.15</a></dd>
+      <dd><a href="../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

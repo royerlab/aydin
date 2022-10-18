@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.classic_denoisers.wavelet &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/example_images_gallery.html">Example Images Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.classic_denoisers.wavelet</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.classic_denoisers.wavelet</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">pywt</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">skimage.restoration</span> <span class="kn">import</span> <span class="n">denoise_wavelet</span> <span class="k">as</span> <span class="n">skimage_denoise_wavelet</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers</span> <span class="kn">import</span> <span class="n">_defaults</span>
+<span class="kn">from</span> <span class="nn">aydin.util.crop.rep_crop</span> <span class="kn">import</span> <span class="n">representative_crop</span>
+<span class="kn">from</span> <span class="nn">aydin.util.j_invariance.j_invariance</span> <span class="kn">import</span> <span class="n">calibrate_denoiser</span>
+
+
+<div class="viewcode-block" id="calibrate_denoise_wavelet"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.wavelet.calibrate_denoise_wavelet">[docs]</a><span class="k">def</span> <span class="nf">calibrate_denoise_wavelet</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">all_wavelets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">wavelet_name_filter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="n">crop_size_in_voxels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_crop_size_normal</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">optimiser</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;smart&#39;</span><span class="p">,</span>  <span class="c1"># using smart optimiser is important here!</span>
+    <span class="n">max_num_evaluations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_max_evals_normal</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">blind_spots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_blind_spots</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">jinv_interpolation_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_jinv_interpolation_mode</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">display_images</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">display_crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">other_fixed_parameters</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calibrates a &lt;a href=&quot;https://en.wikipedia.org/wiki/Wavelet_transform</span>
+<span class="sd">    &quot;&gt;wavelet&lt;/a&gt; denoiser for the given image and returns the optimal</span>
+<span class="sd">    parameters obtained using the N2S loss.</span>
+
+<span class="sd">    Note: we use the scikit-image implementation of wavelet denoising.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image: ArrayLike</span>
+<span class="sd">        Image to calibrate wavelet denoiser for.</span>
+
+<span class="sd">    all_wavelets: bool</span>
+<span class="sd">        If true then all wavelet transforms are tried during calibration,</span>
+<span class="sd">        otherwise only a selection that we consider to be the best.</span>
+<span class="sd">        Note: trying all transforms can take a long time but might find the</span>
+<span class="sd">        magical transform that will make it work for your data.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    wavelet_name_filter: str</span>
+<span class="sd">        Comma separated list of wavelet name substrings. We only keep for</span>
+<span class="sd">        calibration wavelets which name contains these substrings. Best used</span>
+<span class="sd">        when using all transforms as starting list to select a family of wavelets,</span>
+<span class="sd">        or to select a specific one by providing its name in full.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    crop_size_in_voxels: int or None for default</span>
+<span class="sd">        Number of voxels for crop used to calibrate denoiser.</span>
+<span class="sd">        Increase this number by factors of two if denoising quality is</span>
+<span class="sd">        unsatisfactory -- this can be important for very noisy images.</span>
+<span class="sd">        Values to try are: 65000, 128000, 256000, 320000.</span>
+<span class="sd">        We do not recommend values higher than 512000.</span>
+
+<span class="sd">    optimiser: str</span>
+<span class="sd">        Optimiser to use for finding the best denoising</span>
+<span class="sd">        parameters. Can be: &#39;smart&#39; (default), or &#39;fast&#39; for a mix of SHGO</span>
+<span class="sd">        followed by L-BFGS-B.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    max_num_evaluations: int</span>
+<span class="sd">        Maximum number of evaluations for finding the optimal parameters.</span>
+<span class="sd">        Increase this number by factors of two if denoising quality is</span>
+<span class="sd">        unsatisfactory.</span>
+
+<span class="sd">    blind_spots: bool</span>
+<span class="sd">        List of voxel coordinates (relative to receptive field center) to</span>
+<span class="sd">        be included in the blind-spot. For example, you can give a list of</span>
+<span class="sd">        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot</span>
+<span class="sd">        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    jinv_interpolation_mode: str</span>
+<span class="sd">        J-invariance interpolation mode for masking. Can be: &#39;median&#39; or</span>
+<span class="sd">        &#39;gaussian&#39;.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    display_images: bool</span>
+<span class="sd">        When True the denoised images encountered during optimisation are shown.</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    display_crop: bool</span>
+<span class="sd">        Displays crop, for debugging purposes...</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    other_fixed_parameters: dict</span>
+<span class="sd">        Any other fixed parameters</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoising function and dictionary containing optimal parameters.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># obtain representative crop, to speed things up...</span>
+    <span class="n">crop</span> <span class="o">=</span> <span class="n">representative_crop</span><span class="p">(</span>
+        <span class="n">image</span><span class="p">,</span> <span class="n">crop_size</span><span class="o">=</span><span class="n">crop_size_in_voxels</span><span class="p">,</span> <span class="n">display_crop</span><span class="o">=</span><span class="n">display_crop</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Sigma range:</span>
+    <span class="n">sigma_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1e-9</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="c1"># List of all wavelets:</span>
+    <span class="n">all_wavelets_list</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">wavelist</span><span class="p">()</span>
+
+    <span class="n">best_wavelets_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;db1&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;db2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;haar&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bior4.4&#39;</span><span class="p">,</span>  <span class="c1"># same as CDF 9/7 from JPEG 2000 lossy</span>
+        <span class="s1">&#39;bior2.8&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;sym9&#39;,</span>
+        <span class="c1"># &#39;coif1&#39;,</span>
+        <span class="c1"># &#39;coif5&#39;,</span>
+        <span class="c1"># &#39;dmey&#39;,</span>
+        <span class="c1"># &#39;bior2.2&#39;,</span>
+        <span class="c1"># &#39;bior3.1&#39;,</span>
+        <span class="c1"># &#39;bior3.3&#39;,</span>
+    <span class="p">]</span>
+
+    <span class="c1"># List of wavelets to use:</span>
+    <span class="n">wavelet_list</span> <span class="o">=</span> <span class="n">all_wavelets_list</span> <span class="k">if</span> <span class="n">all_wavelets</span> <span class="k">else</span> <span class="n">best_wavelets_list</span>
+
+    <span class="c1"># we parse the filter list:</span>
+    <span class="n">filters</span> <span class="o">=</span> <span class="n">wavelet_name_filter</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="p">)</span>
+    <span class="n">filters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">)</span>
+
+    <span class="c1"># We only keep wavelets that are in the filter:</span>
+    <span class="n">wavelet_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">wavelet_list</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span> <span class="ow">in</span> <span class="n">w</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">))</span>
+
+    <span class="c1"># Finally we exclude continuous wavelets that don&#39;t work for denoising:</span>
+    <span class="n">continuous_wavelet_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cgau&#39;</span><span class="p">,</span> <span class="s1">&#39;gaus&#39;</span><span class="p">,</span> <span class="s1">&#39;cmor&#39;</span><span class="p">,</span> <span class="s1">&#39;fbsp&#39;</span><span class="p">,</span> <span class="s1">&#39;morl&#39;</span><span class="p">,</span> <span class="s1">&#39;mexh&#39;</span><span class="p">,</span> <span class="s1">&#39;shan&#39;</span><span class="p">]</span>
+    <span class="n">wavelet_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="n">w</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">wavelet_list</span> <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">w</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">continuous_wavelet_list</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># If no wavelets remain, we use the best ones as a substitute:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">wavelet_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">wavelet_list</span> <span class="o">=</span> <span class="n">best_wavelets_list</span>
+
+    <span class="c1"># Parameters to test when calibrating the denoising algorithm</span>
+    <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="n">sigma_range</span><span class="p">,</span>
+        <span class="s1">&#39;wavelet&#39;</span><span class="p">:</span> <span class="n">wavelet_list</span><span class="p">,</span>
+        <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;soft&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BayesShrink&#39;</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Partial function:</span>
+    <span class="n">_denoise_wavelet</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">denoise_wavelet</span><span class="p">,</span> <span class="o">**</span><span class="n">other_fixed_parameters</span><span class="p">)</span>
+
+    <span class="c1"># Calibrate denoiser 1st pass:</span>
+    <span class="n">best_parameters</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">calibrate_denoiser</span><span class="p">(</span>
+            <span class="n">crop</span><span class="p">,</span>
+            <span class="n">_denoise_wavelet</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">optimiser</span><span class="p">,</span>
+            <span class="n">denoise_parameters</span><span class="o">=</span><span class="n">parameter_ranges</span><span class="p">,</span>
+            <span class="n">interpolation_mode</span><span class="o">=</span><span class="n">jinv_interpolation_mode</span><span class="p">,</span>
+            <span class="n">max_num_evaluations</span><span class="o">=</span><span class="n">max_num_evaluations</span><span class="p">,</span>
+            <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+            <span class="n">display_images</span><span class="o">=</span><span class="n">display_images</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">|</span> <span class="n">other_fixed_parameters</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Next pass we optimise the mode and method:</span>
+    <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;sigma&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">best_parameters</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]],</span>
+        <span class="s1">&#39;wavelet&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">best_parameters</span><span class="p">[</span><span class="s1">&#39;wavelet&#39;</span><span class="p">]],</span>  <span class="c1">#</span>
+        <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;soft&#39;</span><span class="p">,</span> <span class="s1">&#39;hard&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;BayesShrink&#39;</span><span class="p">,</span> <span class="s1">&#39;VisuShrink&#39;</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Calibrate denoiser 2nd pass:</span>
+    <span class="n">best_parameters</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">calibrate_denoiser</span><span class="p">(</span>
+            <span class="n">crop</span><span class="p">,</span>
+            <span class="n">_denoise_wavelet</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">optimiser</span><span class="p">,</span>
+            <span class="n">denoise_parameters</span><span class="o">=</span><span class="n">parameter_ranges</span><span class="p">,</span>
+            <span class="n">interpolation_mode</span><span class="o">=</span><span class="n">jinv_interpolation_mode</span><span class="p">,</span>
+            <span class="n">max_num_evaluations</span><span class="o">=</span><span class="n">max_num_evaluations</span><span class="p">,</span>
+            <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+            <span class="n">display_images</span><span class="o">=</span><span class="n">display_images</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">|</span> <span class="n">other_fixed_parameters</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Memory needed:</span>
+    <span class="n">memory_needed</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">nbytes</span> <span class="o">*</span> <span class="mi">3</span>  <span class="c1"># transform</span>
+
+    <span class="k">return</span> <span class="n">denoise_wavelet</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">,</span> <span class="n">memory_needed</span></div>
+
+
+<div class="viewcode-block" id="denoise_wavelet"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.wavelet.denoise_wavelet">[docs]</a><span class="k">def</span> <span class="nf">denoise_wavelet</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;db1&#39;</span><span class="p">,</span>
+    <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;soft&#39;</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;BayesShrink&#39;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Denoises the given image using the scikit-image</span>
+<span class="sd">    implementation of &lt;a href=&quot;https://en.wikipedia.org/wiki/Wavelet_transform &quot;&gt;</span>
+<span class="sd">    wavelet&lt;/a&gt; denoising.</span>
+<span class="sd">    \n\n</span>
+<span class="sd">    Note: we use the scikt-image implementation of wavelet denoising.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image: ArrayLike</span>
+<span class="sd">        Image to denoise</span>
+
+<span class="sd">    wavelet : string, optional</span>
+<span class="sd">        The type of wavelet to perform and can be any of the options</span>
+<span class="sd">        ``pywt.wavelist`` outputs. The default is `&#39;db1&#39;`. For example,</span>
+<span class="sd">        ``wavelet`` can be any of ``{&#39;db2&#39;, &#39;haar&#39;, &#39;sym9&#39;}`` and many more</span>
+<span class="sd">        (see PyWavelets documentation).</span>
+
+<span class="sd">    sigma : float or list, optional</span>
+<span class="sd">        The noise standard deviation used when computing the wavelet detail</span>
+<span class="sd">        coefficient threshold(s). When None (default), the noise standard</span>
+<span class="sd">        deviation is estimated via the method in (2)_.</span>
+
+<span class="sd">    mode : {&#39;soft&#39;, &#39;hard&#39;}, optional</span>
+<span class="sd">        An optional argument to choose the type of denoising performed. It</span>
+<span class="sd">        noted that choosing soft thresholding given additive noise finds the</span>
+<span class="sd">        best approximation of the original image.</span>
+
+<span class="sd">    method : {&#39;BayesShrink&#39;, &#39;VisuShrink&#39;}, optional</span>
+<span class="sd">        Thresholding method to be used. The currently supported methods are</span>
+<span class="sd">        &quot;BayesShrink&quot; (1)_ and &quot;VisuShrink&quot; (2)_. Defaults to &quot;BayesShrink&quot;.</span>
+
+<span class="sd">    kwargs : dict</span>
+<span class="sd">        Any other parameters to be passed to scikit-image implementations</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoised image as ndarray</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">skimage_denoise_wavelet</span><span class="p">(</span>
+        <span class="n">image</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">=</span><span class="n">wavelet</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.15
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="../../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="wavelet.html">v0.1.15</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>

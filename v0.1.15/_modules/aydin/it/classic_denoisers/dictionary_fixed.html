@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aydin.it.classic_denoisers.dictionary_fixed &mdash; Aydin  documentation</title>
+      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/clipboard.min.js"></script>
+        <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../../index.html">
+            <img src="../../../../_static/aydin_logo_grad_black_tr1.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/hardware_requirements.html">Hardware Requirements</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Use Cases</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/basics.html">Denoising Basics with Aydin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/newyork.html">Noisy ‘New York’ Test Image</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_royer.html">Spinning-Disk Confocal Images of Zebrafish Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/confocal_maitre.html">Spinning-Disk Confocal Microscopy Images of Mouse Embryos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/opencell.html">OpenCell Images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../use_cases/pourquie.html">Chicken Embryos LSM 780 Images</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/tutorials_home.html">Tutorials Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/gui_tutorials.html">Aydin Studio (GUI) Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cli_tutorials.html">Aydin CLI Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/api_tutorials.html">Aydin API Tutorials</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/restoration.html">Restoration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/image_translator.html">Image Translator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/transforms.html">Transforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/feature_generator.html">Feature Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/regressors.html">Regressors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/io.html">IO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/nn.html">NN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/options_json.html">Options JSON</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/example_images_gallery.html">Example Images Gallery</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contact Us</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/github.html">On Github</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contact_us/imagesc.html">On image.sc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Aydin</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+      <li>aydin.it.classic_denoisers.dictionary_fixed</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for aydin.it.classic_denoisers.dictionary_fixed</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">ArrayLike</span>
+<span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">SparseCoder</span>
+
+<span class="kn">from</span> <span class="nn">aydin.it.classic_denoisers</span> <span class="kn">import</span> <span class="n">_defaults</span>
+<span class="kn">from</span> <span class="nn">aydin.util.crop.rep_crop</span> <span class="kn">import</span> <span class="n">representative_crop</span>
+<span class="kn">from</span> <span class="nn">aydin.util.dictionary.dictionary</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">fixed_dictionary</span><span class="p">,</span>
+    <span class="n">extract_normalised_vectorised_patches</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aydin.util.j_invariance.j_invariance</span> <span class="kn">import</span> <span class="n">calibrate_denoiser</span>
+<span class="kn">from</span> <span class="nn">aydin.util.log.log</span> <span class="kn">import</span> <span class="n">lsection</span><span class="p">,</span> <span class="n">lprint</span>
+<span class="kn">from</span> <span class="nn">aydin.util.patch_size.patch_size</span> <span class="kn">import</span> <span class="n">default_patch_size</span>
+<span class="kn">from</span> <span class="nn">aydin.util.patch_transform.patch_transform</span> <span class="kn">import</span> <span class="n">reconstruct_from_nd_patches</span>
+
+
+<div class="viewcode-block" id="calibrate_denoise_dictionary_fixed"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.dictionary_fixed.calibrate_denoise_dictionary_fixed">[docs]</a><span class="k">def</span> <span class="nf">calibrate_denoise_dictionary_fixed</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">patch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">try_omp</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">try_lasso_lars</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">try_lasso_cd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">try_lars</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">try_threshold</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">num_sparsity_values_to_try</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="n">dictionaries</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;dct&#39;</span><span class="p">,</span>
+    <span class="n">crop_size_in_voxels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_crop_size_normal</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">optimiser</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_optimiser</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">max_num_evaluations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_max_evals_low</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">blind_spots</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_blind_spots</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">jinv_interpolation_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_defaults</span><span class="o">.</span><span class="n">default_jinv_interpolation_mode</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">display_dictionary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">display_images</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">display_crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">other_fixed_parameters</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calibrates the dictionary-based denoiser for the given image and returns the</span>
+<span class="sd">    optimal parameters obtained using the N2S loss.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image : ArrayLike</span>
+<span class="sd">        Image to calibrate denoiser for.</span>
+
+<span class="sd">    patch_size : int</span>
+<span class="sd">        Patch size. Common parameter to both &#39;learned&#39;,</span>
+<span class="sd">        or &#39;fixed&#39; dictionary types.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    try_omp: bool</span>
+<span class="sd">        Whether OMP should be tried as a sparse coding</span>
+<span class="sd">        algorithm during calibration.</span>
+
+<span class="sd">    try_lasso_lars: bool</span>
+<span class="sd">        Whether LASSO-LARS should be tried as a sparse</span>
+<span class="sd">        coding algorithm during calibration.</span>
+
+<span class="sd">    try_lasso_cd: bool</span>
+<span class="sd">        Whether LASSO-CD should be tried as a sparse</span>
+<span class="sd">        coding algorithm during calibration.</span>
+
+<span class="sd">    try_lars: bool</span>
+<span class="sd">        Whether LARS should be tried as a sparse coding</span>
+<span class="sd">        algorithm during calibration.</span>
+
+<span class="sd">    try_threshold: bool</span>
+<span class="sd">        Whether &#39;threshold&#39;&#39; should be tried as a sparse</span>
+<span class="sd">        coding algorithm during calibration.</span>
+
+<span class="sd">    num_sparsity_values_to_try: int</span>
+<span class="sd">        Maximum number of sparsity values to try during calibration</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    dictionaries: str</span>
+<span class="sd">        Fixed dictionaries to be included. Can be: &#39;dct&#39;,</span>
+<span class="sd">        &#39;dst&#39;.</span>
+
+<span class="sd">    crop_size_in_voxels: int or None for default</span>
+<span class="sd">        Number of voxels for crop used to calibrate denoiser.</span>
+<span class="sd">        Increase this number by factors of two if denoising quality is</span>
+<span class="sd">        unsatisfactory -- this can be important for very noisy images.</span>
+<span class="sd">        Values to try are: 65000, 128000, 256000, 320000.</span>
+<span class="sd">        We do not recommend values higher than 512000.</span>
+
+<span class="sd">    optimiser: str</span>
+<span class="sd">        Optimiser to use for finding the best denoising</span>
+<span class="sd">        parameters. Can be: &#39;smart&#39; (default), or &#39;fast&#39; for a mix of SHGO</span>
+<span class="sd">        followed by L-BFGS-B.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    max_num_evaluations: int</span>
+<span class="sd">        Maximum number of evaluations for finding the</span>
+<span class="sd">        optimal parameters. Increase this number by factors of two if denoising</span>
+<span class="sd">        quality is unsatisfactory.</span>
+
+<span class="sd">    blind_spots: bool</span>
+<span class="sd">        List of voxel coordinates (relative to receptive field center) to</span>
+<span class="sd">        be included in the blind-spot. For example, you can give a list of</span>
+<span class="sd">        3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot</span>
+<span class="sd">        to cover voxels of relative coordinates: (0,0,0),(0,1,0), and (0,-1,0)</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    jinv_interpolation_mode: str</span>
+<span class="sd">        J-invariance interpolation mode for masking. Can be: &#39;median&#39; or</span>
+<span class="sd">        &#39;gaussian&#39;.</span>
+<span class="sd">        (advanced)</span>
+
+<span class="sd">    display_dictionary: bool</span>
+<span class="sd">        If True displays dictionary with napari -- for</span>
+<span class="sd">        debug purposes.</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    display_images: bool</span>
+<span class="sd">        When True the denoised images encountered during</span>
+<span class="sd">        optimisation are shown.</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    display_crop: bool</span>
+<span class="sd">        Displays crop, for debugging purposes...</span>
+<span class="sd">        (advanced) (hidden)</span>
+
+<span class="sd">    other_fixed_parameters: dict</span>
+<span class="sd">        Any other fixed parameters</span>
+
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoising function, dictionary containing optimal parameters,</span>
+<span class="sd">    and free memory needed in bytes for computation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Normalise patch size:</span>
+    <span class="n">patch_size</span> <span class="o">=</span> <span class="n">default_patch_size</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">patch_size</span><span class="p">,</span> <span class="n">odd</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># obtain representative crop, to speed things up...</span>
+    <span class="n">crop</span> <span class="o">=</span> <span class="n">representative_crop</span><span class="p">(</span>
+        <span class="n">image</span><span class="p">,</span> <span class="n">crop_size</span><span class="o">=</span><span class="n">crop_size_in_voxels</span><span class="p">,</span> <span class="n">display_crop</span><span class="o">=</span><span class="n">display_crop</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Partial function:</span>
+    <span class="k">def</span> <span class="nf">_denoise_dictionary</span><span class="p">(</span>
+        <span class="n">image</span><span class="p">,</span> <span class="n">max_freq</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">coding_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;omp&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span>
+    <span class="p">):</span>
+        <span class="n">dictionary</span> <span class="o">=</span> <span class="n">fixed_dictionary</span><span class="p">(</span>
+            <span class="n">image</span><span class="p">,</span> <span class="n">patch_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span> <span class="n">dictionaries</span><span class="o">=</span><span class="n">dictionaries</span><span class="p">,</span> <span class="n">max_freq</span><span class="o">=</span><span class="n">max_freq</span>
+        <span class="p">)</span>
+        <span class="n">denoised_image</span> <span class="o">=</span> <span class="n">denoise_dictionary_fixed</span><span class="p">(</span>
+            <span class="n">image</span><span class="p">,</span> <span class="n">dictionary</span><span class="o">=</span><span class="n">dictionary</span><span class="p">,</span> <span class="n">coding_mode</span><span class="o">=</span><span class="n">coding_mode</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">denoised_image</span>
+
+    <span class="c1"># coding modes to try:</span>
+    <span class="n">coding_modes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">try_omp</span><span class="p">:</span>
+        <span class="n">coding_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;omp&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">try_lasso_lars</span><span class="p">:</span>
+        <span class="n">coding_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;lasso_lars&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">try_lasso_cd</span><span class="p">:</span>
+        <span class="n">coding_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;lasso_cd&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">try_lars</span><span class="p">:</span>
+        <span class="n">coding_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;lars&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">try_threshold</span><span class="p">:</span>
+        <span class="n">coding_modes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Parameters to test when calibrating the denoising algorithm</span>
+    <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_freq&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">),</span> <span class="s1">&#39;coding_mode&#39;</span><span class="p">:</span> <span class="n">coding_modes</span><span class="p">}</span>
+
+    <span class="c1"># Calibrate denoiser:</span>
+    <span class="n">best_parameters</span> <span class="o">=</span> <span class="n">calibrate_denoiser</span><span class="p">(</span>
+        <span class="n">crop</span><span class="p">,</span>
+        <span class="n">_denoise_dictionary</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">optimiser</span><span class="p">,</span>
+        <span class="n">denoise_parameters</span><span class="o">=</span><span class="n">parameter_ranges</span><span class="p">,</span>
+        <span class="n">interpolation_mode</span><span class="o">=</span><span class="n">jinv_interpolation_mode</span><span class="p">,</span>
+        <span class="n">max_num_evaluations</span><span class="o">=</span><span class="n">max_num_evaluations</span><span class="p">,</span>
+        <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Best parameters: </span><span class="si">{</span><span class="n">best_parameters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Parameters to test when calibrating the denoising algorithm</span>
+    <span class="n">parameter_ranges</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sparsity&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">][:</span><span class="n">num_sparsity_values_to_try</span><span class="p">]}</span>
+
+    <span class="c1"># Calibrate denoiser:</span>
+    <span class="n">best_parameters</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">calibrate_denoiser</span><span class="p">(</span>
+            <span class="n">crop</span><span class="p">,</span>
+            <span class="n">_denoise_dictionary</span><span class="p">,</span>
+            <span class="n">denoise_parameters</span><span class="o">=</span><span class="n">parameter_ranges</span><span class="p">,</span>
+            <span class="n">interpolation_mode</span><span class="o">=</span><span class="n">jinv_interpolation_mode</span><span class="p">,</span>
+            <span class="n">other_fixed_parameters</span><span class="o">=</span><span class="n">best_parameters</span> <span class="o">|</span> <span class="n">other_fixed_parameters</span><span class="p">,</span>
+            <span class="n">max_num_evaluations</span><span class="o">=</span><span class="n">max_num_evaluations</span><span class="p">,</span>
+            <span class="n">display_images</span><span class="o">=</span><span class="n">display_images</span><span class="p">,</span>
+            <span class="n">blind_spots</span><span class="o">=</span><span class="n">blind_spots</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="o">|</span> <span class="n">best_parameters</span>
+        <span class="o">|</span> <span class="n">other_fixed_parameters</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Cleaning up a bit:</span>
+    <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;other_fixed_parameters&#39;</span><span class="p">)</span>
+
+    <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final best parameters: </span><span class="si">{</span><span class="n">best_parameters</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># we need to replace the max freq argument with the actual dictionary</span>
+    <span class="c1"># because that&#39;s what our client facing denoise function expects:</span>
+    <span class="n">max_freq</span> <span class="o">=</span> <span class="n">best_parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;max_freq&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Dictionary to use based on fixed and best parameters:</span>
+    <span class="n">dictionary</span> <span class="o">=</span> <span class="n">fixed_dictionary</span><span class="p">(</span>
+        <span class="n">image</span><span class="p">,</span> <span class="n">patch_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span> <span class="n">dictionaries</span><span class="o">=</span><span class="n">dictionaries</span><span class="p">,</span> <span class="n">max_freq</span><span class="o">=</span><span class="n">max_freq</span>
+    <span class="p">)</span>
+
+    <span class="n">best_parameters</span> <span class="o">=</span> <span class="n">best_parameters</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;dictionary&#39;</span><span class="p">:</span> <span class="n">dictionary</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">display_dictionary</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">napari</span>
+
+        <span class="k">with</span> <span class="n">napari</span><span class="o">.</span><span class="n">gui_qt</span><span class="p">():</span>
+            <span class="n">viewer</span> <span class="o">=</span> <span class="n">napari</span><span class="o">.</span><span class="n">Viewer</span><span class="p">()</span>
+            <span class="n">viewer</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span>
+                <span class="n">dictionary</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dictionary</span><span class="p">),</span> <span class="o">*</span><span class="n">patch_size</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dictionary&#39;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Memory needed:</span>
+    <span class="n">memory_needed</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">nbytes</span> <span class="o">+</span> <span class="mi">6</span> <span class="o">*</span> <span class="n">image</span><span class="o">.</span><span class="n">nbytes</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">patch_size</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">denoise_dictionary_fixed</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">,</span> <span class="n">memory_needed</span></div>
+
+
+<div class="viewcode-block" id="denoise_dictionary_fixed"><a class="viewcode-back" href="../../../../api/image_translators/classic.html#aydin.it.classic_denoisers.dictionary_fixed.denoise_dictionary_fixed">[docs]</a><span class="k">def</span> <span class="nf">denoise_dictionary_fixed</span><span class="p">(</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="n">dictionary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">coding_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;omp&#39;</span><span class="p">,</span>
+    <span class="n">sparsity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span>
+    <span class="n">multi_core</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Denoises the given image using sparse-coding over a fixed</span>
+<span class="sd">    dictionary of nD image patches. The dictionary learning and</span>
+<span class="sd">    patch sparse coding uses scikit-learn&#39;s Batch-OMP implementation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    image: ArrayLike</span>
+<span class="sd">        nD image to be denoised</span>
+
+<span class="sd">    dictionary: ArrayLike</span>
+<span class="sd">        Dictionary to use for denosing image via sparse coding.</span>
+<span class="sd">        By default (None) a fixed dictionary is used.</span>
+
+<span class="sd">    coding_mode: str</span>
+<span class="sd">        Type of sparse coding, can be:  &#39;lasso_lars&#39;, &#39;lasso_cd&#39;, &#39;lars&#39;, &#39;omp&#39;,</span>
+<span class="sd">        or &#39;threshold&#39;</span>
+
+<span class="sd">    sparsity: int</span>
+<span class="sd">        How many atoms are used to represent each patch after denoising.</span>
+
+<span class="sd">    gamma: float</span>
+<span class="sd">        How much the periphery of teh patches contributes to the final denoised</span>
+<span class="sd">        image. Larger gamma means that we keep more of the central pixels of the</span>
+<span class="sd">        patches, smaller values lead to a more uniform contribution.</span>
+<span class="sd">        A value of 1 corresponds to the default blackman window.</span>
+
+<span class="sd">    multi_core: bool</span>
+<span class="sd">        By default we use as many cores as possible, in some cases, for small</span>
+<span class="sd">        (test) images, it might be faster to run on a single core instead of</span>
+<span class="sd">        starting the whole parallelization machinery.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Denoised image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Convert image to float if needed:</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dictionary</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># learn dictionary with all defaults:</span>
+        <span class="n">dictionary</span> <span class="o">=</span> <span class="n">fixed_dictionary</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+    <span class="c1"># we can infer patch shape from dictionary:</span>
+    <span class="n">patch_size</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Denoise image of shape </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and dtype </span><span class="si">{</span><span class="n">image</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+        <span class="c1"># vectorise dictionary:</span>
+        <span class="n">vectorised_dictionary</span> <span class="o">=</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dictionary</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># setup sparse coder:</span>
+        <span class="n">coder</span> <span class="o">=</span> <span class="n">SparseCoder</span><span class="p">(</span>
+            <span class="n">vectorised_dictionary</span><span class="p">,</span>
+            <span class="n">transform_algorithm</span><span class="o">=</span><span class="n">coding_mode</span><span class="p">,</span>
+            <span class="n">transform_n_nonzero_coefs</span><span class="o">=</span><span class="n">sparsity</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">multi_core</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># First we extract _all_ patches from the image, without any normalisation:</span>
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Extract all patches from image...&quot;</span><span class="p">):</span>
+            <span class="n">patches</span><span class="p">,</span> <span class="n">patch_means</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">extract_normalised_vectorised_patches</span><span class="p">(</span>
+                <span class="n">image</span><span class="p">,</span>
+                <span class="n">patch_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span>
+                <span class="n">max_patches</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">normalise_means</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">normalise_stds</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">output_norm_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Obtain sparse codes for each patch...&quot;</span><span class="p">):</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">coder</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Reconstruct patches from codes...&quot;</span><span class="p">):</span>
+            <span class="n">denoised_patches</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">vectorised_dictionary</span><span class="p">)</span>
+            <span class="c1"># Add back means:</span>
+            <span class="n">denoised_patches</span> <span class="o">+=</span> <span class="n">patch_means</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Reshape to patches...&quot;</span><span class="p">):</span>
+            <span class="n">denoised_patches</span> <span class="o">=</span> <span class="n">denoised_patches</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">patches</span><span class="p">),</span> <span class="o">*</span><span class="n">patch_size</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Reconstructing image from patches...&quot;</span><span class="p">):</span>
+            <span class="c1"># Reconstructs image from denoised patches:</span>
+            <span class="n">denoised_image</span> <span class="o">=</span> <span class="n">reconstruct_from_nd_patches</span><span class="p">(</span>
+                <span class="n">patches</span><span class="o">=</span><span class="n">denoised_patches</span><span class="p">,</span> <span class="n">image_shape</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">denoised_image</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022. Chan Zuckerberg Biohub. All rights reserved.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    : v0.1.15
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../../../../v0.1.11/index.html">v0.1.11</a></dd>
+      <dd><a href="../../../../../v0.1.12/index.html">v0.1.12</a></dd>
+      <dd><a href="../../../../../v0.1.13/index.html">v0.1.13</a></dd>
+      <dd><a href="../../../../../v0.1.14/index.html">v0.1.14</a></dd>
+      <dd><a href="dictionary_fixed.html">v0.1.15</a></dd>
+      <dd><a href="../../../../../v0.1.8/index.html">v0.1.8</a></dd>
+      <dd><a href="../../../../../v0.1.9/index.html">v0.1.9</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: #FFB366;
+    }
+    /* Sidebar */
+<!--    .wy-nav-side {-->
+<!--      background: #ff0000;-->
+<!--    }-->
+  </style>
+
+
+</body>
+</html>
