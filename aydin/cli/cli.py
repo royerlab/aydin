@@ -386,9 +386,12 @@ def benchmark_algos(files, **kwargs):
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
-    for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
-        denoiser_names = get_list_of_denoiser_implementations()
-        print(denoiser_names)
+    denoiser_names = get_list_of_denoiser_implementations()[0]
+
+    # for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
+    for denoiser_name in denoiser_names:
+        denoiser_class = get_denoiser_class_instance(denoiser_name)
+        print(denoiser_name, denoiser_class)
 
 
 
