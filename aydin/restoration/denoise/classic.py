@@ -107,15 +107,12 @@ class Classic(DenoiseRestorationBase):
         lower_level_args
         it_transforms
         """
-        super().__init__()
+        super().__init__(variant=variant)
         self.lower_level_args = lower_level_args
-
-        self.variant = variant
 
         self.input_model_path = input_model_path
         self.use_model_flag = use_model
 
-        self.it = None
         self.it_transforms = (
             [
                 {"class": RangeTransform, "kwargs": {}},

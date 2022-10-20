@@ -11,8 +11,10 @@ from aydin.util.log.log import lprint
 
 
 class DenoiseRestorationBase(ABC):
-    def __init__(self):
-        pass
+    def __init__(self, variant: str = None):
+        self.variant = variant
+
+        self.it = None
 
     def __repr__(self):
         return f"<{self.__class__.__name__}, variant={self.variant}, self.it={self.it}>"
