@@ -49,6 +49,9 @@ class LinearRegressor(RegressorBase):
             lprint(f"mode : {self.mode}")
             lprint(f"alpha: {self.alpha}")
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, mode={self.mode}, max_num_iterations={self.max_num_iterations}>"
+
     def _fit(
         self, x_train, y_train, x_valid=None, y_valid=None, regressor_callback=None
     ):

@@ -87,6 +87,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             {} if calibration_kwargs is None else calibration_kwargs
         )
 
+        self.method = method
         response = importlib.import_module(classic_denoisers.__name__ + '.' + method)
 
         self.calibration_function = response.__getattribute__(
@@ -102,6 +103,9 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         with lsection("Classic image translator"):
             lprint(f"method: {method}")
             lprint(f"main channel: {main_channel}")
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, method={self.method}, max_voxels_for_training={self.max_voxels_for_training}"
 
     def save(self, path: str):
         """Saves a 'all-batteries-included' image translation model at a given path (folder).

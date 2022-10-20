@@ -48,13 +48,11 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             Path to model that is desired to be used for inference.
             By default it is None.
         """
-        super().__init__()
-        self.variant = variant
+        super().__init__(variant=variant)
         self.use_model_flag = use_model
         self.input_model_path = input_model_path
         self.lower_level_args = lower_level_args
 
-        self.it = None
         self.it_transforms = (
             [
                 {"class": RangeTransform, "kwargs": {}},
