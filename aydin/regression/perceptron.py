@@ -73,6 +73,9 @@ class PerceptronRegressor(RegressorBase):
         with lsection("NN Regressor"):
             lprint("with no arguments")  # TODO: fix these logs
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, max_epochs={self.max_epochs}, lr={self.learning_rate}, depth={self.depth}>"
+
     def _fit(
         self, x_train, y_train, x_valid=None, y_valid=None, regressor_callback=None
     ):

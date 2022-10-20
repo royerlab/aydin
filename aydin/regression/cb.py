@@ -164,6 +164,9 @@ class CBRegressor(RegressorBase):
             lprint(f"patience: {self.early_stopping_rounds}")
             lprint(f"gpu: {self.gpu}")
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}, gpu={self.gpu}>"
+
     def recommended_max_num_datapoints(self) -> int:
         """Recommended maximum number of datapoints
 

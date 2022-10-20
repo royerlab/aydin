@@ -23,6 +23,9 @@ class SupportVectorRegressor(RegressorBase):
         super().__init__()
         self.linear = linear
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, linear={self.linear}>"
+
     def _fit(
         self, x_train, y_train, x_valid=None, y_valid=None, regressor_callback=None
     ):
