@@ -63,8 +63,6 @@ def test_nn_regressor(data):
 
 def with_regressor(data, regressor, min_ssim=0.8):
     image, noisy, x, y = data
-    print(regressor)
-    return
 
     regressor.fit(x, y)
 
