@@ -22,8 +22,10 @@ from aydin.io.utils import (
     get_save_model_path,
     split_image_channels,
 )
-from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_instance, \
-    get_list_of_denoiser_implementations
+from aydin.restoration.denoise.util.denoise_utils import (
+    get_denoiser_class_instance,
+    get_list_of_denoiser_implementations,
+)
 from aydin.util.misc.json import load_any_json
 from aydin.util.log.log import lprint, Log
 from aydin.util.misc.slicing_helper import apply_slicing
@@ -392,7 +394,6 @@ def benchmark_algos(files, **kwargs):
     for denoiser_name in denoiser_names:
         denoiser_class = get_denoiser_class_instance(denoiser_name)
         print(denoiser_name, denoiser_class)
-
 
 
 def handle_files(files, slicing):
