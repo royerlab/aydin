@@ -57,13 +57,11 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         it_transforms :
             Transforms to be applied.
         """
-        super().__init__()
+        super().__init__(variant=variant)
         self.use_model_flag = use_model
         self.input_model_path = input_model_path
         self.lower_level_args = lower_level_args
-        self.variant = variant
 
-        self.it = None
         self.it_transforms = (
             [
                 {"class": RangeTransform, "kwargs": {}},

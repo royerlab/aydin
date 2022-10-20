@@ -49,6 +49,9 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         self.training_method = training_method
         self.training_method_kwargs = training_method_kwargs
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, model={self.model}, training_method={self.training_method}"
+
     def save(self, path: str):
         """
         Saves a 'all-batteries-included' image translation model at a given path (folder).

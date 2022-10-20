@@ -124,6 +124,9 @@ class LGBMRegressor(RegressorBase):
             lprint(f"patience: {self.early_stopping_rounds}")
             lprint(f"inference_mode: {self.inference_mode}")
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}>"
+
     def _get_params(self, num_samples, dtype=numpy.float32):
         # min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
 

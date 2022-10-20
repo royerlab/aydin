@@ -62,6 +62,9 @@ class RandomForestRegressor(LGBMRegressor):
         with lsection("Random Forest Regressor"):
             lprint("with no arguments")  # TODO: fix these logs
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}>"
+
     def _get_params(self, num_samples, dtype=numpy.float32):
         params = super()._get_params(num_samples, dtype)
         params["boosting_type"] = "rf"
