@@ -14,6 +14,9 @@ class DenoiseRestorationBase(ABC):
     def __init__(self):
         pass
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, variant={self.variant}, self.it={self.it}>"
+
     @property
     @abstractmethod
     def configurable_arguments(self):
