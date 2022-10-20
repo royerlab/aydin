@@ -151,6 +151,9 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         with lsection("FGR image translator"):
             lprint(f"balance training data: {self.balance_training_data}")
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}, feature_generator={self.feature_generator}, regressor={self.regressor}, balance_training_data={self.balance_training_data}"
+
     def save(self, path: str):
         """Saves a 'all-batteries-included' image translation model at a given path (folder).
 
