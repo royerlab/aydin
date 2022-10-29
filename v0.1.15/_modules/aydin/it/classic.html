@@ -193,6 +193,7 @@
             <span class="p">{}</span> <span class="k">if</span> <span class="n">calibration_kwargs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">calibration_kwargs</span>
         <span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">classic_denoisers</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">method</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">calibration_function</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span>
@@ -208,6 +209,9 @@
         <span class="k">with</span> <span class="n">lsection</span><span class="p">(</span><span class="s2">&quot;Classic image translator&quot;</span><span class="p">):</span>
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;method: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">lprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;main channel: </span><span class="si">{</span><span class="n">main_channel</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">, method=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">, max_voxels_for_training=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_voxels_for_training</span><span class="si">}</span><span class="s2">&quot;</span>
 
 <div class="viewcode-block" id="ImageDenoiserClassic.save"><a class="viewcode-back" href="../../../api/image_translators/classic.html#aydin.it.classic.ImageDenoiserClassic.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Saves a &#39;all-batteries-included&#39; image translation model at a given path (folder).</span>

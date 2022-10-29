@@ -11,11 +11,11 @@ a number of self-supervised, auto-tuned, and unsupervised image denoising algori
 Aydin handles from the get-go n-dimensional array-structured images with an arbitrary number
 of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal dimensions.
 
-It comes with `Aydin Studio` a `graphical user interface <https://royerlab.github.io/aydin/tutorials/gui_tutorials.html>`_
+It comes with `Aydin Studio` a `graphical user interface <tutorials/gui_tutorials.html>`_
 to easily experiment with all the different algorithms and parameters available,
-a `command line interface <https://royerlab.github.io/aydin/tutorials/cli_tutorials.html>`_
+a `command line interface <tutorials/cli_tutorials.html>`_
 to run large jobs offline, and an
-`API <https://royerlab.github.io/aydin/api/introduction.html>`_ for
+`API <api/introduction.html>`_ for
 custom coding and integration into other packages.
 
 Our source code repository can be found `on GitHub <https://github.com/royerlab/aydin>`_. You can
@@ -64,11 +64,11 @@ patience.
 
 Documentation
 ~~~~~~~~~~~~~~
-Tutorials can be found `here <https://royerlab.github.io/aydin/tutorials/tutorials_home.html>`_
+Tutorials can be found `here <tutorials/tutorials_home.html>`_
 for an exhaustive tour of features and parameters for both
 the graphical interface (Aydin Studio), command line interface (CLI), and
 Python programming interface (API). To better understand how to tune parameters
-for a given image, please check our `use cases <https://royerlab.github.io/aydin/use_cases/introduction.html>`_
+for a given image, please check our `use cases <use_cases/introduction.html>`_
 where we go through.
 
 How to cite?

@@ -261,27 +261,6 @@ care. Works with non-axis aligned periodic patterns.(advanced)</p>
 </section>
 <section id="rangetransform">
 <h2>RangeTransform<a class="headerlink" href="#rangetransform" title="Permalink to this headline"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="aydin.it.transforms.range.RangeTransform">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.transforms.range.</span></span><span class="sig-name descname"><span class="pre">RangeTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'minmax'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">percentile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_float_datatype</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priority</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/aydin/it/transforms/range.html#RangeTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.transforms.range.RangeTransform" title="Permalink to this definition"></a></dt>
-<dd><p>Range Normalisation</p>
-<p>Images come in all sorts of formats, and pixels can be represented as 8,
-16, 32 bit integers as well as 16, 32, 64 bit floats. More crucially,
-the actual range of values can vary potentially causing difficulties for
-denoising algorithms. For these reasons and more, it is almost always
-recommended to normalise images to a range within [0, 1] and represented
-as 32 bit floats (sufficient for most cases and ideal for aydin).
-Finally, there are two different normalisation modes. The first ‘minmax’
-simply finds the min and max values in the image and uses that to rescale
-to [0, 1]. However, there are sometimes outlier values that are isolated
-and completely out of context which would skew the normalisation.
-Therefore, we also have a ‘percentile’ mode that uses percentiles to
-determine the range – typically 1% for min value and 99% for max value.
-Optionally, the image can be left as float after denormalisation,
-and values can be clipped to the range during both normalisation and
-denormalisation.</p>
-</dd></dl>
-
 </section>
 <section id="saltandpeppertransform">
 <h2>SaltAndPepperTransform<a class="headerlink" href="#saltandpeppertransform" title="Permalink to this headline"></a></h2>

@@ -154,13 +154,11 @@
 <span class="sd">            Path to model that is desired to be used for inference.</span>
 <span class="sd">            By default it is None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">variant</span> <span class="o">=</span> <span class="n">variant</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">variant</span><span class="o">=</span><span class="n">variant</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">use_model_flag</span> <span class="o">=</span> <span class="n">use_model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_model_path</span> <span class="o">=</span> <span class="n">input_model_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lower_level_args</span> <span class="o">=</span> <span class="n">lower_level_args</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">it</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">it_transforms</span> <span class="o">=</span> <span class="p">(</span>
             <span class="p">[</span>
                 <span class="p">{</span><span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="n">RangeTransform</span><span class="p">,</span> <span class="s2">&quot;kwargs&quot;</span><span class="p">:</span> <span class="p">{}},</span>

@@ -112,66 +112,6 @@
              
   <section id="jinetmodel">
 <h1>JINetModel<a class="headerlink" href="#jinetmodel" title="Permalink to this headline"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="aydin.nn.models.jinet.JINetModel">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.nn.models.jinet.</span></span><span class="sig-name descname"><span class="pre">JINetModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/jinet.html#JINetModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.jinet.JINetModel" title="Permalink to this definition"></a></dt>
-<dd><p>The JINet model is a hybrid CNN-perceptron model that leverages dilated
-convolutions to incorporate a built-in ‘blind-spot’ as required for N2S
-denoising. Supports both 2D and 3D images.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="aydin.nn.models.jinet.JINetModel.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_num_patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img_val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_patches_for_validation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_valid_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/jinet.html#JINetModel.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.jinet.JINetModel.fit" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>input_image</strong></dt><dd></dd>
-<dt><strong>target_image</strong></dt><dd></dd>
-<dt><strong>batch_size</strong></dt><dd></dd>
-<dt><strong>callbacks</strong></dt><dd></dd>
-<dt><strong>verbose</strong></dt><dd></dd>
-<dt><strong>max_epochs</strong></dt><dd></dd>
-<dt><strong>total_num_patches</strong></dt><dd></dd>
-<dt><strong>img_val</strong></dt><dd></dd>
-<dt><strong>create_patches_for_validation</strong></dt><dd></dd>
-<dt><strong>train_valid_ratio</strong></dt><dd></dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>loss_history</dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aydin.nn.models.jinet.JINetModel.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_queue_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_multiprocessing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/jinet.html#JINetModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.jinet.JINetModel.predict" title="Permalink to this definition"></a></dt>
-<dd><p>Overwritten model predict method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>x</strong></dt><dd></dd>
-<dt><strong>batch_size</strong></dt><dd></dd>
-<dt><strong>verbose</strong></dt><dd></dd>
-<dt><strong>steps</strong></dt><dd></dd>
-<dt><strong>callbacks</strong></dt><dd></dd>
-<dt><strong>max_queue_size</strong></dt><dd></dd>
-<dt><strong>workers</strong></dt><dd></dd>
-<dt><strong>use_multiprocessing</strong></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aydin.nn.models.jinet.JINetModel.size">
-<span class="sig-name descname"><span class="pre">size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/nn/models/jinet.html#JINetModel.size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.nn.models.jinet.JINetModel.size" title="Permalink to this definition"></a></dt>
-<dd><p>Returns size of the model in bytes</p>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 
 

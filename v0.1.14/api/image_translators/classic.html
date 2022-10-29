@@ -136,85 +136,6 @@
 <h1>ImageDenoiserClassic - Classic Image Denoiser<a class="headerlink" href="#imagedenoiserclassic-classic-image-denoiser" title="Permalink to this headline"></a></h1>
 <section id="imagedenoiserclassic">
 <h2>ImageDenoiserClassic<a class="headerlink" href="#imagedenoiserclassic" title="Permalink to this headline"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">aydin.it.classic.</span></span><span class="sig-name descname"><span class="pre">ImageDenoiserClassic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'butterworth'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_channel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_voxels_for_training</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calibration_kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blind_spots</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tile_min_margin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tile_max_margin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_memory_usage_ratio</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tiling_overhead</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/it/classic.html#ImageDenoiserClassic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic" title="Permalink to this definition"></a></dt>
-<dd><p>Classic Image Denoiser</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.add_transform">
-<span class="sig-name descname"><span class="pre">add_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aydin.it.transforms.base.ImageTransformBase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.add_transform" title="Permalink to this definition"></a></dt>
-<dd><p>Adds the given transform to the self.transforms_list</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>transform</strong><span class="classifier">ImageTransformBase</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.clear_transforms">
-<span class="sig-name descname"><span class="pre">clear_transforms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.clear_transforms" title="Permalink to this definition"></a></dt>
-<dd><p>Clears the transforms list</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.load">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.load" title="Permalink to this definition"></a></dt>
-<dd><p>Returns an ‘all-batteries-included’ image translation model at a given path (folder).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>path to load from.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.parse_axes_args">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">parse_axes_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_axes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chan_axes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.parse_axes_args" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>batch_axes</strong><span class="classifier">Union[List[int], List[bool]]</span></dt><dd></dd>
-<dt><strong>chan_axes</strong><span class="classifier">Union[List[int], List[bool]]</span></dt><dd></dd>
-<dt><strong>ndim</strong><span class="classifier">int</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.save">
-<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/it/classic.html#ImageDenoiserClassic.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.save" title="Permalink to this definition"></a></dt>
-<dd><p>Saves a ‘all-batteries-included’ image translation model at a given path (folder).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>path</strong><span class="classifier">str</span></dt><dd><p>path to save to</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>frozen</dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="aydin.it.classic.ImageDenoiserClassic.train">
-<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_image</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_valid_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jinv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#aydin.it.classic.ImageDenoiserClassic.train" title="Permalink to this definition"></a></dt>
-<dd><p>Train to translate a given input image to a given output image.
-This has a lot of the machinery for batching and more…</p>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="procedural-calibration-and-denoising-api">
 <h2>Procedural calibration and denoising API:<a class="headerlink" href="#procedural-calibration-and-denoising-api" title="Permalink to this headline"></a></h2>
@@ -428,46 +349,6 @@ starting the whole parallelization machinery.</p>
 </section>
 <section id="dictionary-fixed">
 <h3>Dictionary fixed<a class="headerlink" href="#dictionary-fixed" title="Permalink to this headline"></a></h3>
-<blockquote>
-<div><dl class="py function">
-<dt class="sig sig-object py" id="aydin.it.classic_denoisers.dictionary_fixed.denoise_dictionary_fixed">
-<span class="sig-prename descclassname"><span class="pre">aydin.it.classic_denoisers.dictionary_fixed.</span></span><span class="sig-name descname"><span class="pre">denoise_dictionary_fixed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy._typing._array_like._SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy._typing._nested_sequence._NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy._typing._array_like._SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.dtype</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy._typing._nested_sequence._NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">complex</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coding_mode</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'omp'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sparsity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_core</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/aydin/it/classic_denoisers/dictionary_fixed.html#denoise_dictionary_fixed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#aydin.it.classic_denoisers.dictionary_fixed.denoise_dictionary_fixed" title="Permalink to this definition"></a></dt>
-<dd><p>Denoises the given image using sparse-coding over a fixed
-dictionary of nD image patches. The dictionary learning and
-patch sparse coding uses scikit-learn’s Batch-OMP implementation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>image: ArrayLike</strong></dt><dd><p>nD image to be denoised</p>
-</dd>
-<dt><strong>dictionary: ArrayLike</strong></dt><dd><p>Dictionary to use for denosing image via sparse coding.
-By default (None) a fixed dictionary is used.</p>
-</dd>
-<dt><strong>coding_mode: str</strong></dt><dd><p>Type of sparse coding, can be:  ‘lasso_lars’, ‘lasso_cd’, ‘lars’, ‘omp’,
-or ‘threshold’</p>
-</dd>
-<dt><strong>sparsity: int</strong></dt><dd><p>How many atoms are used to represent each patch after denoising.</p>
-</dd>
-<dt><strong>gamma: float</strong></dt><dd><p>How much the periphery of teh patches contributes to the final denoised
-image. Larger gamma means that we keep more of the central pixels of the
-patches, smaller values lead to a more uniform contribution.
-A value of 1 corresponds to the default blackman window.</p>
-</dd>
-<dt><strong>multi_core: bool</strong></dt><dd><p>By default we use as many cores as possible, in some cases, for small
-(test) images, it might be faster to run on a single core instead of
-starting the whole parallelization machinery.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>Denoised image</dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-</div></blockquote>
 </section>
 <section id="dictionary-learned">
 <h3>Dictionary learned<a class="headerlink" href="#dictionary-learned" title="Permalink to this headline"></a></h3>

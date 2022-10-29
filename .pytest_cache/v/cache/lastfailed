@@ -1,0 +1,5 @@
+{
+  "aydin/analysis/test/test_dimension_analysis.py::test_dimension_analysis_huang": true,
+  "aydin/it/classic_denoisers/test/test_wavelet.py::test_wavelet": true,
+  "aydin/regression/test/test_regressors.py::test_nn_regressor": true
+}
