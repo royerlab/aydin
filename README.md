@@ -24,7 +24,7 @@ a [command line interface] to run large jobs on the terminal possibly on powerfu
 and an [API] for custom coding and integration into your scripts and applications.
 More details and exhaustive explanations can be found in Aydin's [documentation](https://royerlab.github.io/aydin/).
 
-And, of course, a simplified [napari](napari.org) plugin is in the works! 
+And, of course, a simplified [napari](https://napari.org) plugin is in the works! 
 Notebooks for running on Collab are also planned. 
 The project is commercial-use-friendly if you specify pyside as your GUI backend.
 
