@@ -1,4 +1,5 @@
 import ast
+import csv
 import os
 import shutil
 import sys
@@ -12,7 +13,6 @@ from skimage.metrics import (
     peak_signal_noise_ratio,
     structural_similarity,
 )
-from torch.nn import MSELoss
 
 from aydin.gui.gui import run
 from aydin.io.datasets import normalise
@@ -389,27 +389,52 @@ def benchmark_algos(files, **kwargs):
     kwargs : dict
 
     """
-    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
+    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])  # Handle files
 
-    denoiser_names = get_list_of_denoiser_implementations()[0]
+    denoiser_names = get_list_of_denoiser_implementations()[0]  # Get a list of available denoisers
 
-    loss_function = MSELoss()
+    loss_function = mean_squared_error  # Define the loss function
+    results = {}
 
+    # Iterate over the input images
     for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
-        get_mask = RandomMaskedDataset(image_array).get_mask
+        results["filename"] = []
+        get_mask = RandomMaskedDataset(image_array).get_mask  # Create a Dataset object to get random masks
 
+        # Iterate over the available denoisers
         for denoiser_name in denoiser_names:
-            denoiser_instance = get_denoiser_class_instance(denoiser_name)
+            # Get the specific restoration instance with given denoiser variant
+            denoiser_instance = get_denoiser_class_instance(variant=denoiser_name)
 
+            # Train the created denoiser
+            denoiser_instance.train(
+                image_array,
+                batch_axes=metadata.batch_axes,
+                chan_axes=metadata.channel_axes,
+            )
+
+            # Infer on the trained denoiser
             denoised = denoiser_instance.denoise(
                 image_array,
                 batch_axes=metadata.batch_axes,
                 chan_axes=metadata.channel_axes,
             )
 
-            mask = get_mask()
+            # Get a new random mask with given image shape
+            mask = get_mask().to("cpu").detach().numpy()
+
+            print(filename, denoiser_name, image_array.shape, denoised.shape, mask.shape)
             self_supervised_loss = loss_function(denoised * mask, image_array * mask)
+            results["filename"].append(self_supervised_loss)
             lprint(f"{filename}, {denoiser_name}, loss: {self_supervised_loss}")
+
+    print(results)
+
+    # Write the results into a csv file
+    with open('benchmark.csv', 'w') as file:
+        w = csv.DictWriter(file, results.keys())
+        w.writeheader()
+        w.writerow(results)
 
 
 def handle_files(files, slicing):
