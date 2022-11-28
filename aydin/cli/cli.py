@@ -391,10 +391,17 @@ def benchmark_algos(files, **kwargs):
 
     denoiser_names = get_list_of_denoiser_implementations()[0]
 
-    # for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
-    for denoiser_name in denoiser_names:
-        denoiser_class = get_denoiser_class_instance(denoiser_name)
-        print(denoiser_name, denoiser_class)
+    for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
+        for denoiser_name in denoiser_names:
+            denoiser_instance = get_denoiser_class_instance(denoiser_name)
+
+            denoised = denoiser_instance.denoise(
+                image_array,
+                batch_axes=metadata.batch_axes,
+                chan_axes=metadata.channel_axes,
+            )
+
+            self_supervised_loss = calculate_loss()
 
 
 def handle_files(files, slicing):
