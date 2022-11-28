@@ -6,18 +6,25 @@
 [![DOI](https://zenodo.org/badge/188953977.svg)](https://zenodo.org/badge/latestdoi/188953977)
 [![Downloads](https://pepy.tech/badge/aydin)](https://pepy.tech/project/aydin)
 
+
+[graphical user interface]: https://royerlab.github.io/aydin/v0.1.15/tutorials/gui_tutorials.html
+[command line interface]: https://royerlab.github.io/aydin/v0.1.15/tutorials/cli_tutorials.html
+[API]: https://royerlab.github.io/aydin/v0.1.15/tutorials/api_tutorials.html
+[use cases]: https://royerlab.github.io/aydin/v0.1.15/use_cases/introduction.html
+[install]: https://royerlab.github.io/aydin/v0.1.15/getting_started/install.html
+
 *Aydin* is a user-friendly, feature-rich, and fast **image denoising tool** that provides
 a number of **self-supervised, auto-tuned, and unsupervised** image denoising algorithms.
 *Aydin* handles from the get-go n-dimensional array-structured images with an arbitrary number
 of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal dimensions.
 
-It comes with *Aydin Studio* a [graphical user interface](https://royerlab.github.io/aydin/tutorials/gui_tutorials.html)
+It comes with *Aydin Studio* a [graphical user interface][graphical user interface]
 to easily experiment with all the different algorithms and parameters available,
-a [command line interface](https://royerlab.github.io/aydin/tutorials/cli_tutorials.html) to run large jobs on the terminal possibly on powerfull remote machines, 
-and an [API](https://royerlab.github.io/aydin/tutorials/api_tutorials.html) for custom coding and integration into your scripts and applications.
+a [command line interface] to run large jobs on the terminal possibly on powerfull remote machines, 
+and an [API] for custom coding and integration into your scripts and applications.
 More details and exhaustive explanations can be found in Aydin's [documentation](https://royerlab.github.io/aydin/).
 
-And, of course, a simplified [napari](napari.org) plugin is in the works! 
+And, of course, a simplified [napari](https://napari.org) plugin is in the works! 
 Notebooks for running on Collab are also planned. 
 The project is commercial-use-friendly if you specify pyside as your GUI backend.
 
@@ -34,7 +41,7 @@ from the few parameters of a classical algorithm to the millions of weights of a
 network. We leverage and extend these ideas in *Aydin* to provide a variety of auto-tuned 
 and trained high-quality image denoisers. What this means is that for example, we can discover automatically 
 the optimal parameters for non-local-means (NLM) denoising, or the best cut-off frequencies for a low-pass denoiser. 
-These parameters are difficult to determine 'by-hand' but when auto-tuned we show (see [use-cases](https://royerlab.github.io/aydin/use_cases/introduction.html#))
+These parameters are difficult to determine 'by-hand' but when auto-tuned we show (see [use-cases][use cases])
 that you can get remarkable results even with simple 'classic' denoisers, and even be competitive against more complex and slower
 approaches such as deep-learning based denoisers that can also be prone to hallucination and 'copy-paste' effects. 
 Importantly, our experience denoising many different kinds of images has shown that tehre is not a single 'silver-bullet' 
@@ -69,7 +76,7 @@ Some methods actually do combine multiple ideas and so the classification above 
 We recommend trying first a good baseline denoiser such as the *Butterworth denoiser*. 
 If unsatisfied with the result, and you have a powerful computer with a recent NVIDIA
 graphics card, then we recommend you try the Noise2Self-FGR-cb denoiser. 
-For detailed use-cases check [here](https://royerlab.github.io/aydin/use_cases/introduction.html#).  
+For detailed use-cases check [here][use cases].  
 
 We regularly come up with new approaches and ideas, there is just not enough time to write papers about all these ideas.
 This means that the best 'publication' for some of these novel algorithms is this repo itself, and so please be so kind as to
@@ -94,7 +101,7 @@ Download it for your operating system here:
 
 The latest releases and standalone executables can be found [here](https://github.com/royerlab/aydin/releases) 
 and detailed installation instructions of *Aydin Studio* for all three operating systems can be found 
-[here](https://royerlab.github.io/aydin/getting_started/install.html).
+[here][install].
 
 
 ## Installation of *Aydin* in Conda:
