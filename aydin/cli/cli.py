@@ -378,7 +378,8 @@ def fsc(files, **kwargs):
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 def benchmark_algos(files, **kwargs):
-    """aydin hyperstack command
+    """aydin command to benchmark different algorithms
+    against a given image. 
 
     Parameters
     ----------
