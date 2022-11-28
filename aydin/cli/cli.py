@@ -398,7 +398,7 @@ def benchmark_algos(files, **kwargs):
 
     # Iterate over the input images
     for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
-        results["filename"] = []
+        results[filename] = []
         get_mask = RandomMaskedDataset(image_array).get_mask  # Create a Dataset object to get random masks
 
         # Iterate over the available denoisers
