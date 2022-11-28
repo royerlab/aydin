@@ -63,7 +63,7 @@ def get_denoiser_class_instance(variant, lower_level_args=None, it_transforms=No
     return denoiser_class(
         variant=implementation_name,
         lower_level_args=lower_level_args,
-        it_transforms=it_transforms
+        it_transforms=it_transforms,
     )
 
 

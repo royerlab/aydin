@@ -381,7 +381,7 @@ def fsc(files, **kwargs):
 @click.option('-s', '--slicing', default='', type=str)
 def benchmark_algos(files, **kwargs):
     """aydin command to benchmark different algorithms
-    against a given image. 
+    against a given image.
 
     Parameters
     ----------
@@ -389,9 +389,13 @@ def benchmark_algos(files, **kwargs):
     kwargs : dict
 
     """
-    filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])  # Handle files
+    filenames, image_arrays, metadatas = handle_files(
+        files, kwargs['slicing']
+    )  # Handle files
 
-    denoiser_names = get_list_of_denoiser_implementations()[0]  # Get a list of available denoisers
+    denoiser_names = get_list_of_denoiser_implementations()[
+        0
+    ]  # Get a list of available denoisers
 
     loss_function = mean_squared_error  # Define the loss function
     results = {}
@@ -399,7 +403,9 @@ def benchmark_algos(files, **kwargs):
     # Iterate over the input images
     for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
         results[filename] = []
-        get_mask = RandomMaskedDataset(image_array).get_mask  # Create a Dataset object to get random masks
+        get_mask = RandomMaskedDataset(
+            image_array
+        ).get_mask  # Create a Dataset object to get random masks
 
         # Iterate over the available denoisers
         for denoiser_name in denoiser_names:
@@ -423,7 +429,9 @@ def benchmark_algos(files, **kwargs):
             # Get a new random mask with given image shape
             mask = get_mask().to("cpu").detach().numpy()
 
-            print(filename, denoiser_name, image_array.shape, denoised.shape, mask.shape)
+            print(
+                filename, denoiser_name, image_array.shape, denoised.shape, mask.shape
+            )
             self_supervised_loss = loss_function(denoised * mask, image_array * mask)
             results["filename"].append(self_supervised_loss)
             lprint(f"{filename}, {denoiser_name}, loss: {self_supervised_loss}")
