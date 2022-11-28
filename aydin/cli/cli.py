@@ -433,7 +433,7 @@ def benchmark_algos(files, **kwargs):
                 filename, denoiser_name, image_array.shape, denoised.shape, mask.shape
             )
             self_supervised_loss = loss_function(denoised * mask, image_array * mask)
-            results["filename"].append(self_supervised_loss)
+            results[filename].append(self_supervised_loss)
             lprint(f"{filename}, {denoiser_name}, loss: {self_supervised_loss}")
 
     print(results)
