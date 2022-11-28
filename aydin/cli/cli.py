@@ -12,6 +12,7 @@ from skimage.metrics import (
     peak_signal_noise_ratio,
     structural_similarity,
 )
+from torch.nn import MSELoss
 
 from aydin.gui.gui import run
 from aydin.io.datasets import normalise
@@ -22,6 +23,7 @@ from aydin.io.utils import (
     get_save_model_path,
     split_image_channels,
 )
+from aydin.nn.datasets.random_masked_dataset import RandomMaskedDataset
 from aydin.restoration.denoise.util.denoise_utils import (
     get_denoiser_class_instance,
     get_list_of_denoiser_implementations,
@@ -391,7 +393,11 @@ def benchmark_algos(files, **kwargs):
 
     denoiser_names = get_list_of_denoiser_implementations()[0]
 
+    loss_function = MSELoss()
+
     for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
+        get_mask = RandomMaskedDataset(image_array).get_mask
+
         for denoiser_name in denoiser_names:
             denoiser_instance = get_denoiser_class_instance(denoiser_name)
 
@@ -401,7 +407,9 @@ def benchmark_algos(files, **kwargs):
                 chan_axes=metadata.channel_axes,
             )
 
-            self_supervised_loss = calculate_loss()
+            mask = get_mask()
+            self_supervised_loss = loss_function(denoised * mask, image_array * mask)
+            lprint(f"{filename}, {denoiser_name}, loss: {self_supervised_loss}")
 
 
 def handle_files(files, slicing):
