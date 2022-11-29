@@ -1,4 +1,5 @@
 import ast
+import csv
 import os
 import shutil
 import sys
@@ -22,7 +23,11 @@ from aydin.io.utils import (
     get_save_model_path,
     split_image_channels,
 )
-from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_instance
+from aydin.nn.datasets.random_masked_dataset import RandomMaskedDataset
+from aydin.restoration.denoise.util.denoise_utils import (
+    get_denoiser_class_instance,
+    get_list_of_denoiser_implementations,
+)
 from aydin.util.misc.json import load_any_json
 from aydin.util.log.log import lprint, Log
 from aydin.util.misc.slicing_helper import apply_slicing
@@ -369,6 +374,75 @@ def fsc(files, **kwargs):
     plt.plot(correlations)
     plt.title('image1, image2')
     plt.savefig("fsc.png")
+
+
+@cli.command()
+@click.argument('files', nargs=-1)
+@click.option('-s', '--slicing', default='', type=str)
+def benchmark_algos(files, **kwargs):
+    """aydin command to benchmark different algorithms
+    against a given image.
+
+    Parameters
+    ----------
+    files
+    kwargs : dict
+
+    """
+    filenames, image_arrays, metadatas = handle_files(
+        files, kwargs['slicing']
+    )  # Handle files
+
+    denoiser_names = get_list_of_denoiser_implementations()[
+        0
+    ]  # Get a list of available denoisers
+
+    loss_function = mean_squared_error  # Define the loss function
+    results = {}
+
+    # Iterate over the input images
+    for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
+        results[filename] = []
+        get_mask = RandomMaskedDataset(
+            image_array
+        ).get_mask  # Create a Dataset object to get random masks
+
+        # Iterate over the available denoisers
+        for denoiser_name in denoiser_names:
+            # Get the specific restoration instance with given denoiser variant
+            denoiser_instance = get_denoiser_class_instance(variant=denoiser_name)
+
+            # Train the created denoiser
+            denoiser_instance.train(
+                image_array,
+                batch_axes=metadata.batch_axes,
+                chan_axes=metadata.channel_axes,
+            )
+
+            # Infer on the trained denoiser
+            denoised = denoiser_instance.denoise(
+                image_array,
+                batch_axes=metadata.batch_axes,
+                chan_axes=metadata.channel_axes,
+            )
+
+            # Get a new random mask with given image shape
+            mask = get_mask().to("cpu").detach().numpy()
+
+            print(
+                filename, denoiser_name, image_array.shape, denoised.shape, mask.shape
+            )
+            self_supervised_loss = loss_function(denoised * mask, image_array * mask)
+            results[filename].append(self_supervised_loss)
+            lprint(f"{filename}, {denoiser_name}, loss: {self_supervised_loss}")
+
+    print(results)
+
+    # Write the results into a csv file
+    with open('benchmark.csv', 'w') as file:
+        w = csv.DictWriter(file, results.keys())
+        w.writeheader()
+        w.writerow(results)
 
 
 def handle_files(files, slicing):
