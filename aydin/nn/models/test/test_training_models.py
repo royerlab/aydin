@@ -25,6 +25,7 @@ def test_supervised_2D_n2t():
     )
 
     n2t_train(input_image, lizard_image, model, nb_epochs=2)
+    model.cpu()
     result = model(input_image)
 
     assert result.shape == input_image.shape
