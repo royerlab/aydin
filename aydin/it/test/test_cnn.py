@@ -6,10 +6,14 @@ from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
 
 def test_it_cnn_jinet2D_light():
-    train_and_evaluate_cnn(camera())
+    train_and_evaluate_cnn(camera(), model="jinet")
 
 
-def train_and_evaluate_cnn(input_image):
+def test_it_cnn_unet2d():
+    train_and_evaluate_cnn(camera(), model="unet")
+
+
+def train_and_evaluate_cnn(input_image, model="jinet"):
     """
     Demo for self-supervised denoising using camera image with synthetic noise
     """
@@ -20,7 +24,7 @@ def train_and_evaluate_cnn(input_image):
     image = image[H0 : H0 + image_width, W0 : W0 + image_width]
     noisy = add_noise(image)
 
-    it = ImageTranslatorCNNTorch(model='jinet')
+    it = ImageTranslatorCNNTorch(model=model)
     it.train(noisy, noisy)
     denoised = it.translate(noisy, tile_size=image_width)
 
