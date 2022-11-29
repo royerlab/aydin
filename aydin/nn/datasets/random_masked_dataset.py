@@ -2,12 +2,14 @@ import numpy
 import torch
 from torch.utils.data import Dataset
 
+from aydin.nn.datasets.random_sample_patches import random_sample_patches
+
 
 class RandomMaskedDataset(Dataset):
     def __init__(
         self,
         image,
-        nb_masks=4,
+        patch_size: int = 32,
         pixel_masking_probability: float = 0.3,
     ):
         """
@@ -18,14 +20,20 @@ class RandomMaskedDataset(Dataset):
         """
 
         self.image = torch.tensor(image)
-        self.nb_masks = nb_masks
+        self.patch_size = patch_size
+
+        self.patch_slicing_objects = random_sample_patches(
+            image=image,
+            patch_size=patch_size,
+            nb_patches_per_image=min(image.size / numpy.prod(patch_size), 10240)
+        )
         self.p = pixel_masking_probability
 
     def __len__(self):
-        return self.nb_masks
+        return len(self.patch_slicing_objects)
 
     def get_mask(self):
-        shape = self.image.shape
+        shape = (self.patch_size,) * len(self.image.shape)
 
         mask = torch.rand(shape)
         mask[mask > self.p] = 1
@@ -52,7 +60,7 @@ class RandomMaskedDataset(Dataset):
         return filtered_tensor * mask + tensor * mask_inv
 
     def __getitem__(self, index):
-        original_patch = self.image
+        original_patch = self.image[self.patch_slicing_objects[index]]
         mask = self.get_mask()
         mask_inv = torch.ones(mask.shape) - mask
 
