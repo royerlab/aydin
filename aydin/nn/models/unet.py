@@ -9,7 +9,7 @@ class UNetModel(nn.Module):
     def __init__(
         self,
         spacetime_ndim,
-        nb_unet_levels: int = 4,
+        nb_unet_levels: int = 3,
         nb_filters: int = 8,
         learning_rate=0.01,
         pooling_mode: str = 'max',

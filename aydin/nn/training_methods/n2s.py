@@ -5,7 +5,7 @@ from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
-from aydin.nn.datasets.grid_masked_dataset import GridMaskedDataset
+from aydin.nn.datasets.random_masked_dataset import RandomMaskedDataset
 from aydin.util.torch.device import get_torch_device
 
 
@@ -57,9 +57,9 @@ def n2s_train(
 
     loss_function1 = MSELoss()
 
-    dataset = GridMaskedDataset(input_image)
+    dataset = RandomMaskedDataset(input_image)
     print(f"dataset length: {len(dataset)}")
-    data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
+    data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
 
     model.train()
 
