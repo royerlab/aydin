@@ -27,7 +27,7 @@ class RandomMaskedDataset(Dataset):
         self.patch_slicing_objects = random_patches(
             image=image,
             patch_size=patch_size,
-            nb_patches_per_image=min(image.size / numpy.prod(patch_size), 10240),
+            nb_patches_per_image=min(image.size / numpy.prod(patch_size), 1040),
         )
         self.p = pixel_masking_probability
 

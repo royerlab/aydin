@@ -59,7 +59,7 @@ def n2s_train(
 
     dataset = RandomMaskedDataset(input_image)
     print(f"dataset length: {len(dataset)}")
-    data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
+    data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
 
     model.train()
 
