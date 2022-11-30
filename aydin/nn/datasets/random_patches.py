@@ -3,10 +3,10 @@ from scipy.stats import entropy
 
 
 def random_patches(
-        image,
-        patch_size: int,
-        nb_patches_per_image: int,
-        adoption_rate: float = 0.5,
+    image,
+    patch_size: int,
+    nb_patches_per_image: int,
+    adoption_rate: float = 0.5,
 ):
     """
     This functions returns list of slice objects that crops a part of the image
@@ -65,7 +65,7 @@ def random_patches(
                             x,
                             x + patch_size,
                             1,
-                            )
+                        )
                         for idx, x in enumerate(indices_for_current_patch)
                     ],
                 ]
@@ -87,8 +87,8 @@ def random_patches(
 
         # Filter patches according to adoption_rate
         sorted_slice_objects = sorted_slice_objects[
-                               len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1) :
-                               ]
+            len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1) :
+        ]
 
         # Have to convert each element to a tuple again so they can be passed directly for slicing
         sorted_slice_objects = [tuple(elem) for elem in sorted_slice_objects]
