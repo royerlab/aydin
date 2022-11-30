@@ -2,7 +2,7 @@ import numpy
 from scipy.stats import entropy
 
 
-def random_sample_patches(
+def random_patches(
         image,
         patch_size: int,
         nb_patches_per_image: int,
@@ -44,6 +44,8 @@ def random_sample_patches(
     nb_patches_per_image = min(
         int(nb_patches_per_image / adoption_rate), nb_possible_patches_per_image
     )
+
+    # print(nb_patches_per_image, nb_possible_patches_per_image, possible_positions)
 
     for b in range(image.shape[0]):  # b is a single element across batch dimension
         entropies = []

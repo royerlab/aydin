@@ -18,15 +18,15 @@ def train_and_evaluate_cnn(input_image, model="jinet"):
     Demo for self-supervised denoising using camera image with synthetic noise
     """
     # max_epochs = 30
-    image_width = 100
+    # image_width = 100
     image = normalise(input_image)
-    H0, W0 = (numpy.array(image.shape) - image_width) // 2
-    image = image[H0 : H0 + image_width, W0 : W0 + image_width]
+    # H0, W0 = (numpy.array(image.shape) - image_width) // 2
+    # image = image[H0 : H0 + image_width, W0 : W0 + image_width]
     noisy = add_noise(image)
 
     it = ImageTranslatorCNNTorch(model=model)
     it.train(noisy, noisy)
-    denoised = it.translate(noisy, tile_size=image_width)
+    denoised = it.translate(noisy, tile_size=image.shape[0])
 
     image = numpy.clip(image, 0, 1)
     noisy = numpy.clip(noisy.reshape(image.shape), 0, 1)
