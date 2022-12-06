@@ -78,7 +78,7 @@ class RandomMaskedDataset(Dataset):
         filtered_tensor = conv_method(
             tensor,
             kernel,
-            padding=1,  # stride=1,
+            padding=1,
         )
 
         return filtered_tensor * mask + tensor * mask_inv
