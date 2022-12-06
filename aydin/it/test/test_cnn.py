@@ -9,6 +9,10 @@ def test_it_cnn_jinet2D_light():
     train_and_evaluate_cnn(newyork(), model="jinet")
 
 
+def test_it_cnn_jinet3D_light():
+    train_and_evaluate_cnn(examples_single.myers_tribolium.get_array(), model="jinet")
+
+
 def test_it_cnn_unet2d():
     train_and_evaluate_cnn(newyork(), model="unet")
 
