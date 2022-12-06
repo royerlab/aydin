@@ -23,7 +23,10 @@ def test_it_cnn_unet2d():
 
 
 def test_it_cnn_unet3d():
-    train_and_evaluate_cnn(examples_single.myers_tribolium.get_array(), model="unet")
+    train_and_evaluate_cnn(
+        examples_single.janelia_flybrain.get_array()[:128, 1:2, :128, :128],
+        model="unet",
+    )
 
 
 def train_and_evaluate_cnn(input_image, model="jinet"):
