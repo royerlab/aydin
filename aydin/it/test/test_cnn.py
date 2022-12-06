@@ -1,16 +1,20 @@
 import numpy
 
 from aydin.analysis.image_metrics import calculate_print_psnr_ssim
-from aydin.io.datasets import camera, add_noise, normalise
+from aydin.io.datasets import camera, add_noise, normalise, lizard, newyork, examples_single
 from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
 
 def test_it_cnn_jinet2D_light():
-    train_and_evaluate_cnn(camera(), model="jinet")
+    train_and_evaluate_cnn(newyork(), model="jinet")
 
 
 def test_it_cnn_unet2d():
-    train_and_evaluate_cnn(camera(), model="unet")
+    train_and_evaluate_cnn(newyork(), model="unet")
+
+
+def test_it_cnn_unet3d():
+    train_and_evaluate_cnn(examples_single.myers_tribolium.get_array(), model="unet")
 
 
 def train_and_evaluate_cnn(input_image, model="jinet"):
