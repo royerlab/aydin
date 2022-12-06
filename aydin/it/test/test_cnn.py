@@ -1,7 +1,12 @@
 import numpy
 
 from aydin.analysis.image_metrics import calculate_print_psnr_ssim
-from aydin.io.datasets import camera, add_noise, normalise, lizard, newyork, examples_single
+from aydin.io.datasets import (
+    add_noise,
+    normalise,
+    newyork,
+    examples_single,
+)
 from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
 

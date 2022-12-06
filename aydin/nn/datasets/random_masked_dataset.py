@@ -55,11 +55,13 @@ class RandomMaskedDataset(Dataset):
         if len(self.image.shape) == 4:
             kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], [0.5, 1.0, 0.5]])
         elif len(self.image.shape) == 5:
-            kernel = numpy.array([
-                [[0.5, 0.5, 0.5], [0.5, 1.0, 0.5], [0.5, 0.5, 0.5]],
-                [[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], [0.5, 1.0, 0.5]],
-                [[0.5, 0.5, 0.5], [0.5, 1.0, 0.5], [0.5, 0.5, 0.5]],
-            ])
+            kernel = numpy.array(
+                [
+                    [[0.5, 0.5, 0.5], [0.5, 1.0, 0.5], [0.5, 0.5, 0.5]],
+                    [[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], [0.5, 1.0, 0.5]],
+                    [[0.5, 0.5, 0.5], [0.5, 1.0, 0.5], [0.5, 0.5, 0.5]],
+                ]
+            )
         else:
             raise ValueError("Image can only have 2 or 3 spacetime dimensions...")
 
@@ -67,10 +69,16 @@ class RandomMaskedDataset(Dataset):
         kernel = torch.Tensor(kernel).to(device)
         kernel = kernel / kernel.sum()
 
-        conv_method = torch.nn.functional.conv2d if len(self.image.shape) == 4 else torch.nn.functional.conv3d
+        conv_method = (
+            torch.nn.functional.conv2d
+            if len(self.image.shape) == 4
+            else torch.nn.functional.conv3d
+        )
 
         filtered_tensor = conv_method(
-            tensor, kernel, padding=1,  # stride=1,
+            tensor,
+            kernel,
+            padding=1,  # stride=1,
         )
 
         return filtered_tensor * mask + tensor * mask_inv
