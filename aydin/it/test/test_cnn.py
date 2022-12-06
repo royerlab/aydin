@@ -15,7 +15,7 @@ def test_it_cnn_jinet2D_light():
 
 
 def test_it_cnn_jinet3D_light():
-    train_and_evaluate_cnn(examples_single.myers_tribolium.get_array(), model="jinet")
+    train_and_evaluate_cnn(examples_single.myers_tribolium.get_array()[:32, :32, :32], model="jinet")
 
 
 def test_it_cnn_unet2d():
@@ -24,7 +24,7 @@ def test_it_cnn_unet2d():
 
 def test_it_cnn_unet3d():
     train_and_evaluate_cnn(
-        examples_single.janelia_flybrain.get_array()[:128, 1:2, :128, :128],
+        examples_single.janelia_flybrain.get_array()[:32, 1:2, :32, :32],
         model="unet",
     )
 
@@ -44,9 +44,9 @@ def train_and_evaluate_cnn(input_image, model="jinet"):
     it.train(noisy, noisy)
     denoised = it.translate(noisy, tile_size=image.shape[0])
 
-    image = numpy.clip(image, 0, 1)
-    noisy = numpy.clip(noisy.reshape(image.shape), 0, 1)
-    denoised = numpy.clip(denoised, 0, 1)
+    image = numpy.squeeze(numpy.clip(image, 0, 1))
+    noisy = numpy.squeeze(numpy.clip(noisy.reshape(image.shape), 0, 1))
+    denoised = numpy.squeeze(numpy.clip(denoised, 0, 1))
 
     psnr_noisy, psnr_denoised, ssim_noisy, ssim_denoised = calculate_print_psnr_ssim(
         image, noisy, denoised
