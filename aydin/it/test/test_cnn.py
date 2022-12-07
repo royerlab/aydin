@@ -21,7 +21,7 @@ def test_it_cnn_jinet3D_light():
 
 
 def test_it_cnn_unet2d():
-    train_and_evaluate_cnn(camera(), model="unet")
+    train_and_evaluate_cnn(camera(), model="residual_unet")
 
 
 def test_it_cnn_unet3d():
