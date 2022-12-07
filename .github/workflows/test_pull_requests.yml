@@ -51,7 +51,7 @@ jobs:
             pip install flake8==4.0.1
         - name: Check code with Flake8
           run: |
-            flake8 --ignore E501,E203,E731,E741,W503 aydin
+            flake8 --ignore E501,E203,W503 aydin
 
   test-linux39:
       needs: [style, lint]

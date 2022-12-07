@@ -146,8 +146,8 @@ def remove_margin_slice(array_shape, slice_with_margin, slice_without_margin):
 
     """
     slice_tuple = tuple(
-        slice(max(0, v.start - u.start), min(v.stop - u.start, l), 1)
-        for l, u, v in zip(array_shape, slice_with_margin, slice_without_margin)
+        slice(max(0, v.start - u.start), min(v.stop - u.start, a), 1)
+        for a, u, v in zip(array_shape, slice_with_margin, slice_without_margin)
     )
     return slice_tuple
 
