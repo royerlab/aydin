@@ -18,11 +18,15 @@ def pytest_addoption(parser):
     parser.addoption(
         "--rungpu", action="store_true", default=False, help="run gpu tests"
     )
+    parser.addoption(
+        "--rununstable", action="store_true", default=False, help="run unstable tests"
+    )
 
 
 def pytest_configure(config):
     config.addinivalue_line("markers", "heavy: mark test as heavy to run")
     config.addinivalue_line("markers", "gpu: mark test as gpu to run")
+    config.addinivalue_line("markers", "unstable: mark test as unstable to run")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -43,3 +47,9 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "gpu" in item.keywords:
                 item.add_marker(skip_gpu)
+
+    if not config.getoption("--rununstable"):
+        skip_unstable = pytest.mark.skip(reason="need --rununstable option to run")
+        for item in items:
+            if "unstable" in item.keywords:
+                item.add_marker(skip_unstable)
