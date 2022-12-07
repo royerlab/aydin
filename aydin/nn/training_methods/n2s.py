@@ -16,7 +16,7 @@ def n2s_train(
     nb_epochs: int = 128,
     lr: float = 0.001,
     # patch_size: int = 32,
-    patience: int = 128,
+    patience: int = 4,
     verbose: bool = True,
 ):
     """
@@ -39,7 +39,7 @@ def n2s_train(
     model = model.to(device)
     print(f"device {device}")
 
-    optimizer = AdamW(model.parameters(), lr=lr)
+    optimizer = AdamW(model.parameters(), lr=lr, weight_decay=0)
 
     # optimizer = ESAdam(
     #     chain(model.parameters()),
