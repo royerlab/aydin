@@ -123,8 +123,8 @@ def dimension_analysis_on_image(
         # This is the index for the top n (n=min_spatio_temporal) most correlated dimensions:
 
         threshold = 1 - epsilon
-        for _ in range(len(sorted_values)-1):
-            if 2*sorted_values[_] < sorted_values[_+1]:
+        for _ in range(len(sorted_values) - 1):
+            if 2 * sorted_values[_] < sorted_values[_ + 1]:
                 threshold = sorted_values[_]
                 break
 
