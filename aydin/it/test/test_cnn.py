@@ -6,12 +6,13 @@ from aydin.io.datasets import (
     normalise,
     newyork,
     examples_single,
+    camera,
 )
 from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
 
 def test_it_cnn_jinet2D_light():
-    train_and_evaluate_cnn(newyork(), model="jinet")
+    train_and_evaluate_cnn(camera(), model="jinet")
 
 
 def test_it_cnn_jinet3D_light():
@@ -21,7 +22,7 @@ def test_it_cnn_jinet3D_light():
 
 
 def test_it_cnn_unet2d():
-    train_and_evaluate_cnn(newyork(), model="unet")
+    train_and_evaluate_cnn(camera(), model="unet")
 
 
 def test_it_cnn_unet3d():
