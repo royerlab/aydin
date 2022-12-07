@@ -13,13 +13,13 @@ def dimension_analysis_on_image(
     epsilon: float = 0.05,
     min_spatio_temporal: int = 2,
     max_spatio_temporal: int = 4,
-    max_channels_per_axis: int = 0,
+    max_channels_per_axis: int = 4,
     crop_size_in_voxels: Optional[int] = 512000,
     crop_timeout_in_seconds: float = 5,
     max_num_evaluations: Optional[int] = 21,
 ):
     """
-    Analyses an image and tries to determine which dimensions are
+    Analyzes an image and tries to determine which dimensions are
     spatio-temporal, batch, and channel dimensions. Spatio-temporal
     dimensions are dimensions that are not batch or channel dimensions. For
     the purpose of image denoising, the cardinal rule is to consider a
@@ -113,33 +113,34 @@ def dimension_analysis_on_image(
 
         # Let's ensure there is a minimum number of spatio-temporal dimensions:
         sorted_values = list(values)
+        print(f"values: {values}")
 
         # Values very close to 1.0 are probably just that, 1.0:
         sorted_values = list([(1.0 if abs(1 - v) < 0.01 else v) for v in sorted_values])
 
         # We sort the values:
         sorted_values.sort()
+        print(f"sorted values: {sorted_values}")
 
         # This is the index for the top n (n=min_spatio_temporal) most correlated dimensions:
-        index = min(min_spatio_temporal - 1, len(sorted_values) - 1)
 
-        # This is the corresponding threshold so that at least these n dimensions are spatio-temporal:
-        threshold = sorted_values[index]
+        threshold = 1 - epsilon
+        for _ in range(len(sorted_values)-1):
+            if 2*sorted_values[_] < sorted_values[_+1]:
+                threshold = sorted_values[_]
+                break
 
-        # But we have to make sure that
-        threshold = max(1 - epsilon, threshold)
-
-        lprint(
+        print(
             f"Correlation values per axis: {values} (lower values means more correlation)"
         )
 
-        lprint(
+        print(
             f"Threshold for identifying spatio-temporal dimension is ...<={threshold}"
         )
 
         # spatio-temporal axes:
         st_axes = tuple(axis for axis in range(nb_dim) if values[axis] <= threshold)
-
+        print(f"st_axes: {st_axes}")
         # We ensure that there is enough spatio-temporal dimensions by adding dimensions from the 'end':
         for axis in reversed(range(nb_dim)):
             if len(st_axes) < min_spatio_temporal:
