@@ -11,7 +11,6 @@ class UNetModel(nn.Module):
         spacetime_ndim,
         nb_unet_levels: int = 3,
         nb_filters: int = 8,
-        learning_rate=0.01,
         pooling_mode: str = 'max',
     ):
         super(UNetModel, self).__init__()
@@ -19,7 +18,6 @@ class UNetModel(nn.Module):
         self.spacetime_ndim = spacetime_ndim
         self.nb_unet_levels = nb_unet_levels
         self.nb_filters = nb_filters
-        self.learning_rate = learning_rate
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
