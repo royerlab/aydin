@@ -113,14 +113,12 @@ def dimension_analysis_on_image(
 
         # Let's ensure there is a minimum number of spatio-temporal dimensions:
         sorted_values = list(values)
-        print(f"values: {values}")
 
         # Values very close to 1.0 are probably just that, 1.0:
         sorted_values = list([(1.0 if abs(1 - v) < 0.01 else v) for v in sorted_values])
 
         # We sort the values:
         sorted_values.sort()
-        print(f"sorted values: {sorted_values}")
 
         # This is the index for the top n (n=min_spatio_temporal) most correlated dimensions:
 
@@ -130,17 +128,17 @@ def dimension_analysis_on_image(
                 threshold = sorted_values[_]
                 break
 
-        print(
+        lprint(
             f"Correlation values per axis: {values} (lower values means more correlation)"
         )
 
-        print(
+        lprint(
             f"Threshold for identifying spatio-temporal dimension is ...<={threshold}"
         )
 
         # spatio-temporal axes:
         st_axes = tuple(axis for axis in range(nb_dim) if values[axis] <= threshold)
-        print(f"st_axes: {st_axes}")
+
         # We ensure that there is enough spatio-temporal dimensions by adding dimensions from the 'end':
         for axis in reversed(range(nb_dim)):
             if len(st_axes) < min_spatio_temporal:
