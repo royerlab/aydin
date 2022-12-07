@@ -1,6 +1,7 @@
 import pytest
 
 from aydin.analysis.dimension_analysis import dimension_analysis_on_image
+from aydin.io import imread
 from aydin.io.datasets import examples_single
 
 
@@ -112,14 +113,15 @@ def test_dimension_analysis_cognet(display: bool = False):
 
 def test_dimension_analysis_royer(display: bool = False):
 
-    image = examples_single.royerlab_hcr.get_array()
+    image_path = examples_single.royerlab_hcr.get_path()
+    image, metadata = imread(image_path)
 
-    batch_axes, channel_axes = dimension_analysis_on_image(
-        image, max_channels_per_axis=6
-    )
+    batch_axes, channel_axes = dimension_analysis_on_image(image)
 
     print(batch_axes)
     print(channel_axes)
+
+    print(metadata)
 
     if display:
         import napari
@@ -135,7 +137,8 @@ def test_dimension_analysis_royer(display: bool = False):
 
 def test_dimension_analysis_flybrain(display: bool = False):
 
-    image = examples_single.janelia_flybrain.get_array()
+    image_path = examples_single.janelia_flybrain.get_path()
+    image, metadata = imread(image_path)
 
     batch_axes, channel_axes = dimension_analysis_on_image(
         image, max_channels_per_axis=6
@@ -143,6 +146,7 @@ def test_dimension_analysis_flybrain(display: bool = False):
 
     print(batch_axes)
     print(channel_axes)
+    print(metadata)
 
     if display:
         import napari
@@ -176,26 +180,4 @@ def test_dimension_analysis_leonetti(display: bool = False):
 
     assert len(channel_axes) == 1
     assert 1 in channel_axes
-    assert len(batch_axes) == 0
-
-
-def test_dimension_analysis_myers(display: bool = False):
-
-    image = examples_single.myers_tribolium.get_array()
-
-    batch_axes, channel_axes = dimension_analysis_on_image(
-        image, max_channels_per_axis=6
-    )
-
-    print(batch_axes)
-    print(channel_axes)
-
-    if display:
-        import napari
-
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        napari.run()
-
-    assert len(channel_axes) == 0
     assert len(batch_axes) == 0

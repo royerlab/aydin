@@ -13,13 +13,13 @@ def dimension_analysis_on_image(
     epsilon: float = 0.05,
     min_spatio_temporal: int = 2,
     max_spatio_temporal: int = 4,
-    max_channels_per_axis: int = 0,
+    max_channels_per_axis: int = 4,
     crop_size_in_voxels: Optional[int] = 512000,
     crop_timeout_in_seconds: float = 5,
     max_num_evaluations: Optional[int] = 21,
 ):
     """
-    Analyses an image and tries to determine which dimensions are
+    Analyzes an image and tries to determine which dimensions are
     spatio-temporal, batch, and channel dimensions. Spatio-temporal
     dimensions are dimensions that are not batch or channel dimensions. For
     the purpose of image denoising, the cardinal rule is to consider a
@@ -121,13 +121,12 @@ def dimension_analysis_on_image(
         sorted_values.sort()
 
         # This is the index for the top n (n=min_spatio_temporal) most correlated dimensions:
-        index = min(min_spatio_temporal - 1, len(sorted_values) - 1)
 
-        # This is the corresponding threshold so that at least these n dimensions are spatio-temporal:
-        threshold = sorted_values[index]
-
-        # But we have to make sure that
-        threshold = max(1 - epsilon, threshold)
+        threshold = 1 - epsilon
+        for _ in range(len(sorted_values) - 1):
+            if 2 * sorted_values[_] < sorted_values[_ + 1]:
+                threshold = sorted_values[_]
+                break
 
         lprint(
             f"Correlation values per axis: {values} (lower values means more correlation)"
