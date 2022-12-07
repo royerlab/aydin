@@ -16,7 +16,8 @@ def test_it_cnn_jinet2D_light():
 
 def test_it_cnn_jinet3D_light():
     train_and_evaluate_cnn(
-        examples_single.myers_tribolium.get_array()[16:48, 300:332, 300:332], model="jinet"
+        examples_single.myers_tribolium.get_array()[16:48, 300:332, 300:332],
+        model="jinet",
     )
 
 
