@@ -53,3 +53,8 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "unstable" in item.keywords:
                 item.add_marker(skip_unstable)
+    else:
+        skip_unstable = pytest.mark.skip(reason="need --rununstable option to run")
+        for item in items:
+            if "unstable" not in item.keywords:
+                item.add_marker(skip_unstable)
