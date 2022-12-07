@@ -135,6 +135,7 @@ def test_dimension_analysis_royer(display: bool = False):
     assert len(batch_axes) == 0
 
 
+@pytest.mark.unstable
 def test_dimension_analysis_flybrain(display: bool = False):
 
     image_path = examples_single.janelia_flybrain.get_path()
