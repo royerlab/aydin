@@ -288,6 +288,7 @@ def test_it_cnn_jinet2D_supervised_light():
     clear_session()
 
 
+@pytest.mark.unstable
 def test_it_cnn_jinet3D_light():
     """
     Demo for self-supervised denoising
@@ -338,6 +339,7 @@ def test_it_cnn_jinet3D_light():
     clear_session()
 
 
+@pytest.mark.unstable
 def test_it_cnn_jinet3D_supervised_light():
     """
     Demo for self-supervised denoising using camera image with synthetic noise

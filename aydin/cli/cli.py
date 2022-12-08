@@ -402,7 +402,7 @@ def benchmark_algos(files, **kwargs):
 
     # Iterate over the input images
     for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
-        results[filename] = []
+        results[filename] = {}
         get_mask = RandomMaskedDataset(
             image_array
         ).get_mask  # Create a Dataset object to get random masks
@@ -429,20 +429,21 @@ def benchmark_algos(files, **kwargs):
             # Get a new random mask with given image shape
             mask = get_mask().to("cpu").detach().numpy()
 
-            print(
-                filename, denoiser_name, image_array.shape, denoised.shape, mask.shape
-            )
             self_supervised_loss = loss_function(denoised * mask, image_array * mask)
-            results[filename].append(self_supervised_loss)
+            results[filename] |= {denoiser_name: self_supervised_loss}
             lprint(f"{filename}, {denoiser_name}, loss: {self_supervised_loss}")
 
     print(results)
 
     # Write the results into a csv file
-    with open('benchmark.csv', 'w') as file:
-        w = csv.DictWriter(file, results.keys())
+    with open('trial.csv', 'w') as file:
+        w = csv.DictWriter(
+            file, ["filename"] + list(results[list(results.keys())[0]].keys())
+        )
         w.writeheader()
-        w.writerow(results)
+
+        for key, elem in results.items():
+            w.writerow({"filename": key} | elem)
 
 
 def handle_files(files, slicing):
