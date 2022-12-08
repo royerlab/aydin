@@ -437,7 +437,9 @@ def benchmark_algos(files, **kwargs):
 
     # Write the results into a csv file
     with open('trial.csv', 'w') as file:
-        w = csv.DictWriter(file, ["filename"] + list(results[list(results.keys())[0]].keys()))
+        w = csv.DictWriter(
+            file, ["filename"] + list(results[list(results.keys())[0]].keys())
+        )
         w.writeheader()
 
         for key, elem in results.items():
