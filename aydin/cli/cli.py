@@ -435,7 +435,9 @@ def benchmark_algos(files, **kwargs):
 
             # Self-supervised loss
             self_supervised_loss = loss_function(denoised * mask, image_array * mask)
-            self_supervised_loss_results[filename] |= {denoiser_name: self_supervised_loss}
+            self_supervised_loss_results[filename] |= {
+                denoiser_name: self_supervised_loss
+            }
 
             # SNR estimate
             estimated_snr = snr_estimate(denoised)
@@ -447,7 +449,13 @@ def benchmark_algos(files, **kwargs):
     # Write the results into csv files
     with open('self_supervised_loss.csv', 'w') as file:
         w = csv.DictWriter(
-            file, ["filename"] + list(self_supervised_loss_results[list(self_supervised_loss_results.keys())[0]].keys())
+            file,
+            ["filename"]
+            + list(
+                self_supervised_loss_results[
+                    list(self_supervised_loss_results.keys())[0]
+                ].keys()
+            ),
         )
         w.writeheader()
 
@@ -456,7 +464,9 @@ def benchmark_algos(files, **kwargs):
 
     with open('estimated_snr.csv', 'w') as file:
         w = csv.DictWriter(
-            file, ["filename"] + list(estimated_snr_results[list(estimated_snr_results.keys())[0]].keys())
+            file,
+            ["filename"]
+            + list(estimated_snr_results[list(estimated_snr_results.keys())[0]].keys()),
         )
         w.writeheader()
 
