@@ -47,7 +47,7 @@ def demo_snr_estimate(display: bool = True):
     lprint(f"noise5_dB={noise5_dB}")
     lprint(f"clean_dB ={clean_dB}")
 
-    assert noise1_dB == pytest.approx(-41.0, 1, 5)
+    assert noise1_dB == pytest.approx(-44.0, 1, 5)
     assert noise2_dB == pytest.approx(-31.1, 1, 1)
     assert noise3_dB == pytest.approx(-11.0, 1, 1)
     assert noise4_dB == pytest.approx(8.6, 1, 1)
