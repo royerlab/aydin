@@ -14,6 +14,7 @@ from skimage.metrics import (
     structural_similarity,
 )
 
+from aydin.analysis.resolution_estimate import resolution_estimate
 from aydin.analysis.snr_estimate import snr_estimate
 from aydin.gui.gui import run
 from aydin.io.datasets import normalise
@@ -401,11 +402,13 @@ def benchmark_algos(files, **kwargs):
     loss_function = mean_squared_error  # Define the loss function
     self_supervised_loss_results = {}
     estimated_snr_results = {}
+    estimated_res_results = {}
 
     # Iterate over the input images
     for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
         self_supervised_loss_results[filename] = {}
         estimated_snr_results[filename] = {}
+        estimated_res_results[filename] = {}
 
         get_mask = RandomMaskedDataset(
             image_array
@@ -443,9 +446,14 @@ def benchmark_algos(files, **kwargs):
             estimated_snr = snr_estimate(denoised)
             estimated_snr_results[filename] |= {denoiser_name: estimated_snr}
 
+            # Res estimate
+            estimated_res, _ = resolution_estimate(denoised)
+            estimated_res_results[filename] |= {denoiser_name: estimated_res}
+
     result_pairs = [
         ("self_supervised_loss.csv", self_supervised_loss_results),
-        ("estimated_snr.csv", estimated_snr_results)
+        ("estimated_snr.csv", estimated_snr_results),
+        ("res_estimate.csv", estimated_res_results),
     ]
 
     # Write the results into csv files
