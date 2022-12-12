@@ -12,7 +12,7 @@ from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 def demo(image, image_width=200):
     image = normalise(image)
     H0, W0 = (numpy.array(image.shape) - image_width) // 2
-    image = image[H0: H0 + image_width, W0: W0 + image_width]
+    image = image[H0 : H0 + image_width, W0 : W0 + image_width]
     noisy = add_noise(image)
 
     # CNN based Image translation:
