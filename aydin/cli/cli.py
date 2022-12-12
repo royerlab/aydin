@@ -14,6 +14,7 @@ from skimage.metrics import (
     structural_similarity,
 )
 
+from aydin.analysis.resolution_estimate import resolution_estimate
 from aydin.analysis.snr_estimate import snr_estimate
 from aydin.gui.gui import run
 from aydin.io.datasets import normalise
@@ -401,11 +402,13 @@ def benchmark_algos(files, **kwargs):
     loss_function = mean_squared_error  # Define the loss function
     self_supervised_loss_results = {}
     estimated_snr_results = {}
+    estimated_res_results = {}
 
     # Iterate over the input images
     for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
         self_supervised_loss_results[filename] = {}
         estimated_snr_results[filename] = {}
+        estimated_res_results[filename] = {}
 
         get_mask = RandomMaskedDataset(
             image_array
@@ -443,35 +446,28 @@ def benchmark_algos(files, **kwargs):
             estimated_snr = snr_estimate(denoised)
             estimated_snr_results[filename] |= {denoiser_name: estimated_snr}
 
-    print(self_supervised_loss_results)
-    print(estimated_snr_results)
+            # Res estimate
+            estimated_res, _ = resolution_estimate(denoised)
+            estimated_res_results[filename] |= {denoiser_name: estimated_res}
+
+    result_pairs = [
+        ("self_supervised_loss.csv", self_supervised_loss_results),
+        ("estimated_snr.csv", estimated_snr_results),
+        ("res_estimate.csv", estimated_res_results),
+    ]
 
     # Write the results into csv files
-    with open('self_supervised_loss.csv', 'w') as file:
-        w = csv.DictWriter(
-            file,
-            ["filename"]
-            + list(
-                self_supervised_loss_results[
-                    list(self_supervised_loss_results.keys())[0]
-                ].keys()
-            ),
-        )
-        w.writeheader()
+    for pair in result_pairs:
+        output_file, result_dict = pair
+        with open(output_file, 'w') as file:
+            w = csv.DictWriter(
+                file,
+                ["filename"] + list(result_dict[list(result_dict.keys())[0]].keys()),
+            )
+            w.writeheader()
 
-        for key, elem in self_supervised_loss_results.items():
-            w.writerow({"filename": key} | elem)
-
-    with open('estimated_snr.csv', 'w') as file:
-        w = csv.DictWriter(
-            file,
-            ["filename"]
-            + list(estimated_snr_results[list(estimated_snr_results.keys())[0]].keys()),
-        )
-        w.writeheader()
-
-        for key, elem in estimated_snr_results.items():
-            w.writerow({"filename": key} | elem)
+            for key, elem in result_dict.items():
+                w.writerow({"filename": key} | elem)
 
 
 def handle_files(files, slicing):
