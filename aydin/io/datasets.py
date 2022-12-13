@@ -26,9 +26,9 @@ except Exception:
 
 
 def normalise(image):
-    return rescale_intensity(
-        image, in_range='image', out_range=(0, 1)
-    ).astype(numpy.float32, copy=False)
+    return rescale_intensity(image, in_range='image', out_range=(0, 1)).astype(
+        numpy.float32, copy=False
+    )
 
 
 def add_noise(
