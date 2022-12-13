@@ -381,7 +381,7 @@ def fsc(files, **kwargs):
 @cli.command()
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
-@click.option('-nr', "--nb-runs", default=1, type=int)
+@click.option('-nr', "--nbruns", default=1, type=int)
 def benchmark_algos(files, **kwargs):
     """aydin command to benchmark different algorithms
     against a given image.
