@@ -381,6 +381,7 @@ def fsc(files, **kwargs):
 @cli.command()
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
+@click.option('-nr', "--nb-runs", default=1, type=int)
 def benchmark_algos(files, **kwargs):
     """aydin command to benchmark different algorithms
     against a given image.
@@ -416,39 +417,40 @@ def benchmark_algos(files, **kwargs):
 
         # Iterate over the available denoisers
         for denoiser_name in denoiser_names:
-            # Get the specific restoration instance with given denoiser variant
-            denoiser_instance = get_denoiser_class_instance(variant=denoiser_name)
+            ss_losses, snrs, res_estimates = [], [], []
+            for _ in range(kwargs["nb-runs"]):
+                # Get the specific restoration instance with given denoiser variant
+                denoiser_instance = get_denoiser_class_instance(variant=denoiser_name)
 
-            # Train the created denoiser
-            denoiser_instance.train(
-                image_array,
-                batch_axes=metadata.batch_axes,
-                chan_axes=metadata.channel_axes,
-            )
+                # Train the created denoiser
+                denoiser_instance.train(
+                    image_array,
+                    batch_axes=metadata.batch_axes,
+                    chan_axes=metadata.channel_axes,
+                )
 
-            # Infer on the trained denoiser
-            denoised = denoiser_instance.denoise(
-                image_array,
-                batch_axes=metadata.batch_axes,
-                chan_axes=metadata.channel_axes,
-            )
+                # Infer on the trained denoiser
+                denoised = denoiser_instance.denoise(
+                    image_array,
+                    batch_axes=metadata.batch_axes,
+                    chan_axes=metadata.channel_axes,
+                )
 
-            # Get a new random mask with given image shape
-            mask = get_mask().to("cpu").detach().numpy()
+                # Get a new random mask with given image shape
+                mask = get_mask().to("cpu").detach().numpy()
 
-            # Self-supervised loss
-            self_supervised_loss = loss_function(denoised * mask, image_array * mask)
-            self_supervised_loss_results[filename] |= {
-                denoiser_name: self_supervised_loss
-            }
+                # Self-supervised loss
+                ss_losses.append(loss_function(denoised * mask, image_array * mask))
 
-            # SNR estimate
-            estimated_snr = snr_estimate(denoised)
-            estimated_snr_results[filename] |= {denoiser_name: estimated_snr}
+                # SNR estimate
+                snrs.append(snr_estimate(denoised))
 
-            # Res estimate
-            estimated_res, _ = resolution_estimate(denoised)
-            estimated_res_results[filename] |= {denoiser_name: estimated_res}
+                # Res estimate
+                res_estimates.append(resolution_estimate(denoised)[0])
+
+            self_supervised_loss_results[filename] |= {denoiser_name: numpy.average(ss_losses)}
+            estimated_snr_results[filename] |= {denoiser_name: numpy.average(snrs)}
+            estimated_res_results[filename] |= {denoiser_name: numpy.average(res_estimates)}
 
     result_pairs = [
         ("self_supervised_loss.csv", self_supervised_loss_results),
