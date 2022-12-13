@@ -46,9 +46,11 @@ VERSION = __version__
 @click.version_option(version=VERSION)
 def cli(ctx):
     """aydin cli
+
     Parameters
     ----------
     ctx : click.Context
+
     """
     sys._excepthook = sys.excepthook
 
@@ -84,10 +86,12 @@ def cli(ctx):
 @click.option('--output-folder', default='')
 def denoise(files, **kwargs):
     """denoise command
+
     Parameters
     ----------
     files
     kwargs : dict
+
     """
     # Check whether a path is provided for a model to use or save
     input_model_path = kwargs["model_path"] if kwargs["model_path"] else None
