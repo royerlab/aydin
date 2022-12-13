@@ -195,10 +195,12 @@ def denoise(files, **kwargs):
 @click.option('-s', '--slicing', default='', type=str)
 def info(files, **kwargs):
     """aydin info command
+
     Parameters
     ----------
     files
     kwargs
+
     """
     handle_files(
         files, kwargs['slicing']
@@ -210,12 +212,15 @@ def info(files, **kwargs):
 @click.option('-s', '--slicing', default='', type=str)
 def view(files, **kwargs):
     """aydin view command
+
     Parameters
     ----------
     files
     kwargs
+
     Returns
     -------
+
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
@@ -233,10 +238,12 @@ def split_channels(files, **kwargs):
     """aydin split-channels command. Takes multi-channel images as
     input, splits its channels into separate images and writes them
     back.
+
     Parameters
     ----------
     files
     kwargs
+
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
@@ -263,10 +270,12 @@ def split_channels(files, **kwargs):
 @click.option('-s', '--slicing', default='', type=str)
 def hyperstack(files, **kwargs):
     """aydin hyperstack command
+
     Parameters
     ----------
     files
     kwargs : dict
+
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
     result_path = filenames[0]
@@ -284,10 +293,12 @@ def hyperstack(files, **kwargs):
 @click.option('-s', '--slicing', default='', type=str)
 def ssim(files, **kwargs):
     """aydin ssim command
+
     Parameters
     ----------
     files
     kwargs : dict
+
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
@@ -304,10 +315,12 @@ def ssim(files, **kwargs):
 @click.option('-s', '--slicing', default='', type=str)
 def psnr(files, **kwargs):
     """aydin psnr command
+
     Parameters
     ----------
     files
     kwargs : dict
+
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
@@ -324,10 +337,12 @@ def psnr(files, **kwargs):
 @click.option('-s', '--slicing', default='', type=str)
 def mse(files, **kwargs):
     """aydin mean squared error command
+
     Parameters
     ----------
     files
     kwargs : dict
+
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
@@ -345,10 +360,12 @@ def mse(files, **kwargs):
 def fsc(files, **kwargs):
     """aydin fourier shell correlation command.
     Saves the FSC plot and the cut-off freq.
+
     Parameters
     ----------
     files
     kwargs : dict
+
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
@@ -367,10 +384,12 @@ def fsc(files, **kwargs):
 def benchmark_algos(files, **kwargs):
     """aydin command to benchmark different algorithms
     against a given image.
+
     Parameters
     ----------
     files
     kwargs : dict
+
     """
     filenames, image_arrays, metadatas = handle_files(
         files, kwargs['slicing']
@@ -453,12 +472,15 @@ def benchmark_algos(files, **kwargs):
 
 def handle_files(files, slicing):
     """Handle files
+
     Parameters
     ----------
     files
     slicing
+
     Returns
     -------
+
     """
     filepaths = []
     image_arrays = []
