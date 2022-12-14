@@ -13,6 +13,7 @@ from skimage.metrics import (
     peak_signal_noise_ratio,
     structural_similarity,
 )
+from torch.utils.data import DataLoader
 
 from aydin.analysis.resolution_estimate import resolution_estimate
 from aydin.analysis.snr_estimate import snr_estimate
@@ -411,33 +412,37 @@ def benchmark_algos(files, **kwargs):
         estimated_snr_results[filename] = {}
         estimated_res_results[filename] = {}
 
-        get_mask = RandomMaskedDataset(
-            image_array
-        ).get_mask  # Create a Dataset object to get random masks
+        # Create a Dataset object to get random masks
+        array = normalise(image_array[numpy.newaxis, numpy.newaxis, :, :])
+        dataset = RandomMaskedDataset(array, patch_size=min(image_array.shape))
+        print(f"dataset length: {len(dataset)}, patch_size:{dataset.patch_size}")
+        data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
+        _, input_image, mask = next(iter(data_loader))
+
+        mask = mask.to("cpu").detach().numpy()
+        input_image = input_image.to("cpu").detach().numpy()[0, 0, :, :]
+        print(input_image.shape)
 
         # Iterate over the available denoisers
         for denoiser_name in denoiser_names:
             ss_losses, snrs, res_estimates = [], [], []
-            for _ in range(kwargs["nb-runs"]):
+            for _ in range(kwargs["nbruns"]):
                 # Get the specific restoration instance with given denoiser variant
                 denoiser_instance = get_denoiser_class_instance(variant=denoiser_name)
 
                 # Train the created denoiser
                 denoiser_instance.train(
-                    image_array,
+                    input_image,
                     batch_axes=metadata.batch_axes,
                     chan_axes=metadata.channel_axes,
                 )
 
                 # Infer on the trained denoiser
                 denoised = denoiser_instance.denoise(
-                    image_array,
+                    input_image,
                     batch_axes=metadata.batch_axes,
                     chan_axes=metadata.channel_axes,
                 )
-
-                # Get a new random mask with given image shape
-                mask = get_mask().to("cpu").detach().numpy()
 
                 # Self-supervised loss
                 ss_losses.append(loss_function(denoised * mask, image_array * mask))
