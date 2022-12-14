@@ -3,7 +3,7 @@ import numpy
 import torch
 
 from aydin.io.datasets import add_noise, camera, normalise
-from aydin.nn.models.res_unet import ResidualUNetModel
+from aydin.nn.models.residual_unet import ResidualUNetModel
 from aydin.nn.models.unet import UNetModel
 from aydin.nn.training_methods.n2s import n2s_train
 from aydin.nn.training_methods.n2t import n2t_train

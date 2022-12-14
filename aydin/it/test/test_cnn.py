@@ -1,7 +1,12 @@
 import numpy
 
 from aydin.analysis.image_metrics import calculate_print_psnr_ssim
-from aydin.io.datasets import camera, add_noise, normalise
+from aydin.io.datasets import (
+    add_noise,
+    normalise,
+    examples_single,
+    camera,
+)
 from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
 
@@ -9,8 +14,22 @@ def test_it_cnn_jinet2D_light():
     train_and_evaluate_cnn(camera(), model="jinet")
 
 
+def test_it_cnn_jinet3D_light():
+    train_and_evaluate_cnn(
+        examples_single.myers_tribolium.get_array()[16:48, 300:332, 300:332],
+        model="jinet",
+    )
+
+
 def test_it_cnn_unet2d():
     train_and_evaluate_cnn(camera(), model="unet")
+
+
+def test_it_cnn_unet3d():
+    train_and_evaluate_cnn(
+        examples_single.janelia_flybrain.get_array()[:32, 1:2, :32, :32],
+        model="unet",
+    )
 
 
 def train_and_evaluate_cnn(input_image, model="jinet"):
@@ -28,9 +47,9 @@ def train_and_evaluate_cnn(input_image, model="jinet"):
     it.train(noisy, noisy)
     denoised = it.translate(noisy, tile_size=image.shape[0])
 
-    image = numpy.clip(image, 0, 1)
-    noisy = numpy.clip(noisy.reshape(image.shape), 0, 1)
-    denoised = numpy.clip(denoised, 0, 1)
+    image = numpy.squeeze(numpy.clip(image, 0, 1))
+    noisy = numpy.squeeze(numpy.clip(noisy.reshape(image.shape), 0, 1))
+    denoised = numpy.squeeze(numpy.clip(denoised, 0, 1))
 
     psnr_noisy, psnr_denoised, ssim_noisy, ssim_denoised = calculate_print_psnr_ssim(
         image, noisy, denoised

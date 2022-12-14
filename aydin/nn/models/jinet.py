@@ -14,7 +14,7 @@ class JINetModel(nn.Module):
         nb_dense_layers: int = 3,
         nb_channels: int = None,
         final_relu: bool = False,
-        degressive_residuals: bool = False,  # TODO: check what happens when this is True
+        degressive_residuals: bool = True,  # TODO: check what happens when this is True
     ):
         super(JINetModel, self).__init__()
 

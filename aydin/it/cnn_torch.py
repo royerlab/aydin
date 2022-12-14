@@ -120,7 +120,11 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             "aydin.nn.models" + '.' + module_of_interest.name
         )
 
-        class_name = [x for x in dir(response) if model_name + "model" in x.lower()][0]
+        class_name = [
+            x
+            for x in dir(response)
+            if model_name.replace('_', '') + "model" in x.lower()
+        ][0]
 
         model_class = response.__getattribute__(class_name)
 
