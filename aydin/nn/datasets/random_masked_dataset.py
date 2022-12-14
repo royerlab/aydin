@@ -52,7 +52,7 @@ class RandomMaskedDataset(Dataset):
         mask = mask.to(device)
         mask_inv = mask_inv.to(device)
 
-        kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], (0.5, 1.0, 0.5)])
+        kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], [0.5, 1.0, 0.5]])
         kernel = kernel[numpy.newaxis, numpy.newaxis, :, :]
         kernel = torch.Tensor(kernel).to(device)
         kernel = kernel / kernel.sum()
