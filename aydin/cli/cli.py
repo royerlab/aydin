@@ -453,9 +453,13 @@ def benchmark_algos(files, **kwargs):
                 # Res estimate
                 res_estimates.append(resolution_estimate(denoised)[0])
 
-            self_supervised_loss_results[filename] |= {denoiser_name: numpy.average(ss_losses)}
+            self_supervised_loss_results[filename] |= {
+                denoiser_name: numpy.average(ss_losses)
+            }
             estimated_snr_results[filename] |= {denoiser_name: numpy.average(snrs)}
-            estimated_res_results[filename] |= {denoiser_name: numpy.average(res_estimates)}
+            estimated_res_results[filename] |= {
+                denoiser_name: numpy.average(res_estimates)
+            }
 
     result_pairs = [
         ("self_supervised_loss.csv", self_supervised_loss_results),
