@@ -42,7 +42,7 @@ def demo():
     noisy = numpy.clip(noisy, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
 
-    print("noisy", psnr(noisy, image), ssim(noisy, image))
+    print("noisy", psnr(image, noisy), ssim(noisy, image))
     print("denoised", psnr(denoised, image), ssim(denoised, image))
     # print("denoised_predict", psnr(denoised_predict, image), ssim(denoised_predict, image))
 

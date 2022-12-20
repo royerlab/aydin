@@ -73,7 +73,7 @@ def with_regressor(data, regressor, min_ssim=0.8):
     denoised = numpy.clip(denoised, 0, 1)
 
     ssim_value = ssim(denoised, image)
-    psnr_value = psnr(denoised, image)
+    psnr_value = psnr(image, denoised)
 
     print("denoised", psnr_value, ssim_value)
 
@@ -95,7 +95,7 @@ def with_regressor(data, regressor, min_ssim=0.8):
     # print(numpy.max(denoised), numpy.max(image))
     denoised = denoised.clip(0, 1)
     ssim_value = ssim(denoised, image)
-    psnr_value = psnr(denoised, image)
+    psnr_value = psnr(image, denoised)
 
     print("denoised", psnr_value, ssim_value)
 
