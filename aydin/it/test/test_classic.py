@@ -40,7 +40,7 @@ def do_it_classic(method_name, min_psnr=22, min_ssim=0.75):
     ssim_noisy = ssim(noisy, image)
     print("noisy", psnr_noisy, ssim_noisy)
 
-    psnr_denoised = psnr(image, image)
+    psnr_denoised = psnr(image, denoised)
     ssim_denoised = ssim(denoised, image)
     print("denoised", psnr_denoised, ssim_denoised)
 
