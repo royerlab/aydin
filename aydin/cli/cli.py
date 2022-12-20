@@ -472,6 +472,7 @@ def benchmark_algos(files, **kwargs):
             self_supervised_loss_results[filename] |= {
                 denoiser_name: numpy.average(ss_losses)
             }
+            ssl_psnr_results[filename] |= {denoiser_name: numpy.average(ssl_psnrs)}
             estimated_snr_results[filename] |= {denoiser_name: numpy.average(snrs)}
             estimated_res_results[filename] |= {
                 denoiser_name: numpy.average(res_estimates)
