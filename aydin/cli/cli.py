@@ -13,6 +13,7 @@ from skimage.metrics import (
     peak_signal_noise_ratio,
     structural_similarity,
 )
+from skimage.util.dtype import dtype_range
 from torch.utils.data import DataLoader
 
 from aydin.analysis.resolution_estimate import resolution_estimate
@@ -401,20 +402,22 @@ def benchmark_algos(files, **kwargs):
         0
     ]  # Get a list of available denoisers
 
-    loss_function = mean_squared_error  # Define the loss function
+    loss_function = lambda u, v: numpy.abs(u - v)  # Define the loss function
     self_supervised_loss_results = {}
+    ssl_psnr_results = {}
     estimated_snr_results = {}
     estimated_res_results = {}
 
     # Iterate over the input images
     for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
         self_supervised_loss_results[filename] = {}
+        ssl_psnr_results[filename] = {}
         estimated_snr_results[filename] = {}
         estimated_res_results[filename] = {}
 
         # Create a Dataset object to get random masks
         array = normalise(image_array[numpy.newaxis, numpy.newaxis, :, :])
-        dataset = RandomMaskedDataset(array, patch_size=min(image_array.shape))
+        dataset = RandomMaskedDataset(array, patch_size=min(image_array.shape), pixel_masking_probability=0.1)
         print(f"dataset length: {len(dataset)}, patch_size:{dataset.patch_size}")
         data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
         _, input_image, mask = next(iter(data_loader))
@@ -425,7 +428,7 @@ def benchmark_algos(files, **kwargs):
 
         # Iterate over the available denoisers
         for denoiser_name in denoiser_names:
-            ss_losses, snrs, res_estimates = [], [], []
+            ss_losses, ssl_psnrs, snrs, res_estimates = [], [], [], []
             for _ in range(kwargs["nbruns"]):
                 # Get the specific restoration instance with given denoiser variant
                 denoiser_instance = get_denoiser_class_instance(variant=denoiser_name)
@@ -447,6 +450,12 @@ def benchmark_algos(files, **kwargs):
                 # Self-supervised loss
                 ss_losses.append(loss_function(denoised * mask, image_array * mask))
 
+                # PSNR with Self-supervised loss
+                dmax = dtype_range[denoised.dtype.type][1]
+                ssl_psnrs.append(
+                    20 * numpy.log10(dmax) - 10 * numpy.log10(ss_losses[-1])
+                )
+
                 # SNR estimate
                 snrs.append(snr_estimate(denoised))
 
@@ -463,6 +472,7 @@ def benchmark_algos(files, **kwargs):
 
     result_pairs = [
         ("self_supervised_loss.csv", self_supervised_loss_results),
+        ("ssl_psnr.csv", ssl_psnr_results),
         ("estimated_snr.csv", estimated_snr_results),
         ("res_estimate.csv", estimated_res_results),
     ]
