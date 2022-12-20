@@ -79,12 +79,12 @@ def saveload(denoiser, min_psnr=22, min_ssim=0.75):
 
     denoised = denoised.clip(0, 1)
 
-    psnr_noisy = psnr(noisy, image)
-    ssim_noisy = ssim(noisy, image)
+    psnr_noisy = psnr(image, noisy)
+    ssim_noisy = ssim(image, noisy)
     print("noisy", psnr_noisy, ssim_noisy)
 
-    psnr_denoised = psnr(denoised, image)
-    ssim_denoised = ssim(denoised, image)
+    psnr_denoised = psnr(image, denoised)
+    ssim_denoised = ssim(image, denoised)
     print("denoised", psnr_denoised, ssim_denoised)
 
     # Check if denoised image satisfies some checks
