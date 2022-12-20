@@ -80,7 +80,7 @@ For detailed use-cases check [here][use cases].
 
 We regularly come up with new approaches and ideas, there is just not enough time to write papers about all these ideas.
 This means that the best 'publication' for some of these novel algorithms is this repo itself, and so please be so kind as to
-cite this repo (see below) for any ideas that you would use or reuse.
+[cite this repo](https://github.com/royerlab/aydin#cite-this-repo) for any ideas that you would use or reuse.
 We have a long todo list of existing, modified, as well as original algorithms that we plan to add to *Aydin* in the next weeks and months. We will do so progressively as time allows. Stay tuned!
 
 ## Documentation
@@ -201,3 +201,7 @@ Planned features:
 
 Feel free to check our [contributing guideline](CONTRIBUTING.md) first and start 
 discussing your new ideas and feedback with us through issues.
+
+## Cite this repo
+
+You can cite our work with: [https://doi.org/10.5281/zenodo.5654826](https://doi.org/10.5281/zenodo.5654826)
