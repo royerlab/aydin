@@ -402,7 +402,10 @@ def benchmark_algos(files, **kwargs):
         0
     ]  # Get a list of available denoisers
 
-    loss_function = lambda u, v: numpy.abs(u - v)  # Define the loss function
+    # Define the loss function
+    def loss_function(u, v):
+        return numpy.abs(u - v)
+
     self_supervised_loss_results = {}
     ssl_psnr_results = {}
     estimated_snr_results = {}
@@ -417,7 +420,9 @@ def benchmark_algos(files, **kwargs):
 
         # Create a Dataset object to get random masks
         array = normalise(image_array[numpy.newaxis, numpy.newaxis, :, :])
-        dataset = RandomMaskedDataset(array, patch_size=min(image_array.shape), pixel_masking_probability=0.1)
+        dataset = RandomMaskedDataset(
+            array, patch_size=min(image_array.shape), pixel_masking_probability=0.1
+        )
         print(f"dataset length: {len(dataset)}, patch_size:{dataset.patch_size}")
         data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
         _, input_image, mask = next(iter(data_loader))
@@ -452,8 +457,10 @@ def benchmark_algos(files, **kwargs):
 
                 # PSNR with Self-supervised loss
                 dmax = dtype_range[denoised.dtype.type][1]
+
+                # We take square root of the MAX_I^2 term to help dimension units to cancel out with l1 loss
                 ssl_psnrs.append(
-                    20 * numpy.log10(dmax) - 10 * numpy.log10(ss_losses[-1])
+                    10 * numpy.log10(dmax) - 10 * numpy.log10(ss_losses[-1])
                 )
 
                 # SNR estimate
