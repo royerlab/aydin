@@ -64,11 +64,11 @@ def test_denoise():
 
         # denoised = denoised.clip(0, 1)
         #
-        # psnr_noisy = psnr(noisy, image)
+        # psnr_noisy = psnr(image, noisy)
         # ssim_noisy = ssim(noisy, image)
         # print("noisy", psnr_noisy, ssim_noisy)
         #
-        # psnr_denoised = psnr(denoised, image)
+        # psnr_denoised = psnr(image, denoised)
         # ssim_denoised = ssim(denoised, image)
         # print("denoised", psnr_denoised, ssim_denoised)
         #

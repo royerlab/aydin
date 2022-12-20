@@ -36,11 +36,11 @@ def do_it_classic(method_name, min_psnr=22, min_ssim=0.75):
     noisy = numpy.clip(noisy, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
 
-    psnr_noisy = psnr(noisy, image)
+    psnr_noisy = psnr(image, noisy)
     ssim_noisy = ssim(noisy, image)
     print("noisy", psnr_noisy, ssim_noisy)
 
-    psnr_denoised = psnr(denoised, image)
+    psnr_denoised = psnr(image, denoised)
     ssim_denoised = ssim(denoised, image)
     print("denoised", psnr_denoised, ssim_denoised)
 
