@@ -315,7 +315,8 @@ def ssim(files, **kwargs):
 @click.argument('files', nargs=2)
 @click.option('-s', '--slicing', default='', type=str)
 def psnr(files, **kwargs):
-    """aydin psnr command
+    """aydin psnr command. First provided image has to be the
+    true image and second one the test image.
 
     Parameters
     ----------
