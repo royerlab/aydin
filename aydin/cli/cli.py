@@ -404,7 +404,7 @@ def benchmark_algos(files, **kwargs):
 
     # Define the loss function
     def loss_function(u, v):
-        return numpy.abs(u - v)
+        return numpy.mean(numpy.abs(u - v))
 
     self_supervised_loss_results = {}
     ssl_psnr_results = {}
