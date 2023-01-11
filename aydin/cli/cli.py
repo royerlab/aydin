@@ -447,7 +447,12 @@ def benchmark_algos(files, **kwargs):
                 )
 
                 if kwargs['save_denoised_images']:
-                    output_path = None  # TODO: get correct path
+                    output_path, index_counter = get_output_image_path(
+                        filename,
+                        operation_type="denoised",
+                    )
+                    output_path = f"{output_path[:output_path.rfind('.')]}_b_{denoiser_name}{output_path[output_path.rfind('.'):]}"
+
                     imwrite(denoised, output_path)
 
                 # Self-supervised loss
