@@ -384,6 +384,7 @@ def fsc(files, **kwargs):
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 @click.option('-nr', "--nbruns", default=1, type=int)
+@click.option('--save-denoised-images/--rm-denoised-images', default=False)
 def benchmark_algos(files, **kwargs):
     """aydin command to benchmark different algorithms
     against a given image.
@@ -444,6 +445,15 @@ def benchmark_algos(files, **kwargs):
                     batch_axes=metadata.batch_axes,
                     chan_axes=metadata.channel_axes,
                 )
+
+                if kwargs['save_denoised_images']:
+                    output_path, index_counter = get_output_image_path(
+                        filename,
+                        operation_type="denoised",
+                    )
+                    output_path = f"{output_path[:output_path.rfind('.')]}_b_{denoiser_name}{output_path[output_path.rfind('.'):]}"
+
+                    imwrite(denoised, output_path)
 
                 # Self-supervised loss
                 ss_losses.append(loss_function(denoised * mask, image_array * mask))
