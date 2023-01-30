@@ -5,13 +5,16 @@ from aydin.io import imread
 from aydin.io.datasets import examples_single
 
 
-@pytest.mark.parametrize("image, expected_batch_axes, expected_channel_axes", [
-    (examples_single.noisy_newyork.get_array(), [], []),
-    (examples_single.maitre_mouse.get_array(), [0, 1], []),
-    (examples_single.cognet_nanotube_400fps.get_array()[:, 8:-8, 8:-8], [], []),
-    (imread(examples_single.royerlab_hcr.get_path())[0], [], [1]),
-    (examples_single.leonetti_snca.get_array(), [], [1])
-])
+@pytest.mark.parametrize(
+    "image, expected_batch_axes, expected_channel_axes",
+    [
+        (examples_single.noisy_newyork.get_array(), [], []),
+        (examples_single.maitre_mouse.get_array(), [0, 1], []),
+        (examples_single.cognet_nanotube_400fps.get_array()[:, 8:-8, 8:-8], [], []),
+        (imread(examples_single.royerlab_hcr.get_path())[0], [], [1]),
+        (examples_single.leonetti_snca.get_array(), [], [1]),
+    ],
+)
 def test_dimension_analysis(image, expected_batch_axes, expected_channel_axes):
     batch_axes, channel_axes = dimension_analysis_on_image(image)
 

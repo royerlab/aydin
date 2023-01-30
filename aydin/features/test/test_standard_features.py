@@ -5,15 +5,18 @@ from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import camera
 
 
-@pytest.mark.parametrize("dtype", [
-    numpy.float16,
-    numpy.float32,
-    numpy.float64,
-    numpy.uint8,
-    numpy.uint16,
-    numpy.uint32,
-    numpy.uint64
-])
+@pytest.mark.parametrize(
+    "dtype",
+    [
+        numpy.float16,
+        numpy.float32,
+        numpy.float64,
+        numpy.uint8,
+        numpy.uint16,
+        numpy.uint32,
+        numpy.uint64,
+    ],
+)
 def test_standard_features_type_conservation_test(dtype, required_dtype=None):
     image = camera().astype(dtype)
     # feature generator requires images in 'standard' form: BCTZYX
