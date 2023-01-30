@@ -64,52 +64,64 @@ def test_train():
     pass
 
 
-@pytest.mark.parametrize("batch_axes, chan_axes, ndim, expected_batch_axes, expected_chan_axes", [
-    (
+@pytest.mark.parametrize(
+    "batch_axes, chan_axes, ndim, expected_batch_axes, expected_chan_axes",
+    [
+        (
             [False, True, False, False],
             [True, False, False, False],
             4,
             [False, True, False, False],
-            [True, False, False, False]
-    ),
-    ([1], [0], 4, [False, True, False, False], [True, False, False, False]),
-    (
-        [False, False, False, False],
-        [True, False, False, False],
-        4,
-        [False, False, False, False],
-        [True, False, False, False],
-    ),
-    ([], [0], 4, [False, False, False, False], [True, False, False, False]),
-    (
-        [False, False, False, False, False],
-        [True, False, False, False, False],
-        5,
-        [False, False, False, False, False],
-        [True, False, False, False, False],
-    ),
-    ([], [0], 5, [False, False, False, False, False], [True, False, False, False, False]),
-])
-def test_parse_axes_args(batch_axes, chan_axes, ndim, expected_batch_axes, expected_chan_axes):
+            [True, False, False, False],
+        ),
+        ([1], [0], 4, [False, True, False, False], [True, False, False, False]),
+        (
+            [False, False, False, False],
+            [True, False, False, False],
+            4,
+            [False, False, False, False],
+            [True, False, False, False],
+        ),
+        ([], [0], 4, [False, False, False, False], [True, False, False, False]),
+        (
+            [False, False, False, False, False],
+            [True, False, False, False, False],
+            5,
+            [False, False, False, False, False],
+            [True, False, False, False, False],
+        ),
+        (
+            [],
+            [0],
+            5,
+            [False, False, False, False, False],
+            [True, False, False, False, False],
+        ),
+    ],
+)
+def test_parse_axes_args(
+    batch_axes, chan_axes, ndim, expected_batch_axes, expected_chan_axes
+):
     it = ImageTranslatorFGR()
 
-    result_batch_arg, result_chan_arg = it.parse_axes_args(
-        batch_axes, chan_axes, ndim
-    )
+    result_batch_arg, result_chan_arg = it.parse_axes_args(batch_axes, chan_axes, ndim)
     assert result_batch_arg == expected_batch_axes
     assert result_chan_arg == expected_chan_axes
 
 
-@pytest.mark.parametrize("batch_axes, chan_axes, ndim", [
-    ([True, True, True, True], [False, False, False, False], 4),
-    ([0, 1, 2, 3], [], 4),
-    ([False, False, False, False], [True, True, True, True], 4),
-    ([], [0, 1, 2, 3], 4),
-    ([True, False, False, False], [True, False, False, False], 4),
-    ([0], [0], 4),
-    ([False, False, False, False, False], [False, False, False, False, False], 5),
-    ([], [],  5),
-])
+@pytest.mark.parametrize(
+    "batch_axes, chan_axes, ndim",
+    [
+        ([True, True, True, True], [False, False, False, False], 4),
+        ([0, 1, 2, 3], [], 4),
+        ([False, False, False, False], [True, True, True, True], 4),
+        ([], [0, 1, 2, 3], 4),
+        ([True, False, False, False], [True, False, False, False], 4),
+        ([0], [0], 4),
+        ([False, False, False, False, False], [False, False, False, False, False], 5),
+        ([], [], 5),
+    ],
+)
 def test_parse_axes_args_raises_exception(batch_axes, chan_axes, ndim):
     it = ImageTranslatorFGR()
 
