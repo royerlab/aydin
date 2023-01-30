@@ -64,140 +64,57 @@ def test_train():
     pass
 
 
-def test_parse_axes_args_with_bool_lists():
+@pytest.mark.parametrize("batch_axes, chan_axes, ndim, expected_batch_axes, expected_chan_axes", [
+    (
+            [False, True, False, False],
+            [True, False, False, False],
+            4,
+            [False, True, False, False],
+            [True, False, False, False]
+    ),
+    ([1], [0], 4, [False, True, False, False], [True, False, False, False]),
+    (
+        [False, False, False, False],
+        [True, False, False, False],
+        4,
+        [False, False, False, False],
+        [True, False, False, False],
+    ),
+    ([], [0], 4, [False, False, False, False], [True, False, False, False]),
+    (
+        [False, False, False, False, False],
+        [True, False, False, False, False],
+        5,
+        [False, False, False, False, False],
+        [True, False, False, False, False],
+    ),
+    ([], [0], 5, [False, False, False, False, False], [True, False, False, False, False]),
+])
+def test_parse_axes_args(batch_axes, chan_axes, ndim, expected_batch_axes, expected_chan_axes):
     it = ImageTranslatorFGR()
-    sample_batch_arg = [False, True, False, False]
-    sample_chan_arg = [True, False, False, False]
 
     result_batch_arg, result_chan_arg = it.parse_axes_args(
-        sample_batch_arg, sample_chan_arg, 4
+        batch_axes, chan_axes, ndim
     )
-    assert result_batch_arg == sample_batch_arg
-    assert result_chan_arg == sample_chan_arg
+    assert result_batch_arg == expected_batch_axes
+    assert result_chan_arg == expected_chan_axes
 
 
-def test_parse_axes_args_with_index_lists():
-    it = ImageTranslatorFGR()
-    sample_batch_arg = [1]
-    sample_chan_arg = [0]
-
-    result_batch_arg, result_chan_arg = it.parse_axes_args(
-        sample_batch_arg, sample_chan_arg, 4
-    )
-    assert result_batch_arg == [False, True, False, False]
-    assert result_chan_arg == [True, False, False, False]
-
-
-def test_parse_axes_args_with_bool_lists_3d_spacetime():
-    it = ImageTranslatorFGR()
-    sample_batch_arg = [False, False, False, False]
-    sample_chan_arg = [True, False, False, False]
-
-    result_batch_arg, result_chan_arg = it.parse_axes_args(
-        sample_batch_arg, sample_chan_arg, 4
-    )
-    assert result_batch_arg == sample_batch_arg
-    assert result_chan_arg == sample_chan_arg
-
-
-def test_parse_axes_args_with_index_lists_3d_spacetime():
-    it = ImageTranslatorFGR()
-    sample_batch_arg = []
-    sample_chan_arg = [0]
-
-    result_batch_arg, result_chan_arg = it.parse_axes_args(
-        sample_batch_arg, sample_chan_arg, 4
-    )
-    assert result_batch_arg == [False, False, False, False]
-    assert result_chan_arg == [True, False, False, False]
-
-
-def test_parse_axes_args_with_bool_lists_4d_spacetime():
-    it = ImageTranslatorFGR()
-    sample_batch_arg = [False, False, False, False, False]
-    sample_chan_arg = [True, False, False, False, False]
-
-    result_batch_arg, result_chan_arg = it.parse_axes_args(
-        sample_batch_arg, sample_chan_arg, 5
-    )
-    assert result_batch_arg == sample_batch_arg
-    assert result_chan_arg == sample_chan_arg
-
-
-def test_parse_axes_args_with_index_lists_4d_spacetime():
-    it = ImageTranslatorFGR()
-    sample_batch_arg = []
-    sample_chan_arg = [0]
-
-    result_batch_arg, result_chan_arg = it.parse_axes_args(
-        sample_batch_arg, sample_chan_arg, 5
-    )
-    assert result_batch_arg == [False, False, False, False, False]
-    assert result_chan_arg == [True, False, False, False, False]
-
-
-def test_parse_axes_args_with_all_batch():
+@pytest.mark.parametrize("batch_axes, chan_axes, ndim", [
+    ([True, True, True, True], [False, False, False, False], 4),
+    ([0, 1, 2, 3], [], 4),
+    ([False, False, False, False], [True, True, True, True], 4),
+    ([], [0, 1, 2, 3], 4),
+    ([True, False, False, False], [True, False, False, False], 4),
+    ([0], [0], 4),
+    ([False, False, False, False, False], [False, False, False, False, False], 5),
+    ([], [],  5),
+])
+def test_parse_axes_args_raises_exception(batch_axes, chan_axes, ndim):
     it = ImageTranslatorFGR()
 
     with pytest.raises(Exception):
-        sample_batch_arg = [True, True, True, True]
-        sample_chan_arg = [False, False, False, False]
-
-        it.parse_axes_args(sample_batch_arg, sample_chan_arg, 4)
-
-    with pytest.raises(Exception):
-        sample_batch_arg = [0, 1, 2, 3]
-        sample_chan_arg = []
-
-        it.parse_axes_args(sample_batch_arg, sample_chan_arg, 4)
-
-
-def test_parse_axes_args_with_all_chan():
-    it = ImageTranslatorFGR()
-
-    with pytest.raises(Exception):
-        sample_batch_arg = [False, False, False, False]
-        sample_chan_arg = [True, True, True, True]
-
-        it.parse_axes_args(sample_batch_arg, sample_chan_arg, 4)
-
-    with pytest.raises(Exception):
-        sample_batch_arg = []
-        sample_chan_arg = [0, 1, 2, 3]
-
-        it.parse_axes_args(sample_batch_arg, sample_chan_arg, 4)
-
-
-def test_parse_axes_args_with_colliding_batch_chan():
-    it = ImageTranslatorFGR()
-
-    with pytest.raises(Exception):
-        sample_batch_arg = [True, False, False, False]
-        sample_chan_arg = [True, False, False, False]
-
-        it.parse_axes_args(sample_batch_arg, sample_chan_arg, 4)
-
-    with pytest.raises(Exception):
-        sample_batch_arg = [0]
-        sample_chan_arg = [0]
-
-        it.parse_axes_args(sample_batch_arg, sample_chan_arg, 4)
-
-
-def test_parse_axes_args_with_5d_spacetime():
-    it = ImageTranslatorFGR()
-
-    with pytest.raises(Exception):
-        sample_batch_arg = [False, False, False, False, False]
-        sample_chan_arg = [False, False, False, False, False]
-
-        it.parse_axes_args(sample_batch_arg, sample_chan_arg, 5)
-
-    with pytest.raises(Exception):
-        sample_batch_arg = []
-        sample_chan_arg = []
-
-        it.parse_axes_args(sample_batch_arg, sample_chan_arg, 5)
+        it.parse_axes_args(batch_axes, chan_axes, ndim)
 
 
 def test_transform_sorting():
