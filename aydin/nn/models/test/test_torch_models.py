@@ -12,26 +12,29 @@ from aydin.nn.training_methods.n2s import n2s_train
 from aydin.nn.training_methods.n2t import n2t_train
 
 
-@pytest.mark.parametrize("model, train_method, nb_epochs", [
-    (
-        UNetModel(
-            nb_unet_levels=2,
-            spacetime_ndim=2,
+@pytest.mark.parametrize(
+    "model, train_method, nb_epochs",
+    [
+        (
+            UNetModel(
+                nb_unet_levels=2,
+                spacetime_ndim=2,
+            ),
+            n2s_train,
+            128,
         ),
-        n2s_train,
-        128,
-    ),
-    (JINetModel(spacetime_ndim=2), n2s_train, 20),
-    (
+        (JINetModel(spacetime_ndim=2), n2s_train, 20),
+        (
             UNetModel(
                 nb_unet_levels=2,
                 spacetime_ndim=2,
             ),
             n2t_train,
             20,
-    ),
-    (JINetModel(spacetime_ndim=2), n2t_train, 20)
-])
+        ),
+        (JINetModel(spacetime_ndim=2), n2t_train, 20),
+    ],
+)
 def test_models_2D(model, train_method, nb_epochs):
     camera_image = normalise(camera())
     camera_image = numpy.expand_dims(camera_image, axis=0)
