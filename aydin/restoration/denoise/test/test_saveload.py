@@ -22,11 +22,14 @@ transforms = [
 ]
 
 
-@pytest.mark.parametrize("denoiser, min_psnr, min_ssim", [
-    (Classic(variant="gaussian", it_transforms=transforms), 19, 0.61),
-    (Noise2SelfFGR(variant="cb", it_transforms=transforms), 20, 0.78),
-    (Noise2SelfCNN(it_transforms=transforms), 19, 0.61),
-])
+@pytest.mark.parametrize(
+    "denoiser, min_psnr, min_ssim",
+    [
+        (Classic(variant="gaussian", it_transforms=transforms), 19, 0.61),
+        (Noise2SelfFGR(variant="cb", it_transforms=transforms), 20, 0.78),
+        (Noise2SelfCNN(it_transforms=transforms), 19, 0.61),
+    ],
+)
 def test_saveload(denoiser, min_psnr, min_ssim):
     image = normalise(camera().astype(numpy.float32))
     noisy = add_noise(image)
