@@ -12,22 +12,28 @@ from aydin.it.base import ImageTranslatorBase
 from aydin.it.classic import ImageDenoiserClassic
 
 
-@pytest.mark.parametrize("method, min_psnr, min_ssim", [
-    ("gaussian", 20, 0.61),
-    ("lipschitz", 12, 0.16),
-])
+@pytest.mark.parametrize(
+    "method, min_psnr, min_ssim",
+    [
+        ("gaussian", 20, 0.61),
+        ("lipschitz", 12, 0.16),
+    ],
+)
 def test_saveload_gaussian(method, min_psnr, min_ssim):
     saveload(method, min_psnr, min_ssim)
 
 
 @pytest.mark.heavy
-@pytest.mark.parametrize("method, min_psnr, min_ssim", [
-    ("bilateral", 16, 0.30),
-    ("gm", 20, 0.65),
-    ("pca", 20, 0.60),
-    ("tv", 20, 0.73),
-    ("wavelet", 17, 0.40),
-])
+@pytest.mark.parametrize(
+    "method, min_psnr, min_ssim",
+    [
+        ("bilateral", 16, 0.30),
+        ("gm", 20, 0.65),
+        ("pca", 20, 0.60),
+        ("tv", 20, 0.73),
+        ("wavelet", 17, 0.40),
+    ],
+)
 def test_saveload_wavelet(method, min_psnr, min_ssim):
     saveload(method, min_psnr, min_ssim)
 

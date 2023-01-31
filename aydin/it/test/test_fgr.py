@@ -18,12 +18,15 @@ from aydin.regression.support_vector import SupportVectorRegressor
 
 
 @pytest.mark.heavy
-@pytest.mark.parametrize("regressor, min_psnr, min_ssim", [
-    (LinearRegressor(), 18, 0.65),
-    (SupportVectorRegressor(), 22, 0.71),
-    (PerceptronRegressor(max_epochs=64), 22, 0.70),
-    (CBRegressor(max_num_estimators=256, min_num_estimators=64), 22, 0.779)
-])
+@pytest.mark.parametrize(
+    "regressor, min_psnr, min_ssim",
+    [
+        (LinearRegressor(), 18, 0.65),
+        (SupportVectorRegressor(), 22, 0.71),
+        (PerceptronRegressor(max_epochs=64), 22, 0.70),
+        (CBRegressor(max_num_estimators=256, min_num_estimators=64), 22, 0.779),
+    ],
+)
 def test_it_fgr_linear(regressor, min_psnr, min_ssim):
     do_it_fgr(regressor, min_psnr=min_psnr, min_ssim=min_ssim)
 

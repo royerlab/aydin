@@ -32,7 +32,7 @@ def balancing_metrics(balance, nb_runs=1):
 
     balancer.calibrate(image, batch_length=16)
 
-    entries = [image[i: i + 16] for i in range(0, image.size, 16)]
+    entries = [image[i : i + 16] for i in range(0, image.size, 16)]
 
     for j in range(nb_runs):
         balancer.initialise(len(entries))

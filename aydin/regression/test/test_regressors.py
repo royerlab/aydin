@@ -61,14 +61,17 @@ def data():
 #     with_regressor(data, PerceptronRegressor(max_epochs=6, depth=6), min_ssim=0.64)
 
 
-@pytest.mark.parametrize("regressor, min_ssim", [
-    (LinearRegressor(), 0.6),
-    (RandomForestRegressor(), 0.6),
-    (SupportVectorRegressor(), 0.65),
-    (LGBMRegressor(max_num_estimators=600), 0.75),
-    (CBRegressor(max_num_estimators=600), 0.75),
-    (PerceptronRegressor(max_epochs=6, depth=6), 0.64),
-])
+@pytest.mark.parametrize(
+    "regressor, min_ssim",
+    [
+        (LinearRegressor(), 0.6),
+        (RandomForestRegressor(), 0.6),
+        (SupportVectorRegressor(), 0.65),
+        (LGBMRegressor(max_num_estimators=600), 0.75),
+        (CBRegressor(max_num_estimators=600), 0.75),
+        (PerceptronRegressor(max_epochs=6, depth=6), 0.64),
+    ],
+)
 def test_regressor(regressor, min_ssim, data):
     image, noisy, x, y = data
 

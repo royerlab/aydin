@@ -20,7 +20,9 @@ def n(image):
     )
 
 
-@pytest.mark.parametrize("normalizer", [PercentileNormaliser(0), MinMaxNormaliser(), IdentityNormaliser()])
+@pytest.mark.parametrize(
+    "normalizer", [PercentileNormaliser(0), MinMaxNormaliser(), IdentityNormaliser()]
+)
 def test_normalisers_saveload(normalizer):
     input_path = examples_single.maitre_mouse.get_path()
     array, metadata = imread(input_path)
