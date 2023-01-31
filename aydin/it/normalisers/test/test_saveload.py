@@ -2,6 +2,7 @@ import time
 from os.path import join
 
 import numpy
+import pytest
 from skimage.exposure import rescale_intensity
 
 from aydin.io import imread
@@ -19,31 +20,20 @@ def n(image):
     )
 
 
-def test_percentile_saveload():
-    saveload(PercentileNormaliser(0))
-
-
-def test_minmax_saveload():
-    saveload(MinMaxNormaliser())
-
-
-def test_identity_saveload():
-    saveload(IdentityNormaliser())
-
-
-def saveload(normaliser):
+@pytest.mark.parametrize("normalizer", [PercentileNormaliser(0), MinMaxNormaliser(), IdentityNormaliser()])
+def test_normalisers_saveload(normalizer):
     input_path = examples_single.maitre_mouse.get_path()
     array, metadata = imread(input_path)
     assert array.dtype == numpy.uint8
 
-    normaliser.calibrate(array)
+    normalizer.calibrate(array)
     print(f"Before normalisation: min,max = {(array.min(), array.max())}")
 
     temp_file = join(
         get_temp_folder(), "test_normaliser_saveload.json" + str(time.time())
     )
-    normaliser.save(temp_file)
-    del normaliser
+    normalizer.save(temp_file)
+    del normalizer
 
     loaded_normaliser = NormaliserBase.load(temp_file)
 

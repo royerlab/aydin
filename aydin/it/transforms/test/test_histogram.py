@@ -12,14 +12,6 @@ def test_histogram():
     preprocessed = ht.preprocess(image)
     postprocessed = ht.postprocess(preprocessed)
 
-    # import napari
-    #
-    # viewer = napari.Viewer()
-    # viewer.add_image(image, name='image')
-    # viewer.add_image(preprocessed, name='preprocessed')
-    # viewer.add_image(postprocessed, name='postprocessed')
-    # napari.run()
-
     assert postprocessed.dtype == image.dtype
     assert postprocessed.shape == image.shape
     assert (
