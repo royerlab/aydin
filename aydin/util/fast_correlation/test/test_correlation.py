@@ -7,8 +7,14 @@ from skimage.exposure import rescale_intensity
 from aydin.io.datasets import small_newyork
 from aydin.util.fast_correlation.numba_cpu import numba_cpu_correlate
 from aydin.util.fast_correlation.parallel import parallel_correlate
-from aydin.util.fast_correlation.test.compute_correlation import compute_correlation_1d, compute_correlation_2d, \
-    compute_correlation_3d, compute_correlation_4d, compute_correlation_5d, compute_correlation_6d
+from aydin.util.fast_correlation.test.compute_correlation import (
+    compute_correlation_1d,
+    compute_correlation_2d,
+    compute_correlation_3d,
+    compute_correlation_4d,
+    compute_correlation_5d,
+    compute_correlation_6d,
+)
 
 
 def test_correlation_type_support():
@@ -21,14 +27,17 @@ def test_correlation_different_sizes():
     _test_compute_correlation_different_sizes(parallel_correlate)
 
 
-@pytest.mark.parametrize("method", [
-    compute_correlation_1d,
-    compute_correlation_2d,
-    compute_correlation_3d,
-    compute_correlation_4d,
-    compute_correlation_5d,
-    compute_correlation_6d,
-])
+@pytest.mark.parametrize(
+    "method",
+    [
+        compute_correlation_1d,
+        compute_correlation_2d,
+        compute_correlation_3d,
+        compute_correlation_4d,
+        compute_correlation_5d,
+        compute_correlation_6d,
+    ],
+)
 def test_compute_correlation(method):
     method(numba_cpu_correlate)
     method(parallel_correlate)
