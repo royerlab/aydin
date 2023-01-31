@@ -37,31 +37,39 @@ def data():
     return image, noisy, x, y
 
 
-def test_linear_regressor(data):
-    with_regressor(data, LinearRegressor(), min_ssim=0.6)
+# def test_linear_regressor(data):
+#     with_regressor(data, LinearRegressor(), min_ssim=0.6)
+#
+#
+# def test_rf_regressor(data):
+#     with_regressor(data, RandomForestRegressor(), min_ssim=0.6)
+#
+#
+# def test_svr_regressor(data):
+#     with_regressor(data, SupportVectorRegressor(), min_ssim=0.65)
+#
+#
+# def test_lgbm_regressor(data):
+#     with_regressor(data, LGBMRegressor(max_num_estimators=600), min_ssim=0.75)
+#
+#
+# def test_cb_regressor(data):
+#     with_regressor(data, CBRegressor(max_num_estimators=600), min_ssim=0.75)
+#
+#
+# def test_nn_regressor(data):
+#     with_regressor(data, PerceptronRegressor(max_epochs=6, depth=6), min_ssim=0.64)
 
 
-def test_rf_regressor(data):
-    with_regressor(data, RandomForestRegressor(), min_ssim=0.6)
-
-
-def test_svr_regressor(data):
-    with_regressor(data, SupportVectorRegressor(), min_ssim=0.65)
-
-
-def test_lgbm_regressor(data):
-    with_regressor(data, LGBMRegressor(max_num_estimators=600), min_ssim=0.75)
-
-
-def test_cb_regressor(data):
-    with_regressor(data, CBRegressor(max_num_estimators=600), min_ssim=0.75)
-
-
-def test_nn_regressor(data):
-    with_regressor(data, PerceptronRegressor(max_epochs=6, depth=6), min_ssim=0.64)
-
-
-def with_regressor(data, regressor, min_ssim=0.8):
+@pytest.mark.parametrize("regressor, min_ssim", [
+    (LinearRegressor(), 0.6),
+    (RandomForestRegressor(), 0.6),
+    (SupportVectorRegressor(), 0.65),
+    (LGBMRegressor(max_num_estimators=600), 0.75),
+    (CBRegressor(max_num_estimators=600), 0.75),
+    (PerceptronRegressor(max_epochs=6, depth=6), 0.64),
+])
+def test_regressor(regressor, min_ssim, data):
     image, noisy, x, y = data
 
     regressor.fit(x, y)
