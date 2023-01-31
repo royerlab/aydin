@@ -22,33 +22,12 @@ transforms = [
 ]
 
 
-def test_saveload_classic_gaussian():
-    saveload(
-        Classic(variant="gaussian", it_transforms=transforms),
-        min_psnr=19,
-        min_ssim=0.61,
-    )
-
-
-@pytest.mark.heavy
-def test_saveload_noise2selffgr():
-    saveload(
-        Noise2SelfFGR(variant="cb", it_transforms=transforms),
-        min_psnr=20,
-        min_ssim=0.78,
-    )
-
-
-# @pytest.mark.heavy
-def test_saveload_noise2selfcnn():
-    saveload(
-        Noise2SelfCNN(it_transforms=transforms),
-        min_psnr=19,
-        min_ssim=0.61,
-    )
-
-
-def saveload(denoiser, min_psnr=22, min_ssim=0.75):
+@pytest.mark.parametrize("denoiser, min_psnr, min_ssim", [
+    (Classic(variant="gaussian", it_transforms=transforms), 19, 0.61),
+    (Noise2SelfFGR(variant="cb", it_transforms=transforms), 20, 0.78),
+    (Noise2SelfCNN(it_transforms=transforms), 19, 0.61),
+])
+def test_saveload(denoiser, min_psnr, min_ssim):
     image = normalise(camera().astype(numpy.float32))
     noisy = add_noise(image)
 
