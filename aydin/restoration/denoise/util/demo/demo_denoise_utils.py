@@ -5,6 +5,6 @@ from aydin.restoration.denoise.util.denoise_utils import (
 )
 
 
-def est_denoise_utils():
+def demo_denoise_utils():
     implementations = get_list_of_denoiser_implementations()
     pprint(implementations)

@@ -25,14 +25,6 @@ def test_vst():
         preprocessed = vst.preprocess(noisy)
         postprocessed = vst.postprocess(preprocessed)
 
-        # import napari
-        # with napari.gui_qt():
-        #     viewer = napari.Viewer()
-        #     viewer.add_image(image, name='image')
-        #     viewer.add_image(noisy, name='noisy')
-        #     viewer.add_image(preprocessed, name='preprocessed')
-        #     viewer.add_image(postprocessed, name='postprocessed')
-
         error = numpy.abs(
             postprocessed.astype(numpy.float32) - noisy.astype(numpy.float32)
         ).mean()

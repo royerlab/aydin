@@ -18,14 +18,6 @@ def test_suppress_fixed_background_real():
 
     median = median_filter(image, size=3)
 
-    # import napari
-
-    # with napari.gui_qt():
-    # viewer = napari.Viewer()
-    # viewer.add_image(image, name='image')
-    # viewer.add_image(median, name='median')
-    # viewer.add_image(corrected, name='corrected')
-
     error0 = numpy.abs(median - image).mean()
     error = numpy.abs(corrected - image).mean()
 
