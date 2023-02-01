@@ -13,13 +13,16 @@ def _normalise(image):
     )
 
 
-@pytest.mark.parametrize("image_dtype, decimal", [
-    (numpy.float32, 3),
-    (numpy.float16, 1),
-    (numpy.uint32, 0),
-    (numpy.uint16, 0),
-    (numpy.uint8, 0),
-])
+@pytest.mark.parametrize(
+    "image_dtype, decimal",
+    [
+        (numpy.float32, 3),
+        (numpy.float16, 1),
+        (numpy.uint32, 0),
+        (numpy.uint16, 0),
+        (numpy.uint8, 0),
+    ],
+)
 def test_fast_shift_filter_type_support(image_dtype, decimal, _shift=(-1, 3)):
     image = newyork()
     shifted_image = fast_shift(image, shift=_shift)
