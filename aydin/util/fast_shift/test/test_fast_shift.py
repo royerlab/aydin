@@ -1,4 +1,5 @@
 import numpy
+import pytest
 from scipy.ndimage import shift
 from skimage.exposure import rescale_intensity
 
@@ -12,17 +13,15 @@ def _normalise(image):
     )
 
 
-def test_fast_shift_filter_type_support():
+@pytest.mark.parametrize("image_dtype, decimal", [
+    (numpy.float32, 3),
+    (numpy.float16, 1),
+    (numpy.uint32, 0),
+    (numpy.uint16, 0),
+    (numpy.uint8, 0),
+])
+def test_fast_shift_filter_type_support(image_dtype, decimal, _shift=(-1, 3)):
     image = newyork()
-
-    _run_test_for_type(image.astype(dtype=numpy.float32))
-    _run_test_for_type(image.astype(dtype=numpy.float16), decimal=1)
-    _run_test_for_type(image.astype(dtype=numpy.uint32), decimal=0)
-    _run_test_for_type(image.astype(dtype=numpy.uint16), decimal=0)
-    _run_test_for_type(image.astype(dtype=numpy.uint8), decimal=0)
-
-
-def _run_test_for_type(image, decimal=3, _shift=(-1, 3)):
     shifted_image = fast_shift(image, shift=_shift)
     assert shifted_image.dtype == image.dtype
 
@@ -36,7 +35,6 @@ def _run_test_for_type(image, decimal=3, _shift=(-1, 3)):
 
 
 def test_compute_uniform_filter_different_sizes():
-
     shifts = [(1, 2), (16, 7), (3, 7), (4, 4)]
 
     for current_shift in shifts:
