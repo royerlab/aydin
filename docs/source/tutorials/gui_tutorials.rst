@@ -167,6 +167,18 @@ We refer to those different implementations as variants. We expose an extensive 
 for each provided variant. Users can find default value and a small explanation for each argument
 in the list.
 
+
+Basic and Advanced modes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, ``Aydin Studio`` provides selected lists of denoiser variants in ``Denoise`` tab and pre-processing
+options in ``Pre/Post-Processing`` tab. This is helpful to everyday users of ``Aydin Studio`` in finding
+what they need quickly. It is called the basic mode of ``Aydin Studio``. There is also an advanced mode
+of ``Aydin Studio`` where all denoiser variants and all pre-processing options in their corresponding tabs
+are enabled. One can toggle between basic and advanced modes of ``Aydin Studio`` using the ``Preferences``
+menu tab on the application window.
+
+
 Saving denoising options and trained model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
