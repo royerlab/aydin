@@ -47,13 +47,6 @@ def test_deskew_with_non_standard_axes():
     ds_array = sd.preprocess(array)
     s_array = sd.postprocess(ds_array)
 
-    # import napari
-    # with napari.gui_qt():
-    #     viewer = napari.Viewer()
-    #     viewer.add_image(array, name='array')
-    #     viewer.add_image(ds_array, name='ds_array')
-    #     viewer.add_image(s_array, name='s_array')
-
     assert (numpy.abs(s_array - array) < 0.00001).all()
 
 

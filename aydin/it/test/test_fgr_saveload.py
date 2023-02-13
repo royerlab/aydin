@@ -21,38 +21,28 @@ from aydin.regression.support_vector import SupportVectorRegressor
 
 
 @pytest.mark.heavy
-def test_saveload_Linear():
-    regressor = LinearRegressor()
-    saveload(StandardFeatureGenerator(), regressor, min_psnr=19, min_ssim=0.73)
-
-
-@pytest.mark.heavy
-def test_saveload_RF():
-    regressor = RandomForestRegressor()
-    saveload(StandardFeatureGenerator(), regressor, min_ssim=0.75)
-
-
-@pytest.mark.heavy
-def test_saveload_SVR():
-    regressor = SupportVectorRegressor()
-    saveload(StandardFeatureGenerator(), regressor, min_psnr=22, min_ssim=0.71)
-
-
-@pytest.mark.heavy
-def test_saveload_NN():
-    regressor = PerceptronRegressor(max_epochs=12)
-    saveload(StandardFeatureGenerator(), regressor, min_psnr=21, min_ssim=0.73)
+@pytest.mark.parametrize(
+    "regressor, min_psnr, min_ssim",
+    [
+        (LinearRegressor(), 19, 0.73),
+        (RandomForestRegressor(), 22, 0.75),
+        (SupportVectorRegressor(), 22, 0.71),
+        (PerceptronRegressor(max_epochs=12), 21, 0.73),
+        (LGBMRegressor(max_num_estimators=256), 22, 0.79),
+    ],
+)
+def test_saveload_heavy(regressor, min_psnr, min_ssim):
+    saveload(
+        StandardFeatureGenerator(), regressor, min_psnr=min_psnr, min_ssim=min_ssim
+    )
 
 
 def test_saveload_CB():
-    regressor = CBRegressor(max_num_estimators=256, min_num_estimators=64)
-    saveload(StandardFeatureGenerator(), regressor, min_ssim=0.78)
-
-
-@pytest.mark.heavy
-def test_saveload_LGBM():
-    regressor = LGBMRegressor(max_num_estimators=256)
-    saveload(StandardFeatureGenerator(), regressor, min_ssim=0.79)
+    saveload(
+        StandardFeatureGenerator(),
+        CBRegressor(max_num_estimators=256, min_num_estimators=64),
+        min_ssim=0.78,
+    )
 
 
 def saveload(generator, regressor, min_psnr=22, min_ssim=0.75):

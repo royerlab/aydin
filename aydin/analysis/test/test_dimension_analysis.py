@@ -5,45 +5,28 @@ from aydin.io import imread
 from aydin.io.datasets import examples_single
 
 
-def test_dimension_analysis_noisynewyork(display: bool = False):
-
-    image = examples_single.noisy_newyork.get_array()
-
+@pytest.mark.parametrize(
+    "image, expected_batch_axes, expected_channel_axes",
+    [
+        (examples_single.noisy_newyork.get_array(), [], []),
+        (examples_single.maitre_mouse.get_array(), [0, 1], []),
+        (examples_single.cognet_nanotube_400fps.get_array()[:, 8:-8, 8:-8], [], []),
+        (imread(examples_single.royerlab_hcr.get_path())[0], [], [1]),
+        (examples_single.leonetti_snca.get_array(), [], [1]),
+    ],
+)
+def test_dimension_analysis(image, expected_batch_axes, expected_channel_axes):
     batch_axes, channel_axes = dimension_analysis_on_image(image)
 
     print(batch_axes)
     print(channel_axes)
 
-    if display:
-        import napari
-
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        napari.run()
-
-    assert len(channel_axes) == 0
-    assert len(batch_axes) == 0
-
-
-def test_dimension_analysis_maitre(display: bool = False):
-
-    image = examples_single.maitre_mouse.get_array()
-
-    batch_axes, channel_axes = dimension_analysis_on_image(image)
-
-    print(batch_axes)
-    print(channel_axes)
-
-    if display:
-        import napari
-
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        napari.run()
-
-    assert len(channel_axes) == 0
-    assert len(batch_axes) == 2
-    assert 0 in batch_axes and 1 in batch_axes
+    assert len(channel_axes) == len(expected_channel_axes)
+    assert len(batch_axes) == len(expected_batch_axes)
+    for elem in expected_batch_axes:
+        assert elem in batch_axes
+    for elem in expected_channel_axes:
+        assert elem in channel_axes
 
 
 @pytest.mark.heavy
@@ -67,74 +50,6 @@ def test_dimension_analysis_hela(display: bool = False):
     assert len(batch_axes) == 0
 
 
-def test_dimension_analysis_cognet(display: bool = False):
-
-    image = examples_single.cognet_nanotube_400fps.get_array()
-
-    # we remove some weird pixels:
-    image = image[:, 8:-8, 8:-8]
-
-    batch_axes, channel_axes = dimension_analysis_on_image(image)
-
-    print(batch_axes)
-    print(channel_axes)
-
-    if display:
-        import napari
-
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        napari.run()
-
-    assert len(channel_axes) == 0
-    assert len(batch_axes) == 0
-
-
-# def test_dimension_analysis_huang(display: bool = False):
-#
-#     image = examples_single.huang_fixed_pattern_noise.get_array()
-#
-#     batch_axes, channel_axes = dimension_analysis_on_image(image)
-#
-#     print(batch_axes)
-#     print(channel_axes)
-#
-#     if display:
-#         import napari
-#
-#         viewer = napari.Viewer()
-#         viewer.add_image(image, name='image')
-#         napari.run()
-#
-#     assert len(channel_axes) == 0
-#     assert len(batch_axes) == 1
-#     assert 0 in batch_axes
-
-
-def test_dimension_analysis_royer(display: bool = False):
-
-    image_path = examples_single.royerlab_hcr.get_path()
-    image, metadata = imread(image_path)
-
-    batch_axes, channel_axes = dimension_analysis_on_image(image)
-
-    print(batch_axes)
-    print(channel_axes)
-
-    print(metadata)
-
-    if display:
-        import napari
-
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        napari.run()
-
-    assert len(channel_axes) == 1
-    assert 1 in channel_axes
-    assert len(batch_axes) == 0
-
-
 @pytest.mark.unstable
 def test_dimension_analysis_flybrain(display: bool = False):
 
@@ -148,29 +63,6 @@ def test_dimension_analysis_flybrain(display: bool = False):
     print(batch_axes)
     print(channel_axes)
     print(metadata)
-
-    if display:
-        import napari
-
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        napari.run()
-
-    assert len(channel_axes) == 1
-    assert 1 in channel_axes
-    assert len(batch_axes) == 0
-
-
-def test_dimension_analysis_leonetti(display: bool = False):
-
-    image = examples_single.leonetti_snca.get_array()
-
-    batch_axes, channel_axes = dimension_analysis_on_image(
-        image, max_channels_per_axis=6
-    )
-
-    print(batch_axes)
-    print(channel_axes)
 
     if display:
         import napari

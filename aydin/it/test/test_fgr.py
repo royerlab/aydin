@@ -18,9 +18,17 @@ from aydin.regression.support_vector import SupportVectorRegressor
 
 
 @pytest.mark.heavy
-def test_it_fgr_linear():
-    regressor = LinearRegressor()
-    do_it_fgr(regressor, min_psnr=18, min_ssim=0.65)
+@pytest.mark.parametrize(
+    "regressor, min_psnr, min_ssim",
+    [
+        (LinearRegressor(), 18, 0.65),
+        (SupportVectorRegressor(), 22, 0.71),
+        (PerceptronRegressor(max_epochs=64), 22, 0.70),
+        (CBRegressor(max_num_estimators=256, min_num_estimators=64), 22, 0.779),
+    ],
+)
+def test_it_fgr_linear(regressor, min_psnr, min_ssim):
+    do_it_fgr(regressor, min_psnr=min_psnr, min_ssim=min_ssim)
 
 
 def test_it_fgr_rf():
@@ -28,27 +36,9 @@ def test_it_fgr_rf():
     do_it_fgr(regressor, min_ssim=0.75)
 
 
-@pytest.mark.heavy
-def test_it_fgr_svr():
-    regressor = SupportVectorRegressor()
-    do_it_fgr(regressor, min_psnr=22, min_ssim=0.71)
-
-
 def test_it_fgr_lgbm():
     regressor = LGBMRegressor(max_num_estimators=256)
     do_it_fgr(regressor, min_ssim=0.77)
-
-
-@pytest.mark.heavy
-def test_it_fgr_nn():
-    regressor = PerceptronRegressor(max_epochs=64)
-    do_it_fgr(regressor, min_ssim=0.70)
-
-
-@pytest.mark.heavy  # we skip this as we run same for saveload
-def test_it_fgr_cb():
-    regressor = CBRegressor(max_num_estimators=256, min_num_estimators=64)
-    do_it_fgr(regressor, min_ssim=0.779)
 
 
 def test_it_fgr_cb_supervised():

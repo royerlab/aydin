@@ -29,24 +29,9 @@ def test_fixed_pattern_real():
     preprocessed = bs.preprocess(noisy)
     postprocessed = bs.postprocess(preprocessed)
 
-    # import napari
-    # with napari.gui_qt():
-    #     viewer = napari.Viewer()
-    #     viewer.add_image(image, name='image')
-    #     viewer.add_image(noisy, name='noisy')
-    #     viewer.add_image(preprocessed, name='preprocessed')
-    #     viewer.add_image(postprocessed, name='postprocessed')
-
     assert image.shape == postprocessed.shape
     assert image.dtype == postprocessed.dtype
     assert numpy.abs(preprocessed - image).mean() < 0.007
 
     assert preprocessed.dtype == postprocessed.dtype
     assert numpy.abs(postprocessed - noisy).mean() < 1e-8
-
-    # import napari
-    # with napari.gui_qt():
-    #     viewer = napari.Viewer()
-    #     viewer.add_image(image, name='image')
-    #     viewer.add_image(noisy, name='noisy')
-    #     viewer.add_image(corrected, name='corrected')
