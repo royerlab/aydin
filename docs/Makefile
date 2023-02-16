@@ -13,7 +13,13 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 
 # get the most recent tagged version
 # (note that the regex here must be consistent with `smv_tag_whitelist` in the sphinx config)
-LATEST_VERSION = $(shell git for-each-ref --sort=taggerdate --format '%(tag)' | grep '^v\d\+\.\d\+\.\d\+$$' | tail -1)
+OS := $(shell uname)
+ifeq ($(OS), Darwin)
+    LATEST_VERSION = $(shell git for-each-ref --sort=taggerdate --format '%(tag)' | grep -E '^v\d+\.\d+\.\d+$$' | tail -1)
+endif
+ifeq ($(OS), Linux)
+    LATEST_VERSION = $(shell git for-each-ref --sort=taggerdate --format '%(tag)' | grep -P '^v\d+\.\d+\.\d+$$' | tail -1)
+endif
 
 .PHONY: help clean build build-multiversion publish
 
@@ -30,6 +36,7 @@ build:
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 build-multiversion:
+	@echo ${LATEST_VERSION}
 	sphinx-multiversion source build/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
