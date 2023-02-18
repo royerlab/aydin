@@ -23,8 +23,8 @@ class App(QMainWindow):
 
         self.title = "Aydin Studio - image denoising, but chill..."
 
-        self.desktop = QApplication.desktop()
-        self.screenRect = self.desktop.screenGeometry()
+        self.desktop = QApplication.primaryScreen()
+        self.screenRect = self.desktop.availableGeometry()
         height, width = self.screenRect.height(), self.screenRect.width()
 
         self.width = width // 3
