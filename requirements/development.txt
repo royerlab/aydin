@@ -2,5 +2,6 @@ black=22.12.0
 flake8==4.0.1
 mock==4.0.3
 pytest==6.2.5
-pyinstaller==5.1
+pytest-qt==4.0.2
+pyinstaller==4.8
 distributed
