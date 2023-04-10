@@ -286,9 +286,3 @@ def download_from_gdrive(
 def download_all_examples():
     for example in examples_single:
         print(download_from_gdrive(*example.value))
-
-
-def downloaded_example(substring):
-    for example in examples_single.get_list():
-        if substring in example.value[1]:
-            print(download_from_gdrive(*example.value))
