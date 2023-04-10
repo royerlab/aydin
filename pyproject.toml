@@ -10,5 +10,12 @@ requires = [
   "setuptools_scm[toml]>=3.4"
 ]
 
+
 [tool.setuptools_scm]
 write_to = "aydin/_version.py"
+
+
+[tool.pylint]
+# disable all conventions, refactors, warnings (C, R, W) and the following rules:
+# - E1136: 'unsubscriptable-object' (anecdotal false positives for numpy objects)
+disable = ["C", "R", "W", "unsubscriptable-object"]

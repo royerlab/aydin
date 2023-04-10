@@ -76,11 +76,8 @@ conda activate aydin
 # For Macs (OSX) you first need to do:
 brew install libomp
 
-# Install Aydin
-pip install -e .
-
-# Install development specific dependencies
-pip install -r requirements/development.txt
+# Install Aydin and development specific dependencies
+pip install -e '.[dev]'
 
 # Before making a PR make sure tests are passing
 # To run tests

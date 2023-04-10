@@ -47,11 +47,11 @@ jobs:
             python-version: ${{ matrix.python-version }}
         - name: Install dependencies
           run: |
-            python -m pip install --upgrade pip
-            pip install flake8==4.0.1
-        - name: Check code with Flake8
+            python -m pip install '.[dev]'
+        - name: Check code with Flake8 and PyLint
           run: |
             flake8 --ignore E501,E203,W503 aydin
+            pylint aydin --extension-pkg-whitelist=PyQt5
 
   test-linux39:
       needs: [style, lint]
