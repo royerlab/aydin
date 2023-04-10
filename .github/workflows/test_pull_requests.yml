@@ -54,8 +54,7 @@ jobs:
             flake8 --ignore E501,E203,W503 aydin
 
   test-linux39:
-#      needs: [style, lint]
-      name: Tests
+      name: Tests #      needs: [style, lint]
       runs-on: ubuntu-latest
       if: github.repository == 'royerlab/aydin'
 
