@@ -54,31 +54,32 @@ jobs:
             flake8 --ignore E501,E203,W503 aydin
 
   test-linux39:
-      name: Tests #      needs: [style, lint] #            sudo apt install -y libgl1-mesa-glx
-      runs-on: ubuntu-latest
-      if: github.repository == 'royerlab/aydin'
+    needs: [style, lint]
+    name: Tests
+    runs-on: ubuntu-latest
+    if: github.repository == 'royerlab/aydin'
 
-      strategy:
-        matrix:
-          python-version: [ "3.9" ]
+    strategy:
+      matrix:
+        python-version: [ "3.9" ]
 
-      steps:
-        - uses: actions/checkout@v2
-        - name: Set up Python
-          uses: actions/setup-python@v2
-          with:
-            python-version: ${{ matrix.python-version }}
-        - name: Install dependencies
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y libegl1
-            python -m pip install --upgrade pip
-            pip install -e .
-            pip install pytest==6.2.5
-            pip install mock==4.0.3
-        - name: Run the tests
-          run: |
-            python -m pytest . --disable-pytest-warnings --durations=30 --show-capture=stderr
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest==6.2.5
+          pip install mock==4.0.3
+      - name: Run the tests
+        run: |
+          python -m pytest . --disable-pytest-warnings --durations=30 --show-capture=stderr
 
   test-unstable-linux39:
     needs: [ test-linux39 ]
@@ -98,6 +99,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1
           python -m pip install --upgrade pip
           pip install -e .
           pip install pytest==6.2.5
@@ -124,6 +127,8 @@ jobs:
               python-version: ${{ matrix.python-version }}
           - name: Install dependencies
             run: |
+              sudo apt-get update
+              sudo apt-get install -y libegl1
               python -m pip install --upgrade pip
               pip install -e .
               pip install pytest==6.2.5
@@ -150,6 +155,8 @@ jobs:
               python-version: ${{ matrix.python-version }}
           - name: Install dependencies
             run: |
+              sudo apt-get update
+              sudo apt-get install -y libegl1
               python -m pip install --upgrade pip
               pip install -e .
               pip install pytest==6.2.5
