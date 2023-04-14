@@ -134,7 +134,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
     def implementations(self):
         """Returns the list of discovered implementations for given method."""
         regression_modules = self.get_implementations_in_a_module(regression)
-        
+
         if platform.system() == "Darwin":
             for module in regression_modules:
                 if module.name in ["lgbm", "random_forest"]:
@@ -152,7 +152,6 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         feature_generator_description = StandardFeatureGenerator.__doc__.strip()
 
         descriptions = []
-
 
         regression_modules = self.get_implementations_in_a_module(regression)
         if platform.system() == "Darwin":
