@@ -4,6 +4,7 @@ import psutil
 from numba.cuda import CudaSupportError
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox
+import platform
 
 from aydin.util.misc.units import human_readable_byte_size
 
@@ -23,8 +24,9 @@ class SystemSummaryWidget(QWidget):
         self.cpu_group_box.setLayout(self.cpu_group_box_layout)
 
         # CPU freq
+        cpu_freq = round(psutil.cpu_freq().current, 2) if platform.processor() != "arm" else "N/A"
         self.cpu_freq_stats_label = QLabel(
-            f"Current CPU frequency:\t {round(psutil.cpu_freq().current, 2)} Mhz", self
+            f"Current CPU frequency:\t {cpu_freq} Mhz", self
         )
         self.cpu_group_box_layout.addWidget(self.cpu_freq_stats_label)
 

@@ -1,6 +1,7 @@
 import importlib
 import inspect
 import os
+import platform
 import shutil
 import sys
 from typing import Optional
@@ -111,6 +112,11 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             regression
         )
 
+        if platform.system() == "Darwin":
+            for module in regression_modules:
+                if module.name in ["lgbm", "random_forest"]:
+                    regression_modules.remove(module)
+
         for module in regression_modules:
             regressor_args = self.get_class_implementation_kwargs(
                 regression, module, module.name.replace("_", "") + "Regressor"
@@ -127,10 +133,14 @@ class Noise2SelfFGR(DenoiseRestorationBase):
     @property
     def implementations(self):
         """Returns the list of discovered implementations for given method."""
-        return [
-            "Noise2SelfFGR-" + x.name
-            for x in self.get_implementations_in_a_module(regression)
-        ]
+        regression_modules = self.get_implementations_in_a_module(regression)
+        
+        if platform.system() == "Darwin":
+            for module in regression_modules:
+                if module.name in ["lgbm", "random_forest"]:
+                    regression_modules.remove(module)
+
+        return ["Noise2SelfFGR-" + x.name for x in regression_modules]
 
     @property
     def implementations_description(self):
@@ -143,7 +153,14 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
         descriptions = []
 
-        for module in self.get_implementations_in_a_module(regression):
+
+        regression_modules = self.get_implementations_in_a_module(regression)
+        if platform.system() == "Darwin":
+            for module in regression_modules:
+                if module.name in ["lgbm", "random_forest"]:
+                    regression_modules.remove(module)
+
+        for module in regression_modules:
             response = importlib.import_module(regression.__name__ + '.' + module.name)
             elem = [
                 x
