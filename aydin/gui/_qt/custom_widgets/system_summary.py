@@ -24,7 +24,11 @@ class SystemSummaryWidget(QWidget):
         self.cpu_group_box.setLayout(self.cpu_group_box_layout)
 
         # CPU freq
-        cpu_freq = round(psutil.cpu_freq().current, 2) if platform.processor() != "arm" else "N/A"
+        cpu_freq = (
+            round(psutil.cpu_freq().current, 2)
+            if platform.processor() != "arm"
+            else "N/A"
+        )
         self.cpu_freq_stats_label = QLabel(
             f"Current CPU frequency:\t {cpu_freq} Mhz", self
         )
