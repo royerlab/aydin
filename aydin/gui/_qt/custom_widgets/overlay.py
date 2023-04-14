@@ -11,7 +11,7 @@ class Overlay(QWidget):
 
         QWidget.__init__(self, parent)
         palette = QPalette(self.palette())
-        palette.setColor(palette.Background, Qt.transparent)
+        # palette.setColor(palette.Background, Qt.transparent)
         self.setPalette(palette)
 
     def paintEvent(self, event):

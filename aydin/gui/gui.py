@@ -23,8 +23,8 @@ class App(QMainWindow):
 
         self.title = "Aydin Studio - image denoising, but chill..."
 
-        self.desktop = QApplication.desktop()
-        self.screenRect = self.desktop.screenGeometry()
+        self.desktop = QApplication.primaryScreen()
+        self.screenRect = self.desktop.availableGeometry()
         height, width = self.screenRect.height(), self.screenRect.width()
 
         self.width = width // 3
@@ -131,7 +131,7 @@ def run(ver):
 
     """
     app = QApplication(sys.argv)
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+    app.setStyleSheet(qdarkstyle.load_stylesheet())
     ex = App(ver)
     ex.show()
     sys.exit(app.exec())

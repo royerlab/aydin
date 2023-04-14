@@ -89,6 +89,12 @@ class DenoiseTab(QWidget):
             'Noise2SelfFGR-random_forest',
         ]
 
+        self.basic_backend_options = [
+            option
+            for option in self.backend_options
+            if option in self.basic_backend_options
+        ]
+
         self.basic_backend_options_descriptions = [
             description
             for option, description in zip(
