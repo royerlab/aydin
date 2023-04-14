@@ -2,6 +2,7 @@ import importlib
 import inspect
 import os
 import shutil
+import sys
 from typing import Optional
 
 from aydin import regression
@@ -12,13 +13,16 @@ from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.regression.cb import CBRegressor
-from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.linear import LinearRegressor
 from aydin.regression.perceptron import PerceptronRegressor
-from aydin.regression.random_forest import RandomForestRegressor
 from aydin.regression.support_vector import SupportVectorRegressor
 from aydin.restoration.denoise.base import DenoiseRestorationBase
 from aydin.util.log.log import lsection
+
+
+if sys.platform != "darwin":
+    from aydin.regression.lgbm import LGBMRegressor
+    from aydin.regression.random_forest import RandomForestRegressor
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):
