@@ -136,3 +136,11 @@ If you find Aydin useful and use it in your work, please kindly consider to cite
 
    On Github <contact_us/github>
    On image.sc <contact_us/imagesc>
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Developer Guides
+
+   Building dev Docs <dev_guides/build_dev_docs>
+   Making a Release <dev_guides/release>
