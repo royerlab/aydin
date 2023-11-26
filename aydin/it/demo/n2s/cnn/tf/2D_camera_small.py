@@ -2,14 +2,19 @@
 import time
 
 import numpy
+from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
-from aydin.io.datasets import camera, normalise, add_noise
-from aydin.it.cnn_torch import ImageTranslatorCNNTorch
+from aydin.io.datasets import normalise, add_noise
+from aydin.it.cnn import ImageTranslatorCNN
 
 
-def demo(image, image_width=200):
+def demo(image, max_epochs=4, image_width=200):
+    """
+    Demo for self-supervised denoising using camera image with synthetic noise
+    """
+
     image = normalise(image)
     H0, W0 = (numpy.array(image.shape) - image_width) // 2
     image = image[H0 : H0 + image_width, W0 : W0 + image_width]
@@ -17,10 +22,11 @@ def demo(image, image_width=200):
 
     # CNN based Image translation:
     # input_dim only includes H, W, C; number of images is not included
-    it = ImageTranslatorCNNTorch(
-        model="unet"
-        # nb_unet_levels=3,
-        # max_epochs=max_epochs,
+    it = ImageTranslatorCNN(
+        training_architecture='random',
+        nb_unet_levels=3,
+        batch_norm=None,  # 'instance',
+        max_epochs=max_epochs,
     )
 
     start = time.time()
