@@ -7,6 +7,7 @@ def fsc(image1, image2):
     Method that calculates Fourier Shell Correlations between
     the two provided 2D images. For more,
     https://en.wikipedia.org/wiki/Fourier_shell_correlation
+
     Parameters
     ----------
     image1 : numpy.ArrayLike
@@ -59,3 +60,7 @@ def shell_sum(image):
     ]
 
     return output
+
+
+def halfbit_curve(correlations):
+    raise NotImplementedError()

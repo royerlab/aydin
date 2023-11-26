@@ -3,7 +3,6 @@ import zipfile
 from enum import Enum
 from os.path import join, exists
 from typing import Optional
-
 import gdown
 import numpy
 from scipy.ndimage import binary_dilation, zoom
