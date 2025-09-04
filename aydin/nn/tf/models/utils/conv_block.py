@@ -1,20 +1,38 @@
 from deprecated import deprecated
-from tensorflow.python.keras.layers import (
-    ZeroPadding2D,
-    Conv2D,
-    Activation,
-    LeakyReLU,
-    ZeroPadding3D,
-    Conv3D,
-    Cropping2D,
-    Cropping3D,
-    AveragePooling2D,
-    MaxPooling2D,
-    AveragePooling3D,
-    MaxPooling3D,
-)
-from tensorflow.python.keras.regularizers import l1
-from tensorflow.python.layers.normalization import BatchNormalization
+try:
+    from tensorflow.python.keras.layers import (
+        ZeroPadding2D,
+        Conv2D,
+        Activation,
+        LeakyReLU,
+        ZeroPadding3D,
+        Conv3D,
+        Cropping2D,
+        Cropping3D,
+        AveragePooling2D,
+        MaxPooling2D,
+        AveragePooling3D,
+        MaxPooling3D,
+        BatchNormalization,
+    )
+    from tensorflow.python.keras.regularizers import l1
+except ImportError:
+    from tensorflow.keras.layers import (
+        ZeroPadding2D,
+        Conv2D,
+        Activation,
+        LeakyReLU,
+        ZeroPadding3D,
+        Conv3D,
+        Cropping2D,
+        Cropping3D,
+        AveragePooling2D,
+        MaxPooling2D,
+        AveragePooling3D,
+        MaxPooling3D,
+        BatchNormalization,
+    )
+    from tensorflow.keras.regularizers import l1
 
 from aydin.nn.tf.layers.instance_norm import InstanceNormalization
 from aydin.nn.tf.layers.util import Swish

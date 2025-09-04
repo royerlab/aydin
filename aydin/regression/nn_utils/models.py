@@ -1,7 +1,13 @@
-from tensorflow.python.keras import Input, layers
-from tensorflow.python.keras.layers import LeakyReLU, GaussianNoise, Dense
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.regularizers import l1
+try:
+    from tensorflow.python.keras import Input, layers
+    from tensorflow.python.keras.layers import LeakyReLU, GaussianNoise, Dense
+    from tensorflow.python.keras.models import Model
+    from tensorflow.python.keras.regularizers import l1
+except ImportError:
+    from tensorflow.keras import Input, layers
+    from tensorflow.keras.layers import LeakyReLU, GaussianNoise, Dense
+    from tensorflow.keras.models import Model
+    from tensorflow.keras.regularizers import l1
 
 
 def block(
