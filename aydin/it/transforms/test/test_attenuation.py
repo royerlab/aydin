@@ -9,7 +9,10 @@ def test_attenuation_correction_real():
     image = binary_blobs(length=128, rng=1, n_dim=3).astype(numpy.float32)
     image = normalise(image)
 
-    ramp = numpy.linspace(0, 1, 128).astype(numpy.float32)
+    # Start ramp at 0.1 instead of 0: multiplying by 0 destroys all information,
+    # making recovery mathematically impossible. A realistic attenuation scenario
+    # has signal reduction but not complete signal loss.
+    ramp = numpy.linspace(0.1, 1, 128).astype(numpy.float32)
 
     attenuated = image * ramp
 

@@ -21,6 +21,8 @@ def _round_trip(patch_size: int, display: bool):
     # Transform back from patches to image:
     reconstructed_image = reconstruct_from_nd_patches(patches, image.shape)
 
+    assert numpy.allclose(image, reconstructed_image, atol=1e-5)
+
     if display:
         import napari
 
@@ -29,4 +31,3 @@ def _round_trip(patch_size: int, display: bool):
             viewer.add_image(image, name='image')
             viewer.add_image(patches, name='patches')
             viewer.add_image(reconstructed_image, name='reconstructed_image')
-        assert numpy.allclose(image, reconstructed_image, atol=1)

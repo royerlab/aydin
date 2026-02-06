@@ -1,8 +1,7 @@
 # flake8: noqa
 from aydin.io.datasets import cropped_newyork
 from aydin.it.classic_denoisers.demo.demo_2D_lipschitz import demo_lipschitz
-
-from aydin.it.classic_denoisers.nlm import denoise_nlm
+from aydin.it.classic_denoisers.lipschitz import denoise_lipschitz
 from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 
@@ -13,4 +12,4 @@ def test_lipschitz():
 
 
 def test_lipschitz_nd():
-    check_nd(denoise_nlm)
+    check_nd(denoise_lipschitz)

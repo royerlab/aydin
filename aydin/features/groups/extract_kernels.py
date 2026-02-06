@@ -1,7 +1,7 @@
 """Utility functions for extracting representative kernels from images via clustering."""
 
 from math import prod, sqrt
-from typing import Optional, Sequence, Tuple
+from typing import Optional, Sequence, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np

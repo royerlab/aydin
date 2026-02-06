@@ -73,7 +73,6 @@ def test_saveload(denoiser, min_psnr, min_ssim):
     assert ssim_denoised >= 0.61
 
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
-    assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
 
     # if the line below fails, then the parameters of the lgbm regressor have been broken.
     # do not change the number below, but instead, fix the problem -- most likely a parameter.

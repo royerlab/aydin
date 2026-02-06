@@ -36,13 +36,12 @@ def test_translation_feature_group():
     for index in range(translations.num_features(image.ndim)):
         translations.compute_feature(index=index, feature=feature)
         vector = vectors[index]
-        translated = shift(
+        expected = shift(
             image,
             shift=list(vector),
-            output=feature,
             order=0,
             mode='constant',
             cval=0.0,
             prefilter=False,
         )
-        assert (feature == translated).all()
+        assert numpy.allclose(feature, expected)

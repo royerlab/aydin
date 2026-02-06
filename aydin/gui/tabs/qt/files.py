@@ -131,11 +131,13 @@ class FilesTab(QWidget):
         if column == 1:
             if (
                 self.parent.data_model.set_split_channels(
-                    item.text(0), item.text(5), item.checkState(column)
+                    item.text(0),
+                    item.text(5),
+                    item.checkState(column) == Qt.Checked,
                 )
                 == -1
             ):
-                item.setCheckState(column, False)
+                item.setCheckState(column, Qt.Unchecked)
 
     def remove_selected_items_from_tree(self):
         """Remove the currently selected files from the tree and data model."""

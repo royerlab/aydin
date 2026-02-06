@@ -4,16 +4,16 @@ import numpy
 import pytest
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import normalise, camera
+from aydin.io.datasets import camera, normalise
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.it.transforms.attenuation import AttenuationTransform
-from aydin.it.transforms.salt_pepper import SaltPepperTransform
 from aydin.it.transforms.deskew import DeskewTransform
 from aydin.it.transforms.fixedpattern import FixedPatternTransform
 from aydin.it.transforms.histogram import HistogramEqualisationTransform
 from aydin.it.transforms.motion import MotionStabilisationTransform
 from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
+from aydin.it.transforms.salt_pepper import SaltPepperTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.regression.cb import CBRegressor
 
@@ -47,21 +47,6 @@ def test_get_tilling_strategy_and_margins():
 
     assert tilling_strategy[2] > 4 and tilling_strategy[3] > 4
     assert margins == (0, 0, 8, 8)
-
-
-def test_stop_training_classic():
-    # TODO: implement test
-    pass
-
-
-def test_stop_training_cnn():
-    # TODO: implement test
-    pass
-
-
-def test_train():
-    # TODO: write a test that checks edge cases for train method inputs
-    pass
 
 
 @pytest.mark.parametrize(

@@ -77,7 +77,7 @@ def get_cache_folder():
         cache_folder = join(get_home_folder(), '.cache')
 
     elif platform == "darwin":
-        cache_folder = join(get_home_folder(), '/Library/Caches')
+        cache_folder = join(get_home_folder(), 'Library/Caches')
 
     elif platform == "win32":
         cache_folder = join(get_home_folder(), os.getenv('LOCALAPPDATA'))

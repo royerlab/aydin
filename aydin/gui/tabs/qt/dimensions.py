@@ -128,7 +128,7 @@ class DimensionsTab(QWidget):
             column_count = root.child(0).columnCount() - 1
             for i in range(1, column_count + 1):
                 item = root.child(row_index)
-                response.append(bool(item.checkState(i)))
+                response.append(item.checkState(i) == Qt.Checked)
 
         return None if response == [] else response
 
@@ -244,7 +244,7 @@ class DimensionsTab(QWidget):
         other_rows = rows
 
         # if clicked an item to check it
-        if bool(it.checkState(col)):
+        if it.checkState(col) == Qt.Checked:
             # clicked on spatiotemporal row
             if it.text(0) == "spatiotemporal":
                 if nb_spatiotemporal_dimensions > 4:
@@ -255,7 +255,7 @@ class DimensionsTab(QWidget):
             else:
                 if (
                     nb_spatiotemporal_dimensions == 1
-                    and self.spatiotemporal_row.checkState(col)
+                    and self.spatiotemporal_row.checkState(col) == Qt.Checked
                 ):
                     it.setCheckState(col, Qt.Unchecked)
                 else:

@@ -66,7 +66,7 @@ def cli(ctx):
     sys._excepthook = sys.excepthook
 
     def exception_hook(exctype, value, traceback):
-        print(exctype, value, traceback)
+        lprint(exctype, value, traceback)
         sys._excepthook(exctype, value, traceback)
         sys.exit(1)
 
@@ -454,13 +454,13 @@ def benchmark_algos(files, **kwargs):
         # Create a Dataset object to get random masks
         array = normalise(image_array[numpy.newaxis, numpy.newaxis, :, :])
         dataset = RandomMaskedDataset(array, patch_size=min(image_array.shape))
-        print(f"dataset length: {len(dataset)}, patch_size:{dataset.patch_size}")
+        lprint(f"dataset length: {len(dataset)}, patch_size:{dataset.patch_size}")
         data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
         _, input_image, mask = next(iter(data_loader))
 
         mask = mask.to("cpu").detach().numpy()
         input_image = input_image.to("cpu").detach().numpy()[0, 0, :, :]
-        print(input_image.shape)
+        lprint(input_image.shape)
 
         # Iterate over the available denoisers
         for denoiser_name in denoiser_names:
@@ -576,10 +576,10 @@ def handle_files(files, slicing):
 @cli.command()
 def cite(**kwargs):
     """aydin cite command"""
-    print(
+    lprint(
         "\nIf you find Aydin useful in your work, please kindly cite Aydin by using our DOI: "
     )
-    print("https://doi.org/10.5281/zenodo.5654826 \n")
+    lprint("https://doi.org/10.5281/zenodo.5654826 \n")
 
 
 if __name__ == '__main__':

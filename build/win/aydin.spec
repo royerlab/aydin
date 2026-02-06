@@ -17,10 +17,22 @@ import dask
 import distributed
 import gdown
 import napari
+import numba
 import vispy.glsl
 import vispy.io
 
 import aydin
+
+# Get numba path for jitclass
+numba_path = os.path.dirname(numba.__file__)
+numba_jitclass_path = os.path.join(numba_path, 'experimental', 'jitclass')
+
+# Find numba _box binary (platform-specific)
+import glob
+numba_box_binaries = []
+for ext in ['*.pyd', '*.dll']:
+    for box_file in glob.glob(os.path.join(numba_jitclass_path, '_box' + ext[1:])):
+        numba_box_binaries.append((box_file, os.path.join('numba', 'experimental', 'jitclass')))
 
 # Get site-packages dynamically
 site_packages = sysconfig.get_path('purelib')
@@ -40,7 +52,7 @@ block_cipher = None
 a = Analysis(
     ['../../aydin/cli/cli.py'],
     pathex=[],
-    binaries=[],
+    binaries=numba_box_binaries,
     datas=[
         (aydin_resources, 'aydin/gui/resources'),
         (os.path.dirname(napari.__file__), 'napari'),
@@ -48,6 +60,8 @@ a = Analysis(
         (os.path.dirname(distributed.__file__), 'distributed'),
         (os.path.dirname(vispy.glsl.__file__), os.path.join("vispy", "glsl")),
         (os.path.join(os.path.dirname(vispy.io.__file__), "_data"), os.path.join("vispy", "io", "_data")),
+        # numba jitclass with _box binary
+        (numba_jitclass_path, os.path.join("numba", "experimental", "jitclass")),
     ],
     hiddenimports=[
         # Aydin transforms

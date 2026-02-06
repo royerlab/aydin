@@ -81,7 +81,7 @@ class ImagesTab(QWidget):
         child_count = root.childCount()
         for i in range(child_count):
             item = root.child(i)
-            response.append(bool(item.checkState(1)))
+            response.append(item.checkState(1) == Qt.Checked)
 
         return response
 
@@ -148,7 +148,7 @@ class ImagesTab(QWidget):
         """
         if column == 1:
             self.parent.data_model.set_image_to_denoise(
-                item.text(0), item.checkState(1)
+                item.text(0), item.checkState(1) == Qt.Checked
             )
         elif column == 6:
             self.parent.data_model.update_image_output_folder(

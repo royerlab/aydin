@@ -39,6 +39,15 @@ mkdir -p "$BOX_DST"
 cp $BOX_SRC "$BOX_DST" 2>/dev/null && echo "Copied _box binary" || echo "Warning: _box binary not found"
 
 echo ""
+echo "Fixing lightgbm library..."
+# Find and copy the lightgbm library to the correct location
+LGBM_PATH=$(python3 -c "import lightgbm; import os; print(os.path.dirname(lightgbm.__file__))")
+LGBM_LIB_SRC="${LGBM_PATH}/lib/lib_lightgbm.so"
+LGBM_LIB_DST="dist/aydin/_internal/lightgbm/lib/"
+mkdir -p "$LGBM_LIB_DST"
+cp "$LGBM_LIB_SRC" "$LGBM_LIB_DST" 2>/dev/null && echo "Copied lightgbm library" || echo "Warning: lightgbm library not found"
+
+echo ""
 echo "=== Build complete! ==="
 echo "Output directory: $(pwd)/dist/aydin"
 echo ""

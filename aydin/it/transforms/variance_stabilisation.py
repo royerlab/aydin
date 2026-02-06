@@ -119,6 +119,9 @@ class VarianceStabilisationTransform(ImageTransformBase):
         ):
             # Let's ensure we are working with floats:
             self._original_dtype = array.dtype
+            # Store the original data range for postprocess clipping
+            self._min = float(array.min())
+            self._max = float(array.max())
             array = array.astype(numpy.float32, copy=False)
 
             if self.mode == 'identity':
@@ -170,6 +173,24 @@ class VarianceStabilisationTransform(ImageTransformBase):
 
                 # Apply transform:
                 new_array = power_transform.transform(array)
+
+                # Check for degenerate output (all zeros or constant values)
+                # This can happen when the input has very narrow range and
+                # standardization divides by a very small std
+                if numpy.var(new_array) < 1e-10:
+                    lprint(
+                        f"VST {mode} produced degenerate output (variance ~0), "
+                        f"falling back to anscomb transform."
+                    )
+                    # Fall back to anscomb which is more robust for narrow-range data
+                    new_array = numpy.reshape(array, newshape=shape)
+                    min_value = new_array.min()
+                    new_array = _f_anscomb(new_array, min_value)
+                    self._min_value = min_value
+                    # Override mode to anscomb for postprocess
+                    self.mode = 'anscomb'
+                    self._transform = None
+                    return new_array
 
                 # Reshape array:
                 new_array = numpy.reshape(new_array, newshape=shape)
@@ -254,6 +275,24 @@ class VarianceStabilisationTransform(ImageTransformBase):
                 raise ValueError(f"Unsupported VST mode: {self.mode}")
 
             if not self.leave_as_float:
+                # Handle NaN/Inf values before converting back to original dtype
+                # The inverse transform can produce out-of-range values that would
+                # cause FloatingPointError when casting to integer types
+                if not numpy.issubdtype(self._original_dtype, numpy.floating):
+                    # For integer dtypes, clip to the ORIGINAL data range (not just dtype range)
+                    # This produces much better results since we preserve semantic meaning
+                    # of the values instead of clipping to arbitrary dtype limits
+                    clip_min = self._min if self._min is not None else 0.0
+                    clip_max = self._max if self._max is not None else 1.0
+                    # Replace NaN/Inf with range bounds
+                    new_array = numpy.nan_to_num(
+                        new_array,
+                        nan=clip_min,
+                        posinf=clip_max,
+                        neginf=clip_min,
+                    )
+                    # Clip to original data range
+                    new_array = numpy.clip(new_array, clip_min, clip_max)
                 # convert back to original dtype:
                 new_array = new_array.astype(dtype=self._original_dtype, copy=False)
 

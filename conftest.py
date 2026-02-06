@@ -1,3 +1,4 @@
+import numpy
 import pytest
 
 
@@ -5,6 +6,28 @@ import pytest
 def run_around_tests():
     # A test function will be run at this point
     yield
+
+
+@pytest.fixture(scope="session")
+def sample_2d_image():
+    """Normalized 2D test image."""
+    from skimage.data import camera
+
+    from aydin.io.datasets import normalise
+
+    return normalise(camera().astype(numpy.float32))
+
+
+@pytest.fixture(scope="session")
+def sample_2d_noisy_pair():
+    """Clean/noisy image pair for denoising tests."""
+    from skimage.data import camera
+
+    from aydin.io.datasets import add_noise, normalise
+
+    clean = normalise(camera().astype(numpy.float32))
+    noisy = add_noise(clean, seed=42)
+    return clean, noisy
 
 
 def pytest_addoption(parser):
