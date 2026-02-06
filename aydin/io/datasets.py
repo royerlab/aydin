@@ -413,7 +413,7 @@ def download_from_gdrive(
 def download_all_examples():
     """Download all example images to the local cache."""
     for example in examples_single:
-        print(download_from_gdrive(*example.value))
+        lprint(download_from_gdrive(*example.value))
 
 
 def downloaded_example(substring):
@@ -426,4 +426,4 @@ def downloaded_example(substring):
     """
     for example in examples_single:
         if substring in example.value[1]:
-            print(download_from_gdrive(*example.value))
+            lprint(download_from_gdrive(*example.value))

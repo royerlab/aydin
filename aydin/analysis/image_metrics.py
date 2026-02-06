@@ -12,6 +12,8 @@ from skimage.metrics import mean_squared_error
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as _ssim
 
+from aydin.util.log.log import lprint
+
 
 def ssim(im1, im2, **kwargs):
     """Compute the Structural Similarity Index (SSIM) between two images.
@@ -78,8 +80,8 @@ def calculate_print_psnr_ssim(clean_image, noisy_image, denoised_image):
     ssim_noisy = ssim(clean_image, noisy_image)
     psnr_denoised = psnr(clean_image, denoised_image)
     ssim_denoised = ssim(clean_image, denoised_image)
-    print("noisy   :", psnr_noisy, ssim_noisy)
-    print("denoised:", psnr_denoised, ssim_denoised)
+    lprint("noisy   :", psnr_noisy, ssim_noisy)
+    lprint("denoised:", psnr_denoised, ssim_denoised)
 
     return psnr_noisy, psnr_denoised, ssim_noisy, ssim_denoised
 

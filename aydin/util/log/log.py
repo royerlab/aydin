@@ -1,24 +1,45 @@
 """Structured logging utilities for Aydin.
 
 Provides tree-structured logging with hierarchical sections, elapsed time
-tracking, and optional GUI callback support. Use ``lprint`` for log messages
-and ``lsection`` as a context manager for nested log sections.
+tracking, and optional GUI callback support. Uses the ``arbol`` library as
+the backend for tree formatting.
+
+Use ``lprint`` (or ``aprint``) for log messages and ``lsection`` (or
+``asection``) as a context manager for nested log sections.
 """
 
-import locale
 import math
+import re
 import sys
-import time
 from contextlib import contextmanager
 
 import click
+from arbol import Arbol as _ArbolBase
+from arbol import asection as _arbol_asection
+
+# ANSI escape code pattern for stripping colors before GUI emission
+_ANSI_ESCAPE = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
 
-class Log:
+class _LogMeta(type):
+    """Metaclass for Log that provides class-level property for depth."""
+
+    @property
+    def depth(cls):
+        """Current nesting depth (read from arbol backend)."""
+        return _ArbolBase._depth
+
+
+class Log(metaclass=_LogMeta):
     """Singleton-style logging configuration class.
 
     Manages global logging state including output depth, GUI callbacks,
     and display settings. All attributes are class-level (static).
+
+    This class wraps arbol.Arbol and adds Aydin-specific features:
+    - GUI callback emission (Qt signals)
+    - Test-aware output suppression
+    - CLI click.echo support
 
     Attributes
     ----------
@@ -31,7 +52,7 @@ class Log:
     enable_output : bool
         Whether console output is enabled.
     depth : int
-        Current nesting depth for tree-structured output.
+        Current nesting depth for tree-structured output (read-only property).
     max_depth : int or float
         Maximum depth to display (use ``math.inf`` for unlimited).
     log_elapsed_time : bool
@@ -42,41 +63,36 @@ class Log:
         When True, uses ``click.echo`` instead of ``print``.
     """
 
-    # current_section = ''
+    # GUI integration
     gui_callback = None
     gui_statusbar = None
     guiEnabled = True
+
+    # Output control
     enable_output = False
-    depth = 0
-    max_depth = math.inf
-    log_elapsed_time = True
     override_test_exclusion = False
     force_click_echo = False
 
-    # Define special characters:
-    __vl__ = '│'  # 'Vertical Line'
-    __br__ = '├'  # 'Branch Right'
-    __bd__ = '├╗'  # 'Branch Down'
-    __tb__ = '┴'  # 'Terminate Branch'
-    __la__ = '«'  # 'Left Arrow'
+    # Timing
+    log_elapsed_time = True
 
-    #  Windows terminal is dumb. We can't use our fancy characters from Yesteryears, sad:
-    if (
-        locale.getpreferredencoding() == "US-ASCII"
-        or locale.getpreferredencoding() == "cp1252"
-    ):
-        __vl__ = '|'
-        __br__ = '|->'
-        __bd__ = '|\ '  # noqa: W605
-        __tb__ = '-'
-        __la__ = '<<'
+    # Max depth (synced to Arbol)
+    max_depth = math.inf
 
     def __init__(self):
         return
 
     @staticmethod
-    def native_print(*args, sep=' ', end='\n', file=sys.__stdout__):
+    def native_print(*args, sep=' ', end='\n', file=None):
         """Print to stdout and optionally emit to GUI callback.
+
+        This method handles three output channels:
+        1. Console output (via print or click.echo)
+        2. GUI callback emission (Qt signal)
+        3. GUI status bar update
+
+        ANSI escape codes are stripped before GUI emission since
+        QTextEdit does not render them.
 
         Parameters
         ----------
@@ -87,25 +103,29 @@ class Log:
         end : str
             String appended after the last value.
         file : file-like
-            Output stream for console printing.
+            Output stream for console printing (defaults to sys.stdout).
         """
+        # Build the text string
+        text = sep.join(str(arg) for arg in args) + end
+
+        # Console output
         if Log.enable_output:
             if Log.force_click_echo:
-                click.echo(*args)
+                # click.echo adds its own newline, strip ours
+                click.echo(text.rstrip('\n'))
             else:
-                print(*args, sep=sep, end=end, file=file)
+                # Use sys.stdout if no file specified (allows pytest capture)
+                output_file = file if file is not None else sys.stdout
+                print(text, end='', file=output_file)
 
+        # GUI callback emission
         if Log.guiEnabled and Log.gui_callback is not None:
-            result = ""
-            for arg in args:
-                result += str(arg)
-                result += sep
-
-            result += end
-            Log.gui_callback.emit(result)
+            # Strip ANSI codes for GUI display
+            clean_text = _ANSI_ESCAPE.sub('', text)
+            Log.gui_callback.emit(clean_text)
 
             if Log.gui_statusbar is not None:
-                Log.gui_statusbar.showMessage(result)
+                Log.gui_statusbar.showMessage(clean_text.rstrip('\n'))
 
     @staticmethod
     @contextmanager
@@ -117,6 +137,7 @@ class Log:
         Log.override_test_exclusion = False
         Log.force_click_echo = False
 
+    @staticmethod
     def set_log_elapsed_time(log_elapsed_time: bool):
         """Enable or disable elapsed time display for log sections.
 
@@ -126,7 +147,9 @@ class Log:
             Whether to show elapsed time.
         """
         Log.log_elapsed_time = log_elapsed_time
+        _ArbolBase.elapsed_time = log_elapsed_time
 
+    @staticmethod
     def set_log_max_depth(max_depth: int):
         """Set the maximum nesting depth for log output.
 
@@ -136,6 +159,22 @@ class Log:
             Maximum depth level to display (1-based).
         """
         Log.max_depth = max(0, max_depth - 1)
+        _ArbolBase.max_depth = Log.max_depth
+
+
+def _is_test_run():
+    """Check if we're running inside a test."""
+    for arg in sys.argv:
+        if 'test' in arg or 'pytest' in arg:
+            return True
+    return False
+
+
+def _should_output():
+    """Determine if output should be produced."""
+    if Log.override_test_exclusion:
+        return True
+    return not _is_test_run()
 
 
 def lprint(*args, sep=' ', end='\n'):
@@ -153,15 +192,15 @@ def lprint(*args, sep=' ', end='\n'):
     end : str
         String appended after the last value.
     """
-    if not Log.override_test_exclusion:
-        for arg in sys.argv:
-            if "test" in arg:
-                return
+    if not _should_output():
+        return
 
-    if Log.depth <= Log.max_depth:
-        level = min(Log.max_depth, Log.depth)
-        Log.native_print(Log.__vl__ * int(level) + Log.__br__ + ' ', end='')
-        Log.native_print(*args, sep=sep, end=end)
+    if _ArbolBase._depth <= Log.max_depth:
+        level = min(Log.max_depth, _ArbolBase._depth)
+        # Build prefix with tree scaffold
+        prefix = _ArbolBase._vl_ * int(level) + _ArbolBase._br_ + ' '
+        text = sep.join(str(arg) for arg in args)
+        Log.native_print(prefix + text, end=end)
 
 
 @contextmanager
@@ -181,77 +220,39 @@ def lsection(section_header: str):
     None
         Control is yielded to the caller's code block.
     """
-    if not Log.override_test_exclusion:
-        for arg in sys.argv:
-            if "test" in arg:
-                yield
-                return
-
-    if Log.depth + 1 <= Log.max_depth:
-        Log.native_print(
-            Log.__vl__ * Log.depth + Log.__bd__ + ' ' + section_header
-        )  # ≡
-    elif Log.depth + 1 == Log.max_depth + 1:
-        Log.native_print(
-            Log.__vl__ * Log.depth
-            + Log.__br__
-            + f'= {section_header} (log tree truncated here)'
-        )
-
-    Log.depth += 1
-
-    start = time.time()
-    exception = None
-    try:
+    if not _should_output():
         yield
-    except Exception as e:
-        exception = e
+        return
 
-    stop = time.time()
+    # Temporarily enable arbol output and sync settings
+    old_enable = _ArbolBase.enable_output
+    _ArbolBase.enable_output = True
+    _ArbolBase.elapsed_time = Log.log_elapsed_time
+    _ArbolBase.max_depth = Log.max_depth
+    # Disable colors for cleaner output (ANSI stripping handles GUI anyway)
+    _ArbolBase.colorful = False
 
-    Log.depth -= 1
-    if Log.depth + 1 <= Log.max_depth:
+    # Store original native_print and replace with ours
+    original_native_print = _ArbolBase.native_print
 
-        if Log.log_elapsed_time:
-            elapsed = stop - start
+    @staticmethod
+    def aydin_native_print(text, *args, sep=' ', end='\n', file=None):
+        """Aydin's native print that routes through Log.native_print."""
+        if args:
+            text = text + sep + sep.join(str(arg) for arg in args)
+        Log.native_print(text, end=end)
 
-            if elapsed < 0.001:
-                Log.native_print(
-                    Log.__vl__ * (Log.depth + 1)
-                    + Log.__tb__
-                    + Log.__la__
-                    + f' {elapsed * 1000 * 1000:.2f} microseconds'
-                )
-            elif elapsed < 1:
-                Log.native_print(
-                    Log.__vl__ * (Log.depth + 1)
-                    + Log.__tb__
-                    + Log.__la__
-                    + f' {elapsed * 1000:.2f} milliseconds'
-                )
-            elif elapsed < 60:
-                Log.native_print(
-                    Log.__vl__ * (Log.depth + 1)
-                    + Log.__tb__
-                    + Log.__la__
-                    + f' {elapsed:.2f} seconds'
-                )
-            elif elapsed < 60 * 60:
-                Log.native_print(
-                    Log.__vl__ * (Log.depth + 1)
-                    + Log.__tb__
-                    + Log.__la__
-                    + f' {elapsed / 60:.2f} minutes'
-                )
-            elif elapsed < 24 * 60 * 60:
-                Log.native_print(
-                    Log.__vl__ * (Log.depth + 1)
-                    + Log.__tb__
-                    + Log.__la__
-                    + f' {elapsed / (60 * 60):.2f} hours'
-                )
+    _ArbolBase.native_print = aydin_native_print
 
-        Log.native_print(Log.__vl__ * (Log.depth + 1))
+    try:
+        with _arbol_asection(section_header):
+            yield
+    finally:
+        # Restore original settings
+        _ArbolBase.native_print = original_native_print
+        _ArbolBase.enable_output = old_enable
 
-        if exception is not None:
-            raise exception
+
+# Modern aliases (consistent with arbol naming)
+aprint = lprint
+asection = lsection

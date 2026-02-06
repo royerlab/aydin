@@ -12,6 +12,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
 from aydin.nn.datasets.random_masked_dataset import RandomMaskedDataset
+from aydin.util.log.log import lprint
 from aydin.util.torch.device import get_torch_device
 
 
@@ -50,7 +51,7 @@ def n2s_train(
     device = get_torch_device()
 
     model = model.to(device)
-    print(f"device {device}")
+    lprint(f"device {device}")
 
     optimizer = AdamW(model.parameters(), lr=lr)
 
@@ -71,7 +72,7 @@ def n2s_train(
     loss_function1 = MSELoss()
 
     dataset = RandomMaskedDataset(input_image)
-    print(f"dataset length: {len(dataset)}")
+    lprint(f"dataset length: {len(dataset)}")
     data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
 
     model.train()
@@ -98,4 +99,4 @@ def n2s_train(
         scheduler.step(loss)
 
         if verbose:
-            print("Loss (", epoch, "): \t", round(loss.item(), 8))
+            lprint("Loss (", epoch, "): \t", round(loss.item(), 8))

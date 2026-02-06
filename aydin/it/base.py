@@ -914,9 +914,9 @@ class ImageTranslatorBase(ABC):
 
         ndim_spacetime = ndim - (batch_result.count(True) + chan_result.count(True))
         if ndim_spacetime > 4 or ndim_spacetime < 1:
-            print(batch_result)
-            print(chan_result)
-            print(
+            lprint(batch_result)
+            lprint(chan_result)
+            lprint(
                 ndim, batch_result.count(True), chan_result.count(True), ndim_spacetime
             )
             raise Exception(

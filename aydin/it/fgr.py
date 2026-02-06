@@ -601,70 +601,73 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         target_image : numpy.ndarray
             Shape-normalized target image.
         """
-        # the number of voxels:
-        num_of_voxels = input_image.size
-        lprint(
-            f"Image has: {num_of_voxels} voxels, at most: {self.max_voxels_for_training} voxels will be used for training or validation."
-        )
-        # This is the ratio of pixels to keep:
-        max_voxels_keep_ratio = float(self.max_voxels_for_training) / num_of_voxels
-        effective_keep_ratio = min(self.voxel_keep_ratio, max_voxels_keep_ratio)
-        lprint(
-            f"Given train ratio is: {self.voxel_keep_ratio}, max_voxels induced keep-ratio is: {max_voxels_keep_ratio}"
-        )
-
-        # For small images it is not worth having any limit or balance anything:
-        num_voxels_in_small_image = 5 * 1e6
-        effective_keep_ratio = (
-            1.0 if num_of_voxels < num_voxels_in_small_image else effective_keep_ratio
-        )
-        balance_training_data = (
-            False
-            if num_of_voxels < num_voxels_in_small_image
-            else self.balance_training_data
-        )
-
-        lprint(
-            f"Data histogram balancer is: {'active' if balance_training_data else 'inactive'}"
-        )
-        lprint(f"Effective keep-ratio is: {effective_keep_ratio}")
-        lprint(
-            f"Favouring bright pixels: {'yes' if self.favour_bright_pixels > 0 else 'no'}"
-        )
-        if self.favour_bright_pixels != 0:
+        with lsection("Preparing train/validation split"):
+            # the number of voxels:
+            num_of_voxels = input_image.size
             lprint(
-                f"Favouring bright pixels by a linear slope of: {self.favour_bright_pixels}"
+                f"Image has: {num_of_voxels} voxels, at most: {self.max_voxels_for_training} voxels will be used for training or validation."
+            )
+            # This is the ratio of pixels to keep:
+            max_voxels_keep_ratio = float(self.max_voxels_for_training) / num_of_voxels
+            effective_keep_ratio = min(self.voxel_keep_ratio, max_voxels_keep_ratio)
+            lprint(
+                f"Given train ratio is: {self.voxel_keep_ratio}, max_voxels induced keep-ratio is: {max_voxels_keep_ratio}"
             )
 
-        # We decide on a 'batch' length that will be used to shuffle, select and then copy the training data...
-        num_of_voxels_per_stack = input_image[2:].size
-        batch_length = (
-            16
-            if num_of_voxels_per_stack < 1e5
-            else (
-                32
-                if num_of_voxels_per_stack < 1e6
+            # For small images it is not worth having any limit or balance anything:
+            num_voxels_in_small_image = 5 * 1e6
+            effective_keep_ratio = (
+                1.0
+                if num_of_voxels < num_voxels_in_small_image
+                else effective_keep_ratio
+            )
+            balance_training_data = (
+                False
+                if num_of_voxels < num_voxels_in_small_image
+                else self.balance_training_data
+            )
+
+            lprint(
+                f"Data histogram balancer is: {'active' if balance_training_data else 'inactive'}"
+            )
+            lprint(f"Effective keep-ratio is: {effective_keep_ratio}")
+            lprint(
+                f"Favouring bright pixels: {'yes' if self.favour_bright_pixels > 0 else 'no'}"
+            )
+            if self.favour_bright_pixels != 0:
+                lprint(
+                    f"Favouring bright pixels by a linear slope of: {self.favour_bright_pixels}"
+                )
+
+            # We decide on a 'batch' length that will be used to shuffle, select and then copy the training data...
+            num_of_voxels_per_stack = input_image[2:].size
+            batch_length = (
+                16
+                if num_of_voxels_per_stack < 1e5
                 else (
-                    128
-                    if num_of_voxels_per_stack < 1e7
-                    else (512 if num_of_voxels_per_stack < 1e8 else 4096)
+                    32
+                    if num_of_voxels_per_stack < 1e6
+                    else (
+                        128
+                        if num_of_voxels_per_stack < 1e7
+                        else (512 if num_of_voxels_per_stack < 1e8 else 4096)
+                    )
                 )
             )
-        )
-        lprint(f"Using contiguous batches of length: {batch_length} ")
-        # We create a balancer common to all tiles:
-        balancer = DataHistogramBalancer(
-            balance=balance_training_data,
-            keep_ratio=effective_keep_ratio,
-            favour_bright_pixels=self.favour_bright_pixels,
-        )
-        # Calibration of the balancer is done on the entire image:
-        lprint("Calibrating balancer...")
-        balancer.calibrate(target_image.ravel(), batch_length)
+            lprint(f"Using contiguous batches of length: {batch_length} ")
+            # We create a balancer common to all tiles:
+            balancer = DataHistogramBalancer(
+                balance=balance_training_data,
+                keep_ratio=effective_keep_ratio,
+                favour_bright_pixels=self.favour_bright_pixels,
+            )
+            # Calibration of the balancer is done on the entire image:
+            lprint("Calibrating balancer...")
+            balancer.calibrate(target_image.ravel(), batch_length)
 
-        # Keep both balancer and batch length
-        self.train_val_split_balancer = balancer
-        self.train_val_split_batch_length = batch_length
+            # Keep both balancer and batch length
+            self.train_val_split_balancer = balancer
+            self.train_val_split_batch_length = batch_length
 
     def _do_split_train_val(
         self, num_target_channels: int, train_valid_ratio: float, x, y

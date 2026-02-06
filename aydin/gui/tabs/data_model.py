@@ -317,7 +317,7 @@ class DataModel:
 
                 lprint("Images stacked")
             except Exception as e:
-                print(e)
+                lprint(e)
                 return -1
         else:  # We try to de-hyperstack
             filepaths = self.filepaths  # Keep the original file list

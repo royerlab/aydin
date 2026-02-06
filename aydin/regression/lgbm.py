@@ -250,7 +250,7 @@ class LGBMRegressor(RegressorBase):
                 except Exception as e:
                     val_loss = 0
                     lprint("Problem with getting loss from LightGBM 'env' in callback")
-                    print(str(e))
+                    lprint(str(e))
                 if regressor_callback:
                     regressor_callback(env.iteration, val_loss, env.model)
                 else:

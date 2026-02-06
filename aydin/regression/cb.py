@@ -388,7 +388,7 @@ class CBRegressor(RegressorBase):
                             silent=silent,
                         )
                     except CatBoostError as e:
-                        print(e)
+                        lprint(e)
                         lprint("GPU training likely failed, switching to CPU.")
                         self.gpu = False
                         # next attempt next...

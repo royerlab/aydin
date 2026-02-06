@@ -2,6 +2,8 @@
 
 import torch
 
+from aydin.util.log.log import lprint
+
 
 def get_torch_device():
     """Select the best available PyTorch device.
@@ -19,5 +21,5 @@ def get_torch_device():
     else:
         dev = "cpu"
     device = torch.device(dev)
-    print(f"device {device}")
+    lprint(f"device {device}")
     return device

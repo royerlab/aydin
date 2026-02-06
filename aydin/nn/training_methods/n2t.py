@@ -100,7 +100,7 @@ def n2t_train(
         return torch.abs(u - v)
 
     dataset = NoisyGroundtruthDataset([input_images], [target_images], device=device)
-    print(f"dataset length: {len(dataset)}")
+    lprint(f"dataset length: {len(dataset)}")
     data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
 
     patience_counter = 0

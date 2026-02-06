@@ -8,6 +8,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from aydin.util.log.log import lprint
+
 
 class VeryFlatNet(nn.Module):
     """Shallow network with large-kernel feature extraction.
@@ -28,7 +30,7 @@ class VeryFlatNet(nn.Module):
         super(VeryFlatNet, self).__init__()
 
         self.num_channels = num_channels
-        print("num_channels =%d" % num_channels)
+        lprint("num_channels =%d" % num_channels)
 
         padding = int((kernel_size - 1) / 2)
 
@@ -58,7 +60,7 @@ class VeryFlatNet(nn.Module):
         device = next(self.parameters()).device
         with torch.no_grad():
             length = weights.shape[0]
-            print(length)
+            lprint(length)
             self.convfeatures._parameters['weight'][0:length] = torch.from_numpy(
                 weights
             ).to(device)

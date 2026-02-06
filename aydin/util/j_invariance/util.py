@@ -61,7 +61,7 @@ def _j_invariant_loss(
             "Denoising failed during calibration, skipping by returning "
             "the original image (not denoised)."
         )
-        print(traceback.format_exc())
+        lprint(traceback.format_exc())
         denoised = image.copy()
 
     loss = loss_function(image[mask], denoised[mask])

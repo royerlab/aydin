@@ -9,6 +9,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from aydin.util.log.log import lprint
+
 
 class JInet2D(nn.Module):
     """2D J-Invariant Dilated Convolution Network for self-supervised denoising.
@@ -120,7 +122,7 @@ class JInet2D(nn.Module):
                 padding_mode=padding_mode,
                 groups=num_groups,
             )
-            print(dilated_convolution)
+            lprint(dilated_convolution)
 
             # We keep track of the total number of features until now:
             total_num_features += num
