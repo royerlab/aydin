@@ -3,15 +3,20 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleExecutable</key>
-  <string>aydin_0.1.5rc3</string>
+  <string>aydin</string>
   <key>CFBundleIconFile</key>
   <string>icon-windowed.icns</string>
   <key>CFBundleIdentifier</key>
-  <string>aydin_</string>
+  <string>org.royerlab.aydin</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>aydin_</string>
+  <string>Aydin</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
 </dict>
 </plist>
-

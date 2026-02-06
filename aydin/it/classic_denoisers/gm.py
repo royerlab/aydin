@@ -1,8 +1,16 @@
-from typing import Optional, Tuple, List
+"""Gaussian-Median mix denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions that combine median filtering
+and Gaussian filtering at two different scales. The mixing coefficients
+are calibrated automatically. Simple, fast, and effective for low to
+moderate noise levels with band-limited signals.
+"""
+
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
-from scipy.ndimage import median_filter, gaussian_filter
+from scipy.ndimage import gaussian_filter, median_filter
 from scipy.signal import medfilt2d
 
 from aydin.it.classic_denoisers import _defaults
@@ -53,7 +61,7 @@ def calibrate_denoise_gm(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -170,13 +178,16 @@ def denoise_gm(
         Ratio between the scales of the two scales
 
     alpha: float
-        First mixing coefficient.
+        Overall mixing coefficient between median and Gaussian filtering.
+        A value of 1 uses only median, 0 uses only Gaussian.
 
     beta: float
-        First mixing coefficient.
+        Mixing coefficient between fine-scale and coarse-scale median
+        filtering. A value of 1 uses only fine-scale median.
 
     gamma: float
-        First mixing coefficient.
+        Mixing coefficient between fine-scale and coarse-scale Gaussian
+        filtering. A value of 1 uses only fine-scale Gaussian.
 
 
     Returns

@@ -1,4 +1,11 @@
-from typing import Tuple, List
+"""Blind-spot analysis for Noise2Self-style denoising.
+
+This module provides functions for automatically detecting blind-spot patterns
+in images by analyzing the noise autocorrelation structure. It is used to
+determine which pixel offsets should be excluded during self-supervised training.
+"""
+
+from typing import List, Tuple
 
 import numpy
 import scipy
@@ -7,6 +14,9 @@ from numpy.linalg import norm
 from scipy.ndimage import gaussian_filter
 
 from aydin.util.crop.rep_crop import representative_crop
+
+# Maximum number of voxels to use for fast-mode blind spot analysis
+_MAX_CROP_VOXELS = 1_000_000
 
 
 def auto_detect_blindspots(
@@ -20,42 +30,50 @@ def auto_detect_blindspots(
     crop_border: int = 2,
     fastmode: bool = True,
 ) -> Tuple[List[Tuple[int, ...]], numpy.ndarray]:
-    """Automatically determines the list of blind-spots for Noise2Self
+    """Automatically determine the list of blind-spots for Noise2Self.
+
+    Analyzes the noise autocorrelation of the image to find pixel offsets
+    where the noise is correlated. These offsets are returned as blind-spot
+    coordinates that should be excluded during self-supervised training.
 
     Parameters
     ----------
     image : numpy.typing.ArrayLike
-        Image for which to conduct blind-spot analysis
+        Image for which to conduct blind-spot analysis.
 
-    batch_axes : Tuple[bool]
-        Batch axes for image
+    batch_axes : Tuple[bool], optional
+        Boolean tuple indicating which axes are batch dimensions.
+        If None, no axes are treated as batch axes initially.
 
-    channel_axes : Tuple[bool]
-        Channel axes for image
+    channel_axes : Tuple[bool], optional
+        Boolean tuple indicating which axes are channel dimensions.
+        If None, no axes are treated as channel axes initially.
 
-    threshold
-        threshold for inclusion as a blind-spot
+    threshold : float
+        Correlation threshold for inclusion as a blind-spot.
+        Offsets with autocorrelation above this value are included.
 
-    max_blind_spots
-        Max number of blindspots
+    max_blind_spots : int
+        Maximum number of blind-spots to return.
 
     max_range : int
-        maximal range of the returned blind-spots and noise autocorrelogram
+        Maximal range of the returned blind-spots and noise autocorrelogram.
 
     window : int
-        window used for computing autocorrelogram (best left unchanged)
+        Window size used for computing the autocorrelogram. Best left unchanged.
 
     crop_border : int
-        Cropping border
+        Number of border pixels to crop from each side to avoid edge artifacts.
 
-    fastmode : str
-        When True we use an even faster approach.
-
+    fastmode : bool
+        When True, uses a representative crop to speed up computation.
 
     Returns
     -------
-    Tuple of list of blindspots and the noise autocorrelogram
-
+    blind_spots : List[Tuple[int, ...]]
+        List of blind-spot offset tuples, one per detected correlated offset.
+    noise_auto : numpy.ndarray
+        Noise autocorrelogram array of shape ``(max_range*2+1,) * ndim``.
     """
 
     # Handle default values for batch and channel dim specification:
@@ -102,7 +120,9 @@ def auto_detect_blindspots(
 
     if fastmode:
         # obtain representative crop, to speed things up...
-        image = representative_crop(image, crop_size=int(1e6), favour_odd_lengths=True)
+        image = representative_crop(
+            image, crop_size=_MAX_CROP_VOXELS, favour_odd_lengths=True
+        )
 
     # We compute the autocorrelogram of the noise:
     noise_auto = noise_autocorrelation(image, max_range=max_range, window=window)
@@ -136,24 +156,26 @@ def auto_detect_blindspots(
 
 
 def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.ndarray:
-    """This function computes the noise autocorrelogram.
+    """Compute the noise autocorrelogram of an image.
 
-    Principle: We simply divide the autocorrelogram of the raw image by the autocorrelogram of a naively denoised image.
-    What is left is the autocorrelogram of the noise.
+    Divides the autocorrelogram of the raw image by the autocorrelogram of a
+    naively denoised (Gaussian-blurred) version. What remains is the
+    autocorrelogram of the noise.
 
     Parameters
     ----------
     image : numpy.typing.ArrayLike
-        image to compute the noise autocorrelation
+        Image for which to compute the noise autocorrelation.
     max_range : int
-        expected maximal range of correlation (3 is a good number!)
+        Expected maximal range of noise correlation (3 is a good default).
     window : int
-        window size for correlation computation (31 is a good number!)
+        Window size for autocorrelation computation (31 is a good default).
 
     Returns
     -------
     analysis : numpy.ndarray
-        noise autocorrelogram of shape (max_range*2+1,)*ndim  where ndim is the number of dimensions of the input image.
+        Noise autocorrelogram of shape ``(max_range*2+1,) * ndim`` where
+        ndim is the number of dimensions of the input image.
     """
 
     # Cast, copy, and normalise:
@@ -177,16 +199,20 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
 
     # Max range might be too much for very shallow dimensions, and for non odd dimensions the center
     # is not at the cente so we need to reduce the range accordingly:
-    range = tuple(min(c, s - c, max_range) for c, s in zip(center, analysis.shape))
+    effective_range = tuple(
+        min(c, s - c, max_range) for c, s in zip(center, analysis.shape)
+    )
 
     # Let's compute the center slice:
-    center_slice = tuple(slice(c - r, c + r + 1, 1) for c, r in zip(center, range))
+    center_slice = tuple(
+        slice(c - r, c + r + 1, 1) for c, r in zip(center, effective_range)
+    )
     outside[center_slice] = 0
     floor = numpy.max(outside)
 
     # And remove it:
     analysis = analysis - floor
-    analysis = analysis.clip(0, numpy.math.inf)
+    analysis = analysis.clip(0, numpy.inf)
 
     # We normalise to a sum of 1:
     if analysis.max() > 0:
@@ -199,21 +225,24 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
 
 
 def _autocorrelation(image, window: int = 31) -> numpy.ndarray:
-    """Computes the autocorrelation of an image over a cropped window around the origin
+    """Compute the autocorrelation of an image over a cropped window around the origin.
 
     Parameters
     ----------
     image : numpy.typing.ArrayLike
-        image
+        Input image.
     window : int
-        window size
+        Window size for the autocorrelation computation.
 
     Returns
     -------
     array : numpy.ndarray
-
+        Autocorrelation array of shape ``(window,) * ndim``.
     """
-    image = image / norm(image)
+    img_norm = norm(image)
+    if img_norm == 0:
+        return numpy.zeros((window,) * image.ndim)
+    image = image / img_norm
 
     array = _phase_correlation(image, image)
     shift = tuple(min(window, s) // 2 for s in image.shape)
@@ -224,18 +253,21 @@ def _autocorrelation(image, window: int = 31) -> numpy.ndarray:
 
 
 def _phase_correlation(image, reference_image) -> numpy.ndarray:
-    """Computes the phase correlation between am image and a reference image.
-    Note: both images must be of the same shape.
+    """Compute the phase correlation between an image and a reference image.
+
+    Both images must have the same shape.
 
     Parameters
     ----------
     image : numpy.typing.ArrayLike
-    reference_image : numpy.ArrayLike
+        Input image.
+    reference_image : numpy.typing.ArrayLike
+        Reference image of the same shape as ``image``.
 
     Returns
     -------
-    r : numpy.ndarray
-
+    phase_correlation : numpy.ndarray
+        Phase correlation array with the same shape as the input images.
     """
     image_f = scipy.fft.fftn(image, workers=-1)
 

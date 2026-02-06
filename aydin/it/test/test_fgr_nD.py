@@ -5,8 +5,8 @@ import pytest
 from skimage.data import binary_blobs
 from skimage.exposure import rescale_intensity
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
 
+from aydin.analysis.image_metrics import ssim
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import add_noise
 from aydin.it.fgr import ImageTranslatorFGR
@@ -120,7 +120,7 @@ def it_fgr_nD(
     Test for self-supervised denoising using camera image with synthetic noise
     """
 
-    image = binary_blobs(length=length, seed=1, n_dim=n_dim).astype(numpy.float32)
+    image = binary_blobs(length=length, rng=1, n_dim=n_dim).astype(numpy.float32)
     image = n(image)
 
     noisy = add_noise(image)

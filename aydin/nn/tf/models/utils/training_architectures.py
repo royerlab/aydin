@@ -1,3 +1,10 @@
+"""Training architecture configuration for TensorFlow models.
+
+Provides helper functions to configure validation data and training
+steps for different self-supervised training methods (shift-convolution,
+checkerbox masking, random masking).
+"""
+
 import numpy
 
 from aydin.nn.tf.util.mask_generator import maskedgen, randmaskgen
@@ -12,21 +19,27 @@ def get_jinet_fit_args(
     create_patches_for_validation,
     train_valid_ratio,
 ):
-    """
+    """Configure validation data for JINet model training.
 
     Parameters
     ----------
-    input_image
-    batch_size
-    total_num_patches
-    img_val
-    create_patches_for_validation
-    train_valid_ratio
+    input_image : numpy.ndarray
+        Training input image.
+    batch_size : int
+        Mini-batch size.
+    total_num_patches : int
+        Total number of training patches.
+    img_val : numpy.ndarray or None
+        Validation image (used when not creating patches for validation).
+    create_patches_for_validation : bool
+        If ``True``, splits patches for validation.
+    train_valid_ratio : float
+        Fraction of data used for validation.
 
     Returns
     -------
-    validation_data
-
+    tuple of numpy.ndarray
+        Validation data as ``(input, target)`` tuple.
     """
     if create_patches_for_validation:
         val_split = total_num_patches * train_valid_ratio
@@ -56,26 +69,43 @@ def get_unet_fit_args(
     val_marker=None,
     replace_by=None,
 ):
-    """
+    """Configure validation data and steps for UNet model training.
+
+    Builds the appropriate validation data generator and computes
+    the number of validation steps based on the chosen training method.
 
     Parameters
     ----------
-    train_method
-    create_patches_for_validation
-    input_image
-    total_num_patches
-    train_valid_ratio
-    batch_size
-    random_mask_ratio
-    img_val
-    mask_size
-    val_marker
-    replace_by
+    train_method : str
+        Training method: ``'shiftconv'``, ``'checkerbox'``, ``'random'``,
+        or ``'checkran'``.
+    create_patches_for_validation : bool
+        If ``True``, creates patches for validation.
+    input_image : numpy.ndarray
+        Training input image.
+    total_num_patches : int
+        Total number of training patches.
+    train_valid_ratio : float
+        Fraction of data used for validation.
+    batch_size : int
+        Mini-batch size.
+    random_mask_ratio : float or None
+        Fraction of pixels to mask in random masking mode.
+    img_val : numpy.ndarray or None
+        Validation image for pixel-level validation.
+    mask_size : tuple of int or None
+        Unit mask size for checkerbox masking.
+    val_marker : numpy.ndarray or None
+        Boolean mask for validation pixels.
+    replace_by : str or None
+        Replacement strategy for masked pixels.
 
     Returns
     -------
-    validation_data, validation_steps tuple
-
+    validation_data : generator or tuple or None
+        Validation data for the training loop.
+    validation_steps : int or None
+        Number of validation steps per epoch.
     """
     validation_steps = None
     validation_data = None

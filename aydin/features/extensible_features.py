@@ -1,4 +1,6 @@
-from typing import Optional, Tuple, List
+"""Extensible feature generator that composes multiple feature groups."""
+
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy import ndarray
@@ -9,16 +11,21 @@ from aydin.util.log.log import lprint, lsection
 
 
 class ExtensibleFeatureGenerator(FeatureGeneratorBase):
-    """
-    Extensible Feature Generator class
+    """Feature generator that composes multiple feature groups.
 
+    This generator allows building a feature set by adding multiple
+    ``FeatureGroupBase`` instances. Each feature group contributes its own
+    set of features, and they are all computed sequentially during the
+    ``compute`` call.
 
+    Attributes
+    ----------
+    features_group_list : list of FeatureGroupBase
+        List of feature groups that have been added to this generator.
     """
 
     def __init__(self):
-        """
-        Constructs an extensible feature generator
-        """
+        """Construct an extensible feature generator with an empty group list."""
         # Calls super constructor:
         super().__init__()
 
@@ -26,41 +33,45 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
         self.features_group_list = []
 
     def _load_internals(self, path: str):
+        """Load internal state (no-op for this class).
+
+        Parameters
+        ----------
+        path : str
+            Directory path (unused).
+        """
         pass
 
     def add_feature_group(self, feature_group: FeatureGroupBase, *args, **kwargs):
-        """
-        Adds a feature to this feature generator.
+        """Add a feature group to this generator.
 
         Parameters
         ----------
         feature_group : FeatureGroupBase
-            feature group
+            Feature group to add.
         args
-            additional arguments for function
+            Additional positional arguments (reserved for future use).
         kwargs
-            additional keyword arguments for function
+            Additional keyword arguments (reserved for future use).
         """
         self.features_group_list.append(feature_group)
 
     def clear_features(self):
-        """
-        Clears the features group list
-        """
+        """Remove all feature groups from this generator."""
         self.features_group_list = []
 
     def get_num_features(self, ndim: int) -> int:
-        """
-        Returns the number of features when considering translations
+        """Return the total number of features across all feature groups.
 
         Parameters
         ----------
         ndim : int
-            number of dimensions
+            Number of spatial dimensions of the image.
 
         Returns
         -------
         nb_features : int
+            Total number of features produced by all groups combined.
         """
         nb_features = 0
         for feature_group in self.features_group_list:
@@ -68,13 +79,12 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
         return nb_features
 
     def get_receptive_field_radius(self) -> int:
-        """
-        Returns the receptive field radius in pixels
+        """Return the maximum receptive field radius across all feature groups.
 
         Returns
         -------
-        result : int
-            receptive field radius in pixels
+        receptive_field_radius : int
+            Maximum receptive field radius in pixels across all groups.
         """
 
         receptive_field_radius = 0
@@ -98,32 +108,33 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
         spatial_feature_scale: Optional[Tuple[float, ...]] = None,
     ):
         """
-        Computes the features given an image. If the input image is of shape (d,h,w),
-        resulting features are of shape (n,d,h,w) where n is the number of features.
+        Compute features for the given image using all registered feature groups.
+
+        Iterates over batches and channels, computing features from each
+        feature group and assembling them into a single output array.
 
         Parameters
         ----------
         image : numpy.ndarray
-            image for which features are computed
+            Image for which features are computed. Expected to be in standard
+            form with shape ``(batch, channel, *spatial_dims)``.
 
         exclude_center_feature : bool
-            If true, features that use the image
-            patch's center pixel are entirely excluded from teh set of computed
-            features.
+            If True, features that use the image patch's center pixel are
+            entirely excluded from the set of computed features.
 
         exclude_center_value : bool
-            If true, the center pixel is never used
-            to compute any feature, different feature generation algorithms can
-            take different approaches to achieve that.
+            If True, the center pixel is never used to compute any feature.
+            Different feature generation algorithms can take different
+            approaches to achieve that.
 
         features : ndarray
-            If None the feature array is allocated internally,
-            if not None the provided array is used to store the features.
+            If None the feature array is allocated internally.
+            If not None the provided array is used to store the features.
 
         feature_last_dim : bool
-            If True the last dimension of the feature
-            array is the feature dimension, if False then it is the first
-            dimension.
+            If True the last dimension of the feature array is the feature
+            dimension; if False then it is the first dimension.
 
         passthrough_channels : Optional[Tuple[bool]]
             Optional tuple of booleans that specify which channels are
@@ -131,27 +142,27 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
             and directly used as features.
 
         num_reserved_features : int
-            Number of features to be left as blank,
-            useful when adding features separately.
+            Number of features to be left blank, useful when adding
+            features separately.
 
         excluded_voxels : Optional[List[Tuple[int]]]
-            List of pixel coordinates -- expressed as tuple of ints relative to
-            the central pixel -- that will be excluded from any computed features.
-            This is used for implementing 'extended blind-spot' N2S denoising
-            approaches.
+            List of pixel coordinates -- expressed as tuples of ints relative
+            to the central pixel -- that will be excluded from any computed
+            features. This is used for implementing 'extended blind-spot'
+            Noise2Self denoising approaches.
 
-        spatial_feature_offset: Optional[Tuple[float, ...]]
+        spatial_feature_offset : Optional[Tuple[float, ...]]
             Offset vector to be applied (added) to the spatial features
             (if used).
 
-        spatial_feature_scale: Optional[Tuple[float, ...]]
+        spatial_feature_scale : Optional[Tuple[float, ...]]
             Scale vector to be applied (multiplied) to the spatial features
             (if used).
 
         Returns
         -------
-        feature array : numpy.ndarray
-
+        features : numpy.ndarray
+            The computed feature array.
         """
 
         with lsection('Computing features'):
@@ -233,7 +244,7 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                             else:
                                 single_image = image[image_slice]
 
-                                # Usefull code snippet for debugging features:
+                                # Useful code snippet for debugging features:
                                 # with napari.gui_qt():
                                 #      viewer = Viewer()
                                 #      viewer.add_image(image_batch_gpu.get(), name='image')
@@ -264,6 +275,8 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                                     # Excluded voxels:
                                     if excluded_voxels is None:
                                         excluded_voxels = []
+                                    else:
+                                        excluded_voxels = list(excluded_voxels)
                                     excluded_voxels_for_feature_group = []
 
                                     if exclude_center_value_for_channel:
@@ -301,7 +314,7 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
 
                                     feature_group.finish()
 
-            # # Usefull code snippet for debugging features:
+            # # Useful code snippet for debugging features:
             # import napari
             #
             # with napari.gui_qt():

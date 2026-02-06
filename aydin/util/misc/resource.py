@@ -1,7 +1,9 @@
-from urllib.request import urlretrieve
-from pathlib import Path
+"""Utility for downloading and extracting zip resources from URLs."""
+
 import os
 import zipfile
+from pathlib import Path
+from urllib.request import urlretrieve
 
 
 def download_and_extract_zipresource(url, targetdir='.'):
@@ -31,6 +33,12 @@ def download_and_extract_zipresource(url, targetdir='.'):
         urlretrieve(url, relative_path_to_zip)
         # Extract the content
         with zipfile.ZipFile(relative_path_to_zip, "r") as zip_ref:
+            # Validate paths to prevent Zip Slip vulnerability
+            targetdir_real = os.path.realpath(str(targetdir))
+            for member in zip_ref.namelist():
+                member_path = os.path.realpath(os.path.join(str(targetdir), member))
+                if not member_path.startswith(targetdir_real + os.sep):
+                    raise ValueError(f"Attempted path traversal in zip file: {member}")
             zip_ref.extractall(str(targetdir))
 
         # Delete zip file

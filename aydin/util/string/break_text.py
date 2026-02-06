@@ -1,9 +1,34 @@
+"""Text wrapping and line-breaking utilities with HTML awareness."""
+
 import re
 
 
 def break_text(
     text, max_width: int = 80, clear_existing_breaks: bool = True, line_break='\n'
 ):
+    """Wrap text to a maximum line width, with HTML tag awareness.
+
+    Breaks text at word boundaries to fit within the specified width.
+    Preserves double line breaks (paragraph separators). HTML tags
+    are excluded from width calculations.
+
+    Parameters
+    ----------
+    text : str
+        Input text to wrap.
+    max_width : int
+        Maximum line width in characters.
+    clear_existing_breaks : bool
+        If True, removes existing single line breaks before re-wrapping,
+        while preserving double line breaks.
+    line_break : str
+        Character(s) to use for line breaks.
+
+    Returns
+    -------
+    str
+        Wrapped text.
+    """
 
     # We remove existing line breaks except double line breaks if requested:
     if clear_existing_breaks:
@@ -39,6 +64,18 @@ _html_clean_re = re.compile('<.*?>')
 
 
 def _clean_html(text):
+    """Strip HTML tags and URLs from text for width calculation.
+
+    Parameters
+    ----------
+    text : str
+        Input text possibly containing HTML markup.
+
+    Returns
+    -------
+    str
+        Text with HTML tags and URLs removed.
+    """
     if len(text.strip()) == 0:
         return text
     else:

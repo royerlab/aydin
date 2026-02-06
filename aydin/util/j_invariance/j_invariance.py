@@ -1,17 +1,24 @@
+"""Self-supervised denoiser calibration via J-invariance.
+
+Implements the calibration method from Batson & Royer (Noise2Self, ICML 2019)
+for automatically tuning denoiser parameters without ground truth.
+"""
+
 import math
 from functools import partial
-from typing import Callable, Dict, Union, Tuple, List, Any, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
 import numpy
 from scipy.optimize import minimize, shgo
 
-from aydin.util.j_invariance.losses import mean_squared_error, mean_absolute_error
+from aydin.util.j_invariance.losses import mean_absolute_error, mean_squared_error
 from aydin.util.j_invariance.util import (
     _generate_mask,
-    _product_from_dict,
-    _j_invariant_loss,
     _interpolate_image,
+    _j_invariant_loss,
+    _product_from_dict,
 )
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lprint, lsection
 from aydin.util.optimizer.optimizer import Optimizer
 
 
@@ -42,10 +49,10 @@ def calibrate_denoiser(
     Parameters
     ----------
     image: ArrayLike
-        Image to calibate denoiser with.
+        Image to calibrate denoiser with.
 
     denoise_function: Callable
-        Denosing function to calibrate. Should take an image as first parameter,
+        Denoising function to calibrate. Should take an image as first parameter,
         all other parameters should have defaults
 
     denoise_parameters:
@@ -126,7 +133,7 @@ def calibrate_denoiser(
         masked_input_image = interpolation.copy()
 
         # We backup the masked input image to make sure that it is unchanged after optimisation,
-        # which would indicate a 'non-behaving' denoiser that ioperates 'in-place'...
+        # which would indicate a 'non-behaving' denoiser that operates 'in-place'...
         masked_input_image_backup = masked_input_image.copy()
 
         # first we separate the categorical from numerical parameters;
@@ -265,7 +272,7 @@ def calibrate_denoiser(
                                     f"Best parameters until now: {result.x} for loss: {result.fun}"
                                 )
 
-                                # starting point for next ioptimkisation round is result of previous step:
+                                # starting point for next optimisation round is result of previous step:
                                 x0 = result.x
 
                                 # local optimisation using L-BFGS-B:

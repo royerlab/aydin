@@ -1,9 +1,17 @@
+"""Base classes for the Image Translator framework.
+
+This module defines the abstract base class `ImageTranslatorBase` that provides
+the core interface and shared functionality for all image translation implementations,
+including training, inference, tiling, transform management, and serialization.
+"""
+
 import gc
 import math
 import os
 from abc import ABC, abstractmethod
 from os.path import join
-from typing import Union, List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
+
 import jsonpickle
 import numpy
 import psutil
@@ -14,17 +22,23 @@ from aydin.it.exceptions.base import ArrayShapeDoesNotMatchError
 from aydin.it.normalisers.shape import ShapeNormaliser
 from aydin.it.transforms.base import ImageTransformBase
 from aydin.util.array.nd import nd_split_slices, remove_margin_slice
-from aydin.util.misc.json import encode_indent
 from aydin.util.log.log import lprint, lsection
+from aydin.util.misc.json import encode_indent
 from aydin.util.offcore.offcore import offcore_array
+
+# Maximum number of voxels per tile for tiled processing
+_MAX_VOXELS_PER_TILE = 768**3
 
 
 class ImageTranslatorBase(ABC):
-    """Image Translator base class
+    """Abstract base class for image translators.
 
-    Notes
-    -----
+    Provides the core interface for training and translating (denoising) images.
+    Handles batch/channel axis normalization, tiled inference for large images,
+    image transforms (preprocessing/postprocessing), blind-spot specification,
+    and model serialization.
 
+    Subclasses must implement `_train`, `_translate`, and `_load_internals`.
     """
 
     def __init__(
@@ -36,11 +50,12 @@ class ImageTranslatorBase(ABC):
         max_memory_usage_ratio: float = 0.9,
         max_tiling_overhead: float = 0.1,
     ):
-        """Image Translator base class
+        """Construct an ImageTranslatorBase.
 
         Parameters
         ----------
-        monitor
+        monitor : object, optional
+            Monitor object for tracking training progress and callbacks.
 
         blind_spots : Optional[Union[str,List[Tuple[int]]]]
             List of voxel coordinates (relative to receptive field center) to
@@ -84,7 +99,7 @@ class ImageTranslatorBase(ABC):
 
         self.max_memory_usage_ratio = max_memory_usage_ratio
         self.max_tiling_overhead = max_tiling_overhead
-        self.max_voxels_per_tile = 768**3
+        self.max_voxels_per_tile = _MAX_VOXELS_PER_TILE
 
         self.callback_period = 3
         self.last_callback_time_sec = -math.inf
@@ -92,12 +107,14 @@ class ImageTranslatorBase(ABC):
         self.loss_history = None
 
     def add_transform(self, transform: ImageTransformBase, sort: bool = True):
-        """Adds the given transform to the self.transforms_list
+        """Add a transform to the preprocessing/postprocessing pipeline.
 
         Parameters
         ----------
         transform : ImageTransformBase
-
+            The image transform to add.
+        sort : bool
+            If True, re-sort transforms by priority after adding.
         """
         self.transforms_list.append(transform)
         if sort:
@@ -106,40 +123,64 @@ class ImageTranslatorBase(ABC):
             )
 
     def clear_transforms(self):
-        """Clears the transforms list"""
+        """Remove all transforms from the preprocessing/postprocessing pipeline."""
         self.transforms_list.clear()
 
     def _transform_preprocess_image(self, image):
+        """Apply all transforms in order as preprocessing steps.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Input image to preprocess.
+
+        Returns
+        -------
+        numpy.ndarray
+            Preprocessed image.
+        """
         with lsection("transform preprocess:"):
             for transform in self.transforms_list:
                 lprint(f"applying transform: {transform}")
                 try:
                     image = transform.preprocess(image)
-                except BaseException as e:
+                except Exception as e:
                     error_message = str(e).replace('\n', ', ')
                     lprint(
                         f"Preprocessing failed for {transform} with: {error_message} "
                     )
-                    import traceback
                     import sys
+                    import traceback
 
                     traceback.print_exception(*sys.exc_info())
 
         return image
 
     def _transform_postprocess_image(self, image):
+        """Apply all transforms in reverse order as postprocessing steps.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image to postprocess.
+
+        Returns
+        -------
+        numpy.ndarray
+            Postprocessed image.
+        """
         with lsection("transform postprocess"):
             for transform in reversed(self.transforms_list):
                 lprint(f"applying transform: {transform}")
                 try:
                     image = transform.postprocess(image)
-                except BaseException as e:
+                except Exception as e:
                     error_message = str(e).replace('\n', ', ')
                     lprint(
                         f"Postprocessing failed for {transform} with: {error_message}"
                     )
-                    import traceback
                     import sys
+                    import traceback
 
                     traceback.print_exception(*sys.exc_info())
 
@@ -149,56 +190,81 @@ class ImageTranslatorBase(ABC):
     def _train(
         self, input_image, target_image, train_valid_ratio, callback_period, jinv
     ):
-        """This function supposed to take normalized input image only
+        """Train the model on shape-normalized input and target images.
+
+        Subclasses must implement this method to define their training logic.
 
         Parameters
         ----------
-        input_image
-        target_image
-        train_valid_ratio
-        callback_period
-        jinv
-
-        Returns
-        -------
-
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        target_image : numpy.ndarray
+            Shape-normalized target image with same shape as input_image.
+        train_valid_ratio : float
+            Fraction of data to use for validation (e.g. 0.1 for 10%).
+        callback_period : int
+            Period in seconds between progress callbacks.
+        jinv : bool or tuple of bool, optional
+            Controls J-invariance (blind-spot) behavior during training.
         """
         raise NotImplementedError()
 
     def stop_training(self):
+        """Request early stopping of an ongoing training process.
+
+        The default implementation is a no-op. Subclasses should override
+        this to support interrupting training.
+        """
         pass
 
     @abstractmethod
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
-        """Translates an input image into an output image according to the learned function
+        """Translate an input image tile into a denoised output image.
+
+        Subclasses must implement this method to define their inference logic.
 
         Parameters
         ----------
-        input_image
-            input image
-        image_slice
-        whole_image_shape
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        image_slice : tuple of slice, optional
+            Slice tuple indicating where this tile sits within the whole image.
+        whole_image_shape : tuple of int, optional
+            Shape of the full image (before tiling).
 
         Returns
         -------
-
+        numpy.ndarray
+            Translated (denoised) output image with same shape as input.
         """
         raise NotImplementedError()
 
     @abstractmethod
     def _load_internals(self, path: str):
-        raise NotImplementedError()
+        """Load model-specific internal state from disk.
 
-    def _estimate_memory_needed_and_available(self, image):
-        """
+        Subclasses must implement this to restore any state not captured
+        by JSON serialization (e.g., neural network weights).
 
         Parameters
         ----------
-        image
+        path : str
+            Directory path to load from.
+        """
+        raise NotImplementedError()
+
+    def _estimate_memory_needed_and_available(self, image):
+        """Estimate memory requirements and availability for translating an image.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            The image to estimate memory requirements for.
 
         Returns
         -------
-
+        tuple of (float, float)
+            A tuple of (memory_needed, memory_available) in bytes.
         """
         # TODO: make sure if this makes sense with GPU too
         # By default there is no memory needed and all memory is available
@@ -214,8 +280,34 @@ class ImageTranslatorBase(ABC):
         callback_period=3,
         jinv=None,
     ):
-        """Train to translate a given input image to a given output image.
-        This has a lot of the machinery for batching and more...
+        """Train the translator to map input images to target images.
+
+        Handles batch/channel axis parsing, shape normalization,
+        blind-spot auto-detection, transform preprocessing, and
+        delegates to the subclass-specific `_train` method.
+
+        Parameters
+        ----------
+        input_image : numpy.ndarray
+            Input image array of arbitrary dimensionality.
+        target_image : numpy.ndarray, optional
+            Target image array. If None, uses input_image (self-supervised).
+        batch_axes : tuple of bool or list of int, optional
+            Specifies which axes are batch dimensions.
+        channel_axes : tuple of bool or list of int, optional
+            Specifies which axes are channel dimensions.
+        train_valid_ratio : float
+            Fraction of data reserved for validation. Default is 0.1.
+        callback_period : int
+            Period in seconds between monitoring callbacks. Default is 3.
+        jinv : bool or tuple of bool, optional
+            Controls J-invariance behavior. None means auto-detect.
+
+        Raises
+        ------
+        ArrayShapeDoesNotMatchError
+            If batch_axes length does not match image dimensions, or if
+            input and target spatial dimensions do not match.
         """
 
         if target_image is None:
@@ -293,7 +385,7 @@ class ImageTranslatorBase(ABC):
                     sign='+',
                 )
                 lprint(f"Autocorrelogram unique values in decreasing order: {auto_str}")
-            elif type(self.blind_spots) == str:
+            elif isinstance(self.blind_spots, str):
                 # Number of spatio-temporal dims:
                 st_ndim = shape_normalised_input_image.ndim - 2
                 # Parse:
@@ -328,6 +420,35 @@ class ImageTranslatorBase(ABC):
         channel_axes=None,
         tile_size=None,
     ):
+        """Translate (denoise) an input image using the trained model.
+
+        Handles tiled inference for large images, shape normalization,
+        and transform postprocessing.
+
+        Parameters
+        ----------
+        input_image : numpy.ndarray
+            Input image to translate.
+        translated_image : numpy.ndarray, optional
+            Pre-allocated output array. If None, a new array is created.
+        batch_axes : tuple of bool or list of int, optional
+            Specifies which axes are batch dimensions.
+        channel_axes : tuple of bool or list of int, optional
+            Specifies which axes are channel dimensions.
+        tile_size : int, optional
+            Suggested tile size for tiled inference. Use 0 to disable tiling.
+            If None, tiling is determined automatically.
+
+        Returns
+        -------
+        numpy.ndarray
+            The translated (denoised) image.
+
+        Raises
+        ------
+        ArrayShapeDoesNotMatchError
+            If batch_axes length does not match image dimensions.
+        """
 
         with lsection(
             f"Predicting output image from input image of dimension {input_image.shape}, batch_axes={batch_axes}, channel_axes={channel_axes}"
@@ -457,9 +578,9 @@ class ImageTranslatorBase(ABC):
 
                         # We plug in the batch without margins into the destination image:
                         lprint("Inserting translated batch into result image...")
-                        shape_normalised_translated_image[
-                            slice_tuple
-                        ] = translated_image_tile[remove_margin_slice_tuple]
+                        shape_normalised_translated_image[slice_tuple] = (
+                            translated_image_tile[remove_margin_slice_tuple]
+                        )
 
                         counter += 1
 
@@ -488,6 +609,31 @@ class ImageTranslatorBase(ABC):
         max_margin,
         suggested_tile_size=None,
     ):
+        """Determine the optimal tiling strategy and margins for inference.
+
+        Computes how to split an image into tiles based on memory constraints,
+        maximum voxels per tile, and suggested tile sizes.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            The image to compute the tiling strategy for.
+        max_voxels_per_tile : int
+            Maximum number of voxels allowed per tile.
+        min_margin : int
+            Minimum margin width in voxels around each tile.
+        max_margin : int or None
+            Maximum margin width in voxels around each tile.
+        suggested_tile_size : int, optional
+            Suggested tile size. If None, determined automatically.
+
+        Returns
+        -------
+        tuple of (tuple of int, tuple of int)
+            A tuple of (tiling_strategy, margins) where tiling_strategy
+            specifies the number of splits per dimension and margins
+            specifies the overlap per dimension.
+        """
 
         # We will store the batch strategy as a list of integers representing the number of chunks per dimension:
         with lsection("Determine tilling strategy:"):
@@ -635,17 +781,20 @@ class ImageTranslatorBase(ABC):
             return tilling_strategy, margins
 
     def save(self, path: str):
-        """
-        Saves a 'all-batteries-included' image translation model at a given path (folder).
+        """Save the image translator model to disk.
+
+        Serializes the translator state as JSON and writes it to
+        the specified directory.
 
         Parameters
         ----------
         path : str
-            path to save to
+            Directory path to save the model to.
 
         Returns
         -------
-
+        str
+            JSON string of the serialized model.
         """
         os.makedirs(path, exist_ok=True)
 
@@ -659,17 +808,17 @@ class ImageTranslatorBase(ABC):
 
     @staticmethod
     def load(path: str):
-        """
-        Returns an 'all-batteries-included' image translation model at a given path (folder).
+        """Load a previously saved image translator model from disk.
 
         Parameters
         ----------
         path : str
-            path to load from.
+            Directory path to load the model from.
 
         Returns
         -------
-
+        ImageTranslatorBase
+            The restored image translator instance.
         """
         lprint(f"Loading image translator from: {path}")
         with open(join(path, "image_translation.json"), "r") as json_file:
@@ -681,11 +830,19 @@ class ImageTranslatorBase(ABC):
 
         return thawed
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Customize pickle state to exclude non-serializable normaliser fields.
+
+        Returns
+        -------
+        dict
+            Object state dictionary with normalisers excluded.
+        """
         state = self.__dict__.copy()
-        del state['input_normaliser']
-        del state['target_normaliser']
+        if 'input_normaliser' in state:
+            del state['input_normaliser']
+        if 'target_normaliser' in state:
+            del state['target_normaliser']
         return state
 
     @staticmethod
@@ -694,18 +851,31 @@ class ImageTranslatorBase(ABC):
         chan_axes: Union[List[int], List[bool]],
         ndim: int,
     ):
-        """
+        """Parse and validate batch and channel axis specifications.
 
+        Accepts either boolean arrays or integer index arrays and converts
+        them into a consistent boolean array representation.
 
         Parameters
         ----------
-        batch_axes : Union[List[int], List[bool]]
-        chan_axes : Union[List[int], List[bool]]
+        batch_axes : list of int or list of bool
+            Batch axis specification as boolean flags or integer indices.
+        chan_axes : list of int or list of bool
+            Channel axis specification as boolean flags or integer indices.
         ndim : int
+            Total number of dimensions in the image.
 
         Returns
         -------
+        tuple of (list of bool, list of bool)
+            Validated boolean arrays for batch and channel axes.
 
+        Raises
+        ------
+        Exception
+            If axes indices are out of range, axes types are mixed,
+            the number of spacetime axes is invalid (not 1-4),
+            or any axis is marked as both batch and channel.
         """
         if (
             batch_axes == []
@@ -762,6 +932,25 @@ class ImageTranslatorBase(ABC):
 
     @staticmethod
     def _parse_blind_spot_shorthand_notation(blind_spots: str, st_ndim: int):
+        """Parse blind-spot shorthand notation into a list of coordinate tuples.
+
+        Converts shorthand strings like 'x#1,y#2' into explicit lists of
+        relative voxel coordinates for the blind-spot mask.
+
+        Parameters
+        ----------
+        blind_spots : str
+            Shorthand notation string. Use '<axis>#<radius>' format
+            (e.g. 'x#1' or 'x#1,y#2'). Use 'center' for only the
+            center voxel.
+        st_ndim : int
+            Number of spatio-temporal dimensions.
+
+        Returns
+        -------
+        list of tuple of int
+            List of relative voxel coordinate tuples for the blind-spot.
+        """
         lprint(f"Blindspot shorthand notation detected: {blind_spots} ")
         # Replace commas with spaces:
         blind_spots = blind_spots.replace(',', ' ')

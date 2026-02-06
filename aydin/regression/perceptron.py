@@ -1,22 +1,31 @@
+"""Multi-layer perceptron (neural network) regressor for Aydin's FGR pipeline.
+
+This module provides :class:`PerceptronRegressor`, a Keras-based feed-forward
+neural network regressor with early stopping, learning-rate scheduling, and
+model checkpointing.
+"""
+
 import gc
 import random
-from os.path import join, exists
+from os.path import exists, join
+
+import keras
 import numpy
 import psutil
-from tensorflow.python.eager.context import device
-from tensorflow.python.keras.optimizer_v2.adam import Adam
-from tensorflow.python.keras.saving.model_config import model_from_json
+import tensorflow as tf
+from keras.models import model_from_json
+from keras.optimizers import Adam
 
 from aydin.io.folders import get_temp_folder
+from aydin.regression.base import RegressorBase
 from aydin.regression.nn_utils.callbacks import (
-    NNCallback,
     EarlyStopping,
-    ReduceLROnPlateau,
     ModelCheckpoint,
+    NNCallback,
+    ReduceLROnPlateau,
 )
 from aydin.regression.nn_utils.models import feed_forward
-from aydin.regression.base import RegressorBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lprint, lsection
 from aydin.util.tf.device import get_best_device_name
 
 
@@ -40,7 +49,7 @@ class PerceptronRegressor(RegressorBase):
         depth: int = 6,
         loss: str = 'l1',
     ):
-        """
+        """Construct a multi-layer perceptron regressor.
 
         Parameters
         ----------
@@ -79,13 +88,35 @@ class PerceptronRegressor(RegressorBase):
     def _fit(
         self, x_train, y_train, x_valid=None, y_valid=None, regressor_callback=None
     ):
-        """Fits function y=f(x) given training pairs (x_train, y_train).
-        Stops when performance stops improving on the test dataset: (x_test, y_test).
+        """Fit a single-channel perceptron model.
+
+        Trains a feed-forward neural network using Keras with early stopping
+        and learning-rate reduction on plateau. Integer feature types are
+        handled by rescaling targets to the integer range during training
+        and inverting the scaling at prediction time.
+
+        Parameters
+        ----------
+        x_train : numpy.ndarray
+            Training feature vectors of shape ``(n_samples, n_features)``.
+        y_train : numpy.ndarray
+            Training target values of shape ``(n_samples,)``.
+        x_valid : numpy.ndarray, optional
+            Validation feature vectors.
+        y_valid : numpy.ndarray, optional
+            Validation target values.
+        regressor_callback : callable, optional
+            Callback invoked at each training epoch.
+
+        Returns
+        -------
+        _NNModel
+            Fitted neural network model wrapper.
         """
 
         with lsection("NN Regressor fitting:"):
 
-            with device(get_best_device_name()):
+            with tf.device(get_best_device_name()):
                 # First we make sure that the arrays are of a type supported:
                 def assert_type(array):
                     assert (
@@ -106,8 +137,8 @@ class PerceptronRegressor(RegressorBase):
                     assert_type(y_valid)
 
                     # Types have to be consistent between train and valid sets:
-                    assert x_train.dtype is x_valid.dtype
-                    assert y_train.dtype is y_valid.dtype
+                    assert x_train.dtype == x_valid.dtype
+                    assert y_train.dtype == y_valid.dtype
 
                 # In case the y dtype does not match the x dtype, we rescale and cast y:
                 if numpy.issubdtype(x_train.dtype, numpy.integer) and numpy.issubdtype(
@@ -168,7 +199,7 @@ class PerceptronRegressor(RegressorBase):
                     weight_decay=weight_decay,
                     noise=noise,
                 )
-                opt = Adam(lr=learning_rate, decay=learning_rate_decay)
+                opt = Adam(learning_rate=learning_rate)
                 model.compile(optimizer=opt, loss=self.loss)
 
                 lprint(f"Number of parameters in model: {model.count_params()}")
@@ -246,9 +277,11 @@ class PerceptronRegressor(RegressorBase):
                     train_history = model.fit(
                         x_train,
                         y_train,
-                        validation_data=(x_valid, y_valid)
-                        if (x_valid is not None and y_valid is not None)
-                        else None,
+                        validation_data=(
+                            (x_valid, y_valid)
+                            if (x_valid is not None and y_valid is not None)
+                            else None
+                        ),
                         epochs=effective_number_of_epochs,
                         batch_size=min(batch_size, nb_data_points),
                         shuffle=True,
@@ -282,6 +315,24 @@ class PerceptronRegressor(RegressorBase):
 
 
 class _NNModel:
+    """Internal wrapper around a fitted Keras model.
+
+    Handles serialisation, deserialisation, prediction, and optional
+    dtype/scale inversion for a single output channel.
+
+    Attributes
+    ----------
+    model : keras.Model
+        The underlying Keras model.
+    original_y_dtype : numpy.dtype or None
+        Original target dtype before integer rescaling, or ``None`` if no
+        rescaling was applied.
+    original_y_scale : float or None
+        Scale factor to invert integer rescaling at prediction time.
+    loss_history : dict
+        Training and validation loss arrays.
+    """
+
     def __init__(self, model, original_y_dtype, original_y_scale, loss_history):
         self.model = model
         self.original_y_dtype = original_y_dtype
@@ -289,6 +340,14 @@ class _NNModel:
         self.loss_history = loss_history
 
     def _save_internals(self, path: str):
+        """Save the Keras model architecture and weights to the given directory.
+
+        Parameters
+        ----------
+        path : str
+            Directory in which to write ``keras_model.txt`` (architecture)
+            and ``keras_weights.txt`` (weights).
+        """
 
         if self.model is not None:
             # serialize model to JSON:
@@ -302,6 +361,13 @@ class _NNModel:
             self.model.save_weights(keras_model_file)
 
     def _load_internals(self, path: str):
+        """Load the Keras model architecture and weights from the given directory.
+
+        Parameters
+        ----------
+        path : str
+            Directory containing ``keras_model.txt`` and ``keras_weights.txt``.
+        """
         # load JSON and create model:
         keras_model_file = join(path, 'keras_model.txt')
         with open(keras_model_file, 'r') as json_file:
@@ -318,19 +384,26 @@ class _NNModel:
         return state
 
     def predict(self, x):
-        """Predicts y given x by applying the learned function f: y=f(x)
+        """Predict target values for the given feature vectors.
+
+        Automatically batches the prediction to fit within available memory
+        and inverts any integer-range rescaling that was applied during
+        training.
 
         Parameters
         ----------
-        x
+        x : numpy.ndarray
+            Feature vectors of shape ``(n_samples, n_features)``.
 
         Returns
         -------
-
+        numpy.ndarray
+            Predicted values, cast back to the original target dtype if
+            integer rescaling was used during training.
         """
         with lsection("NN Regressor prediction:"):
 
-            with device(get_best_device_name()):
+            with tf.device(get_best_device_name()):
                 lprint(f"Number of data points             : {x.shape[0]}")
                 lprint(f"Number of features per data points: {x.shape[-1]}")
 

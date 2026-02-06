@@ -1,24 +1,40 @@
-from functools import reduce
-from operator import mul
-from typing import Tuple, Union, Sequence
+"""Uniform (box/integral) feature group for multi-scale image features."""
+
+from math import prod
+from typing import Sequence, Tuple
 
 import numpy
-from numba import jit, cuda
+from numba import cuda, jit
 from numba.cuda import CudaSupportError
 from numpy.typing import ArrayLike
 
 from aydin.features.groups.base import FeatureGroupBase
-
-
 from aydin.util.array.nd import nd_range_radii
 from aydin.util.fast_shift.fast_shift import fast_shift
 from aydin.util.fast_uniform_filter.numba_cpu_uf import numba_cpu_uniform_filter
 from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
 from aydin.util.log.log import lprint
 
+# Minimum image size (in voxels) to consider CUDA acceleration
+_CUDA_MIN_IMAGE_SIZE = 1024
 
-# Removes duplicates without changing list's order:
+# Maximum ratio of excluded voxels to footprint volume before excluding a feature entirely
+_MAX_FOOTPRINT_EXCLUSION_RATIO = 0.1
+
+
 def _remove_duplicates(seq):
+    """Remove duplicate items from a sequence while preserving order.
+
+    Parameters
+    ----------
+    seq : iterable
+        Input sequence that may contain duplicates.
+
+    Returns
+    -------
+    list
+        List with duplicates removed, maintaining original order.
+    """
     seen = set()
     seen_add = seen.add
     return [x for x in seq if not (x in seen or seen_add(x))]
@@ -190,6 +206,13 @@ class UniformFeatures(FeatureGroupBase):
         self.kwargs = None
 
     def _ensure_feature_description_available(self, ndim: int):
+        """Ensure feature descriptions are computed for the given dimensionality.
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions.
+        """
         if (
             self._feature_descriptions_list is None
             or len(self._feature_descriptions_list[0][0]) != ndim
@@ -197,17 +220,20 @@ class UniformFeatures(FeatureGroupBase):
             self._feature_descriptions_list = self._get_feature_descriptions_list(ndim)
 
     def _get_feature_descriptions_list(self, ndim: int):
-        """
-        Get feature descriptions
+        """Build the list of feature descriptions for the given dimensionality.
+
+        Each feature description is a tuple of
+        ``(effective_shift, negative_extent, positive_extent, shape_code)``.
 
         Parameters
         ----------
         ndim : int
+            Number of spatial dimensions.
 
         Returns
         -------
-        feature_description_list
-
+        feature_description_list : list of tuple
+            List of feature description tuples with duplicates removed.
         """
         feature_description_list = []
 
@@ -341,6 +367,13 @@ class UniformFeatures(FeatureGroupBase):
 
     @property
     def receptive_field_radius(self) -> int:
+        """Return the maximum receptive field radius across all kernel levels.
+
+        Returns
+        -------
+        radius : int
+            Receptive field radius in pixels.
+        """
         radius = 0
         counter = 0
         for width, scale in zip(self.kernel_widths, self.kernel_scales):
@@ -354,10 +387,37 @@ class UniformFeatures(FeatureGroupBase):
         return radius
 
     def num_features(self, ndim: int) -> int:
+        """Return the number of uniform features for the given dimensionality.
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions.
+
+        Returns
+        -------
+        num : int
+            Number of uniform features.
+        """
         self._ensure_feature_description_available(ndim)
         return len(self._feature_descriptions_list)
 
     def prepare(self, image, excluded_voxels=None, **kwargs):
+        """Prepare uniform features by pre-computing filtered images.
+
+        Applies uniform (box) filters of all required sizes and caches the
+        results so that individual features can be computed efficiently via
+        translation and center-exclusion adjustments.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image for which features will be computed.
+        excluded_voxels : list of tuple of int, optional
+            Voxels to exclude from features.
+        **kwargs
+            Additional keyword arguments (unused).
+        """
         if excluded_voxels is None:
             excluded_voxels = []
 
@@ -399,6 +459,18 @@ class UniformFeatures(FeatureGroupBase):
         self._size_to_full_feature = size_to_feature
 
     def compute_feature(self, index: int, feature):
+        """Compute a single uniform feature by index.
+
+        Retrieves the pre-computed uniform filter result and applies
+        the appropriate translation and center-value exclusion.
+
+        Parameters
+        ----------
+        index : int
+            Index of the feature to compute.
+        feature : numpy.ndarray
+            Pre-allocated array for storing the computed feature.
+        """
 
         feature_description = self._feature_descriptions_list[index]
         lprint(
@@ -422,9 +494,25 @@ class UniformFeatures(FeatureGroupBase):
     def _translate_and_exclude_center_value(
         self, image, feature_in, feature_out, feature_description, excluded_voxels
     ):
-        """
-        It is not recommended to optimise this function as there is some very technical points happening here,
-        and the key functions that need optimizing have been externalised anyway (see below).
+        """Translate a uniform-filtered image and exclude specified voxels.
+
+        Applies the translation described in the feature description and
+        corrects for any excluded voxels (e.g., the center pixel for
+        blind-spot denoising). When too many voxels in a feature's footprint
+        are excluded, the feature is zeroed out entirely.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Original input image.
+        feature_in : numpy.ndarray
+            Pre-computed uniform filter result.
+        feature_out : numpy.ndarray
+            Output array for the translated and corrected feature.
+        feature_description : tuple
+            Feature description tuple ``(shift, neg_extent, pos_extent, shape)``.
+        excluded_voxels : list of tuple of int
+            Voxels to exclude from the feature computation.
         """
 
         # This function exists to facilitate the implementation of optimised versions of it.
@@ -450,7 +538,7 @@ class UniformFeatures(FeatureGroupBase):
             # If the translation does not translated anything then let's just not translate, right?
             feature_out[...] = feature_in
 
-        # We store here the sum of excluded values to be able to substract:
+        # We store here the sum of excluded values to be able to subtract:
         excluded_values_sum = None
         # And count how many voxels are effectively excluded:
         excluded_count = 0
@@ -490,13 +578,13 @@ class UniformFeatures(FeatureGroupBase):
             # we compute the volume of the footprint in voxels:
             footprint_volume = prod(size)
 
-            # If we have more than one excluded voxel, we need to be carefull: if the proportion of excluded voxels
+            # If we have more than one excluded voxel, we need to be careful: if the proportion of excluded voxels
             # in a feature becomes too large (> 10%), we need  to exclude that feature entirely, otherwise it will be
             # too much difference between the feature with or without excluded voxels, and thus too confusing for the regressor.
             # Some of this comes from empirical evidence.
             num_of_excluded_voxels = len(excluded_voxels)
             exclude_feature_entirely = num_of_excluded_voxels > 1 and (
-                excluded_count / footprint_volume > 0.1
+                excluded_count / footprint_volume > _MAX_FOOTPRINT_EXCLUSION_RATIO
             )
 
             if exclude_feature_entirely:
@@ -509,8 +597,22 @@ class UniformFeatures(FeatureGroupBase):
                 )
 
     def _compute_uniform_filter(self, image, size):
-        """
-        Override this method to provide an accelerated version
+        """Compute a uniform (box) filter on the image.
+
+        Attempts to use CUDA acceleration; falls back to Numba CPU or
+        parallel scipy depending on filter size.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Input image.
+        size : int or tuple of int
+            Filter size along each dimension.
+
+        Returns
+        -------
+        output : numpy.ndarray
+            Filtered image.
         """
 
         def no_cuda_cpu_mode():
@@ -528,7 +630,7 @@ class UniformFeatures(FeatureGroupBase):
 
             return output
 
-        if image.size < 1024:
+        if image.size < _CUDA_MIN_IMAGE_SIZE:
             lprint("Image too small, CUDA not needed!")
             output = no_cuda_cpu_mode()
         else:
@@ -578,20 +680,42 @@ class UniformFeatures(FeatureGroupBase):
         return output
 
     def _translate_and_add_image(self, sum_image, translation, image):
-        """
-        Override this method to provide an accelerated version
+        """Translate an image and add it to a running sum in-place.
+
+        Parameters
+        ----------
+        sum_image : numpy.ndarray
+            Accumulator array (modified in-place).
+        translation : tuple of int
+            Translation vector.
+        image : numpy.ndarray
+            Image to translate and add.
+
+        Returns
+        -------
+        sum_image : numpy.ndarray
+            The updated accumulator array.
         """
         fast_shift(image, shift=tuple(translation), output=sum_image, add=True)
         return sum_image
 
     def _translate_image(self, feature_in, feature_out, translation):
-        """
-        Override this method to provide an accelerated version
+        """Translate an image by the given vector, writing to an output array.
+
+        Parameters
+        ----------
+        feature_in : numpy.ndarray
+            Input image to translate.
+        feature_out : numpy.ndarray
+            Output array for the translated image.
+        translation : tuple of int
+            Translation vector.
         """
         fast_shift(feature_in, shift=tuple(translation), output=feature_out)
 
     def finish(self):
-        # Here we cleanup any resource alocated for the last feature computation:
+        """Clean up cached data from the last feature computation."""
+        # Here we cleanup any resource allocated for the last feature computation:
         self.image = None
         self.excluded_voxels = None
         self.kwargs = None
@@ -604,6 +728,22 @@ class UniformFeatures(FeatureGroupBase):
 def _apply_correction(
     feature, excluded_values_sum, footprint_volume: int, excluded_count: int
 ):
+    """Apply correction to a feature after excluding voxels.
+
+    Rescales the feature so that the mean over non-excluded voxels is
+    preserved, compensating for the removed values.
+
+    Parameters
+    ----------
+    feature : numpy.ndarray
+        Feature array to correct (modified in-place).
+    excluded_values_sum : numpy.ndarray
+        Sum of image values at excluded voxel positions.
+    footprint_volume : int
+        Total number of voxels in the filter footprint.
+    excluded_count : int
+        Number of excluded voxels.
+    """
     if (
         feature.dtype == numpy.int16
         or feature.dtype == numpy.uint16
@@ -633,6 +773,19 @@ def _apply_correction(
 def _apply_correction_numba(
     feature, excluded_values_sum, footprint_volume: int, excluded_count: int
 ):
+    """Numba-accelerated correction for excluded voxels.
+
+    Parameters
+    ----------
+    feature : numpy.ndarray
+        Feature array to correct (modified in-place).
+    excluded_values_sum : numpy.ndarray
+        Sum of image values at excluded voxel positions.
+    footprint_volume : int
+        Total number of voxels in the filter footprint.
+    excluded_count : int
+        Number of excluded voxels.
+    """
     alpha = footprint_volume / (footprint_volume - excluded_count)
     beta = -alpha / footprint_volume
 
@@ -647,9 +800,13 @@ def _apply_correction_numba(
     fastmath={'contract', 'afn', 'reassoc'},
 )
 def _fast_inplace_add(a, b):
+    """Add array ``b`` to array ``a`` in-place using Numba parallel execution.
+
+    Parameters
+    ----------
+    a : numpy.ndarray
+        Target array (modified in-place).
+    b : numpy.ndarray
+        Array to add.
+    """
     a += b
-
-
-def prod(atuple: Tuple[Union[float, int]]):
-    # In python 3.8 there is a prod function in math, until then we have:
-    return reduce(mul, atuple)

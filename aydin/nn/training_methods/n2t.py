@@ -1,14 +1,21 @@
+"""Noise2Truth supervised training method for PyTorch models.
+
+Implements supervised training with paired noisy/clean images using
+L1 loss, early stopping, best-model checkpointing, and TensorBoard logging.
+"""
+
 import math
 from collections import OrderedDict
 from itertools import chain
+
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+
 from aydin.nn._legacy_pytorch.optimizers.esadam import ESAdam
 from aydin.nn.datasets.noisy_gt_dataset import NoisyGroundtruthDataset
-
 from aydin.util.log.log import lprint
 from aydin.util.torch.device import get_torch_device
 
@@ -28,31 +35,44 @@ def n2t_train(
     reload_best_model_period=1024,
     best_val_loss_value=None,
 ):
-    """
-    Noise2Truth training method.
+    """Train a model using the Noise2Truth supervised method.
+
+    Uses paired noisy input and clean target images with L1 loss,
+    early stopping based on validation loss, and periodic reloading
+    of the best model weights.
 
     Parameters
     ----------
-    input_images
-    target_images
-    model : nn.Module
+    input_images : numpy.ndarray
+        Noisy input image tensor with shape ``(B, C, ...spatial_dims...)``.
+    target_images : numpy.ndarray
+        Clean target image tensor with the same shape as ``input_images``.
+    model : torch.nn.Module
+        PyTorch model to train.
     nb_epochs : int
+        Maximum number of training epochs.
     lr : float
+        Initial learning rate for the ESAdam optimizer.
     training_noise : float
-
-    l2_weight_regularization
-    patience
-    patience_epsilon
-    reduce_lr_factor
-    reload_best_model_period
-    best_val_loss_value
-
+        Initial noise level added to gradients by the ESAdam optimizer.
+    l2_weight_regularization : float
+        L2 weight decay coefficient for the optimizer.
+    patience : int
+        Number of epochs without improvement before early stopping.
+    patience_epsilon : float
+        Minimum improvement required to reset the patience counter.
+    reduce_lr_factor : float
+        Factor by which the learning rate is reduced on plateau.
+    reload_best_model_period : int
+        Interval (in epochs) for reloading the best model weights
+        when validation loss is not improving.
+    best_val_loss_value : float or None
+        Initial best validation loss value. If ``None``, starts at
+        infinity.
     """
     writer = SummaryWriter()
 
     device = get_torch_device()
-
-    torch.autograd.set_detect_anomaly(True)
 
     model = model.to(device)
 
@@ -83,10 +103,13 @@ def n2t_train(
     print(f"dataset length: {len(dataset)}")
     data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
 
+    patience_counter = 0
+    best_model_state_dict = None
+
     for epoch in range(nb_epochs):
         train_loss_value = 0
         val_loss_value = 0
-        iteration = 0
+        num_batches = 0
         for i, batch in enumerate(data_loader):
             input_image, target_image = batch
             input_image = input_image.to(device)
@@ -116,7 +139,6 @@ def n2t_train(
 
             # update training loss_deconvolution for whole image:
             train_loss_value += translation_loss_value.item()
-            iteration += 1
 
             # Validation:
             with torch.no_grad():
@@ -133,12 +155,13 @@ def n2t_train(
 
                 # update validation loss_deconvolution for whole image:
                 val_loss_value += translation_loss_value
-                iteration += 1
 
-        train_loss_value /= iteration
+            num_batches += 1
+
+        train_loss_value /= num_batches
         lprint(f"Training loss value: {train_loss_value}")
 
-        val_loss_value /= iteration
+        val_loss_value /= num_batches
         lprint(f"Validation loss value: {val_loss_value}")
 
         writer.add_scalar("Loss/train", train_loss_value, epoch)

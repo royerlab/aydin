@@ -1,13 +1,15 @@
+"""Denoise tab for selecting and configuring denoising algorithms."""
+
 import os
 import shutil
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
     QHBoxLayout,
-    QStackedWidget,
     QListWidget,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
 )
 
 from aydin.gui._qt.custom_widgets.denoise_tab_method import DenoiseTabMethodWidget
@@ -126,21 +128,58 @@ class DenoiseTab(QWidget):
         self.advance_enabled = False
 
     def change_current_method(self, new_index):
+        """Switch the displayed denoising method to the one at the given index.
+
+        Parameters
+        ----------
+        new_index : int
+            Index of the denoising method to display.
+        """
         self.stacked_widget.setCurrentIndex(new_index)
 
     @property
     def selected_backend(self):
+        """Name of the currently selected denoising backend.
+
+        Returns
+        -------
+        str
+            Backend name string (e.g. 'Noise2SelfFGR-cb').
+        """
         return self.stacked_widget.currentWidget().name
 
     @property
     def current_backend_widget(self):
+        """The widget for the currently selected denoising backend.
+
+        Returns
+        -------
+        DenoiseTabMethodWidget or DenoiseTabPretrainedMethodWidget
+            The active backend configuration widget.
+        """
         return self.stacked_widget.currentWidget()
 
     @property
     def lower_level_args(self):
+        """Arguments dictionary for the currently selected backend.
+
+        Returns
+        -------
+        dict
+            Nested dictionary of constructor arguments for each component
+            of the selected denoising method, plus the variant name.
+        """
         return self.stacked_widget.currentWidget().lower_level_args()
 
     def set_advanced_enabled(self, enable: bool = False):
+        """Toggle between basic and advanced denoising backend options.
+
+        Parameters
+        ----------
+        enable : bool, optional
+            If True, show all available backends and advanced parameters.
+            If False, show only the basic subset. Default is False.
+        """
         if enable:
             options = self.backend_options
             description_list = self.backend_options_descriptions
@@ -174,6 +213,17 @@ class DenoiseTab(QWidget):
     def refresh_available_backends(
         self, options, description_list, advance_mode_enabled=False
     ):
+        """Rebuild the list of available denoising backends.
+
+        Parameters
+        ----------
+        options : list of str
+            Backend option names to populate.
+        description_list : list of str
+            Corresponding descriptions for each backend option.
+        advance_mode_enabled : bool, optional
+            Whether to show advanced constructor arguments. Default is False.
+        """
         # Clear existing entries
         self.leftlist.clear()
 
@@ -203,7 +253,7 @@ class DenoiseTab(QWidget):
                 )
 
     def refresh_pretrained_backends(self):
-
+        """Refresh the list entries for any loaded pretrained models."""
         for index in range(self.leftlist.count() - 1, -1, -1):
             if "pretrained" in self.leftlist.item(index).text():
                 self.leftlist.takeItem(index)

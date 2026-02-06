@@ -1,3 +1,10 @@
+"""Classic image denoising restoration module.
+
+Provides the :class:`Classic` denoising class and the convenience function
+:func:`classic_denoise`. Wraps classical denoising algorithms (Butterworth,
+Gaussian, NLM, Total Variation, etc.) behind a unified train-then-denoise API.
+"""
+
 import importlib
 import inspect
 import os
@@ -12,7 +19,6 @@ from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.restoration.denoise.base import DenoiseRestorationBase
 from aydin.util.log.log import lsection
-
 
 if os.getenv("BUNDLED_AYDIN") == "1":
     from aydin.it.classic_denoisers.bilateral import (  # noqa: F401
@@ -74,7 +80,13 @@ if os.getenv("BUNDLED_AYDIN") == "1":
 
 
 class Classic(DenoiseRestorationBase):
-    """Classic Image Denoising"""
+    """Classic (non-learning) image denoising restoration.
+
+    Wraps :class:`~aydin.it.classic.ImageDenoiserClassic` with auto-calibration
+    support. Each classical algorithm (Butterworth, Gaussian, NLM, TV, etc.)
+    is exposed as a variant that can be selected at construction time or
+    discovered dynamically via the :attr:`implementations` property.
+    """
 
     disabled_modules = ["bilateral", "bmnd", "_defaults"]
 
@@ -87,25 +99,28 @@ class Classic(DenoiseRestorationBase):
         lower_level_args=None,
         it_transforms=None,
     ):
-        """
+        """Construct a Classic denoiser.
 
         Parameters
         ----------
-        variant : str
-            Variant of the Classic denoiser to be used. Variant
-            would supersede the denoiser option passed in lower_level_args.
-            `implementations` property would return a complete list
-            of variants (with a prefix of 'Classic-`) that can be used
-            on a given installation. Example variants: `butterworth`,
-            `gaussian`, `lipschitz`, `nlm`, ...
-        use_model : bool
-            Flag to choose to train a new model or infer from a
-            previously trained model. By default it is None.
-        input_model_path : string
-            Path to model that is desired to be used for inference.
-            By default it is None.
-        lower_level_args
-        it_transforms
+        variant : str, optional
+            Variant of the Classic denoiser to use. Supersedes the denoiser
+            option in ``lower_level_args``. The :attr:`implementations`
+            property returns a complete list of available variants (prefixed
+            with ``'Classic-'``). Example variants: ``'butterworth'``,
+            ``'gaussian'``, ``'lipschitz'``, ``'nlm'``.
+        use_model : bool, optional
+            If ``True``, load and use a previously trained model instead
+            of training a new one.
+        input_model_path : str, optional
+            Path to a saved model zip file for inference.
+        lower_level_args : dict, optional
+            Additional low-level arguments passed to the underlying
+            image translator and calibration functions.
+        it_transforms : list of dict, optional
+            Custom list of transforms to apply. Each entry should have
+            keys ``'class'`` and ``'kwargs'``. Defaults to Range, Padding,
+            and Variance Stabilisation transforms.
         """
         super().__init__(variant=variant)
         self.lower_level_args = lower_level_args
@@ -153,9 +168,11 @@ class Classic(DenoiseRestorationBase):
         ]
 
         if platform.system() == "Darwin":
-            for module in method_modules:
-                if module.name in ["spectral", "dictionary_learned"]:
-                    method_modules.remove(module)
+            method_modules = [
+                module
+                for module in method_modules
+                if module.name not in ["spectral", "dictionary_learned"]
+            ]
 
         for module in method_modules:
             calibration_args = self.get_function_implementation_kwargs(
@@ -192,14 +209,17 @@ class Classic(DenoiseRestorationBase):
         ]
 
         if platform.system() == "Darwin":
-            for module in method_modules:
-                if module.name in ["spectral", "dictionary_learned"]:
-                    method_modules.remove(module)
+            method_modules = [
+                module
+                for module in method_modules
+                if module.name not in ["spectral", "dictionary_learned"]
+            ]
 
         return ["Classic-" + x.name for x in method_modules]
 
     @property
     def implementations_description(self):
+        """Return human-readable descriptions for each Classic implementation."""
         it_classic_description = ImageDenoiserClassic.__doc__.strip()
 
         descriptions = []
@@ -214,9 +234,11 @@ class Classic(DenoiseRestorationBase):
         ]
 
         if platform.system() == "Darwin":
-            for module in method_modules:
-                if module.name in ["spectral", "dictionary_learned"]:
-                    method_modules.remove(module)
+            method_modules = [
+                module
+                for module in method_modules
+                if module.name not in ["spectral", "dictionary_learned"]
+            ]
 
         for module in method_modules:
             response = importlib.import_module(
@@ -237,21 +259,20 @@ class Classic(DenoiseRestorationBase):
         return descriptions
 
     def stop_running(self):
-        """Method to stop running N2S instance"""
+        """Stop the current Classic denoiser training or inference."""
         self.it.stop_training()
 
     def get_translator(self):
-        """Returns the corresponding translator instance for given selections.
+        """Return the image translator for the current configuration.
 
-        Parameters
-        ----------
-        feature_generator : FeatureGeneratorBase
-        regressor : RegressorBase
+        If ``use_model`` is set, loads a pre-trained model from disk.
+        Otherwise, creates a new :class:`ImageDenoiserClassic` with the
+        configured variant and calibration arguments.
 
         Returns
         -------
-        it : ImageTranslatorBase
-
+        ImageTranslatorBase
+            Configured image translator instance.
         """
         if self.variant:
             return ImageDenoiserClassic(method=self.variant)
@@ -281,6 +302,7 @@ class Classic(DenoiseRestorationBase):
         return it
 
     def add_transforms(self):
+        """Add the configured image transforms to the image translator."""
         if self.it_transforms is not None:
             for transform in self.it_transforms:
                 transform_class = transform["class"]
@@ -288,20 +310,22 @@ class Classic(DenoiseRestorationBase):
                 self.it.add_transform(transform_class(**transform_kwargs))
 
     def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
-        """Method to run training for Noise2Self FGR.
+        """Train the Classic denoiser on a noisy image.
+
+        Calibrates the underlying classical denoising algorithm to find
+        optimal parameters for the given image.
 
         Parameters
         ----------
         noisy_image : numpy.ndarray
+            The noisy input image.
         batch_axes : array_like, optional
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-
-        Returns
-        -------
-        response : numpy.ndarray
-
+        **kwargs
+            Additional keyword arguments. Supports ``'train_valid_ratio'``,
+            ``'callback_period'``, and ``'jinv'``.
         """
         with lsection("Noise2Self train is starting..."):
 
@@ -315,30 +339,35 @@ class Classic(DenoiseRestorationBase):
                 noisy_image,
                 batch_axes=batch_axes,
                 channel_axes=chan_axes,
-                train_valid_ratio=kwargs['train_valid_ratio']
-                if 'train_valid_ratio' in kwargs
-                else 0.1,
-                callback_period=kwargs['callback_period']
-                if 'callback_period' in kwargs
-                else 3,
+                train_valid_ratio=(
+                    kwargs['train_valid_ratio']
+                    if 'train_valid_ratio' in kwargs
+                    else 0.1
+                ),
+                callback_period=(
+                    kwargs['callback_period'] if 'callback_period' in kwargs else 3
+                ),
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
 
     def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
-        """Method to denoise an image with trained Noise2Self FGR.
+        """Denoise an image using the trained Classic denoiser.
 
         Parameters
         ----------
+        noisy_image : numpy.ndarray
+            The noisy input image to denoise.
         batch_axes : array_like, optional
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-        noisy_image : numpy.ndarray
+        **kwargs
+            Additional keyword arguments. Supports ``'tile_size'``.
 
         Returns
         -------
-        response : numpy.ndarray
-
+        numpy.ndarray
+            The denoised image, cast to the input image's dtype.
         """
         with lsection("Noise2Self denoise is starting..."):
 

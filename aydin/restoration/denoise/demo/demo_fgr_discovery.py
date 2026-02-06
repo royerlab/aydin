@@ -1,9 +1,12 @@
+"""Demo script for discovering available Noise2Self FGR implementations."""
+
 from pprint import pprint
 
 from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
 
 
 def demo_fgr_discovery():
+    """Print all available FGR implementations, their arguments, and descriptions."""
 
     implementations = Noise2SelfFGR().implementations
     pprint(implementations)

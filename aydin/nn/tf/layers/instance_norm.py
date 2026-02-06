@@ -1,12 +1,9 @@
+"""Instance normalization layer for Keras/TensorFlow (deprecated)."""
+
+import keras
 from deprecated import deprecated
-from tensorflow.keras import (
-    initializers,
-    regularizers,
-    constraints,
-    backend,
-)
-from tensorflow.python.keras.engine.base_layer import Layer
-from tensorflow.python.keras.engine.input_spec import InputSpec
+from keras import backend, constraints, initializers, regularizers
+from keras.layers import InputSpec, Layer
 
 
 @deprecated(
@@ -99,12 +96,17 @@ class InstanceNormalization(Layer):
         self.gamma_constraint = constraints.get(gamma_constraint)
 
     def build(self, input_shape):
-        """
+        """Build the layer weights based on the input shape.
 
         Parameters
         ----------
         input_shape : tuple
+            Shape of the input tensor.
 
+        Raises
+        ------
+        ValueError
+            If axis is 0 or axis is specified for a rank-1 tensor.
         """
         ndim = len(input_shape)
         if self.axis == 0:
@@ -143,18 +145,21 @@ class InstanceNormalization(Layer):
         self.built = True
 
     def call(self, inputs, **kwargs):
-        """
+        """Apply instance normalization to the input tensor.
 
         Parameters
         ----------
-        inputs
-        training
+        inputs : tf.Tensor
+            Input tensor to normalize.
+        **kwargs
+            Additional keyword arguments (e.g., ``training``).
 
         Returns
         -------
-
+        tf.Tensor
+            Instance-normalized tensor.
         """
-        input_shape = backend.int_shape(inputs)
+        input_shape = tuple(inputs.shape)
         reduction_axes = list(range(0, len(input_shape)))
 
         if self.axis is not None:
@@ -179,12 +184,13 @@ class InstanceNormalization(Layer):
         return normed
 
     def get_config(self):
-        """
+        """Return the layer configuration dictionary.
 
         Returns
         -------
-        config dict : dict
-
+        dict
+            Configuration dictionary containing all layer parameters,
+            suitable for layer serialization.
         """
         config = {
             'axis': self.axis,

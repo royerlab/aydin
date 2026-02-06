@@ -1,14 +1,13 @@
+"""Demo: Noise2Truth supervised training with UNet on 2D images."""
+
 # flake8: noqa
 import time
+
 import numpy
 import torch
 
 from aydin.analysis.image_metrics import calculate_print_psnr_ssim
-from aydin.io.datasets import (
-    normalise,
-    add_noise,
-    camera,
-)
+from aydin.io.datasets import add_noise, camera, normalise
 from aydin.nn.models.unet import UNetModel
 from aydin.nn.training_methods.n2t import n2t_train
 from aydin.util.log.log import Log

@@ -1,14 +1,22 @@
+"""Human-readable formatting utilities for byte sizes."""
+
+
 def human_readable_byte_size(nbytes: int) -> str:
-    """
+    """Convert a byte count to a human-readable string with unit suffix.
+
+    Automatically selects the most appropriate unit (B, KB, MB, GB, TB, PB)
+    and formats the value with up to two decimal places, removing trailing
+    zeros.
 
     Parameters
     ----------
     nbytes : int
+        Number of bytes.
 
     Returns
     -------
-    Human readable string : str
-
+    str
+        Human-readable string, e.g. '1.5 GB' or '256 KB'.
     """
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
     i = 0

@@ -1,12 +1,13 @@
 import time
 from os.path import join
+
 import numpy
 import pytest
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
 
-from aydin.io.datasets import normalise, add_noise
+from aydin.analysis.image_metrics import ssim
+from aydin.io.datasets import add_noise, normalise
 from aydin.io.folders import get_temp_folder
 from aydin.it.base import ImageTranslatorBase
 from aydin.it.classic import ImageDenoiserClassic

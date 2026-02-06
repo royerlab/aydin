@@ -1,12 +1,34 @@
+"""Default patch size computation for image denoising.
+
+Provides a utility function to determine appropriate patch sizes based
+on image dimensionality and shape.
+"""
+
 from typing import Tuple
 
 
 def default_patch_size(image, patch_size, odd: bool = True) -> Tuple[int, ...]:
-    """
-    Returns  a normalised patch size given an image amd a parity.
+    """Compute a normalized patch size for a given image.
+
+    Selects a default patch size based on image dimensionality if none
+    is provided, normalizes scalar sizes to tuples, and ensures the
+    patch size does not exceed half the image dimensions.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Image for which to determine the patch size.
+    patch_size : int, tuple of int, or None
+        Requested patch size. If None, a default is chosen based on
+        the number of image dimensions.
+    odd : bool
+        If True and ``patch_size`` is None, prefer odd default sizes;
+        otherwise prefer even sizes.
+
     Returns
     -------
-    object
+    tuple of int
+        Normalized patch size tuple with one entry per image dimension.
     """
     # Default patch sizes vary with image dimension:
     if patch_size is None:

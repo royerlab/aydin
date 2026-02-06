@@ -11,148 +11,164 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository == 'royerlab/aydin'
 
-    strategy:
-      matrix:
-        python-version: [ 3.9 ]
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.9"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install black==22.12.0
+          pip install "black>=24.0.0" "isort>=5.13.0"
       - name: Check code styling with Black
         run: |
-          black --diff -S -t py39 aydin
-          black --check -S -t py39 aydin
+          black --diff aydin
+          black --check aydin
+      - name: Check import sorting with isort
+        run: |
+          isort --check-only aydin/
 
   lint:
-      name: Lint Check
-      runs-on: ubuntu-latest
-      if: github.repository == 'royerlab/aydin'
-
-      strategy:
-        matrix:
-          python-version: [ 3.9 ]
-
-      steps:
-        - uses: actions/checkout@v2
-        - name: Set up Python
-          uses: actions/setup-python@v2
-          with:
-            python-version: ${{ matrix.python-version }}
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            pip install flake8==4.0.1
-        - name: Check code with Flake8
-          run: |
-            flake8 --ignore E501,E203,W503 aydin
-
-  test-linux39:
-      needs: [style, lint]
-      name: Tests
-      runs-on: ubuntu-latest
-      if: github.repository == 'royerlab/aydin'
-
-      strategy:
-        matrix:
-          python-version: [ "3.9" ]
-
-      steps:
-        - uses: actions/checkout@v2
-        - name: Set up Python
-          uses: actions/setup-python@v2
-          with:
-            python-version: ${{ matrix.python-version }}
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            pip install -e .
-            pip install pytest==6.2.5
-            pip install mock==4.0.3
-        - name: Run the tests
-          run: |
-            python -m pytest . --disable-pytest-warnings --durations=30 --show-capture=stderr
-
-  test-unstable-linux39:
-    needs: [ test-linux39 ]
-    name: Tests
+    name: Lint Check
     runs-on: ubuntu-latest
     if: github.repository == 'royerlab/aydin'
 
-    strategy:
-      matrix:
-        python-version: [ "3.9" ]
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.9"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
-          pip install pytest==6.2.5
-          pip install mock==4.0.3
-      - name: Run the tests
+          pip install "flake8>=7.0.0"
+      - name: Check code with Flake8
         run: |
-          python -m pytest . --rununstable --disable-pytest-warnings --durations=30 --show-capture=stderr
+          flake8 --ignore=E501,E203,E741,W503 aydin
+
+  test-linux39:
+    needs: [style, lint]
+    name: Tests (Python 3.9)
+    runs-on: ubuntu-latest
+    if: github.repository == 'royerlab/aydin'
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run the tests with coverage
+        run: |
+          pytest aydin/ --cov=aydin --cov-report=xml --disable-pytest-warnings --durations=30
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   test-linux310:
-        needs: [style, lint]
-        name: Tests
-        runs-on: ubuntu-latest
-        if: github.repository == 'royerlab/aydin'
+    needs: [style, lint]
+    name: Tests (Python 3.10)
+    runs-on: ubuntu-latest
+    if: github.repository == 'royerlab/aydin'
 
-        strategy:
-          matrix:
-            python-version: [ "3.10" ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run the tests
+        run: |
+          pytest aydin/ --disable-pytest-warnings --durations=30
 
-        steps:
-          - uses: actions/checkout@v2
-          - name: Set up Python
-            uses: actions/setup-python@v2
-            with:
-              python-version: ${{ matrix.python-version }}
-          - name: Install dependencies
-            run: |
-              python -m pip install --upgrade pip
-              pip install -e .
-              pip install pytest==6.2.5
-              pip install mock==4.0.3
-          - name: Run the tests
-            run: |
-              python -m pytest . --disable-pytest-warnings --durations=30 --show-capture=stderr
+  test-linux311:
+    needs: [style, lint]
+    name: Tests (Python 3.11)
+    runs-on: ubuntu-latest
+    if: github.repository == 'royerlab/aydin'
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run the tests
+        run: |
+          pytest aydin/ --disable-pytest-warnings --durations=30
+
+  test-linux312:
+    needs: [style, lint]
+    name: Tests (Python 3.12)
+    runs-on: ubuntu-latest
+    if: github.repository == 'royerlab/aydin'
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run the tests
+        run: |
+          pytest aydin/ --disable-pytest-warnings --durations=30
+
+  test-unstable-linux39:
+    needs: [test-linux39]
+    name: Tests Unstable (Python 3.9)
+    runs-on: ubuntu-latest
+    if: github.repository == 'royerlab/aydin'
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run the tests
+        run: |
+          pytest aydin/ --rununstable --disable-pytest-warnings --durations=30
 
   test-heavy-linux39:
-        needs: [test-linux39]
-        name: Tests
-        runs-on: ubuntu-latest
-        if: github.repository == 'royerlab/aydin'
+    needs: [test-linux39]
+    name: Tests Heavy (Python 3.9)
+    runs-on: ubuntu-latest
+    if: github.repository == 'royerlab/aydin'
 
-        strategy:
-          matrix:
-            python-version: [ "3.9" ]
-
-        steps:
-          - uses: actions/checkout@v2
-          - name: Set up Python
-            uses: actions/setup-python@v2
-            with:
-              python-version: ${{ matrix.python-version }}
-          - name: Install dependencies
-            run: |
-              python -m pip install --upgrade pip
-              pip install -e .
-              pip install pytest==6.2.5
-              pip install mock==4.0.3
-          - name: Run the tests
-            run: |
-              python -m pytest . --runheavy --disable-pytest-warnings --durations=30 --show-capture=stderr
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Run the tests
+        run: |
+          pytest aydin/ --runheavy --disable-pytest-warnings --durations=30

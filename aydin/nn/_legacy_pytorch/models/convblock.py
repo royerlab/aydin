@@ -1,7 +1,40 @@
+"""Configurable convolution block with residual connections.
+
+Provides a two-layer convolution block with optional dropout,
+normalization, residual connections, and reflection padding.
+"""
+
 import torch.nn as nn
 
 
 class ConvBlock(nn.Module):
+    """Two-layer convolution block with optional residual connection.
+
+    Applies two convolutions with configurable activation, normalization,
+    dropout, and residual connections. Supports reflection padding.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    dropout : bool
+        Whether to apply dropout.
+    norm : str or None
+        Normalization type: ``'batch'``, ``'instance'``, or ``None``.
+    residual : bool
+        Whether to add a residual (skip) connection.
+    activation : str
+        Activation function: ``'leakyrelu'``, ``'relu'``, ``'elu'``, or ``'selu'``.
+    in_place_activation : bool
+        Whether to use in-place activation.
+    transpose : bool
+        Whether to use transposed convolutions.
+    reflectpad : bool
+        Whether to use reflection padding.
+    """
+
     def __init__(
         self,
         in_channels,

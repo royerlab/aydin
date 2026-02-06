@@ -1,14 +1,27 @@
 # flake8: noqa
+"""Demo benchmarking Numba vs scipy uniform filter performance."""
+
 import numpy
 from numba import threading_layer
 from scipy.ndimage import uniform_filter
 
 from aydin.features.groups.uniform import UniformFeatures
 from aydin.io.datasets import examples_single
-from aydin.util.log.log import lsection, Log
+from aydin.util.log.log import Log, lsection
 
 
 def demo_uniform(image_name: str, image, repeats=32):
+    """Benchmark Numba-accelerated vs scipy uniform filter.
+
+    Parameters
+    ----------
+    image_name : str
+        Label for the image being benchmarked.
+    image : numpy.ndarray
+        Input image to filter.
+    repeats : int
+        Number of repetitions for timing.
+    """
     Log.enable_output = True
 
     uniform = UniformFeatures()

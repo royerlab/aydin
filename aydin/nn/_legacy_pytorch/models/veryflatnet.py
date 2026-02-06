@@ -1,9 +1,29 @@
+"""VeryFlatNet - a shallow feature extraction and dense inference network.
+
+Provides a flat architecture with a single large-kernel feature
+extraction layer followed by 1x1 convolution dense layers.
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 
 class VeryFlatNet(nn.Module):
+    """Shallow network with large-kernel feature extraction.
+
+    Extracts features using a single large convolution kernel and
+    then processes them through cascading 1x1 convolutions with
+    channel reduction.
+
+    Parameters
+    ----------
+    num_channels : int
+        Number of feature channels in the extraction layer.
+    kernel_size : int
+        Kernel size for the feature extraction convolution.
+    """
+
     def __init__(self, num_channels=128, kernel_size=9):
         super(VeryFlatNet, self).__init__()
 

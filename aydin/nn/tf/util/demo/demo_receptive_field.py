@@ -1,6 +1,9 @@
+"""Demo: Receptive field visualization for different CNN architectures."""
+
 # flake8: noqa
-import numpy
 import matplotlib.pyplot as plt
+import numpy
+
 from aydin.it.cnn.models.unet_2d import UNet2DModel
 
 

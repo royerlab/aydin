@@ -1,3 +1,5 @@
+"""Tests for the MedianFeatures feature group."""
+
 import numpy
 from scipy.ndimage import median_filter
 from skimage.exposure import rescale_intensity
@@ -7,12 +9,14 @@ from aydin.io.datasets import camera
 
 
 def n(image):
+    """Normalize image to float32 in [0, 1] range."""
     return rescale_intensity(
         image.astype(numpy.float32), in_range='image', out_range=(0, 1)
     )
 
 
 def test_median_feature_group():
+    """Test median features match scipy median_filter output."""
     # get image:
     image = n(camera().astype(numpy.float32))
 
@@ -27,7 +31,7 @@ def test_median_feature_group():
     # Set image:
     medians.prepare(image)
 
-    # compute features and check their valididty:
+    # compute features and check their validity:
     feature = numpy.empty_like(image)
     for index in range(medians.num_features(image.ndim)):
         medians.compute_feature(index=index, feature=feature)

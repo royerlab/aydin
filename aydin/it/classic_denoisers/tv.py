@@ -1,5 +1,13 @@
+"""Total Variation (TV) denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on Total Variation
+regularization. Supports both Bregman and Chambolle algorithms via
+scikit-image, with optional Gaussian mixing to mitigate the piece-wise
+constant appearance typical of TV denoising.
+"""
+
 from functools import partial
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import numpy
 from numba import jit
@@ -29,7 +37,7 @@ def calibrate_denoise_tv(
     Calibrates the Total Variation (TV) denoiser for the given image and
     returns the optimal parameters obtained using the N2S loss.
 
-    Note: we use the scikt-image implementation of TV denoising.
+    Note: we use the scikit-image implementation of TV denoising.
 
     Parameters
     ----------
@@ -64,7 +72,7 @@ def calibrate_denoise_tv(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -102,9 +110,9 @@ def calibrate_denoise_tv(
     )
 
     # Sigma spatial range:
-    range = max(1e-10, numpy.max(image) - numpy.min(image))
+    value_range = max(1e-10, numpy.max(image) - numpy.min(image))
     # weight_range = np.arange(0.01, 1.5*std, 0.05*std) ** 1.5
-    weight_range = (0.01 * range, 1.5 * range)
+    weight_range = (0.01 * value_range, 1.5 * value_range)
 
     # Algorithms:
     algorithms = ['bregman', 'chambolle'] if image.ndim <= 2 else ['chambolle']
@@ -230,4 +238,22 @@ def denoise_tv(
 
 @jit(nopython=True, parallel=True)
 def _mixin(image_a: ArrayLike, image_b: ArrayLike, alpha: float, beta: float):
+    """Linearly mix two images with given weights.
+
+    Parameters
+    ----------
+    image_a : ArrayLike
+        First image (typically TV-denoised).
+    image_b : ArrayLike
+        Second image (typically Gaussian-filtered original).
+    alpha : float
+        Weight for the first image.
+    beta : float
+        Weight for the second image.
+
+    Returns
+    -------
+    numpy.ndarray
+        Weighted sum: alpha * image_a + beta * image_b.
+    """
     return alpha * image_a + beta * image_b

@@ -1,3 +1,9 @@
+"""Lucy-Richardson deconvolution as a PyTorch neural network layer.
+
+Implements Lucy-Richardson deconvolution as a differentiable module
+with learnable PSF kernels, and provides a corresponding loss function.
+"""
+
 import numpy
 import torch
 import torch.nn.functional as F
@@ -5,6 +11,24 @@ from torch import nn
 
 
 def lucy_richardson_loss(observed_image, candidate_image, psf_kernel, mask=None):
+    """Compute the Lucy-Richardson deconvolution loss.
+
+    Parameters
+    ----------
+    observed_image : torch.Tensor
+        Observed (blurred and noisy) image.
+    candidate_image : torch.Tensor
+        Candidate deconvolved image.
+    psf_kernel : torch.Tensor
+        Point spread function kernel.
+    mask : torch.Tensor or None
+        Optional mask to restrict the loss to specific pixels.
+
+    Returns
+    -------
+    torch.Tensor
+        Lucy-Richardson loss tensor.
+    """
     if mask is not None:
         candidate_image = candidate_image * mask
 
@@ -21,6 +45,26 @@ def lucy_richardson_loss(observed_image, candidate_image, psf_kernel, mask=None)
 
 
 class LucyRichardson(nn.Module):
+    """Differentiable Lucy-Richardson deconvolution module.
+
+    Performs iterative Lucy-Richardson deconvolution with a learnable
+    PSF kernel. The number of iterations controls the deconvolution
+    strength.
+
+    Parameters
+    ----------
+    psf_kernel : numpy.ndarray
+        Initial PSF kernel (2D array).
+    num_channels_in : int
+        Number of input channels.
+    num_channels_out : int
+        Number of output channels.
+    iterations : int
+        Number of Lucy-Richardson iterations.
+    clip : bool
+        Whether to clip output values to [-1, 1].
+    """
+
     def __init__(
         self, psf_kernel, num_channels_in=1, num_channels_out=1, iterations=4, clip=True
     ):
@@ -33,7 +77,7 @@ class LucyRichardson(nn.Module):
 
         self.psf_size = psf_kernel.shape[0]
 
-        psf_kernel = psf_kernel.astype(numpy.float)
+        psf_kernel = psf_kernel.astype(numpy.float64)
         kernel_psf_mirror = psf_kernel[::-1, ::-1].copy()
 
         self.kernel_psf_tensor = torch.from_numpy(
@@ -69,6 +113,7 @@ class LucyRichardson(nn.Module):
         return im_deconv
 
     def post_optimisation(self):
+        """Ensure PSF kernel is non-negative and normalized after each step."""
         with torch.no_grad():
             self.kernel_psf_tensor += torch.min(self.kernel_psf_tensor)
             self.kernel_psf_tensor /= torch.sum(self.kernel_psf_tensor)

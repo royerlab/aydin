@@ -1,30 +1,41 @@
+"""TensorFlow/Keras CNN-based image translator (deprecated).
+
+This module provides `ImageTranslatorCNN`, a convolutional neural network
+based image translator using TensorFlow/Keras. Supports UNet and JINet
+architectures with various self-supervised training schemes.
+
+.. deprecated::
+    All TensorFlow-related code is deprecated and will be removed by v0.1.16.
+    Use `ImageTranslatorCNNTorch` instead.
+"""
+
 import random
 from os.path import join
-from typing import Optional, Union, List, Tuple
+from typing import List, Optional, Tuple, Union
 
-from deprecated import deprecated
 import keras.models
 import numpy
-from tensorflow.python.eager.context import device
+import tensorflow as tf
+from deprecated import deprecated
 
 from aydin.io.folders import get_temp_folder
 from aydin.it.base import ImageTranslatorBase
 from aydin.nn.tf.models.jinet import JINetModel
 from aydin.nn.tf.models.unet import UNetModel
-from aydin.nn.tf.models.utils.image_tile import tile_target_images, tile_input_images
+from aydin.nn.tf.models.utils.image_tile import tile_input_images, tile_target_images
 from aydin.nn.tf.models.utils.unet_patch_size import (
     get_ideal_patch_size,
     post_tiling_patch_size_validation,
 )
 from aydin.nn.tf.util.callbacks import (
     EarlyStopping,
-    ReduceLROnPlateau,
-    StopCenterGradient3D,
-    StopCenterGradient2D,
     ModelCheckpoint,
+    ReduceLROnPlateau,
+    StopCenterGradient2D,
+    StopCenterGradient3D,
 )
 from aydin.nn.tf.util.random_sample_patches import random_sample_patches
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lprint, lsection
 from aydin.util.tf.device import get_best_device_name
 
 
@@ -32,8 +43,14 @@ from aydin.util.tf.device import get_best_device_name
     "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
 )
 class ImageTranslatorCNN(ImageTranslatorBase):
-    """
-    Convolutional Neural Network (CNN) based Image Translator<br>
+    """Convolutional Neural Network (CNN) based image translator (TensorFlow/Keras).
+
+    Supports UNet and JINet model architectures with self-supervised
+    training schemes including shift-convolution, checkerboard masking,
+    random masking, and combined approaches.
+
+    .. deprecated::
+        All TensorFlow-related code is deprecated. Use `ImageTranslatorCNNTorch`.
     """
 
     verbose = 0
@@ -60,7 +77,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         max_memory_usage_ratio: float = 0.9,
         max_tiling_overhead: float = 0.1,
     ):
-        """
+        """Construct a CNN-based image translator.
 
         Parameters
         ----------
@@ -191,6 +208,18 @@ class ImageTranslatorCNN(ImageTranslatorBase):
 
     @property
     def model_class(self):
+        """Return the model class corresponding to the selected architecture.
+
+        Returns
+        -------
+        type
+            JINetModel or UNetModel class.
+
+        Raises
+        ------
+        ValueError
+            If an unknown model architecture is specified.
+        """
         if self.model_architecture == "jinet":
             return JINetModel
         elif self.model_architecture == "unet":
@@ -199,17 +228,19 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             raise ValueError("Unknown model architecture")
 
     def save(self, path: str):
-        """
-        Saves a 'all-batteries-included' image translation model at a given path (folder).
+        """Save the CNN image translator model to disk.
+
+        Saves both the JSON state and the Keras model files.
 
         Parameters
         ----------
         path : str
-            path to save to
+            Directory path to save the model to.
 
         Returns
         -------
-
+        str
+            JSON string of the serialized model state.
         """
         with lsection(f"Saving 'CNN' image translator to {path}"):
             frozen = super().save(path)
@@ -217,6 +248,13 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         return frozen
 
     def save_cnn(self, path: str):
+        """Save the Keras CNN model and inference model to disk.
+
+        Parameters
+        ----------
+        path : str
+            Directory path to save the model files to.
+        """
         if self.model is not None:
             # serialize model to JSON:
             self.model.save(join(path, "tf_model"))
@@ -229,6 +267,13 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             lprint("self.infmodel is None, no inference model will be saved.")
 
     def __getstate__(self):
+        """Customize pickle state to exclude non-serializable Keras objects.
+
+        Returns
+        -------
+        dict
+            Object state with Keras models and callbacks excluded.
+        """
         state = self.__dict__.copy()
         # exclude fields below that should/cannot be saved properly:
         del state['early_stopping']
@@ -242,6 +287,13 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         return state
 
     def _load_internals(self, path: str):
+        """Load Keras model files from disk.
+
+        Parameters
+        ----------
+        path : str
+            Directory path to load the model files from.
+        """
         with lsection(f"Loading 'cnn' image translator from {path}"):
             # load JSON and create model:
             self.model = keras.models.load_model(join(path, "tf_model"))
@@ -262,7 +314,25 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         callback_period=3,
         jinv=False,
     ):
-        with device(get_best_device_name()):
+        """Train the CNN model on the given images.
+
+        Handles patch extraction, model construction, callback setup,
+        and training loop execution.
+
+        Parameters
+        ----------
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        target_image : numpy.ndarray
+            Shape-normalized target image.
+        train_valid_ratio : float
+            Fraction of data for validation. Default is 0.1.
+        callback_period : int
+            Callback period in seconds. Default is 3.
+        jinv : bool
+            J-invariance flag. Default is False.
+        """
+        with tf.device(get_best_device_name()):
             # Reshape the input image
             input_image = numpy.moveaxis(input_image, 1, input_image.ndim - 1)
             if not self.self_supervised:
@@ -518,7 +588,26 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     )
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
-        with device(get_best_device_name()):
+        """Translate (denoise) an input image using the trained CNN model.
+
+        Handles padding for model compatibility and manages the inference
+        model weights.
+
+        Parameters
+        ----------
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        image_slice : tuple of slice, optional
+            Slice indicating tile position within the whole image.
+        whole_image_shape : tuple of int, optional
+            Shape of the full image before tiling.
+
+        Returns
+        -------
+        numpy.ndarray
+            Denoised output image with same spatial shape as input.
+        """
+        with tf.device(get_best_device_name()):
             # Change dimensions to (B, space, C)
             input_image = numpy.moveaxis(input_image, 1, input_image.ndim - 1)
 

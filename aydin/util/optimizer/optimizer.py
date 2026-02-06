@@ -1,8 +1,15 @@
+"""Surrogate-based black-box optimizer with RBF interpolation.
+
+Combines radial basis function interpolation with exploration/exploitation
+balancing to efficiently optimize expensive black-box functions.
+"""
+
 import itertools
 import math
 import traceback
 from copy import copy
-from typing import Callable, List, Tuple, Union, Optional
+from typing import Callable, List, Optional, Tuple, Union
+
 import numpy
 from joblib import Parallel, delayed
 from numpy.linalg import LinAlgError, norm
@@ -13,6 +20,29 @@ from aydin.util.log.log import lprint, lsection
 
 
 class Optimizer:
+    """Black-box function optimizer using RBF surrogate interpolation.
+
+    Alternates between exploiting an RBF-interpolated proxy of the
+    objective function and exploring under-sampled regions of the
+    parameter space to find the global optimum with minimal function
+    evaluations.
+
+    Attributes
+    ----------
+    function : callable or None
+        The objective function being optimized.
+    bounds : list of tuple
+        Parameter bounds.
+    x : list of numpy.ndarray
+        Evaluated parameter points.
+    y : list of float
+        Function values at evaluated points.
+    best_point : numpy.ndarray or None
+        Best parameter point found so far.
+    best_value : float
+        Best function value found so far.
+    """
+
     def __init__(self):
 
         self.function = None
@@ -36,7 +66,7 @@ class Optimizer:
     ) -> Tuple[tuple[float, ...], float]:
         """
         Optimizes (maximizes) a given function by alternating between optimisation
-        of a proxy function obtrained through interpolation, and exploration of the
+        of a proxy function obtained through interpolation, and exploration of the
         least sampled regions of the optimisation domain.
 
         Parameters
@@ -61,7 +91,7 @@ class Optimizer:
             Maximum number of evaluations of the /a priori/ costly given function.
 
         num_interpolated_evaluations: int
-            Max number of evaluations of the inyterpolated function.
+            Max number of evaluations of the interpolated function.
 
         workers: int
             Number of workers, if -1 the maximum is used.

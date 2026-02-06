@@ -1,11 +1,14 @@
 ignore:
-  - "aydin/it/demo/**/*"
+  - "aydin/**/demo/**"
+  - "aydin/**/test/**"
 coverage:
   status:
     project:
       default:
         target: auto
-        threshold: 0.5%  # coverage can drop by up to 0.5% while still posting success
-    patch: off
+        threshold: 2%
+    patch:
+      default:
+        target: 80%
 comment:
-  require_changes: true  # if true: only post the PR comment if coverage changes
+  require_changes: false

@@ -1,3 +1,10 @@
+"""Configurable UNet architecture with multiple pooling and upsampling modes.
+
+Provides a flexible UNet implementation supporting different pooling
+(max, average, convolutional), upsampling (bilinear, nearest, transposed
+convolution), activation, and normalization options.
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,6 +13,30 @@ from aydin.nn._legacy_pytorch.models.convblock import ConvBlock
 
 
 class Unet(nn.Module):
+    """Configurable UNet with multiple downsampling and upsampling modes.
+
+    Parameters
+    ----------
+    n_channel_in : int
+        Number of input channels.
+    n_channel_out : int
+        Number of output channels.
+    n_internal_channels : int
+        Number of channels in the first level.
+    residual : bool
+        Whether to add a global residual connection.
+    down : str
+        Downsampling mode: ``'maxpool'``, ``'avgpool'``, or ``'convpool'``.
+    up : str
+        Upsampling mode: ``'bilinear'``, ``'nearest'``, or ``'tconv'``.
+    activation : str
+        Activation function name.
+    norm : str or None
+        Normalization type.
+    softmax : bool
+        Whether to apply softmax between levels.
+    """
+
     def __init__(
         self,
         n_channel_in=1,

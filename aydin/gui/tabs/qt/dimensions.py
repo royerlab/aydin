@@ -1,10 +1,12 @@
+"""Dimensions tab for configuring spatiotemporal, batch, and channel axes."""
+
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
     QHBoxLayout,
     QTreeWidget,
     QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
 from aydin.gui._qt.custom_widgets.readmoreless_label import QReadMoreLessLabel
@@ -64,22 +66,61 @@ class DimensionsTab(QWidget):
 
     @property
     def axes(self):
+        """Current axes string for the loaded image (e.g. 'TZYX').
+
+        Returns
+        -------
+        str or None
+            Axes string, or None if no image is loaded.
+        """
         return self._axes
 
     @property
     def spatiotemporal_axes(self):
+        """Boolean list indicating which axes are spatiotemporal.
+
+        Returns
+        -------
+        list of bool or None
+            One boolean per axis, or None if no image is loaded.
+        """
         return self._get_current_row_values(1)
 
     @property
     def batch_axes(self):
+        """Boolean list indicating which axes are batch dimensions.
+
+        Returns
+        -------
+        list of bool or None
+            One boolean per axis, or None if no image is loaded.
+        """
         return self._get_current_row_values(2)
 
     @property
     def channel_axes(self):
+        """Boolean list indicating which axes are channel dimensions.
+
+        Returns
+        -------
+        list of bool or None
+            One boolean per axis, or None if no image is loaded.
+        """
         return self._get_current_row_values(3)
 
     def _get_current_row_values(self, row_index):
+        """Read checkbox states from a row in the dimensions tree.
 
+        Parameters
+        ----------
+        row_index : int
+            Row index (1=spatiotemporal, 2=batch, 3=channel).
+
+        Returns
+        -------
+        list of bool or None
+            Checkbox states for each column, or None if tree is empty.
+        """
         response = []
         root = self.dimensions_tree.invisibleRootItem()
 
@@ -93,6 +134,13 @@ class DimensionsTab(QWidget):
 
     @property
     def dimensions(self):
+        """Shape values for the first row of the dimensions tree.
+
+        Returns
+        -------
+        list of int or None
+            List of dimension sizes [T, Z, Y, X], or None if the tree is empty.
+        """
         # TODO: change this to return a dict about dimensions
         response = []
         root = self.dimensions_tree.invisibleRootItem()
@@ -109,6 +157,14 @@ class DimensionsTab(QWidget):
 
     @dimensions.setter
     def dimensions(self, dimensions_metadata):
+        """Populate the dimensions tree from image metadata.
+
+        Parameters
+        ----------
+        dimensions_metadata : FileMetadata or None
+            Image metadata containing axes, shape, batch_axes, and
+            channel_axes. If None, clears the tree and disables the tab.
+        """
         if dimensions_metadata is None or dimensions_metadata == FileMetadata():
             self.remove_items_from_tree()
             self.parent.enable_disable_a_tab(self.__class__, False)
@@ -167,6 +223,19 @@ class DimensionsTab(QWidget):
 
     @Slot(QTreeWidgetItem, int)
     def onTreeClicked(self, it, col):
+        """Handle clicks on dimension tree checkboxes.
+
+        Enforces mutual exclusivity between spatiotemporal, batch, and
+        channel rows, and ensures at least one spatiotemporal dimension
+        remains selected.
+
+        Parameters
+        ----------
+        it : QTreeWidgetItem
+            The clicked tree item.
+        col : int
+            The column index that was clicked.
+        """
         nb_spatiotemporal_dimensions = sum(int(x) for x in self.spatiotemporal_axes)
         clicked_row = ["spatiotemporal", "batch", "channel"].index(it.text(0))
 
@@ -201,6 +270,11 @@ class DimensionsTab(QWidget):
                 it.setCheckState(col, Qt.Checked)
 
     def handle_special_cases(self):
+        """Apply special dimension assignment rules after initialization.
+
+        If there are 4 spatiotemporal dimensions including T, automatically
+        assigns the T axis as a batch dimension to limit computation.
+        """
         nb_spatiotemporal_dimensions = sum(int(x) for x in self.spatiotemporal_axes)
 
         if (
@@ -216,11 +290,21 @@ class DimensionsTab(QWidget):
 
     @staticmethod
     def handle_exclusive_states(other_rows, col_idx):
+        """Uncheck the given column in all other rows to enforce exclusivity.
+
+        Parameters
+        ----------
+        other_rows : list of QTreeWidgetItem
+            The rows to uncheck.
+        col_idx : int
+            The column index to uncheck.
+        """
         for other_row in other_rows:
             if other_row.checkState(col_idx) == Qt.Checked:
                 other_row.setCheckState(col_idx, Qt.Unchecked)
 
     def remove_items_from_tree(self):
+        """Remove all items from the dimensions tree widget."""
         root = self.dimensions_tree.invisibleRootItem()
         child_count = root.childCount()
         for i in reversed(range(child_count)):
@@ -229,6 +313,11 @@ class DimensionsTab(QWidget):
             (item.parent() or root).removeChild(item)
 
     def on_data_model_update(self):
+        """Refresh the dimensions tree from the current data model.
+
+        Only populates dimensions when exactly one image is marked for
+        denoising; otherwise clears the tree.
+        """
         self.dimensions = (
             self.parent.data_model.images_to_denoise[0][2]
             if len(self.parent.data_model.images_to_denoise) == 1

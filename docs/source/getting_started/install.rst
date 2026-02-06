@@ -75,6 +75,21 @@ You can open the folder and double-click on the ``run-aydin`` file to start Aydi
 Install Aydin bundle on Linux
 ---------------------------------------
 
+.. note::
+   **Linux System Dependencies**: Aydin's GUI requires ``libxcb-cursor0`` (needed by Qt 6.5+).
+   If you encounter a Qt platform plugin error, install it first:
+
+   .. code-block:: bash
+
+      # Ubuntu/Debian
+      sudo apt install libxcb-cursor0
+
+      # Fedora/RHEL
+      sudo dnf install xcb-util-cursor
+
+      # Arch Linux
+      sudo pacman -S xcb-util-cursor
+
 Download the `Linux bundle <https://royerlab.github.io/aydin/>`_  to start. Then extract the Aydin bundle
 from the compressed file. You should be able to see the see extracted folder as shown below:
 
@@ -94,12 +109,24 @@ or you can get into ``aydin`` folder and double-click on the executable named ``
 Install Aydin in a Conda environment with CUDA support
 ---------------------------------------------------------------------
 
-If you are an OSX user please first make sure to install ``libomp``:
+**macOS users** need to install ``libomp`` first:
 
 .. code-block:: bash
 
     $ brew install libomp
 
+**Linux users** need to install the Qt system dependency:
+
+.. code-block:: bash
+
+    # Ubuntu/Debian
+    $ sudo apt install libxcb-cursor0
+
+    # Fedora/RHEL
+    $ sudo dnf install xcb-util-cursor
+
+    # Arch Linux
+    $ sudo pacman -S xcb-util-cursor
 
 Then you can install Aydin with CUDA support:
 

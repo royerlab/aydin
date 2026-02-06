@@ -11,14 +11,14 @@ def add_patterned_noise(image, n):
     image *= 1 + 0.1 * (numpy.random.rand(n, n) - 0.5)
     image += 0.1 * numpy.random.rand(n, n)
     # image += 0.1*numpy.random.rand(n)[]
-    image = random_noise(image, mode="gaussian", var=0.00001, seed=0)
-    image = random_noise(image, mode="s&p", amount=0.000001, seed=0)
+    image = random_noise(image, mode="gaussian", var=0.00001, rng=0)
+    image = random_noise(image, mode="s&p", amount=0.000001, rng=0)
     return image
 
 
 def test_fixed_pattern_real():
     n = 128
-    image = binary_blobs(length=n, seed=1, n_dim=3, volume_fraction=0.01).astype(
+    image = binary_blobs(length=n, rng=1, n_dim=3, volume_fraction=0.01).astype(
         numpy.float32
     )
     image = gaussian_filter(image, sigma=4)

@@ -1,5 +1,13 @@
+"""Fixed-dictionary sparse coding denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions that use sparse coding over a
+fixed dictionary (e.g. DCT, DST) of n-dimensional image patches. Each patch
+is represented as a sparse linear combination of dictionary atoms, and the
+sparse reconstruction serves as the denoised patch.
+"""
+
 import math
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -8,11 +16,11 @@ from sklearn.decomposition import SparseCoder
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.dictionary.dictionary import (
-    fixed_dictionary,
     extract_normalised_vectorised_patches,
+    fixed_dictionary,
 )
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lprint, lsection
 from aydin.util.patch_size.patch_size import default_patch_size
 from aydin.util.patch_transform.patch_transform import reconstruct_from_nd_patches
 
@@ -97,7 +105,7 @@ def calibrate_denoise_dictionary_fixed(
         optimal parameters. Increase this number by factors of two if denoising
         quality is unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -253,7 +261,7 @@ def denoise_dictionary_fixed(
         nD image to be denoised
 
     dictionary: ArrayLike
-        Dictionary to use for denosing image via sparse coding.
+        Dictionary to use for denoising image via sparse coding.
         By default (None) a fixed dictionary is used.
 
     coding_mode: str
@@ -264,7 +272,7 @@ def denoise_dictionary_fixed(
         How many atoms are used to represent each patch after denoising.
 
     gamma: float
-        How much the periphery of teh patches contributes to the final denoised
+        How much the periphery of the patches contributes to the final denoised
         image. Larger gamma means that we keep more of the central pixels of the
         patches, smaller values lead to a more uniform contribution.
         A value of 1 corresponds to the default blackman window.

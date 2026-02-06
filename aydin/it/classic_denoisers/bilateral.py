@@ -1,5 +1,13 @@
+"""Bilateral filter denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on the bilateral filter,
+an edge-preserving smoothing filter that weights pixels by both spatial
+distance and intensity similarity. Uses scikit-image's bilateral filter
+implementation, extended to support n-dimensional images.
+"""
+
 from functools import partial
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -59,7 +67,7 @@ def calibrate_denoise_bilateral(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -73,20 +81,23 @@ def calibrate_denoise_bilateral(
 
     display_images: bool
         When True the denoised images encountered during
-        optimisation are shown
+        optimisation are shown.
         (advanced) (hidden)
 
     display_crop: bool
-        Displays crop, for debugging purposes...
+        Displays crop, for debugging purposes.
         (advanced) (hidden)
 
     other_fixed_parameters: dict
-        Any other fixed parameters
+        Any other fixed parameters.
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    tuple
+        A tuple of (denoising_function, best_parameters, memory_needed) where
+        denoising_function is the callable for denoising, best_parameters is
+        a dict of optimal parameters, and memory_needed is the estimated
+        memory in bytes.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -165,11 +176,12 @@ def denoise_bilateral(
         A larger value results in improved accuracy.
 
     kwargs: dict
-        Other parameters
+        Other parameters.
 
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
 
     """
 

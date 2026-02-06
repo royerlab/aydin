@@ -1,13 +1,20 @@
+"""Periodic noise suppression transform.
+
+Detects and suppresses periodic noise by identifying peaks in the Fourier
+power spectral density and attenuating them. Works with non-axis-aligned
+periodic patterns. Can reapply the suppression during post-processing or
+optionally restore the periodic components.
+"""
+
 import numpy
 import scipy
-
 from numpy.typing import ArrayLike
 from scipy.ndimage import minimum_filter
 from skimage.feature import peak_local_max
 
 from aydin.it.classic_denoisers.gaussian import calibrate_denoise_gaussian
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lprint, lsection
 
 
 class PeriodicNoiseSuppressionTransform(ImageTransformBase):
@@ -23,7 +30,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         "Periodic noise suppression" + ImageTransformBase.preprocess_description
     )
     postprocess_description = (
-        "Reaply periodic noise" + ImageTransformBase.postprocess_description
+        "Reapply periodic noise" + ImageTransformBase.postprocess_description
     )
     postprocess_supported = True
     postprocess_recommended = False
@@ -37,7 +44,6 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         priority: float = 0.30,
         **kwargs,
     ):
-
         """
         Constructs a Periodic Noise Suppression Transform
 
@@ -57,7 +63,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
@@ -68,7 +74,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         self._original_dtype = None
         self._coordinates = {}
 
-        lprint(f"Instanciating: {self}")
+        lprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -89,6 +95,18 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
+        """Detect and suppress periodic noise patterns in the image.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Image with periodic noise suppressed.
+        """
 
         with lsection(
             f"Applies periodic noise suppression to array of shape: {array.shape} and dtype: {array.dtype}"
@@ -97,6 +115,22 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
             return new_array
 
     def postprocess(self, array: ArrayLike):
+        """Reapply or re-suppress periodic noise after denoising.
+
+        If ``post_processing_is_inverse`` is True, restores the suppressed
+        periodic components. Otherwise, applies suppression again to
+        eliminate any remaining periodic noise.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Post-processed image.
+        """
 
         if not self.do_postprocess:
             return array
@@ -201,6 +235,22 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
 
 
 def _sphere(shape, radius, position):
+    """Generate a boolean mask for a hypersphere at a given position.
+
+    Parameters
+    ----------
+    shape : tuple of int
+        Shape of the output mask array.
+    radius : int or float
+        Radius of the sphere in pixels/voxels.
+    position : tuple of int
+        Center coordinates of the sphere.
+
+    Returns
+    -------
+    numpy.ndarray
+        Boolean mask where True indicates voxels inside the sphere.
+    """
     # From : https://stackoverflow.com/questions/46626267/how-to-generate-a-sphere-in-3d-numpy-array/46626448
 
     # assume shape and position are both a 3-tuple of int or float

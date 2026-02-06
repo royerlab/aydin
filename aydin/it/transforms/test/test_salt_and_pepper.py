@@ -4,13 +4,13 @@ from numpy.linalg import norm
 from scipy.ndimage import median_filter
 from skimage.util import random_noise
 
-from aydin.io.datasets import camera, normalise, newyork
+from aydin.io.datasets import camera, newyork, normalise
 from aydin.it.transforms.salt_pepper import SaltPepperTransform
 
 
 def test_suppress_fixed_background_real():
     image = normalise(newyork())
-    noisy = random_noise(image, mode="s&p", amount=0.03, seed=0, clip=False)
+    noisy = random_noise(image, mode="s&p", amount=0.03, rng=0, clip=False)
 
     bpc = SaltPepperTransform(threshold=0.15)
 

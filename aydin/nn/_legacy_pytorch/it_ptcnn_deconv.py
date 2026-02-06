@@ -1,3 +1,9 @@
+"""PyTorch-based CNN image deconvolution translator.
+
+Extends the CNN image translator with a PSF forward model for
+joint denoising and deconvolution.
+"""
+
 import numpy
 import torch
 import torch.nn.functional as F
@@ -9,6 +15,18 @@ from aydin.util.log.log import lprint
 
 
 def to_numpy(tensor):
+    """Convert a PyTorch tensor to a NumPy array.
+
+    Parameters
+    ----------
+    tensor : torch.Tensor
+        Input tensor.
+
+    Returns
+    -------
+    numpy.ndarray
+        Detached NumPy array on CPU.
+    """
     return tensor.clone().detach().cpu().numpy()
 
 
@@ -18,12 +36,16 @@ class PTCNNDeconvolution(PTCNNImageTranslator):
     """
 
     def __init__(self, psf_kernel=None, broaden_psf=1, **kwargs):
-        """
-        Constructs a CNN image translator using the _legacy_pytorch deep learning library.
+        """Construct a CNN deconvolution translator.
 
-        :param normaliser_type: normaliser type
-        :param balance_training_data: balance data ? (limits number training entries per target value histogram bin)
-        :param monitor: monitor to track progress of training externally (used by UI)
+        Parameters
+        ----------
+        psf_kernel : numpy.ndarray or None
+            Point spread function kernel.
+        broaden_psf : int
+            Number of times to broaden the PSF by convolution.
+        **kwargs
+            Additional keyword arguments passed to ``PTCNNImageTranslator``.
         """
         super().__init__(**kwargs)
 

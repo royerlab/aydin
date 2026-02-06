@@ -59,12 +59,12 @@ def demo(image):
     print(
         "noisy",
         psnr(image[..., s], noisy[..., s], data_range=255),
-        ssim(image[..., s], noisy[..., s], multichannel=True),
+        ssim(image[..., s], noisy[..., s], channel_axis=-1),
     )
     print(
         "denoised",
         psnr(image[..., s], denoised, data_range=255),
-        ssim(image[..., s], denoised, multichannel=True),
+        ssim(image[..., s], denoised, channel_axis=-1),
     )
     # print("denoised_predict", psnr(denoised_predict, image), ssim(denoised_predict, image))
 

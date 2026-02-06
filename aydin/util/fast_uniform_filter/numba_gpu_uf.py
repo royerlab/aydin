@@ -1,7 +1,13 @@
+"""Numba CUDA GPU-accelerated uniform (box) filter for n-dimensional arrays.
+
+Provides GPU implementations of the separable uniform filter for 2D to 4D
+arrays using CUDA kernels.
+"""
+
 import math
 
 import numpy
-from numba import get_num_threads, cuda
+from numba import cuda, get_num_threads
 from numba.cuda import device_array
 
 from aydin.util.fast_uniform_filter.numba_cpu_uf import _cpu_line_filter
@@ -10,6 +16,33 @@ from aydin.util.fast_uniform_filter.numba_cpu_uf import _cpu_line_filter
 def numba_gpu_uniform_filter(
     image, size=3, cuda_stream=0, output=None, mode="nearest", cval=0.0, origin=0
 ):
+    """Apply a uniform (box) filter on GPU using CUDA.
+
+    Separable implementation that processes one axis at a time.
+    Supports arrays from 2D to 4D.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array (2D to 4D).
+    size : int or tuple of int
+        Filter window size. If a tuple, specifies size per axis.
+    cuda_stream : int
+        CUDA stream for asynchronous operations.
+    output : numpy.ndarray, optional
+        Not used directly; kept for API compatibility.
+    mode : str
+        Boundary mode. Only 'nearest' is supported.
+    cval : float
+        Not used (kept for API compatibility).
+    origin : int
+        Not used (kept for API compatibility).
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered image copied back to host memory.
+    """
 
     original_dtype = image.dtype
 
@@ -65,6 +98,29 @@ def numba_gpu_uniform_filter(
 def uniform_filter1d_with_conditionals_gpu(
     image, output, current_size, axis, parallelism=None
 ):
+    """Dispatch 1D GPU uniform filter along a specific axis.
+
+    Selects the appropriate CUDA kernel based on the array
+    dimensionality (2D, 3D, or 4D).
+
+    Parameters
+    ----------
+    image : numba.cuda.DeviceNDArray
+        Input array on GPU device.
+    output : numba.cuda.DeviceNDArray
+        Output array on GPU device (pre-allocated).
+    current_size : int
+        Window size for the uniform filter.
+    axis : int
+        Axis along which to apply the filter.
+    parallelism : int, optional
+        Not used for GPU (kept for API compatibility).
+
+    Raises
+    ------
+    Exception
+        If the input array is 1D (not supported on GPU).
+    """
     if image.ndim == 1:
         raise Exception("numba gpu implementation is no supporting 1D input arrays.")
     elif image.ndim == 2:
@@ -177,18 +233,24 @@ def uniform_filter1d_with_conditionals_gpu(
 def gpu_line_filter_2d(
     image, output, filter_size, line_length, length1, step_size, x_length
 ):
-    """
-    Numba CUDA line filter implementation. Doesn't return anything,
-    output array should be provided as an argument.
+    """CUDA kernel for 2D line-wise uniform filtering.
 
     Parameters
     ----------
-    input_line
-        1D input array
-    output_line
-        1D output array
-    filter_size
-        Size of the uniform filter
+    image : numba.cuda.DeviceNDArray
+        Flattened input array on device.
+    output : numba.cuda.DeviceNDArray
+        Flattened output array on device.
+    filter_size : int
+        Window size for the uniform filter.
+    line_length : int
+        Length of lines to filter.
+    length1 : int
+        Stride for the first non-filter axis.
+    step_size : int
+        Stride along the filter axis.
+    x_length : int
+        Number of lines to process.
     """
     # Thread id in a 1D block
     tx = cuda.threadIdx.x
@@ -221,18 +283,28 @@ def gpu_line_filter_3d(
     x_length,
     y_length,
 ):
-    """
-    Numba CUDA line filter implementation. Doesn't return anything,
-    output array should be provided as an argument.
+    """CUDA kernel for 3D line-wise uniform filtering.
 
     Parameters
     ----------
-    input_line
-        1D input array
-    output_line
-        1D output array
-    filter_size
-        Size of the uniform filter
+    image : numba.cuda.DeviceNDArray
+        Flattened input array on device.
+    output : numba.cuda.DeviceNDArray
+        Flattened output array on device.
+    filter_size : int
+        Window size for the uniform filter.
+    line_length : int
+        Length of lines to filter.
+    length1 : int
+        Stride for the first non-filter axis.
+    length2 : int
+        Stride for the second non-filter axis.
+    step_size : int
+        Stride along the filter axis.
+    x_length : int
+        Number of lines along the first non-filter axis.
+    y_length : int
+        Number of lines along the second non-filter axis.
     """
     # Thread id in a 1D block
     tx = cuda.threadIdx.x
@@ -276,18 +348,32 @@ def gpu_line_filter_4d(
     y_length,
     z_length,
 ):
-    """
-    Numba CUDA line filter implementation. Doesn't return anything,
-    output array should be provided as an argument.
+    """CUDA kernel for 4D line-wise uniform filtering.
 
     Parameters
     ----------
-    input_line
-        1D input array
-    output_line
-        1D output array
-    filter_size
-        Size of the uniform filter
+    image : numba.cuda.DeviceNDArray
+        Flattened input array on device.
+    output : numba.cuda.DeviceNDArray
+        Flattened output array on device.
+    filter_size : int
+        Window size for the uniform filter.
+    line_length : int
+        Length of lines to filter.
+    length1 : int
+        Stride for the first non-filter axis.
+    length2 : int
+        Stride for the second non-filter axis.
+    length3 : int
+        Stride for the third non-filter axis.
+    step_size : int
+        Stride along the filter axis.
+    x_length : int
+        Number of lines along the first non-filter axis.
+    y_length : int
+        Number of lines along the second non-filter axis.
+    z_length : int
+        Number of lines along the third non-filter axis.
     """
     # Thread id in a 1D block
     tx = cuda.threadIdx.x
@@ -328,6 +414,20 @@ def gpu_line_filter_4d(
 
 @cuda.jit(device=True)
 def gpu_line_filter(input_line, output_line, current_size):
+    """CUDA device function for sliding-window uniform filtering of a 1D line.
+
+    Uses a running sum accumulator for O(n) filtering regardless of
+    filter size. Boundary handling uses nearest-neighbor clamping.
+
+    Parameters
+    ----------
+    input_line : numba.cuda.DeviceNDArray
+        1D input array slice on device.
+    output_line : numba.cuda.DeviceNDArray
+        1D output array slice on device.
+    current_size : int
+        Window size for the uniform filter.
+    """
     array_size = len(input_line)
     left_offset, right_offset = (
         current_size // 2,

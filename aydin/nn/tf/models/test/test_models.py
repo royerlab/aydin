@@ -1,3 +1,5 @@
+"""Tests for TensorFlow model architectures."""
+
 import numpy as np
 
 from aydin.nn.tf.models.jinet import JINetModel

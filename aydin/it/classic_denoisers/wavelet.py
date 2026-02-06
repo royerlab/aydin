@@ -1,5 +1,12 @@
+"""Wavelet denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on wavelet thresholding.
+Uses scikit-image's wavelet denoising implementation with support for
+multiple wavelet families and thresholding methods (BayesShrink, VisuShrink).
+"""
+
 from functools import partial
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy
 import pywt
@@ -68,7 +75,7 @@ def calibrate_denoise_wavelet(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -213,7 +220,7 @@ def denoise_wavelet(
     implementation of <a href="https://en.wikipedia.org/wiki/Wavelet_transform ">
     wavelet</a> denoising.
     \n\n
-    Note: we use the scikt-image implementation of wavelet denoising.
+    Note: we use the scikit-image implementation of wavelet denoising.
 
     Parameters
     ----------

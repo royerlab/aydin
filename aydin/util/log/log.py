@@ -1,3 +1,10 @@
+"""Structured logging utilities for Aydin.
+
+Provides tree-structured logging with hierarchical sections, elapsed time
+tracking, and optional GUI callback support. Use ``lprint`` for log messages
+and ``lsection`` as a context manager for nested log sections.
+"""
+
 import locale
 import math
 import sys
@@ -8,8 +15,31 @@ import click
 
 
 class Log:
-    """
-    Custom Log class
+    """Singleton-style logging configuration class.
+
+    Manages global logging state including output depth, GUI callbacks,
+    and display settings. All attributes are class-level (static).
+
+    Attributes
+    ----------
+    gui_callback : object or None
+        Qt signal for GUI log output.
+    gui_statusbar : object or None
+        Qt status bar widget for displaying messages.
+    guiEnabled : bool
+        Whether GUI logging is enabled.
+    enable_output : bool
+        Whether console output is enabled.
+    depth : int
+        Current nesting depth for tree-structured output.
+    max_depth : int or float
+        Maximum depth to display (use ``math.inf`` for unlimited).
+    log_elapsed_time : bool
+        Whether to display elapsed time for sections.
+    override_test_exclusion : bool
+        When True, logging is enabled even during test runs.
+    force_click_echo : bool
+        When True, uses ``click.echo`` instead of ``print``.
     """
 
     # current_section = ''
@@ -46,6 +76,19 @@ class Log:
 
     @staticmethod
     def native_print(*args, sep=' ', end='\n', file=sys.__stdout__):
+        """Print to stdout and optionally emit to GUI callback.
+
+        Parameters
+        ----------
+        *args : object
+            Values to print.
+        sep : str
+            Separator between values.
+        end : str
+            String appended after the last value.
+        file : file-like
+            Output stream for console printing.
+        """
         if Log.enable_output:
             if Log.force_click_echo:
                 click.echo(*args)
@@ -67,6 +110,7 @@ class Log:
     @staticmethod
     @contextmanager
     def test_context():
+        """Context manager that enables logging output during tests."""
         Log.override_test_exclusion = True
         Log.force_click_echo = True
         yield
@@ -74,22 +118,40 @@ class Log:
         Log.force_click_echo = False
 
     def set_log_elapsed_time(log_elapsed_time: bool):
+        """Enable or disable elapsed time display for log sections.
+
+        Parameters
+        ----------
+        log_elapsed_time : bool
+            Whether to show elapsed time.
+        """
         Log.log_elapsed_time = log_elapsed_time
 
     def set_log_max_depth(max_depth: int):
+        """Set the maximum nesting depth for log output.
+
+        Parameters
+        ----------
+        max_depth : int
+            Maximum depth level to display (1-based).
+        """
         Log.max_depth = max(0, max_depth - 1)
 
 
 def lprint(*args, sep=' ', end='\n'):
-    """
-    Log print
+    """Print a log message at the current nesting depth.
+
+    Output is suppressed during test runs unless ``Log.override_test_exclusion``
+    is True. Messages are indented according to the current section depth.
 
     Parameters
     ----------
-    args : Sequence
+    *args : object
+        Values to print, same semantics as built-in ``print``.
     sep : str
+        Separator between values.
     end : str
-
+        String appended after the last value.
     """
     if not Log.override_test_exclusion:
         for arg in sys.argv:
@@ -104,13 +166,20 @@ def lprint(*args, sep=' ', end='\n'):
 
 @contextmanager
 def lsection(section_header: str):
-    """
-    Log section
+    """Context manager for a named log section with timing.
+
+    Creates a hierarchical log section that tracks elapsed time.
+    Nested sections are indented in the tree-structured output.
 
     Parameters
     ----------
     section_header : str
+        Header text displayed at the start of the section.
 
+    Yields
+    ------
+    None
+        Control is yielded to the caller's code block.
     """
     if not Log.override_test_exclusion:
         for arg in sys.argv:

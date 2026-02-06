@@ -1,5 +1,13 @@
+"""Learned-dictionary sparse coding denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions that use sparse coding over a
+learned dictionary of n-dimensional image patches. Supports multiple dictionary
+learning algorithms (K-Means, PCA, ICA, SDL) and sparse coding methods
+(OMP, LASSO, LARS, threshold).
+"""
+
 import math
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -55,7 +63,7 @@ def calibrate_denoise_dictionary_learned(
 
     patch_size : int
         Patch size. If None it is automatically adjusted
-        to teh number of dimensions of the image to
+        to the number of dimensions of the image to
         ensure a reasonable computational effort.
         (advanced)
 
@@ -166,7 +174,7 @@ def calibrate_denoise_dictionary_learned(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -298,18 +306,24 @@ def calibrate_denoise_dictionary_learned(
 
 
 def denoise_dictionary_learned(*args, **kwargs):
-    """
-    Denoises the given image using sparse-coding over a fixed
-    dictionary of nD image patches. The dictionary learning and
-    patch sparse coding uses scikit-learn's Batch-OMP implementation.
+    """Denoise an image using sparse coding over a learned dictionary.
+
+    Delegates to ``denoise_dictionary_fixed`` with the provided arguments.
+    The dictionary should have been learned during calibration and passed
+    as a keyword argument.
 
     Parameters
     ----------
-    args
-    kwargs
+    *args
+        Positional arguments forwarded to ``denoise_dictionary_fixed``.
+    **kwargs
+        Keyword arguments forwarded to ``denoise_dictionary_fixed``.
+        Typically includes ``dictionary``, ``coding_mode``, ``sparsity``,
+        ``gamma``, and ``multi_core``.
 
     Returns
     -------
-    denoised image
+    numpy.ndarray
+        Denoised image.
     """
     return denoise_dictionary_fixed(*args, **kwargs)

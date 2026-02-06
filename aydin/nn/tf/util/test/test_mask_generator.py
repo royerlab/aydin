@@ -1,4 +1,7 @@
+"""Tests for mask generator utilities."""
+
 import numpy
+
 from aydin.nn.tf.util.mask_generator import maskedgen, randmaskgen
 
 

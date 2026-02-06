@@ -1,8 +1,17 @@
-from deprecated import deprecated
+"""Keras callbacks for training management (deprecated).
+
+Provides custom callbacks for CNN training including early stopping,
+learning rate scheduling, model checkpointing, and blind-spot
+kernel gradient management.
+"""
+
 import warnings
+
+import keras
 import numpy as np
-from tensorflow.python.keras import backend
-from tensorflow.python.keras.callbacks import Callback
+from deprecated import deprecated
+from keras import backend
+from keras.callbacks import Callback
 
 from aydin.util.log.log import lprint
 
@@ -148,7 +157,7 @@ class EarlyStopping(Callback):
         if self.baseline is not None:
             self.best = self.baseline
         else:
-            self.best = np.Inf if self.monitor_op == np.less else -np.Inf
+            self.best = np.inf if self.monitor_op == np.less else -np.inf
 
     def on_epoch_end(self, epoch, logs=None):
         """on_epoch_end part of callback"""
@@ -292,10 +301,10 @@ class ReduceLROnPlateau(Callback):
             self.mode = 'auto'
         if self.mode == 'min' or (self.mode == 'auto' and 'acc' not in self.monitor):
             self.monitor_op = lambda a, b: np.less(a, b - self.min_delta)
-            self.best = np.Inf
+            self.best = np.inf
         else:
             self.monitor_op = lambda a, b: np.greater(a, b + self.min_delta)
-            self.best = -np.Inf
+            self.best = -np.inf
         self.cooldown_counter = 0
         self.wait = 0
 
@@ -304,7 +313,7 @@ class ReduceLROnPlateau(Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         logs = logs or {}
-        logs['lr'] = backend.get_value(self.model.optimizer.lr)
+        logs['lr'] = float(self.model.optimizer.learning_rate)
         current = logs.get(self.monitor)
         if current is None:
             warnings.warn(
@@ -325,11 +334,11 @@ class ReduceLROnPlateau(Callback):
             elif not self.in_cooldown():
                 self.wait += 1
                 if self.wait >= self.patience:
-                    old_lr = float(backend.get_value(self.model.optimizer.lr))
+                    old_lr = float(self.model.optimizer.learning_rate)
                     if old_lr > self.min_lr:
                         new_lr = old_lr * self.factor
                         new_lr = max(new_lr, self.min_lr)
-                        backend.set_value(self.model.optimizer.lr, new_lr)
+                        self.model.optimizer.learning_rate.assign(new_lr)
                         if self.verbose > 0:
                             lprint(
                                 'Epoch %05d: ReduceLROnPlateau reducing '
@@ -415,17 +424,17 @@ class ModelCheckpoint(Callback):
 
         if mode == 'min':
             self.monitor_op = np.less
-            self.best = np.Inf
+            self.best = np.inf
         elif mode == 'max':
             self.monitor_op = np.greater
-            self.best = -np.Inf
+            self.best = -np.inf
         else:
             if 'acc' in self.monitor or self.monitor.startswith('fmeasure'):
                 self.monitor_op = np.greater
-                self.best = -np.Inf
+                self.best = -np.inf
             else:
                 self.monitor_op = np.less
-                self.best = np.Inf
+                self.best = np.inf
 
     def on_epoch_end(self, epoch, logs=None):
         logs = logs or {}
@@ -547,7 +556,7 @@ class StopCenterGradient2D(Callback):
                 weights[0][indexes[0], indexes[1], ...] = 0
 
                 # Set layer weights back to layer object
-                lyr.set_weight(weights)
+                lyr.set_weights(weights)
 
     def on_epoch_end(self, epoch, logs=None):
         """
@@ -636,7 +645,7 @@ class StopCenterGradient2D(Callback):
                 # Plug the new weights values back to layer weight array
                 weights0 = np.transpose(weights0, [1, 2, 3, 0])
 
-                # Determine the index of cneter pixel
+                # Determine the index of center pixel
                 indexes = tuple((i - 1) // 2 for i in lyr.kernel_size)
 
                 # Plug 0 to the center pixel of kernel weight
@@ -732,7 +741,7 @@ class StopCenterGradient3D(Callback):
                 weights[0][indexes[0], indexes[1], indexes[2], ...] = 0
 
                 # Set layer weights back to layer object
-                lyr.set_weight(weights)
+                lyr.set_weights(weights)
 
     def on_epoch_end(self, epoch, logs=None):
         """
@@ -830,7 +839,7 @@ class StopCenterGradient3D(Callback):
                 # Plug the new weights values back to layer weight array
                 weights0 = np.transpose(weights0, [1, 2, 3, 4, 0])
 
-                # Determine the index of cneter pixel
+                # Determine the index of center pixel
                 indexes = tuple((i - 1) // 2 for i in lyr.kernel_size)
 
                 # Plug 0 to the center pixel of kernel weight

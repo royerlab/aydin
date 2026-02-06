@@ -1,6 +1,7 @@
+"""Demo: Lucy-Richardson deconvolution comparison experiments."""
+
 # flake8: noqa
 import numpy
-from aydin.it.pytorch.lucyrichardson.demo.regularised_lr import richardson_lucy_reg
 from scipy.signal import convolve2d
 from skimage.exposure import rescale_intensity
 from skimage.metrics import peak_signal_noise_ratio as psnr
@@ -10,6 +11,7 @@ from skimage.restoration import richardson_lucy
 from aydin.features.fast.fast_features import FastMultiscaleConvolutionalFeatures
 from aydin.io.datasets import add_noise, newyork
 from aydin.it.it_classic import ImageTranslatorClassic
+from aydin.it.pytorch.lucyrichardson.demo.regularised_lr import richardson_lucy_reg
 from aydin.regression.gbm import GBMRegressor
 from aydin.util.psf.simple_microscope_psf import SimpleMicroscopePSF
 

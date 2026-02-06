@@ -1,14 +1,51 @@
+"""JIDCNet2D -- J-Invariant Dilated Convolution Network.
+
+Implements a 2D CNN with dilated convolutions that maintains
+J-invariance (blind-spot property) for self-supervised denoising.
+"""
+
 import numpy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-"""
-    JIDCnet2D -- J-invariant Dilated Convolution Net
-"""
-
 
 class JInet2D(nn.Module):
+    """2D J-Invariant Dilated Convolution Network for self-supervised denoising.
+
+    Uses a series of dilated convolutions with increasing receptive fields
+    to extract multi-scale spatial features while maintaining a blind spot
+    at the center pixel. Features are combined through 1x1 convolutions
+    (dense layers) with residual connections.
+
+    Parameters
+    ----------
+    num_input_channels : int
+        Number of input image channels.
+    num_output_channels : int
+        Number of output image channels.
+    kernel_sizes : list of int or None
+        Kernel sizes for each dilated convolution scale.
+    num_features : list of int or None
+        Number of output features per dilated convolution scale.
+    num_dense_layers : int
+        Number of 1x1 convolution (dense) layers.
+    num_channels : int or None
+        Number of channels in the dense layers.
+    final_relu : bool
+        Whether to clamp output to [0, 1].
+    full_convolutional_across_channels : bool
+        If ``True``, uses full cross-channel convolutions.
+    padding_mode : str
+        Padding mode for convolutions (e.g., ``'zeros'``).
+    degressive_residuals : bool
+        Whether to apply decaying weights to residual connections.
+    kernel_continuity_regularisation : bool
+        Whether to apply kernel smoothing regularization.
+    sine_activations : bool
+        Whether to use sine activations instead of LeakyReLU.
+    """
+
     def __init__(
         self,
         num_input_channels=1,
@@ -24,18 +61,6 @@ class JInet2D(nn.Module):
         kernel_continuity_regularisation=True,
         sine_activations=True,
     ):
-        """
-
-        Parameters
-        ----------
-        num_input_channels
-        num_output_channels
-        kernel_sizes
-        num_features
-        num_dense_layers
-        num_channels
-        final_relu
-        """
         super().__init__()
 
         # These are the scales and associated kernel sizes and number of features
@@ -137,15 +162,17 @@ class JInet2D(nn.Module):
         )
 
     def forward(self, x0):
-        """
+        """Run the forward pass through the JINet.
 
         Parameters
         ----------
-        x0  input
+        x0 : torch.Tensor
+            Input tensor with shape ``(B, C, H, W)``.
 
-        Returns output of model
+        Returns
         -------
-
+        torch.Tensor
+            Denoised output tensor with the same shape as input.
         """
         # Deep spatial feature generation:
         x = x0

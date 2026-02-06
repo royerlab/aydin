@@ -1,16 +1,45 @@
+"""GPU-accelerated Lucy-Richardson deconvolution using PyTorch.
+
+Provides a function for performing iterative Lucy-Richardson
+deconvolution on images using CUDA-accelerated tensor operations.
+"""
+
 import numpy
 import torch
 import torch.nn.functional as F
 
 
 def richardson_lucy_pytorch(image, psf, iterations=50, clip=True, donut=False):
+    """Perform Lucy-Richardson deconvolution using PyTorch on GPU.
+
+    Implements iterative Lucy-Richardson deconvolution with reflection
+    padding, accelerated using CUDA tensors when available.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        2D input image to deconvolve.
+    psf : numpy.ndarray
+        2D point spread function kernel.
+    iterations : int
+        Number of deconvolution iterations.
+    clip : bool
+        Whether to clip output values to [0, 1].
+    donut : bool
+        Unused parameter (reserved for future use).
+
+    Returns
+    -------
+    numpy.ndarray
+        Deconvolved 2D image.
+    """
     use_cuda = True
     device_index = 0
     device = torch.device(f"cuda:{device_index}" if use_cuda else "cpu")
     # print(f"Using device: {device}")
 
-    image = image.astype(numpy.float)
-    psf = psf.astype(numpy.float)
+    image = image.astype(numpy.float64)
+    psf = psf.astype(numpy.float64)
     im_deconv = numpy.full(image.shape, image.mean())
     psf_mirror = psf[::-1, ::-1].copy()
     psf_size = psf_mirror.shape[0]

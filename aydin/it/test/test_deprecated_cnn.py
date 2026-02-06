@@ -1,16 +1,16 @@
 import time
 
+import keras
 import numpy
 import pytest
 import tensorflow as tf  # noqa: F401
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
-from tensorflow.python.keras.backend import clear_session
 
+from aydin.analysis.image_metrics import ssim
 from aydin.io import io
-from aydin.io.datasets import normalise, add_noise, examples_single
+from aydin.io.datasets import add_noise, examples_single, normalise
 from aydin.it.cnn import ImageTranslatorCNN
 
 
@@ -39,7 +39,7 @@ def test_it_cnn_history():
 
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
-    clear_session()
+    keras.backend.clear_session()
 
 
 def test_it_cnn_shiftconv_light():
@@ -82,7 +82,7 @@ def test_it_cnn_shiftconv_light():
     print(f"Total elapsed time: {stop - start} ")
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
 
-    clear_session()
+    keras.backend.clear_session()
 
 
 def test_it_cnn_checkerbox_light():
@@ -123,7 +123,7 @@ def test_it_cnn_checkerbox_light():
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
-    clear_session()
+    keras.backend.clear_session()
 
 
 def test_it_cnn_random_light():
@@ -163,7 +163,7 @@ def test_it_cnn_random_light():
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
     assert psnr_denoised > psnr_noisy * 0.9 and ssim_denoised > ssim_noisy * 0.9
-    clear_session()
+    keras.backend.clear_session()
 
 
 def test_it_cnn_checkran_light():
@@ -213,7 +213,7 @@ def test_it_cnn_checkran_light():
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
-    clear_session()
+    keras.backend.clear_session()
 
 
 def test_it_cnn_jinet2D_light():
@@ -249,7 +249,7 @@ def test_it_cnn_jinet2D_light():
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
-    clear_session()
+    keras.backend.clear_session()
 
 
 def test_it_cnn_jinet2D_supervised_light():
@@ -285,7 +285,7 @@ def test_it_cnn_jinet2D_supervised_light():
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
-    clear_session()
+    keras.backend.clear_session()
 
 
 @pytest.mark.unstable
@@ -336,7 +336,7 @@ def test_it_cnn_jinet3D_light():
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
     assert psnr_denoised > (psnr_noisy * 0.5) and ssim_denoised > (ssim_noisy * 0.5)
-    clear_session()
+    keras.backend.clear_session()
 
 
 @pytest.mark.unstable
@@ -377,17 +377,17 @@ def test_it_cnn_jinet3D_supervised_light():
     denoised = numpy.squeeze(denoised)
 
     psnr_noisy = psnr(noisy, image)
-    ssim_noisy = ssim(noisy, image, multichannel=True)
+    ssim_noisy = ssim(noisy, image, channel_axis=-1)
     print("noisy", psnr_noisy, ssim_noisy)
 
     psnr_denoised = psnr(denoised, image)
-    ssim_denoised = ssim(denoised, image, multichannel=True)
+    ssim_denoised = ssim(denoised, image, channel_axis=-1)
     print("denoised", psnr_denoised, ssim_denoised)
 
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
     assert psnr_denoised > (psnr_noisy * 0.5) and ssim_denoised > (ssim_noisy * 0.5)
-    clear_session()
+    keras.backend.clear_session()
 
 
 @pytest.mark.heavy

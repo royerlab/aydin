@@ -1,5 +1,13 @@
+"""Block-Matching nD (BMnD) denoiser.
+
+Provides calibration and denoising functions using the Block-Matching nD
+approach, a generalization of BM3D. Patches are extracted, transformed
+to the DCT domain, grouped by nearest-neighbor search, and aggregated
+(via median or mean) to produce denoised patches.
+"""
+
 import math
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy
 from numpy.typing import ArrayLike
@@ -67,7 +75,7 @@ def denoise_bmnd(
     \n\n
     Note: This is currently only usable for small images, even for
     moderately sized images the computation time is prohibitive. We
-    are planning to implement a GPU version to make it more usefull.
+    are planning to implement a GPU version to make it more useful.
 
 
     Parameters
@@ -83,26 +91,16 @@ def denoise_bmnd(
         to give the best results.
 
     block_depth: int or None for default
-        Block depth.
+        Block depth, i.e. number of nearest-neighbor patches to aggregate.
+        If None, defaults to the maximum of the patch size dimensions.
 
     mode: str
-        Possible modes are: 'median', 'mean'.
-
-    threshold: float
-        Threshold between 0 and 1
-
-    freq_bias_stength: float
-        Frequency bias: closer to zero: no bias against high frequencies,
-        closer to one and above: stronger bias towards high-frequencies.
-
-    freq_cutoff: float
-        Cutoff frequency, must be within [0, 1]. In addition
-
-    order: float
-        Filter order, typically an integer above 1.
+        Aggregation mode for matched blocks. Possible modes are:
+        'median' and 'mean'.
 
     reconstruction_gamma: float
-        Patch reconstruction parameter
+        Patch reconstruction parameter that controls blending of
+        overlapping patches. A value of 0 gives uniform weighting.
 
     multi_core: bool
         By default we use as many cores as possible, in some cases, for small

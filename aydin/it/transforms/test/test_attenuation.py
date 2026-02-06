@@ -6,7 +6,7 @@ from aydin.it.transforms.attenuation import AttenuationTransform
 
 
 def test_attenuation_correction_real():
-    image = binary_blobs(length=128, seed=1, n_dim=3).astype(numpy.float32)
+    image = binary_blobs(length=128, rng=1, n_dim=3).astype(numpy.float32)
     image = normalise(image)
 
     ramp = numpy.linspace(0, 1, 128).astype(numpy.float32)

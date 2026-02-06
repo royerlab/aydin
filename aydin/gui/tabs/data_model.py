@@ -1,21 +1,27 @@
+"""Data model managing loaded images, file paths, and their transformations."""
+
 import pathlib
 from copy import deepcopy
 from os import listdir
-from os.path import join, isfile, isdir
+from os.path import isdir, isfile, join
 from pathlib import Path
 
 from aydin.io import imread
-from aydin.io.utils import split_image_channels, hyperstack_arrays
+from aydin.io.utils import hyperstack_arrays, split_image_channels
 from aydin.util.log.log import lprint
 
 
 class DataModel:
-    """DataModel - manages our business logic regarding
-    the images loaded into our GUI.
+    """Manages the image data model for the Aydin Studio GUI.
+
+    Handles file path storage, image loading, channel splitting,
+    hyperstacking, and coordinates updates between the data layer
+    and the GUI tab views.
 
     Parameters
     ----------
-    parent : Object
+    parent : MainPage
+        The parent MainPage widget that owns the tab views.
     """
 
     def __init__(self, parent=None):
@@ -25,13 +31,14 @@ class DataModel:
 
     @property
     def filepaths(self):
-        """filepaths is the dict which has file paths as keys
-        and corresponding tuple of array and metadata as value.
+        """File paths loaded into the model with their image data.
 
         Returns
         -------
-        self._filepaths : dict
-
+        dict
+            Mapping of file path strings to ``(array, metadata)`` tuples
+            where ``array`` is a numpy ndarray and ``metadata`` is a
+            ``FileMetadata`` instance.
         """
         return self._filepaths
 
@@ -95,13 +102,15 @@ class DataModel:
 
     @property
     def images(self):
-        """images is the list of a list with a particular
-        format for each existing image in the model.
+        """List of image records currently in the model.
+
+        Each record is a list of:
+        ``[filename, array, metadata, denoise_flag, filepath, output_folder]``.
 
         Returns
         -------
-        self._images : List[List[str, numpy.typing.ArrayLike, FileMetadata, bool, bool, str]]
-
+        list
+            List of image record lists.
         """
         return self._images
 
@@ -163,13 +172,12 @@ class DataModel:
 
     @property
     def images_to_denoise(self):
-        """Returns sublist of self.images with only elements
-        of it that are marked to be denoised.
+        """Subset of images that are marked for denoising.
 
         Returns
         -------
-        List[List[str, numpy.typing.ArrayLike, FileMetadata, bool, bool, str]]
-
+        list
+            Image records where the denoise flag is True.
         """
         return list(filter(lambda image: image[3], self.images))
 
@@ -190,7 +198,15 @@ class DataModel:
                 self.update_cropping_tabview()
 
     def update_image_output_folder(self, filename, new_value):
-        #  TODO: write proper docstrings here
+        """Update the output folder for an image identified by filename.
+
+        Parameters
+        ----------
+        filename : str
+            The display name of the image to update.
+        new_value : str
+            The new output folder path.
+        """
         for imagelist_item in self._images:
             if imagelist_item[0] == filename:
                 imagelist_item[5] = new_value

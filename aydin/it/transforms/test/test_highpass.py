@@ -1,13 +1,13 @@
 import numpy
 from skimage.util import random_noise
 
-from aydin.io.datasets import normalise, camera
+from aydin.io.datasets import camera, normalise
 from aydin.it.transforms.highpass import HighpassTransform
 
 
 def test_high_pass():
     image = normalise(camera())
-    image = random_noise(image, mode="s&p", amount=0.03, seed=0, clip=False)
+    image = random_noise(image, mode="s&p", amount=0.03, rng=0, clip=False)
 
     ac = HighpassTransform()
 

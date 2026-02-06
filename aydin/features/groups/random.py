@@ -1,3 +1,5 @@
+"""Random convolutional feature group for experimental feature generation."""
+
 from typing import Optional, Sequence, Tuple
 
 import numpy
@@ -36,8 +38,16 @@ class RandomFeatures(CorrelationFeatures):
         self.exclude_center: Sequence[Tuple[int, ...]] = []
 
     def _ensure_random_kernels_available(self, ndim: int):
-        # Ensures that the kernels are available for subsequent steps.
-        # We can't construct the kernels until we know the dimension of the image
+        """Ensure random kernels are generated for the given dimensionality.
+
+        Generates deterministic pseudo-random kernels (seeded by kernel index)
+        consisting of binary patterns smoothed by a Gaussian filter.
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions.
+        """
         if self.kernels is None or self.kernels[0].ndim != ndim:
             rnd_kernels = []
 
@@ -66,13 +76,43 @@ class RandomFeatures(CorrelationFeatures):
 
     @property
     def receptive_field_radius(self) -> int:
+        """Return the receptive field radius based on the kernel size.
+
+        Returns
+        -------
+        radius : int
+            Half the kernel size.
+        """
         return self.size // 2
 
     def num_features(self, ndim: int) -> int:
+        """Return the number of random convolutional features.
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions.
+
+        Returns
+        -------
+        num : int
+            Number of random features.
+        """
         self._ensure_random_kernels_available(ndim)
         return super().num_features(ndim)
 
     def prepare(self, image, excluded_voxels=None, **kwargs):
+        """Prepare random features by generating kernels for the image.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image for which features will be computed.
+        excluded_voxels : list of tuple of int, optional
+            Voxels to exclude from feature computation.
+        **kwargs
+            Additional keyword arguments passed to the parent class.
+        """
         if excluded_voxels is None:
             excluded_voxels = []
         self._ensure_random_kernels_available(image.ndim)

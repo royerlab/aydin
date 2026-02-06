@@ -1,5 +1,11 @@
-from torch import nn
+"""Noise2Self self-supervised training method for PyTorch models.
+
+Implements self-supervised training using random pixel masking, where
+the model learns to predict masked pixels from their unmasked neighbors.
+"""
+
 import torch
+from torch import nn
 from torch.nn import MSELoss
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -19,22 +25,29 @@ def n2s_train(
     patience: int = 128,
     verbose: bool = True,
 ):
-    """
-    Noise2Self training method.
+    """Train a model using the Noise2Self self-supervised method.
+
+    Uses random pixel masking where the model is trained to predict
+    masked pixel values from their unmasked neighbors using MSE loss
+    with AdamW optimizer and learning rate reduction on plateau.
 
     Parameters
     ----------
-    input_image
-    model : nn.Module
+    input_image : numpy.ndarray
+        Input noisy image tensor with shape ``(B, C, ...spatial_dims...)``.
+    model : torch.nn.Module
+        PyTorch model to train.
     nb_epochs : int
+        Maximum number of training epochs.
     lr : float
+        Initial learning rate for the AdamW optimizer.
     patience : int
+        Number of epochs without improvement before stopping. Also
+        controls the learning rate scheduler patience (patience // 8).
     verbose : bool
-
+        If ``True``, print loss values during training.
     """
     device = get_torch_device()
-
-    torch.autograd.set_detect_anomaly(True)
 
     model = model.to(device)
     print(f"device {device}")
@@ -73,16 +86,6 @@ def n2s_train(
             mask = mask.to(device)
 
             net_output = model(net_input)
-
-            if epoch == 25555:
-                import napari
-
-                viewer = napari.Viewer()
-                viewer.add_image(
-                    model(original_patch.to(device)).detach().cpu().numpy(),
-                    name=f"{epoch}",
-                )
-                napari.run()
 
             loss = loss_function1(net_output * mask, original_patch * mask)
 

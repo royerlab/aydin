@@ -1,15 +1,26 @@
+"""Classical image denoiser implementation.
+
+This module provides `ImageDenoiserClassic`, an image translator that uses
+classical denoising methods (Butterworth, Gaussian, NLM, Total Variation, etc.)
+with automatic parameter calibration via J-invariance.
+"""
+
 import importlib
-from typing import Optional, Union, List, Tuple
+from typing import List, Optional, Tuple, Union
+
 import numpy
 
 from aydin.it import classic_denoisers
 from aydin.it.base import ImageTranslatorBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lprint, lsection
 
 
 class ImageDenoiserClassic(ImageTranslatorBase):
-    """
-    Classic Image Denoiser
+    """Classical image denoiser using traditional signal processing methods.
+
+    Wraps classical denoising algorithms and automatically calibrates their
+    parameters using J-invariance. Each channel is calibrated independently
+    by selecting the batch with highest variance for parameter optimization.
     """
 
     def __init__(
@@ -105,20 +116,21 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             lprint(f"main channel: {main_channel}")
 
     def __repr__(self):
+        """Return a string representation of the classic denoiser."""
         return f"<{self.__class__.__name__}, method={self.method}, max_voxels_for_training={self.max_voxels_for_training}"
 
     def save(self, path: str):
-        """Saves a 'all-batteries-included' image translation model at a given path (folder).
+        """Save the classic denoiser model to disk.
 
         Parameters
         ----------
         path : str
-            path to save to
+            Directory path to save the model to.
 
         Returns
         -------
-        frozen
-
+        str
+            JSON string of the serialized model.
         """
         with lsection(f"Saving 'classic' image denoiser to {path}"):
             frozen = super().save(path)
@@ -126,17 +138,51 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         return frozen
 
     def _load_internals(self, path: str):
+        """Load classic denoiser internal state from disk.
+
+        For the classic denoiser, no additional internal state needs
+        to be loaded beyond JSON deserialization.
+
+        Parameters
+        ----------
+        path : str
+            Directory path to load from.
+        """
         with lsection(f"Loading 'classic' image denoiser from {path}"):
             pass
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Customize pickle state for serialization.
+
+        Returns
+        -------
+        dict
+            Object state dictionary.
+        """
         state = self.__dict__.copy()
         return state
 
     def _train(
         self, input_image, target_image, train_valid_ratio, callback_period, jinv
     ):
+        """Calibrate the classical denoiser on the input image.
+
+        For each channel, selects the batch with highest standard deviation
+        and calibrates denoising parameters using the selected method.
+
+        Parameters
+        ----------
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        target_image : numpy.ndarray
+            Shape-normalized target image (unused for classical denoisers).
+        train_valid_ratio : float
+            Fraction of data for validation (unused for classical denoisers).
+        callback_period : int
+            Callback period in seconds (unused for classical denoisers).
+        jinv : bool or tuple of bool, optional
+            J-invariance flag (unused; classical methods use built-in calibration).
+        """
         with lsection(
             f"Training image translator from image of shape {input_image.shape}:"
         ):
@@ -173,35 +219,41 @@ class ImageDenoiserClassic(ImageTranslatorBase):
                 self._memory_needed = memory_requirements
 
     def _estimate_memory_needed_and_available(self, image):
-        """
+        """Estimate memory requirements for the classical denoiser.
 
         Parameters
         ----------
-        image
+        image : numpy.ndarray
+            The image to estimate memory requirements for.
 
         Returns
         -------
-
+        tuple of (float, float)
+            A tuple of (memory_needed, memory_available) in bytes.
         """
         _, available = super()._estimate_memory_needed_and_available(image)
 
         return self._memory_needed, available
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
-        """Internal method that translates an input image on the basis of the trained model.
+        """Denoise an input image using the calibrated classical method.
+
+        Applies the per-channel denoising function with the best parameters
+        found during calibration.
 
         Parameters
         ----------
-        input_image
-            input image
-        image_slice
-        whole_image_shape
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        image_slice : tuple of slice, optional
+            Slice indicating where this tile sits within the whole image.
+        whole_image_shape : tuple of int, optional
+            Shape of the full image (before tiling).
 
         Returns
         -------
-        numpy.ArrayLike
-            translated image
-
+        numpy.ndarray
+            Denoised image with same shape as input.
         """
         shape = input_image.shape
         num_batches = shape[0]

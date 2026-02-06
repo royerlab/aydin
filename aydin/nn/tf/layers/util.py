@@ -1,8 +1,15 @@
-from deprecated import deprecated
+"""Utility Keras layers for tensor manipulation (deprecated).
+
+Provides Split, Swish activation, and Rot90 rotation layers used
+in shift-convolution architectures.
+"""
+
+import keras
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.keras import backend
-from tensorflow.python.keras.layers import Lambda
+from deprecated import deprecated
+from keras import backend
+from keras.layers import Lambda
 
 
 @deprecated(
@@ -30,7 +37,7 @@ def Split(
     Split layer : layers.Lambda
 
     """
-    out_shape = backend.int_shape(x[0])
+    out_shape = tuple(x[0].shape)
     return Lambda(
         lambda xx: xx[idx * batchsize : (idx + 1) * batchsize],
         output_shape=out_shape,
@@ -69,7 +76,7 @@ def Rot90(xx, kk=1, lyrname=None):
     xx
         input tensor from previous layer
     kk
-        index for rotation (crock wise)
+        index for rotation (clockwise)
     lyrname : string
         name of the layer
 
@@ -77,7 +84,7 @@ def Rot90(xx, kk=1, lyrname=None):
     -------
     Rot90 layer : layers.Lambda
     """
-    out_shape = list(backend.int_shape(xx))
+    out_shape = list(xx.shape)
     if kk % 2 == 1 and 0 < kk % 6 < 5:
         out_shape[-3:-1] = np.flip(out_shape[-3:-1], 0)
     elif abs(kk) % 6 == 5 or kk % 6 == 0:

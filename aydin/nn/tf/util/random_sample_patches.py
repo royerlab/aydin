@@ -1,3 +1,11 @@
+"""Random patch sampling with entropy-based filtering for TensorFlow.
+
+Provides utilities to extract random patches from images and select
+the most informative ones based on intensity histogram entropy.
+Supports both TensorFlow (channels-last) and PyTorch (channels-first)
+axis conventions.
+"""
+
 import numpy
 from deprecated import deprecated
 from scipy.stats import entropy
@@ -147,7 +155,7 @@ def legacy_random_sample_patches(input_img, patch_size, num_patch, adoption_rate
     -------
     patch_slice
     """
-    if type(patch_size) == int:
+    if isinstance(patch_size, int):
         if len(input_img.shape) == 4:
             patch_size = (patch_size, patch_size)
         if len(input_img.shape) == 5:

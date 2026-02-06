@@ -8,7 +8,7 @@ from skimage.metrics import structural_similarity as ssim
 from skimage.util import random_noise
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import newyork, pollen, normalise, lizard, dots
+from aydin.io.datasets import dots, lizard, newyork, normalise, pollen
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.cb import CBRegressor
 from aydin.util.log.log import Log
@@ -23,8 +23,8 @@ def demo(image, name):
 
     image = normalise(image.astype(np.float32))
     # noisy = add_noise(image, intensity=None, variance=0.1, sap=0, clip=False)
-    noisy = random_noise(image, mode="gaussian", var=0.1, seed=0, clip=False)
-    noisier = random_noise(noisy, mode="gaussian", var=0.1, seed=100, clip=False)
+    noisy = random_noise(image, mode="gaussian", var=0.1, rng=0, clip=False)
+    noisier = random_noise(noisy, mode="gaussian", var=0.1, rng=100, clip=False)
 
     generator = StandardFeatureGenerator(
         include_corner_features=True,

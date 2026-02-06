@@ -1,16 +1,30 @@
+"""Array slicing helper for parsing user-provided slice strings."""
+
+
 def apply_slicing(data, slicing_string: str):
-    """
-    Function to apply slicing without evaluating argument passed by user
+    """Apply a slicing operation to an array from a string representation.
+
+    Parses a bracket-enclosed, comma-separated slice string and applies
+    it to the data array. Supports both full-dimension (``:``) and
+    range (``start:stop``) specifications per axis.
 
     Parameters
     ----------
-    data : numpy.typing.ArrayLike
+    data : numpy.ndarray
+        Array to slice.
     slicing_string : str
+        Slice specification string, e.g. ``'[0:10,:,5:20]'``.
+        An empty string returns the data unchanged.
 
     Returns
     -------
-    sliced_data : numpy.typing.ArrayLike
+    numpy.ndarray
+        Copy of the sliced portion of the array.
 
+    Raises
+    ------
+    ValueError
+        If the slicing string cannot be parsed.
     """
     if slicing_string == "":
         return data

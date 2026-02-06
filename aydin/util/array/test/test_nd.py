@@ -2,13 +2,13 @@ import numpy
 from skimage.data import binary_blobs
 
 from aydin.util.array.nd import (
+    extract_tiles,
+    nd_loop,
     nd_range,
     nd_range_bool_tuple,
-    nd_loop,
+    nd_range_radii,
     nd_split_slices,
     remove_margin_slice,
-    nd_range_radii,
-    extract_tiles,
 )
 
 
@@ -115,7 +115,7 @@ def test_nd_split_slices_with_margins():
 
 def test_extract_tiles():
 
-    blob_image = binary_blobs(length=512, seed=1, n_dim=2)
+    blob_image = binary_blobs(length=512, rng=1, n_dim=2)
 
     tiles = extract_tiles(blob_image, tile_size=64, extraction_step=64, flatten=True)
 

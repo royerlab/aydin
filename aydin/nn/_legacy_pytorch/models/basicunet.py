@@ -1,9 +1,25 @@
+"""BasicUNet - a 4-level UNet with instance normalization.
+
+Provides a UNet implementation with max pooling, nearest-neighbor
+upsampling, instance normalization, and optional residual connection.
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 
 class BasicConvBlock(nn.Module):
+    """Convolution block with two convolutions and instance normalization.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+
     def __init__(self, in_channels, out_channels):
         super(BasicConvBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
@@ -18,6 +34,20 @@ class BasicConvBlock(nn.Module):
 
 
 class BasicUNet(nn.Module):
+    """4-level UNet with instance normalization and optional residual.
+
+    Parameters
+    ----------
+    n_input_channel : int
+        Number of input channels.
+    n_output_channel : int
+        Number of output channels.
+    nic : int
+        Number of internal channels in the first level.
+    residual : bool
+        Whether to add a global residual connection.
+    """
+
     def __init__(self, n_input_channel=1, n_output_channel=1, nic=8, residual=True):
         super().__init__()
 

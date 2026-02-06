@@ -1,16 +1,18 @@
+"""Job runner for executing denoising operations in a background thread."""
+
 import traceback
 
-from qtpy.QtWidgets import QWidget, QHBoxLayout
+from qtpy.QtWidgets import QHBoxLayout, QWidget
 
 from aydin.gui._qt.custom_widgets.denoise_tab_pretrained_method import (
     DenoiseTabPretrainedMethodWidget,
 )
-from aydin.gui._qt.output_wrapper import OutputWrapper
 from aydin.gui._qt.job_runners.worker import Worker
+from aydin.gui._qt.output_wrapper import OutputWrapper
 from aydin.io.io import imwrite
 from aydin.io.utils import (
-    get_output_image_path,
     get_options_json_path,
+    get_output_image_path,
     get_save_model_path,
 )
 from aydin.restoration.denoise.util.denoise_utils import (
@@ -21,6 +23,23 @@ from aydin.util.log.log import Log, lprint
 
 
 class DenoiseJobRunner(QWidget):
+    """Manages the execution of denoising jobs in a background thread.
+
+    Coordinates gathering images, configuration, and batch/channel axes from
+    the GUI tabs, instantiates the appropriate denoiser, runs training and
+    inference in a worker thread, writes results to disk, and opens napari
+    to display the results when complete.
+
+    Parameters
+    ----------
+    parent : MainPage
+        The parent MainPage widget.
+    threadpool : QThreadPool
+        Thread pool for executing background workers.
+    start_button : QPushButton
+        The Start button that triggers denoising.
+    """
+
     def __init__(self, parent, threadpool, start_button):
         super(DenoiseJobRunner, self).__init__(parent)
         self.parent = parent
@@ -42,10 +61,23 @@ class DenoiseJobRunner(QWidget):
         self.setLayout(self.widget_layout)
 
     def stop_running(self):
+        """Signal the denoiser to stop early."""
         self.early_stopped = True
         self.denoiser.stop_running()
 
     def start_func(self, progress_callback):
+        """Worker function that runs training and inference for each image.
+
+        Parameters
+        ----------
+        progress_callback : Signal
+            Qt signal for reporting progress text to the GUI.
+
+        Returns
+        -------
+        list
+            List of denoised image arrays.
+        """
         Log.gui_callback = progress_callback
 
         results = []
@@ -103,12 +135,27 @@ class DenoiseJobRunner(QWidget):
         return results
 
     def progress_fn(self, log_str):
+        """Append progress text to the activity log.
+
+        Parameters
+        ----------
+        log_str : str
+            Text to append.
+        """
         self.parent.activity_widget.infoTextBox.insertPlainText(log_str)
 
     def result_callback(self, results):
+        """Store denoised result images from the worker thread.
+
+        Parameters
+        ----------
+        results : list
+            List of denoised image arrays from the worker.
+        """
         self.result_images += results
 
     def thread_complete(self):
+        """Handle worker thread completion by re-enabling the UI and showing results."""
         self.start_button.setEnabled(True)
 
         # Turn the overlay off
@@ -119,6 +166,7 @@ class DenoiseJobRunner(QWidget):
             self.parent.open_images_with_napari()
 
     def prep_and_run(self):
+        """Gather settings from the GUI and launch the denoising worker thread."""
         # Get images and their related data
         self.image_paths = [i[4] for i in self.parent.data_model.images_to_denoise]
         self.output_folders = [i[5] for i in self.parent.data_model.images_to_denoise]
@@ -162,9 +210,9 @@ class DenoiseJobRunner(QWidget):
 
             try:
                 lower_level_args = self.parent.tabs["Denoise"].lower_level_args
-            except Exception:
+            except Exception as e:
                 self.parent.status_bar.showMessage(
-                    "There is a mistake with given parameter values..."
+                    f"There is a mistake with given parameter values: {e}"
                 )
                 traceback.print_exc()
                 return
@@ -203,4 +251,11 @@ class DenoiseJobRunner(QWidget):
         self.threadpool.start(worker)
 
     def result_image_arrays(self):
+        """Return the list of denoised result image arrays.
+
+        Returns
+        -------
+        list
+            List of numpy arrays, one per denoised image.
+        """
         return self.result_images

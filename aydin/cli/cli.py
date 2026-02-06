@@ -1,3 +1,10 @@
+"""Command-line interface for Aydin image denoising.
+
+This module defines the Click-based CLI for Aydin, providing commands for
+image denoising, viewing, analysis (SSIM, PSNR, MSE, FSC), channel splitting,
+hyperstacking, and benchmarking of denoising algorithms.
+"""
+
 import ast
 import csv
 import os
@@ -5,9 +12,10 @@ import shutil
 import sys
 from copy import deepcopy
 from glob import glob
+
 import click
-import numpy
 import napari
+import numpy
 from skimage.metrics import (
     mean_squared_error,
     peak_signal_noise_ratio,
@@ -15,27 +23,26 @@ from skimage.metrics import (
 )
 from torch.utils.data import DataLoader
 
+from aydin import __version__
 from aydin.analysis.resolution_estimate import resolution_estimate
 from aydin.analysis.snr_estimate import snr_estimate
 from aydin.gui.gui import run
 from aydin.io.datasets import normalise
-from aydin.it.base import ImageTranslatorBase
-from aydin.io.io import imwrite, imread
+from aydin.io.io import imread, imwrite
 from aydin.io.utils import (
     get_output_image_path,
     get_save_model_path,
     split_image_channels,
 )
+from aydin.it.base import ImageTranslatorBase
 from aydin.nn.datasets.random_masked_dataset import RandomMaskedDataset
 from aydin.restoration.denoise.util.denoise_utils import (
     get_denoiser_class_instance,
     get_list_of_denoiser_implementations,
 )
+from aydin.util.log.log import Log, lprint
 from aydin.util.misc.json import load_any_json
-from aydin.util.log.log import lprint, Log
 from aydin.util.misc.slicing_helper import apply_slicing
-from aydin import __version__
-
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -46,12 +53,15 @@ VERSION = __version__
 @click.pass_context
 @click.version_option(version=VERSION)
 def cli(ctx):
-    """aydin cli
+    """Launch Aydin Studio GUI or invoke a subcommand.
+
+    When called without a subcommand, launches the Aydin Studio GUI.
+    Otherwise, dispatches to the specified subcommand.
 
     Parameters
     ----------
     ctx : click.Context
-
+        Click context object for subcommand dispatch.
     """
     sys._excepthook = sys.excepthook
 
@@ -80,19 +90,23 @@ def cli(ctx):
 @click.option(
     '-ca', '--channel-axes', type=str, help='only pass while denoising a single image'
 )
-@click.option('-d', '--denoiser', default='noise2selffgr-cb')
+@click.option('-d', '--denoiser', 'denoiser_name', default='noise2selffgr-cb')
 @click.option('--use-model/--save-model', default=False)
 @click.option('--model-path', default=None)
 @click.option('--lower-level-args', default=None)
 @click.option('--output-folder', default='')
 def denoise(files, **kwargs):
-    """denoise command
+    """Denoise one or more image files.
+
+    Reads each input image, trains a denoiser (or loads a pre-trained model),
+    applies denoising, and writes the result to disk.
 
     Parameters
     ----------
-    files
-    kwargs : dict
-
+    files : tuple of str
+        Input image file paths or glob patterns.
+    **kwargs : dict
+        CLI options including denoiser name, slicing, model path, etc.
     """
     # Check whether a path is provided for a model to use or save
     input_model_path = kwargs["model_path"] if kwargs["model_path"] else None
@@ -100,10 +114,10 @@ def denoise(files, **kwargs):
     # Check whether a filename is provided for lower-level-args json
     if kwargs["lower_level_args"]:
         lower_level_args = load_any_json(kwargs['lower_level_args'])
-        denoiser = lower_level_args["variant"]
+        variant = lower_level_args["variant"]
     else:
         lower_level_args = None
-        denoiser = kwargs["denoiser"]
+        variant = kwargs["denoiser_name"]
 
     filenames = []
     for filename in files:
@@ -154,30 +168,30 @@ def denoise(files, **kwargs):
             kwargs_to_pass.pop("batch_axes")
             kwargs_to_pass.pop("channel_axes")
 
-            denoiser = get_denoiser_class_instance(
-                lower_level_args=lower_level_args, variant=denoiser
+            denoiser_instance = get_denoiser_class_instance(
+                lower_level_args=lower_level_args, variant=variant
             )
 
-            denoiser.train(
+            denoiser_instance.train(
                 noisy2train,
-                batch_axes=noisy_metadata.batch_axes
-                if noisy_metadata is not None
-                else None,
-                chan_axes=noisy_metadata.channel_axes
-                if noisy_metadata is not None
-                else None,
+                batch_axes=(
+                    noisy_metadata.batch_axes if noisy_metadata is not None else None
+                ),
+                chan_axes=(
+                    noisy_metadata.channel_axes if noisy_metadata is not None else None
+                ),
                 image_path=path,
                 **kwargs_to_pass,
             )
 
-            denoised = denoiser.denoise(
+            denoised = denoiser_instance.denoise(
                 noisy2infer,
-                batch_axes=noisy_metadata.batch_axes
-                if noisy_metadata is not None
-                else None,
-                chan_axes=noisy_metadata.channel_axes
-                if noisy_metadata is not None
-                else None,
+                batch_axes=(
+                    noisy_metadata.batch_axes if noisy_metadata is not None else None
+                ),
+                chan_axes=(
+                    noisy_metadata.channel_axes if noisy_metadata is not None else None
+                ),
             )
 
             model_path = get_save_model_path(
@@ -185,7 +199,7 @@ def denoise(files, **kwargs):
                 passed_counter=index_counter,
                 output_folder=kwargs["output_folder"],
             )
-            denoiser.save(model_path)
+            denoiser_instance.save(model_path)
 
         imwrite(denoised, output_path)
         lprint("DONE")
@@ -195,13 +209,16 @@ def denoise(files, **kwargs):
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 def info(files, **kwargs):
-    """aydin info command
+    """Display metadata and information about image files.
+
+    Reads each input file and prints its metadata (shape, dtype, axes, etc.).
 
     Parameters
     ----------
-    files
-    kwargs
-
+    files : tuple of str
+        Input image file paths or glob patterns.
+    **kwargs : dict
+        CLI options including slicing specification.
     """
     handle_files(
         files, kwargs['slicing']
@@ -212,39 +229,42 @@ def info(files, **kwargs):
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 def view(files, **kwargs):
-    """aydin view command
+    """View image files in a napari viewer.
+
+    Reads each input file and displays it in an interactive napari viewer.
 
     Parameters
     ----------
-    files
-    kwargs
-
-    Returns
-    -------
-
+    files : tuple of str
+        Input image file paths or glob patterns.
+    **kwargs : dict
+        CLI options including slicing specification.
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
+    viewer = napari.Viewer()
 
-        for idx, image in enumerate(image_arrays):
-            viewer.add_image(image, name=filenames[idx])
+    for idx, image in enumerate(image_arrays):
+        viewer.add_image(image, name=filenames[idx])
+
+    napari.run()
 
 
 @cli.command()
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 def split_channels(files, **kwargs):
-    """aydin split-channels command. Takes multi-channel images as
-    input, splits its channels into separate images and writes them
-    back.
+    """Split multi-channel images into separate single-channel files.
+
+    Reads each input image, splits along the channel axis, and writes
+    each channel as a separate image file.
 
     Parameters
     ----------
-    files
-    kwargs
-
+    files : tuple of str
+        Input image file paths or glob patterns.
+    **kwargs : dict
+        CLI options including slicing specification.
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
@@ -270,13 +290,17 @@ def split_channels(files, **kwargs):
 @click.argument('files', nargs=-1)
 @click.option('-s', '--slicing', default='', type=str)
 def hyperstack(files, **kwargs):
-    """aydin hyperstack command
+    """Stack multiple images into a single higher-dimensional image.
+
+    Reads all input images and stacks them along a new leading axis,
+    writing the result as a single file.
 
     Parameters
     ----------
-    files
-    kwargs : dict
-
+    files : tuple of str
+        Input image file paths or glob patterns.
+    **kwargs : dict
+        CLI options including slicing specification.
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
     result_path = filenames[0]
@@ -293,13 +317,14 @@ def hyperstack(files, **kwargs):
 @click.argument('files', nargs=2)
 @click.option('-s', '--slicing', default='', type=str)
 def ssim(files, **kwargs):
-    """aydin ssim command
+    """Compute the Structural Similarity Index (SSIM) between two images.
 
     Parameters
     ----------
-    files
-    kwargs : dict
-
+    files : tuple of str
+        Exactly two image file paths.
+    **kwargs : dict
+        CLI options including slicing specification.
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
@@ -315,14 +340,17 @@ def ssim(files, **kwargs):
 @click.argument('files', nargs=2)
 @click.option('-s', '--slicing', default='', type=str)
 def psnr(files, **kwargs):
-    """aydin psnr command. First provided image has to be the
-    true image and second one the test image.
+    """Compute the Peak Signal-to-Noise Ratio (PSNR) between two images.
+
+    The first provided image is treated as the ground truth and the
+    second as the test image.
 
     Parameters
     ----------
-    files
-    kwargs : dict
-
+    files : tuple of str
+        Exactly two image file paths (ground truth first, test second).
+    **kwargs : dict
+        CLI options including slicing specification.
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
@@ -338,18 +366,19 @@ def psnr(files, **kwargs):
 @click.argument('files', nargs=2)
 @click.option('-s', '--slicing', default='', type=str)
 def mse(files, **kwargs):
-    """aydin mean squared error command
+    """Compute the Mean Squared Error (MSE) between two images.
 
     Parameters
     ----------
-    files
-    kwargs : dict
-
+    files : tuple of str
+        Exactly two image file paths.
+    **kwargs : dict
+        CLI options including slicing specification.
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
     lprint(
-        "psnr: ",
+        "mse: ",
         mean_squared_error(
             normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
         ),
@@ -360,18 +389,22 @@ def mse(files, **kwargs):
 @click.argument('files', nargs=2)
 @click.option('-s', '--slicing', default='', type=str)
 def fsc(files, **kwargs):
-    """aydin fourier shell correlation command.
-    Saves the FSC plot and the cut-off freq.
+    """Compute and plot the Fourier Shell Correlation (FSC) between two images.
+
+    Computes the FSC curve and saves it as ``fsc.png`` in the current directory.
 
     Parameters
     ----------
-    files
-    kwargs : dict
-
+    files : tuple of str
+        Exactly two image file paths.
+    **kwargs : dict
+        CLI options including slicing specification.
     """
+    from aydin.analysis.fsc import fsc as compute_fsc
+
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
-    correlations = fsc(normalise(image_arrays[0]), normalise(image_arrays[1]))
+    correlations = compute_fsc(normalise(image_arrays[0]), normalise(image_arrays[1]))
 
     import matplotlib.pyplot as plt
 
@@ -386,14 +419,18 @@ def fsc(files, **kwargs):
 @click.option('-nr', "--nbruns", default=1, type=int)
 @click.option('--save-denoised-images/--rm-denoised-images', default=False)
 def benchmark_algos(files, **kwargs):
-    """aydin command to benchmark different algorithms
-    against a given image.
+    """Benchmark all available denoising algorithms on the given images.
+
+    Trains and evaluates each available denoiser on the input images,
+    computing self-supervised loss, estimated SNR, and resolution estimates.
+    Results are written to CSV files.
 
     Parameters
     ----------
-    files
-    kwargs : dict
-
+    files : tuple of str
+        Input image file paths or glob patterns.
+    **kwargs : dict
+        CLI options including slicing, number of runs, and save option.
     """
     filenames, image_arrays, metadatas = handle_files(
         files, kwargs['slicing']
@@ -493,16 +530,25 @@ def benchmark_algos(files, **kwargs):
 
 
 def handle_files(files, slicing):
-    """Handle files
+    """Read and preprocess a collection of image files.
+
+    Expands glob patterns, reads each image file, and applies optional slicing.
 
     Parameters
     ----------
-    files
-    slicing
+    files : tuple of str
+        Input file paths or glob patterns.
+    slicing : str
+        Slicing specification string (e.g., ``'0:10'``) to apply to each image.
 
     Returns
     -------
-
+    filepaths : list of str
+        Expanded list of file paths.
+    image_arrays : list of numpy.ndarray
+        List of loaded (and optionally sliced) image arrays.
+    metadatas : list of FileMetadata
+        List of metadata objects for each image.
     """
     filepaths = []
     image_arrays = []

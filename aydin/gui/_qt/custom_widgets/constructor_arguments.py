@@ -1,14 +1,40 @@
+"""Dynamic form widget for editing class constructor arguments."""
+
 import inspect
 import json
+
 import docstring_parser
 import numpy
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QWidget, QGridLayout, QLabel, QCheckBox, QLineEdit
+from qtpy.QtWidgets import QCheckBox, QGridLayout, QLabel, QLineEdit, QWidget
 
 from aydin.util.log.log import lprint
 
 
 class ConstructorArgumentsWidget(QWidget):
+    """Widget that generates a form for editing constructor arguments.
+
+    Dynamically creates labeled input fields (QLineEdit for numeric/string
+    values, QCheckBox for booleans) from a class constructor's argument
+    specification, including descriptions parsed from the class docstring.
+
+    Parameters
+    ----------
+    parent : QWidget
+        The parent widget.
+    arg_names : list of str, optional
+        Constructor argument names.
+    arg_defaults : tuple, optional
+        Default values for each argument.
+    arg_annotations : dict, optional
+        Type annotations mapping argument names to types.
+    reference_class : type, optional
+        The class whose constructor docstring provides parameter descriptions.
+    disable_spatial_features : bool, optional
+        If True, disables the 'include spatial features' parameter.
+        Default is False.
+    """
+
     def __init__(
         self,
         parent,
@@ -110,6 +136,18 @@ class ConstructorArgumentsWidget(QWidget):
 
     @staticmethod
     def annotation_prettifier(annotation):
+        """Convert a type annotation to a human-readable tooltip string.
+
+        Parameters
+        ----------
+        annotation : type
+            The type annotation to format.
+
+        Returns
+        -------
+        str
+            A simplified string representation of the type.
+        """
         if "'int'" in str(annotation):
             return "int"
         elif "'float'" in str(annotation):
@@ -124,6 +162,14 @@ class ConstructorArgumentsWidget(QWidget):
 
     @property
     def params_dict(self):
+        """Collect current parameter values from the form into a dictionary.
+
+        Returns
+        -------
+        dict
+            Dictionary with 'class' key (the reference class) and 'kwargs'
+            key (mapping argument names to their current values).
+        """
         params_dict = {"class": self.reference_class, "kwargs": {}}
 
         for name, lineedit, annotation in zip(
@@ -152,6 +198,13 @@ class ConstructorArgumentsWidget(QWidget):
         return params_dict
 
     def set_advanced_enabled(self, enable: bool = False):
+        """Show or hide parameters marked as '(advanced)' in their descriptions.
+
+        Parameters
+        ----------
+        enable : bool, optional
+            If True, show advanced parameters. Default is False.
+        """
         for _ in range(self.arguments_layout.rowCount()):
 
             item = self.arguments_layout.itemAtPosition(_, 2)

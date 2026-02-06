@@ -1,7 +1,26 @@
+"""Outer product and sum operations for n-dimensional arrays."""
+
 import numpy
 
 
 def outer_product(*arrays):
+    """Compute the element-wise outer product of multiple 1D arrays.
+
+    Constructs an n-dimensional array where each element is the product
+    of corresponding elements from the input arrays, broadcast across
+    all dimensions.
+
+    Parameters
+    ----------
+    *arrays : numpy.ndarray
+        One or more 1D arrays to compute the outer product of.
+
+    Returns
+    -------
+    numpy.ndarray
+        N-dimensional array containing the outer product, where N is
+        the number of input arrays.
+    """
 
     outer = numpy.ix_(*arrays)
     shapes = tuple(m.shape for m in outer)
@@ -14,6 +33,23 @@ def outer_product(*arrays):
 
 
 def outer_sum(*arrays):
+    """Compute the element-wise outer sum of multiple 1D arrays.
+
+    Constructs an n-dimensional array where each element is the sum
+    of corresponding elements from the input arrays, broadcast across
+    all dimensions.
+
+    Parameters
+    ----------
+    *arrays : numpy.ndarray
+        One or more 1D arrays to compute the outer sum of.
+
+    Returns
+    -------
+    numpy.ndarray
+        N-dimensional array containing the outer sum, where N is
+        the number of input arrays.
+    """
 
     outer = numpy.ix_(*arrays)
     shapes = tuple(m.shape for m in outer)

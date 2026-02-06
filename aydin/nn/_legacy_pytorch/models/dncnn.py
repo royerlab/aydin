@@ -1,7 +1,34 @@
+"""DnCNN (Denoising Convolutional Neural Network) implementation.
+
+Implements the DnCNN architecture from Zhang et al. (2017),
+a feed-forward denoising network with batch normalization.
+"""
+
 import torch.nn as nn
 
 
 class DnCNN(nn.Module):
+    """DnCNN denoising network.
+
+    Feed-forward CNN with batch normalization for image denoising,
+    based on the architecture from Zhang et al. (2017).
+
+    Parameters
+    ----------
+    n_channel_in : int
+        Number of input channels.
+    n_channel_out : int
+        Number of output channels.
+    num_of_layers : int
+        Total number of convolution layers.
+    kernel_size : int
+        Convolution kernel size.
+    padding : int
+        Padding size for convolutions.
+    features : int
+        Number of intermediate feature channels.
+    """
+
     def __init__(
         self,
         n_channel_in=1,

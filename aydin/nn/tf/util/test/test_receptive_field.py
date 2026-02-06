@@ -1,5 +1,6 @@
-import numpy
+"""Tests for receptive field computation utilities."""
 
+import numpy
 
 # Test masking method ====================================================================
 from aydin.nn.tf.models.unet import UNetModel

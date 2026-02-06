@@ -1,20 +1,32 @@
+"""N-dimensional array utility functions for splitting, iteration, and tiling."""
+
 import numbers
 from math import ceil
 from random import shuffle
+
 import numpy
 from numpy.lib.stride_tricks import as_strided
 
 
 def nd_range(start, stop, dims):
-    """
-    nd_range
+    """Generate all n-dimensional index tuples within a range.
+
+    Recursively generates all tuples of length ``dims`` where each
+    element is in the range [start, stop).
 
     Parameters
     ----------
     start : int
+        Start of range (inclusive).
     stop : int
+        End of range (exclusive).
     dims : int
+        Number of dimensions (tuple length).
 
+    Yields
+    ------
+    tuple of int
+        Index tuples of length ``dims``.
     """
     if not dims:
         yield ()
@@ -25,13 +37,20 @@ def nd_range(start, stop, dims):
 
 
 def nd_range_radii(radii):
-    """
-    nd_range_radii
+    """Generate all n-dimensional index tuples within given radii per axis.
+
+    For each axis, iterates from ``-radius`` to ``+radius`` (inclusive),
+    producing all possible coordinate tuples.
 
     Parameters
     ----------
-    radii : list
+    radii : list of int
+        Radius for each dimension.
 
+    Yields
+    ------
+    tuple of int
+        Index tuples spanning the given radii.
     """
     if not radii:
         yield ()
@@ -48,15 +67,24 @@ def nd_range_radii(radii):
 
 
 def nd_range_bool_tuple(start, stop, dims):
-    """
-    nd_range_bool_tuple
+    """Generate n-dimensional index tuples with per-axis enable flags.
+
+    For each dimension, if the corresponding flag in ``dims`` is True,
+    iterates over [start, stop). Otherwise, yields only the midpoint.
 
     Parameters
     ----------
     start : int
+        Start of range (inclusive).
     stop : int
-    dims : int
+        End of range (exclusive).
+    dims : tuple of bool
+        Boolean flags indicating which dimensions to iterate over.
 
+    Yields
+    ------
+    tuple of int
+        Index tuples respecting the per-axis enable flags.
     """
     if len(dims) == 0:
         yield ()
@@ -70,13 +98,17 @@ def nd_range_bool_tuple(start, stop, dims):
 
 
 def nd_loop(stops):
-    """
-    nd_loop
+    """Generate all n-dimensional index tuples from zero up to given stops.
 
     Parameters
     ----------
-    stops : list
+    stops : list of int
+        Upper bound (exclusive) for each dimension.
 
+    Yields
+    ------
+    tuple of int
+        Index tuples with each element in range [0, stop) for its dimension.
     """
     if not stops:
         yield ()
@@ -87,19 +119,26 @@ def nd_loop(stops):
 
 
 def nd_split_slices(array_shape, nb_slices, do_shuffle=False, margins=None):
-    """
-    nd_split_slices
+    """Generate slice tuples that partition an n-dimensional array.
+
+    Divides each axis into the specified number of slices with optional
+    overlap margins, useful for tiled parallel processing.
 
     Parameters
     ----------
-    array_shape : tuple
-    nb_slices : list
-    do_shuffle : tuple
-    margins : tuple
+    array_shape : tuple of int
+        Shape of the array to split.
+    nb_slices : tuple of int
+        Number of slices along each dimension.
+    do_shuffle : bool
+        Whether to shuffle the slice order (useful for load balancing).
+    margins : tuple of int, optional
+        Overlap margin per dimension. Defaults to zero for all dimensions.
 
-    Returns
-    -------
-
+    Yields
+    ------
+    tuple of slice
+        Slice tuples that cover the array with the requested partitioning.
     """
     if not array_shape:
         yield ()
@@ -131,19 +170,24 @@ def nd_split_slices(array_shape, nb_slices, do_shuffle=False, margins=None):
 
 
 def remove_margin_slice(array_shape, slice_with_margin, slice_without_margin):
-    """
-    Remove_margin_slice
+    """Compute a slice that removes the margin from a margined tile.
+
+    Given slice tuples with and without margins, returns a slice into
+    the margined tile that extracts only the non-margin region.
 
     Parameters
     ----------
-    array_shape : tuple
-    slice_with_margin : array_like
-    slice_without_margin : array_like
+    array_shape : tuple of int
+        Shape of the original array.
+    slice_with_margin : tuple of slice
+        Slice including margins.
+    slice_without_margin : tuple of slice
+        Slice without margins (target region).
 
     Returns
     -------
-    sliced_tuple : tuple
-
+    tuple of slice
+        Slice into the margined tile that extracts the non-margin region.
     """
     slice_tuple = tuple(
         slice(max(0, v.start - u.start), min(v.stop - u.start, a), 1)
@@ -153,34 +197,28 @@ def remove_margin_slice(array_shape, slice_with_margin, slice_without_margin):
 
 
 def extract_tiles(arr, tile_size=8, extraction_step=1, flatten=False):
-    """
-    Extracts patches of any n-dimensional array in place using strides.
-    Given an n-dimensional array it will return a 2n-dimensional array with
-    the first n dimensions indexing patch position and the last n indexing
-    the patch content. This operation is immediate (O(1)). A reshape
-    performed on the first n dimensions will cause numpy to copy data, leading
-    to a list of extracted patches.
-    Read more in the :ref:`User Guide <image_feature_extraction>`.
+    """Extract patches from an n-dimensional array using stride tricks.
+
+    Uses NumPy stride tricks for O(1) patch extraction without copying data.
+    The resulting array has 2N dimensions: the first N index patch positions
+    and the last N contain patch contents.
 
     Parameters
     ----------
-    arr : ndarray
-        n-dimensional array of which patches are to be extracted
-    tile_size : integer or tuple of length arr.ndim
-        Indicates the shape of the patches to be extracted. If an
-        integer is given, the shape will be a hypercube of
-        sidelength given by its value.
-    extraction_step : integer or tuple of length arr.ndim
-        Indicates step size at which extraction shall be performed.
-        If integer is given, then the step is uniform in all dimensions.
+    arr : numpy.ndarray
+        N-dimensional array from which to extract patches.
+    tile_size : int or tuple of int
+        Shape of each patch. If an integer, all dimensions use the same size.
+    extraction_step : int or tuple of int
+        Step size between patches. If an integer, uniform across all dimensions.
+    flatten : bool
+        If True, reshape output to (n_patches, *tile_size).
+
     Returns
     -------
-    patches : strided ndarray
-        2n-dimensional array indexing patches on first n dimensions and
-        containing patches on the last n dimensions. These dimensions
-        are fake, but this way no data is copied. A simple reshape invokes
-        a copying operation to obtain a list of patches:
-        result.reshape([-1] + list(patch_shape))
+    numpy.ndarray
+        Array of extracted patches. If ``flatten`` is False, shape is
+        2N-dimensional; otherwise (n_patches, *tile_size).
     """
 
     arr_ndim = arr.ndim

@@ -1,3 +1,10 @@
+"""Default configuration values for classic denoiser calibration.
+
+Provides named default values for optimiser settings, blind spots,
+J-invariance interpolation mode, crop sizes, and maximum evaluation counts
+used by the classic denoiser calibration functions.
+"""
+
 from collections import namedtuple
 
 DefaultValue = namedtuple(typename="DefaultValue", field_names=["value"])

@@ -1,4 +1,6 @@
-from typing import Union, Optional
+"""Learned convolutional feature group using MiniBatchKMeans kernel extraction."""
+
+from typing import Optional, Union
 
 from aydin.features.groups.correlation import CorrelationFeatures
 from aydin.features.groups.extract_kernels import extract_kernels
@@ -40,12 +42,41 @@ class LearnedCorrelationFeatures(CorrelationFeatures):
 
     @property
     def receptive_field_radius(self) -> int:
+        """Return the receptive field radius based on the kernel size.
+
+        Returns
+        -------
+        radius : int
+            Half the kernel size.
+        """
         return self.size // 2
 
     def num_features(self, ndim: int) -> int:
+        """Return the number of learned convolutional features.
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions (unused).
+
+        Returns
+        -------
+        num : int
+            Number of kernels to learn.
+        """
         return self.num_kernels
 
     def learn(self, image):
+        """Learn representative convolutional kernels from the image.
+
+        Uses MiniBatchKMeans clustering on image patches to discover
+        representative local patterns that serve as convolutional kernels.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image from which to extract kernels.
+        """
         self.kernels = extract_kernels(
             image,
             size=self.size,
@@ -54,6 +85,17 @@ class LearnedCorrelationFeatures(CorrelationFeatures):
         )
 
     def prepare(self, image, excluded_voxels=None, **kwargs):
+        """Prepare the learned correlation feature group for computation.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image for which features will be computed.
+        excluded_voxels : list of tuple of int, optional
+            Voxels to exclude from feature computation.
+        **kwargs
+            Additional keyword arguments passed to the parent class.
+        """
         if excluded_voxels is None:
             excluded_voxels = []
 

@@ -1,17 +1,25 @@
+"""Harmonic prior denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on a non-linear harmonic
+prior. The gradient of the prior is a Laplace-like operator scaled by the
+local value range, making it effective at smoothing uniform regions while
+preserving edges.
+"""
+
 import math
 from functools import partial
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.linalg import norm
 from numpy.typing import ArrayLike
 from scipy.ndimage import (
+    gaussian_filter,
+    maximum_filter,
     median_filter,
     minimum_filter,
-    maximum_filter,
-    uniform_filter,
     rank_filter,
-    gaussian_filter,
+    uniform_filter,
 )
 
 from aydin.it.classic_denoisers import _defaults
@@ -64,7 +72,7 @@ def calibrate_denoise_harmonic(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -206,7 +214,7 @@ def denoise_harmonic(
         Starting step used for gradient descent
 
     max_gradient: float
-        Maximum gradient tolerated -- usefull to avoid 'numerical explosions' ;-)
+        Maximum gradient tolerated -- useful to avoid 'numerical explosions' ;-)
 
     Returns
     -------
@@ -249,7 +257,7 @@ def denoise_harmonic(
             # If gradient jumps around turn down the heat:
             step *= 0.95
         else:
-            # if teh gradient goes down, turn up the heat:
+            # if the gradient goes down, turn up the heat:
             step *= 1.01
 
         # Stopping if convergence or stabilisation:
@@ -274,6 +282,22 @@ def denoise_harmonic(
 
 
 def _laplace(image, filter: str = 'uniform', rank: bool = False):
+    """Compute a range-normalized Laplace-like operator on the image.
+
+    Parameters
+    ----------
+    image : ArrayLike
+        Input image.
+    filter : str
+        Type of smoothing filter: 'uniform', 'gaussian', or 'median'.
+    rank : bool
+        If True, uses rank filters for more robust min/max estimation.
+
+    Returns
+    -------
+    numpy.ndarray
+        The Laplace-like response normalized by local value range.
+    """
     if rank:
         min_value = rank_filter(image, size=3, rank=1)
         max_value = rank_filter(image, size=3, rank=-2)
@@ -281,11 +305,11 @@ def _laplace(image, filter: str = 'uniform', rank: bool = False):
         min_value = minimum_filter(image, size=3)
         max_value = maximum_filter(image, size=3)
 
-    range = max_value - min_value + 1e-6
+    value_range = max_value - min_value + 1e-6
 
     if filter == 'uniform':
-        return (uniform_filter(image, size=3) - image) / range
+        return (uniform_filter(image, size=3) - image) / value_range
     elif filter == 'gaussian':
-        return (gaussian_filter(image, sigma=1, truncate=2) - image) / range
+        return (gaussian_filter(image, sigma=1, truncate=2) - image) / value_range
     elif filter == 'median':
-        return (median_filter(image, size=3) - image) / range
+        return (median_filter(image, size=3) - image) / value_range

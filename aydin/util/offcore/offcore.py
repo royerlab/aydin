@@ -1,12 +1,29 @@
+"""Off-core array allocation for large datasets.
+
+Provides memory-mapped and zarr-backed array allocation that
+automatically falls back to disk-based storage when physical
+memory is insufficient.
+"""
+
+import tempfile
+from typing import Generator, Tuple, Union
+
 import numpy
 import psutil
-import tempfile
-from typing import Tuple, Union, Generator
 
 from aydin.util.log.log import lprint, lsection
 
 
 class OffCore:
+    """Configuration for off-core array storage.
+
+    Attributes
+    ----------
+    memmap_directory : str or None
+        Directory for memory-mapped temporary files. If None, the
+        system default temporary directory is used.
+    """
+
     memmap_directory = None
 
 
@@ -18,19 +35,35 @@ def offcore_array(
     no_memmap_limit: bool = True,
     max_memory_usage_ratio: float = 0.9,
 ):
-    """
-    Instanciates an array of given shape and dtype in  'off-core' fashion i.e. not in main memory.
-    Right now it simply uses memory mapping on temp file that is deleted after the file is closed
+    """Allocate an array, using off-core storage when memory is limited.
+
+    Checks available physical and swap memory, and falls back to
+    memory-mapped files or zarr-backed arrays when the requested
+    array would exceed available memory.
 
     Parameters
     ----------
-    shape : tuple
+    shape : tuple of int
+        Shape of the array to allocate.
     dtype : numpy.dtype
+        Data type of the array.
     force_memmap : bool
+        If True, always use memory-mapped storage regardless of
+        available memory.
     zarr_allowed : bool
+        If True, allow zarr-backed storage as a fallback when
+        memory-mapping is not available.
     no_memmap_limit : bool
+        If True, use memory-mapping even for very large arrays
+        that exceed total system memory.
     max_memory_usage_ratio : float
+        Maximum fraction of total memory (physical + swap) to use
+        before switching to off-core storage.
 
+    Returns
+    -------
+    numpy.ndarray or numpy.memmap or zarr.Array
+        Allocated array using the most appropriate storage backend.
     """
 
     with lsection(f"Array of shape: {shape} and dtype: {dtype} requested"):

@@ -1,14 +1,29 @@
+"""System resource summary widget showing CPU, memory, and GPU information."""
+
 import os
+
 import numba
 import psutil
 from numba.cuda import CudaSupportError
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox
+from qtpy.QtWidgets import QGroupBox, QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 from aydin.util.misc.units import human_readable_byte_size
 
 
 class SystemSummaryWidget(QWidget):
+    """Widget displaying a summary of the system's CPU, memory, and GPU resources.
+
+    Shows CPU frequency, core count, load averages, free/total RAM, CUDA GPU
+    name, toolkit availability, and GPU memory. Values are color-coded
+    (green/orange/red) to indicate resource adequacy.
+
+    Parameters
+    ----------
+    parent : QWidget
+        The parent widget.
+    """
+
     def __init__(self, parent):
         QWidget.__init__(self, parent)
 

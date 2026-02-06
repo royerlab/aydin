@@ -1,7 +1,8 @@
+"""Integration tests for PyTorch model training and denoising quality."""
+
 # flake8: noqa
 import numpy
 import pytest
-
 import torch
 
 from aydin.analysis.image_metrics import calculate_print_psnr_ssim

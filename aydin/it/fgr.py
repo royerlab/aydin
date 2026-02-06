@@ -1,6 +1,15 @@
+"""Feature Generation & Regression (FGR) based image translator.
+
+This module provides `ImageTranslatorFGR`, the recommended image translator
+for most use cases. It uses feature generation (e.g. multi-scale convolutions)
+combined with gradient boosting regression (e.g. CatBoost, LightGBM) to achieve
+self-supervised image denoising.
+"""
+
 import gc
 import time
-from typing import Optional, Union, List, Tuple
+from typing import List, Optional, Tuple, Union
+
 import numpy
 
 from aydin.features.base import FeatureGeneratorBase
@@ -15,8 +24,12 @@ from aydin.util.offcore.offcore import offcore_array
 
 
 class ImageTranslatorFGR(ImageTranslatorBase):
-    """
-    Feature Generation & Regression (FGR) based Image TranslatorFGR Image Translator.
+    """Feature Generation & Regression (FGR) based image translator.
+
+    Uses feature engineering (multi-scale filters, spatial features, etc.)
+    combined with regression learning (CatBoost, LightGBM, etc.) to denoise
+    images. This is the recommended approach for most denoising tasks as it
+    provides good quality with reasonable training and inference times.
     """
 
     feature_generator: FeatureGeneratorBase
@@ -36,7 +49,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         max_tiling_overhead: float = 0.1,
     ):
         """Constructs a FGR image translator. FGR image translators use
-        feature generation and regression learning to acheive image
+        feature generation and regression learning to achieve image
         translation. Typically used to denoise images using the Noise 2Self
         principle.
 
@@ -71,7 +84,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             necessarily need more than several million voxels to train an
             effective denoiser. Different regressors (lgbm, cb, ...) can
             handle varying sizes of training data. We recommend at least a
-            million (1e6) and at most 40 million if you have a powerfull
+            million (1e6) and at most 40 million if you have a powerful
             machine with GPU and if you are armed with patience. (advanced)
 
         favour_bright_pixels : float
@@ -152,20 +165,21 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             lprint(f"balance training data: {self.balance_training_data}")
 
     def __repr__(self):
+        """Return a string representation of the FGR translator."""
         return f"<{self.__class__.__name__}, feature_generator={self.feature_generator}, regressor={self.regressor}, balance_training_data={self.balance_training_data}"
 
     def save(self, path: str):
-        """Saves a 'all-batteries-included' image translation model at a given path (folder).
+        """Save the FGR translator model, feature generator, and regressor to disk.
 
         Parameters
         ----------
         path : str
-            path to save to
+            Directory path to save the model to.
 
         Returns
         -------
-        frozen
-
+        str
+            Concatenated JSON strings of the serialized components.
         """
         with lsection(f"Saving 'fgr' image translator to {path}"):
             frozen = super().save(path)
@@ -175,12 +189,27 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         return frozen
 
     def _load_internals(self, path: str):
+        """Load the feature generator and regressor from disk.
+
+        Parameters
+        ----------
+        path : str
+            Directory path to load from.
+        """
         with lsection(f"Loading 'fgr' image translator from {path}"):
             self.feature_generator = FeatureGeneratorBase.load(path)
             self.regressor = RegressorBase.load(path)
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Customize pickle state to exclude feature generator and regressor.
+
+        These are saved separately via their own save methods.
+
+        Returns
+        -------
+        dict
+            Object state with feature_generator and regressor excluded.
+        """
         state = self.__dict__.copy()
         del state['feature_generator']
         del state['regressor']
@@ -193,6 +222,21 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         self.regressor.stop_fit()
 
     def _estimate_memory_needed_and_available(self, image):
+        """Estimate memory requirements based on number of features.
+
+        Creates a small dummy image to determine the number of features
+        and their dtype, then extrapolates to the full image size.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            The image to estimate memory requirements for.
+
+        Returns
+        -------
+        tuple of (float, float)
+            A tuple of (memory_needed, memory_available) in bytes.
+        """
         with lsection(
             "Estimating the amount of memory needed to store feature arrays:"
         ):
@@ -233,22 +277,30 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         image_slice=None,
         whole_image_shape=None,
     ):
-        """Internal function that computes features for a given image.
+        """Compute feature vectors for all voxels in the given image.
 
         Parameters
         ----------
-        image
-        exclude_center_feature
-        exclude_center_value
+        image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        exclude_center_feature : bool
+            Whether to exclude the center pixel feature.
+        exclude_center_value : bool
+            Whether to exclude the center pixel value (for J-invariance).
         features_last : bool
+            If True, feature dimension is last; otherwise first.
         num_reserved_features : int
-        image_slice
-        whole_image_shape
+            Number of reserved feature slots.
+        image_slice : tuple of slice, optional
+            Slice indicating tile position for spatial feature computation.
+        whole_image_shape : tuple of int, optional
+            Full image shape for spatial feature normalization.
 
         Returns
         -------
-        flattened array of features
-
+        numpy.ndarray
+            Flattened array of features with shape (num_voxels, num_features)
+            if features_last, or (num_features, num_voxels) otherwise.
         """
 
         with lsection(f"Computing features for image of shape {image.shape}:"):
@@ -303,6 +355,24 @@ class ImageTranslatorFGR(ImageTranslatorBase):
     def _train(
         self, input_image, target_image, train_valid_ratio, callback_period, jinv
     ):
+        """Train the FGR model by computing features and fitting the regressor.
+
+        Computes features for each image tile, splits into train/validation sets
+        with optional histogram balancing, and fits the regressor.
+
+        Parameters
+        ----------
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        target_image : numpy.ndarray
+            Shape-normalized target image.
+        train_valid_ratio : float
+            Fraction of data for validation.
+        callback_period : int
+            Callback period in seconds.
+        jinv : bool or tuple of bool, optional
+            Controls J-invariance behavior for feature computation.
+        """
         with lsection(
             f"Training image translator from image of shape {input_image.shape} to image of shape {target_image.shape}:"
         ):
@@ -418,6 +488,12 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             self.loss_history = self.regressor.loss_history
 
     def prepare_monitoring_images(self):
+        """Compute features for monitoring images used during training callbacks.
+
+        If a monitor with monitoring images is configured, normalizes and
+        computes features for each monitoring image for use in progress
+        visualization.
+        """
         # Compute features for monitoring images:
         if self.monitor is not None and self.monitor.monitoring_images is not None:
             # Normalise monitoring images:
@@ -444,6 +520,15 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         self.monitoring_datasets = monitoring_images_features
 
     def get_callback(self):
+        """Create a callback function for regressor training progress monitoring.
+
+        Returns
+        -------
+        callable
+            A callback function that receives (iteration, val_loss, model)
+            and updates the monitor with predicted monitoring images.
+        """
+
         # Regressor callback:
         def regressor_callback(iteration, val_loss, model):
 
@@ -504,6 +589,18 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         return regressor_callback
 
     def _prepare_split_train_val(self, input_image, target_image):
+        """Prepare the train/validation split and histogram balancer.
+
+        Calculates the effective keep ratio based on image size and configured
+        limits, then calibrates a DataHistogramBalancer for balanced sampling.
+
+        Parameters
+        ----------
+        input_image : numpy.ndarray
+            Shape-normalized input image.
+        target_image : numpy.ndarray
+            Shape-normalized target image.
+        """
         # the number of voxels:
         num_of_voxels = input_image.size
         lprint(
@@ -572,6 +669,27 @@ class ImageTranslatorFGR(ImageTranslatorBase):
     def _do_split_train_val(
         self, num_target_channels: int, train_valid_ratio: float, x, y
     ):
+        """Split feature and target arrays into training and validation sets.
+
+        Uses the pre-calibrated histogram balancer to perform balanced
+        sampling while splitting data into train and validation sets.
+
+        Parameters
+        ----------
+        num_target_channels : int
+            Number of target channels.
+        train_valid_ratio : float
+            Fraction of data for validation.
+        x : numpy.ndarray
+            Feature array with shape (num_features, num_entries).
+        y : numpy.ndarray
+            Target array with shape (num_channels, num_entries).
+
+        Returns
+        -------
+        tuple of (numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray)
+            (x_train, x_valid, y_train, y_valid) arrays.
+        """
         with lsection(
             f"Splitting train and test sets (train_test_ratio={train_valid_ratio}) "
         ):
@@ -700,18 +818,21 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         return x_train, x_valid, y_train, y_valid
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
-        """Internal method that translates an input image on the basis of the trained model.
+        """Denoise an input image by computing features and applying the regressor.
 
         Parameters
         ----------
-        input_image
-        image_slice
-        whole_image_shape
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        image_slice : tuple of slice, optional
+            Slice indicating tile position for spatial feature computation.
+        whole_image_shape : tuple of int, optional
+            Full image shape for spatial feature normalization.
 
         Returns
         -------
-        inferred image
-
+        numpy.ndarray
+            Denoised image with same shape as input.
         """
         shape = input_image.shape
         num_batches = shape[0]

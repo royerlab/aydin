@@ -1,19 +1,33 @@
+"""Fourier Shell Correlation (FSC) for image quality assessment.
+
+This module implements Fourier Shell Correlation, a frequency-domain measure
+of similarity between two images. FSC is commonly used to estimate the
+resolution of reconstructed images in microscopy and cryo-EM.
+
+See: https://en.wikipedia.org/wiki/Fourier_shell_correlation
+"""
+
 import numpy
 from numpy import fft
 
 
 def fsc(image1, image2):
-    """
-    Method that calculates Fourier Shell Correlations between
-    the two provided 2D images. For more,
-    https://en.wikipedia.org/wiki/Fourier_shell_correlation
+    """Calculate the Fourier Shell Correlation between two 2D images.
+
+    Computes the normalized cross-correlation in concentric frequency
+    shells between the Fourier transforms of the two input images.
+
     Parameters
     ----------
-    image1 : numpy.ArrayLike
-    image2 : numpy.ArrayLike
+    image1 : numpy.typing.ArrayLike
+        First input image (2D).
+    image2 : numpy.typing.ArrayLike
+        Second input image (2D), same shape as ``image1``.
+
     Returns
     -------
-    Sequence[float]
+    fourier_shell_correlations : list of float
+        FSC values for each frequency shell, from low to high frequency.
     """
     f_image1 = fft.fftshift(fft.fft2(image1))
     f_image2 = fft.fftshift(fft.fft2(image2))
@@ -30,15 +44,21 @@ def fsc(image1, image2):
 
 
 def shell_sum(image):
-    """
-    Method that calculates sum of intensities over image
-    centric shells.
+    """Compute the sum of intensities over concentric shells centered on the image.
+
+    For each radial distance from the image center, sums pixel values that
+    fall within that shell (using both floor and ceiling rounding of the
+    distance, averaged).
+
     Parameters
     ----------
-    image : numpy.ArrayLike
+    image : numpy.typing.ArrayLike
+        2D input image (typically a Fourier-domain image).
+
     Returns
     -------
-    Sequence[float]
+    output : list of complex or float
+        Sum of intensities for each concentric shell, ordered by radius.
     """
     len_x, len_y = image.shape
     r = numpy.arange(len_x) - numpy.floor(len_x / 2)

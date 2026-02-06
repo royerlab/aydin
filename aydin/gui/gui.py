@@ -1,8 +1,75 @@
+"""Aydin Studio main application window and entry point."""
+
+import platform
 import sys
+
+
+def _check_linux_qt_dependencies():
+    """Check for required system libraries on Linux before Qt initialization.
+
+    Qt 6.5+ requires libxcb-cursor0 on Linux. If missing, Qt will abort with
+    an unhelpful error. This function detects the issue early and provides
+    clear installation instructions.
+    """
+    if platform.system() != 'Linux':
+        return
+
+    import ctypes
+    import ctypes.util
+
+    # Try to load libxcb-cursor
+    lib_name = ctypes.util.find_library('xcb-cursor')
+    if lib_name:
+        try:
+            ctypes.CDLL(lib_name)
+            return  # Library found and loadable
+        except OSError:
+            pass
+
+    # Try common library paths directly
+    for lib_path in ['libxcb-cursor.so.0', 'libxcb-cursor.so']:
+        try:
+            ctypes.CDLL(lib_path)
+            return  # Library found and loadable
+        except OSError:
+            continue
+
+    # Library not found - print helpful message and exit
+    print(
+        """
+================================================================================
+ERROR: Missing required system library for Qt GUI
+
+Aydin's GUI requires 'libxcb-cursor0' on Linux (required since Qt 6.5).
+
+To fix this, install the library using your package manager:
+
+  Ubuntu/Debian:
+    sudo apt install libxcb-cursor0
+
+  Fedora/RHEL:
+    sudo dnf install xcb-util-cursor
+
+  Arch Linux:
+    sudo pacman -S xcb-util-cursor
+
+After installing, run 'aydin' again.
+
+For more information, see the Aydin installation documentation:
+https://royerlab.github.io/aydin/
+================================================================================
+"""
+    )
+    sys.exit(1)
+
+
+# Check dependencies before importing Qt
+_check_linux_qt_dependencies()
+
+import qdarkstyle
 from qtpy.QtCore import QThreadPool
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QMainWindow, QAction, QApplication, QStatusBar
-import qdarkstyle
+from qtpy.QtWidgets import QAction, QApplication, QMainWindow, QStatusBar
 
 from aydin.gui.main_page import MainPage
 from aydin.gui.resources.json_resource_loader import absPath
@@ -10,7 +77,16 @@ from aydin.util.log.log import lprint
 
 
 class App(QMainWindow):
-    """GUI app"""
+    """Main application window for Aydin Studio.
+
+    Sets up the main window geometry, status bar, menu bar, and central
+    widget (MainPage). Acts as the top-level container for the GUI.
+
+    Parameters
+    ----------
+    ver : str
+        Aydin version string displayed in the status bar and help menu.
+    """
 
     def __init__(self, ver):
         super(App, self).__init__()
@@ -23,8 +99,8 @@ class App(QMainWindow):
 
         self.title = "Aydin Studio - image denoising, but chill..."
 
-        self.desktop = QApplication.desktop()
-        self.screenRect = self.desktop.screenGeometry()
+        screen = QApplication.primaryScreen()
+        self.screenRect = screen.availableGeometry()
         height, width = self.screenRect.height(), self.screenRect.width()
 
         self.width = width // 3
@@ -33,7 +109,7 @@ class App(QMainWindow):
         self.top = (height - self.height) // 2
 
         self.setWindowTitle(self.title)
-        self.setGeometry(self.top, self.left, self.width, self.height)
+        self.setGeometry(self.left, self.top, self.width, self.height)
 
         # Status bar
         self.statusBar = QStatusBar(self)
@@ -47,12 +123,19 @@ class App(QMainWindow):
         self.setupMenubar()
 
     def closeEvent(self, event):
+        """Handle window close by quitting the application.
+
+        Parameters
+        ----------
+        event : QCloseEvent
+            The close event.
+        """
         lprint("closeEvent of mainwindow is called")
         app = QApplication.instance()
         app.quit()
 
     def setupMenubar(self):
-        """Method to populate menubar."""
+        """Populate the menu bar with File, Run, Preferences, and Help menus."""
 
         mainMenu = self.menuBar()
         mainMenu.setNativeMenuBar(False)
@@ -118,6 +201,7 @@ class App(QMainWindow):
         helpMenu.addAction(versionButton)
 
     def setAydinWindowIcon(self):
+        """Set the Aydin icon for the application window."""
         self.setWindowIcon(QIcon(absPath("aydin_icon.png")))
 
 

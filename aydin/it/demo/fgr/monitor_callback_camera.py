@@ -4,15 +4,15 @@ import time
 import napari
 import numpy
 import numpy as np
-from aydin.features.fast.fast_features import FastFeatureGenerator
-from aydin.it.monitor import Monitor
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 from skimage.util import random_noise
 
+from aydin.features.fast.fast_features import FastFeatureGenerator
 from aydin.it.fgr import ImageTranslatorFGR
+from aydin.it.monitor import Monitor
 from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.perceptron import PerceptronRegressor
 
@@ -33,7 +33,7 @@ def demo(regressor):
     intensity = 5
     np.random.seed(0)
     noisy = np.random.poisson(image * intensity) / intensity
-    noisy = random_noise(noisy, mode='gaussian', var=0.01, seed=0)
+    noisy = random_noise(noisy, mode='gaussian', var=0.01, rng=0)
     noisy = noisy.astype(np.float32)
 
     with napari.gui_qt():

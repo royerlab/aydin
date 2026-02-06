@@ -1,4 +1,8 @@
-# Adapted from https://discuss.pytorch.org/t/unet-implementation/426
+"""Ronneberger UNet implementation adapted for PyTorch.
+
+Adapted from https://discuss.pytorch.org/t/unet-implementation/426
+Implements the original U-Net architecture from Ronneberger et al. (2015).
+"""
 
 import torch
 import torch.nn.functional as F
@@ -6,6 +10,13 @@ from torch import nn
 
 
 class RonnebergerUNet(nn.Module):
+    """Original Ronneberger U-Net architecture for biomedical image segmentation.
+
+    Implementation of U-Net: Convolutional Networks for Biomedical Image
+    Segmentation (Ronneberger et al., 2015).
+    See https://arxiv.org/abs/1505.04597
+    """
+
     def __init__(
         self,
         in_channels=1,
@@ -16,29 +27,34 @@ class RonnebergerUNet(nn.Module):
         batch_norm=False,
         up_mode='upconv',
     ):
-        """
-        Implementation of
-        U-Net: Convolutional Networks for Biomedical Image Segmentation
-        (Ronneberger et al., 2015)
-        https://arxiv.org/abs/1505.04597
+        """Initialize the Ronneberger UNet.
 
-        Using the default arguments will yield the exact version used
-        in the original paper
+        Implementation of U-Net: Convolutional Networks for Biomedical
+        Image Segmentation (Ronneberger et al., 2015).
+        See https://arxiv.org/abs/1505.04597
 
-        Args:
-            in_channels (int): number of input channels
-            n_classes (int): number of output channels
-            depth (int): depth of the network
-            wf (int): number of filters in the first layer is 2**wf
-            padding (bool): if True, apply padding such that the input shape
-                            is the same as the output.
-                            This may introduce artifacts
-            batch_norm (bool): Use BatchNorm after layers with an
-                               activation function
-            up_mode (str): one of 'upconv' or 'upsample'.
-                           'upconv' will use transposed convolutions for
-                           learned upsampling.
-                           'upsample' will use bilinear upsampling.
+        Using the default arguments yields the exact version used in
+        the original paper.
+
+        Parameters
+        ----------
+        in_channels : int
+            Number of input channels.
+        n_classes : int
+            Number of output channels.
+        depth : int
+            Depth of the network (number of encoder levels).
+        wf : int
+            Width factor; the number of filters in the first layer
+            is ``2**wf``.
+        padding : bool
+            If ``True``, apply padding so that input and output shapes
+            match. May introduce artifacts.
+        batch_norm : bool
+            Whether to use BatchNorm after activation functions.
+        up_mode : str
+            Upsampling mode: ``'upconv'`` for transposed convolutions
+            or ``'upsample'`` for bilinear upsampling.
         """
         super().__init__()
         assert up_mode in ('upconv', 'upsample')
@@ -76,6 +92,23 @@ class RonnebergerUNet(nn.Module):
 
 
 class UNetConvBlock(nn.Module):
+    """Double convolution block for the UNet.
+
+    Two 3x3 convolutions each followed by ReLU and optional batch
+    normalization.
+
+    Parameters
+    ----------
+    in_size : int
+        Number of input channels.
+    out_size : int
+        Number of output channels.
+    padding : bool
+        Whether to pad convolutions.
+    batch_norm : bool
+        Whether to apply batch normalization.
+    """
+
     def __init__(self, in_size, out_size, padding, batch_norm):
         super(UNetConvBlock, self).__init__()
         block = []
@@ -98,6 +131,25 @@ class UNetConvBlock(nn.Module):
 
 
 class UNetUpBlock(nn.Module):
+    """Upsampling block for the UNet decoder path.
+
+    Upsamples the input and concatenates with the skip connection
+    from the encoder, then applies a convolution block.
+
+    Parameters
+    ----------
+    in_size : int
+        Number of input channels.
+    out_size : int
+        Number of output channels.
+    up_mode : str
+        Upsampling mode: ``'upconv'`` or ``'upsample'``.
+    padding : bool
+        Whether to pad convolutions.
+    batch_norm : bool
+        Whether to apply batch normalization.
+    """
+
     def __init__(self, in_size, out_size, up_mode, padding, batch_norm):
         super(UNetUpBlock, self).__init__()
         if up_mode == 'upconv':

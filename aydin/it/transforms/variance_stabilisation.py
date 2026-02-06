@@ -1,12 +1,19 @@
+"""Variance stabilisation transform (VST) and range compression functions.
+
+Provides transforms that convert images with non-Gaussian (e.g. Poisson)
+noise into images with approximately Gaussian noise, facilitating denoising.
+Supports Anscombe, Yeo-Johnson, Box-Cox, quantile, log, sqrt, and identity
+transforms with their corresponding inverse operations.
+"""
+
 import numpy
 from numba import jit
-
 from numpy.typing import ArrayLike
 from sklearn.base import TransformerMixin
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lprint, lsection
 
 
 class VarianceStabilisationTransform(ImageTransformBase):
@@ -39,7 +46,6 @@ class VarianceStabilisationTransform(ImageTransformBase):
         priority: float = 0.11,
         **kwargs,
     ):
-
         """
         Constructs a Variance Stabilisation Transform
 
@@ -58,13 +64,13 @@ class VarianceStabilisationTransform(ImageTransformBase):
             to match the input distribution.
 
         leave_as_float : bool
-            Does not attempt to cast back to original non-flloat data
+            Does not attempt to cast back to original non-float data
             type (8, 16, 32 bit integer), but instead leaves as 32 bit float.
 
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
@@ -77,7 +83,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
         self._max = None
         self._transform: TransformerMixin = None
 
-        lprint(f"Instanciating: {self}")
+        lprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -95,6 +101,18 @@ class VarianceStabilisationTransform(ImageTransformBase):
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
+        """Apply the variance stabilisation transform to the image.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Variance-stabilised image.
+        """
 
         with lsection(
             f"Stabilising variance ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
@@ -186,6 +204,18 @@ class VarianceStabilisationTransform(ImageTransformBase):
             return new_array
 
     def postprocess(self, array: ArrayLike):
+        """Apply the inverse variance stabilisation transform.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised variance-stabilised image.
+
+        Returns
+        -------
+        numpy.ndarray
+            Image in the original intensity space.
+        """
 
         if not self.do_postprocess:
             return array
@@ -232,34 +262,133 @@ class VarianceStabilisationTransform(ImageTransformBase):
 
 @jit(nopython=True, parallel=True, error_model='numpy')
 def _f_sqrt(image, min_value):
+    """Forward square-root variance stabilisation transform.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image.
+    min_value : float
+        Minimum value to shift image to non-negative range.
+
+    Returns
+    -------
+    numpy.ndarray
+        Square-root transformed image.
+    """
     return numpy.sqrt(image - min_value)
 
 
 @jit(nopython=True, parallel=True, error_model='numpy')
 def _i_sqrt(image, min_value):
+    """Inverse square-root transform.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Square-root transformed image.
+    min_value : float
+        Original minimum value.
+
+    Returns
+    -------
+    numpy.ndarray
+        Image in original intensity space.
+    """
     return image ** _F(2) + min_value
 
 
 @jit(nopython=True, parallel=True, error_model='numpy')
 def _f_log(image, min_value):
+    """Forward log1p variance stabilisation transform.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image.
+    min_value : float
+        Minimum value to shift image to non-negative range.
+
+    Returns
+    -------
+    numpy.ndarray
+        Log-transformed image.
+    """
     return numpy.log1p(image - min_value)
 
 
 @jit(nopython=True, parallel=True, error_model='numpy')
 def _i_log(image, min_value):
+    """Inverse log1p transform.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Log-transformed image.
+    min_value : float
+        Original minimum value.
+
+    Returns
+    -------
+    numpy.ndarray
+        Image in original intensity space.
+    """
     return numpy.exp(image) - _F(1) + min_value
 
 
 @jit(nopython=True, parallel=True, error_model='numpy')
 def _f_anscomb(image, min_value):
+    """Forward Anscombe variance stabilisation transform.
+
+    Transforms Poisson-distributed data to approximately Gaussian-distributed
+    data using the generalized Anscombe transform.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image (assumed Poisson-distributed).
+    min_value : float
+        Minimum value to shift image to non-negative range.
+
+    Returns
+    -------
+    numpy.ndarray
+        Anscombe-transformed image.
+    """
     return _F(2) * numpy.sqrt(image - min_value + _F(0.375))
 
 
 @jit(nopython=True, parallel=True, error_model='numpy')
 def _i_anscomb(image, min_value):
+    """Inverse Anscombe transform.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Anscombe-transformed image.
+    min_value : float
+        Original minimum value.
+
+    Returns
+    -------
+    numpy.ndarray
+        Image in original intensity space.
+    """
     return (image / _F(2)) ** _F(2) + min_value - _F(0.375)
 
 
 @jit(nopython=True, error_model='numpy')
 def _F(x):
+    """Convert a scalar to a float32 numpy scalar (Numba-compatible).
+
+    Parameters
+    ----------
+    x : scalar
+        Value to convert.
+
+    Returns
+    -------
+    numpy.float32
+        Float32 numpy scalar.
+    """
     return numpy.asarray(x, dtype=numpy.float32)

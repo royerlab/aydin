@@ -1,3 +1,5 @@
+"""Tests for the DataModel class."""
+
 from mock import Mock
 
 from aydin.gui.tabs.data_model import DataModel

@@ -1,19 +1,25 @@
+"""Receptive field computation utilities for CNN models.
+
+Provides functions to calculate theoretical and empirical receptive
+field sizes for convolution, pooling, and upsampling layers.
+"""
+
 import numpy
 
 
 def bbox_idx(x, thresh=None):
     """
-    Returns indices of bounding box of receptive filed. This is useful for visualize receptive field.
+    Returns indices of bounding box of receptive field. This is useful for visualize receptive field.
 
     Parameters
     ----------
     x
-        output image of the target model with inpulse input image
+        output image of the target model with impulse input image
     thresh
 
     Returns
     -------
-    list of indices of bounding box of receptive filed
+    list of indices of bounding box of receptive field
     """
     if thresh is None:
         thresh = 0

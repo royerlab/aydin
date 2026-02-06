@@ -10,7 +10,7 @@ from aydin.util.log.log import Log
 
 def demo(image):
     """
-    In some cases it might be usefull to append a compression transform (sqrt) after normalisation,
+    In some cases it might be useful to append a compression transform (sqrt) after normalisation,
     something akin to a VST transform but without the exact variance stabilisation, and more as a way
     to deskew the histogram. There are only a few situations where this truly helps, and there are not many.
     So by default this is off.

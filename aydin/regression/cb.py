@@ -1,16 +1,23 @@
+"""CatBoost gradient boosting regressor for Aydin's FGR pipeline.
+
+This module provides :class:`CBRegressor`, which wraps the CatBoost library
+for gradient-boosted decision-tree regression with optional GPU acceleration.
+"""
+
 import gc
 import math
 import multiprocessing
 import shutil
 from os.path import join
 from tempfile import mkdtemp
-from typing import Sequence, Optional
+from typing import Optional, Sequence
+
 import numpy
-from catboost import CatBoostRegressor, CatBoostError, Pool
+from catboost import CatBoostError, CatBoostRegressor, Pool
 
 from aydin.regression.base import RegressorBase
 from aydin.regression.cb_utils.callbacks import CatBoostStopTrainingCallback
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lprint, lsection
 
 
 class CBRegressor(RegressorBase):
@@ -78,7 +85,7 @@ class CBRegressor(RegressorBase):
             (advanced)
 
         loss : str
-            Type of loss to be used. Van be 'l1' for L1 loss (MAE), and 'l2' for
+            Type of loss to be used. Can be 'l1' for L1 loss (MAE), and 'l2' for
             L2 loss (RMSE), 'Lq:q=1.5' with q>=1 real number as power coefficient (here q=1.5),
             'Poisson' for Poisson loss, 'Huber:delta=0.1' for Huber loss with delta=0.1,
             'Expectile:alpha=0.5' for expectile loss with alpha parameter set to 0.5,
@@ -101,7 +108,7 @@ class CBRegressor(RegressorBase):
             (advanced)
 
         gpu_use_pinned_ram : Optional[bool]
-            True forces the usage of CPU pinned memory byte GPU which can be a
+            True forces the usage of CPU pinned memory by the GPU which can be a
             bit slower but also can accommodate larger dataset. By default the
             usage, or not, of CPU pinned memory is determined automatically
             based on size of data and GPU VRAM size. You can override this
@@ -168,16 +175,36 @@ class CBRegressor(RegressorBase):
         return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}, gpu={self.gpu}>"
 
     def recommended_max_num_datapoints(self) -> int:
-        """Recommended maximum number of datapoints
+        """Return the recommended maximum number of data points.
+
+        GPU training can handle significantly more data points than CPU.
 
         Returns
         -------
         int
-
+            Upper bound on the number of data points to use for training.
         """
         return int(40e6 if self.gpu else 1e6)
 
     def _get_params(self, num_samples, learning_rate, use_gpu, train_folder):
+        """Build the CatBoost parameter dictionary for training.
+
+        Parameters
+        ----------
+        num_samples : int
+            Number of training samples, used to set ``min_data_in_leaf``.
+        learning_rate : float or None
+            Learning rate override. ``None`` lets CatBoost choose automatically.
+        use_gpu : bool
+            Whether to use GPU acceleration.
+        train_folder : str
+            Temporary directory for CatBoost training artifacts.
+
+        Returns
+        -------
+        dict
+            CatBoost training parameters.
+        """
 
         # Setting min data in leaf:
         min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
@@ -216,9 +243,9 @@ class CBRegressor(RegressorBase):
         params = {
             "iterations": iterations,
             "task_type": "GPU" if use_gpu else "CPU",
-            "devices": 'NULL'
-            if self.gpu_devices is None
-            else ':'.join(self.gpu_devices),  # uses all available GPUs
+            "devices": (
+                'NULL' if self.gpu_devices is None else ':'.join(self.gpu_devices)
+            ),  # uses all available GPUs
             'objective': objective,
             "loss_function": self.metric.upper(),
             "allow_writing_files": True,
@@ -247,12 +274,36 @@ class CBRegressor(RegressorBase):
         return params
 
     def stop_fit(self):
+        """Request an early stop of the current CatBoost training run."""
         self.stop_training_callback.continue_training = False
 
     def _fit(
         self, x_train, y_train, x_valid=None, y_valid=None, regressor_callback=None
     ):
+        """Fit a single-channel CatBoost model.
 
+        Automatically retries with decreasing learning rates if training
+        converges too early (fewer estimators than ``min_num_estimators``).
+        Falls back to CPU if GPU training fails.
+
+        Parameters
+        ----------
+        x_train : numpy.ndarray
+            Training feature vectors of shape ``(n_samples, n_features)``.
+        y_train : numpy.ndarray
+            Training target values of shape ``(n_samples,)``.
+        x_valid : numpy.ndarray, optional
+            Validation feature vectors.
+        y_valid : numpy.ndarray, optional
+            Validation target values.
+        regressor_callback : callable, optional
+            Callback invoked at each training iteration.
+
+        Returns
+        -------
+        _CBModel
+            Fitted CatBoost model wrapper.
+        """
         with lsection("CatBoost regressor fitting:"):
 
             nb_data_points = y_train.shape[0]
@@ -383,26 +434,70 @@ class CBRegressor(RegressorBase):
 
 
 def _read_loss_history(train_folder):
-    training_loss = numpy.genfromtxt(
-        join(train_folder, "learn_error.tsv"), delimiter="\t", skip_header=1
-    )[:, 1]
-    validation_loss = numpy.genfromtxt(
-        join(train_folder, "test_error.tsv"), delimiter="\t", skip_header=1
-    )[:, 1]
-    return {'training': training_loss, 'validation': validation_loss}
+    """Read training and validation loss history from CatBoost log files.
+
+    Parameters
+    ----------
+    train_folder : str
+        Path to the CatBoost training output directory.
+
+    Returns
+    -------
+    dict
+        Dictionary with keys ``'training'`` and ``'validation'``, each
+        containing a numpy array of loss values. Empty arrays are returned
+        if the log files cannot be read.
+    """
+    try:
+        training_loss = numpy.genfromtxt(
+            join(train_folder, "learn_error.tsv"), delimiter="\t", skip_header=1
+        )[:, 1]
+        validation_loss = numpy.genfromtxt(
+            join(train_folder, "test_error.tsv"), delimiter="\t", skip_header=1
+        )[:, 1]
+        return {'training': training_loss, 'validation': validation_loss}
+    except Exception:
+        return {'training': numpy.array([]), 'validation': numpy.array([])}
 
 
 class _CBModel:
+    """Internal wrapper around a fitted CatBoost model.
+
+    Handles serialisation, deserialisation, and prediction for a single
+    output channel.
+
+    Attributes
+    ----------
+    model : CatBoostRegressor
+        The underlying CatBoost model.
+    loss_history : dict
+        Training and validation loss arrays.
+    """
+
     def __init__(self, model, loss_history):
         self.model: CatBoostRegressor = model
         self.loss_history = loss_history
 
     def _save_internals(self, path: str):
+        """Save the CatBoost model file to the given directory.
+
+        Parameters
+        ----------
+        path : str
+            Directory in which to write ``catboost_model.txt``.
+        """
         if self.model is not None:
             cb_model_file = join(path, 'catboost_model.txt')
             self.model.save_model(cb_model_file)
 
     def _load_internals(self, path: str):
+        """Load the CatBoost model file from the given directory.
+
+        Parameters
+        ----------
+        path : str
+            Directory containing ``catboost_model.txt``.
+        """
         cb_model_file = join(path, 'catboost_model.txt')
         self.model = CatBoostRegressor()
         self.model.load_model(cb_model_file)
@@ -414,7 +509,18 @@ class _CBModel:
         return state
 
     def predict(self, x):
+        """Predict target values for the given feature vectors.
 
+        Parameters
+        ----------
+        x : numpy.ndarray
+            Feature vectors of shape ``(n_samples, n_features)``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Predicted values as float32 array.
+        """
         with lsection("CatBoost regressor prediction"):
 
             lprint(f"Number of data points             : {x.shape[0]}")

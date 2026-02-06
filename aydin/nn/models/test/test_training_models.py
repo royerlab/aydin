@@ -1,3 +1,5 @@
+"""Tests for training PyTorch models with N2S and N2T methods."""
+
 import numpy
 import pytest
 import torch

@@ -1,12 +1,20 @@
+"""Spectral patch denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions that denoise images by applying
+a patch transform followed by spectral thresholding (DCT, DST, or FFT).
+Combines Butterworth filtering with coefficient thresholding and configurable
+frequency bias to suppress noise while preserving signal.
+"""
+
 import math
 from functools import partial
-from typing import Optional, Union, Tuple, Sequence, List
+from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy
 from numba import jit, prange
 from numpy.fft import fftshift, ifftshift
 from numpy.typing import ArrayLike
-from scipy.fft import fftn, ifftn, dctn, idctn, dstn, idstn
+from scipy.fft import dctn, dstn, fftn, idctn, idstn, ifftn
 
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.array.outer import outer_sum
@@ -64,7 +72,7 @@ def calibrate_denoise_spectral(
         Tries FFT transform during optimisation.
 
     try_dst: bool
-        Tries DST ransform during optimisation.
+        Tries DST transform during optimisation.
 
     max_order: float
         Maximal order for the Butterworth filter.
@@ -88,7 +96,7 @@ def calibrate_denoise_spectral(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -217,7 +225,7 @@ def denoise_spectral(
         Image to denoise
 
     axes: Optional[Tuple[int,...]]
-        Axes over which to apply the spetcral transform (dct, dst, fft) for denoising each patch.
+        Axes over which to apply the spectral transform (dct, dst, fft) for denoising each patch.
 
     patch_size: int
         Patch size for the 'image-to-patch' transform.
@@ -372,6 +380,25 @@ def denoise_spectral(
 
 # @jit(nopython=True, parallel=True)
 def _freq_bias_window(shape: Tuple[int], alpha: float = 1):
+    """Compute a frequency bias window for spectral thresholding.
+
+    Creates an n-dimensional window that assigns higher weight to lower
+    frequencies, raised to the power alpha. Used to bias the thresholding
+    towards suppressing high-frequency coefficients.
+
+    Parameters
+    ----------
+    shape : Tuple[int]
+        Shape of the window (typically the patch size).
+    alpha : float
+        Strength of the frequency bias. Values closer to 0 give no bias,
+        values of 1 and above produce stronger bias against high frequencies.
+
+    Returns
+    -------
+    numpy.ndarray
+        Frequency bias window of the given shape, normalized to [0, 1].
+    """
     window_tuple = tuple(numpy.linspace(0, 1, s) ** 2 for s in shape)
     window_nd = numpy.sqrt(outer_sum(*window_tuple)) + 1e-6
     window_nd = 1.0 / (1.0 + window_nd)
@@ -383,6 +410,22 @@ def _freq_bias_window(shape: Tuple[int], alpha: float = 1):
 
 # @jit(nopython=True, parallel=True)
 def _compute_distance_image_for_dxt(freq_cutoff, shape, selected_axes):
+    """Compute squared normalized distance image for DCT/DST transforms.
+
+    Parameters
+    ----------
+    freq_cutoff : tuple
+        Per-axis frequency cutoff values.
+    shape : tuple
+        Shape of the patch.
+    selected_axes : tuple of bool
+        Which axes are active for filtering.
+
+    Returns
+    -------
+    numpy.ndarray
+        Squared normalized distance array for Butterworth filtering.
+    """
     # Normalise selected axes:
     if selected_axes is None:
         selected_axes = (a for a in range(len(shape)))
@@ -399,6 +442,25 @@ def _compute_distance_image_for_dxt(freq_cutoff, shape, selected_axes):
 
 # @jit(nopython=True, parallel=True)
 def _compute_distance_image_for_fft(freq_cutoff, shape, selected_axes):
+    """Compute squared normalized distance image for FFT transform.
+
+    Unlike the DCT/DST version, frequencies range from -1 to 1 since the
+    FFT spectrum is centered via fftshift.
+
+    Parameters
+    ----------
+    freq_cutoff : tuple
+        Per-axis frequency cutoff values.
+    shape : tuple
+        Shape of the patch.
+    selected_axes : tuple of bool
+        Which axes are active for filtering.
+
+    Returns
+    -------
+    numpy.ndarray
+        Squared normalized distance array for Butterworth filtering.
+    """
     f = numpy.zeros(shape=shape, dtype=numpy.float32)
     axis_grid = tuple(
         (numpy.linspace(-1, 1, s) if sa else numpy.zeros((s,)))
@@ -410,6 +472,22 @@ def _compute_distance_image_for_fft(freq_cutoff, shape, selected_axes):
 
 
 def _filter(image_f, f, order):
+    """Apply Butterworth-like low-pass filter to spectral coefficients.
+
+    Parameters
+    ----------
+    image_f : numpy.ndarray
+        Batch of spectral coefficient arrays (first dimension is batch).
+    f : numpy.ndarray
+        Squared normalized distance array.
+    order : float
+        Filter order controlling the sharpness of the cutoff.
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered spectral coefficients.
+    """
     factor = 1 / numpy.sqrt(1.0 + f**order)
     factor = factor.astype(numpy.float32)
     n = image_f.shape[0]

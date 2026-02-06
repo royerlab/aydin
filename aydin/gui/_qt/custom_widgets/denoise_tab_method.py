@@ -1,11 +1,13 @@
+"""Widget for configuring a single denoising method in the Denoise tab."""
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
-    QVBoxLayout,
-    QLabel,
     QCheckBox,
+    QHBoxLayout,
+    QLabel,
     QScrollArea,
+    QVBoxLayout,
+    QWidget,
 )
 
 from aydin.gui._qt.custom_widgets.constructor_arguments import (
@@ -18,6 +20,24 @@ from aydin.restoration.denoise.util.denoise_utils import get_denoiser_class_inst
 
 
 class DenoiseTabMethodWidget(QWidget):
+    """Widget displaying configuration options for a single denoising method.
+
+    Shows a description panel on the left and configurable constructor
+    arguments on the right, along with checkboxes for saving JSON options
+    and the trained model.
+
+    Parameters
+    ----------
+    parent : DenoiseTab
+        The parent denoise tab widget.
+    name : str, optional
+        Backend name (e.g. 'Noise2SelfFGR-cb').
+    description : str, optional
+        HTML description text for the denoising method.
+    disable_spatial_features : bool, optional
+        If True, disables spatial feature parameters. Default is False.
+    """
+
     def __init__(
         self, parent, name=None, description=None, disable_spatial_features=False
     ):
@@ -98,9 +118,9 @@ class DenoiseTabMethodWidget(QWidget):
                 reference_class=sub_dict["reference_class"],
                 disable_spatial_features=disable_spatial_features,
             )
-            self.constructor_arguments_widget_dict[
-                component
-            ] = constructor_arguments_widget
+            self.constructor_arguments_widget_dict[component] = (
+                constructor_arguments_widget
+            )
             self.table_and_panes_layout.addWidget(constructor_arguments_widget)
             self.table_and_panes_layout.setSpacing(0)
             self.table_and_panes_layout.setAlignment(Qt.AlignTop)
@@ -114,6 +134,14 @@ class DenoiseTabMethodWidget(QWidget):
         self.setLayout(self.main_layout)
 
     def lower_level_args(self):
+        """Collect all constructor arguments for this denoising method.
+
+        Returns
+        -------
+        dict
+            Dictionary mapping component names to their parameter
+            dictionaries, plus a 'variant' key with the method name.
+        """
         args = {}
 
         for key, value in self.constructor_arguments_widget_dict.items():

@@ -1,19 +1,25 @@
-from typing import Union, Sequence
+"""Axis-aligned attenuation correction transform.
+
+Corrects intensity attenuation along specified axes using linear trend
+fitting (Theil-Sen regression). Useful for compensating signal decay over
+time or depth in microscopy images.
+"""
+
+from typing import Sequence, Union
 
 import numpy
 from numba import jit
-
 from numpy.typing import ArrayLike
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import lprint, lsection
 
 
 class AttenuationTransform(ImageTransformBase):
     """Axis-aligned attenuation correction
 
     Corrects intensity attenuation of an image along a given list of axis.
-    This is usefull to correct for signal attenuation over time or along
+    This is useful to correct for signal attenuation over time or along
     space. Currently only linear attenuation is supported. More modes on the
     way.
     """
@@ -50,7 +56,7 @@ class AttenuationTransform(ImageTransformBase):
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
@@ -64,7 +70,7 @@ class AttenuationTransform(ImageTransformBase):
         self._corrections = {}
         self._axis = None
 
-        lprint(f"Instanciating: {self}")
+        lprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -81,6 +87,18 @@ class AttenuationTransform(ImageTransformBase):
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
+        """Correct intensity attenuation along the specified axes.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Attenuation-corrected image as float32.
+        """
 
         with lsection(
             f"Correcting attenuation for array of shape: {array.shape} and dtype: {array.dtype}:"
@@ -90,7 +108,7 @@ class AttenuationTransform(ImageTransformBase):
             if self._axis is None:
                 self._axis = list(range(0, array.ndim))
 
-            if type(self._axis) == int:
+            if isinstance(self._axis, int):
                 self._axis = [self._axis]
 
             self._original_dtype = array.dtype
@@ -138,6 +156,23 @@ class AttenuationTransform(ImageTransformBase):
             return new_array
 
     def _trend_fit(self, medians_along_axis):
+        """Fit a trend to the median values along an axis.
+
+        Parameters
+        ----------
+        medians_along_axis : numpy.ndarray
+            1D array of median values along the attenuation axis.
+
+        Returns
+        -------
+        numpy.ndarray
+            Fitted trend values.
+
+        Raises
+        ------
+        ValueError
+            If the attenuation correction mode is not supported.
+        """
         if self.mode == 'linear':
             # prepare data for Thiel-Sen fitting:
             X = numpy.arange(0, len(medians_along_axis), 1).reshape(-1, 1)
@@ -153,6 +188,18 @@ class AttenuationTransform(ImageTransformBase):
             raise ValueError(f"Mode '{self.mode}' for attenuation correction unknown!")
 
     def postprocess(self, array: ArrayLike):
+        """Reapply the attenuation that was corrected during preprocessing.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Image with original attenuation restored.
+        """
 
         if not self.do_postprocess:
             return array
@@ -183,4 +230,13 @@ class AttenuationTransform(ImageTransformBase):
     fastmath={'contract', 'afn', 'reassoc'},
 )
 def _in_place_multiply(image, factor):
+    """Multiply an image array in-place by a factor (Numba-accelerated).
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Image array to modify in-place.
+    factor : numpy.ndarray
+        Multiplicative correction factor.
+    """
     image *= factor

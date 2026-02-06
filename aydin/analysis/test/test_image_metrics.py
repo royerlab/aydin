@@ -2,16 +2,16 @@ import numpy
 import pytest
 
 from aydin.analysis.image_metrics import (
-    mutual_information,
     joint_information,
+    mutual_information,
     spectral_mutual_information,
     spectral_psnr,
 )
-from aydin.io.datasets import camera, add_noise, normalise
+from aydin.io.datasets import add_noise, camera, normalise
 
 
 def test_spectral_psnr():
-    camera_image = normalise(camera()).astype(numpy.float)
+    camera_image = normalise(camera()).astype(float)
     camera_image_with_noise_high = add_noise(camera_image)
     camera_image_with_noise_low = add_noise(
         camera_image, intensity=10, variance=0.1, sap=0.000001
@@ -37,15 +37,12 @@ def test_normalised_mutual_information():
     camera_image = camera()
     camera_image_with_noise = add_noise(camera())
 
-    assert pytest.approx(
-        mutual_information(camera_image, camera_image, normalised=True), 1
-    )
-    assert pytest.approx(
-        mutual_information(
-            camera_image_with_noise, camera_image_with_noise, normalised=True
-        ),
-        1,
-    )
+    assert mutual_information(
+        camera_image, camera_image, normalised=True
+    ) == pytest.approx(1)
+    assert mutual_information(
+        camera_image_with_noise, camera_image_with_noise, normalised=True
+    ) == pytest.approx(1)
 
     assert (
         mutual_information(camera_image, camera_image_with_noise, normalised=True) < 1

@@ -1,27 +1,50 @@
+"""Individual transform configuration widget with preview capability."""
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
-    QWidget,
-    QHBoxLayout,
     QCheckBox,
+    QHBoxLayout,
     QLabel,
-    QVBoxLayout,
     QScrollArea,
+    QVBoxLayout,
+    QWidget,
 )
 
 from aydin.gui._qt.custom_widgets.constructor_arguments import (
     ConstructorArgumentsWidget,
 )
-from aydin.gui._qt.job_runners.preview_job_runner import PreviewJobRunner
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
 from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
     QVerticalLineBreakWidget,
 )
+from aydin.gui._qt.job_runners.preview_job_runner import PreviewJobRunner
 from aydin.util.string.break_text import break_text
 
 
 class TransformsTabItem(QWidget):
+    """Widget for a single image transform in the Pre/Post-Processing tab.
+
+    Displays a description, enable/disable checkbox, postprocess checkbox,
+    preview button, and configurable constructor arguments for one transform.
+
+    Parameters
+    ----------
+    parent : TransformsTabWidget
+        The parent tab widget.
+    name : str, optional
+        Display name for the transform enable checkbox.
+    arg_names : list of str, optional
+        Constructor argument names.
+    arg_defaults : tuple, optional
+        Default values for each constructor argument.
+    arg_annotations : dict, optional
+        Type annotations for each constructor argument.
+    transform_class : type, optional
+        The transform class from ``aydin.it.transforms``.
+    """
+
     def __init__(
         self,
         parent,
@@ -110,10 +133,19 @@ class TransformsTabItem(QWidget):
         self.setLayout(self.main_layout)
 
     def preprocess_chechbox_on_state_changed(self):
+        """Enable the postprocess checkbox only when preprocessing is enabled."""
         self.postprocess_checkbox.setEnabled(self.preprocess_checkbox.isChecked())
 
     @property
     def params_dict(self):
+        """Parameter dictionary for this transform if enabled.
+
+        Returns
+        -------
+        dict or None
+            Dictionary with 'class' and 'kwargs' keys if the transform is
+            enabled, or None if the preprocess checkbox is unchecked.
+        """
         if self.preprocess_checkbox.isChecked():
             params_dict = self.constructor_arguments_widget.params_dict
             params_dict["kwargs"][

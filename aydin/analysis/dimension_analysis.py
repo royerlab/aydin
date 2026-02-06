@@ -1,3 +1,10 @@
+"""Dimension analysis for n-dimensional images.
+
+This module provides functions to automatically determine which dimensions of
+an image are spatio-temporal (correlated), batch, or channel dimensions.
+This is critical for correctly setting up denoising pipelines.
+"""
+
 from typing import Optional
 
 import numpy
@@ -18,57 +25,48 @@ def dimension_analysis_on_image(
     crop_timeout_in_seconds: float = 5,
     max_num_evaluations: Optional[int] = 21,
 ):
-    """
-    Analyzes an image and tries to determine which dimensions are
-    spatio-temporal, batch, and channel dimensions. Spatio-temporal
-    dimensions are dimensions that are not batch or channel dimensions. For
-    the purpose of image denoising, the cardinal rule is to consider a
-    dimension as spatio-temporal if there is a degree of continuity of the
-    true underlying noiseless signal. So we determine the degree of
-    correlation along each axis. Axis for which there is no (sufficient)
-    correlation are assumed to be batch or channel dimensions. We guess which
-    are channel dimensions on the basis of the number of putative channels per
-    axis. By default we avoid guessing channels because it is rarely useful for
-    the purpose of denoising.
+    """Analyze image dimensions to classify them as spatio-temporal, batch, or channel.
+
+    Determines which dimensions of an n-dimensional image are spatio-temporal
+    (i.e., exhibit signal continuity), batch, or channel dimensions. This is
+    done by measuring the degree of correlation along each axis using
+    Butterworth filtering. Axes with insufficient correlation are classified
+    as batch or channel dimensions based on their length.
 
     Parameters
     ----------
-    image : ndarray
-        Image to analyse.
-
-    algorithm : str
-       Algorithm used to analyse dimensions. May be: 'butterworth'.
+    image : numpy.ndarray
+        Image to analyze.
 
     epsilon : float
-        Value below which a correlation is considered zero.
+        Value below which a frequency cutoff is considered to indicate
+        no meaningful correlation (dimension is not spatio-temporal).
 
-    min_spatio_temporal: int
-        Minimum number of spatio-temporal dimensions.
+    min_spatio_temporal : int
+        Minimum number of spatio-temporal dimensions to enforce.
 
-    max_spatio_temporal: int
-        Maximum number of spatio-temporal dimensions.
+    max_spatio_temporal : int
+        Maximum number of spatio-temporal dimensions to allow.
 
-    max_channels_per_axis: int
-        Max number of channels per chanhnel axis.
+    max_channels_per_axis : int
+        Maximum number of entries along an axis for it to be considered
+        a channel axis (rather than a batch axis).
 
-    max_sigma : float
-        Max sigma for correlation determination
+    crop_size_in_voxels : int, optional
+        Size of the representative crop in voxels, used to speed up computation.
 
-    crop_size_in_voxels : int
-        Size of crop in voxels, used to speed up computation.
+    crop_timeout_in_seconds : float
+        Timeout in seconds for finding the best crop to analyze dimensions.
 
-    crop_timeout_in_seconds: int
-        Time-out in seconds for finding the best crop to analyse dimensions.
-
-    max_num_evaluations : int
-        Maximum number of evaluations per axis.
+    max_num_evaluations : int, optional
+        Maximum number of Butterworth filter evaluations per axis.
 
     Returns
     -------
-    List of batch axes and list of channel axes.
-
-
-
+    batch_axes : tuple of int
+        Indices of axes identified as batch dimensions.
+    channel_axes : tuple of int
+        Indices of axes identified as channel dimensions.
     """
     with lsection(
         "Analysing dimensions to determine which should be spatio-temporal, batch, or channel"
@@ -172,6 +170,22 @@ def dimension_analysis_on_image(
 
 @jit(nopython=True, parallel=True)
 def _normalise(image, min_value, max_value):
+    """Clip and normalize an image to the [0, 1] range.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array.
+    min_value : float
+        Lower clipping bound (maps to 0).
+    max_value : float
+        Upper clipping bound (maps to 1).
+
+    Returns
+    -------
+    image : numpy.ndarray
+        Normalized image in the [0, 1] range.
+    """
     image = numpy.clip(image, a_min=min_value, a_max=max_value)
     image = (image - min_value) / (max_value - min_value)
     return image

@@ -1,11 +1,13 @@
+"""Widget for displaying a pretrained denoising model in the Denoise tab."""
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
-    QWidget,
+    QCheckBox,
     QHBoxLayout,
-    QVBoxLayout,
     QLabel,
     QScrollArea,
-    QCheckBox,
+    QVBoxLayout,
+    QWidget,
 )
 
 from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
@@ -14,6 +16,19 @@ from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
 
 
 class DenoiseTabPretrainedMethodWidget(QWidget):
+    """Widget for a pretrained denoising model loaded from file.
+
+    Displays the model description and save options, but does not expose
+    configurable parameters since the model is already trained.
+
+    Parameters
+    ----------
+    parent : DenoiseTab
+        The parent denoise tab widget.
+    loaded_it : ImageTranslatorBase
+        The loaded pretrained image translator instance.
+    """
+
     def __init__(self, parent, loaded_it):
         super(DenoiseTabPretrainedMethodWidget, self).__init__(parent)
 

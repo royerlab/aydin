@@ -1,7 +1,8 @@
-from functools import reduce
-from math import sqrt
-from operator import mul
-from typing import Tuple, Union, Optional, Sequence
+"""Utility functions for extracting representative kernels from images via clustering."""
+
+from math import prod, sqrt
+from typing import Optional, Sequence, Tuple
+
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import ArrayLike
@@ -19,33 +20,32 @@ def extract_kernels(
     num_iterations: int = 100,
     display: bool = False,
 ) -> Sequence[ArrayLike]:
-    """
-    Extracts representative kernels from a given image using MiniBatchKMeans.
+    """Extract representative kernels from an image using MiniBatchKMeans clustering.
+
+    Extracts random patches from the image and clusters them to discover
+    representative local patterns. The cluster centers are returned as
+    normalized convolutional kernels.
 
     Parameters
     ----------
-    image: ArrayLike
+    image : ArrayLike
         Image to compute kernels for.
-
-    size: int
-        Size of the kernels
-
-    num_kernels: int
-        Number of kernels to extract
-
-    num_patches: int
-        Number of image patches to consider.
-
-    num_iterations: int
-        Number of iterations.
-
-    display: bool
-        When True a napari window opens up to display the kernels.
+    size : int
+        Size of each kernel along each dimension.
+    num_kernels : int, optional
+        Number of kernels to extract. If None, defaults to ``size ** ndim``.
+    num_patches : int
+        Total number of image patches to consider across all iterations.
+    num_iterations : int
+        Number of online learning iterations.
+    display : bool
+        When True, a matplotlib figure showing the learned kernels is
+        displayed.
 
     Returns
     -------
-    Sequence of kernels.
-
+    kernels : list of numpy.ndarray
+        List of learned kernel arrays, each of shape ``(size,) * ndim``.
     """
     if num_kernels is None:
         num_kernels = size**image.ndim
@@ -96,34 +96,30 @@ def extract_kernels(
 def extract_patches_nd(
     image, patch_shape: Union[int, Tuple[int, ...]], num_patches: Optional[int] = None
 ):
-    """Reshape a 2D image into a collection of patches
+    """Extract patches from an n-dimensional image.
 
-    The resulting patches are allocated in a dedicated array.
-
-    Read more in the :ref:`User Guide <image_feature_extraction>`.
+    The resulting patches are allocated in a dedicated array and can be
+    randomly subsampled when ``num_patches`` is specified.
 
     Parameters
     ----------
-    image : ndarray of shape (image_height, image_width) or \
-        (image_height, image_width, n_channels)
-        The original image data. For color images, the last dimension specifies
-        the channel: a RGB image would have `n_channels=3`.
+    image : numpy.ndarray
+        The original image data of arbitrary dimensionality.
 
-    patch_shape : int or tuple of ints (..., depth, heigt, width)
-        The shape of one patch. Can be a single int for all axis.
+    patch_shape : int or tuple of int
+        The shape of one patch. Can be a single int (applied to all axes)
+        or a tuple specifying the size along each axis.
 
-    num_patches : int or float, default=None
-        The maximum number of patches to extract. If `max_patches` is a float
-        between 0 and 1, it is taken to be a proportion of the total number
-        of patches.
+    num_patches : int or float, optional
+        The maximum number of patches to extract. If a float between 0 and 1,
+        it is taken as a proportion of the total number of extractable patches.
+        If None, all patches are returned.
 
     Returns
     -------
-    patches : array of shape (n_patches, patch_height, patch_width) or \
-        (n_patches, patch_height, patch_width, n_channels)
-        The collection of patches extracted from the image, where `n_patches`
-        is either `max_patches` or the total number of patches that can be
-        extracted.
+    patches : numpy.ndarray
+        Array of shape ``(n_patches, *patch_shape)`` containing the extracted
+        patches.
     """
 
     if type(patch_shape) is not tuple:
@@ -155,8 +151,3 @@ def extract_patches_nd(
     patches = patches.reshape(-1, *patch_shape)
 
     return patches
-
-
-def prod(atuple: Tuple[Union[float, int]]):
-    # In python 3.8 there is a prod function in math, until then we have:
-    return reduce(mul, atuple)

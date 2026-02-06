@@ -1,3 +1,9 @@
+"""BabyUnet - a lightweight 2-level UNet architecture.
+
+Provides a minimal UNet with two encoder/decoder levels using
+average pooling and bilinear upsampling.
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,6 +12,19 @@ from aydin.nn._legacy_pytorch.models.convblock import ConvBlock
 
 
 class BabyUnet(nn.Module):
+    """Lightweight 2-level UNet for image denoising.
+
+    A minimal UNet with two encoder levels, average pooling for
+    downsampling, and bilinear interpolation for upsampling.
+
+    Parameters
+    ----------
+    n_channel_in : int
+        Number of input channels.
+    n_channel_out : int
+        Number of output channels.
+    """
+
     def __init__(self, n_channel_in=1, n_channel_out=1):
         super(BabyUnet, self).__init__()
         self.pool1 = nn.AvgPool2d(kernel_size=2)
@@ -29,7 +48,7 @@ class BabyUnet(nn.Module):
         x = self.pool1(c1)
         c2 = self.conv2(x)
         x = self.pool2(c2)
-        self.conv3(x)
+        x = self.conv3(x)
 
         x = self.up1(x)
         x = torch.cat([x, c2], 1)

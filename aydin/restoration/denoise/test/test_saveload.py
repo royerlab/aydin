@@ -1,20 +1,19 @@
-from os.path import join
 import time
+from os.path import join
 
 import numpy
 import pytest
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
 
 from aydin import Classic
-from aydin.io.datasets import normalise, add_noise
+from aydin.analysis.image_metrics import ssim
+from aydin.io.datasets import add_noise, normalise
 from aydin.io.folders import get_temp_folder
 from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.restoration.denoise.noise2selfcnn import Noise2SelfCNN
 from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
-
 
 transforms = [
     {"class": RangeTransform, "kwargs": {}},

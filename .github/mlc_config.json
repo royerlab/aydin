@@ -1,0 +1,11 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://github.com/royerlab/aydin/compare"
+    },
+    {
+      "pattern": "^https://localhost"
+    }
+  ],
+  "aliveStatusCodes": [200, 206, 429]
+}

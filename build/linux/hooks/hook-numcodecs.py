@@ -1,10 +1,16 @@
+# PyInstaller hook for numcodecs (Linux)
 import os
 import sys
 
-from PyInstaller.utils.hooks import collect_data_files, collect_submodules, copy_metadata
-from build.osx.hooks.hook_utils import _my_collect_data_files
+# Add common hooks to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'common'))
+from hook_utils import _my_collect_data_files
 
-sys.path.append(os.path.split(os.path.abspath(__file__))[0])
+from PyInstaller.utils.hooks import (
+    collect_data_files,
+    collect_submodules,
+    copy_metadata,
+)
 
 datas = copy_metadata('numcodecs')
 datas += collect_data_files("numcodecs")

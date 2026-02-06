@@ -1,12 +1,12 @@
 # flake8: noqa
 import random
-from math import pi, cos, sin
+from math import cos, pi, sin
 
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage import data
 from skimage.color import rgb2gray
-from skimage.draw import circle, circle_perimeter, line_aa
+from skimage.draw import circle_perimeter, disk, line_aa
 
 from aydin.analysis.correlation import correlation, correlation_distance
 from aydin.io.datasets import examples_single
@@ -14,13 +14,13 @@ from aydin.io.datasets import examples_single
 
 def discs(shape=(512, 512), radius=10, num=512, fill=True, image=None):
     if image is None:
-        image = np.zeros(shape, dtype=np.float)
+        image = np.zeros(shape, dtype=np.float64)
 
     for i in range(num):
         x = int(random.uniform(0, shape[0]))
         y = int(random.uniform(0, shape[1]))
         if fill:
-            rr, cc = circle(x, y, radius, shape=image.shape)
+            rr, cc = disk((x, y), radius, shape=image.shape)
             image[rr, cc] = 1
         else:
             rr, cc = circle_perimeter(
@@ -33,7 +33,7 @@ def discs(shape=(512, 512), radius=10, num=512, fill=True, image=None):
 
 def lines(shape=(512, 512), length=10, num=512, fill=False, image=None):
     if image is None:
-        image = np.zeros(shape, dtype=np.float)
+        image = np.zeros(shape, dtype=np.float64)
 
     for i in range(num):
         xb = int(random.uniform(length, shape[0] - 1 - length))

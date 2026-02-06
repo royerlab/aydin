@@ -1,14 +1,29 @@
+"""Keras training callbacks for the perceptron regressor.
+
+Provides custom Keras callbacks for early stopping, learning-rate reduction,
+model checkpointing, and integration with Aydin's regressor callback interface.
+"""
+
 import warnings
+
+import keras
 import numpy as np
-from tensorflow.python.keras.backend import get_value, set_value
-from tensorflow.python.keras.callbacks import Callback
+from keras.callbacks import Callback
 
 from aydin.util.log.log import lprint
 
 
 class NNCallback(Callback):
-    """
-    Keras Callback to linkup to the it callback machinery
+    """Keras callback that bridges to Aydin's image translator callback interface.
+
+    Forwards epoch-end and training-end events to an upstream regressor
+    callback function with signature ``(iteration, val_loss, model)``.
+
+    Parameters
+    ----------
+    regressor_callback : callable or None
+        Upstream callback to notify. If ``None``, notifications are silently
+        skipped.
     """
 
     def __init__(self, regressor_callback):
@@ -18,18 +33,29 @@ class NNCallback(Callback):
         self.iteration = 0
 
     def on_train_begin(self, logs=None):
+        """Called at the beginning of training (no-op)."""
         pass
 
     def on_batch_ends(self, batch, logs=None):
+        """Called at the end of each batch; forwards to :meth:`notify`."""
         self.notify(logs)
 
     def on_epoch_end(self, epoch, logs=None):
+        """Called at the end of each epoch; forwards to :meth:`notify`."""
         self.notify(logs)
 
     def on_train_end(self, logs=None):
+        """Called at the end of training; forwards to :meth:`notify`."""
         self.notify(logs)
 
     def notify(self, logs):
+        """Forward current training state to the upstream regressor callback.
+
+        Parameters
+        ----------
+        logs : dict or None
+            Keras training logs for the current event.
+        """
         if self.regressor_callback:
             iteration = self.iteration
             val_loss = self.get_monitor_value(logs)
@@ -38,6 +64,18 @@ class NNCallback(Callback):
             self.iteration += 1
 
     def get_monitor_value(self, logs):
+        """Extract the validation loss from training logs.
+
+        Parameters
+        ----------
+        logs : dict or None
+            Keras training logs.
+
+        Returns
+        -------
+        float or None
+            The ``'val_loss'`` value, or ``None`` if unavailable.
+        """
         if logs is not None:
             monitor_value = logs.get('val_loss')
             return monitor_value
@@ -45,32 +83,31 @@ class NNCallback(Callback):
 
 
 class EarlyStopping(Callback):
-    """Stop training when a monitored quantity has stopped improving.
+    """Stop training when a monitored metric has stopped improving.
 
-    # Arguments
-        nn_regressor: parent regressor
-        monitor: quantity to be monitored.
-        min_delta: minimum change in the monitored quantity
-            to qualify as an improvement, i.e. an absolute
-            change of less than min_delta, will count as no
-            improvement.
-        patience: number of epochs with no improvement
-            after which training will be stopped.
-        verbose: verbosity mode.
-        mode: one of {auto, min, max}. In `min` mode,
-            training will stop when the quantity
-            monitored has stopped decreasing; in `max`
-            mode it will stop when the quantity
-            monitored has stopped increasing; in `auto`
-            mode, the direction is automatically inferred
-            from the name of the monitored quantity.
-        baseline: Baseline value for the monitored quantity to reach.
-            Training will stop if the model doesn't show improvement
-            over the baseline.
-        restore_best_weights: whether to restore model weights from
-            the epoch with the best value of the monitored quantity.
-            If False, the model weights obtained at the last step of
-            training are used.
+    Also integrates with Aydin's external stop mechanism: training is
+    halted if ``nn_regressor._stop_fit`` becomes ``True``.
+
+    Parameters
+    ----------
+    nn_regressor : PerceptronRegressor
+        Parent regressor instance whose ``_stop_fit`` flag is checked
+        each epoch.
+    monitor : str
+        Name of the metric to monitor (e.g. ``'val_loss'``).
+    min_delta : float
+        Minimum change in the monitored metric to qualify as an
+        improvement.
+    patience : int
+        Number of epochs with no improvement after which training stops.
+    mode : str
+        One of ``{'auto', 'min', 'max'}``. Determines whether improvement
+        means decreasing or increasing the monitored metric.
+    baseline : float, optional
+        Baseline value the monitored metric must beat.
+    restore_best_weights : bool
+        If ``True``, restore model weights from the epoch with the best
+        monitored metric value.
     """
 
     def __init__(
@@ -118,15 +155,25 @@ class EarlyStopping(Callback):
             self.min_delta *= -1
 
     def on_train_begin(self, logs=None):
+        """Reset internal state to allow callback re-use."""
         # Allow instances to be re-used
         self.wait = 0
         self.stopped_epoch = 0
         if self.baseline is not None:
             self.best = self.baseline
         else:
-            self.best = np.Inf if self.monitor_op == np.less else -np.Inf
+            self.best = np.inf if self.monitor_op == np.less else -np.inf
 
     def on_epoch_end(self, epoch, logs=None):
+        """Check for improvement and optionally stop training.
+
+        Parameters
+        ----------
+        epoch : int
+            Current epoch index.
+        logs : dict or None
+            Keras training logs.
+        """
         current = self.get_monitor_value(logs)
         if current is None:
             return
@@ -151,10 +198,23 @@ class EarlyStopping(Callback):
             self.model.stop_training = True
 
     def on_train_end(self, logs=None):
+        """Log the early stopping epoch if applicable."""
         if self.stopped_epoch > 0:
             lprint('Epoch %05d: early stopping' % (self.stopped_epoch + 1))
 
     def get_monitor_value(self, logs):
+        """Extract the monitored metric value from training logs.
+
+        Parameters
+        ----------
+        logs : dict
+            Keras training logs.
+
+        Returns
+        -------
+        float or None
+            The monitored metric value, or ``None`` if unavailable.
+        """
         monitor_value = logs.get(self.monitor)
         if monitor_value is None:
             warnings.warn(
@@ -170,37 +230,33 @@ class ReduceLROnPlateau(Callback):
     """Reduce learning rate when a metric has stopped improving.
 
     Models often benefit from reducing the learning rate by a factor
-    of 2-10 once learning stagnates. This callback monitors a
-    quantity and if no improvement is seen for a 'patience' number
-    of epochs, the learning rate is reduced.
+    of 2--10 once learning stagnates. This callback monitors a quantity
+    and if no improvement is seen for a ``patience`` number of epochs,
+    the learning rate is reduced.
 
-    # Example
-
-    ```python
-    reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,
-                                  patience=5, min_lr=0.001)
-    model.fit(X_train, Y_train, callbacks=[reduce_lr])
-    ```
-
-    # Arguments
-        monitor: quantity to be monitored.
-        factor: factor by which the learning rate will
-            be reduced. new_lr = lr * factor
-        patience: number of epochs with no improvement
-            after which learning rate will be reduced.
-        verbose: int. 0: quiet, 1: update messages.
-        mode: one of {auto, min, max}. In `min` mode,
-            lr will be reduced when the quantity
-            monitored has stopped decreasing; in `max`
-            mode it will be reduced when the quantity
-            monitored has stopped increasing; in `auto`
-            mode, the direction is automatically inferred
-            from the name of the monitored quantity.
-        min_delta: threshold for measuring the new optimum,
-            to only focus on significant changes.
-        cooldown: number of epochs to wait before resuming
-            normal operation after lr has been reduced.
-        min_lr: lower bound on the learning rate.
+    Parameters
+    ----------
+    monitor : str
+        Name of the metric to monitor (e.g. ``'val_loss'``).
+    factor : float
+        Factor by which the learning rate is reduced:
+        ``new_lr = lr * factor``. Must be less than 1.0.
+    patience : int
+        Number of epochs with no improvement after which the learning
+        rate is reduced.
+    verbose : int
+        Verbosity mode. ``0``: quiet, ``1``: log update messages.
+    mode : str
+        One of ``{'auto', 'min', 'max'}``. Determines whether improvement
+        means decreasing or increasing the monitored metric.
+    min_delta : float
+        Threshold for measuring a new optimum; only changes larger than
+        ``min_delta`` count as improvements.
+    cooldown : int
+        Number of epochs to wait before resuming normal operation after
+        the learning rate has been reduced.
+    min_lr : float
+        Lower bound on the learning rate.
     """
 
     def __init__(
@@ -250,19 +306,29 @@ class ReduceLROnPlateau(Callback):
             self.mode = 'auto'
         if self.mode == 'min' or (self.mode == 'auto' and 'acc' not in self.monitor):
             self.monitor_op = lambda a, b: np.less(a, b - self.min_delta)
-            self.best = np.Inf
+            self.best = np.inf
         else:
             self.monitor_op = lambda a, b: np.greater(a, b + self.min_delta)
-            self.best = -np.Inf
+            self.best = -np.inf
         self.cooldown_counter = 0
         self.wait = 0
 
     def on_train_begin(self, logs=None):
+        """Reset internal state at the start of training."""
         self._reset()
 
     def on_epoch_end(self, epoch, logs=None):
+        """Check for improvement and optionally reduce learning rate.
+
+        Parameters
+        ----------
+        epoch : int
+            Current epoch index.
+        logs : dict or None
+            Keras training logs.
+        """
         logs = logs or {}
-        logs['lr'] = get_value(self.model.optimizer.lr)
+        logs['lr'] = float(self.model.optimizer.learning_rate)
         current = logs.get(self.monitor)
         if current is None:
             warnings.warn(
@@ -283,11 +349,11 @@ class ReduceLROnPlateau(Callback):
             elif not self.in_cooldown():
                 self.wait += 1
                 if self.wait >= self.patience:
-                    old_lr = float(get_value(self.model.optimizer.lr))
+                    old_lr = float(self.model.optimizer.learning_rate)
                     if old_lr > self.min_lr:
                         new_lr = old_lr * self.factor
                         new_lr = max(new_lr, self.min_lr)
-                        set_value(self.model.optimizer.lr, new_lr)
+                        self.model.optimizer.learning_rate.assign(new_lr)
                         if self.verbose > 0:
                             lprint(
                                 'Epoch %05d: ReduceLROnPlateau reducing '
@@ -297,39 +363,43 @@ class ReduceLROnPlateau(Callback):
                         self.wait = 0
 
     def in_cooldown(self):
+        """Return whether the callback is currently in a cooldown period.
+
+        Returns
+        -------
+        bool
+            ``True`` if cooldown is active.
+        """
         return self.cooldown_counter > 0
 
 
 class ModelCheckpoint(Callback):
-    """Save the model after every epoch.
+    """Save the model after every epoch (or periodically).
 
-    `filepath` can contain named formatting options,
-    which will be filled the value of `epoch` and
-    keys in `logs` (passed in `on_epoch_end`).
+    ``filepath`` can contain named formatting options that are filled with
+    the value of ``epoch`` and keys in ``logs`` (passed in ``on_epoch_end``).
+    For example, ``'weights.{epoch:02d}-{val_loss:.2f}.hdf5'`` will include
+    the epoch number and validation loss in the filename.
 
-    For example: if `filepath` is `weights.{epoch:02d}-{val_loss:.2f}.hdf5`,
-    then the model checkpoints will be saved with the epoch number and
-    the validation loss in the filename.
-
-    # Arguments
-        filepath: string, path to save the model file.
-        monitor: quantity to monitor.
-        verbose: verbosity mode, 0 or 1.
-        save_best_only: if `save_best_only=True`,
-            the latest best model according to
-            the quantity monitored will not be overwritten.
-        mode: one of {auto, min, max}.
-            If `save_best_only=True`, the decision
-            to overwrite the current save file is made
-            based on either the maximization or the
-            minimization of the monitored quantity. For `val_acc`,
-            this should be `max`, for `val_loss` this should
-            be `min`, etc. In `auto` mode, the direction is
-            automatically inferred from the name of the monitored quantity.
-        save_weights_only: if True, then only the model's weights will be
-            saved (`model.save_weights(filepath)`), else the full model
-            is saved (`model.save(filepath)`).
-        period: Interval (number of epochs) between checkpoints.
+    Parameters
+    ----------
+    filepath : str
+        Path (optionally with format placeholders) to save the model file.
+    monitor : str
+        Metric to monitor for ``save_best_only`` mode.
+    verbose : int
+        Verbosity mode: ``0`` (quiet) or ``1`` (log messages).
+    save_best_only : bool
+        If ``True``, only overwrite the saved model when the monitored
+        metric improves.
+    save_weights_only : bool
+        If ``True``, save only the model weights; otherwise save the full
+        model.
+    mode : str
+        One of ``{'auto', 'min', 'max'}``. Determines the direction of
+        improvement for the monitored metric.
+    period : int
+        Interval (number of epochs) between checkpoints.
     """
 
     def __init__(
@@ -361,19 +431,28 @@ class ModelCheckpoint(Callback):
 
         if mode == 'min':
             self.monitor_op = np.less
-            self.best = np.Inf
+            self.best = np.inf
         elif mode == 'max':
             self.monitor_op = np.greater
-            self.best = -np.Inf
+            self.best = -np.inf
         else:
             if 'acc' in self.monitor or self.monitor.startswith('fmeasure'):
                 self.monitor_op = np.greater
-                self.best = -np.Inf
+                self.best = -np.inf
             else:
                 self.monitor_op = np.less
-                self.best = np.Inf
+                self.best = np.inf
 
     def on_epoch_end(self, epoch, logs=None):
+        """Save the model if checkpoint criteria are met.
+
+        Parameters
+        ----------
+        epoch : int
+            Current epoch index.
+        logs : dict or None
+            Keras training logs.
+        """
         logs = logs or {}
         self.epochs_since_last_save += 1
         if self.epochs_since_last_save >= self.period:

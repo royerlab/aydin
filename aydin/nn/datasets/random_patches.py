@@ -1,3 +1,9 @@
+"""Random patch extraction with entropy-based filtering.
+
+Provides utilities to extract random patches from images and select
+the most informative ones based on intensity histogram entropy.
+"""
+
 import numpy
 from scipy.stats import entropy
 
@@ -8,30 +14,32 @@ def random_patches(
     nb_patches_per_image: int,
     adoption_rate: float = 0.5,
 ):
-    """
-    This functions returns list of slice objects that crops a part of the image
-    which we call patch. Also sorts the patches, and makes sure only patches with
-    higher entropy in the intensity histogram are selected.
+    """Extract random patches from an image, filtered by entropy.
 
-    To be able to work with any adoption_rate between 0 and 1, we accordingly
-    generate more patches per image during patch generation. After sorting, we
-    are able to apply the adoption rate to the total number of patches we generated
-    for each image.
+    Returns a list of slice objects for cropping patches from the image.
+    Patches are sorted by their intensity histogram entropy and only those
+    with higher entropy (more informative content) are retained.
+
+    To work with any ``adoption_rate`` between 0 and 1, more patches are
+    generated initially and then filtered down after entropy-based sorting.
 
     Parameters
     ----------
-    image : numpy.ArrayLike
-        This function assumes the axis order BXY(Z)C.
+    image : numpy.ndarray
+        Input image with axis order ``(B, C, Y, X)`` or ``(B, C, Z, Y, X)``.
     patch_size : int
+        Spatial size of each patch along each dimension.
     nb_patches_per_image : int
+        Desired number of patches to extract per batch element.
     adoption_rate : float
-    backend : str
-        Option to choose axes convention for different backends, valid values: tensorflow, models
+        Fraction of generated patches to keep after entropy sorting.
+        Values between 0 and 1.
 
     Returns
     -------
-    List of Tuples of Slicing Objects
-
+    list of tuple of slice
+        List of slicing tuples that can be used to index the input image
+        to extract the selected patches.
     """
     list_of_slice_objects = []
 

@@ -1,8 +1,33 @@
+"""Simple feed-forward CNN with residual connections.
+
+Provides a straightforward convolutional architecture where outputs
+from all layers are summed with residual connections.
+"""
+
 import torch.nn as nn
 import torch.nn.functional as F
 
 
 class FeedForward(nn.Module):
+    """Feed-forward CNN with residual connections.
+
+    A simple convolutional network where outputs from all intermediate
+    layers are summed together before a final 1x1 convolution.
+
+    Parameters
+    ----------
+    n_input_channel : int
+        Number of input channels.
+    n_output_channel : int
+        Number of output channels.
+    depth : int
+        Number of convolution layers.
+    nic : int
+        Number of intermediate channels.
+    kernel_size : int
+        Convolution kernel size.
+    """
+
     def __init__(
         self, n_input_channel=1, n_output_channel=1, depth=8, nic=8, kernel_size=3
     ):

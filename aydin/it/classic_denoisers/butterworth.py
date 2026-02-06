@@ -1,5 +1,13 @@
+"""Butterworth low-pass filter denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on the Butterworth low-pass
+filter. Supports isotropic and anisotropic frequency cutoffs for n-dimensional
+images, with configurable filter order and padding. Particularly effective for
+band-limited signals such as microscopy images.
+"""
+
 from functools import partial
-from typing import Sequence, Union, Optional, Tuple, List
+from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy
 from numba import jit
@@ -549,6 +557,25 @@ def denoise_butterworth(
 # Todo: write a jitted version of this!
 # @jit(nopython=True, parallel=True)
 def _compute_distance_image(freq_cutoff, image, selected_axes):
+    """Compute squared normalized distance image for Butterworth filtering.
+
+    Builds an n-dimensional grid of squared distances from the origin,
+    scaled by the per-axis frequency cutoffs.
+
+    Parameters
+    ----------
+    freq_cutoff : tuple of float
+        Per-axis frequency cutoff values.
+    image : numpy.ndarray
+        Image whose shape determines the grid dimensions.
+    selected_axes : tuple of bool
+        Which axes are active for filtering.
+
+    Returns
+    -------
+    numpy.ndarray
+        Squared normalized distance array (float32).
+    """
     f = numpy.zeros_like(image, dtype=numpy.float32)
     axis_grid = tuple(
         (numpy.linspace(-1, 1, s) if sa else numpy.zeros((s,)))
@@ -560,6 +587,28 @@ def _compute_distance_image(freq_cutoff, image, selected_axes):
 
 
 def _apw(dim_size, freq_cutoff, min_padding, max_padding):
+    """Compute adaptive padding width for a single dimension.
+
+    The padding is inversely proportional to the frequency cutoff,
+    clamped between min_padding and max_padding, and at most half the
+    dimension size.
+
+    Parameters
+    ----------
+    dim_size : int
+        Size of the image along this dimension.
+    freq_cutoff : float
+        Frequency cutoff for this dimension.
+    min_padding : int
+        Minimum padding width.
+    max_padding : int
+        Maximum padding width.
+
+    Returns
+    -------
+    int
+        Computed padding width for this dimension.
+    """
     return min(
         dim_size // 2,
         min(max_padding, max(min_padding, int(1.0 / (1e-10 + freq_cutoff)))),
@@ -567,10 +616,42 @@ def _apw(dim_size, freq_cutoff, min_padding, max_padding):
 
 
 def _filter_chebyshev(image_f, epsilon, chebyshev):
+    """Apply a Type II Chebyshev low-pass filter in the frequency domain.
+
+    Parameters
+    ----------
+    image_f : numpy.ndarray
+        Image in the frequency domain (complex).
+    epsilon : float
+        Ripple control parameter (inverse of filter order).
+    chebyshev : numpy.ndarray
+        Pre-computed Chebyshev polynomial values.
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered frequency-domain image.
+    """
     image_f /= numpy.sqrt(1 + 1 / ((epsilon * chebyshev) ** 2))
     return image_f
 
 
 def _filter_butterworth(image_f, f, order):
+    """Apply a Butterworth low-pass filter in the frequency domain.
+
+    Parameters
+    ----------
+    image_f : numpy.ndarray
+        Image in the frequency domain (complex).
+    f : numpy.ndarray
+        Squared normalized distance array.
+    order : float
+        Filter order controlling the sharpness of the cutoff.
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered frequency-domain image.
+    """
     image_f /= numpy.sqrt(1 + f**order)
     return image_f
