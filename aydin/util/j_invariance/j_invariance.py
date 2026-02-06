@@ -18,7 +18,7 @@ from aydin.util.j_invariance.util import (
     _j_invariant_loss,
     _product_from_dict,
 )
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 from aydin.util.optimizer.optimizer import Optimizer
 
 
@@ -116,7 +116,7 @@ def calibrate_denoiser(
     # for display purposes:
     denoised_images = []
 
-    with lsection("Calibrating denoiser:"):
+    with asection("Calibrating denoiser:"):
 
         # Convert image to float if that is not already the case:
         image = image.astype(dtype=numpy.float32, copy=False)
@@ -152,8 +152,8 @@ def calibrate_denoiser(
         numerical_parameters_bounds = list(
             numerical_parameters[n] for n in numerical_parameters_names
         )
-        lprint(f"Parameter names : {numerical_parameters_names}")
-        lprint(f"Parameter bounds: {numerical_parameters_bounds}")
+        aprint(f"Parameter names : {numerical_parameters_names}")
+        aprint(f"Parameter bounds: {numerical_parameters_bounds}")
 
         # number of numerical parameters:
         n = len(numerical_parameters_names)
@@ -169,10 +169,10 @@ def calibrate_denoiser(
         best_loss_value = -math.inf
 
         # we optimise for each such combination of categorical parameters:
-        with lsection(f"Going through {n} combinations of categorical parameters:"):
+        with asection(f"Going through {n} combinations of categorical parameters:"):
 
             for combination in expanded_categorical_parameters:
-                with lsection(
+                with asection(
                     f"Optimising categorical parameters combination: {combination}"
                 ):
 
@@ -197,7 +197,7 @@ def calibrate_denoiser(
                         if math.isnan(loss) or math.isinf(loss):
                             loss = math.inf
 
-                        # lprint(f"({point}) -> {loss}")
+                        # aprint(f"({point}) -> {loss}")
                         # denoise image and store it, if needed:
                         if display_images:
                             denoised_image = denoise_function(image, **param)
@@ -211,11 +211,11 @@ def calibrate_denoiser(
                         # If there is no numerical parameters to optimise, we just get the value for that categorical combination:
                         new_parameters = {}
                         new_loss_value = opt_function(new_parameters)
-                        lprint(f"Loss: {new_loss_value}")
+                        aprint(f"Loss: {new_loss_value}")
                     else:
 
                         if mode == "smart":
-                            with lsection(
+                            with asection(
                                 f"Searching by 'smart optimiser' the best denoising parameters among: {numerical_parameters}"
                             ):
 
@@ -233,12 +233,12 @@ def calibrate_denoiser(
                                 pass
 
                         elif mode == "fast":
-                            with lsection(
+                            with asection(
                                 f"Searching by SHGO followed by L-BFGS-B the best denoising parameters among: {numerical_parameters}"
                             ):
 
                                 def callback(x):
-                                    lprint(x)
+                                    aprint(x)
 
                                 # x0 = numpy.asarray(tuple((0.5 * (v[1] - v[0]) for (n, v) in
                                 #            numerical_parameters.items())))
@@ -261,14 +261,14 @@ def calibrate_denoiser(
                                     },
                                     callback=callback,
                                 )
-                                lprint(f"Global optimisation success: {result.success}")
-                                lprint(
+                                aprint(f"Global optimisation success: {result.success}")
+                                aprint(
                                     f"Global optimisation convergence message: {result.message}"
                                 )
-                                lprint(
+                                aprint(
                                     f"Global optimisation number of function evaluations: {result.nfev}"
                                 )
-                                lprint(
+                                aprint(
                                     f"Best parameters until now: {result.x} for loss: {result.fun}"
                                 )
 
@@ -300,14 +300,14 @@ def calibrate_denoiser(
                                     x0 = result.x
                                     eps *= 100
 
-                                lprint(f"Local optimisation success: {result.success}")
-                                lprint(
+                                aprint(f"Local optimisation success: {result.success}")
+                                aprint(
                                     f"Local optimisation convergence message: {result.message}"
                                 )
-                                lprint(
+                                aprint(
                                     f"Local optimisation number of function evaluations: {result.nfev}"
                                 )
-                                lprint(
+                                aprint(
                                     f"Best parameters until now: {result.x} for loss: {result.fun}"
                                 )
 
@@ -326,7 +326,7 @@ def calibrate_denoiser(
                         best_combination = combination
                         best_loss_value = new_loss_value
 
-                    lprint(
+                    aprint(
                         f"Best numerical parameters: {best_numerical_parameters} for combination: {combination}"
                     )
 
@@ -338,7 +338,7 @@ def calibrate_denoiser(
                 )
             }
 
-            lprint(f"Best parameters: {best_parameters}")
+            aprint(f"Best parameters: {best_parameters}")
 
         # We check that the masked input image is unchanged:
         if not numpy.array_equal(masked_input_image_backup, masked_input_image):
@@ -356,7 +356,7 @@ def calibrate_denoiser(
             viewer.add_image(numpy.stack(denoised_images), name='denoised')
             napari.run()
         except Exception:
-            lprint(
+            aprint(
                 "Problem while trying to display images obtained during optimization"
             )
 

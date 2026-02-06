@@ -25,7 +25,7 @@ from scipy.ndimage import (
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_harmonic(
@@ -262,21 +262,21 @@ def denoise_harmonic(
 
         # Stopping if convergence or stabilisation:
         if gradient_norm < epsilon:
-            lprint("Converged!")
+            aprint("Converged!")
             break
 
         # Stopping if convergence or stabilisation:
         if last_gradient_norm == gradient_norm:
             counter += 1
             if counter > 8:
-                lprint("Gradient stabilised! converged!")
+                aprint("Gradient stabilised! converged!")
                 break
 
         # We save the last gradient:
         last_gradient_norm = gradient_norm
 
         # if i % 32 == 0:
-        #    lprint(f"gradient magnitude: {gradient_norm}, step: {step}")
+        #    aprint(f"gradient magnitude: {gradient_norm}, step: {step}")
 
     return denoised
 

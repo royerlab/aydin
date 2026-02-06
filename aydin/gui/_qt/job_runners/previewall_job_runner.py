@@ -5,7 +5,7 @@ from qtpy.QtWidgets import QApplication, QHBoxLayout, QPushButton, QStyle, QWidg
 
 from aydin.gui._qt.job_runners.worker import Worker
 from aydin.it.fgr import ImageTranslatorFGR
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 class PreviewAllJobRunner(QWidget):
@@ -104,7 +104,7 @@ class PreviewAllJobRunner(QWidget):
         # Get images and their related data
         self.images = self.parent.parent.tabs["Training Crop"].images
         if len(self.images) == 0:
-            lprint("Preview All cannot be started with no image")
+            aprint("Preview All cannot be started with no image")
             return
 
         Log.gui_statusbar = self.parent.parent.parent.statusBar

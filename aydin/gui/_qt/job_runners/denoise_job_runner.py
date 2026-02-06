@@ -19,7 +19,7 @@ from aydin.restoration.denoise.util.denoise_utils import (
     get_denoiser_class_instance,
     get_pretrained_denoiser_class_instance,
 )
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 class DenoiseJobRunner(QWidget):
@@ -115,7 +115,7 @@ class DenoiseJobRunner(QWidget):
                         output_folder=output_folder,
                     )
                     self.parent.save_options_json(json_path)
-                    lprint(f"DONE, options json written in {json_path}")
+                    aprint(f"DONE, options json written in {json_path}")
 
                 if self.save_model:
                     model_path = get_save_model_path(
@@ -124,12 +124,12 @@ class DenoiseJobRunner(QWidget):
                         output_folder=output_folder,
                     )
                     self.denoiser.save(model_path)
-                    lprint(f"DONE, trained model written in {model_path}")
+                    aprint(f"DONE, trained model written in {model_path}")
 
-                lprint(f"DONE, results written in {output_path}")
+                aprint(f"DONE, results written in {output_path}")
             else:
                 self.early_stopped = True
-                lprint("DONE, failed to run...")
+                aprint("DONE, failed to run...")
 
         Log.gui_callback = None
         return results
@@ -171,7 +171,7 @@ class DenoiseJobRunner(QWidget):
         self.image_paths = [i[4] for i in self.parent.data_model.images_to_denoise]
         self.output_folders = [i[5] for i in self.parent.data_model.images_to_denoise]
         if len(self.image_paths) == 0:
-            lprint("Aydin cannot be started with no image")
+            aprint("Aydin cannot be started with no image")
             return
 
         self.training_images = self.parent.tabs["Training Crop"].images

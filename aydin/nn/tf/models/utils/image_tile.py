@@ -7,7 +7,7 @@ and validation sets, with support for pixel-level validation masking.
 import numpy
 
 from aydin.nn.tf.util.validation_generator import train_image_generator
-from aydin.util.log.log import lsection
+from aydin.util.log.log import asection
 
 
 def tile_input_images(
@@ -48,14 +48,14 @@ def tile_input_images(
     val_marker = None
 
     if create_patches_for_validation:
-        with lsection(
+        with asection(
             f'Validation data will be created by monitoring {train_valid_ratio} of the patches/images in the input data.'
         ):
             for i in input_patch_idx:
                 img_train_patch.append(input_image[i])
             img_train = numpy.vstack(img_train_patch)
     else:
-        with lsection(
+        with asection(
             f'Validation data will be created by monitoring {train_valid_ratio} of the pixels in the input data.'
         ):
             img_train, img_val, val_marker = train_image_generator(

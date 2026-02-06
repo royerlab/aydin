@@ -9,7 +9,7 @@ import jsonpickle
 import numpy
 from numpy import ndarray
 
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 from aydin.util.misc.json import encode_indent
 from aydin.util.offcore.offcore import offcore_array
 
@@ -67,7 +67,7 @@ class FeatureGeneratorBase(ABC):
 
         frozen = encode_indent(self)
 
-        lprint(f"Saving feature generator to: {path}")
+        aprint(f"Saving feature generator to: {path}")
         with open(join(path, "feature_generation.json"), "w") as json_file:
             json_file.write(frozen)
 
@@ -91,7 +91,7 @@ class FeatureGeneratorBase(ABC):
             The deserialized feature generator instance.
         """
 
-        lprint(f"Loading feature generator from: {path}")
+        aprint(f"Loading feature generator from: {path}")
         with open(join(path, "feature_generation.json"), "r") as json_file:
             frozen = json_file.read()
 
@@ -222,7 +222,7 @@ class FeatureGeneratorBase(ABC):
             with the appropriate dtype.
         """
 
-        with lsection(f'Creating feature array for image of shape: {image.shape}'):
+        with asection(f'Creating feature array for image of shape: {image.shape}'):
             # That's the shape we need:
             shape = (nb_features, image.shape[0]) + image.shape[2:]
             dtype = image.dtype if self.dtype is None else self.dtype

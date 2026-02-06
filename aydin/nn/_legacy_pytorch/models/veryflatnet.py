@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class VeryFlatNet(nn.Module):
@@ -30,7 +30,7 @@ class VeryFlatNet(nn.Module):
         super(VeryFlatNet, self).__init__()
 
         self.num_channels = num_channels
-        lprint("num_channels =%d" % num_channels)
+        aprint("num_channels =%d" % num_channels)
 
         padding = int((kernel_size - 1) / 2)
 
@@ -60,7 +60,7 @@ class VeryFlatNet(nn.Module):
         device = next(self.parameters()).device
         with torch.no_grad():
             length = weights.shape[0]
-            lprint(length)
+            aprint(length)
             self.convfeatures._parameters['weight'][0:length] = torch.from_numpy(
                 weights
             ).to(device)

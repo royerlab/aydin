@@ -8,7 +8,7 @@ import dask
 import numpy
 
 from aydin.it.normalisers.base import NormaliserBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class MinMaxNormaliser(NormaliserBase):
@@ -43,7 +43,7 @@ class MinMaxNormaliser(NormaliserBase):
         tuple of (float, float)
             The computed (min_value, max_value) range.
         """
-        with lsection("Calibrating array using minmax method"):
+        with asection("Calibrating array using minmax method"):
             self.original_dtype = array.dtype
 
             if hasattr(array, '__dask_keys__'):
@@ -53,6 +53,6 @@ class MinMaxNormaliser(NormaliserBase):
                 self.rmin = numpy.min(array)
                 self.rmax = numpy.max(array)
 
-            lprint(f"Range for normalisation: [{self.rmin}, {self.rmax}]")
+            aprint(f"Range for normalisation: [{self.rmin}, {self.rmax}]")
 
             return self.rmin, self.rmax

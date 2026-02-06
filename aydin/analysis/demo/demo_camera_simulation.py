@@ -5,7 +5,7 @@ from aydin.analysis.camera_simulation import simulate_camera_image
 from aydin.analysis.resolution_estimate import resolution_estimate
 from aydin.analysis.snr_estimate import snr_estimate
 from aydin.io.datasets import camera
-from aydin.util.log.log import lprint, Log
+from aydin.util.log.log import Log, aprint
 
 
 def demo_camera_simulation():
@@ -22,7 +22,7 @@ def demo_camera_simulation():
     fc, _ = resolution_estimate(noisy_video[16])
     snr = snr_estimate(noisy_video[16])
 
-    lprint(f"Resolution: {fc}, snr: {snr}")
+    aprint(f"Resolution: {fc}, snr: {snr}")
 
     import napari
 

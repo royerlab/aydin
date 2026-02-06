@@ -8,7 +8,7 @@ from scipy.ndimage import gaussian_filter
 
 from aydin.features.groups.base import FeatureGroupBase
 from aydin.util.fast_correlation.correlation import correlate as fast_correlate
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class CorrelationFeatures(FeatureGroupBase):
@@ -120,7 +120,7 @@ class CorrelationFeatures(FeatureGroupBase):
             Pre-allocated array for storing the correlation result.
         """
         kernel = self.kernels[index]
-        lprint(
+        aprint(
             f"Correlative feature: {index} of shape={kernel.shape}, excluded_voxels={self.excluded_voxels}"
         )
 

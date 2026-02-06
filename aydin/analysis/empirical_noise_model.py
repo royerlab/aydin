@@ -8,7 +8,7 @@ maps each possible clean pixel value to a distribution of observed noisy values.
 import numpy
 from numpy.random import randint
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def distill_noise_model(clean_array, noisy_array, nb_samples: int = 2**18):
@@ -54,7 +54,7 @@ def distill_noise_model(clean_array, noisy_array, nb_samples: int = 2**18):
     for clean_value in range(0, clean_max + 1):
 
         if clean_value % 128 == 0:
-            lprint(f"... analysing values: [{clean_value}, {clean_value + 128}]")
+            aprint(f"... analysing values: [{clean_value}, {clean_value + 128}]")
 
         (indices,) = numpy.where(x == clean_value)
 

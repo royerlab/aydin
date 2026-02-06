@@ -7,7 +7,7 @@ LinearRegression, HuberRegressor, and Lasso into a unified interface.
 from sklearn.linear_model import HuberRegressor, Lasso, LinearRegression
 
 from aydin.regression.base import RegressorBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class LinearRegressor(RegressorBase):
@@ -53,9 +53,9 @@ class LinearRegressor(RegressorBase):
         self.alpha = alpha
         self.beta = beta
 
-        with lsection("Linear Regressor"):
-            lprint(f"mode : {self.mode}")
-            lprint(f"alpha: {self.alpha}")
+        with asection("Linear Regressor"):
+            aprint(f"mode : {self.mode}")
+            aprint(f"alpha: {self.alpha}")
 
     def __repr__(self):
         return f"<{self.__class__.__name__}, mode={self.mode}, max_num_iterations={self.max_num_iterations}>"
@@ -139,13 +139,13 @@ class _LinearModel:
         numpy.ndarray
             Predicted values.
         """
-        with lsection("Linear regressor prediction"):
+        with asection("Linear regressor prediction"):
 
-            lprint(f"Number of data points             : {x.shape[0]}")
-            lprint(f"Number of features per data points: {x.shape[-1]}")
+            aprint(f"Number of data points             : {x.shape[0]}")
+            aprint(f"Number of features per data points: {x.shape[-1]}")
 
-            with lsection("Linear prediction now"):
+            with asection("Linear prediction now"):
                 prediction = self.model.predict(x)
 
-            lprint("Linear regressor predicting done!")
+            aprint("Linear regressor predicting done!")
             return prediction

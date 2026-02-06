@@ -14,7 +14,7 @@ from aydin.it.normalisers.base import NormaliserBase
 from aydin.it.normalisers.minmax import MinMaxNormaliser
 from aydin.it.normalisers.percentile import PercentileNormaliser
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class RangeTransform(ImageTransformBase):
@@ -89,7 +89,7 @@ class RangeTransform(ImageTransformBase):
         self._min_value = None
         self._max_value = None
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -125,7 +125,7 @@ class RangeTransform(ImageTransformBase):
             Range-normalised image as float32.
         """
 
-        with lsection(
+        with asection(
             f"Normalizing value range ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
 
@@ -164,7 +164,7 @@ class RangeTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Denormalizing value range ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             force_float_datatype = self.force_float_datatype

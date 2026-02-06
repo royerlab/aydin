@@ -6,7 +6,7 @@ import numpy
 from scipy.ndimage import median_filter
 
 from aydin.features.groups.base import FeatureGroupBase
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class MedianFeatures(FeatureGroupBase):
@@ -92,7 +92,7 @@ class MedianFeatures(FeatureGroupBase):
             Pre-allocated array for storing the median-filtered result.
         """
         radius = self.radii[index]
-        lprint(
+        aprint(
             f"Median feature: {index}, radius: {radius}, excluded_voxels={self.excluded_voxels}"
         )
         footprint_shape = (2 * radius + 1,) * self.image.ndim

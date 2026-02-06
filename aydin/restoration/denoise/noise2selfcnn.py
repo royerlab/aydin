@@ -20,7 +20,7 @@ from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.nn.tf import models
 from aydin.restoration.denoise.base import DenoiseRestorationBase
-from aydin.util.log.log import lsection
+from aydin.util.log.log import asection
 
 
 class Noise2SelfCNN(DenoiseRestorationBase):
@@ -198,7 +198,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             Additional keyword arguments. Supports ``'train_valid_ratio'``,
             ``'callback_period'``, and ``'jinv'``.
         """
-        with lsection("Noise2Self train is starting..."):
+        with asection("Noise2Self train is starting..."):
             if chan_axes is not None and len(chan_axes) > 0 and any(chan_axes):
                 pass  # Channel axes provided, continue with training
 
@@ -242,7 +242,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         numpy.ndarray
             The denoised image, cast to the input image's dtype.
         """
-        with lsection("Noise2Self denoise is starting..."):
+        with asection("Noise2Self denoise is starting..."):
 
             # Predict the resulting image
             response = self.it.translate(

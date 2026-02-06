@@ -9,7 +9,7 @@ from aydin.features.groups.median import MedianFeatures
 from aydin.features.groups.random import RandomFeatures
 from aydin.features.groups.spatial import SpatialFeatures
 from aydin.features.groups.uniform import UniformFeatures
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class StandardFeatureGenerator(ExtensibleFeatureGenerator):
@@ -175,7 +175,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
         super().__init__()
 
         self.dtype = dtype
-        lprint(f"Features will be computed using dtype: {dtype}")
+        aprint(f"Features will be computed using dtype: {dtype}")
 
         uniform = UniformFeatures(
             kernel_widths=kernel_widths,

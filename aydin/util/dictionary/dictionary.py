@@ -1,19 +1,18 @@
 from math import prod
 from typing import Optional, Tuple
+
 import numpy
 from numba import jit
 from numpy.linalg import norm
-from scipy.fft import idstn, idctn
-from scipy.ndimage import convolve
-from scipy.ndimage import median_filter, gaussian_filter
-from sklearn.decomposition import FastICA, PCA
+from scipy.fft import idctn, idstn
+from scipy.ndimage import convolve, gaussian_filter, median_filter
 from sklearn.cluster import MiniBatchKMeans as KMeans
+from sklearn.decomposition import PCA, FastICA
 from sklearn.decomposition import MiniBatchDictionaryLearning as DictLearning
 
-
+from aydin.util.log.log import asection
 from aydin.util.patch_size.patch_size import default_patch_size
 from aydin.util.patch_transform.patch_transform import extract_patches_nd
-from aydin.util.log.log import lsection
 
 
 def learn_dictionary(
@@ -116,7 +115,7 @@ def learn_dictionary(
         image, patch_size=patch_size, max_patches=max_patches, normalise_stds=True
     )
 
-    with lsection(
+    with asection(
         f"Learning dictionary of {dictionary_size} atoms from {len(patches)} patches using algorithm '{algorithm}'."
     ):
 

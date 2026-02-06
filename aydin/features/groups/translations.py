@@ -5,7 +5,7 @@ from typing import Sequence, Tuple
 from scipy.ndimage import shift
 
 from aydin.features.groups.base import FeatureGroupBase
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class TranslationFeatures(FeatureGroupBase):
@@ -93,7 +93,7 @@ class TranslationFeatures(FeatureGroupBase):
             Pre-allocated array for storing the translated image.
         """
         translation = self.translations[index]
-        lprint(
+        aprint(
             f"translation feature: {index}, translation={translation}, exclude_center={self.excluded_voxels}"
         )
 

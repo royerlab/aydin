@@ -1,7 +1,7 @@
 """Tests for Aydin logging utilities.
 
 Tests cover:
-- Basic lprint/lsection functionality
+- Basic aprint/asection functionality
 - Depth tracking
 - Test suppression behavior
 - GUI callback emission
@@ -9,24 +9,22 @@ Tests cover:
 - Configuration options (max_depth, elapsed_time)
 """
 
-import io
-import sys
 from unittest.mock import MagicMock
 
 import pytest
 
-from aydin.util.log.log import Log, aprint, asection, lprint, lsection
+from aydin.util.log.log import Log, aprint, asection
 
 
 class TestBasicLogging:
-    """Test basic lprint and lsection functionality."""
+    """Test basic aprint and asection functionality."""
 
-    def test_lprint_basic(self, capsys):
-        """Test that lprint outputs correctly when enabled."""
+    def test_aprint_basic(self, capsys):
+        """Test that aprint outputs correctly when enabled."""
         Log.override_test_exclusion = True
         Log.enable_output = True
 
-        lprint('Hello world')
+        aprint('Hello world')
 
         captured = capsys.readouterr()
         assert 'Hello world' in captured.out
@@ -34,12 +32,12 @@ class TestBasicLogging:
         Log.override_test_exclusion = False
         Log.enable_output = False
 
-    def test_lprint_with_multiple_args(self, capsys):
-        """Test lprint with multiple arguments."""
+    def test_aprint_with_multiple_args(self, capsys):
+        """Test aprint with multiple arguments."""
         Log.override_test_exclusion = True
         Log.enable_output = True
 
-        lprint('a', 'b', 'c')
+        aprint('a', 'b', 'c')
 
         captured = capsys.readouterr()
         assert 'a b c' in captured.out
@@ -47,25 +45,25 @@ class TestBasicLogging:
         Log.override_test_exclusion = False
         Log.enable_output = False
 
-    def test_lprint_suppressed_during_tests(self, capsys):
-        """Test that lprint is suppressed during test runs by default."""
+    def test_aprint_suppressed_during_tests(self, capsys):
+        """Test that aprint is suppressed during test runs by default."""
         # Ensure override is off
         Log.override_test_exclusion = False
         Log.enable_output = True
 
-        lprint('Should not appear')
+        aprint('Should not appear')
 
         captured = capsys.readouterr()
         assert 'Should not appear' not in captured.out
 
         Log.enable_output = False
 
-    def test_lsection_outputs_header(self, capsys):
-        """Test that lsection outputs the section header."""
+    def test_asection_outputs_header(self, capsys):
+        """Test that asection outputs the section header."""
         Log.override_test_exclusion = True
         Log.enable_output = True
 
-        with lsection('Test Section'):
+        with asection('Test Section'):
             pass
 
         captured = capsys.readouterr()
@@ -83,14 +81,14 @@ class TestDepthTracking:
         assert Log.depth == 0
 
     def test_depth_increments_in_section(self):
-        """Test that depth increases inside lsection."""
+        """Test that depth increases inside asection."""
         Log.override_test_exclusion = True
         Log.enable_output = True
 
         assert Log.depth == 0
-        with lsection('Level 1'):
+        with asection('Level 1'):
             assert Log.depth == 1
-            with lsection('Level 2'):
+            with asection('Level 2'):
                 assert Log.depth == 2
             assert Log.depth == 1
         assert Log.depth == 0
@@ -104,24 +102,24 @@ class TestDepthTracking:
         Log.override_test_exclusion = True
         Log.enable_output = True
 
-        with lsection('a section'):
-            lprint('a line')
+        with asection('a section'):
+            aprint('a line')
 
-            with lsection('a subsection'):
-                lprint('another line')
+            with asection('a subsection'):
+                aprint('another line')
 
-                with lsection('a subsection'):
+                with asection('a subsection'):
                     assert Log.depth == 3
 
-                    with lsection('a subsection'):
-                        with lsection('a subsection'):
+                    with asection('a subsection'):
+                        with asection('a subsection'):
                             assert Log.depth == 5
 
-                            with lsection('a subsection'):
-                                with lsection('a subsection'):
+                            with asection('a subsection'):
+                                with asection('a subsection'):
                                     assert Log.depth == 7
 
-        lprint('test is finished...')
+        aprint('test is finished...')
         assert Log.depth == 0
 
         Log.override_test_exclusion = False
@@ -140,7 +138,7 @@ class TestGUICallback:
         mock_callback = MagicMock()
         Log.gui_callback = mock_callback
 
-        lprint('Test message')
+        aprint('Test message')
 
         # Callback should have been called
         mock_callback.emit.assert_called()
@@ -183,7 +181,7 @@ class TestGUICallback:
         Log.gui_callback = mock_callback
         Log.gui_statusbar = mock_statusbar
 
-        lprint('Status message')
+        aprint('Status message')
 
         mock_statusbar.showMessage.assert_called()
         call_args = mock_statusbar.showMessage.call_args[0][0]
@@ -213,7 +211,7 @@ class TestConfiguration:
 
         # With elapsed time disabled
         Log.set_log_elapsed_time(False)
-        with lsection('No timing'):
+        with asection('No timing'):
             pass
 
         captured = capsys.readouterr()
@@ -233,7 +231,7 @@ class TestConfiguration:
         Log.enable_output = True
         Log.log_elapsed_time = True
 
-        with lsection('With timing'):
+        with asection('With timing'):
             pass
 
         captured = capsys.readouterr()
@@ -258,7 +256,7 @@ class TestTestContext:
         Log.enable_output = True
 
         with Log.test_context():
-            lprint('Inside test context')
+            aprint('Inside test context')
 
         captured = capsys.readouterr()
         assert 'Inside test context' in captured.out
@@ -267,27 +265,31 @@ class TestTestContext:
 
 
 class TestAliases:
-    """Test that aprint/asection are aliases for lprint/lsection."""
+    """Test that lprint/lsection are backward-compatible aliases."""
 
-    def test_aprint_is_lprint(self):
-        """Test that aprint is the same as lprint."""
-        assert aprint is lprint
+    def test_lprint_is_aprint(self):
+        """Test that lprint is the same as aprint (backward compatibility)."""
+        from aydin.util.log.log import lprint
 
-    def test_asection_is_lsection(self):
-        """Test that asection is the same as lsection."""
-        assert asection is lsection
+        assert lprint is aprint
+
+    def test_lsection_is_asection(self):
+        """Test that lsection is the same as asection (backward compatibility)."""
+        from aydin.util.log.log import lsection
+
+        assert lsection is asection
 
 
 class TestExceptionHandling:
     """Test exception handling in sections."""
 
     def test_exception_propagates_from_section(self):
-        """Test that exceptions inside lsection are propagated."""
+        """Test that exceptions inside asection are propagated."""
         Log.override_test_exclusion = True
         Log.enable_output = True
 
         with pytest.raises(ValueError, match='test error'):
-            with lsection('Error section'):
+            with asection('Error section'):
                 raise ValueError('test error')
 
         # Depth should be reset even after exception

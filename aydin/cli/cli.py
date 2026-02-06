@@ -40,7 +40,7 @@ from aydin.restoration.denoise.util.denoise_utils import (
     get_denoiser_class_instance,
     get_list_of_denoiser_implementations,
 )
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 from aydin.util.misc.json import load_any_json
 from aydin.util.misc.slicing_helper import apply_slicing
 
@@ -66,7 +66,7 @@ def cli(ctx):
     sys._excepthook = sys.excepthook
 
     def exception_hook(exctype, value, traceback):
-        lprint(exctype, value, traceback)
+        aprint(exctype, value, traceback)
         sys._excepthook(exctype, value, traceback)
         sys.exit(1)
 
@@ -202,7 +202,7 @@ def denoise(files, **kwargs):
             denoiser_instance.save(model_path)
 
         imwrite(denoised, output_path)
-        lprint("DONE")
+        aprint("DONE")
 
 
 @cli.command()
@@ -283,7 +283,7 @@ def split_channels(files, **kwargs):
             imwrite(
                 splitted_array, splitted_filename, splitted_metadata, overwrite=False
             )
-            lprint(f"writing {splitted_filename} is done.")
+            aprint(f"writing {splitted_filename} is done.")
 
 
 @cli.command()
@@ -328,7 +328,7 @@ def ssim(files, **kwargs):
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
-    lprint(
+    aprint(
         "ssim: ",
         structural_similarity(
             normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
@@ -354,7 +354,7 @@ def psnr(files, **kwargs):
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
-    lprint(
+    aprint(
         "psnr: ",
         peak_signal_noise_ratio(
             normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
@@ -377,7 +377,7 @@ def mse(files, **kwargs):
     """
     filenames, image_arrays, metadatas = handle_files(files, kwargs['slicing'])
 
-    lprint(
+    aprint(
         "mse: ",
         mean_squared_error(
             normalise(image_arrays[1]).clip(0, 1), normalise(image_arrays[0]).clip(0, 1)
@@ -454,13 +454,13 @@ def benchmark_algos(files, **kwargs):
         # Create a Dataset object to get random masks
         array = normalise(image_array[numpy.newaxis, numpy.newaxis, :, :])
         dataset = RandomMaskedDataset(array, patch_size=min(image_array.shape))
-        lprint(f"dataset length: {len(dataset)}, patch_size:{dataset.patch_size}")
+        aprint(f"dataset length: {len(dataset)}, patch_size:{dataset.patch_size}")
         data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
         _, input_image, mask = next(iter(data_loader))
 
         mask = mask.to("cpu").detach().numpy()
         input_image = input_image.to("cpu").detach().numpy()[0, 0, :, :]
-        lprint(input_image.shape)
+        aprint(input_image.shape)
 
         # Iterate over the available denoisers
         for denoiser_name in denoiser_names:
@@ -576,10 +576,10 @@ def handle_files(files, slicing):
 @cli.command()
 def cite(**kwargs):
     """aydin cite command"""
-    lprint(
+    aprint(
         "\nIf you find Aydin useful in your work, please kindly cite Aydin by using our DOI: "
     )
-    lprint("https://doi.org/10.5281/zenodo.5654826 \n")
+    aprint("https://doi.org/10.5281/zenodo.5654826 \n")
 
 
 if __name__ == '__main__':

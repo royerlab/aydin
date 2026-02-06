@@ -11,7 +11,7 @@ from numpy.typing import ArrayLike
 from skimage.exposure import cumulative_distribution, equalize_adapthist
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class HistogramEqualisationTransform(ImageTransformBase):
@@ -61,7 +61,7 @@ class HistogramEqualisationTransform(ImageTransformBase):
         self._bin_centers = None
         self._original_dtype = None
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -91,7 +91,7 @@ class HistogramEqualisationTransform(ImageTransformBase):
             Histogram-equalised image.
         """
 
-        with lsection(
+        with asection(
             f"Equalises histogram for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
 
@@ -132,7 +132,7 @@ class HistogramEqualisationTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Undoing histogram equalisation for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             array = array.astype(numpy.float32, copy=False)

@@ -13,7 +13,7 @@ from aydin.util.array.nd import nd_range_radii
 from aydin.util.fast_shift.fast_shift import fast_shift
 from aydin.util.fast_uniform_filter.numba_cpu_uf import numba_cpu_uniform_filter
 from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 # Minimum image size (in voxels) to consider CUDA acceleration
 _CUDA_MIN_IMAGE_SIZE = 1024
@@ -361,7 +361,7 @@ class UniformFeatures(FeatureGroupBase):
             no_duplicate_feature_description_list
         )
 
-        lprint(f"Number of duplicate features: {number_of_duplicates}")
+        aprint(f"Number of duplicate features: {number_of_duplicates}")
         feature_description_list = no_duplicate_feature_description_list
         return feature_description_list
 
@@ -449,7 +449,7 @@ class UniformFeatures(FeatureGroupBase):
 
             # Let's check that the feature is not already computed:
             if size not in size_to_feature:
-                lprint(f"Pre-computing uniform filter of size: {size}")
+                aprint(f"Pre-computing uniform filter of size: {size}")
                 # Compute the feature
                 feature = self._compute_uniform_filter(image, size=size)
 
@@ -473,7 +473,7 @@ class UniformFeatures(FeatureGroupBase):
         """
 
         feature_description = self._feature_descriptions_list[index]
-        lprint(
+        aprint(
             f"Uniform feature: {index}, description: {feature_description}, excluded_voxels={self.excluded_voxels}"
         )
 
@@ -552,7 +552,7 @@ class UniformFeatures(FeatureGroupBase):
                 )
             )
             if center_value_within_footprint:
-                lprint(f"excluded voxel: {excluded_voxel}")
+                aprint(f"excluded voxel: {excluded_voxel}")
 
                 # We increment the exclusion count:
                 excluded_count += 1
@@ -622,16 +622,16 @@ class UniformFeatures(FeatureGroupBase):
             if max_size > 128:
                 # Numba scales well for large filter sizes:
                 output = numba_cpu_uniform_filter(image, size=size, mode="nearest")
-                lprint(f"Computed filter of size: {size} with Numba")
+                aprint(f"Computed filter of size: {size} with Numba")
             else:
                 # Scipy parallel is more efficient for small filter sizes:
                 output = parallel_uniform_filter(image, size=size, mode="nearest")
-                lprint(f"Computed filter of size: {size} with parallel scipy")
+                aprint(f"Computed filter of size: {size} with parallel scipy")
 
             return output
 
         if image.size < _CUDA_MIN_IMAGE_SIZE:
-            lprint("Image too small, CUDA not needed!")
+            aprint("Image too small, CUDA not needed!")
             output = no_cuda_cpu_mode()
         else:
             try:
@@ -655,10 +655,10 @@ class UniformFeatures(FeatureGroupBase):
                     mode="nearest",
                     cuda_stream=self.cuda_stream,
                 )
-                lprint(f"Computed filter of size: {size} with CUDA")
+                aprint(f"Computed filter of size: {size} with CUDA")
             except Exception as e:
                 if isinstance(e, CudaSupportError):
-                    lprint(
+                    aprint(
                         "CUDA not supported on this machine, falling back to numba and scipy."
                     )
                 else:
@@ -667,7 +667,7 @@ class UniformFeatures(FeatureGroupBase):
                     error_str = (str(sys.exc_info()[0]) + ', and: ' + str(e)).replace(
                         '\n', ', '
                     )
-                    lprint(
+                    aprint(
                         f"Cannot use CUDA for computing uniform filter because of: {error_str}"
                     )
                 output = no_cuda_cpu_mode()

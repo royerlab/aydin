@@ -11,7 +11,7 @@ from scipy.signal import convolve2d
 
 from aydin.nn._legacy_pytorch.it_ptcnn import PTCNNImageTranslator
 from aydin.nn._legacy_pytorch.models.psf_convolution import PSFConvolutionLayer
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def to_numpy(tensor):
@@ -75,7 +75,7 @@ class PTCNNDeconvolution(PTCNNImageTranslator):
         try:
             self.model.kernel_continuity_regularisation = False
         except AttributeError:
-            lprint("Cannot deactivate kernel continuity regularisation")
+            aprint("Cannot deactivate kernel continuity regularisation")
 
         super()._train_loop(data_loader, optimizer, loss_function)
 

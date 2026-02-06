@@ -6,7 +6,7 @@ field sizes for convolution, pooling, and upsampling layers.
 
 import numpy
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def bbox_idx(x, thresh=None):
@@ -133,10 +133,10 @@ def receptive_field_model(model, verbose=False):
         elif 'UpSampling' in lyr_type:
             n1 = receptive_field_up(layer.size[0], n1)
         if verbose:
-            lprint(f'{lyr_type}: RF {n1}, shift {s}')
+            aprint(f'{lyr_type}: RF {n1}, shift {s}')
     if shift:
         n1 = (n1 + s) * 2
-        lprint(
+        aprint(
             f'Synthetic receptive field is {n1}^2 (with {int(n1/2 + s)}^2 empty space at 4 corners).'
         )
     return n1

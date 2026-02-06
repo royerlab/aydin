@@ -18,7 +18,7 @@ from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.restoration.denoise.base import DenoiseRestorationBase
-from aydin.util.log.log import lsection
+from aydin.util.log.log import asection
 
 if os.getenv("BUNDLED_AYDIN") == "1":
     from aydin.it.classic_denoisers.bilateral import (  # noqa: F401
@@ -327,7 +327,7 @@ class Classic(DenoiseRestorationBase):
             Additional keyword arguments. Supports ``'train_valid_ratio'``,
             ``'callback_period'``, and ``'jinv'``.
         """
-        with lsection("Noise2Self train is starting..."):
+        with asection("Noise2Self train is starting..."):
 
             self.it = self.get_translator()
 
@@ -369,7 +369,7 @@ class Classic(DenoiseRestorationBase):
         numpy.ndarray
             The denoised image, cast to the input image's dtype.
         """
-        with lsection("Noise2Self denoise is starting..."):
+        with asection("Noise2Self denoise is starting..."):
 
             # Predict the resulting image
             response = self.it.translate(

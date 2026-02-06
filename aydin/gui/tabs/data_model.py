@@ -8,7 +8,7 @@ from pathlib import Path
 
 from aydin.io import imread
 from aydin.io.utils import hyperstack_arrays, split_image_channels
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class DataModel:
@@ -239,7 +239,7 @@ class DataModel:
             imagelist_item = imagelist_items[0]
 
             if imagelist_item[2].axes.find("C") == -1:
-                lprint("Array has no channel axis detected")
+                aprint("Array has no channel axis detected")
                 return -1
 
             self.remove_image(filepath)  # Remove the existing image from the model
@@ -315,9 +315,9 @@ class DataModel:
                     {hyperstacked_filepath: (hyperstacked_array, hyperstacked_metadata)}
                 )  # Add the hyperstacked image
 
-                lprint("Images stacked")
+                aprint("Images stacked")
             except Exception as e:
-                lprint(e)
+                aprint(e)
                 return -1
         else:  # We try to de-hyperstack
             filepaths = self.filepaths  # Keep the original file list

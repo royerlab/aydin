@@ -9,7 +9,7 @@ from copy import deepcopy
 import numpy as np
 from scipy.ndimage import median_filter
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def masker(batch_vol, i=None, mask_shape=None, p=None):
@@ -109,7 +109,7 @@ def maskedgen(image, batch_size, mask_size, replace_by='zero'):
 
     j = 0
     num_cycle = np.ceil(img_output.shape[0] / batch_size)
-    lprint(f'Masked pixels are replaced by {replace_by}')
+    aprint(f'Masked pixels are replaced by {replace_by}')
     while True:
         i = np.mod(j, num_cycle).astype(int, copy=False)
         image_batch = img_output[batch_size * i : batch_size * (i + 1)]
@@ -170,7 +170,7 @@ def randmaskgen(
 
     j = 0
     num_cycle = np.ceil(img_output.shape[0] / batch_size)
-    lprint(f'Masked pixels are replaced by {replace_by}')
+    aprint(f'Masked pixels are replaced by {replace_by}')
     while True:
         i = np.mod(j, num_cycle).astype(int, copy=False)
         image_batch = img_output[batch_size * i : batch_size * (i + 1)]

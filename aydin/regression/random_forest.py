@@ -7,7 +7,7 @@ random forest boosting mode for fast, decent-quality regression.
 import numpy
 
 from aydin.regression.lgbm import LGBMRegressor
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class RandomForestRegressor(LGBMRegressor):
@@ -65,8 +65,8 @@ class RandomForestRegressor(LGBMRegressor):
             verbosity,
         )
 
-        with lsection("Random Forest Regressor"):
-            lprint("with no arguments")  # TODO: fix these logs
+        with asection("Random Forest Regressor"):
+            aprint("with no arguments")  # TODO: fix these logs
 
     def __repr__(self):
         return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}>"

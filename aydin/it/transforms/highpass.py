@@ -13,7 +13,7 @@ from numpy.typing import ArrayLike
 from scipy.ndimage import gaussian_filter, median_filter
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class HighpassTransform(ImageTransformBase):
@@ -72,7 +72,7 @@ class HighpassTransform(ImageTransformBase):
         self._min = None
         self._max = None
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -106,7 +106,7 @@ class HighpassTransform(ImageTransformBase):
             High-pass filtered image (low frequencies removed).
         """
 
-        with lsection(
+        with asection(
             f"Applies high-pass filter of sigma {self.sigma} {'and median filtering' if self.median_filtering else ''} to array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             # Remember min and max:
@@ -144,7 +144,7 @@ class HighpassTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Adds back low-pass frequencies to array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             array = array.astype(numpy.float32, copy=False)
@@ -181,7 +181,7 @@ class HighpassTransform(ImageTransformBase):
             Low-pass filtered image (with mean subtracted).
         """
 
-        lprint(f"Sigma for high-pass filter is: {self.sigma}")
+        aprint(f"Sigma for high-pass filter is: {self.sigma}")
 
         # Median filtering if selected:
         if self.median_filtering:

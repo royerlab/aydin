@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class JInet2D(nn.Module):
@@ -122,7 +122,7 @@ class JInet2D(nn.Module):
                 padding_mode=padding_mode,
                 groups=num_groups,
             )
-            lprint(dilated_convolution)
+            aprint(dilated_convolution)
 
             # We keep track of the total number of features until now:
             total_num_features += num

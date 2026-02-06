@@ -13,7 +13,7 @@ from numpy.typing import ArrayLike
 from scipy.ndimage import gaussian_filter
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class FixedPatternTransform(ImageTransformBase):
@@ -95,7 +95,7 @@ class FixedPatternTransform(ImageTransformBase):
         self.sigma = sigma
         self._corrections = {}
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -127,7 +127,7 @@ class FixedPatternTransform(ImageTransformBase):
             Pattern-corrected image as float32.
         """
 
-        with lsection(
+        with asection(
             f"Removing axis-aligned fixed patterns for array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
             self._original_dtype = array.dtype
@@ -151,7 +151,7 @@ class FixedPatternTransform(ImageTransformBase):
             self._corrections = {}
 
             for axis_combination in axis_combinations:
-                lprint(f"Suppressing variations across hyperplane: {axis_combination}")
+                aprint(f"Suppressing variations across hyperplane: {axis_combination}")
                 value = numpy.percentile(
                     new_array, q=self.percentile, axis=axis_combination, keepdims=True
                 )
@@ -183,7 +183,7 @@ class FixedPatternTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Adding back axis-aligned fixed pattern to array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
 

@@ -15,7 +15,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from aydin.it.base import ImageTranslatorBase
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class DenoiseRestorationBase(ABC):
@@ -238,7 +238,7 @@ class DenoiseRestorationBase(ABC):
         archive_to = os.path.basename(source.strip(os.sep))
 
         if os.path.exists(os.path.join(destination, f"{name}.{archive_format}")):
-            lprint(
+            aprint(
                 "Previously existing model will be deleted before saving the new model"
             )
             os.remove(os.path.join(destination, f"{name}.{archive_format}"))
@@ -248,7 +248,7 @@ class DenoiseRestorationBase(ABC):
         try:
             shutil.move(f"{name}.{archive_format}", destination)
         except shutil.Error as e:
-            lprint(e)
+            aprint(e)
 
     def save(self, model_path):
         """Save the trained model as a zip archive.
@@ -282,6 +282,6 @@ class DenoiseRestorationBase(ABC):
             Full path to the model zip file (e.g. ``'/path/to/model.zip'``).
         """
 
-        lprint(f"Loading image translator from: {model_path}")
+        aprint(f"Loading image translator from: {model_path}")
         shutil.unpack_archive(model_path, os.path.dirname(model_path), "zip")
         self.it = ImageTranslatorBase.load(model_path[:-4])

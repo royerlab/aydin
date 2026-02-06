@@ -13,7 +13,7 @@ from sklearn.base import TransformerMixin
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class VarianceStabilisationTransform(ImageTransformBase):
@@ -83,7 +83,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
         self._max = None
         self._transform: TransformerMixin = None
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -114,7 +114,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
             Variance-stabilised image.
         """
 
-        with lsection(
+        with asection(
             f"Stabilising variance ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             # Let's ensure we are working with floats:
@@ -146,7 +146,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
                     if array.min() < 0 or numpy.var(numpy.log1p(array.ravel())) < 1e-6
                     else self.mode
                 )
-                lprint(f"Actual mode used: {mode} ")
+                aprint(f"Actual mode used: {mode} ")
 
                 # We prepare array to make it compatible to sklearn API and save shape:
                 shape = array.shape
@@ -160,7 +160,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
                     # Fit tranform:
                     power_transform.fit(array)
                 except (Warning, FloatingPointError):
-                    lprint(
+                    aprint(
                         f"VST {mode} failed for some numerical reasons, falling back to yeo-johnson."
                     )
                     mode = 'yeo-johnson'
@@ -178,7 +178,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
                 # This can happen when the input has very narrow range and
                 # standardization divides by a very small std
                 if numpy.var(new_array) < 1e-10:
-                    lprint(
+                    aprint(
                         f"VST {mode} produced degenerate output (variance ~0), "
                         f"falling back to anscomb transform."
                     )
@@ -241,7 +241,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Applying inverse variance stabilisation transform ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
 

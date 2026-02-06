@@ -6,7 +6,7 @@ as a degenerate case of the Gibson & Lanni model (no coverslip).
 
 import numpy
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 from aydin.util.psf.microscope_psf import MicroscopePSF
 
 
@@ -68,6 +68,6 @@ class SimpleMicroscopePSF(MicroscopePSF):
         psf_xyz_array = self.gLXYZParticleScan(
             dxy=dxy, xy_size=xy_size, pz=pz, zv=z_offset
         )
-        lprint(psf_xyz_array.shape)
+        aprint(psf_xyz_array.shape)
 
         return psf_xyz_array

@@ -2,7 +2,7 @@
 
 import torch
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def get_torch_device():
@@ -21,5 +21,5 @@ def get_torch_device():
     else:
         dev = "cpu"
     device = torch.device(dev)
-    lprint(f"device {device}")
+    aprint(f"device {device}")
     return device

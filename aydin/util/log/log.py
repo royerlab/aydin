@@ -4,8 +4,9 @@ Provides tree-structured logging with hierarchical sections, elapsed time
 tracking, and optional GUI callback support. Uses the ``arbol`` library as
 the backend for tree formatting.
 
-Use ``lprint`` (or ``aprint``) for log messages and ``lsection`` (or
-``asection``) as a context manager for nested log sections.
+Use ``aprint`` for log messages and ``asection`` as a context manager for
+nested log sections. Legacy aliases ``lprint`` and ``lsection`` are also
+available for backward compatibility.
 """
 
 import math
@@ -177,7 +178,7 @@ def _should_output():
     return not _is_test_run()
 
 
-def lprint(*args, sep=' ', end='\n'):
+def aprint(*args, sep=' ', end='\n'):
     """Print a log message at the current nesting depth.
 
     Output is suppressed during test runs unless ``Log.override_test_exclusion``
@@ -204,7 +205,7 @@ def lprint(*args, sep=' ', end='\n'):
 
 
 @contextmanager
-def lsection(section_header: str):
+def asection(section_header: str):
     """Context manager for a named log section with timing.
 
     Creates a hierarchical log section that tracks elapsed time.
@@ -253,6 +254,6 @@ def lsection(section_header: str):
         _ArbolBase.enable_output = old_enable
 
 
-# Modern aliases (consistent with arbol naming)
-aprint = lprint
-asection = lsection
+# Legacy aliases for backward compatibility
+lprint = aprint
+lsection = asection

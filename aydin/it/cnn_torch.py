@@ -17,7 +17,7 @@ import aydin.nn.models as nnmodels
 from aydin.it.base import ImageTranslatorBase
 from aydin.nn.training_methods.n2s import n2s_train
 from aydin.nn.training_methods.n2t import n2t_train
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class ImageTranslatorCNNTorch(ImageTranslatorBase):
@@ -107,7 +107,7 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         str
             JSON string of the serialized model state.
         """
-        with lsection(f"Saving 'CNN' image translator to {path}"):
+        with asection(f"Saving 'CNN' image translator to {path}"):
             frozen = super().save(path)
             self.save_cnn(path)
         return frozen
@@ -129,7 +129,7 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             # serialize model to JSON:
             raise NotImplementedError()
         else:
-            lprint("There is no model to save yet.")
+            aprint("There is no model to save yet.")
 
     def __getstate__(self):
         """Customize pickle state for serialization.
@@ -162,7 +162,7 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         NotImplementedError
             This method is not yet implemented.
         """
-        with lsection(f"Loading 'cnn' image translator from {path}"):
+        with asection(f"Loading 'cnn' image translator from {path}"):
             # load JSON and create model:
             # self.model =
             raise NotImplementedError()

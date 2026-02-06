@@ -12,7 +12,7 @@ from numba import jit
 
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 def dimension_analysis_on_image(
@@ -68,7 +68,7 @@ def dimension_analysis_on_image(
     channel_axes : tuple of int
         Indices of axes identified as channel dimensions.
     """
-    with lsection(
+    with asection(
         "Analysing dimensions to determine which should be spatio-temporal, batch, or channel"
     ):
 
@@ -126,11 +126,11 @@ def dimension_analysis_on_image(
                 threshold = sorted_values[_]
                 break
 
-        lprint(
+        aprint(
             f"Correlation values per axis: {values} (lower values means more correlation)"
         )
 
-        lprint(
+        aprint(
             f"Threshold for identifying spatio-temporal dimension is ...<={threshold}"
         )
 
@@ -161,7 +161,7 @@ def dimension_analysis_on_image(
             if axis not in st_axes and image.shape[axis] <= max_channels_per_axis
         )
 
-        lprint(
+        aprint(
             f"Inferred batch axes: {batch_axes} and channel axes: {channel_axes} for image of shape {image.shape}"
         )
 

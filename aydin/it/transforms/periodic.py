@@ -14,7 +14,7 @@ from skimage.feature import peak_local_max
 
 from aydin.it.classic_denoisers.gaussian import calibrate_denoise_gaussian
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class PeriodicNoiseSuppressionTransform(ImageTransformBase):
@@ -74,7 +74,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         self._original_dtype = None
         self._coordinates = {}
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -108,7 +108,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
             Image with periodic noise suppressed.
         """
 
-        with lsection(
+        with asection(
             f"Applies periodic noise suppression to array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             new_array = self._suppress_periodic_patterns(array)
@@ -135,7 +135,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Reapplies periodic noise to array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             # turns out it is better to suppress the periodic patterns before and after:
@@ -188,7 +188,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         for i, coordinate in enumerate(coordinates):
             coordinate = tuple(coordinate)
             if coordinate != center:
-                lprint(f"Suppressing peak at location: {coordinate}")
+                aprint(f"Suppressing peak at location: {coordinate}")
 
                 # We compute a mask:
                 mask = _sphere(

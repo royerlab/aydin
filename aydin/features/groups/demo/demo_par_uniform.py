@@ -6,7 +6,7 @@ from scipy.ndimage import uniform_filter
 
 from aydin.io.datasets import examples_single, newyork
 from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
-from aydin.util.log.log import Log, lsection
+from aydin.util.log.log import Log, asection
 
 
 def demo_par_uniform(image_name: str, image, repeats=32):
@@ -25,11 +25,11 @@ def demo_par_uniform(image_name: str, image, repeats=32):
 
     size = 4
 
-    with lsection(f"Par {image_name} (r={repeats}):"):
+    with asection(f"Par {image_name} (r={repeats}):"):
         for _ in range(repeats):
             par_filtered_image = parallel_uniform_filter(image, size=size)
 
-    with lsection(f"Scipy {image_name} (r={repeats}):"):
+    with asection(f"Scipy {image_name} (r={repeats}):"):
         for _ in range(repeats):
             scipy_filtered_image = uniform_filter(image, size=size, mode="nearest")
 

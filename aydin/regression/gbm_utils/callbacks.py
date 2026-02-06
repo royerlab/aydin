@@ -9,7 +9,7 @@ from operator import gt, lt
 
 from lightgbm.callback import EarlyStopException
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def _format_eval_result(value, show_stdv=True):
@@ -76,7 +76,7 @@ def early_stopping(gbm_regressor, stopping_rounds):
             )
 
         msg = "Training until validation scores don't improve for {} rounds."
-        lprint(msg.format(stopping_rounds))
+        aprint(msg.format(stopping_rounds))
 
         for eval_ret in env.evaluation_result_list:
             best_iter.append(0)
@@ -100,7 +100,7 @@ def early_stopping(gbm_regressor, stopping_rounds):
                 best_iter[i] = env.iteration
                 best_score_list[i] = env.evaluation_result_list
             elif env.iteration - best_iter[i] >= stopping_rounds:
-                lprint(
+                aprint(
                     'Early stopping, best iteration is: [%d]\t%s'
                     % (
                         best_iter[i] + 1,
@@ -109,7 +109,7 @@ def early_stopping(gbm_regressor, stopping_rounds):
                 )
                 raise EarlyStopException(best_iter[i], best_score_list[i])
             if env.iteration == env.end_iteration - 1:
-                lprint(
+                aprint(
                     'Did not meet early stopping. Best iteration is:\n[%d]\t%s'
                     % (
                         best_iter[i] + 1,

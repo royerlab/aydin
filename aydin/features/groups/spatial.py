@@ -4,7 +4,7 @@ from math import pi, sin
 from typing import Optional, Tuple
 
 from aydin.features.groups.base import FeatureGroupBase
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class SpatialFeatures(FeatureGroupBase):
@@ -102,7 +102,7 @@ class SpatialFeatures(FeatureGroupBase):
         feature : numpy.ndarray
             Pre-allocated array for storing the computed feature.
         """
-        lprint(
+        aprint(
             f"Spatial feature {index}, offset={self.offset}, scale={self.scale}, coarsening={self.coarsening}, period={self.period} "
         )
 

@@ -1,6 +1,6 @@
 from aydin.io.datasets import characters
 from aydin.util.edge_filter.fast_edge_filter import fast_edge_filter
-from aydin.util.log.log import lsection, Log
+from aydin.util.log.log import Log, asection
 
 
 def demo_fast_edge(display=True):
@@ -10,10 +10,10 @@ def demo_fast_edge(display=True):
 
     image = characters()
 
-    with lsection(f"Computing edge filter for image of shape: {image.shape}"):
+    with asection(f"Computing edge filter for image of shape: {image.shape}"):
         image_sobel = fast_edge_filter(image)
 
-    with lsection(f"Computing edge filter for image of shape: {image.shape}, again"):
+    with asection(f"Computing edge filter for image of shape: {image.shape}, again"):
         image_sobel = fast_edge_filter(image)
 
     assert image_sobel is not None

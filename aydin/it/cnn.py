@@ -35,7 +35,7 @@ from aydin.nn.tf.util.callbacks import (
     StopCenterGradient3D,
 )
 from aydin.nn.tf.util.random_sample_patches import random_sample_patches
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 from aydin.util.tf.device import get_best_device_name
 
 
@@ -198,13 +198,13 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         self.nb_unet_levels = nb_unet_levels  # unet
         self.training_architecture = training_architecture  # unet
 
-        with lsection("CNN image translator"):
-            lprint("training architecture: ", self.training_architecture)
-            lprint("number of layers: ", self.nb_unet_levels)
-            lprint("batch norm: ", self.batch_norm)
-            lprint("mask size: ", self.mask_size)
-            lprint("max_epochs", self.max_epochs)
-            lprint("verbose: ", self.verbose)
+        with asection("CNN image translator"):
+            aprint("training architecture: ", self.training_architecture)
+            aprint("number of layers: ", self.nb_unet_levels)
+            aprint("batch norm: ", self.batch_norm)
+            aprint("mask size: ", self.mask_size)
+            aprint("max_epochs", self.max_epochs)
+            aprint("verbose: ", self.verbose)
 
     @property
     def model_class(self):
@@ -242,7 +242,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         str
             JSON string of the serialized model state.
         """
-        with lsection(f"Saving 'CNN' image translator to {path}"):
+        with asection(f"Saving 'CNN' image translator to {path}"):
             frozen = super().save(path)
             self.save_cnn(path)
         return frozen
@@ -259,12 +259,12 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             # serialize model to JSON:
             self.model.save(join(path, "tf_model"))
         else:
-            lprint("There is no model to save yet.")
+            aprint("There is no model to save yet.")
 
         if self.infmodel is not None:
             self.infmodel.save(join(path, "tf_inf_model"))
         else:
-            lprint("self.infmodel is None, no inference model will be saved.")
+            aprint("self.infmodel is None, no inference model will be saved.")
 
     def __getstate__(self):
         """Customize pickle state to exclude non-serializable Keras objects.
@@ -294,7 +294,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
         path : str
             Directory path to load the model files from.
         """
-        with lsection(f"Loading 'cnn' image translator from {path}"):
+        with asection(f"Loading 'cnn' image translator from {path}"):
             # load JSON and create model:
             self.model = keras.models.load_model(join(path, "tf_model"))
             self.infmodel = keras.models.load_model(join(path, "tf_inf_model"))
@@ -352,14 +352,14 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 and 'shiftconv' in self.training_architecture
             ):
                 self.batch_size = 1
-                lprint(
+                aprint(
                     'When patch_size is assigned under shiftconv architecture, batch_size is automatically set to 1.'
                 )
 
             if self.model_architecture == "jinet" and self.spacetime_ndim == 3:
                 self.batch_size = 1
 
-            lprint(f"Batch size for training: {self.batch_size}")
+            aprint(f"Batch size for training: {self.batch_size}")
 
             # Compute patch size from batch size
             if self.patch_size is None:
@@ -417,7 +417,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
             )
 
             # Tile input and target image
-            with lsection('Random patch sampling...'):
+            with asection('Random patch sampling...'):
                 input_patch_idx = random_sample_patches(
                     input_image,
                     self.patch_size[0],
@@ -426,9 +426,9 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 )
 
                 self.total_num_patches = len(input_patch_idx)
-                lprint(f'Total number of patches: {self.total_num_patches}')
+                aprint(f'Total number of patches: {self.total_num_patches}')
 
-                with lsection('Input image...'):
+                with asection('Input image...'):
                     (
                         img_train,
                         self.validation_images,
@@ -440,7 +440,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         train_valid_ratio,
                     )
 
-                with lsection('Target image...'):
+                with asection('Target image...'):
                     target_image = tile_target_images(
                         img_train, target_image, input_patch_idx, self.self_supervised
                     )
@@ -472,21 +472,21 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 **unet_only_model_constructor_kwargs,
             )
 
-            with lsection('CNN model summary:'):
-                lprint(f'Model architecture: {self.model_architecture}')
+            with asection('CNN model summary:'):
+                aprint(f'Model architecture: {self.model_architecture}')
                 if self.model_architecture == 'unet':
-                    lprint(f'Train scheme: {self.training_architecture}')
-                    lprint(f'Number of layers: {self.nb_unet_levels}')
-                lprint(
+                    aprint(f'Train scheme: {self.training_architecture}')
+                    aprint(f'Number of layers: {self.nb_unet_levels}')
+                aprint(
                     f'Number of parameters in the model: {self.model.count_params()}'
                 )
-                lprint(f'Batch normalization: {self.batch_norm}')
-                lprint(f'Training input size: {img_train.shape[1:]}')
+                aprint(f'Batch normalization: {self.batch_norm}')
+                aprint(f'Training input size: {img_train.shape[1:]}')
 
             # End of train function and beginning of _train from legacy implementation
             input_image = img_train
 
-            with lsection(
+            with asection(
                 f"Training image translator from image of shape {input_image.shape} to image of shape {target_image.shape}:"
             ):
 
@@ -495,11 +495,11 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                     self.ReduceLR_patience = self.ReduceLR_patience + 20
 
                 # Early stopping patience:
-                lprint(f"Early stopping patience: {self.EStop_patience}")
+                aprint(f"Early stopping patience: {self.EStop_patience}")
 
                 # Effective LR patience:
-                lprint(f"Effective LR patience: {self.ReduceLR_patience}")
-                lprint(f'Batch size: {self.batch_size}')
+                aprint(f"Effective LR patience: {self.ReduceLR_patience}")
+                aprint(f'Batch size: {self.batch_size}')
 
                 # Here is the list of callbacks:
                 callbacks = []
@@ -525,7 +525,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         get_temp_folder(),
                         f"aydin_cnn_keras_model_file_{random.randint(0, 1e16)}.hdf5",
                     )
-                    lprint(f"Model will be saved at: {self.model_file_path}")
+                    aprint(f"Model will be saved at: {self.model_file_path}")
                     self.checkpoint = ModelCheckpoint(
                         self.model_file_path, verbose=1, save_best_only=True
                     )
@@ -554,7 +554,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                         else callbacks
                     )
 
-                lprint("Training now...")
+                aprint("Training now...")
                 if 'jinet' in self.model_architecture:
                     self.loss_history = self.model.fit(
                         input_image=input_image,

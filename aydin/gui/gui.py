@@ -73,7 +73,7 @@ from qtpy.QtWidgets import QAction, QApplication, QMainWindow, QStatusBar
 
 from aydin.gui.main_page import MainPage
 from aydin.gui.resources.json_resource_loader import absPath
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class App(QMainWindow):
@@ -130,7 +130,7 @@ class App(QMainWindow):
         event : QCloseEvent
             The close event.
         """
-        lprint("closeEvent of mainwindow is called")
+        aprint("closeEvent of mainwindow is called")
         app = QApplication.instance()
         app.quit()
 

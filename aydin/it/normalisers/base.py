@@ -14,7 +14,7 @@ import jsonpickle
 import numpy
 from numba import jit, prange
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 from aydin.util.misc.json import encode_indent
 
 
@@ -70,7 +70,7 @@ class NormaliserBase(ABC):
 
         frozen = encode_indent(self)
 
-        lprint(f"Saving normalisers to: {path}")
+        aprint(f"Saving normalisers to: {path}")
         with open(join(path, f"normaliser_{name}.json"), "w") as json_file:
             json_file.write(frozen)
 
@@ -92,7 +92,7 @@ class NormaliserBase(ABC):
         NormaliserBase
             The restored normaliser instance.
         """
-        lprint(f"Loading normalisers from: {path}")
+        aprint(f"Loading normalisers from: {path}")
         with open(join(path, f"normaliser_{name}.json"), "r") as json_file:
             frozen = json_file.read()
 

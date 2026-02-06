@@ -9,7 +9,7 @@ import numpy
 from numpy.typing import ArrayLike
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class DeskewTransform(ImageTransformBase):
@@ -69,7 +69,7 @@ class DeskewTransform(ImageTransformBase):
         self.skew_axis = skew_axis
         self.pad = pad
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -103,7 +103,7 @@ class DeskewTransform(ImageTransformBase):
         numpy.ndarray
             Deskewed image array.
         """
-        with lsection(
+        with asection(
             f"Deskewing (delta={self.delta}, z_axis={self.z_axis}, skew_axis={self.skew_axis}, pad={self.pad}) array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
             if array.ndim >= 3:
@@ -128,7 +128,7 @@ class DeskewTransform(ImageTransformBase):
         """
         if not self.do_postprocess:
             return array
-        with lsection(
+        with asection(
             f"Undoing deskew for array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
             if array.ndim >= 3:

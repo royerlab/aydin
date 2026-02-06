@@ -11,7 +11,7 @@ from typing import Generator, Tuple, Union
 import numpy
 import psutil
 
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class OffCore:
@@ -66,42 +66,42 @@ def offcore_array(
         Allocated array using the most appropriate storage backend.
     """
 
-    with lsection(f"Array of shape: {shape} and dtype: {dtype} requested"):
+    with asection(f"Array of shape: {shape} and dtype: {dtype} requested"):
         size_in_bytes = numpy.prod(shape) * numpy.dtype(dtype).itemsize
-        lprint(f'Array requested will be {(size_in_bytes / 1E6)} MB.')
+        aprint(f'Array requested will be {(size_in_bytes / 1E6)} MB.')
 
         total_physical_memory_in_bytes = psutil.virtual_memory().total
         total_swap_memory_in_bytes = psutil.swap_memory().total
 
         total_mem_in_bytes = total_physical_memory_in_bytes + total_swap_memory_in_bytes
-        lprint(
+        aprint(
             f'There is {int(psutil.virtual_memory().total / 1E6)} MB of physical memory'
         )
-        lprint(f'There is {int(psutil.swap_memory().total / 1E6)} MB of swap memory')
-        lprint(f'There is {int(total_mem_in_bytes / 1E6)} MB of total memory')
+        aprint(f'There is {int(psutil.swap_memory().total / 1E6)} MB of swap memory')
+        aprint(f'There is {int(total_mem_in_bytes / 1E6)} MB of total memory')
 
         is_enough_total_memory = (
             size_in_bytes < max_memory_usage_ratio * total_mem_in_bytes
         )
 
         if not force_memmap and is_enough_total_memory:
-            lprint(
+            aprint(
                 'There is enough physical+swap memory -- we do not need to use a mem mapped array or zarr-backed array.'
             )
             array = numpy.zeros(shape, dtype=dtype)
 
         elif no_memmap_limit:
-            lprint(
+            aprint(
                 'There is not enough physical+swap memory -- we will use a mem mapped array.'
             )
             temp_file = tempfile.NamedTemporaryFile(dir=OffCore.memmap_directory)
-            lprint(
+            aprint(
                 f'The temporary memory mapped file is at: {temp_file.name} (but you might not be able to see it!)'
             )
             array = numpy.memmap(temp_file, dtype=dtype, mode='w+', shape=shape)
 
         elif zarr_allowed:
-            lprint(
+            aprint(
                 'There is not enough physical+swap memory -- we will use a zarr-backed array.'
             )
             import zarr

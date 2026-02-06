@@ -149,7 +149,7 @@ def denoise_lipschitz(
     wrapped_compute_error = jit(nopython=True, parallel=multi_core)(_compute_error)
 
     for i in range(max_num_iterations):
-        # lprint(f"Iteration {i}")
+        # aprint(f"Iteration {i}")
 
         # Compute median:
         median = uniform_filter(image, size=5)
@@ -169,7 +169,7 @@ def denoise_lipschitz(
 
         # count number of corrections for this round:
         num_corrections = numpy.sum(mask)
-        # lprint(f"Number of corrections: {num_corrections}")
+        # aprint(f"Number of corrections: {num_corrections}")
 
         # if no corrections made we stop iterating:
         if num_corrections == 0:

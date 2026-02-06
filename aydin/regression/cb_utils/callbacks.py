@@ -4,7 +4,7 @@ Provides a stop-training callback that can be used to gracefully interrupt
 CatBoost training from an external thread.
 """
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class CatBoostStopTrainingCallback:
@@ -41,7 +41,7 @@ class CatBoostStopTrainingCallback:
         bool
             ``True`` to continue training, ``False`` to stop.
         """
-        lprint(
+        aprint(
             f"{info.iteration}: learn: {info.metrics['learn']['MAE'][-1]}  test: {info.metrics['test']['MAE'][-1]}"
         )
         return self.continue_training

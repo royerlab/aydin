@@ -25,7 +25,7 @@ from aydin.regression.nn_utils.callbacks import (
     ReduceLROnPlateau,
 )
 from aydin.regression.nn_utils.models import feed_forward
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 from aydin.util.tf.device import get_best_device_name
 
 
@@ -79,8 +79,8 @@ class PerceptronRegressor(RegressorBase):
         loss = 'mse' if loss.lower() == 'l2' else loss
         self.loss = loss
 
-        with lsection("NN Regressor"):
-            lprint("with no arguments")  # TODO: fix these logs
+        with asection("NN Regressor"):
+            aprint("with no arguments")  # TODO: fix these logs
 
     def __repr__(self):
         return f"<{self.__class__.__name__}, max_epochs={self.max_epochs}, lr={self.learning_rate}, depth={self.depth}>"
@@ -114,7 +114,7 @@ class PerceptronRegressor(RegressorBase):
             Fitted neural network model wrapper.
         """
 
-        with lsection("NN Regressor fitting:"):
+        with asection("NN Regressor fitting:"):
 
             with tf.device(get_best_device_name()):
                 # First we make sure that the arrays are of a type supported:
@@ -171,10 +171,10 @@ class PerceptronRegressor(RegressorBase):
                 nb_data_points = x_train.shape[0]
                 num_features = x_train.shape[-1]
 
-                lprint(f"Number of data points : {nb_data_points}")
+                aprint(f"Number of data points : {nb_data_points}")
                 if has_valid_dataset:
-                    lprint(f"Number of validation data points: {x_valid.shape[0]}")
-                lprint(f"Number of features per data point: {num_features}")
+                    aprint(f"Number of validation data points: {x_valid.shape[0]}")
+                aprint(f"Number of features per data point: {num_features}")
 
                 # Shapes of both x and y arrays:
                 x_shape = (-1, num_features)
@@ -183,14 +183,14 @@ class PerceptronRegressor(RegressorBase):
                 # Learning rate and decay:
                 learning_rate = self.learning_rate
                 learning_rate_decay = 0.1 * self.learning_rate
-                lprint(f"Learning rate: {learning_rate}")
-                lprint(f"Learning rate decay: {learning_rate_decay}")
+                aprint(f"Learning rate: {learning_rate}")
+                aprint(f"Learning rate decay: {learning_rate_decay}")
 
                 # Weight decay and noise:
                 weight_decay = 0.01 * self.learning_rate
                 noise = 0.1 * self.learning_rate
-                lprint(f"Weight decay: {weight_decay}")
-                lprint(f"Added noise: {noise}")
+                aprint(f"Weight decay: {weight_decay}")
+                aprint(f"Added noise: {noise}")
 
                 # Initialise model if not done yet:
                 model = feed_forward(
@@ -202,7 +202,7 @@ class PerceptronRegressor(RegressorBase):
                 opt = Adam(learning_rate=learning_rate)
                 model.compile(optimizer=opt, loss=self.loss)
 
-                lprint(f"Number of parameters in model: {model.count_params()}")
+                aprint(f"Number of parameters in model: {model.count_params()}")
 
                 # Reshape arrays:
                 x_train = x_train.reshape(x_shape)
@@ -213,19 +213,19 @@ class PerceptronRegressor(RegressorBase):
                     y_valid = y_valid.reshape(y_shape)
 
                 batch_size = 1024
-                lprint(f"Keras batch size for training: {batch_size}")
+                aprint(f"Keras batch size for training: {batch_size}")
 
                 # Effective number of epochs:
                 effective_number_of_epochs = self.max_epochs
-                lprint(f"Effective max number of epochs: {effective_number_of_epochs}")
+                aprint(f"Effective max number of epochs: {effective_number_of_epochs}")
 
                 # Early stopping patience:
                 early_stopping_patience = self.patience
-                lprint(f"Early stopping patience: {early_stopping_patience}")
+                aprint(f"Early stopping patience: {early_stopping_patience}")
 
                 # Effective LR patience:
                 effective_lr_patience = max(1, self.patience // 2)
-                lprint(f"Effective LR patience: {effective_lr_patience}")
+                aprint(f"Effective LR patience: {effective_lr_patience}")
 
                 # Here is the list of callbacks:
                 callbacks = []
@@ -273,7 +273,7 @@ class PerceptronRegressor(RegressorBase):
                 # y_valid = y_valid.astype(numpy.float64)
 
                 # Training happens here:
-                with lsection("NN regressor fitting now:"):
+                with asection("NN regressor fitting now:"):
                     train_history = model.fit(
                         x_train,
                         y_train,
@@ -288,18 +288,18 @@ class PerceptronRegressor(RegressorBase):
                         verbose=0,  # 0 if is_batch else 1,
                         callbacks=callbacks,
                     )
-                    lprint("NN regressor fitting done.")
+                    aprint("NN regressor fitting done.")
 
                 del x_train
                 del y_train
 
                 # Reload the best weights:
                 if exists(model_file_path):
-                    lprint("Loading best model to date.")
+                    aprint("Loading best model to date.")
                     model.load_weights(model_file_path)
 
                 # loss_history = train_history.history['loss']
-                # lprint(f"Loss history after training: {loss_history}")
+                # aprint(f"Loss history after training: {loss_history}")
 
                 if 'val_loss' in train_history.history:
                     self.last_val_loss = train_history.history['val_loss'][0]
@@ -401,11 +401,11 @@ class _NNModel:
             Predicted values, cast back to the original target dtype if
             integer rescaling was used during training.
         """
-        with lsection("NN Regressor prediction:"):
+        with asection("NN Regressor prediction:"):
 
             with tf.device(get_best_device_name()):
-                lprint(f"Number of data points             : {x.shape[0]}")
-                lprint(f"Number of features per data points: {x.shape[-1]}")
+                aprint(f"Number of data points             : {x.shape[0]}")
+                aprint(f"Number of features per data points: {x.shape[-1]}")
 
                 # Number of features:
                 num_of_features = x.shape[-1]
@@ -432,12 +432,12 @@ class _NNModel:
                     batch_size, (700000 * max_gpu_mem_in_bytes) // 12884901888
                 )
 
-                lprint(f"Batch size: {batch_size}")
-                lprint(f"Predicting. features shape = {x.shape}")
+                aprint(f"Batch size: {batch_size}")
+                aprint(f"Predicting. features shape = {x.shape}")
 
-                lprint("NN regressor predicting now...")
+                aprint("NN regressor predicting now...")
                 yp = self.model.predict(x, batch_size=batch_size)
-                lprint("NN regressor predicting done!")
+                aprint("NN regressor predicting done!")
 
                 # We cast back yp to the correct type and range:
                 if self.original_y_dtype is not None:

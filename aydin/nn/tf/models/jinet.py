@@ -13,7 +13,7 @@ from keras.optimizers import Adam
 
 from aydin.nn.tf.models.utils.conv_block import conv2d_torch, conv3d_torch
 from aydin.nn.tf.models.utils.training_architectures import get_jinet_fit_args
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 @deprecated(
@@ -239,7 +239,7 @@ class JINetModel(Model):
         # stack all features into one tensor:
         x = Concatenate(axis=-1)(dilated_conv_list)
 
-        lprint("after concat", x.shape)
+        aprint("after concat", x.shape)
         # We keep the number of features:
         self.total_num_features = total_num_features
 

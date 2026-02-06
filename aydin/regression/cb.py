@@ -17,7 +17,7 @@ from catboost import CatBoostError, CatBoostRegressor, Pool
 
 from aydin.regression.base import RegressorBase
 from aydin.regression.cb_utils.callbacks import CatBoostStopTrainingCallback
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class CBRegressor(RegressorBase):
@@ -167,9 +167,9 @@ class CBRegressor(RegressorBase):
         self.gpu_use_pinned_ram = gpu_use_pinned_ram
         self.gpu_devices = gpu_devices
 
-        with lsection("CB Regressor"):
-            lprint(f"patience: {self.early_stopping_rounds}")
-            lprint(f"gpu: {self.gpu}")
+        with asection("CB Regressor"):
+            aprint(f"patience: {self.early_stopping_rounds}")
+            aprint(f"gpu: {self.gpu}")
 
     def __repr__(self):
         return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}, gpu={self.gpu}>"
@@ -208,7 +208,7 @@ class CBRegressor(RegressorBase):
 
         # Setting min data in leaf:
         min_data_in_leaf = 20 + int(0.01 * (num_samples / self.num_leaves))
-        lprint(f'min_data_in_leaf: {min_data_in_leaf}')
+        aprint(f'min_data_in_leaf: {min_data_in_leaf}')
 
         # Normalise losses/metrics/objectives:
         objective: str = self.metric
@@ -222,23 +222,23 @@ class CBRegressor(RegressorBase):
             objective = 'Expectile:alpha=0.5'
         else:
             objective = 'l1'
-        lprint(f'objective: {objective}')
+        aprint(f'objective: {objective}')
 
         # We pick a max depth:
         max_depth = max(3, int(math.log2(self.num_leaves)) - 1)
         max_depth = min(max_depth, 8) if use_gpu else max_depth
-        lprint(f'max_depth: {max_depth}')
+        aprint(f'max_depth: {max_depth}')
 
         # If the dataset is really big we want to switch to pinned memeory:
         if self.gpu_use_pinned_ram is None:
             gpu_ram_type = 'CpuPinnedMemory' if num_samples > 10e6 else 'GpuRam'
         else:
             gpu_ram_type = 'CpuPinnedMemory' if self.gpu_use_pinned_ram else 'GpuRam'
-        lprint(f'gpu_ram_type: {gpu_ram_type}')
+        aprint(f'gpu_ram_type: {gpu_ram_type}')
 
         # Setting max number of iterations:
         iterations = self.max_num_estimators
-        lprint(f'max_num_estimators: {iterations}')
+        aprint(f'max_num_estimators: {iterations}')
 
         params = {
             "iterations": iterations,
@@ -304,16 +304,16 @@ class CBRegressor(RegressorBase):
         _CBModel
             Fitted CatBoost model wrapper.
         """
-        with lsection("CatBoost regressor fitting:"):
+        with asection("CatBoost regressor fitting:"):
 
             nb_data_points = y_train.shape[0]
             self.num_features = x_train.shape[-1]
             has_valid_dataset = x_valid is not None and y_valid is not None
 
-            lprint(f"Number of data points: {nb_data_points}")
+            aprint(f"Number of data points: {nb_data_points}")
             if has_valid_dataset:
-                lprint(f"Number of validation data points: {y_valid.shape[0]}")
-            lprint(f"Number of features per data point: {self.num_features}")
+                aprint(f"Number of validation data points: {y_valid.shape[0]}")
+            aprint(f"Number of features per data point: {self.num_features}")
 
             # Train folder to store training info:
             train_folder = mkdtemp(prefix="catboost_training_")
@@ -322,7 +322,7 @@ class CBRegressor(RegressorBase):
 
             model = None
 
-            with lsection(
+            with asection(
                 f"CatBoost regressor fitting now using {f'GPU({self.gpu_devices})' if self.gpu else 'CPU'} "
             ):
                 # CatBoost prefers float32 arrays:
@@ -347,7 +347,7 @@ class CBRegressor(RegressorBase):
                 for i in range(10):
                     if not self.stop_training_callback.continue_training:
                         break
-                    lprint(
+                    aprint(
                         f"Trying learning rate of '{learning_rate}' (None -> automatic)"
                     )
 
@@ -359,7 +359,7 @@ class CBRegressor(RegressorBase):
                             use_gpu=self.gpu,
                             train_folder=train_folder,
                         )
-                        lprint(f"Initialising CatBoost with {params}")
+                        aprint(f"Initialising CatBoost with {params}")
                         model = CatBoostRegressor(**params)
 
                         # Logging callback:
@@ -367,7 +367,7 @@ class CBRegressor(RegressorBase):
                             def after_iteration(self, info):
                                 iteration = info.iteration
                                 metrics = info.metrics
-                                lprint(f"Iteration: {iteration} metrics: {metrics}")
+                                aprint(f"Iteration: {iteration} metrics: {metrics}")
                                 return True
 
                         # Callbacks:
@@ -376,7 +376,7 @@ class CBRegressor(RegressorBase):
                         # When to be silent? when we actually can printout the logs.
                         silent = not self.gpu
 
-                        lprint(
+                        aprint(
                             f"Fitting CatBoost model for: X{x_train_shape} -> y{y_train_shape}"
                         )
                         model.fit(
@@ -388,8 +388,8 @@ class CBRegressor(RegressorBase):
                             silent=silent,
                         )
                     except CatBoostError as e:
-                        lprint(e)
-                        lprint("GPU training likely failed, switching to CPU.")
+                        aprint(e)
+                        aprint("GPU training likely failed, switching to CPU.")
                         self.gpu = False
                         # next attempt next...
                         continue
@@ -401,7 +401,7 @@ class CBRegressor(RegressorBase):
                         or model.best_iteration_ > self.min_num_estimators
                     ):
                         self.learning_rate = learning_rate
-                        lprint(
+                        aprint(
                             f"CatBoost fitting succeeded! new learning rate for regressor: {learning_rate}"
                         )
                         break
@@ -412,12 +412,12 @@ class CBRegressor(RegressorBase):
                             # with the (relatively high) default value of 0.1
                             learning_rate = 2 * 0.1
                         learning_rate *= 0.5
-                        lprint(
+                        aprint(
                             f"CatBoost fitting failed! best_iteration=={model.best_iteration_} < {self.min_num_estimators} reducing learning rate to: {learning_rate}"
                         )
                         gc.collect()
 
-                lprint("CatBoost fitting done.")
+                aprint("CatBoost fitting done.")
 
             if has_valid_dataset and model is not None:
                 valid_loss = model.get_best_score()['validation'][params['objective']]
@@ -521,12 +521,12 @@ class _CBModel:
         numpy.ndarray
             Predicted values as float32 array.
         """
-        with lsection("CatBoost regressor prediction"):
+        with asection("CatBoost regressor prediction"):
 
-            lprint(f"Number of data points             : {x.shape[0]}")
-            lprint(f"Number of features per data points: {x.shape[-1]}")
+            aprint(f"Number of data points             : {x.shape[0]}")
+            aprint(f"Number of features per data points: {x.shape[-1]}")
 
-            lprint("Converting input to CatBoost's Pool format...")
+            aprint("Converting input to CatBoost's Pool format...")
             # CatBoost prefers float32 arrays:
             x = x.astype(dtype=numpy.float32, copy=False)
             # Create pool object:
@@ -540,17 +540,17 @@ class _CBModel:
                     task_type=task_type,
                 ).astype(numpy.float32, copy=False)
 
-            with lsection("CatBoost prediction now"):
+            with asection("CatBoost prediction now"):
                 prediction = _predict('CPU')
 
                 # Unfortunately this does not work yet, please keep code for when it does...
                 # try:
-                #     lprint("Trying GPU inference...")
+                #     aprint("Trying GPU inference...")
                 #     prediction = _predict('GPU')
-                #     lprint("Success!")
+                #     aprint("Success!")
                 # except:
-                #     lprint("GPU inference failed, trying CPU inference instead...")
+                #     aprint("GPU inference failed, trying CPU inference instead...")
                 #     prediction = _predict('CPU')
 
-            lprint("CatBoost regressor predicting done!")
+            aprint("CatBoost regressor predicting done!")
             return prediction

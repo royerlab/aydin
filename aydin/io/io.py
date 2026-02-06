@@ -27,7 +27,7 @@ from numpy import array_equal
 from tifffile import TiffFile, memmap, tifffile
 
 from aydin.io.utils import is_zarr_storage, read_zarr_array
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 def is_batch(code, shape, axes):
@@ -162,7 +162,7 @@ def imread(input_path):
         Metadata about the image file. None if reading fails.
     """
 
-    with lsection(f"Reading image file at: {input_path}"):
+    with asection(f"Reading image file at: {input_path}"):
 
         metadata = FileMetadata()
 
@@ -183,13 +183,13 @@ def imread(input_path):
             if is_zarr:
                 g = zarr.open(input_path, mode='r')
                 if isinstance(g, zarr.Array):
-                    lprint(f"Reading file {input_path} as ZARR array")
+                    aprint(f"Reading file {input_path} as ZARR array")
 
                     if 'axes' in g.attrs:
                         metadata.axes = g.attrs['axes']
                 else:
                     # Then we treat it as dexp-convention zarr group
-                    lprint(f"Reading file {input_path} as ZARR group")
+                    aprint(f"Reading file {input_path} as ZARR group")
                     nb_arrays = 0
                     for key in g.group_keys():
                         nb_arrays += 1
@@ -202,7 +202,7 @@ def imread(input_path):
                 metadata.dtype = array.dtype
 
             elif is_tiff:
-                lprint(f"Reading file {input_path} as TIFF file")
+                aprint(f"Reading file {input_path} as TIFF file")
                 with TiffFile(input_path) as tif:
                     if len(tif.series) >= 1:
                         serie = tif.series[0]
@@ -211,13 +211,13 @@ def imread(input_path):
                         metadata.axes = serie.axes
                         metadata.other = tif.imagej_metadata
                     else:
-                        lprint(f'There is no series in file: {input_path}')
+                        aprint(f'There is no series in file: {input_path}')
 
                 metadata.format = 'tiff'
                 array = tifffile.imread(input_path)
 
             elif is_czi:
-                lprint(f"Reading file {input_path} as CZI file")
+                aprint(f"Reading file {input_path} as CZI file")
                 with CziFile(input_path) as czi:
                     metadata.format = 'czi'
                     metadata.axes = czi.axes
@@ -228,7 +228,7 @@ def imread(input_path):
                 array = czifile.imread(input_path)
 
             elif is_png or is_jpg:
-                lprint(f"Reading file {input_path} as PNG file")
+                aprint(f"Reading file {input_path} as PNG file")
                 array = skimage.io.imread(input_path)
 
                 # We check if this is a gray level image:
@@ -253,11 +253,11 @@ def imread(input_path):
                     metadata.axes = "ZYXC"
                 else:
                     metadata.axes = "ZYXC"
-                    lprint(
+                    aprint(
                         f"Warning: Can't interpret {'png' if is_png else 'jpg'} structure, might be incorrect!"
                     )
             elif is_npy:
-                lprint(f"Reading file {input_path} as NPY file")
+                aprint(f"Reading file {input_path} as NPY file")
 
                 array = numpy.load(input_path)
                 metadata.format = 'npy'
@@ -266,10 +266,10 @@ def imread(input_path):
                 metadata.axes = ''.join(('Q',) * len(array.shape))
 
             elif is_npz:
-                lprint(f"Reading file {input_path} as NPZ file")
+                aprint(f"Reading file {input_path} as NPZ file")
 
                 data = numpy.load(input_path)
-                lprint(data.files)
+                aprint(data.files)
 
                 # this could contain several arrays, we read the one with the most voxels (good heuristic):
                 # We read the largest array:
@@ -278,19 +278,19 @@ def imread(input_path):
                 for _file in data.files:
                     _array = data[_file]
                     size = numpy.size(_array)
-                    lprint(
+                    aprint(
                         f"Reading array of name: {_file}, shape: {_array.shape}, and dtype: {_array.dtype}, size: {size}"
                     )
 
                     if biggest_size < size:
-                        lprint("Bigger!")
+                        aprint("Bigger!")
                         file = _file
                         biggest_size = size
                         array = _array
 
                 # makse sure the array is 'clean':
                 array = numpy.asarray(array)
-                lprint(
+                aprint(
                     f"Selected array: name: {file}, shape: {array.shape}, and dtype: {array.dtype}"
                 )
                 metadata.format = 'npz'
@@ -301,7 +301,7 @@ def imread(input_path):
                 ]
 
             elif is_nd2:
-                lprint(f"Reading file {input_path} as ND2 file")
+                aprint(f"Reading file {input_path} as ND2 file")
                 import pims
 
                 n2image = ND2Reader(input_path)
@@ -315,7 +315,7 @@ def imread(input_path):
                 metadata.dtype = array.dtype
 
             elif is_globlist:
-                lprint(f"Reading file {input_path} as file list")
+                aprint(f"Reading file {input_path} as file list")
                 import pims
 
                 array = pims.ImageSequence(input_path)
@@ -370,17 +370,17 @@ def imread(input_path):
                         0 : array.ndim
                     ]
                 except Exception as error:
-                    lprint(error)
-                    lprint(traceback.format_exc())
-                    lprint(
+                    aprint(error)
+                    aprint(traceback.format_exc())
+                    aprint(
                         f"Tried to open file {input_path} with skimage io but failed to obtain image."
                     )
                     return None, None
 
         except Exception as error:
-            lprint(error)
-            lprint(traceback.format_exc())
-            lprint(f"Could not read file {input_path} !")
+            aprint(error)
+            aprint(traceback.format_exc())
+            aprint(f"Could not read file {input_path} !")
             return None, None
 
         if metadata.axes:
@@ -392,7 +392,7 @@ def imread(input_path):
                 is_channel(axis, s) for axis, s in zip(metadata.axes, metadata.shape)
             )
 
-        lprint(f"Metadata: {metadata}")
+        aprint(f"Metadata: {metadata}")
 
         _sync_array_with_metadata(array, metadata)
 
@@ -446,7 +446,7 @@ def imwrite(array, output_path, metadata=None, overwrite=True):
         len(array.shape) > 3
         or (len(array.shape) == 3 and array.shape[-1] not in [3, 4])
     ):
-        lprint(
+        aprint(
             "png images with more than 2 dimensions are not supported, will be writing the result as a tif"
         )
         output_path = f"{output_path[:output_path.rfind('.')]}.tif"
@@ -510,6 +510,6 @@ def mapped_tiff(output_path, shape, dtype):
         array.flush()
     finally:
         del array
-        lprint(
+        aprint(
             f"Flushing and writing all bytes to TIFF file {output_path}  (shape={shape}, dtype={dtype})"
         )

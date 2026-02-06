@@ -13,7 +13,7 @@ from deprecated import deprecated
 from keras import backend
 from keras.callbacks import Callback
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 @deprecated(
@@ -176,18 +176,18 @@ class EarlyStopping(Callback):
                 self.stopped_epoch = epoch
                 self.model.stop_training = True
                 if self.restore_best_weights:
-                    lprint('Restoring model weights from the end of ' 'the best epoch')
+                    aprint('Restoring model weights from the end of ' 'the best epoch')
                     self.model.set_weights(self.best_weights)
 
         # This is where we stop training externally:
         if self.parent.stop_fitting:
-            lprint('Training externally stopped!')
+            aprint('Training externally stopped!')
             self.model.stop_training = True
 
     def on_train_end(self, logs=None):
         """on_train_end part of callback"""
         if self.stopped_epoch > 0:
-            lprint('Epoch %05d: early stopping' % (self.stopped_epoch + 1))
+            aprint('Epoch %05d: early stopping' % (self.stopped_epoch + 1))
 
     def get_monitor_value(self, logs):
         """returns the monitor value"""
@@ -340,7 +340,7 @@ class ReduceLROnPlateau(Callback):
                         new_lr = max(new_lr, self.min_lr)
                         self.model.optimizer.learning_rate.assign(new_lr)
                         if self.verbose > 0:
-                            lprint(
+                            aprint(
                                 'Epoch %05d: ReduceLROnPlateau reducing '
                                 'learning rate to %s.' % (epoch + 1, new_lr)
                             )
@@ -453,7 +453,7 @@ class ModelCheckpoint(Callback):
                 else:
                     if self.monitor_op(current, self.best):
                         if self.verbose > 0:
-                            lprint(
+                            aprint(
                                 'Epoch %05d: %s=%0.5f improved from %0.5f to %0.5f,'
                                 % (epoch + 1, self.monitor, current, self.best, current)
                             )
@@ -464,13 +464,13 @@ class ModelCheckpoint(Callback):
                             self.model.save(filepath, overwrite=True)
                     else:
                         if self.verbose > 0:
-                            lprint(
+                            aprint(
                                 'Epoch %05d: %s=%0.5f did not improve from %0.5f'
                                 % (epoch + 1, self.monitor, current, self.best)
                             )
             else:
                 if self.verbose > 0:
-                    lprint('Epoch %05d: saving model to %s' % (epoch + 1, filepath))
+                    aprint('Epoch %05d: saving model to %s' % (epoch + 1, filepath))
                 if self.save_weights_only:
                     self.model.save_weights(filepath, overwrite=True)
                 else:

@@ -11,7 +11,7 @@ import dask
 import numpy
 
 from aydin.it.normalisers.base import NormaliserBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class PercentileNormaliser(NormaliserBase):
@@ -56,7 +56,7 @@ class PercentileNormaliser(NormaliserBase):
             The computed (min_value, max_value) range based on percentiles.
         """
 
-        with lsection("Calibrating array using percentile method"):
+        with asection("Calibrating array using percentile method"):
             self.original_dtype = array.dtype
 
             if self.percentile is None:
@@ -66,7 +66,7 @@ class PercentileNormaliser(NormaliserBase):
             else:
                 p = self.percentile
 
-            lprint(f"Using percentile value: {p}")
+            aprint(f"Using percentile value: {p}")
 
             if hasattr(array, '__dask_keys__'):
                 self.rmin = dask.array.percentile(array.flatten(), 100 * p).compute()
@@ -77,6 +77,6 @@ class PercentileNormaliser(NormaliserBase):
                 self.rmin = numpy.percentile(array, 100 * p)
                 self.rmax = numpy.percentile(array, 100 - 100 * p)
 
-            lprint(f"Range for normalisation: [{self.rmin}, {self.rmax}]")
+            aprint(f"Range for normalisation: [{self.rmin}, {self.rmax}]")
 
             return self.rmin, self.rmax

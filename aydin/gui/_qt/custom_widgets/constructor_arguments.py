@@ -8,7 +8,7 @@ import numpy
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QCheckBox, QGridLayout, QLabel, QLineEdit, QWidget
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class ConstructorArgumentsWidget(QWidget):
@@ -129,7 +129,7 @@ class ConstructorArgumentsWidget(QWidget):
             )
 
         if not arg_names:
-            lprint("No parameters to configure")
+            aprint("No parameters to configure")
             self.arguments_layout.addWidget(QLabel("No parameters to configure"))
 
         self.setLayout(self.arguments_layout)

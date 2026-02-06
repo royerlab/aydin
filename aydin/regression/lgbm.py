@@ -19,7 +19,7 @@ from lightgbm import Booster, record_evaluation
 
 from aydin.regression.base import RegressorBase
 from aydin.regression.gbm_utils.callbacks import early_stopping
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class LGBMRegressor(RegressorBase):
@@ -123,13 +123,13 @@ class LGBMRegressor(RegressorBase):
         self.inference_mode = 'auto' if inference_mode is None else inference_mode
         self.compute_training_loss = compute_training_loss  # This can be expensive
 
-        with lsection("LGBM Regressor"):
-            lprint(f"learning rate: {self.learning_rate}")
-            lprint(f"number of leaves: {self.num_leaves}")
-            lprint(f"max bin: {self.max_bin}")
-            lprint(f"n_estimators: {self.max_num_estimators}")
-            lprint(f"patience: {self.early_stopping_rounds}")
-            lprint(f"inference_mode: {self.inference_mode}")
+        with asection("LGBM Regressor"):
+            aprint(f"learning rate: {self.learning_rate}")
+            aprint(f"number of leaves: {self.num_leaves}")
+            aprint(f"max bin: {self.max_bin}")
+            aprint(f"n_estimators: {self.max_num_estimators}")
+            aprint(f"patience: {self.early_stopping_rounds}")
+            aprint(f"inference_mode: {self.inference_mode}")
 
     def __repr__(self):
         return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}>"
@@ -167,18 +167,18 @@ class LGBMRegressor(RegressorBase):
         else:
             objective = 'regression_l1'
 
-        lprint(f'objective: {self.num_leaves}')
+        aprint(f'objective: {self.num_leaves}')
 
         # Setting max depth:
         max_depth = max(3, int(int(math.log2(self.num_leaves))) - 1)
-        lprint(f'max_depth:  {max_depth}')
+        aprint(f'max_depth:  {max_depth}')
 
         # Setting max bin:
         max_bin = 256 if dtype == numpy.uint8 else self.max_bin
-        lprint(f'max_bin:    {max_bin}')
+        aprint(f'max_bin:    {max_bin}')
 
-        lprint(f'learning_rate:  {self.learning_rate}')
-        lprint(f'num_leaves: {self.num_leaves}')
+        aprint(f'learning_rate:  {self.learning_rate}')
+        aprint(f'num_leaves: {self.num_leaves}')
 
         params = {
             "device": "cpu",
@@ -223,16 +223,16 @@ class LGBMRegressor(RegressorBase):
         _LGBMModel
             Fitted LightGBM model wrapper.
         """
-        with lsection("GBM regressor fitting:"):
+        with asection("GBM regressor fitting:"):
 
             nb_data_points = y_train.shape[0]
             self.num_features = x_train.shape[-1]
             has_valid_dataset = x_valid is not None and y_valid is not None
 
-            lprint(f"Number of data points: {nb_data_points}")
+            aprint(f"Number of data points: {nb_data_points}")
             if has_valid_dataset:
-                lprint(f"Number of validation data points: {y_valid.shape[0]}")
-            lprint(f"Number of features per data point: {self.num_features}")
+                aprint(f"Number of validation data points: {y_valid.shape[0]}")
+            aprint(f"Number of features per data point: {self.num_features}")
 
             train_dataset = lightgbm.Dataset(x_train, y_train)
             valid_dataset = (
@@ -249,12 +249,12 @@ class LGBMRegressor(RegressorBase):
                     val_loss = env.evaluation_result_list[0][2]
                 except Exception as e:
                     val_loss = 0
-                    lprint("Problem with getting loss from LightGBM 'env' in callback")
-                    lprint(str(e))
+                    aprint("Problem with getting loss from LightGBM 'env' in callback")
+                    aprint(str(e))
                 if regressor_callback:
                     regressor_callback(env.iteration, val_loss, env.model)
                 else:
-                    lprint(f"Epoch {self.__epoch_counter}: Validation loss: {val_loss}")
+                    aprint(f"Epoch {self.__epoch_counter}: Validation loss: {val_loss}")
                     self.__epoch_counter += 1
 
             evals_result = {}
@@ -263,7 +263,7 @@ class LGBMRegressor(RegressorBase):
                 self, self.early_stopping_rounds
             )
 
-            with lsection("GBM regressor fitting now:"):
+            with asection("GBM regressor fitting now:"):
                 model = lightgbm.train(
                     params=self._get_params(nb_data_points, dtype=x_train.dtype),
                     init_model=None,
@@ -284,7 +284,7 @@ class LGBMRegressor(RegressorBase):
                         else [lgbm_callback]
                     ),
                 )
-                lprint("GBM fitting done.")
+                aprint("GBM fitting done.")
 
             del train_dataset
             del valid_dataset
@@ -371,10 +371,10 @@ class _LGBMModel:
         numpy.ndarray
             Predicted values as float32 array.
         """
-        with lsection("GBM regressor prediction:"):
+        with asection("GBM regressor prediction:"):
 
-            lprint(f"Number of data points             : {x.shape[0]}")
-            lprint(f"Number of features per data points: {x.shape[-1]}")
+            aprint(f"Number of data points             : {x.shape[0]}")
+            aprint(f"Number of features per data points: {x.shape[-1]}")
 
             # we decide here what 'auto' means:
             if self.inference_mode == 'auto':
@@ -385,14 +385,14 @@ class _LGBMModel:
                 else:
                     self.inference_mode = 'lgbm'
 
-            lprint("GBM regressor predicting now...")
+            aprint("GBM regressor predicting now...")
             if self.inference_mode == 'lleaves' and find_spec('lleaves'):
                 try:
                     return self._predict_lleaves(x)
                 except Exception:
                     # printing stack trace
                     # traceback.print_exc()
-                    lprint("Failed lleaves-based regression!")
+                    aprint("Failed lleaves-based regression!")
 
             # This must work!
             return self._predict_lgbm(x)
@@ -411,10 +411,10 @@ class _LGBMModel:
             Predicted values.
         """
 
-        with lsection("Attempting lleaves-based regression."):
+        with asection("Attempting lleaves-based regression."):
 
             # Creating lleaves model and compiling it:
-            with lsection("Model saving and compilation"):
+            with asection("Model saving and compilation"):
                 # Creating temporary file:
                 with tempfile.NamedTemporaryFile() as temp_file:
 
@@ -448,5 +448,5 @@ class _LGBMModel:
         prediction = self.model.predict(x, num_iteration=self.model.best_iteration)
         # LGBM is annoying, it spits out float64s
         prediction = prediction.astype(numpy.float32, copy=False)
-        lprint("GBM regressor predicting done!")
+        aprint("GBM regressor predicting done!")
         return prediction

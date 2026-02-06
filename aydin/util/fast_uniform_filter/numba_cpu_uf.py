@@ -69,11 +69,11 @@ def numba_cpu_uniform_filter(
 
             filter_size = size[axis] if isinstance(size, tuple) else size
 
-            # lprint(f"axis: {axis}, filter_size: {filter_size}")
+            # aprint(f"axis: {axis}, filter_size: {filter_size}")
 
             # set the parallelism:
             parallelism = numba.get_num_threads()
-            # lprint(f"Number of threads: {parallelism}")
+            # aprint(f"Number of threads: {parallelism}")
             # max(1, int(0.9*multiprocessing.cpu_count()))
 
             uniform_filter1d_with_conditionals(

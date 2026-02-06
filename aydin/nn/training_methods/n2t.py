@@ -16,7 +16,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from aydin.nn._legacy_pytorch.optimizers.esadam import ESAdam
 from aydin.nn.datasets.noisy_gt_dataset import NoisyGroundtruthDataset
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 from aydin.util.torch.device import get_torch_device
 
 
@@ -100,7 +100,7 @@ def n2t_train(
         return torch.abs(u - v)
 
     dataset = NoisyGroundtruthDataset([input_images], [target_images], device=device)
-    lprint(f"dataset length: {len(dataset)}")
+    aprint(f"dataset length: {len(dataset)}")
     data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
 
     patience_counter = 0
@@ -115,7 +115,7 @@ def n2t_train(
             input_image = input_image.to(device)
             target_image = target_image.to(device)
 
-            lprint(f"index: {i}, shape:{input_image.shape}")
+            aprint(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
@@ -159,10 +159,10 @@ def n2t_train(
             num_batches += 1
 
         train_loss_value /= num_batches
-        lprint(f"Training loss value: {train_loss_value}")
+        aprint(f"Training loss value: {train_loss_value}")
 
         val_loss_value /= num_batches
-        lprint(f"Validation loss value: {val_loss_value}")
+        aprint(f"Validation loss value: {val_loss_value}")
 
         writer.add_scalar("Loss/train", train_loss_value, epoch)
         writer.add_scalar("Loss/valid", val_loss_value, epoch)
@@ -171,9 +171,9 @@ def n2t_train(
         scheduler.step(val_loss_value)
 
         if val_loss_value < best_val_loss_value:
-            lprint("## New best val loss!")
+            aprint("## New best val loss!")
             if val_loss_value < best_val_loss_value - patience_epsilon:
-                lprint("## Good enough to reset patience!")
+                aprint("## Good enough to reset patience!")
                 patience_counter = 0
 
             # Update best val loss value:
@@ -186,20 +186,20 @@ def n2t_train(
 
         else:
             if epoch % max(1, reload_best_model_period) == 0 and best_model_state_dict:
-                lprint("Reloading best models to date!")
+                aprint("Reloading best models to date!")
                 model.load_state_dict(best_model_state_dict)
 
             if patience_counter > patience:
-                lprint("Early stopping!")
+                aprint("Early stopping!")
                 break
 
             # No improvement:
-            lprint(
+            aprint(
                 f"No improvement of validation losses, patience = {patience_counter}/{patience} "
             )
             patience_counter += 1
 
-        lprint(f"## Best val loss: {best_val_loss_value}")
+        aprint(f"## Best val loss: {best_val_loss_value}")
 
         # if epoch % 512 == 0:
         #     print(epoch)

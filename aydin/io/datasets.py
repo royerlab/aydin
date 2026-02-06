@@ -20,7 +20,7 @@ from skimage.util import random_noise
 
 from aydin.io import io
 from aydin.io.folders import get_cache_folder
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 from aydin.util.psf.simple_microscope_psf import SimpleMicroscopePSF
 
 datasets_folder = join(get_cache_folder(), 'data')
@@ -388,11 +388,11 @@ def download_from_gdrive(
     url = f'https://drive.google.com/uc?id={id}'
     output_path = join(dest_folder, name)
     if overwrite or not exists(output_path):
-        lprint(f"Downloading file {output_path} as it does not exist yet.")
+        aprint(f"Downloading file {output_path} as it does not exist yet.")
         gdown.download(url, output_path, quiet=False)
 
         if unzip:
-            lprint(f"Unzipping file {output_path}...")
+            aprint(f"Unzipping file {output_path}...")
             zip_ref = zipfile.ZipFile(output_path, 'r')
             # Validate paths to prevent Zip Slip vulnerability
             dest_folder_real = os.path.realpath(dest_folder)
@@ -406,14 +406,14 @@ def download_from_gdrive(
 
         return output_path
     else:
-        lprint(f"Not downloading file {output_path} as it already exists.")
+        aprint(f"Not downloading file {output_path} as it already exists.")
         return None
 
 
 def download_all_examples():
     """Download all example images to the local cache."""
     for example in examples_single:
-        lprint(download_from_gdrive(*example.value))
+        aprint(download_from_gdrive(*example.value))
 
 
 def downloaded_example(substring):
@@ -426,4 +426,4 @@ def downloaded_example(substring):
     """
     for example in examples_single:
         if substring in example.value[1]:
-            lprint(download_from_gdrive(*example.value))
+            aprint(download_from_gdrive(*example.value))

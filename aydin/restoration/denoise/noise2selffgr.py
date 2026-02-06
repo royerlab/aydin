@@ -26,7 +26,7 @@ from aydin.regression.perceptron import PerceptronRegressor
 from aydin.regression.random_forest import RandomForestRegressor
 from aydin.regression.support_vector import SupportVectorRegressor
 from aydin.restoration.denoise.base import DenoiseRestorationBase
-from aydin.util.log.log import lsection
+from aydin.util.log.log import asection
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):
@@ -279,7 +279,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             Additional keyword arguments. Supports ``'train_valid_ratio'``,
             ``'callback_period'``, and ``'jinv'``.
         """
-        with lsection("Noise2Self train is starting..."):
+        with asection("Noise2Self train is starting..."):
 
             self.it = self.get_translator(
                 feature_generator=self.get_generator(), regressor=self.get_regressor()
@@ -323,7 +323,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         numpy.ndarray
             The denoised image, cast to the input image's dtype.
         """
-        with lsection("Noise2Self denoise is starting..."):
+        with asection("Noise2Self denoise is starting..."):
 
             # Predict the resulting image
             response = self.it.translate(

@@ -19,7 +19,7 @@ from aydin.it.base import ImageTranslatorBase
 from aydin.regression.base import RegressorBase
 from aydin.regression.cb import CBRegressor
 from aydin.util.array.nd import nd_split_slices
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 from aydin.util.offcore.offcore import offcore_array
 
 
@@ -161,8 +161,8 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         # directly as features. This is not intended to be used directly by users.
         self._passthrough_channels = None
 
-        with lsection("FGR image translator"):
-            lprint(f"balance training data: {self.balance_training_data}")
+        with asection("FGR image translator"):
+            aprint(f"balance training data: {self.balance_training_data}")
 
     def __repr__(self):
         """Return a string representation of the FGR translator."""
@@ -181,7 +181,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         str
             Concatenated JSON strings of the serialized components.
         """
-        with lsection(f"Saving 'fgr' image translator to {path}"):
+        with asection(f"Saving 'fgr' image translator to {path}"):
             frozen = super().save(path)
             frozen += self.feature_generator.save(path) + '\n'
             frozen += self.regressor.save(path) + '\n'
@@ -196,7 +196,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         path : str
             Directory path to load from.
         """
-        with lsection(f"Loading 'fgr' image translator from {path}"):
+        with asection(f"Loading 'fgr' image translator from {path}"):
             self.feature_generator = FeatureGeneratorBase.load(path)
             self.regressor = RegressorBase.load(path)
 
@@ -237,7 +237,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         tuple of (float, float)
             A tuple of (memory_needed, memory_available) in bytes.
         """
-        with lsection(
+        with asection(
             "Estimating the amount of memory needed to store feature arrays:"
         ):
             num_spatio_temp_dim = len(image.shape[2:])
@@ -303,7 +303,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             if features_last, or (num_features, num_voxels) otherwise.
         """
 
-        with lsection(f"Computing features for image of shape {image.shape}:"):
+        with asection(f"Computing features for image of shape {image.shape}:"):
             excluded_voxels = (
                 None
                 if self.blind_spots is None or 'center' in self.blind_spots
@@ -316,9 +316,9 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                 )
             )
 
-            lprint(f"exclude_center_feature = {exclude_center_feature}")
-            lprint(f"exclude_center_value   = {exclude_center_value}")
-            lprint(f"excluded_voxels        = {excluded_voxels}")
+            aprint(f"exclude_center_feature = {exclude_center_feature}")
+            aprint(f"exclude_center_value   = {exclude_center_value}")
+            aprint(f"excluded_voxels        = {excluded_voxels}")
 
             # If this is a part of a larger image, we can figure out what are the offsets and scales for the spatial features:
             spatial_feature_scale = (
@@ -329,8 +329,8 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             spatial_feature_offset = (
                 None if image_slice is None else tuple(s.start for s in image_slice[2:])
             )
-            lprint(f"spatial_feature_scale     = {spatial_feature_scale}")
-            lprint(f"spatial_feature_offset    = {spatial_feature_offset}")
+            aprint(f"spatial_feature_scale     = {spatial_feature_scale}")
+            aprint(f"spatial_feature_offset    = {spatial_feature_offset}")
 
             features = self.feature_generator.compute(
                 image,
@@ -373,7 +373,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         jinv : bool or tuple of bool, optional
             Controls J-invariance behavior for feature computation.
         """
-        with lsection(
+        with asection(
             f"Training image translator from image of shape {input_image.shape} to image of shape {target_image.shape}:"
         ):
 
@@ -401,8 +401,8 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                 min_margin=self.tile_min_margin,
                 max_margin=self.tile_max_margin,
             )
-            lprint(f"Tilling strategy (just batches): {tilling_strategy}")
-            lprint(f"Margins for tiles: {margins} .")
+            aprint(f"Tilling strategy (just batches): {tilling_strategy}")
+            aprint(f"Margins for tiles: {margins} .")
 
             # tile slice objects with margins:
             tile_slices_margins = list(
@@ -413,13 +413,13 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
             # Number of tiles:
             number_of_tiles = len(tile_slices_margins)
-            lprint(f"Number of tiles (slices): {number_of_tiles}")
+            aprint(f"Number of tiles (slices): {number_of_tiles}")
 
             # We initialise the arrays:
             x_train, x_valid, y_train, y_valid = (None,) * 4
 
             for idx, slice_margin_tuple in enumerate(tile_slices_margins):
-                with lsection(
+                with asection(
                     f"Current tile: {idx}/{number_of_tiles}, slice: {slice_margin_tuple} "
                 ):
 
@@ -441,7 +441,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                     num_features_tile = x_tile.shape[0]
                     num_entries_tile = y_tile.shape[1]
 
-                    lprint(
+                    aprint(
                         f"Number of entries: {num_entries_tile}, features: {num_features_tile}, input channels: {num_input_channels}, target channels: {num_target_channels}"
                     )
 
@@ -476,7 +476,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                         y_train = numpy.append(y_train, y_train_tile, axis=1)
                         y_valid = numpy.append(y_valid, y_valid_tile, axis=1)
 
-            lprint("Training now...")
+            aprint("Training now...")
             self.regressor.fit(
                 x_train=x_train,
                 y_train=y_train,
@@ -601,16 +601,16 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         target_image : numpy.ndarray
             Shape-normalized target image.
         """
-        with lsection("Preparing train/validation split"):
+        with asection("Preparing train/validation split"):
             # the number of voxels:
             num_of_voxels = input_image.size
-            lprint(
+            aprint(
                 f"Image has: {num_of_voxels} voxels, at most: {self.max_voxels_for_training} voxels will be used for training or validation."
             )
             # This is the ratio of pixels to keep:
             max_voxels_keep_ratio = float(self.max_voxels_for_training) / num_of_voxels
             effective_keep_ratio = min(self.voxel_keep_ratio, max_voxels_keep_ratio)
-            lprint(
+            aprint(
                 f"Given train ratio is: {self.voxel_keep_ratio}, max_voxels induced keep-ratio is: {max_voxels_keep_ratio}"
             )
 
@@ -627,15 +627,15 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                 else self.balance_training_data
             )
 
-            lprint(
+            aprint(
                 f"Data histogram balancer is: {'active' if balance_training_data else 'inactive'}"
             )
-            lprint(f"Effective keep-ratio is: {effective_keep_ratio}")
-            lprint(
+            aprint(f"Effective keep-ratio is: {effective_keep_ratio}")
+            aprint(
                 f"Favouring bright pixels: {'yes' if self.favour_bright_pixels > 0 else 'no'}"
             )
             if self.favour_bright_pixels != 0:
-                lprint(
+                aprint(
                     f"Favouring bright pixels by a linear slope of: {self.favour_bright_pixels}"
                 )
 
@@ -654,7 +654,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                     )
                 )
             )
-            lprint(f"Using contiguous batches of length: {batch_length} ")
+            aprint(f"Using contiguous batches of length: {batch_length} ")
             # We create a balancer common to all tiles:
             balancer = DataHistogramBalancer(
                 balance=balance_training_data,
@@ -662,7 +662,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                 favour_bright_pixels=self.favour_bright_pixels,
             )
             # Calibration of the balancer is done on the entire image:
-            lprint("Calibrating balancer...")
+            aprint("Calibrating balancer...")
             balancer.calibrate(target_image.ravel(), batch_length)
 
             # Keep both balancer and batch length
@@ -693,7 +693,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         tuple of (numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray)
             (x_train, x_valid, y_train, y_valid) arrays.
         """
-        with lsection(
+        with asection(
             f"Splitting train and test sets (train_test_ratio={train_valid_ratio}) "
         ):
             balancer: DataHistogramBalancer = self.train_val_split_balancer
@@ -703,7 +703,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             nb_entries = y.shape[1]
 
             nb_split_batches = max(nb_entries // batch_length, 64)
-            lprint(
+            aprint(
                 f"Creating random indices for train/val split (nb_split_batches={nb_split_batches})"
             )
 
@@ -711,21 +711,21 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             nb_split_batches_train = nb_split_batches - nb_split_batches_valid
             is_train_array = numpy.full(nb_split_batches, False)
             is_train_array[nb_split_batches_valid:] = True
-            lprint(f"train/valid bool array created (length={is_train_array.shape[0]})")
+            aprint(f"train/valid bool array created (length={is_train_array.shape[0]})")
 
-            lprint("Shuffling train/valid bool array...")
+            aprint("Shuffling train/valid bool array...")
             numpy.random.shuffle(is_train_array)
 
-            lprint("Calculating number of entries for train and validation...")
+            aprint("Calculating number of entries for train and validation...")
             nb_entries_per_split_batch = max(1, nb_entries // nb_split_batches)
             nb_entries_train = nb_split_batches_train * nb_entries_per_split_batch
             nb_entries_valid = nb_split_batches_valid * nb_entries_per_split_batch
 
-            lprint(
+            aprint(
                 f"Number of entries for training: {nb_entries_train} = {nb_split_batches_train}*{nb_entries_per_split_batch}, validation: {nb_entries_valid} = {nb_split_batches_valid} * {nb_entries_per_split_batch}"
             )
 
-            lprint("Allocating arrays...")
+            aprint("Allocating arrays...")
             x_train = offcore_array(
                 shape=(nb_features, nb_entries_train),
                 dtype=x.dtype,
@@ -747,7 +747,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                 max_memory_usage_ratio=self.max_memory_usage_ratio,
             )
 
-            with lsection("Copying data for training and validation sets..."):
+            with asection("Copying data for training and validation sets..."):
 
                 # We use a random permutation to avoid having the balancer drop only from the 'end' of the image
                 permutation = numpy.random.permutation(nb_split_batches)
@@ -760,7 +760,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
                 for is_train in numpy.nditer(is_train_array):
                     if i % (nb_split_batches // 64) == 0:
-                        lprint(
+                        aprint(
                             f"Copying section [{i},{min(nb_split_batches, i + nb_split_batches // 64)}]"
                         )
 
@@ -803,19 +803,19 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                 x_valid = x_valid[:, 0:dst_stop_valid]
                 y_valid = y_valid[:, 0:dst_stop_valid]
 
-                lprint(f"Histogram all    : {balancer.get_histogram_all_as_string()}")
-                lprint(f"Histogram kept   : {balancer.get_histogram_kept_as_string()}")
-                lprint(
+                aprint(f"Histogram all    : {balancer.get_histogram_all_as_string()}")
+                aprint(f"Histogram kept   : {balancer.get_histogram_kept_as_string()}")
+                aprint(
                     f"Histogram dropped: {balancer.get_histogram_dropped_as_string()}"
                 )
-                lprint(
+                aprint(
                     f"Number of entries kept: {balancer.total_kept()} out of {balancer.total_entries} total"
                 )
-                lprint(
+                aprint(
                     f"Percentage of data kept: {100 * balancer.percentage_kept():.3f}% (train_data_ratio={balancer.keep_ratio}) "
                 )
                 if balancer.keep_ratio >= 1 and balancer.percentage_kept() < 1:
-                    lprint(
+                    aprint(
                         "Note: balancer has dropped entries that fell on over-represented histogram bins"
                     )
         return x_train, x_valid, y_train, y_valid
@@ -850,10 +850,10 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             whole_image_shape=whole_image_shape,
         )
 
-        with lsection(
+        with asection(
             f"Predict from feature vector of dimension {x.shape} and dtype: {x.dtype}:"
         ):
-            lprint("Predicting... ")
+            aprint("Predicting... ")
             # Predict using regressor:
             yp = self.regressor.predict(x)
 
@@ -864,7 +864,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             # We reshape the array:
             num_target_channels = yp.shape[0]
             translated_image_shape = (num_batches, num_target_channels) + shape[2:]
-            lprint(f"Reshaping array to {translated_image_shape}... ")
+            aprint(f"Reshaping array to {translated_image_shape}... ")
             inferred_image = yp.reshape(translated_image_shape)
 
         return inferred_image

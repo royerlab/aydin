@@ -6,7 +6,7 @@ based on filter size for optimal performance.
 
 from aydin.util.fast_uniform_filter.numba_cpu_uf import numba_cpu_uniform_filter
 from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def uniform_filter_auto(image, size: int, printout_choice: bool = False):
@@ -40,11 +40,11 @@ def uniform_filter_auto(image, size: int, printout_choice: bool = False):
         # Numba scales well for large filter sizes:
         output = numba_cpu_uniform_filter(image, size=size, mode="nearest")
         if printout_choice:
-            lprint(f"Computed filter of size: {size} with Numba")
+            aprint(f"Computed filter of size: {size} with Numba")
     else:
         # Scipy parallel is more efficient for small filter sizes:
         output = parallel_uniform_filter(image, size=size, mode="nearest")
         if printout_choice:
-            lprint(f"Computed filter of size: {size} with parallel scipy")
+            aprint(f"Computed filter of size: {size} with parallel scipy")
 
     return output

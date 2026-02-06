@@ -13,7 +13,7 @@ from scipy.ndimage import uniform_filter
 
 from aydin.it.classic_denoisers.lipschitz import denoise_lipschitz
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class SaltPepperTransform(ImageTransformBase):
@@ -99,7 +99,7 @@ class SaltPepperTransform(ImageTransformBase):
 
         self._original_dtype = None
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -137,7 +137,7 @@ class SaltPepperTransform(ImageTransformBase):
             Corrected image as float32.
         """
 
-        with lsection(
+        with asection(
             f"Broken Pixels Correction for array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
             # We save the original dtype:
@@ -178,25 +178,25 @@ class SaltPepperTransform(ImageTransformBase):
         return array
 
     def _repeated_value_method(self, array: ArrayLike):
-        with lsection(
+        with asection(
             "Correcting for wrong pixels values using the 'repeated-value' approach:"
         ):
             unique, counts = numpy.unique(array, return_counts=True)
 
             # How many unique values in image?
             num_unique_values = unique.size
-            lprint(f"Number of unique values in image: {num_unique_values}.")
+            aprint(f"Number of unique values in image: {num_unique_values}.")
 
             # Most occuring value
             most_occuring_value = unique[numpy.argmax(counts)]
             highest_count = numpy.max(counts)
-            lprint(
+            aprint(
                 f"Most occurring value in array: {most_occuring_value}, {highest_count} times."
             )
 
             # Assuming a uniform distribution we would expect each value to be used at most:
             average_count = array.size // num_unique_values
-            lprint(
+            aprint(
                 f"Average number of occurences of a value assuming uniform distribution: {average_count}"
             )
 
@@ -214,22 +214,22 @@ class SaltPepperTransform(ImageTransformBase):
             n = self.max_repeated
             n = min(n, len(selected_counts))
             max_tolerated_count = selected_counts[-n]
-            lprint(f"Maximum tolerated count per value: {max_tolerated_count}.")
+            aprint(f"Maximum tolerated count per value: {max_tolerated_count}.")
 
             # If a voxel value appears over more than 0.1% of voxels, then it is a problematic value:
             problematic_counts_mask = counts > max_tolerated_count
             problematic_counts = counts[problematic_counts_mask]
             problematic_values = unique[problematic_counts_mask]
 
-            lprint(f"Problematic values: {list(problematic_values)}.")
-            lprint(f"Problematic counts: {list(problematic_counts)}.")
+            aprint(f"Problematic values: {list(problematic_values)}.")
+            aprint(f"Problematic counts: {list(problematic_counts)}.")
 
             # We construct the mask of good values:
             good_values_mask = numpy.ones_like(array, dtype=numpy.bool_)
             for problematic_value in problematic_values:
                 good_values_mask &= array != problematic_value
 
-            with lsection(f"Correcting voxels with values: {problematic_values}."):
+            with asection(f"Correcting voxels with values: {problematic_values}."):
 
                 # We save the good values (copy!):
                 good_values = array[good_values_mask].copy()
@@ -242,7 +242,7 @@ class SaltPepperTransform(ImageTransformBase):
 
                 # We solve the harmonic equation:
                 for i in range(num_iterations):
-                    lprint(f"Iteration {i}")
+                    aprint(f"Iteration {i}")
                     # We compute the median:
                     array = uniform_filter(array, size=3)
                     # We use the median to correct pixels:
@@ -250,13 +250,13 @@ class SaltPepperTransform(ImageTransformBase):
 
                 # count number of corrections for this round:
                 num_corrections = numpy.sum(mask)
-                lprint(f"Number of corrections: {num_corrections}.")
+                aprint(f"Number of corrections: {num_corrections}.")
 
         return array
 
     def _lipschitz_method(self, array):
         # Iterations:
-        with lsection(
+        with asection(
             "Correcting for wrong pixels values using the Lipschitz approach:"
         ):
             array = denoise_lipschitz(
@@ -270,7 +270,7 @@ class SaltPepperTransform(ImageTransformBase):
 
             # OLD METHOD KEEP!
             # for i in range(self.num_iterations):
-            #     lprint(f"Iteration {i}")
+            #     aprint(f"Iteration {i}")
             #
             #     # Compute median:
             #     median = median_filter(array, size=3)
@@ -294,7 +294,7 @@ class SaltPepperTransform(ImageTransformBase):
             #
             #     # count number of corrections for this round:
             #     num_corrections = numpy.sum(mask)
-            #     lprint(f"Number of corrections: {num_corrections}")
+            #     aprint(f"Number of corrections: {num_corrections}")
             #
             #     # if no corrections made we stop iterating:
             #     if num_corrections == 0:
@@ -304,7 +304,7 @@ class SaltPepperTransform(ImageTransformBase):
             #     proportion = (
             #         num_corrections + total_number_of_corrections
             #     ) / array.size
-            #     lprint(
+            #     aprint(
             #         f"Proportion of corrected pixels: {int(proportion * 100)}% (up to now), versus maximum: {int(self.max_proportion_corrected * 100)}%) "
             #     )
             #

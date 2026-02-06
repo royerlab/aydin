@@ -16,7 +16,7 @@ from numpy.linalg import LinAlgError, norm
 from scipy.interpolate import RBFInterpolator
 from scipy.optimize import minimize
 
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class Optimizer:
@@ -129,7 +129,7 @@ class Optimizer:
             init_strategies = 'three+random'
 
         # First we initialise with some points on the corners:
-        with lsection("Evaluating function at corners (and centers)"):
+        with asection("Evaluating function at corners (and centers)"):
             if 'two' in init_strategies:
                 init_grid = copy(bounds)
             elif 'three' in init_strategies:
@@ -146,7 +146,7 @@ class Optimizer:
 
             # Then we initialise with some random points:
             if 'random' in init_strategies:
-                with lsection("Evaluating function at random points"):
+                with asection("Evaluating function at random points"):
                     point_list = list(
                         self._random_sample() for _ in range(min(4, 2 * n))
                     )
@@ -156,12 +156,12 @@ class Optimizer:
         self.since_last_best = 0
 
         # This is the main loop that evaluates the function:
-        with lsection(
+        with asection(
             f"Optimizing function with at most {max_num_evaluations} function evaluations within: {bounds}"
         ):
             for i in range(max_num_evaluations):
-                # lprint(f"Evaluation #{i}")
-                # lprint(f"x={x}")
+                # aprint(f"Evaluation #{i}")
+                # aprint(f"x={x}")
 
                 # Given the existing points, we can build the interpolating function:
                 try:
@@ -184,25 +184,25 @@ class Optimizer:
                     # We add that point to the list of points:
                     has_new_best = self._add_points([new_point])
 
-                    lprint(
+                    aprint(
                         f"{i}{'!' if has_new_best else' '}: {' Exploring' if do_explore else 'Optimizing'}, Best point: {self.best_point}, best value: {self.best_value}, new point: {new_point})"
                     )
 
                     # Are we running out of patience?
                     if self.since_last_best > patience:
                         # If yes we stop searching:
-                        lprint(
+                        aprint(
                             f"Run out of patience: {self.since_last_best} > {patience} !"
                         )
                         break
 
                 except LinAlgError:
-                    lprint("Error while optimizing, let's stop training now!")
-                    lprint(f"x={self.x}")
+                    aprint("Error while optimizing, let's stop training now!")
+                    aprint(f"x={self.x}")
                     traceback.print_exc()
                     break
 
-        lprint(f"Best point: {self.best_point}, best value: {self.best_value}")
+        aprint(f"Best point: {self.best_point}, best value: {self.best_value}")
 
         return self.best_point, self.best_value
 
@@ -222,7 +222,7 @@ class Optimizer:
         def _function(*_point):
             _value = self.function(*_point)
             if display_points:
-                lprint(f"New point: {_point} -> {_value}")
+                aprint(f"New point: {_point} -> {_value}")
             return _value
 
         # Evaluate function in parallel:
@@ -275,7 +275,7 @@ class Optimizer:
                     # interpolation value:
                     value += self.interpolator(point.reshape(n, -1).T)
                 except Exception as e:
-                    lprint(f"Exception: {e}")
+                    aprint(f"Exception: {e}")
                     # If there is an issue with interpolation, we fallback on exploration:
                     fallback_exploration = True
 
@@ -320,7 +320,7 @@ class Optimizer:
         while True:
             if _is_in(point, self.x) or point is None:
                 # If we get a point we already have, lets pick a point at random:
-                # lprint(
+                # aprint(
                 #     f"Point {point} already suggested (or None), trying something else..."
                 # )
                 try:
@@ -330,7 +330,7 @@ class Optimizer:
                     else:
                         # Add noise to current point
                         point = self._add_noise(point, sigma=0.01)
-                    # lprint(f"point: {point}")
+                    # aprint(f"point: {point}")
                 except RecursionError:
                     # Fail safe in case we recurse too much:
                     point = self._random_sample()

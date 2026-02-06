@@ -7,7 +7,7 @@ from scipy.ndimage import uniform_filter
 
 from aydin.features.groups.uniform import UniformFeatures
 from aydin.io.datasets import examples_single
-from aydin.util.log.log import Log, lsection
+from aydin.util.log.log import Log, asection
 
 
 def demo_uniform(image_name: str, image, repeats=32):
@@ -29,14 +29,14 @@ def demo_uniform(image_name: str, image, repeats=32):
     size = 3
 
     # Warmup:
-    with lsection(f"Numba {image_name} (r={repeats}) WARMUP!:"):
+    with asection(f"Numba {image_name} (r={repeats}) WARMUP!:"):
         numba_filtered_image = uniform._compute_uniform_filter(image, size=size)
 
-    with lsection(f"Numba {image_name} (r={repeats}):"):
+    with asection(f"Numba {image_name} (r={repeats}):"):
         for _ in range(repeats):
             numba_filtered_image = uniform._compute_uniform_filter(image, size=size)
 
-    with lsection(f"Scipy {image_name} (r={repeats}):"):
+    with asection(f"Scipy {image_name} (r={repeats}):"):
         for _ in range(repeats):
             scipy_filtered_image = uniform_filter(image, size=size, mode="nearest")
 

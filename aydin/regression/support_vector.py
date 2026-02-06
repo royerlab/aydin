@@ -8,7 +8,7 @@ is included primarily for benchmarking purposes.
 from sklearn.svm import SVR, LinearSVR
 
 from aydin.regression.base import RegressorBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class SupportVectorRegressor(RegressorBase):
@@ -103,13 +103,13 @@ class _SVRModel:
         numpy.ndarray
             Predicted values.
         """
-        with lsection("SVR regressor prediction"):
+        with asection("SVR regressor prediction"):
 
-            lprint(f"Number of data points             : {x.shape[0]}")
-            lprint(f"Number of features per data points: {x.shape[-1]}")
+            aprint(f"Number of data points             : {x.shape[0]}")
+            aprint(f"Number of features per data points: {x.shape[-1]}")
 
-            with lsection("SVR prediction now"):
+            with asection("SVR prediction now"):
                 prediction = self.model.predict(x)
 
-            lprint("SVR regressor predicting done!")
+            aprint("SVR regressor predicting done!")
             return prediction

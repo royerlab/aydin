@@ -7,7 +7,7 @@ validate input dimensions for shift-convolution architectures.
 
 import numpy
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def get_ideal_patch_size(nb_unet_levels, training_architecture):
@@ -46,7 +46,7 @@ def get_ideal_patch_size(nb_unet_levels, training_architecture):
     if patch_size < 2**nb_unet_levels:
         raise ValueError('Number of layers is too large for given patch size.')
 
-    lprint(f'Patch size: {patch_size}')
+    aprint(f'Patch size: {patch_size}')
     return patch_size
 
 
@@ -99,7 +99,7 @@ def post_tiling_patch_size_validation(
             raise ValueError(
                 'Each dimension of the input image has to be a multiple of 2^nb_unet_levels for shiftconv.'
             )
-        lprint(
+        aprint(
             'Model will be generated for self-supervised learning with shift convolution scheme.'
         )
         if numpy.diff(img_train.shape[1:][:2]) != 0:

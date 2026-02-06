@@ -32,7 +32,7 @@ from aydin.gui.tabs.qt.processing import ProcessingTab
 from aydin.gui.tabs.qt.summary import SummaryTab
 from aydin.gui.tabs.qt.training_cropping import TrainingCroppingTab
 from aydin.io.utils import get_options_json_path
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 from aydin.util.misc.json import save_any_json
 
 
@@ -302,7 +302,7 @@ class MainPage(QWidget):
         except Exception:
             # Download failed:
             # printing stack trace
-            lprint("Failed to download or open file!")
+            aprint("Failed to download or open file!")
             traceback.print_exception(*sys.exc_info())
 
     def handle_use_same_crop_state_changed(self):

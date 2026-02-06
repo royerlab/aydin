@@ -5,7 +5,7 @@ import zipfile
 from pathlib import Path
 from urllib.request import urlretrieve
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def download_and_extract_zipresource(url, targetdir='.'):
@@ -26,11 +26,11 @@ def download_and_extract_zipresource(url, targetdir='.'):
 
     # Compute relative path to resource
     relative_path_to_zip = str(targetdir) + '/' + os.path.basename(url)
-    lprint("relativepath= ", relative_path_to_zip)
+    aprint("relativepath= ", relative_path_to_zip)
 
     # Check if target resource already exists, retrieve the resource if not exists
     if os.path.exists(relative_path_to_zip[:-4]):
-        lprint("Resource already exists, nothing to download")
+        aprint("Resource already exists, nothing to download")
     else:
         urlretrieve(url, relative_path_to_zip)
         # Extract the content

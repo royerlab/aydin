@@ -13,7 +13,7 @@ from os.path import join
 import jsonpickle
 import numpy
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 from aydin.util.misc.json import encode_indent
 
 
@@ -195,7 +195,7 @@ class RegressorBase(ABC):
 
         frozen = encode_indent(self)
 
-        lprint(f"Saving regressor to: {path}")
+        aprint(f"Saving regressor to: {path}")
         with open(join(path, "regressor.json"), "w") as json_file:
             json_file.write(frozen)
 
@@ -224,7 +224,7 @@ class RegressorBase(ABC):
         RegressorBase
             The deserialised regressor instance with all models restored.
         """
-        lprint(f"Loading regressor from: {path}")
+        aprint(f"Loading regressor from: {path}")
         with open(join(path, "regressor.json"), "r") as json_file:
             frozen = json_file.read()
 
@@ -233,7 +233,7 @@ class RegressorBase(ABC):
         thawed.models = []
         for i in range(thawed.num_channels):
             channel_path = join(path, f"channel{i}")
-            lprint(f"Loading regressor model for channel {i} from: {path}")
+            aprint(f"Loading regressor model for channel {i} from: {path}")
             with open(join(channel_path, "regressor_model.json"), "r") as json_file:
                 frozen_model = json_file.read()
 

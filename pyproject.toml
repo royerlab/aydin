@@ -33,6 +33,8 @@ dependencies = [
     "tensorflow>=2.18.0,<3.0.0",
     "keras>=3.0.0,<4.0.0",
     "torch>=2.4.0,<3.0.0",
+    # CUDA support for TensorFlow XLA (Linux/Windows only, not available on macOS)
+    "nvidia-cuda-nvcc-cu12>=12.0.0; sys_platform == 'linux' or sys_platform == 'win32'",
     # Scientific Computing
     "numpy>=2.0.0,<3.0.0",
     "scipy>=1.12.0,<2.0.0",
@@ -83,6 +85,8 @@ bundle = [
     "tensorflow==2.18.0",
     "keras==3.6.0",
     "torch==2.4.1",
+    # CUDA support for TensorFlow XLA (Linux/Windows only)
+    "nvidia-cuda-nvcc-cu12==12.6.85; sys_platform == 'linux' or sys_platform == 'win32'",
     # Scientific Computing
     "numpy==2.0.2",
     "scipy==1.14.1",

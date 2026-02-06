@@ -11,7 +11,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 class ActivityWidget(QWidget):
@@ -126,7 +126,7 @@ class ActivityWidget(QWidget):
                     path = self.parent.tabs["File(s)"].filepaths[idx]
 
         if path is None or path == "":
-            lprint("Cannot write the logs into a file")
+            aprint("Cannot write the logs into a file")
             return
 
         logfile_path = f"{path[:path.rfind('.')]}.txt"

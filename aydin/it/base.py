@@ -22,7 +22,7 @@ from aydin.it.exceptions.base import ArrayShapeDoesNotMatchError
 from aydin.it.normalisers.shape import ShapeNormaliser
 from aydin.it.transforms.base import ImageTransformBase
 from aydin.util.array.nd import nd_split_slices, remove_margin_slice
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 from aydin.util.misc.json import encode_indent
 from aydin.util.offcore.offcore import offcore_array
 
@@ -139,14 +139,14 @@ class ImageTranslatorBase(ABC):
         numpy.ndarray
             Preprocessed image.
         """
-        with lsection("transform preprocess:"):
+        with asection("transform preprocess:"):
             for transform in self.transforms_list:
-                lprint(f"applying transform: {transform}")
+                aprint(f"applying transform: {transform}")
                 try:
                     image = transform.preprocess(image)
                 except Exception as e:
                     error_message = str(e).replace('\n', ', ')
-                    lprint(
+                    aprint(
                         f"Preprocessing failed for {transform} with: {error_message} "
                     )
                     import sys
@@ -169,14 +169,14 @@ class ImageTranslatorBase(ABC):
         numpy.ndarray
             Postprocessed image.
         """
-        with lsection("transform postprocess"):
+        with asection("transform postprocess"):
             for transform in reversed(self.transforms_list):
-                lprint(f"applying transform: {transform}")
+                aprint(f"applying transform: {transform}")
                 try:
                     image = transform.postprocess(image)
                 except Exception as e:
                     error_message = str(e).replace('\n', ', ')
-                    lprint(
+                    aprint(
                         f"Postprocessing failed for {transform} with: {error_message}"
                     )
                     import sys
@@ -313,20 +313,20 @@ class ImageTranslatorBase(ABC):
         if target_image is None:
             target_image = input_image
 
-        with lsection(
+        with asection(
             f"Learning to translate from image of dimensions {str(input_image.shape)} to {str(target_image.shape)}, batch_axes={batch_axes}, channel_axes={channel_axes}, jinv={jinv}."
         ):
 
-            lprint('Running garbage collector...')
+            aprint('Running garbage collector...')
             gc.collect()
 
             # If we use the same image for input and output then we are in a self-supervised setting:
             self.self_supervised = input_image is target_image
 
             if self.self_supervised:
-                lprint('Training is self-supervised.')
+                aprint('Training is self-supervised.')
             else:
-                lprint('Training is supervised.')
+                aprint('Training is supervised.')
 
             # Let's apply the transforms:
             input_image = self._transform_preprocess_image(input_image)
@@ -366,13 +366,13 @@ class ImageTranslatorBase(ABC):
 
             # Automatic blind-spot discovery:
             if self.blind_spots is None:
-                lprint(
+                aprint(
                     "Automatic discovery of noise autocorrelation and specification of N2S blind-spots activated!"
                 )
                 self.blind_spots, autocorrelogram = auto_detect_blindspots(
                     shape_normalised_input_image[0, 0]
                 )
-                lprint(f"Blind spots: {self.blind_spots}")
+                aprint(f"Blind spots: {self.blind_spots}")
                 autocorrelogram_values = numpy.unique(autocorrelogram)
                 autocorrelogram_values = numpy.sort(autocorrelogram_values)[::-1][:5]
                 auto_str = array2string(
@@ -384,7 +384,7 @@ class ImageTranslatorBase(ABC):
                     edgeitems=16,
                     sign='+',
                 )
-                lprint(f"Autocorrelogram unique values in decreasing order: {auto_str}")
+                aprint(f"Autocorrelogram unique values in decreasing order: {auto_str}")
             elif isinstance(self.blind_spots, str):
                 # Number of spatio-temporal dims:
                 st_ndim = shape_normalised_input_image.ndim - 2
@@ -450,7 +450,7 @@ class ImageTranslatorBase(ABC):
             If batch_axes length does not match image dimensions.
         """
 
-        with lsection(
+        with asection(
             f"Predicting output image from input image of dimension {input_image.shape}, batch_axes={batch_axes}, channel_axes={channel_axes}"
         ):
 
@@ -518,8 +518,8 @@ class ImageTranslatorBase(ABC):
                     self.tile_max_margin,
                     suggested_tile_size=tile_size,
                 )
-                lprint(f"Tilling strategy: {tilling_strategy}")
-                lprint(f"Margins for tiles: {margins} .")
+                aprint(f"Tilling strategy: {tilling_strategy}")
+                aprint(f"Margins for tiles: {margins} .")
 
                 # tile slice objects (with and without margins):
                 tile_slices_margins = list(
@@ -533,14 +533,14 @@ class ImageTranslatorBase(ABC):
 
                 # Number of tiles:
                 number_of_tiles = len(tile_slices)
-                lprint(f"Number of tiles (slices): {number_of_tiles}")
+                aprint(f"Number of tiles (slices): {number_of_tiles}")
 
                 # We create slice list:
                 slicezip = zip(tile_slices_margins, tile_slices)
 
                 counter = 1
                 for slice_margin_tuple, slice_tuple in slicezip:
-                    with lsection(
+                    with asection(
                         f"Current tile: {counter}/{number_of_tiles}, slice: {slice_tuple} "
                     ):
 
@@ -550,7 +550,7 @@ class ImageTranslatorBase(ABC):
                         ].copy()
 
                         # We do the actual translation:
-                        lprint("Translating...")
+                        aprint("Translating...")
                         translated_image_tile = self._translate(
                             input_image_tile,
                             image_slice=slice_margin_tuple,
@@ -558,7 +558,7 @@ class ImageTranslatorBase(ABC):
                         )
 
                         # We compute the slice needed to cut out the margins:
-                        lprint("Removing margins...")
+                        aprint("Removing margins...")
                         remove_margin_slice_tuple = remove_margin_slice(
                             normalised_input_shape, slice_margin_tuple, slice_tuple
                         )
@@ -577,7 +577,7 @@ class ImageTranslatorBase(ABC):
                             )
 
                         # We plug in the batch without margins into the destination image:
-                        lprint("Inserting translated batch into result image...")
+                        aprint("Inserting translated batch into result image...")
                         shape_normalised_translated_image[slice_tuple] = (
                             translated_image_tile[remove_margin_slice_tuple]
                         )
@@ -636,7 +636,7 @@ class ImageTranslatorBase(ABC):
         """
 
         # We will store the batch strategy as a list of integers representing the number of chunks per dimension:
-        with lsection("Determine tilling strategy:"):
+        with asection("Determine tilling strategy:"):
 
             suggested_tile_size = (
                 math.inf if suggested_tile_size is None else suggested_tile_size
@@ -646,32 +646,32 @@ class ImageTranslatorBase(ABC):
             shape = image.shape
             num_spatio_temp_dim = num_spatiotemp_dim = len(shape) - 2
 
-            lprint(f"image shape             = {shape}")
-            lprint(f"max_voxels_per_tile     = {max_voxels_per_tile}")
+            aprint(f"image shape             = {shape}")
+            aprint(f"max_voxels_per_tile     = {max_voxels_per_tile}")
 
             # Estimated amount of memory needed for storing all features:
             (
                 estimated_memory_needed,
                 total_memory_available,
             ) = self._estimate_memory_needed_and_available(image)
-            lprint(f"Estimated amount of memory needed: {estimated_memory_needed}")
+            aprint(f"Estimated amount of memory needed: {estimated_memory_needed}")
 
             # Available physical memory :
             total_memory_available *= self.max_memory_usage_ratio
 
-            lprint(
+            aprint(
                 f"Available memory (we reserve 10% for 'comfort'): {total_memory_available}"
             )
 
             # How much do we need to tile because of memory, if at all?
             split_factor_mem = estimated_memory_needed / total_memory_available
-            lprint(
+            aprint(
                 f"How much do we need to tile because of memory? : {split_factor_mem} times."
             )
 
             # how much do we have to tile because of the limit on the number of voxels per tile?
             split_factor_max_voxels = image.size / max_voxels_per_tile
-            lprint(
+            aprint(
                 f"How much do we need to tile because of the limit on the number of voxels per tile? : {split_factor_max_voxels} times."
             )
 
@@ -679,7 +679,7 @@ class ImageTranslatorBase(ABC):
             split_factor_suggested_tile_size = image.size / (
                 suggested_tile_size**num_spatio_temp_dim
             )
-            lprint(
+            aprint(
                 f"How much do we need to tile because of the suggested tile size? : {split_factor_suggested_tile_size} times."
             )
 
@@ -691,7 +691,7 @@ class ImageTranslatorBase(ABC):
             )
             # We cannot split less than 1 time:
             desired_split_factor = max(1, int(math.ceil(desired_split_factor)))
-            lprint(f"Desired split factor: {desired_split_factor}")
+            aprint(f"Desired split factor: {desired_split_factor}")
 
             # Number of batches:
             num_batches = shape[0]
@@ -701,7 +701,7 @@ class ImageTranslatorBase(ABC):
                 # Not enough splitting happening along the batch dimension, we need to split further:
                 # how much?
                 rest_split_factor = desired_split_factor / num_batches
-                lprint(
+                aprint(
                     f"Not enough splitting happening along the batch dimension, we need to split spatio-temp dims by: {rest_split_factor}"
                 )
 
@@ -709,7 +709,7 @@ class ImageTranslatorBase(ABC):
                 split_per_dim = (rest_split_factor / numpy.prod(shape[2:])) ** (
                     1 / num_spatio_temp_dim
                 )
-                lprint(f"Splitting per dimension: {split_per_dim}")
+                aprint(f"Splitting per dimension: {split_per_dim}")
 
                 # We split proportionally to each axis but do not exceed the rest_split_factor per axis:
                 spatiotemp_tilling_strategy = tuple(
@@ -718,7 +718,7 @@ class ImageTranslatorBase(ABC):
                 )
 
                 tilling_strategy = (num_batches, 1) + spatiotemp_tilling_strategy
-                lprint(f"Preliminary tilling strategy is: {tilling_strategy}")
+                aprint(f"Preliminary tilling strategy is: {tilling_strategy}")
 
                 # We correct for eventual oversplitting by favouring splitting over the front dimensions:
                 current_splitting_factor = 1
@@ -742,7 +742,7 @@ class ImageTranslatorBase(ABC):
                     1 for s in shape[2:]
                 )
 
-            lprint(f"Tilling strategy is: {tilling_strategy}")
+            aprint(f"Tilling strategy is: {tilling_strategy}")
 
             # Handles defaults:
             if max_margin is None:
@@ -755,7 +755,7 @@ class ImageTranslatorBase(ABC):
             estimated_tile_shape = tuple(
                 int(round(s / ts)) for s, ts in zip(shape[2:], tilling_strategy[2:])
             )
-            lprint(f"The estimated tile shape is: {estimated_tile_shape}")
+            aprint(f"The estimated tile shape is: {estimated_tile_shape}")
 
             # Limit margins:
             # We automatically set the margin of the tile size:
@@ -800,7 +800,7 @@ class ImageTranslatorBase(ABC):
 
         frozen = encode_indent(self)
 
-        lprint(f"Saving image translator to: {path}")
+        aprint(f"Saving image translator to: {path}")
         with open(join(path, "image_translation.json"), "w") as json_file:
             json_file.write(frozen)
 
@@ -820,7 +820,7 @@ class ImageTranslatorBase(ABC):
         ImageTranslatorBase
             The restored image translator instance.
         """
-        lprint(f"Loading image translator from: {path}")
+        aprint(f"Loading image translator from: {path}")
         with open(join(path, "image_translation.json"), "r") as json_file:
             frozen = json_file.read()
 
@@ -914,9 +914,9 @@ class ImageTranslatorBase(ABC):
 
         ndim_spacetime = ndim - (batch_result.count(True) + chan_result.count(True))
         if ndim_spacetime > 4 or ndim_spacetime < 1:
-            lprint(batch_result)
-            lprint(chan_result)
-            lprint(
+            aprint(batch_result)
+            aprint(chan_result)
+            aprint(
                 ndim, batch_result.count(True), chan_result.count(True), ndim_spacetime
             )
             raise Exception(
@@ -951,7 +951,7 @@ class ImageTranslatorBase(ABC):
         list of tuple of int
             List of relative voxel coordinate tuples for the blind-spot.
         """
-        lprint(f"Blindspot shorthand notation detected: {blind_spots} ")
+        aprint(f"Blindspot shorthand notation detected: {blind_spots} ")
         # Replace commas with spaces:
         blind_spots = blind_spots.replace(',', ' ')
         # First split by white space:
@@ -993,6 +993,6 @@ class ImageTranslatorBase(ABC):
 
         blind_spots = list(blind_spots_set)
 
-        lprint(f"Parsed blindspot from shorthand notation: {blind_spots} ")
+        aprint(f"Parsed blindspot from shorthand notation: {blind_spots} ")
 
         return blind_spots

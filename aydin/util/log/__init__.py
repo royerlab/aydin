@@ -5,14 +5,14 @@ and timing information. Uses ``arbol`` as the backend.
 
 Example
 -------
->>> from aydin.util.log import Log, lprint, lsection
+>>> from aydin.util.log import Log, aprint, asection
 >>> Log.enable_output = True
->>> with lsection('Processing'):
-...     lprint('Step 1 complete')
-...     with lsection('Substep'):
-...         lprint('Detail')
+>>> with asection('Processing'):
+...     aprint('Step 1 complete')
+...     with asection('Substep'):
+...         aprint('Detail')
 """
 
 from aydin.util.log.log import Log, aprint, asection, lprint, lsection
 
-__all__ = ['Log', 'lprint', 'lsection', 'aprint', 'asection']
+__all__ = ['Log', 'aprint', 'asection', 'lprint', 'lsection']

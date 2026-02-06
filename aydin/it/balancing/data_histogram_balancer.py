@@ -11,7 +11,7 @@ import random
 import numpy
 from skimage.transform import downscale_local_mean
 
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class DataHistogramBalancer:
@@ -85,7 +85,7 @@ class DataHistogramBalancer:
 
         # Calibration is not needed if we don't balance
         if not self.balance:
-            lprint("Balancer: no calibration needed ")
+            aprint("Balancer: no calibration needed ")
             self.total_kept_counter = 0
             return
 
@@ -97,7 +97,7 @@ class DataHistogramBalancer:
             full_min_value = array.min()
             full_max_value = array.max()
 
-        with lsection("Balancer: sampling to estimate min and max values for entries"):
+        with asection("Balancer: sampling to estimate min and max values for entries"):
             # refine with sampling
             values_list = []
             array_length = array.size
@@ -127,11 +127,11 @@ class DataHistogramBalancer:
         batch_min_value = max(full_min_value, batch_min_value)
         batch_max_value = min(full_max_value, batch_max_value)
 
-        lprint(
+        aprint(
             f"Balancer: full data min and max: [{full_min_value}, {full_max_value}] "
         )
-        lprint(f"Balancer: batch min and max: [{batch_min_value}, {batch_max_value}] ")
-        lprint(
+        aprint(f"Balancer: batch min and max: [{batch_min_value}, {batch_max_value}] ")
+        aprint(
             f"Balancer: effective min and max: [{self.min_value}, {self.max_value}] "
         )
 

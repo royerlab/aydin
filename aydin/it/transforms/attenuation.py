@@ -12,7 +12,7 @@ from numba import jit
 from numpy.typing import ArrayLike
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class AttenuationTransform(ImageTransformBase):
@@ -70,7 +70,7 @@ class AttenuationTransform(ImageTransformBase):
         self._corrections = {}
         self._axis = None
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -100,7 +100,7 @@ class AttenuationTransform(ImageTransformBase):
             Attenuation-corrected image as float32.
         """
 
-        with lsection(
+        with asection(
             f"Correcting attenuation for array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
 
@@ -121,7 +121,7 @@ class AttenuationTransform(ImageTransformBase):
 
             # Iterating over dimensions to correct:
             for axis in self._axis:
-                lprint(f"Correcting along axis: {axis}")
+                aprint(f"Correcting along axis: {axis}")
                 if array.shape[axis] <= 1:
                     continue
 
@@ -204,7 +204,7 @@ class AttenuationTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Reapplying attenuation for array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
 
@@ -212,7 +212,7 @@ class AttenuationTransform(ImageTransformBase):
             new_array = array.astype(dtype=numpy.float32, copy=True)
 
             for axis in reversed(self._axis):
-                lprint(f"Correcting along axis: {axis}")
+                aprint(f"Correcting along axis: {axis}")
                 correction = self._corrections[axis]
                 inverse_correction = 1.0 / correction
                 inverse_correction = inverse_correction.astype(dtype=correction.dtype)

@@ -7,7 +7,7 @@ from numpy import ndarray
 
 from aydin.features.base import FeatureGeneratorBase
 from aydin.features.groups.base import FeatureGroupBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class ExtensibleFeatureGenerator(FeatureGeneratorBase):
@@ -165,7 +165,7 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
             The computed feature array.
         """
 
-        with lsection('Computing features'):
+        with asection('Computing features'):
 
             # some important numbers:
             num_dims = len(image.shape)
@@ -197,7 +197,7 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
             # We iterate over batches:
             for batch_index in range(num_batches):
 
-                with lsection(
+                with asection(
                     f'Computing features for batch: {batch_index + 1}/{num_batches}'
                 ):
                     feature_pointer = 0
@@ -205,7 +205,7 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                     # We iterate over channels:
                     for channel_index in range(num_channels):
 
-                        with lsection(
+                        with asection(
                             f'Computing features for channel: {channel_index + 1}/{num_channels}'
                         ):
                             # We collect the 'exclude_center_value' for the current channel:
@@ -213,7 +213,7 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                                 channel_index
                             ]
 
-                            lprint(
+                            aprint(
                                 f'Excluding center value for channel: {exclude_center_value_for_channel}'
                             )
 
@@ -224,11 +224,11 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                                 *(slice(None),) * num_spatiotemp_dim,
                             )
 
-                            lprint(f'Image slice: {image_slice}')
+                            aprint(f'Image slice: {image_slice}')
 
                             if passthrough_channels[channel_index]:
                                 # A passthrough channel is simply fed directly as a feature:
-                                lprint(
+                                aprint(
                                     f'Adding passthrough channel feature for channel index: {channel_index}'
                                 )
                                 batch_feature_slice = (
@@ -256,14 +256,14 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                                     batch_index,
                                     *(slice(None),) * num_spatiotemp_dim,
                                 )
-                                lprint(
+                                aprint(
                                     f'Feature slice for batch and channel: {batch_feature_slice}'
                                 )
 
                                 batch_channel_features = features[batch_feature_slice]
 
                                 for feature_group in self.features_group_list:
-                                    lprint(
+                                    aprint(
                                         f'Computing feature {feature_group}, '  # , and kwargs={kwargs}'
                                     )
 
@@ -327,7 +327,7 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
             # The following line creates a view of the array
             # in which the features are indexed by the last dimension instead:
             if feature_last_dim:
-                lprint('Move feature axis to the last axis ...')
+                aprint('Move feature axis to the last axis ...')
                 features = numpy.moveaxis(features, 0, -1)
 
             return features

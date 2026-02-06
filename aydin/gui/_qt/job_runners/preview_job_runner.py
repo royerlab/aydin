@@ -4,7 +4,7 @@ import napari
 from qtpy.QtWidgets import QApplication, QHBoxLayout, QPushButton, QStyle, QWidget
 
 from aydin.gui._qt.job_runners.worker import Worker
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 class PreviewJobRunner(QWidget):
@@ -62,7 +62,7 @@ class PreviewJobRunner(QWidget):
                 )
             except BaseException as e:
                 error_message = str(e).replace('\n', ', ')
-                lprint(
+                aprint(
                     f"Preprocessing failed for {transform_instance} with: {error_message} "
                 )
 
@@ -106,7 +106,7 @@ class PreviewJobRunner(QWidget):
         self.images = self.parent.parent.parent.parent.tabs["Training Crop"].images
 
         if len(self.images) == 0:
-            lprint("Preview cannot be started with no image")
+            aprint("Preview cannot be started with no image")
             return
 
         self.transform_class = self.parent.transform_class

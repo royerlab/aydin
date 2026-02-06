@@ -15,7 +15,7 @@ from numpy.typing import ArrayLike
 from scipy.ndimage import convolve, gaussian_filter, median_filter
 
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def _j_invariant_loss(
@@ -57,11 +57,11 @@ def _j_invariant_loss(
 
         denoised = denoise_function(masked_input_image, **denoiser_kwargs)
     except RuntimeError:
-        lprint(
+        aprint(
             "Denoising failed during calibration, skipping by returning "
             "the original image (not denoised)."
         )
-        lprint(traceback.format_exc())
+        aprint(traceback.format_exc())
         denoised = image.copy()
 
     loss = loss_function(image[mask], denoised[mask])
@@ -225,13 +225,13 @@ def _generate_mask(
 
     # Do we have to extend these spots?
     if blind_spots is None:
-        lprint("Detection of extended blindspots requested!")
+        aprint("Detection of extended blindspots requested!")
         blind_spots, noise_auto = auto_detect_blindspots(image, max_range=max_range)
 
     extended_blind_spot = len(blind_spots) > 1
 
     if extended_blind_spot:
-        lprint(f"Extended blindspots detected: {blind_spots}")
+        aprint(f"Extended blindspots detected: {blind_spots}")
 
         # Determine size of spot kernel:
         min_coord = tuple(

@@ -16,7 +16,7 @@ from scipy.ndimage import gaussian_filter
 from scipy.optimize import curve_fit
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class MotionStabilisationTransform(ImageTransformBase):
@@ -108,7 +108,7 @@ class MotionStabilisationTransform(ImageTransformBase):
         self._shifts = {}
         self._original_dtype = None
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -144,7 +144,7 @@ class MotionStabilisationTransform(ImageTransformBase):
         numpy.ndarray
             Motion-stabilised image as float32.
         """
-        with lsection(f"Motion-correcting array of shape: {array.shape}:"):
+        with asection(f"Motion-correcting array of shape: {array.shape}:"):
 
             self._original_dtype = array.dtype
 
@@ -155,7 +155,7 @@ class MotionStabilisationTransform(ImageTransformBase):
 
             self._shifts = {}
             for axis in axes:
-                lprint(f"Correcting along axis: {axis}")
+                aprint(f"Correcting along axis: {axis}")
                 array = self._permutate(array, axis=axis)
                 shifts, mean_shift = _measure_shifts(
                     array,
@@ -165,7 +165,7 @@ class MotionStabilisationTransform(ImageTransformBase):
                     mode='com',
                     sigma=self.sigma,
                 )
-                lprint(f"Mean shift: {mean_shift}")
+                aprint(f"Mean shift: {mean_shift}")
                 array = _shift_transform(
                     array, -shifts, pad=self.pad, crop=False, pad_mode=self.pad_mode
                 )
@@ -190,7 +190,7 @@ class MotionStabilisationTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
 
-        with lsection(f"Undoing motion-correction for array of shape: {array.shape}:"):
+        with asection(f"Undoing motion-correction for array of shape: {array.shape}:"):
 
             # We need a copy because the shift-transfrom is in-place
             array = array.astype(numpy.float32, copy=True)
@@ -198,7 +198,7 @@ class MotionStabilisationTransform(ImageTransformBase):
             axes = range(array.ndim) if self.axes is None else self.axes
 
             for axis in reversed(axes):
-                lprint(f"Correcting along axis: {axis}")
+                aprint(f"Correcting along axis: {axis}")
                 array = self._permutate(array, axis=axis)
                 shifts = self._shifts[axis]
                 array = _shift_transform(
@@ -252,11 +252,11 @@ def _shift_transform(array: ArrayLike, shifts, pad, crop, pad_mode='wrap'):
 
     min_shift = abs(numpy.min(shifts, axis=0))
     max_shift = abs(numpy.max(shifts, axis=0))
-    lprint(f"min_shift: {min_shift}, max_shift: {max_shift}")
+    aprint(f"min_shift: {min_shift}, max_shift: {max_shift}")
 
     if pad:
         padding = tuple((mi, ma) for mi, ma in zip(min_shift, max_shift))
-        lprint(f"Padding: {padding}")
+        aprint(f"Padding: {padding}")
 
         value = 0
         value = array.mean() if pad_mode == 'mean_constant' else value
@@ -268,7 +268,7 @@ def _shift_transform(array: ArrayLike, shifts, pad, crop, pad_mode='wrap'):
         array = numpy.pad(array, pad_width=((0, 0),) + padding, mode=pad_mode, **kwargs)
 
     for ti, shift in enumerate(shifts):
-        lprint(f"Motion correcting {ti} by {shift}")
+        aprint(f"Motion correcting {ti} by {shift}")
         array[ti, ...] = numpy.roll(
             array[ti, ...], shift=shift, axis=tuple(range(0, array.ndim - 1))
         )
@@ -341,7 +341,7 @@ def _measure_shifts(
         )
         shifts.append(shift)
         correlations.append(correlation)
-        lprint(f"Measured shift of {shift} for image {i}.")
+        aprint(f"Measured shift of {shift} for image {i}.")
 
     shifts = numpy.array(shifts)
     if reference_index < 0:
@@ -391,7 +391,7 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
         per-axis shift values and correlation is the cropped correlogram.
     """
     # Basic idea: We just need to low-pass filter the heck of it, and it works.
-    lprint(f"max_pixel_shift: {max_pixel_shift}, mode: {mode}, sigma: {sigma}")
+    aprint(f"max_pixel_shift: {max_pixel_shift}, mode: {mode}, sigma: {sigma}")
 
     # First we blur the input images:
     a = _fast_denoise(a, sigma=sigma)
@@ -467,7 +467,7 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
             )
             for rs, s in zip(rough_shift, correlation.shape)
         )
-        lprint(f"Cropped correlation: {cropped_correlation_slice}")
+        aprint(f"Cropped correlation: {cropped_correlation_slice}")
         cropped_correlation = correlation[cropped_correlation_slice]
 
         # We compute the signed rough shift

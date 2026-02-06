@@ -12,7 +12,7 @@ import numpy
 
 from aydin.it import classic_denoisers
 from aydin.it.base import ImageTranslatorBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class ImageDenoiserClassic(ImageTranslatorBase):
@@ -111,9 +111,9 @@ class ImageDenoiserClassic(ImageTranslatorBase):
 
         self.main_channel = main_channel
 
-        with lsection("Classic image translator"):
-            lprint(f"method: {method}")
-            lprint(f"main channel: {main_channel}")
+        with asection("Classic image translator"):
+            aprint(f"method: {method}")
+            aprint(f"main channel: {main_channel}")
 
     def __repr__(self):
         """Return a string representation of the classic denoiser."""
@@ -132,7 +132,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         str
             JSON string of the serialized model.
         """
-        with lsection(f"Saving 'classic' image denoiser to {path}"):
+        with asection(f"Saving 'classic' image denoiser to {path}"):
             frozen = super().save(path)
 
         return frozen
@@ -148,7 +148,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         path : str
             Directory path to load from.
         """
-        with lsection(f"Loading 'classic' image denoiser from {path}"):
+        with asection(f"Loading 'classic' image denoiser from {path}"):
             pass
 
     def __getstate__(self):
@@ -183,7 +183,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         jinv : bool or tuple of bool, optional
             J-invariance flag (unused; classical methods use built-in calibration).
         """
-        with lsection(
+        with asection(
             f"Training image translator from image of shape {input_image.shape}:"
         ):
             shape = input_image.shape
@@ -194,7 +194,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
 
             # We calibrate per channel
             for channel_index in range(num_channels):
-                lprint(f'Calibrating denoiser on channel {channel_index}')
+                aprint(f'Calibrating denoiser on channel {channel_index}')
                 channel_image = input_image[:, channel_index]
 
                 # for a given channel we find the best batch to use:
@@ -263,7 +263,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
 
         for batch_index in range(num_batches):
             for channel_index in range(num_channels):
-                lprint(
+                aprint(
                     f'Denoising image for batch: {batch_index} and channel: {channel_index}'
                 )
                 best_parameters = self.best_parameters[channel_index]

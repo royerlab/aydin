@@ -9,7 +9,7 @@ from numpy.typing import ArrayLike
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.feature_extraction.image import _extract_patches
 
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 def extract_kernels(
@@ -53,7 +53,7 @@ def extract_kernels(
     # #############################################################################
     # Learn the dictionary of images
 
-    with lsection(
+    with asection(
         f'Learning a dictionary of {num_kernels} kernels of size {size} from {num_patches} patches'
     ):
         rng = np.random.RandomState(0)
@@ -62,7 +62,7 @@ def extract_kernels(
 
         # The online learning part: cycle over the whole dataset 6 times
         for i in range(num_iterations):
-            lprint(f"Iteration: {i}")
+            aprint(f"Iteration: {i}")
             data = extract_patches_nd(
                 image, kernel_size, num_patches=int(num_patches) // num_iterations
             )

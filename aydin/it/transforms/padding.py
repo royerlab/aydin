@@ -10,7 +10,7 @@ import numpy
 from numpy.typing import ArrayLike
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class PaddingTransform(ImageTransformBase):
@@ -70,7 +70,7 @@ class PaddingTransform(ImageTransformBase):
         self.min_length_to_pad = min_length_to_pad
         self._pad_width = None
 
-        lprint(f"Instantiating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -104,7 +104,7 @@ class PaddingTransform(ImageTransformBase):
         numpy.ndarray
             Padded image array.
         """
-        with lsection(
+        with asection(
             f"Padding array of shape: {array.shape} with {self.pad_width} voxels and mode: {self.mode}:"
         ):
             padded_array, self._pad_width = _pad(
@@ -128,7 +128,7 @@ class PaddingTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Cropping array of shape: {array.shape} by removing padding of {self.pad_width} voxels:"
         ):
             new_array = _unpad(array, pad_width=self._pad_width)
@@ -173,7 +173,7 @@ def _pad(array: ArrayLike, mode: str, pad_width: int, min_length_to_pad: int):
         )
 
     # Do padding:
-    lprint(f"Effective padding widths: {pad_width}")
+    aprint(f"Effective padding widths: {pad_width}")
     padded_array = numpy.pad(array, pad_width=pad_width, mode=mode)
 
     return padded_array, pad_width
@@ -203,7 +203,7 @@ def _unpad(array: ArrayLike, pad_width):
         slices.append(slice(before, after))
 
     # Crop to 'unpad':
-    lprint(f"Effective cropping widths: {pad_width}")
+    aprint(f"Effective cropping widths: {pad_width}")
     cropped_array = array[tuple(slices)]
 
     return cropped_array

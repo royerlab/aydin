@@ -15,7 +15,7 @@ import dask.array as da
 import numpy
 import zarr
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def is_zarr_storage(input_path):
@@ -37,7 +37,7 @@ def is_zarr_storage(input_path):
     try:
         z = zarr.open(input_path)
         if len(z.shape) >= 0:
-            lprint(f"This path is a ZARR storage: {input_path}")
+            aprint(f"This path is a ZARR storage: {input_path}")
         else:
             raise Exception
         # IF we reach this point, then we could open the file and therefore it is a Zarr file...
@@ -161,7 +161,7 @@ def get_output_image_path(
             output_image_format = image_format
             break
     else:  # means no break in this context
-        lprint("Image file format is not supported, will be writing result as tif")
+        aprint("Image file format is not supported, will be writing result as tif")
         output_path = f"{path[:path.rfind('.')]}_{operation_type}.tif"
         output_image_format = ".tif"
 
@@ -270,7 +270,7 @@ def split_image_channels(image_array, metadata):
     channel_axis = metadata.axes.find("C")
 
     if channel_axis == -1:
-        lprint("Array has no channel axis detected")
+        aprint("Array has no channel axis detected")
         return
 
     # Handle image splitting
@@ -323,7 +323,7 @@ def hyperstack_arrays(image_arrays, metadatas):
         If images have different shapes.
     """
     if len(image_arrays) < 2:
-        lprint("Need at least two images to hyperstack.")
+        aprint("Need at least two images to hyperstack.")
         return image_arrays, metadatas
 
     shape_of_first_image = ()

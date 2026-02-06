@@ -16,7 +16,7 @@ from numpy.typing import ArrayLike
 from scipy.ndimage import gaussian_filter, sobel
 
 from aydin.util.edge_filter.fast_edge_filter import fast_edge_filter
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 def representative_crop(
@@ -113,21 +113,21 @@ def representative_crop(
     # Start time:
     start_time = time.time()
 
-    with lsection(
+    with asection(
         f"Cropping image of size: {image.shape} with at most {crop_size} voxels and mode {mode}"
     ):
 
         # save reference to original image:
         original_image = image
 
-        with lsection("Cast and normalise image..."):
+        with asection("Cast and normalise image..."):
             # Cast, if needed:
             image = image.astype(numpy.float32, copy=False)
             # Normalise:
             # image = _normalise(image)
 
         # Apply filter:
-        with lsection(f"Apply cropping filter to image of shape: {image.shape}"):
+        with asection(f"Apply cropping filter to image of shape: {image.shape}"):
 
             # Smoothing:
             sigma = tuple(
@@ -273,7 +273,7 @@ def representative_crop(
                     best_crop = original_image[best_slice]
 
                 if i >= min_num_crops and time.time() > start_time + timeout_in_seconds:
-                    lprint(
+                    aprint(
                         f"Interrupting crop search because of timeout after {i} crops examined!"
                     )
                     break
@@ -317,7 +317,7 @@ def representative_crop(
                     best_crop = original_image[best_slice]
 
                 if i >= min_num_crops and time.time() > start_time + timeout_in_seconds:
-                    lprint(
+                    aprint(
                         f"Interrupting crop search because of timeout after {i} crops examined!"
                     )
                     break

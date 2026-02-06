@@ -13,7 +13,7 @@ import numpy
 from aydin.io import imread
 from aydin.io.io import mapped_tiff
 from aydin.it.base import ImageTranslatorBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class TimelapseDenoiser:
@@ -137,7 +137,7 @@ class TimelapseDenoiser:
         numpy.ndarray
             The denoised image array.
         """
-        with lsection(
+        with asection(
             f"Denoising image with dimensions {input_image_array.shape} along first dimension"
         ):
             num_time_points = input_image_array.shape[0]
@@ -198,11 +198,11 @@ class TimelapseDenoiser:
         tile_size : int or None
             Tile size for tiled inference.
         """
-        with lsection(
+        with asection(
             f"Denoising time point: {tpi} of shape: {input_image_array[tpi].shape}"
         ):
             ftw = self.fine_temporal_window
-            with lsection(
+            with asection(
                 f"Adding fine temporal feature channels for range: [-{ftw},{ftw}]"
             ):
 
@@ -210,7 +210,7 @@ class TimelapseDenoiser:
                     index = tpi + rel_index
                     index = min(num_time_points - 1, index)
                     index = max(0, index)
-                    lprint(f'Fine features delta={rel_index} ')
+                    aprint(f'Fine features delta={rel_index} ')
                     return input_image_array[index]
 
                 fine_window_list = [
@@ -218,7 +218,7 @@ class TimelapseDenoiser:
                 ]
 
             ctw = self.coarse_temporal_window
-            with lsection(
+            with asection(
                 f"Added coarse temporal feature channels for range: [-{ctw},{ctw}]"
             ):
 
@@ -231,7 +231,7 @@ class TimelapseDenoiser:
                         if index <= tpi:
                             return numpy.zeros_like(input_image_array[0])
 
-                        lprint(f'Slice: {[tpi + 1, index + 1]}')
+                        aprint(f'Slice: {[tpi + 1, index + 1]}')
                         average_stack = input_image_array[tpi + 1 : index + 1]
                         average_stack = average_stack.astype(numpy.float32)
                         if self.use_median:
@@ -253,7 +253,7 @@ class TimelapseDenoiser:
                         if index >= tpi:
                             return numpy.zeros_like(input_image_array[0])
 
-                        lprint(f'Slice: {[index, tpi - 1 + 1]}')
+                        aprint(f'Slice: {[index, tpi - 1 + 1]}')
                         average_stack = input_image_array[index : tpi - 1 + 1]
                         average_stack = average_stack.astype(numpy.float32)
                         if self.use_median:
@@ -269,7 +269,7 @@ class TimelapseDenoiser:
                             return numpy.zeros_like(input_image_array[0])
                         average_stack /= divisor
 
-                    lprint(f'Coarse temporal feature extent={extent}')
+                    aprint(f'Coarse temporal feature extent={extent}')
                     return average_stack
 
                 coarse_window_list_past = [
@@ -292,9 +292,9 @@ class TimelapseDenoiser:
                 True,
             ) * (2 * ctw)
 
-            lprint(f'Channel dims: {channel_dims_tp} ')
-            lprint(f'Force J-invariance tuple: {force_jinv} ')
-            lprint(f'Pass-through channels: {self.translator._passthrough_channels} ')
+            aprint(f'Channel dims: {channel_dims_tp} ')
+            aprint(f'Force J-invariance tuple: {force_jinv} ')
+            aprint(f'Pass-through channels: {self.translator._passthrough_channels} ')
 
             self.translator.train(
                 input_array_for_tp,
