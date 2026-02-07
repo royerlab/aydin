@@ -356,7 +356,6 @@ class PTCNNImageTranslator(ImageTranslatorBase):
             optimizer,
             'min',
             factor=self.reduce_lr_factor,
-            verbose=True,
             patience=self.reduce_lr_patience,
         )
 

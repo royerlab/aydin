@@ -3,7 +3,7 @@ API Tutorials
 =============
 
 We have several API tutorials below to demonstrate how to use various features
-of the Aydin API provides. You can also try each of them on [Google Colab platform]().
+of the Aydin API.
 
 .. toctree::
    :maxdepth: 1
@@ -12,7 +12,6 @@ of the Aydin API provides. You can also try each of them on [Google Colab platfo
    Denoise an image using Classic <api_tutorials/restoration/classic>
    Denoise an image using Noise2SelfFGR <api_tutorials/restoration/noise2self_fgr>
    Denoise an image using Noise2SelfCNN <api_tutorials/restoration/noise2self_cnn>
-   Deconvolving an image using aydin API <api_tutorials/restoration/lucyrichardson>
 
 
 .. toctree::

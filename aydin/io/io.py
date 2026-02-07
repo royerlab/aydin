@@ -194,7 +194,7 @@ def imread(input_path):
                     for key in g.group_keys():
                         nb_arrays += 1
                         if 'axes' in g[key][key].attrs:
-                            metadata.axes = g.attrs['axes']
+                            metadata.axes = g[key][key].attrs['axes']
 
                 metadata.format = 'zarr'
                 array = read_zarr_array(input_path)

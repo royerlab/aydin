@@ -255,7 +255,7 @@ class PerceptronRegressor(RegressorBase):
 
                 model_file_path = join(
                     get_temp_folder(),
-                    f"aydin_nn_keras_model_file_{random.randint(0, 1e16)}.hdf5",
+                    f"aydin_nn_keras_model_file_{random.randint(0, 10**16)}.hdf5",
                 )
                 checkpoint = ModelCheckpoint(
                     model_file_path, monitor='val_loss', verbose=1, save_best_only=True

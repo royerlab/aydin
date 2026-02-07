@@ -8,7 +8,7 @@ from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 @pytest.mark.heavy
 def test_spectral():
-    assert demo_spectral(cropped_newyork(), display=False) >= 0.474 - 0.01
+    assert demo_spectral(cropped_newyork(), display=False) >= 0.47
 
 
 def test_spectral_nd():

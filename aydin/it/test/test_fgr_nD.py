@@ -78,7 +78,7 @@ def test_it_fgr_gbm_2D_batchdims():
         numpy.s_[..., 0:117, 0:175],
         regressor='gbm',
         batch_dims=(False, True),
-        min_ssim=0.30,
+        min_ssim=0.40,
     )
 
 

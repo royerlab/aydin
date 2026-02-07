@@ -58,21 +58,21 @@ class GridMaskedDataset(Dataset):
         A = torch.zeros(shape)
 
         if len(self.image.shape) == 4:
-            for i in range(shape[-2]):
-                for j in range(shape[-1]):
-                    if i % patch_size == phase and j % patch_size == phase:
-                        A[:, :, i, j] = 1
+            for row in range(shape[-2]):
+                for col in range(shape[-1]):
+                    if row % patch_size == phase and col % patch_size == phase:
+                        A[:, :, row, col] = 1
 
         elif len(self.image.shape) == 5:
-            for i in range(shape[-3]):
-                for j in range(shape[-2]):
-                    for k in range(shape[-1]):
+            for depth in range(shape[-3]):
+                for row in range(shape[-2]):
+                    for col in range(shape[-1]):
                         if (
-                            i % patch_size == phase
-                            and j % patch_size == phase
-                            and k % patch_size == phase
+                            depth % patch_size == phase
+                            and row % patch_size == phase
+                            and col % patch_size == phase
                         ):
-                            A[:, :, i, j, k] = 1
+                            A[:, :, depth, row, col] = 1
 
         return torch.Tensor(A)
 
@@ -98,14 +98,32 @@ class GridMaskedDataset(Dataset):
         mask = mask.to(device)
         mask_inv = mask_inv.to(device)
 
-        kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], (0.5, 1.0, 0.5)])
-        kernel = kernel[numpy.newaxis, numpy.newaxis, :, :]
-        kernel = torch.Tensor(kernel).to(device)
-        kernel = kernel / kernel.sum()
+        ndim = len(self.image.shape[2:])
 
-        filtered_tensor = torch.nn.functional.conv2d(
-            tensor, kernel, stride=1, padding=1
-        )
+        if ndim == 2:
+            kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], [0.5, 1.0, 0.5]])
+            kernel = kernel[numpy.newaxis, numpy.newaxis, :, :]
+            kernel = torch.Tensor(kernel).to(device)
+            kernel = kernel / kernel.sum()
+            filtered_tensor = torch.nn.functional.conv2d(
+                tensor, kernel, stride=1, padding=1
+            )
+        elif ndim == 3:
+            kernel = numpy.array(
+                [
+                    [[0.0, 0.5, 0.0], [0.5, 1.0, 0.5], [0.0, 0.5, 0.0]],
+                    [[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], [0.5, 1.0, 0.5]],
+                    [[0.0, 0.5, 0.0], [0.5, 1.0, 0.5], [0.0, 0.5, 0.0]],
+                ]
+            )
+            kernel = kernel[numpy.newaxis, numpy.newaxis, :, :, :]
+            kernel = torch.Tensor(kernel).to(device)
+            kernel = kernel / kernel.sum()
+            filtered_tensor = torch.nn.functional.conv3d(
+                tensor, kernel, stride=1, padding=1
+            )
+        else:
+            raise ValueError(f"Unsupported number of spatial dimensions: {ndim}")
 
         return filtered_tensor * mask + tensor * mask_inv
 

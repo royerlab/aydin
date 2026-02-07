@@ -6,13 +6,13 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
 from aydin.io.datasets import (
-    normalise,
     add_noise,
+    characters,
     dots,
     lizard,
-    pollen,
     newyork,
-    characters,
+    normalise,
+    pollen,
 )
 from aydin.it.classic_denoisers.dictionary_learned import (
     calibrate_denoise_dictionary_learned,
@@ -39,9 +39,9 @@ def demo_dictionary_learned(image, display=True):
     noisy = numpy.clip(noisy, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
     psnr_noisy = psnr(image, noisy)
-    ssim_noisy = ssim(image, noisy)
+    ssim_noisy = ssim(image, noisy, data_range=1.0)
     psnr_denoised = psnr(image, denoised)
-    ssim_denoised = ssim(image, denoised)
+    ssim_denoised = ssim(image, denoised, data_range=1.0)
     print("           noisy   :", psnr_noisy, ssim_noisy)
     print("dictionary denoised:", psnr_denoised, ssim_denoised)
 

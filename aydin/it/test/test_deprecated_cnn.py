@@ -335,7 +335,7 @@ def test_it_cnn_jinet3D_light():
 
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
-    assert psnr_denoised > (psnr_noisy * 0.5) and ssim_denoised > (ssim_noisy * 0.5)
+    assert psnr_denoised > (psnr_noisy * 0.75) and ssim_denoised > (ssim_noisy * 0.75)
     keras.backend.clear_session()
 
 
@@ -386,7 +386,7 @@ def test_it_cnn_jinet3D_supervised_light():
 
     stop = time.time()
     print(f"Total elapsed time: {stop - start} ")
-    assert psnr_denoised > (psnr_noisy * 0.5) and ssim_denoised > (ssim_noisy * 0.5)
+    assert psnr_denoised > (psnr_noisy * 0.75) and ssim_denoised > (ssim_noisy * 0.75)
     keras.backend.clear_session()
 
 

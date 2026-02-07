@@ -77,7 +77,7 @@ class VeryFlatNet(nn.Module):
         )
 
     def verylastparameters(self):
-        return self.convp5.parameters()
+        return self.convpf.parameters()
 
     def forward(self, x):
         y = self.convfeatures(x)

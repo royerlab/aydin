@@ -8,8 +8,8 @@ The first approach is to download the operating system specific 'app bundles' th
 This approach requires zero command-line interactions. It is as simple as downloading the bundle,
 then installing/unzipping the bundle, and finally double-clicking on the Aydin app to start it.
 
-The second approach is to install Aydin via ``pip``. With this approach, you will have a more
-more flexible installation. This can help to set certain GPU-using dependencies, but als requires
+The second approach is to install Aydin via ``pip``. With this approach, you will have a
+more flexible installation. This can help to set certain GPU-using dependencies, but also requires
 more familiarity with Python package managers.
 
 Below, we provide detailed, step-by-step installation guides, to help you install Aydin on your computer.
@@ -18,7 +18,7 @@ Below, we provide detailed, step-by-step installation guides, to help you instal
 Install Aydin bundle on Mac OSX
 ---------------------------------------
 
-Download the `OSX bundle <https://royerlab.github.io/aydin/>`_ to start. Then right-click and open the Aydin installer as shown
+Download the `OSX bundle <https://github.com/royerlab/aydin/releases>`_ to start. Then right-click and open the Aydin installer as shown
 below:
 
 .. image:: ../resources/install/osx/right_click_open.png
@@ -59,8 +59,8 @@ folder as shown below:
 Install Aydin bundle on Windows
 ---------------------------------------
 
-Download the `Windows bundle <https://royerlab.github.io/aydin/>`_ to start. Then extract the compressed
-Aydin bundle, you should be able to see the see extracted folder as shown
+Download the `Windows bundle <https://github.com/royerlab/aydin/releases>`_ to start. Then extract the compressed
+Aydin bundle, you should be able to see the extracted folder as shown
 below:
 
 .. image:: ../resources/install/win/unzip_and_open_the_folder.png
@@ -90,8 +90,8 @@ Install Aydin bundle on Linux
       # Arch Linux
       sudo pacman -S xcb-util-cursor
 
-Download the `Linux bundle <https://royerlab.github.io/aydin/>`_  to start. Then extract the Aydin bundle
-from the compressed file. You should be able to see the see extracted folder as shown below:
+Download the `Linux bundle <https://github.com/royerlab/aydin/releases>`_  to start. Then extract the Aydin bundle
+from the compressed file. You should be able to see the extracted folder as shown below:
 
 .. image:: ../resources/install/linux/unzip_bundle.png
 
@@ -106,7 +106,7 @@ or you can get into ``aydin`` folder and double-click on the executable named ``
 .. image:: ../resources/install/linux/aydin_executable.png
 
 
-Install Aydin in a Conda environment with CUDA support
+Install Aydin with pip
 ---------------------------------------------------------------------
 
 **macOS users** need to install ``libomp`` first:
@@ -128,11 +128,10 @@ Install Aydin in a Conda environment with CUDA support
     # Arch Linux
     $ sudo pacman -S xcb-util-cursor
 
-Then you can install Aydin with CUDA support:
+Then you can install Aydin:
 
 .. code-block:: bash
 
-    $ conda create -y -n aydin_env python=3.9
-    $ conda activate aydin_env
+    $ python -m venv aydin_env
+    $ source aydin_env/bin/activate  # On Windows: aydin_env\Scripts\activate
     $ pip install aydin
-    $ conda install cudatoolkit

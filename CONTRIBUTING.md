@@ -67,20 +67,16 @@ Once you're ready to share your contribution with us you should submit it as a P
 #### How to setup development environment:
 
 ```bash
-# Create a new environment
-conda create -n aydin python=3.9
-
-# Activate the environment
-conda activate aydin
-
-# For Macs (OSX) you first need to do:
+# For Macs (macOS) you first need to do:
 brew install libomp
 
-# Install Aydin with dev dependencies
-pip install -e ".[dev]"
+# For Linux, install Qt system dependency:
+sudo apt install libxcb-cursor0  # Ubuntu/Debian
 
-# Or use make for full setup (includes docs deps and pre-commit hooks)
-make setup
+# Clone and install Aydin with dev dependencies
+git clone https://github.com/royerlab/aydin.git
+cd aydin
+make setup  # installs dev + docs deps, sets up pre-commit hooks
 
 # Before making a PR make sure tests are passing
 make test

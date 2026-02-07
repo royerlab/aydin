@@ -30,10 +30,10 @@ from aydin.util.log.log import asection
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):
-    """
-    Noise2Self image denoising using the "Feature Generation & Regression" (
-    FGR) approach. Follows from the theory exposed in the <a
-    href="https://arxiv.org/abs/1901.11365">Noise2Self paper</a>.
+    """Noise2Self image denoising using Feature Generation & Regression (FGR).
+
+    Follows from the theory exposed in the
+    `Noise2Self paper <https://arxiv.org/abs/1901.11365>`_.
     """
 
     def __init__(
@@ -347,17 +347,21 @@ def noise2self_fgr(noisy, *, batch_axes=None, chan_axes=None, variant=None):
     Parameters
     ----------
     noisy : numpy.ndarray
-        Image to denoise
+        Image to denoise.
     batch_axes : array_like, optional
         Indices of batch axes.
     chan_axes : array_like, optional
         Indices of channel axes.
-    variant : str
-        Algorithm variant.
+    variant : str, optional
+        Regression algorithm variant. Available variants: ``'cb'``
+        (CatBoost, default), ``'lgbm'`` (LightGBM), ``'linear'``,
+        ``'perceptron'``, ``'random_forest'``, ``'support_vector'``.
+        When ``None``, CatBoost is used.
 
     Returns
     -------
-    Denoised image : numpy.ndarray
+    numpy.ndarray
+        Denoised image.
 
     """
     # Run N2S and save the result

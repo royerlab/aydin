@@ -225,7 +225,7 @@ def representative_crop(
         # account the size of the crops to define a 'granularity' (
         # stride) of the translations used for search:
 
-        granularity = tuple(cs // granularity_factor for cs in cropped_shape)
+        granularity = tuple(max(1, cs // granularity_factor) for cs in cropped_shape)
 
         if search_mode == 'random':
 

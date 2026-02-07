@@ -327,7 +327,7 @@ class Classic(DenoiseRestorationBase):
             Additional keyword arguments. Supports ``'train_valid_ratio'``,
             ``'callback_period'``, and ``'jinv'``.
         """
-        with asection("Noise2Self train is starting..."):
+        with asection("Classic denoiser calibration is starting..."):
 
             self.it = self.get_translator()
 
@@ -369,7 +369,7 @@ class Classic(DenoiseRestorationBase):
         numpy.ndarray
             The denoised image, cast to the input image's dtype.
         """
-        with asection("Noise2Self denoise is starting..."):
+        with asection("Classic denoise is starting..."):
 
             # Predict the resulting image
             response = self.it.translate(
@@ -385,22 +385,31 @@ class Classic(DenoiseRestorationBase):
 
 
 def classic_denoise(noisy, *, batch_axes=None, chan_axes=None, variant=None):
-    """Method to denoise an image with Classic denoising restoration module.
+    """Denoise an image using a classical (non-learning) algorithm.
+
+    Convenience function that creates a :class:`Classic` instance,
+    trains (calibrates) it on the noisy image, and returns the denoised
+    result.
 
     Parameters
     ----------
     noisy : numpy.ndarray
-        Image to denoise
+        Image to denoise.
     batch_axes : array_like, optional
         Indices of batch axes.
     chan_axes : array_like, optional
         Indices of channel axes.
-    variant : str
-        Algorithm variant.
+    variant : str, optional
+        Algorithm variant. Available variants: ``'butterworth'``,
+        ``'dictionary_fixed'``, ``'dictionary_learned'``, ``'gaussian'``,
+        ``'gm'``, ``'harmonic'``, ``'lipschitz'``, ``'nlm'``, ``'pca'``,
+        ``'spectral'``, ``'tv'``, ``'wavelet'``.
+        When ``None``, the best variant is selected automatically.
 
     Returns
     -------
-    Denoised image : numpy.ndarray
+    numpy.ndarray
+        Denoised image.
 
     """
     # Run and save the result

@@ -39,7 +39,7 @@ class RegressorBase(ABC):
         super().__init__()
         self._stop_fit = False
         self.num_channels = None
-        self.models = 0
+        self.models = []
 
         self.loss_history = []
 

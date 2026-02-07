@@ -215,7 +215,7 @@ def run(ver):
 
     """
     app = QApplication(sys.argv)
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+    app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
     ex = App(ver)
     ex.show()
     sys.exit(app.exec())

@@ -35,11 +35,11 @@ def default_patch_size(image, patch_size, odd: bool = True) -> Tuple[int, ...]:
         if image.ndim == 1:
             patch_size = 17 if odd else 16
         elif image.ndim == 2:
-            patch_size = 8 if odd else 7
+            patch_size = 7 if odd else 8
         elif image.ndim == 3:
-            patch_size = 6 if odd else 5
+            patch_size = 5 if odd else 6
         elif image.ndim == 4:
-            patch_size = 4 if odd else 3
+            patch_size = 3 if odd else 4
 
     # Normalise to tuple:
     if type(patch_size) is not tuple:

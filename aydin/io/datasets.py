@@ -209,7 +209,7 @@ def dots():
     image = numpy.random.rand(512, 512) < 0.005  # andromeda()#[256:-256, 256:-256]
     image = 0.8 * binary_dilation(image).astype(numpy.float32, copy=False)
     image[0:256, 0:256] += 0.1
-    image.clip(0, 1)
+    image = image.clip(0, 1)
     return image
 
 

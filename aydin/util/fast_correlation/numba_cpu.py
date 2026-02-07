@@ -54,7 +54,7 @@ def numba_cpu_correlate(image: ArrayLike, kernel: ArrayLike, output=None):
     # Ensure contiguity:
     if not image.flags['C_CONTIGUOUS']:
         image = numpy.ascontiguousarray(image)
-    if not image.flags['C_CONTIGUOUS']:
+    if not kernel.flags['C_CONTIGUOUS']:
         kernel = numpy.ascontiguousarray(kernel)
 
     if output is None:

@@ -8,6 +8,7 @@ from aydin.it.classic_denoisers.demo.demo_2D_dictionary_learned import (
     demo_dictionary_learned,
 )
 from aydin.it.classic_denoisers.dictionary_fixed import denoise_dictionary_fixed
+from aydin.it.classic_denoisers.dictionary_learned import denoise_dictionary_learned
 from aydin.it.classic_denoisers.test.util_test_nd import check_nd
 
 
@@ -20,5 +21,9 @@ def test_dictionary_fixed():
     assert demo_dictionary_fixed(cropped_newyork(), display=False) >= 0.636 - 0.02
 
 
-def test_dictionary_nd():
+def test_dictionary_fixed_nd():
     check_nd(denoise_dictionary_fixed)
+
+
+def test_dictionary_learned_nd():
+    check_nd(denoise_dictionary_learned)

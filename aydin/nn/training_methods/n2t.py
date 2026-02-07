@@ -92,7 +92,6 @@ def n2t_train(
         optimizer,
         'min',
         factor=reduce_lr_factor,
-        verbose=True,
         patience=reduce_lr_patience,
     )
 

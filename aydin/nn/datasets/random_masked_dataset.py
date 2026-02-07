@@ -50,7 +50,9 @@ class RandomMaskedDataset(Dataset):
         self.patch_slicing_objects = random_patches(
             image=image,
             patch_size=patch_size,
-            nb_patches_per_image=min(image.size / numpy.prod(patch_size), 1040),
+            nb_patches_per_image=min(
+                numpy.prod(image.shape) // numpy.prod(patch_size), 1040
+            ),
         )
         self.p = pixel_masking_probability
 
@@ -65,14 +67,11 @@ class RandomMaskedDataset(Dataset):
         -------
         torch.Tensor
             Binary mask tensor with shape ``(1, 1, ...spatial_dims...)``,
-            where 0 indicates masked pixels and 1 indicates kept pixels.
+            where 1 indicates blind-spot (masked) pixels and 0 indicates context pixels.
         """
         shape = (self.patch_size,) * len(self.image.shape[2:])
 
-        mask = torch.rand(shape)
-        mask[mask > self.p] = 1
-        mask[mask <= self.p] = 0
-        # mask = mask.bool()
+        mask = (torch.rand(shape) <= self.p).float()
         mask = torch.unsqueeze(mask, 0)
         mask = torch.unsqueeze(mask, 0)
 
@@ -100,14 +99,32 @@ class RandomMaskedDataset(Dataset):
         mask = mask.to(device)
         mask_inv = mask_inv.to(device)
 
-        kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], [0.5, 1.0, 0.5]])
-        kernel = kernel[numpy.newaxis, numpy.newaxis, :, :]
-        kernel = torch.Tensor(kernel).to(device)
-        kernel = kernel / kernel.sum()
+        ndim = len(self.image.shape[2:])
 
-        filtered_tensor = torch.nn.functional.conv2d(
-            tensor, kernel, stride=1, padding=1
-        )
+        if ndim == 2:
+            kernel = numpy.array([[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], [0.5, 1.0, 0.5]])
+            kernel = kernel[numpy.newaxis, numpy.newaxis, :, :]
+            kernel = torch.Tensor(kernel).to(device)
+            kernel = kernel / kernel.sum()
+            filtered_tensor = torch.nn.functional.conv2d(
+                tensor, kernel, stride=1, padding=1
+            )
+        elif ndim == 3:
+            kernel = numpy.array(
+                [
+                    [[0.0, 0.5, 0.0], [0.5, 1.0, 0.5], [0.0, 0.5, 0.0]],
+                    [[0.5, 1.0, 0.5], [1.0, 0.0, 1.0], [0.5, 1.0, 0.5]],
+                    [[0.0, 0.5, 0.0], [0.5, 1.0, 0.5], [0.0, 0.5, 0.0]],
+                ]
+            )
+            kernel = kernel[numpy.newaxis, numpy.newaxis, :, :, :]
+            kernel = torch.Tensor(kernel).to(device)
+            kernel = kernel / kernel.sum()
+            filtered_tensor = torch.nn.functional.conv3d(
+                tensor, kernel, stride=1, padding=1
+            )
+        else:
+            raise ValueError(f"Unsupported number of spatial dimensions: {ndim}")
 
         return filtered_tensor * mask + tensor * mask_inv
 

@@ -2,16 +2,16 @@
 
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aydin)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
-[![codecov](https://codecov.io/gl/aydinorg/aydin/branch/master/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gl/aydinorg/aydin)
+[![codecov](https://codecov.io/gh/royerlab/aydin/branch/master/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gh/royerlab/aydin)
 [![DOI](https://zenodo.org/badge/188953977.svg)](https://zenodo.org/badge/latestdoi/188953977)
 [![Downloads](https://pepy.tech/badge/aydin)](https://pepy.tech/project/aydin)
 
 
-[graphical user interface]: https://royerlab.github.io/aydin/v0.1.15/tutorials/gui_tutorials.html
-[command line interface]: https://royerlab.github.io/aydin/v0.1.15/tutorials/cli_tutorials.html
-[API]: https://royerlab.github.io/aydin/v0.1.15/tutorials/api_tutorials.html
-[use cases]: https://royerlab.github.io/aydin/v0.1.15/use_cases/introduction.html
-[install]: https://royerlab.github.io/aydin/v0.1.15/getting_started/install.html
+[graphical user interface]: https://royerlab.github.io/aydin/tutorials/gui_tutorials.html
+[command line interface]: https://royerlab.github.io/aydin/tutorials/cli_tutorials.html
+[API]: https://royerlab.github.io/aydin/tutorials/api_tutorials.html
+[use cases]: https://royerlab.github.io/aydin/use_cases/introduction.html
+[install]: https://royerlab.github.io/aydin/getting_started/install.html
 
 *Aydin* is a user-friendly, feature-rich, and fast **image denoising tool** that provides
 a number of **self-supervised, auto-tuned, and unsupervised** image denoising algorithms.
@@ -20,42 +20,43 @@ of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal d
 
 It comes with *Aydin Studio* a [graphical user interface][graphical user interface]
 to easily experiment with all the different algorithms and parameters available,
-a [command line interface] to run large jobs on the terminal possibly on powerfull remote machines, 
+a [command line interface] to run large jobs on the terminal possibly on powerful remote machines,
 and an [API] for custom coding and integration into your scripts and applications.
 More details and exhaustive explanations can be found in Aydin's [documentation](https://royerlab.github.io/aydin/).
 
-And, of course, a simplified [napari](https://napari.org) plugin is in the works! 
-Notebooks for running on Collab are also planned. 
-The project is commercial-use-friendly if you specify pyside as your GUI backend.
-
 ## Supported algorithms:
 
-Currently *Aydin* supports two main families of denoisers: the first family consists 
-of 'classical' denoising algorithms that leverage among other: frequency domain filtering, 
-smoothness priors, low-rank representations, self-similarity, and more. 
-The second family consists of algorithms that leverage machine learning approaches 
-such as convolutional neural networks (CNN) or gradient boosting (GB). 
-In the [Noise2Self paper](https://deepai.org/publication/noise2self-blind-denoising-by-self-supervision) 
-we show that it is possible to calibrate any parameterised denoising algorithm, 
-from the few parameters of a classical algorithm to the millions of weights of a deep neural 
-network. We leverage and extend these ideas in *Aydin* to provide a variety of auto-tuned 
-and trained high-quality image denoisers. What this means is that for example, we can discover automatically 
-the optimal parameters for non-local-means (NLM) denoising, or the best cut-off frequencies for a low-pass denoiser. 
+Currently *Aydin* supports two main families of denoisers: the first family consists
+of 'classical' denoising algorithms that leverage among other: frequency domain filtering,
+smoothness priors, low-rank representations, self-similarity, and more.
+The second family consists of algorithms that leverage machine learning approaches
+such as convolutional neural networks (CNN) or gradient boosting (GB).
+In the [Noise2Self paper](https://deepai.org/publication/noise2self-blind-denoising-by-self-supervision)
+we show that it is possible to calibrate any parameterised denoising algorithm,
+from the few parameters of a classical algorithm to the millions of weights of a deep neural
+network. We leverage and extend these ideas in *Aydin* to provide a variety of auto-tuned
+and trained high-quality image denoisers. What this means is that for example, we can discover automatically
+the optimal parameters for non-local-means (NLM) denoising, or the best cut-off frequencies for a low-pass denoiser.
 These parameters are difficult to determine 'by-hand' but when auto-tuned we show (see [use-cases][use cases])
 that you can get remarkable results even with simple 'classic' denoisers, and even be competitive against more complex and slower
-approaches such as deep-learning based denoisers that can also be prone to hallucination and 'copy-paste' effects. 
-Importantly, our experience denoising many different kinds of images has shown that tehre is not a single 'silver-bullet' 
-denoiser, different kinds of datasets require different approaches.  
-Here is the list of currently available methods: 
+approaches such as deep-learning based denoisers that can also be prone to hallucination and 'copy-paste' effects.
+Importantly, our experience denoising many different kinds of images has shown that there is not a single 'silver-bullet'
+denoiser, different kinds of datasets require different approaches.
+Here is the list of currently available methods:
 
 - **Low-pass filtering based algorithms:**
   - Butterworth denoiser (*butterworth*).
   - Gaussian blur denoiser (*gaussian*).
   - Gaussian-Median mixed denoiser (*gm*).
- 
+
 - **Optimisation-based with smoothness priors:**
   - Total-Variation denoising (*tv*)
   - Harmonic prior (*harmonic*)
+
+- **Spectral and wavelet domain:**
+  - Spectral denoising (*spectral*)
+  - Wavelet denoising (*wavelet*)
+  - PCA denoising (*pca*)
 
 - **Low-rank representations:**
   - Denoising via sparse decomposition (e.g. OMP) over a fixed dictionary (DCT, DST, ...)
@@ -63,20 +64,20 @@ Here is the list of currently available methods:
 
 - **Patch similarity:**
   - Non-Local Means denoising (*nlm*)
-  - BMnD (not available just yet but partly implemented!) 
+  - BMnD (not available just yet but partly implemented!)
 
 - **Machine learning based:**
-  - Noise2Self-FGR: Noise2Self denoising via Feature Generation and Regression (FGR). We use specially crafted integral features. We have several variants that leverage different regressors: CatBoost(cb), lightGBM, linear, perceptron, random-forrest, support vector regression) 
-  - Noise2Self-CNN: Noise2Self denoising via Convolutional Neural Networks (CNN). This is the original approach of Noise2Self. In our experience this is typically slower to train, and more prone to hallucination and residual noise than FGR.  
- 
+  - Noise2Self-FGR: Noise2Self denoising via Feature Generation and Regression (FGR). We use specially crafted integral features. We have several variants that leverage different regressors: CatBoost(cb), lightGBM, linear, perceptron, random-forest, support vector regression)
+  - Noise2Self-CNN: Noise2Self denoising via Convolutional Neural Networks (CNN). This is the original approach of Noise2Self. In our experience this is typically slower to train, and more prone to hallucination and residual noise than FGR.
+
 - **Other:**
-  - Lipschitz continuity denoising.     
+  - Lipschitz continuity denoising.
 
 Some methods actually do combine multiple ideas and so the classification above is not strict.
-We recommend trying first a good baseline denoiser such as the *Butterworth denoiser*. 
+We recommend trying first a good baseline denoiser such as the *Butterworth denoiser*.
 If unsatisfied with the result, and you have a powerful computer with a recent NVIDIA
-graphics card, then we recommend you try the Noise2Self-FGR-cb denoiser. 
-For detailed use-cases check [here][use cases].  
+graphics card, then we recommend you try the Noise2Self-FGR-cb denoiser.
+For detailed use-cases check [here][use cases].
 
 We regularly come up with new approaches and ideas, there is just not enough time to write papers about all these ideas.
 This means that the best 'publication' for some of these novel algorithms is this repo itself, and so please be so kind as to
@@ -89,63 +90,45 @@ We have a long todo list of existing, modified, as well as original algorithms t
 
 ## Installation of *Aydin Studio*
 
-We recommend that users that are not familiar with python start with our user-friendly UI. 
+We recommend that users that are not familiar with python start with our user-friendly UI.
 Download it for your operating system here:
 
-[<img src="https://user-images.githubusercontent.com/1870994/140653991-fb570f5a-bc6f-4afd-95b6-e36d05d1382d.png" width="200" >
-](https://github.com/royerlab/aydin/releases/download/v0.1.13/aydin_0.1.13_linux.zip) 
-[<img src="https://user-images.githubusercontent.com/1870994/140653995-5055e607-5226-4b76-8cc4-04de17d2811f.png" width="200" >
-](https://github.com/royerlab/aydin/releases/download/v0.1.13/aydin_0.1.13_win.zip) 
-[<img src="https://user-images.githubusercontent.com/1870994/140653999-5f6368d9-3e82-4d10-9283-2359aa1464fa.png" width="200" >
-](https://github.com/royerlab/aydin/releases/download/v0.1.13/aydin_0.1.13_osx.pkg)
-
-The latest releases and standalone executables can be found [here](https://github.com/royerlab/aydin/releases) 
-and detailed installation instructions of *Aydin Studio* for all three operating systems can be found 
+The latest releases and standalone executables can be found on the
+[releases page](https://github.com/royerlab/aydin/releases).
+Detailed installation instructions of *Aydin Studio* for all three operating systems can be found
 [here][install].
 
 
-## Installation of *Aydin* in Conda:
+## Installation
 
-First download and install [miniconda](https://docs.conda.io/en/latest/miniconda.html) or [anaconda](https://www.anaconda.com/products/individual). 
+### Install from PyPI
 
-Then create a conda environment to host aydin:
-```bash
-conda create -n aydin_env python=3.9
-```
-
-Activate the environment:
-```bash
-conda activate aydin_env
-```
-
-Install *Aydin* in the environment: 
+*Aydin* requires Python 3.9 or later. We recommend using a virtual environment:
 ```bash
 pip install aydin
 ```
 
-### CUDA dependencies:
+### Install for development
 
-If you have a NVIDIA CUDA Graphics card, you should install the CUDA toolkit:
 ```bash
-conda install cudatoolkit
+git clone https://github.com/royerlab/aydin.git
+cd aydin
+make setup  # or: pip install -e ".[dev]"
 ```
 
-### Mac specific dependencies:
+### Platform-specific dependencies
 
-For Macs (OSX) you first need to do:
+**macOS:** Install OpenMP support:
 ```bash
 brew install libomp
 ```
-
 You can install *Brew* by following the instructions [here](https://brew.sh/).
 
-### Ubuntu/Linux specific dependencies:
-
-If you encounter problems running Aydin in Ubuntu/linux,
-please install the following package:
-
+**Linux:** Install the Qt system dependency (required by Qt 6.5+):
 ```bash
-sudo apt install libqt5x11extras5
+sudo apt install libxcb-cursor0    # Ubuntu/Debian
+sudo dnf install xcb-util-cursor   # Fedora/RHEL
+sudo pacman -S xcb-util-cursor     # Arch Linux
 ```
 
 ## How to run ?
@@ -169,9 +152,9 @@ aydin -h
 
 ## Recommended Operating System Versions
 
-#### Linux: Ubuntu 18.04+
-#### Windows: Windows 10
-#### OSX: Mojave 10.14.6+
+#### Linux: Ubuntu 20.04+
+#### Windows: Windows 10+
+#### macOS: Big Sur 11+
 
 ## Recommended Hardware:
 
@@ -182,24 +165,12 @@ gives an overview of the strengths and weaknesses of your machine, highlighting 
 items that might be problematic.
 
 ## Known Issues:
-Here are some issues that are being actively addressed and will be addressed asap:
 
-  - Stop button for all algorithms. For technical reasons having to do with the diversity of libraries we use, we currently cannot stop training. We are planning to solve this using subprocess spawning. For now, to stop *Aydin* from running, you need to close the window and/or terminate the process. We know this is very unfortunate and are determined to fix this quickly.
-
-  - On Ubuntu and perhaps other Linux systems, high-dpi modes tend to mess with font and ui element rendering.
-
-  - M1 Macs are not yet supported, we depend on libraries that have not yet made the move, yet! Hopefully we will soon be able to run Aydin on M1 Macs!
-
-## Road Map:
-
-Planned features:
-  - ~~Toggling between 'Advanced' and 'Basic' modes to show and hide advanced algorithms.~~ :white_check_mark:
-  - Loading of denoising model and configurations (JSON) on *Aydin Studio*
-  - Pytorch backend
+  - On Ubuntu and perhaps other Linux systems, high-dpi modes tend to mess with font and UI element rendering.
 
 ## Contributing
 
-Feel free to check our [contributing guideline](CONTRIBUTING.md) first and start 
+Feel free to check our [contributing guideline](CONTRIBUTING.md) first and start
 discussing your new ideas and feedback with us through issues.
 
 ## Cite this repo

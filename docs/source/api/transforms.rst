@@ -92,7 +92,7 @@ RangeTransform
     :inherited-members:
 
 
-SaltAndPepperTransform
+SaltPepperTransform
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: aydin.it.transforms.salt_pepper
@@ -110,4 +110,3 @@ VarianceStabilisationTransform
 .. autoclass:: VarianceStabilisationTransform
     :members:
     :inherited-members:
-

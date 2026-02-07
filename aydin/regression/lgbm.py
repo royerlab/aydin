@@ -167,7 +167,7 @@ class LGBMRegressor(RegressorBase):
         else:
             objective = 'regression_l1'
 
-        aprint(f'objective: {self.num_leaves}')
+        aprint(f'objective: {objective}')
 
         # Setting max depth:
         max_depth = max(3, int(int(math.log2(self.num_leaves))) - 1)
@@ -377,16 +377,17 @@ class _LGBMModel:
             aprint(f"Number of features per data points: {x.shape[-1]}")
 
             # we decide here what 'auto' means:
-            if self.inference_mode == 'auto':
+            inference_mode = self.inference_mode
+            if inference_mode == 'auto':
                 if x.shape[0] > 5e6:
                     # Lleaves takes a long time to compile models, so only
                     # interesting for very large inferences!
-                    self.inference_mode = 'lleaves'
+                    inference_mode = 'lleaves'
                 else:
-                    self.inference_mode = 'lgbm'
+                    inference_mode = 'lgbm'
 
             aprint("GBM regressor predicting now...")
-            if self.inference_mode == 'lleaves' and find_spec('lleaves'):
+            if inference_mode == 'lleaves' and find_spec('lleaves'):
                 try:
                     return self._predict_lleaves(x)
                 except Exception:

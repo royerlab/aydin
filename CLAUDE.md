@@ -10,9 +10,9 @@ Aydin is a self-supervised, auto-tuned image denoising tool for n-dimensional im
 
 ### Development Setup
 ```bash
-conda create -n aydin python=3.9
-conda activate aydin
-make setup  # or: pip install -e ".[dev]"
+pip install -e ".[dev]"
+# Or use the Makefile (also installs docs deps + pre-commit hooks):
+make setup
 ```
 
 ### Testing
@@ -20,11 +20,11 @@ make setup  # or: pip install -e ".[dev]"
 # Run all tests (excludes heavy, gpu, unstable by default)
 make test
 
-# Run a single test file
-pytest aydin/path/to/test_file.py --disable-pytest-warnings
+# Run a single test file (use hatch run to ensure correct environment)
+hatch run pytest aydin/path/to/test_file.py --disable-pytest-warnings
 
 # Run a single test function
-pytest aydin/path/to/test_file.py::test_function_name --disable-pytest-warnings
+hatch run pytest aydin/path/to/test_file.py::test_function_name --disable-pytest-warnings
 
 # Run heavy tests only (marked @pytest.mark.heavy)
 make test-heavy
@@ -83,8 +83,18 @@ cd docs && make publish     # Build multi-version docs
 - `io.py` - Image reading/writing supporting TIFF, CZI, ND2, Zarr formats
 
 **Interfaces**:
-- `aydin/gui/` - PyQt5-based GUI (Aydin Studio)
+- `aydin/gui/` - PyQt6-based GUI (Aydin Studio)
 - `aydin/cli/cli.py` - Click-based CLI
+
+### Build System
+
+- **Build backend**: hatchling (configured in `pyproject.toml`)
+- **Makefile**: Orchestrates common commands (`make help` for full list)
+  - `make setup` / `make install-dev` - Install for development
+  - `make test` / `make test-heavy` / `make test-gpu` - Run tests
+  - `make format` / `make check` - Code formatting and linting
+  - `make build` / `make clean` - Build and clean artifacts
+  - `make publish` / `make publish-patch` - Version bump and publish
 
 ### Test Markers
 

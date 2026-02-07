@@ -1,17 +1,16 @@
 """Noise2Self self-supervised training method for PyTorch models.
 
-Implements self-supervised training using random pixel masking, where
+Implements self-supervised training using grid-based pixel masking, where
 the model learns to predict masked pixels from their unmasked neighbors.
 """
 
 import torch
 from torch import nn
-from torch.nn import MSELoss
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
-from aydin.nn.datasets.random_masked_dataset import RandomMaskedDataset
+from aydin.nn.datasets.grid_masked_dataset import GridMaskedDataset
 from aydin.util.log.log import aprint
 from aydin.util.torch.device import get_torch_device
 
@@ -22,13 +21,12 @@ def n2s_train(
     *,
     nb_epochs: int = 128,
     lr: float = 0.001,
-    # patch_size: int = 32,
     patience: int = 128,
     verbose: bool = True,
 ):
     """Train a model using the Noise2Self self-supervised method.
 
-    Uses random pixel masking where the model is trained to predict
+    Uses grid-based pixel masking where the model is trained to predict
     masked pixel values from their unmasked neighbors using MSE loss
     with AdamW optimizer and learning rate reduction on plateau.
 
@@ -55,30 +53,21 @@ def n2s_train(
 
     optimizer = AdamW(model.parameters(), lr=lr)
 
-    # optimizer = ESAdam(
-    #     chain(model.parameters()),
-    #     lr=learning_rate,
-    #     start_noise_level=0.001,
-    #     weight_decay=1e-9,
-    # )
-
     scheduler = ReduceLROnPlateau(
         optimizer,
         'min',
-        verbose=True,
         patience=patience // 8,
     )
 
-    loss_function1 = MSELoss()
-
-    dataset = RandomMaskedDataset(input_image)
+    dataset = GridMaskedDataset(input_image)
     aprint(f"dataset length: {len(dataset)}")
-    data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
+    data_loader = DataLoader(dataset, batch_size=1, num_workers=0, shuffle=True)
 
     model.train()
 
     for epoch in range(nb_epochs):
-        loss = 0
+        epoch_loss = 0
+        num_batches = 0
         for i, batch in enumerate(data_loader):
             original_patch, net_input, mask = batch
 
@@ -88,7 +77,10 @@ def n2s_train(
 
             net_output = model(net_input)
 
-            loss = loss_function1(net_output * mask, original_patch * mask)
+            # Compute MSE only over blind-spot pixels to avoid loss dilution
+            diff = (net_output - original_patch) * mask
+            mask_count = mask.sum()
+            loss = diff.pow(2).sum() / mask_count.clamp(min=1)
 
             optimizer.zero_grad()
 
@@ -96,7 +88,11 @@ def n2s_train(
 
             optimizer.step()
 
-        scheduler.step(loss)
+            epoch_loss += loss.item()
+            num_batches += 1
+
+        epoch_loss /= max(num_batches, 1)
+        scheduler.step(epoch_loss)
 
         if verbose:
-            aprint("Loss (", epoch, "): \t", round(loss.item(), 8))
+            aprint("Loss (", epoch, "): \t", round(epoch_loss, 8))

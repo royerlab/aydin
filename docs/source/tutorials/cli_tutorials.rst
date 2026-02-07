@@ -105,41 +105,26 @@ Or alternatively one can use glob patterns such as:
    $ aydin denoise image*.tif
 
 
-Deconvolving a single image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can use the following line to deconvolve a single image with default
-options. Passed psf file assumed to be a single psf image
-in a lossless format.
-
-.. code-block:: bash
-
-   $ aydin lucyrichardson image.tif psf.tif
-
-
 Specifying your own output folder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use the following lines to specify your desired output folder to
-Aydin for both denoising and deconvolution runs:
+You can use the following line to specify your desired output folder:
 
 .. code-block:: bash
 
    $ aydin denoise image.tif --output-folder=/PATH/TO/YOUR/FOLDER
-   $ aydin lucyrichardson image.tif  psf.tif --output-folder=/PATH/TO/YOUR/FOLDER
 
 
 
 Choosing the computational backend
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use the following line to denoise or deconvolve a single image
-with their choice of computational backend.
+You can use the following line to denoise a single image
+with your choice of computational backend.
 
 .. code-block:: bash
 
    $ aydin denoise image.tif --backend="noise2selffgr-nn"
-   $ aydin lucyrichardson image.tif --backend="cupy"
 
 
 Generating Fourier Shell Correlations(FSC) Plot

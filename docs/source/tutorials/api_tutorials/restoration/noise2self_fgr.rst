@@ -14,7 +14,7 @@ options using our Object-Oriented denoising API.
 
 
 It is also easy to pass specific transforms to use before and/or after
-denoising. One can do the the following:
+denoising. One can do the following:
 
 .. code-block:: python
 
@@ -36,5 +36,3 @@ options using our procedural denoising endpoint.
    from aydin.restoration.denoise.noise2selffgr import noise2self_fgr
 
    denoised_image = noise2self_fgr(noisy_image)
-
-

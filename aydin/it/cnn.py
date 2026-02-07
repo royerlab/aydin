@@ -5,7 +5,7 @@ based image translator using TensorFlow/Keras. Supports UNet and JINet
 architectures with various self-supervised training schemes.
 
 .. deprecated::
-    All TensorFlow-related code is deprecated and will be removed by v0.1.16.
+    All TensorFlow-related code is deprecated.
     Use `ImageTranslatorCNNTorch` instead.
 """
 
@@ -523,7 +523,7 @@ class ImageTranslatorCNN(ImageTranslatorBase):
                 if self.checkpoint is None:
                     self.model_file_path = join(
                         get_temp_folder(),
-                        f"aydin_cnn_keras_model_file_{random.randint(0, 1e16)}.hdf5",
+                        f"aydin_cnn_keras_model_file_{random.randint(0, 10**16)}.hdf5",
                     )
                     aprint(f"Model will be saved at: {self.model_file_path}")
                     self.checkpoint = ModelCheckpoint(

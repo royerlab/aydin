@@ -24,10 +24,10 @@ from aydin.util.log.log import asection
 
 
 class Noise2SelfCNN(DenoiseRestorationBase):
-    """
-    Noise2Self image denoising using the "Convolutional Neural Networks" (
-    CNN) approach. Follows from the theory exposed in the <a
-    href="https://arxiv.org/abs/1901.11365">Noise2Self paper</a>.
+    """Noise2Self image denoising using Convolutional Neural Networks (CNN).
+
+    Follows from the theory exposed in the
+    `Noise2Self paper <https://arxiv.org/abs/1901.11365>`_.
     """
 
     def __init__(
@@ -266,18 +266,19 @@ def noise2self_cnn(image, *, batch_axes=None, chan_axes=None, variant=None):
     Parameters
     ----------
     image : numpy.ndarray
-        Image to denoise
+        Image to denoise.
     batch_axes : array_like, optional
         Indices of batch axes.
     chan_axes : array_like, optional
         Indices of channel axes.
-    variant : str
-        Algorithm variant.
-
+    variant : str, optional
+        CNN architecture variant. Available variants: ``'unet'``,
+        ``'jinet'``. When ``None``, the default architecture is used.
 
     Returns
     -------
-    Denoised image : numpy.ndarray
+    numpy.ndarray
+        Denoised image.
 
     """
     # Run N2S and save the result
