@@ -1,15 +1,22 @@
+"""Noise2Truth supervised training method for PyTorch models.
+
+Implements supervised training with paired noisy/clean images using
+L1 loss, early stopping, best-model checkpointing, and TensorBoard logging.
+"""
+
 import math
 from collections import OrderedDict
 from itertools import chain
+
 import torch
 from torch import nn
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+
 from aydin.nn._legacy_pytorch.optimizers.esadam import ESAdam
 from aydin.nn.datasets.noisy_gt_dataset import NoisyGroundtruthDataset
-
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 from aydin.util.torch.device import get_torch_device
 
 
@@ -28,31 +35,44 @@ def n2t_train(
     reload_best_model_period=1024,
     best_val_loss_value=None,
 ):
-    """
-    Noise2Truth training method.
+    """Train a model using the Noise2Truth supervised method.
+
+    Uses paired noisy input and clean target images with L1 loss,
+    early stopping based on validation loss, and periodic reloading
+    of the best model weights.
 
     Parameters
     ----------
-    input_images
-    target_images
-    model : nn.Module
+    input_images : numpy.ndarray
+        Noisy input image tensor with shape ``(B, C, ...spatial_dims...)``.
+    target_images : numpy.ndarray
+        Clean target image tensor with the same shape as ``input_images``.
+    model : torch.nn.Module
+        PyTorch model to train.
     nb_epochs : int
+        Maximum number of training epochs.
     lr : float
+        Initial learning rate for the ESAdam optimizer.
     training_noise : float
-
-    l2_weight_regularization
-    patience
-    patience_epsilon
-    reduce_lr_factor
-    reload_best_model_period
-    best_val_loss_value
-
+        Initial noise level added to gradients by the ESAdam optimizer.
+    l2_weight_regularization : float
+        L2 weight decay coefficient for the optimizer.
+    patience : int
+        Number of epochs without improvement before early stopping.
+    patience_epsilon : float
+        Minimum improvement required to reset the patience counter.
+    reduce_lr_factor : float
+        Factor by which the learning rate is reduced on plateau.
+    reload_best_model_period : int
+        Interval (in epochs) for reloading the best model weights
+        when validation loss is not improving.
+    best_val_loss_value : float or None
+        Initial best validation loss value. If ``None``, starts at
+        infinity.
     """
     writer = SummaryWriter()
 
     device = get_torch_device()
-
-    torch.autograd.set_detect_anomaly(True)
 
     model = model.to(device)
 
@@ -72,7 +92,6 @@ def n2t_train(
         optimizer,
         'min',
         factor=reduce_lr_factor,
-        verbose=True,
         patience=reduce_lr_patience,
     )
 
@@ -80,19 +99,22 @@ def n2t_train(
         return torch.abs(u - v)
 
     dataset = NoisyGroundtruthDataset([input_images], [target_images], device=device)
-    print(f"dataset length: {len(dataset)}")
+    aprint(f"dataset length: {len(dataset)}")
     data_loader = DataLoader(dataset, batch_size=16, num_workers=3, shuffle=False)
+
+    patience_counter = 0
+    best_model_state_dict = None
 
     for epoch in range(nb_epochs):
         train_loss_value = 0
         val_loss_value = 0
-        iteration = 0
+        num_batches = 0
         for i, batch in enumerate(data_loader):
             input_image, target_image = batch
             input_image = input_image.to(device)
             target_image = target_image.to(device)
 
-            lprint(f"index: {i}, shape:{input_image.shape}")
+            aprint(f"index: {i}, shape:{input_image.shape}")
 
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
@@ -116,7 +138,6 @@ def n2t_train(
 
             # update training loss_deconvolution for whole image:
             train_loss_value += translation_loss_value.item()
-            iteration += 1
 
             # Validation:
             with torch.no_grad():
@@ -133,13 +154,14 @@ def n2t_train(
 
                 # update validation loss_deconvolution for whole image:
                 val_loss_value += translation_loss_value
-                iteration += 1
 
-        train_loss_value /= iteration
-        lprint(f"Training loss value: {train_loss_value}")
+            num_batches += 1
 
-        val_loss_value /= iteration
-        lprint(f"Validation loss value: {val_loss_value}")
+        train_loss_value /= num_batches
+        aprint(f"Training loss value: {train_loss_value}")
+
+        val_loss_value /= num_batches
+        aprint(f"Validation loss value: {val_loss_value}")
 
         writer.add_scalar("Loss/train", train_loss_value, epoch)
         writer.add_scalar("Loss/valid", val_loss_value, epoch)
@@ -148,9 +170,9 @@ def n2t_train(
         scheduler.step(val_loss_value)
 
         if val_loss_value < best_val_loss_value:
-            lprint("## New best val loss!")
+            aprint("## New best val loss!")
             if val_loss_value < best_val_loss_value - patience_epsilon:
-                lprint("## Good enough to reset patience!")
+                aprint("## Good enough to reset patience!")
                 patience_counter = 0
 
             # Update best val loss value:
@@ -163,20 +185,20 @@ def n2t_train(
 
         else:
             if epoch % max(1, reload_best_model_period) == 0 and best_model_state_dict:
-                lprint("Reloading best models to date!")
+                aprint("Reloading best models to date!")
                 model.load_state_dict(best_model_state_dict)
 
             if patience_counter > patience:
-                lprint("Early stopping!")
+                aprint("Early stopping!")
                 break
 
             # No improvement:
-            lprint(
+            aprint(
                 f"No improvement of validation losses, patience = {patience_counter}/{patience} "
             )
             patience_counter += 1
 
-        lprint(f"## Best val loss: {best_val_loss_value}")
+        aprint(f"## Best val loss: {best_val_loss_value}")
 
         # if epoch % 512 == 0:
         #     print(epoch)

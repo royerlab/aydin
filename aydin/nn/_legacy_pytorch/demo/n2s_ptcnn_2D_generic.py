@@ -1,3 +1,5 @@
+"""Demo: Noise2Self self-supervised denoising with legacy PyTorch CNN."""
+
 # flake8: noqa
 import math
 import os
@@ -10,16 +12,16 @@ from skimage.metrics import structural_similarity as ssim
 
 from aydin.analysis.image_metrics import mutual_information
 from aydin.io.datasets import (
-    normalise,
     add_noise,
-    newyork,
-    characters,
-    lizard,
-    scafoldings,
-    pollen,
     andromeda,
-    fibsem,
+    characters,
     dots,
+    fibsem,
+    lizard,
+    newyork,
+    normalise,
+    pollen,
+    scafoldings,
 )
 from aydin.nn._legacy_pytorch.it_ptcnn import PTCNNImageTranslator
 from aydin.util.log.log import Log

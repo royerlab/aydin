@@ -1,5 +1,11 @@
+"""Numba-accelerated array shifting for 1D to 4D arrays.
+
+Provides fast, parallel shift operations with zero-fill boundary
+handling and optional additive accumulation mode.
+"""
+
 from math import ceil
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import numba
 import numpy
@@ -12,6 +18,36 @@ __error_model = 'numpy'
 def fast_shift(
     image, shift: Tuple[int], output=None, add=False, parallelism: Optional[int] = 8
 ):
+    """Shift an array by integer offsets using Numba-accelerated code.
+
+    Shifts the input image by the specified integer offsets along each
+    axis. Regions that fall outside the array boundaries are filled
+    with zeros. Supports 1D to 4D arrays.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input array to shift (1D to 4D).
+    shift : tuple of int
+        Integer shift amounts for each axis.
+    output : numpy.ndarray, optional
+        Pre-allocated output array. If None, a zeros array is created.
+    add : bool
+        If True, shifted values are added to the output array instead
+        of replacing existing values.
+    parallelism : int, optional
+        Number of parallel threads. If None, uses all available threads.
+
+    Returns
+    -------
+    numpy.ndarray
+        Shifted array with the original dtype.
+
+    Raises
+    ------
+    ValueError
+        If the image has more than 4 dimensions.
+    """
 
     # Save original image dtype:
     original_dtype = image.dtype

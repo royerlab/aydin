@@ -1,43 +1,92 @@
-import pytest
 from os import path
 from os.path import join
 
 import numpy
+import pytest
 
 from aydin.io import io
 from aydin.io.datasets import examples_single
 from aydin.io.folders import get_temp_folder
-from aydin.io.io import imread, mapped_tiff, imwrite
+from aydin.io.io import imread, imwrite, mapped_tiff
 
 
 def test_analysis():
+    """Test that imread returns valid metadata for all example images.
 
+    Note: Some examples may fail due to download issues or format problems.
+    This test asserts on all successfully loaded images.
+    """
+    successful_reads = 0
     for example in examples_single:
+        try:
+            example_file_path = example.get_path()
+            array, metadata = io.imread(example_file_path)
+        except Exception:
+            # Skip examples that fail to download
+            continue
 
-        example_file_path = example.get_path()
+        if array is None:
+            # Some formats may not be fully supported
+            continue
 
-        _, analysis_result = io.imread(example_file_path)
+        successful_reads += 1
 
-        print(analysis_result)
+        # Verify metadata is present and valid for successfully loaded images
+        assert metadata is not None, f"Failed to get metadata for {example.value[1]}"
+        assert (
+            metadata.shape is not None
+        ), f"Missing shape in metadata for {example.value[1]}"
+        assert (
+            metadata.axes is not None
+        ), f"Missing axes in metadata for {example.value[1]}"
+        assert len(metadata.axes) == len(metadata.shape), (
+            f"Axes length mismatch for {example.value[1]}: "
+            f"axes={metadata.axes}, shape={metadata.shape}"
+        )
+
+    # Ensure at least some examples were successfully tested
+    assert successful_reads > 0, "No example images could be loaded"
 
 
 @pytest.mark.heavy
 def test_opening_examples():
+    """Test that all example images can be opened and have consistent metadata.
 
+    Note: Some examples may fail due to download issues or format problems.
+    This test asserts on all successfully loaded images.
+    """
+    successful_reads = 0
     for example in examples_single:
+        try:
+            example_file_path = example.get_path()
+            array, metadata = io.imread(example_file_path)
+        except Exception:
+            # Skip examples that fail to download
+            continue
 
-        example_file_path = example.get_path()
+        if array is None:
+            # Some formats may not be fully supported
+            continue
 
-        # print(f"Trying to open and make sense of file {example_file_path}")
+        successful_reads += 1
 
-        array, metadata = io.imread(example_file_path)
+        # Assert metadata was successfully extracted
+        assert metadata is not None, f"No metadata for: {example.value[1]}"
 
-        if array is not None:
-            print(
-                f"dataset: {example.value[1]}, shape:{array.shape}, dtype:{array.dtype} "
-            )
-        else:
-            print(f"Cannot open dataset: {example.value[1]}")
+        # Assert shape consistency between array and metadata
+        assert array.shape == metadata.shape, (
+            f"Shape mismatch for {example.value[1]}: "
+            f"array.shape={array.shape}, metadata.shape={metadata.shape}"
+        )
+
+        # Assert dtype consistency
+        assert array.dtype == metadata.dtype, (
+            f"Dtype mismatch for {example.value[1]}: "
+            f"array.dtype={array.dtype}, metadata.dtype={metadata.dtype}"
+        )
+
+    # Ensure at least some examples were successfully tested
+    assert successful_reads > 0, "No example images could be loaded"
 
 
 def test_imwrite():

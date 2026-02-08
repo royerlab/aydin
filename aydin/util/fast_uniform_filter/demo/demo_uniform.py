@@ -2,32 +2,32 @@
 import numpy
 from scipy.ndimage import uniform_filter
 
+from aydin.io.datasets import characters, examples_single
 from aydin.util.fast_uniform_filter.numba_cpu_uf import numba_cpu_uniform_filter
 from aydin.util.fast_uniform_filter.numba_gpu_uf import numba_gpu_uniform_filter
 from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
-from aydin.io.datasets import examples_single, characters
-from aydin.util.log.log import lsection, Log
+from aydin.util.log.log import Log, asection
 
 
 def demo_par_uniform(image_name: str, image, size=128, repeats=32):
     Log.enable_output = True
 
-    with lsection(f"size={size}:"):
-        with lsection(f"Numba-CPU {image_name} (r={repeats}):"):
+    with asection(f"size={size}:"):
+        with asection(f"Numba-CPU {image_name} (r={repeats}):"):
             for _ in range(repeats):
                 numba_filtered_image = numba_cpu_uniform_filter(
                     image, size=size, mode="nearest"
                 )
 
-        with lsection(f"Parallel {image_name} (r={repeats}):"):
+        with asection(f"Parallel {image_name} (r={repeats}):"):
             for _ in range(repeats):
                 parallel_filtered_image = parallel_uniform_filter(image, size=size)
 
-        with lsection(f"Scipy {image_name} (r={repeats}):"):
+        with asection(f"Scipy {image_name} (r={repeats}):"):
             for _ in range(repeats):
                 scipy_filtered_image = uniform_filter(image, size=size, mode="nearest")
 
-        with lsection(f"Numba-CUDA {image_name} (r={repeats}):"):
+        with asection(f"Numba-CUDA {image_name} (r={repeats}):"):
             for _ in range(repeats):
                 numba_cuda_filtered_image = numba_gpu_uniform_filter(image, size=size)
 

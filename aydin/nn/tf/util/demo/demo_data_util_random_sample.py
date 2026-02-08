@@ -1,10 +1,12 @@
+"""Demo: Random patch sampling with entropy-based filtering."""
+
+import napari
 import numpy
 from skimage.exposure import rescale_intensity
 
 from aydin.io import io
 from aydin.io.datasets import examples_single
 from aydin.it.cnn.util.data_util import random_sample_patches
-import napari
 
 
 def n(image):

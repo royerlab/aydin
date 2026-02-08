@@ -1,3 +1,10 @@
+"""Noise2Self Convolutional Neural Network (CNN) denoising module.
+
+Provides the :class:`Noise2SelfCNN` denoising class and the convenience
+function :func:`noise2self_cnn`. Uses self-supervised CNN architectures
+(UNet, JiNet) for image denoising.
+"""
+
 import importlib
 import inspect
 import os
@@ -13,14 +20,14 @@ from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.nn.tf import models
 from aydin.restoration.denoise.base import DenoiseRestorationBase
-from aydin.util.log.log import lsection
+from aydin.util.log.log import asection
 
 
 class Noise2SelfCNN(DenoiseRestorationBase):
-    """
-    Noise2Self image denoising using the "Convolutional Neural Networks" (
-    CNN) approach. Follows from the theory exposed in the <a
-    href="https://arxiv.org/abs/1901.11365">Noise2Self paper</a>.
+    """Noise2Self image denoising using Convolutional Neural Networks (CNN).
+
+    Follows from the theory exposed in the
+    `Noise2Self paper <https://arxiv.org/abs/1901.11365>`_.
     """
 
     def __init__(
@@ -32,21 +39,26 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         lower_level_args=None,
         it_transforms=None,
     ):
-        """
-        Noise2Self image denoising using "Convolutional Neural Networks" (CNN).
+        """Construct a Noise2Self CNN denoiser.
 
         Parameters
         ----------
         variant : str, optional
-            Variant of CNN denoiser to be used. Variant would supersede
-            the denoiser option passed in lower_level_args. Currently, we
-            support only two variants: `unet` and `jinet`.
-        use_model : bool
-            Flag to choose to train a new model or infer from a
-            previously trained model. By default it is None.
-        input_model_path : string
-            Path to model that is desired to be used for inference.
-            By default it is None.
+            CNN architecture variant to use. Currently supported variants
+            are ``'unet'`` and ``'jinet'``. Supersedes any variant specified
+            in ``lower_level_args``.
+        use_model : bool, optional
+            If ``True``, load and use a previously trained model instead of
+            training a new one.
+        input_model_path : str, optional
+            Path to a saved model zip file for inference.
+        lower_level_args : dict, optional
+            Additional low-level arguments passed to the underlying
+            image translator and model constructors.
+        it_transforms : list of dict, optional
+            Custom list of transforms to apply. Each entry should have
+            keys ``'class'`` and ``'kwargs'``. Defaults to Range, Padding,
+            and Variance Stabilisation transforms.
         """
         super().__init__(variant=variant)
         self.use_model_flag = use_model
@@ -107,6 +119,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
 
     @property
     def implementations_description(self):
+        """Return human-readable descriptions for each CNN implementation."""
         cnn_description = Noise2SelfCNN.__doc__.strip()
 
         descriptions = []
@@ -130,7 +143,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         return descriptions
 
     def stop_running(self):
-        """Method to stop running N2S instance"""
+        """Stop the current Noise2Self CNN training or inference."""
         self.it.stop_training()
 
     def get_translator(self):
@@ -153,14 +166,17 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             it = ImageTranslatorBase.load(self.input_model_path[:-4])
         else:
             it = ImageTranslatorCNN(
-                **self.lower_level_args["it"]["kwargs"]
-                if self.lower_level_args is not None
-                else {}
+                **(
+                    self.lower_level_args["it"]["kwargs"]
+                    if self.lower_level_args is not None
+                    else {}
+                )
             )
 
         return it
 
     def add_transforms(self):
+        """Add the configured image transforms to the image translator."""
         if self.it_transforms is not None:
             for transform in self.it_transforms:
                 transform_class = transform["class"]
@@ -168,24 +184,23 @@ class Noise2SelfCNN(DenoiseRestorationBase):
                 self.it.add_transform(transform_class(**transform_kwargs))
 
     def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
-        """Method to run Noise2Self CNN training.
+        """Train the Noise2Self CNN denoiser on a noisy image.
 
         Parameters
         ----------
-        noisy_image : numpy.ArrayLike
+        noisy_image : numpy.ndarray
+            The noisy input image.
         batch_axes : array_like, optional
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-
-        Returns
-        -------
-        response : numpy.ArrayLike
-
+        **kwargs
+            Additional keyword arguments. Supports ``'train_valid_ratio'``,
+            ``'callback_period'``, and ``'jinv'``.
         """
-        with lsection("Noise2Self train is starting..."):
-            if sum(chan_axes):
-                return
+        with asection("Noise2Self train is starting..."):
+            if chan_axes is not None and len(chan_axes) > 0 and any(chan_axes):
+                pass  # Channel axes provided, continue with training
 
             self.it = self.get_translator()
 
@@ -197,32 +212,37 @@ class Noise2SelfCNN(DenoiseRestorationBase):
                 noisy_image,
                 batch_axes=batch_axes,
                 channel_axes=chan_axes,
-                train_valid_ratio=kwargs['train_valid_ratio']
-                if 'train_valid_ratio' in kwargs
-                else 0.1,
-                callback_period=kwargs['callback_period']
-                if 'callback_period' in kwargs
-                else 3,
+                train_valid_ratio=(
+                    kwargs['train_valid_ratio']
+                    if 'train_valid_ratio' in kwargs
+                    else 0.1
+                ),
+                callback_period=(
+                    kwargs['callback_period'] if 'callback_period' in kwargs else 3
+                ),
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
 
     def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
-        """Method to denoise an image with trained Noise2Self.
+        """Denoise an image using the trained Noise2Self CNN model.
 
         Parameters
         ----------
+        noisy_image : numpy.ndarray
+            The noisy input image to denoise.
         batch_axes : array_like, optional
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-        noisy_image : numpy.ndarray
+        **kwargs
+            Additional keyword arguments. Supports ``'tile_size'``.
 
         Returns
         -------
-        response : numpy.ndarray
-
+        numpy.ndarray
+            The denoised image, cast to the input image's dtype.
         """
-        with lsection("Noise2Self denoise is starting..."):
+        with asection("Noise2Self denoise is starting..."):
 
             # Predict the resulting image
             response = self.it.translate(
@@ -238,23 +258,27 @@ class Noise2SelfCNN(DenoiseRestorationBase):
 
 
 def noise2self_cnn(image, *, batch_axes=None, chan_axes=None, variant=None):
-    """Method to denoise an image with Noise2Self CNN.
+    """Denoise an image using Noise2Self CNN in a single call.
+
+    Convenience function that creates a :class:`Noise2SelfCNN` instance,
+    trains it on the noisy image, and returns the denoised result.
 
     Parameters
     ----------
     image : numpy.ndarray
-        Image to denoise
+        Image to denoise.
     batch_axes : array_like, optional
         Indices of batch axes.
     chan_axes : array_like, optional
         Indices of channel axes.
-    variant : str
-        Algorithm variant.
-
+    variant : str, optional
+        CNN architecture variant. Available variants: ``'unet'``,
+        ``'jinet'``. When ``None``, the default architecture is used.
 
     Returns
     -------
-    Denoised image : numpy.ndarray
+    numpy.ndarray
+        Denoised image.
 
     """
     # Run N2S and save the result

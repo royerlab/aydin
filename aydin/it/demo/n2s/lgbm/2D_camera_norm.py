@@ -29,7 +29,7 @@ def demo():
     noisy = image.astype(numpy.float32)
     noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
     noisy = numpy.random.poisson(noisy * intensity) / intensity
-    noisy = random_noise(noisy, mode='gaussian', var=0.01, seed=0)
+    noisy = random_noise(noisy, mode='gaussian', var=0.01, rng=0)
     noisy *= 255
     noisy = noisy.astype(numpy.uint16)
 

@@ -1,3 +1,11 @@
+"""Timelapse denoiser for large time-series image data.
+
+This module provides `TimelapseDenoiser`, a specialized denoiser for
+long timelapses that may not fit in memory. It uses temporal context
+from neighboring frames and long-range averages to achieve temporally
+consistent denoising.
+"""
+
 from typing import Tuple
 
 import numpy
@@ -5,24 +13,23 @@ import numpy
 from aydin.io import imread
 from aydin.io.io import mapped_tiff
 from aydin.it.base import ImageTranslatorBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class TimelapseDenoiser:
-    """TimeLapse denoiser
-    This translator is specialised for scaling up denoising to very long timelapses that can't fit in memory.
-    This makes particularly sense for very large 3D+t datasets.
-    For each time point we collect features from time points before and after as well as long-range averages (or medians)
-    This helps to get good temporal consistency. To protect against self-hallucinations and speed up denoising, we train
-    one denoiser per time point. It is advised to turn on spatial features. For timelapses with very large 3D stacks, it is
-    recomended to use tiling.
+    """Timelapse denoiser for large time-series image data.
 
-    Attributes
-    ----------
+    Specialized for scaling up denoising to very long timelapses that may
+    not fit in memory. Particularly useful for large 3D+t datasets.
 
-    Notes
-    -----
+    For each time point, features are collected from neighboring time points
+    (fine temporal window) and long-range averages or medians (coarse temporal
+    window). This helps achieve good temporal consistency.
 
+    To protect against self-hallucinations and speed up denoising, a separate
+    denoiser is trained per time point. It is advised to turn on spatial
+    features. For timelapses with very large 3D stacks, it is recommended
+    to use tiling.
     """
 
     def __init__(
@@ -32,15 +39,21 @@ class TimelapseDenoiser:
         coarse_temporal_window: int = 7,
         use_median=True,
     ):
-        """Constructs a timelapse denoiser given an image translator and the following parameters:
+        """Construct a timelapse denoiser.
 
         Parameters
         ----------
         translator : ImageTranslatorBase
-        coarse_temporal_window : int
+            The underlying image translator to use for per-timepoint denoising.
         fine_temporal_window : int
+            Number of neighboring timepoints on each side to use as
+            fine-grained temporal features. Default is 1.
+        coarse_temporal_window : int
+            Number of exponentially-spaced long-range temporal windows
+            on each side to use as coarse temporal features. Default is 7.
         use_median : bool
-
+            If True, use median for coarse temporal aggregation.
+            If False, use mean. Default is True.
         """
         self.use_median = use_median
         self.coarse_temporal_window = coarse_temporal_window
@@ -56,17 +69,25 @@ class TimelapseDenoiser:
         tile_size=None,
         interval=None,
     ):
-        """Convenience method to denoise an image from a path
+        """Denoise an image given file paths for input and output.
+
+        Reads the input image from disk, creates a memory-mapped output
+        TIFF file, and runs the denoising pipeline.
 
         Parameters
         ----------
         input_image_path : str
+            Path to the input image file.
         denoised_image_path : str
-        batch_dims : tuple
-        channel_dims : tuple
-        tile_size
-        interval
-
+            Path where the denoised image will be saved as TIFF.
+        batch_dims : tuple of bool, optional
+            Specifies which axes are batch dimensions.
+        channel_dims : tuple of bool, optional
+            Specifies which axes are channel dimensions.
+        tile_size : int, optional
+            Suggested tile size for tiled inference.
+        interval : tuple of (int, int), optional
+            Time point range (start, end) to denoise. If None, all timepoints.
         """
         input_image_array, _ = imread(input_image_path)
 
@@ -91,21 +112,32 @@ class TimelapseDenoiser:
         tile_size=None,
         interval=None,
     ):
-        """Denoises image.
-        Ideally, the array should not be fully loaded in memory but should be a 'lazy-loading' array.
+        """Denoise a timelapse image array one timepoint at a time.
+
+        Ideally, the input array should not be fully loaded in memory
+        but should be a lazy-loading array (e.g. memory-mapped TIFF).
 
         Parameters
         ----------
         input_image_array : numpy.ndarray
-            image to denoise
-        denoised_image_array : numpy.ndarray
-            denoised image
-        batch_dims : tuple
-            tuple specifying which are the batch dimensions
-        channel_dims : tuple
-            tuple specifying which are the channel dimensions
+            Image array to denoise. First dimension is time.
+        denoised_image_array : numpy.ndarray, optional
+            Pre-allocated output array. If None, a new array is created.
+        batch_dims : tuple of bool, optional
+            Specifies which axes are batch dimensions.
+        channel_dims : tuple of bool, optional
+            Specifies which axes are channel dimensions.
+        tile_size : int, optional
+            Suggested tile size for tiled inference.
+        interval : tuple of (int, int), optional
+            Time point range (start, end) to denoise. If None, all timepoints.
+
+        Returns
+        -------
+        numpy.ndarray
+            The denoised image array.
         """
-        with lsection(
+        with asection(
             f"Denoising image with dimensions {input_image_array.shape} along first dimension"
         ):
             num_time_points = input_image_array.shape[0]
@@ -144,24 +176,33 @@ class TimelapseDenoiser:
         channel_dims,
         tile_size,
     ):
-        """Private method to denoise single given timepoint.
+        """Denoise a single timepoint using temporal context features.
+
+        Constructs input features from the fine and coarse temporal windows
+        around the given timepoint, trains the translator, and translates.
 
         Parameters
         ----------
-        tpi
-        num_time_points
-        input_image_array
-        denoised_image_array
-        batch_dims
-        channel_dims
-        tile_size
-
+        tpi : int
+            Index of the timepoint to denoise.
+        num_time_points : int
+            Total number of timepoints in the timelapse.
+        input_image_array : numpy.ndarray
+            Full timelapse input image array.
+        denoised_image_array : numpy.ndarray
+            Output array where the denoised timepoint is written.
+        batch_dims : tuple of bool
+            Batch dimension specification.
+        channel_dims : tuple of bool
+            Channel dimension specification.
+        tile_size : int or None
+            Tile size for tiled inference.
         """
-        with lsection(
+        with asection(
             f"Denoising time point: {tpi} of shape: {input_image_array[tpi].shape}"
         ):
             ftw = self.fine_temporal_window
-            with lsection(
+            with asection(
                 f"Adding fine temporal feature channels for range: [-{ftw},{ftw}]"
             ):
 
@@ -169,7 +210,7 @@ class TimelapseDenoiser:
                     index = tpi + rel_index
                     index = min(num_time_points - 1, index)
                     index = max(0, index)
-                    lprint(f'Fine features delta={rel_index} ')
+                    aprint(f'Fine features delta={rel_index} ')
                     return input_image_array[index]
 
                 fine_window_list = [
@@ -177,7 +218,7 @@ class TimelapseDenoiser:
                 ]
 
             ctw = self.coarse_temporal_window
-            with lsection(
+            with asection(
                 f"Added coarse temporal feature channels for range: [-{ctw},{ctw}]"
             ):
 
@@ -190,7 +231,7 @@ class TimelapseDenoiser:
                         if index <= tpi:
                             return numpy.zeros_like(input_image_array[0])
 
-                        lprint(f'Slice: {[tpi + 1, index + 1]}')
+                        aprint(f'Slice: {[tpi + 1, index + 1]}')
                         average_stack = input_image_array[tpi + 1 : index + 1]
                         average_stack = average_stack.astype(numpy.float32)
                         if self.use_median:
@@ -201,7 +242,10 @@ class TimelapseDenoiser:
                             average_stack = numpy.sum(
                                 average_stack, axis=0, keepdims=False
                             )
-                        average_stack /= abs(tpi - (index))
+                        divisor = abs(tpi - (index))
+                        if divisor == 0:
+                            return numpy.zeros_like(input_image_array[0])
+                        average_stack /= divisor
 
                     else:
                         index = tpi + extent
@@ -209,7 +253,7 @@ class TimelapseDenoiser:
                         if index >= tpi:
                             return numpy.zeros_like(input_image_array[0])
 
-                        lprint(f'Slice: {[index, tpi - 1 + 1]}')
+                        aprint(f'Slice: {[index, tpi - 1 + 1]}')
                         average_stack = input_image_array[index : tpi - 1 + 1]
                         average_stack = average_stack.astype(numpy.float32)
                         if self.use_median:
@@ -220,9 +264,12 @@ class TimelapseDenoiser:
                             average_stack = numpy.sum(
                                 average_stack, axis=0, keepdims=False
                             )
-                        average_stack /= abs((tpi + 1) - index)
+                        divisor = abs((tpi + 1) - index)
+                        if divisor == 0:
+                            return numpy.zeros_like(input_image_array[0])
+                        average_stack /= divisor
 
-                    lprint(f'Coarse temporal feature extent={extent}')
+                    aprint(f'Coarse temporal feature extent={extent}')
                     return average_stack
 
                 coarse_window_list_past = [
@@ -245,9 +292,9 @@ class TimelapseDenoiser:
                 True,
             ) * (2 * ctw)
 
-            lprint(f'Channel dims: {channel_dims_tp} ')
-            lprint(f'Force J-invariance tuple: {force_jinv} ')
-            lprint(f'Pass-through channels: {self.translator._passthrough_channels} ')
+            aprint(f'Channel dims: {channel_dims_tp} ')
+            aprint(f'Force J-invariance tuple: {force_jinv} ')
+            aprint(f'Pass-through channels: {self.translator._passthrough_channels} ')
 
             self.translator.train(
                 input_array_for_tp,

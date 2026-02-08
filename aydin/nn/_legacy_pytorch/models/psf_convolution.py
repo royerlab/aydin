@@ -1,8 +1,29 @@
+"""PSF convolution layer for image formation modeling.
+
+Provides a fixed-weight convolution layer that applies a known
+point spread function (PSF) to simulate image degradation.
+"""
+
 import torch
 from torch import nn
 
 
 class PSFConvolutionLayer(nn.Module):
+    """Convolution layer with a fixed PSF kernel.
+
+    Applies a known point spread function to an image using
+    reflection padding and a non-trainable convolution.
+
+    Parameters
+    ----------
+    kernel_psf : numpy.ndarray
+        2D PSF kernel array.
+    num_channels_in : int
+        Number of input channels.
+    num_channels_out : int
+        Number of output channels.
+    """
+
     def __init__(self, kernel_psf, num_channels_in=1, num_channels_out=1):
         kernel_size = kernel_psf.shape[0]
         super().__init__()

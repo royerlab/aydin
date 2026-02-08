@@ -1,3 +1,10 @@
+"""Image resolution estimation using self-supervised calibration.
+
+This module estimates the isotropic resolution of an image by calibrating a
+Butterworth denoiser and finding the optimal frequency cutoff. The cutoff
+frequency serves as a proxy for the resolution limit of the image.
+"""
+
 from functools import partial
 
 import numpy
@@ -9,25 +16,31 @@ from aydin.util.j_invariance.j_invariance import calibrate_denoiser
 
 
 def resolution_estimate(image, precision: int = 2, display_images: bool = False):
-    """Estimation of isotropic resolution in normalised frequency (within [0, 1]).
-    Work best
+    """Estimate the isotropic resolution of an image in normalized frequency.
+
+    Uses self-supervised calibration of a Butterworth denoiser to find the
+    optimal frequency cutoff, which serves as a resolution estimate.
+    Works best on images with a clear distinction between signal and noise
+    in the frequency domain.
 
     Parameters
     ----------
     image : numpy.typing.ArrayLike
-        Image to estimate (isotropic) resolution from
-    precision: int
-        Precision in decimal digits
-    display_images: bool
-        Display image, for debugging purposes.
+        Image to estimate (isotropic) resolution from.
+    precision : int
+        Precision in decimal digits. Each additional digit of precision
+        requires an additional round of optimization.
+    display_images : bool
+        If True, displays intermediate images for debugging purposes.
 
     Returns
     -------
-    Estimate of resolution in normalised frequency -- which assumes that the
-    sampling frequency is 1. Values are between 0 and 1, with 0 meaning no
-    resolution at all, and 1 means full resolution.
-    Also returns the crop used for the estimate.
-
+    frequency : float
+        Estimated resolution as a normalized frequency in [0, 1], where
+        the sampling frequency is 1. A value of 0 means no resolution,
+        and 1 means full (Nyquist) resolution.
+    crop_original : numpy.ndarray
+        The representative crop of the image used for the estimate.
     """
 
     # obtain representative crop, to speed things up...

@@ -1,21 +1,41 @@
+"""PyTorch-based CNN image translator for denoising.
+
+Provides an image translator that uses PyTorch neural networks
+for self-supervised and supervised image denoising, with support
+for various model architectures and training configurations.
+"""
+
 import math
 from collections import OrderedDict
 from itertools import chain
 
 import numpy
 import torch
+from torch import nn
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.utils.data import Dataset
+
 from aydin.it.base import ImageTranslatorBase
 from aydin.nn._legacy_pytorch.models.jidcnet import JInet2D
 from aydin.nn._legacy_pytorch.models.masking import Masking
 from aydin.nn._legacy_pytorch.optimizers.esadam import ESAdam
 from aydin.util.array.nd import extract_tiles
-from aydin.util.log.log import lsection, lprint
-from torch import nn
-from torch.optim.lr_scheduler import ReduceLROnPlateau
-from torch.utils.data import Dataset
+from aydin.util.log.log import aprint, asection
 
 
 def to_numpy(tensor):
+    """Convert a PyTorch tensor to a NumPy array.
+
+    Parameters
+    ----------
+    tensor : torch.Tensor
+        Input tensor.
+
+    Returns
+    -------
+    numpy.ndarray
+        Detached NumPy array on CPU.
+    """
     return tensor.clone().detach().cpu().numpy()
 
 
@@ -41,18 +61,44 @@ class PTCNNImageTranslator(ImageTranslatorBase):
         use_cuda=True,
         device_index=0,
     ):
-        """
-        Constructs an image translator using the _legacy_pytorch deep learning library.
+        """Construct a PyTorch CNN image translator.
 
-        :param normaliser_type: normaliser type
-        :param balance_training_data: balance data ? (limits number training entries per target value histogram bin)
-
+        Parameters
+        ----------
+        max_epochs : int
+            Maximum number of training epochs.
+        patience : int
+            Early stopping patience.
+        patience_epsilon : float
+            Minimum improvement to reset patience.
+        learning_rate : float
+            Initial learning rate.
+        batch_size : int
+            Training batch size.
+        model_class : type
+            PyTorch model class to instantiate.
+        denoise_loss : str
+            Denoising loss type: ``'l1'`` or ``'l2'``.
+        deconv_loss : str
+            Deconvolution loss type.
+        normaliser_type : str
+            Image normalizer type.
+        balance_training_data : int or None
+            Max entries per histogram bin for data balancing.
+        keep_ratio : float
+            Fraction of training data to keep.
+        max_voxels_for_training : float
+            Maximum number of voxels for training.
+        use_cuda : bool
+            Whether to use CUDA GPU acceleration.
+        device_index : int
+            CUDA device index.
         """
         super().__init__(normaliser_type)
 
         use_cuda = use_cuda and (torch.cuda.device_count() > 0)
         self.device = torch.device(f"cuda:{device_index}" if use_cuda else "cpu")
-        lprint(f"Using device: {self.device}")
+        aprint(f"Using device: {self.device}")
 
         self.max_epochs = max_epochs
         self.patience = patience
@@ -83,14 +129,22 @@ class PTCNNImageTranslator(ImageTranslatorBase):
         self._stop_training_flag = False
 
         # pytorch_info = models.__config__.show().replace('\n', ';')
-        # lprint(f"PyTorch Info: {pytorch_info}")
+        # aprint(f"PyTorch Info: {pytorch_info}")
 
     def save(self, path: str):
+        """Save the image translator model to the given path.
+
+        Parameters
+        ----------
+        path : str
+            Directory path to save the model.
+
+        Returns
+        -------
+        dict
+            Frozen model state.
         """
-        Saves a 'all-batteries-included' image translation model at a given path (folder).
-        :param path: path to save to
-        """
-        with lsection(f"Saving 'classic' image translator to {path}"):
+        with asection(f"Saving 'classic' image translator to {path}"):
             frozen = super().save(path)
             pass
             # TODO: complete!
@@ -98,18 +152,22 @@ class PTCNNImageTranslator(ImageTranslatorBase):
         return frozen
 
     def _load_internals(self, path: str):
-        with lsection(f"Loading 'classic' image translator from {path}"):
+        with asection(f"Loading 'classic' image translator from {path}"):
             pass
             # TODO: complete!
 
     # We exclude certain fields from saving:
     def __getstate__(self):
         state = self.__dict__.copy()
-        del state['XXXXXXX']
+        # Exclude non-serializable fields
+        if 'model' in state:
+            del state['model']
+        if 'device' in state:
+            del state['device']
         return state
 
     def stop_training(self):
-        lprint("Received notification to stop training loop now.")
+        aprint("Received notification to stop training loop now.")
         self._stop_training_flag = True
 
     def _train(
@@ -133,16 +191,16 @@ class PTCNNImageTranslator(ImageTranslatorBase):
 
         # Decide on how many voxels to be used for validation:
         num_val_voxels = int(train_valid_ratio * input_image.size)
-        lprint(
+        aprint(
             f"Number of voxels used for validation: {num_val_voxels} (train_valid_ratio={train_valid_ratio})"
         )
 
         # Generate random coordinates for these voxels:
         val_voxels = tuple(numpy.random.randint(d, size=num_val_voxels) for d in shape)
-        lprint(f"Validation voxel coordinates: {val_voxels}")
+        aprint(f"Validation voxel coordinates: {val_voxels}")
 
         # Training Tile size:
-        lprint(f"Train Tile dimensions: {tile_size}")
+        aprint(f"Train Tile dimensions: {tile_size}")
 
         # Prepare Training Dataset:
         dataset = self._get_dataset(
@@ -153,12 +211,12 @@ class PTCNNImageTranslator(ImageTranslatorBase):
             mode='grid',
             validation_voxels=val_voxels,
         )
-        lprint(f"Number tiles for training: {len(dataset)}")
+        aprint(f"Number tiles for training: {len(dataset)}")
 
         # Training Data Loader:
         # num_workers = max(3, os.cpu_count() // 2)
         num_workers = 0  # faster if data is already in memory...
-        lprint(f"Number of workers for loading training/validation data: {num_workers}")
+        aprint(f"Number of workers for loading training/validation data: {num_workers}")
         data_loader = torch.utils.data.DataLoader(
             dataset,
             batch_size=1,  # self.batch_size,
@@ -175,15 +233,15 @@ class PTCNNImageTranslator(ImageTranslatorBase):
         number_of_parameters = sum(
             p.numel() for p in self.model.parameters() if p.requires_grad
         )
-        lprint(
+        aprint(
             f"Number of trainable parameters in {self.model_class} model: {number_of_parameters}"
         )
 
         if self.masking:
             self.masked_model = Masking(self.model).to(self.device)
 
-        lprint(f"Optimizer class: {self.optimizer_class}")
-        lprint(f"Learning rate : {self.learning_rate}")
+        aprint(f"Optimizer class: {self.optimizer_class}")
+        aprint(f"Learning rate : {self.learning_rate}")
 
         # Optimizer:
         optimizer = self.optimizer_class(
@@ -193,29 +251,27 @@ class PTCNNImageTranslator(ImageTranslatorBase):
             weight_decay=self.l2_weight_regularisation,
         )
 
-        lprint(f"Optimizer: {optimizer}")
+        aprint(f"Optimizer: {optimizer}")
 
         # Denoise loss functon:
         loss_function = nn.L1Loss()
         if self.denoise_loss.lower() == 'l2':
-            lprint("Training/Validation loss: L2")
+            aprint("Training/Validation loss: L2")
             if self.masking:
-                loss_function = (
-                    lambda u, v, m: (u - v) ** 2 if m is None else ((u - v) * m) ** 2
+                loss_function = lambda u, v, m: (
+                    (u - v) ** 2 if m is None else ((u - v) * m) ** 2
                 )
             else:
                 loss_function = lambda u, v: (u - v) ** 2  # noqa : E731
 
         elif self.denoise_loss.lower() == 'l1':
             if self.masking:
-                loss_function = (
-                    lambda u, v, m: torch.abs(u - v)
-                    if m is None
-                    else torch.abs((u - v) * m)
+                loss_function = lambda u, v, m: (
+                    torch.abs(u - v) if m is None else torch.abs((u - v) * m)
                 )
             else:
                 loss_function = lambda u, v: torch.abs(u - v)  # noqa : E731
-            lprint("Training/Validation loss: L1")
+            aprint("Training/Validation loss: L1")
 
         # Start training:
         self._train_loop(data_loader, optimizer, loss_function)
@@ -230,8 +286,10 @@ class PTCNNImageTranslator(ImageTranslatorBase):
         validation_voxels,
     ):
         class _Dataset(Dataset):
+            """Internal dataset for tiled image pair training."""
+
             def __init__(self, input_image, target_image, tilesize):
-                """ """
+                """Initialize tiled dataset from input and target images."""
 
                 num_channels_input = input_image.shape[1]
                 num_channels_target = target_image.shape[1]
@@ -298,7 +356,6 @@ class PTCNNImageTranslator(ImageTranslatorBase):
             optimizer,
             'min',
             factor=self.reduce_lr_factor,
-            verbose=True,
             patience=self.reduce_lr_patience,
         )
 
@@ -306,14 +363,14 @@ class PTCNNImageTranslator(ImageTranslatorBase):
         best_model_state_dict = None
         patience_counter = 0
 
-        with lsection("Training loop:"):
-            lprint(f"Maximum number of epochs: {self.max_epochs}")
-            lprint(
+        with asection("Training loop:"):
+            aprint(f"Maximum number of epochs: {self.max_epochs}")
+            aprint(
                 f"Training type: {'self-supervised' if self.self_supervised else 'supervised'}"
             )
 
             for epoch in range(self.max_epochs):
-                with lsection(f"Epoch {epoch}:"):
+                with asection(f"Epoch {epoch}:"):
 
                     train_loss_value = 0
                     val_loss_value = 0
@@ -321,7 +378,7 @@ class PTCNNImageTranslator(ImageTranslatorBase):
                     for i, (input_images, target_images, val_mask_images) in enumerate(
                         data_loader
                     ):
-                        lprint(f"index: {i}, shape:{input_images.shape}")
+                        aprint(f"index: {i}, shape:{input_images.shape}")
 
                         input_images_gpu = input_images.to(
                             self.device, non_blocking=True
@@ -339,7 +396,7 @@ class PTCNNImageTranslator(ImageTranslatorBase):
                                 alpha = self.training_noise / (
                                     1 + (10000 * epoch / self.max_epochs)
                                 )
-                                lprint(f"Training noise level: {alpha}")
+                                aprint(f"Training noise level: {alpha}")
                                 training_noise = alpha * torch.randn_like(input_images)
                                 input_images_gpu += training_noise.to(
                                     input_images_gpu.device
@@ -400,9 +457,9 @@ class PTCNNImageTranslator(ImageTranslatorBase):
                         if self.self_supervised and self.enforce_blind_spot:
                             try:
                                 self.model.enforce_blind_spot()
-                                lprint("Post optimisation corrections applied to model")
+                                aprint("Post optimisation corrections applied to model")
                             except AttributeError:
-                                lprint(
+                                aprint(
                                     "NO post optimisation corrections applied to model"
                                 )
 
@@ -446,18 +503,18 @@ class PTCNNImageTranslator(ImageTranslatorBase):
                             iteration += 1
 
                     train_loss_value /= iteration
-                    lprint("Training loss value: {train_loss_value}")
+                    aprint(f"Training loss value: {train_loss_value}")
 
                     val_loss_value /= iteration
-                    lprint("Validation loss value: {val_loss_value}")
+                    aprint(f"Validation loss value: {val_loss_value}")
 
                     # Learning rate schedule:
                     scheduler.step(val_loss_value)
 
                     if val_loss_value < best_val_loss_value:
-                        lprint("## New best val loss!")
+                        aprint("## New best val loss!")
                         if val_loss_value < best_val_loss_value - self.patience_epsilon:
-                            lprint("## Good enough to reset patience!")
+                            aprint("## Good enough to reset patience!")
                             patience_counter = 0
 
                         # Update best val loss value:
@@ -473,34 +530,34 @@ class PTCNNImageTranslator(ImageTranslatorBase):
                             epoch % max(1, self.reload_best_model_period) == 0
                             and best_model_state_dict
                         ):
-                            lprint("Reloading best models to date!")
+                            aprint("Reloading best models to date!")
                             self.model.load_state_dict(best_model_state_dict)
 
                         if patience_counter > self.patience:
-                            lprint("Early stopping!")
+                            aprint("Early stopping!")
                             break
 
                         # No improvement:
-                        lprint(
-                            "No improvement of validation losses, patience = {patience_counter}/{self.patience} "
+                        aprint(
+                            f"No improvement of validation losses, patience = {patience_counter}/{self.patience} "
                         )
                         patience_counter += 1
 
-                    lprint("## Best val loss: {best_val_loss_value}")
+                    aprint(f"## Best val loss: {best_val_loss_value}")
 
                     if self._stop_training_flag:
-                        lprint("Training interupted!")
+                        aprint("Training interupted!")
                         break
 
-        lprint("Reloading best models to date!")
+        aprint("Reloading best models to date!")
         self.model.load_state_dict(best_model_state_dict)
 
         if self.self_supervised and self.enforce_blind_spot:
             try:
                 self.model.fill_blind_spot()
-                lprint("Blind spot filled!")
+                aprint("Blind spot filled!")
             except AttributeError:
-                lprint("Blind spot NOT filled! (no method available)")
+                aprint("Blind spot NOT filled! (no method available)")
 
     def _additional_losses(self, translated_image, forward_model_image):
         return None
@@ -532,6 +589,6 @@ class PTCNNImageTranslator(ImageTranslatorBase):
         try:
             self.model.visualise_weights()
         except AttributeError:
-            lprint(
+            aprint(
                 "Method 'visualise_weights()' unavailable, cannot visualise weights. "
             )

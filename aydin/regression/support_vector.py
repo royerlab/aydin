@@ -1,17 +1,24 @@
+"""Support vector regressor for Aydin's FGR pipeline.
+
+This module provides :class:`SupportVectorRegressor`, which wraps scikit-learn's
+SVR and LinearSVR. This regressor is generally too slow for practical use and
+is included primarily for benchmarking purposes.
+"""
+
 from sklearn.svm import SVR, LinearSVR
 
 from aydin.regression.base import RegressorBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class SupportVectorRegressor(RegressorBase):
     """
-    The Support Vector Regressor is too slow and does not in pour experience
+    The Support Vector Regressor is too slow and does not in our experience
     perform better than random forests or gradient boosting.
     """
 
     def __init__(self, linear: bool = True):
-        """Constructs a linear regressor.
+        """Construct a support vector regressor.
 
         Parameters
         ----------
@@ -29,8 +36,25 @@ class SupportVectorRegressor(RegressorBase):
     def _fit(
         self, x_train, y_train, x_valid=None, y_valid=None, regressor_callback=None
     ):
-        """Fits function y=f(x) given training pairs (x_train, y_train).
-        Stops when performance stops improving on the test dataset: (x_test, y_test).
+        """Fit a single-channel support vector regression model.
+
+        Parameters
+        ----------
+        x_train : numpy.ndarray
+            Training feature vectors of shape ``(n_samples, n_features)``.
+        y_train : numpy.ndarray
+            Training target values of shape ``(n_samples,)``.
+        x_valid : numpy.ndarray, optional
+            Validation feature vectors (unused by SVR).
+        y_valid : numpy.ndarray, optional
+            Validation target values (unused by SVR).
+        regressor_callback : callable, optional
+            Callback (unused by SVR).
+
+        Returns
+        -------
+        _SVRModel
+            Fitted SVR model wrapper.
         """
 
         if self.linear:
@@ -44,24 +68,48 @@ class SupportVectorRegressor(RegressorBase):
 
 
 class _SVRModel:
+    """Internal wrapper around a fitted scikit-learn SVR model.
+
+    Attributes
+    ----------
+    model : object
+        The underlying scikit-learn SVR or LinearSVR estimator.
+    loss_history : dict
+        Empty loss history (SVR does not track iterative loss).
+    """
+
     def __init__(self, model):
         self.model = model
         self.loss_history = {'training': [], 'validation': []}
 
     def _save_internals(self, path: str):
+        """Save model internals (no-op for scikit-learn models)."""
         pass
 
     def _load_internals(self, path: str):
+        """Load model internals (no-op for scikit-learn models)."""
         pass
 
     def predict(self, x):
-        with lsection("SVR regressor prediction"):
+        """Predict target values for the given feature vectors.
 
-            lprint(f"Number of data points             : {x.shape[0]}")
-            lprint(f"Number of features per data points: {x.shape[-1]}")
+        Parameters
+        ----------
+        x : numpy.ndarray
+            Feature vectors of shape ``(n_samples, n_features)``.
 
-            with lsection("SVR prediction now"):
+        Returns
+        -------
+        numpy.ndarray
+            Predicted values.
+        """
+        with asection("SVR regressor prediction"):
+
+            aprint(f"Number of data points             : {x.shape[0]}")
+            aprint(f"Number of features per data points: {x.shape[-1]}")
+
+            with asection("SVR prediction now"):
                 prediction = self.model.predict(x)
 
-            lprint("SVR regressor predicting done!")
+            aprint("SVR regressor predicting done!")
             return prediction

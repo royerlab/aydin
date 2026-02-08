@@ -5,7 +5,7 @@ Hardware Requirements
 Aydin tries to make use of high-end NVIDIA GPUs (Graphical Processing Units) whenever it can.
 Some of the computational packages that Aydin depends on can make use of an
 existing CUDA GPU out of the box (CatBoost) whereas other libraries
-such as Numba require the CUDA toolkit to be installed (conda install cudatoolkit)
+such as Numba require the CUDA toolkit to be installed
 to be able to make use of CUDA GPUs. Aside from the CUDA GPU support, having a faster CPU with more cores
 and a bigger memory can help with Aydin's runtime performance.
 
@@ -21,4 +21,3 @@ items that might be problematic.
 
 Having said that, some algorithms in Aydin such as the 'Butterworth' denoiser  can be quite fast,
 can run on modest machines, and may be sufficient for your needs.
-

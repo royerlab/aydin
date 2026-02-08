@@ -1,8 +1,8 @@
 Restoration
 -------------
 
-Restorations module is the place various image restorations methods implemented. Denoising,
-deconvolution and so. One can use object-oriented restoration API calls or procedural
+The restoration module provides high-level image restoration methods.
+One can use object-oriented restoration API calls or procedural
 restoration API calls Aydin provides.
 
 
@@ -10,4 +10,3 @@ restoration API calls Aydin provides.
    :maxdepth: 1
 
    Denoise <restorations/denoise_restoration>
-

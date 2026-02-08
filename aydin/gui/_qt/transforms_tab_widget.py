@@ -1,6 +1,9 @@
+"""Tab widget for dynamically loading and configuring image transforms."""
+
 import importlib
 import inspect
 import pkgutil
+
 from qtpy.QtWidgets import QTabWidget
 
 from aydin.gui._qt.transforms_tab_item import TransformsTabItem
@@ -8,6 +11,18 @@ from aydin.it import transforms
 
 
 class TransformsTabWidget(QTabWidget):
+    """Tab widget that dynamically loads all available image transforms.
+
+    Discovers transform classes from ``aydin.it.transforms``, creates a
+    ``TransformsTabItem`` widget for each, and provides basic/advanced
+    mode toggling.
+
+    Parameters
+    ----------
+    parent : ProcessingTab
+        The parent processing tab widget.
+    """
+
     def __init__(self, parent):
         super(TransformsTabWidget, self).__init__(parent)
 
@@ -47,9 +62,17 @@ class TransformsTabWidget(QTabWidget):
                 widget.preprocess_checkbox.setChecked(True)
 
     def clear_the_list(self):
+        """Remove all transform tabs from the widget."""
         self.clear()
 
     def set_advanced_enabled(self, enable: bool = False):
+        """Toggle visibility of advanced transforms and their parameters.
+
+        Parameters
+        ----------
+        enable : bool, optional
+            If True, show tabs for advanced transforms. Default is False.
+        """
         for index, item_widget in enumerate(self.list_of_item_widgets):
             if "(advanced)" in item_widget.transform_class.__doc__:
                 self.setTabVisible(index, enable)

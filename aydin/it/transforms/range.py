@@ -1,3 +1,10 @@
+"""Range normalisation transform.
+
+Normalises image pixel values to a [0, 1] range using either min-max or
+percentile-based scaling. Almost always recommended as a preprocessing step
+to ensure consistent behavior across different image formats and value ranges.
+"""
+
 from typing import Optional
 
 import numpy
@@ -7,7 +14,7 @@ from aydin.it.normalisers.base import NormaliserBase
 from aydin.it.normalisers.minmax import MinMaxNormaliser
 from aydin.it.normalisers.percentile import PercentileNormaliser
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import aprint, asection
 
 
 class RangeTransform(ImageTransformBase):
@@ -48,7 +55,6 @@ class RangeTransform(ImageTransformBase):
         priority: float = 0.2,
         **kwargs,
     ):
-
         """
         Constructs a Range Transform
 
@@ -70,7 +76,7 @@ class RangeTransform(ImageTransformBase):
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
@@ -83,7 +89,7 @@ class RangeTransform(ImageTransformBase):
         self._min_value = None
         self._max_value = None
 
-        lprint(f"Instanciating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -106,8 +112,20 @@ class RangeTransform(ImageTransformBase):
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
+        """Normalise the image value range to [0, 1].
 
-        with lsection(
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Range-normalised image as float32.
+        """
+
+        with asection(
             f"Normalizing value range ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
 
@@ -127,11 +145,26 @@ class RangeTransform(ImageTransformBase):
             return new_array
 
     def postprocess(self, array: ArrayLike):
+        """Denormalise the image back to the original value range and data type.
+
+        May keep data as float if the original integer range is too narrow
+        (less than 128 levels).
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised normalised image.
+
+        Returns
+        -------
+        numpy.ndarray
+            Image in original value range and (possibly original) data type.
+        """
 
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Denormalizing value range ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             force_float_datatype = self.force_float_datatype
@@ -140,8 +173,8 @@ class RangeTransform(ImageTransformBase):
             if force_float_datatype is False and numpy.issubdtype(
                 self._original_dtype, numpy.integer
             ):
-                range = abs(self._max_value - self._min_value)
-                if range < 128:
+                value_range = abs(self._max_value - self._min_value)
+                if value_range < 128:
                     force_float_datatype = True
 
             new_array = self._normaliser.denormalise(

@@ -1,3 +1,11 @@
+"""Noise2Self Feature Generation and Regression (FGR) denoising module.
+
+Provides the :class:`Noise2SelfFGR` denoising class and the convenience
+function :func:`noise2self_fgr`. This approach combines feature generation
+with gradient boosting or other regression methods for self-supervised
+image denoising.
+"""
+
 import importlib
 import inspect
 import os
@@ -18,14 +26,14 @@ from aydin.regression.perceptron import PerceptronRegressor
 from aydin.regression.random_forest import RandomForestRegressor
 from aydin.regression.support_vector import SupportVectorRegressor
 from aydin.restoration.denoise.base import DenoiseRestorationBase
-from aydin.util.log.log import lsection
+from aydin.util.log.log import asection
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):
-    """
-    Noise2Self image denoising using the "Feature Generation & Regression" (
-    FGR) approach. Follows from the theory exposed in the <a
-    href="https://arxiv.org/abs/1901.11365">Noise2Self paper</a>.
+    """Noise2Self image denoising using Feature Generation & Regression (FGR).
+
+    Follows from the theory exposed in the
+    `Noise2Self paper <https://arxiv.org/abs/1901.11365>`_.
     """
 
     def __init__(
@@ -130,6 +138,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
     @property
     def implementations_description(self):
+        """Return human-readable descriptions for each FGR implementation."""
         fgr_description = Noise2SelfFGR.__doc__.strip()
 
         feature_generator_name = StandardFeatureGenerator.__name__.replace(
@@ -163,7 +172,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         return descriptions
 
     def stop_running(self):
-        """Method to stop running N2S instance"""
+        """Stop the current Noise2Self FGR training or inference."""
         self.it.stop_training()
 
     def get_generator(self):
@@ -235,14 +244,17 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             it = ImageTranslatorFGR(
                 feature_generator=feature_generator,
                 regressor=regressor,
-                **self.lower_level_args["it"]["kwargs"]
-                if self.lower_level_args is not None
-                else {},
+                **(
+                    self.lower_level_args["it"]["kwargs"]
+                    if self.lower_level_args is not None
+                    else {}
+                ),
             )
 
         return it
 
     def add_transforms(self):
+        """Add the configured image transforms to the image translator."""
         if self.it_transforms is not None:
             for transform in self.it_transforms:
                 transform_class = transform["class"]
@@ -250,22 +262,24 @@ class Noise2SelfFGR(DenoiseRestorationBase):
                 self.it.add_transform(transform_class(**transform_kwargs))
 
     def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
-        """Method to run training for Noise2Self FGR.
+        """Train the Noise2Self FGR denoiser on a noisy image.
+
+        Generates features from the noisy image and trains a regression
+        model to predict clean pixel values in a self-supervised manner.
 
         Parameters
         ----------
         noisy_image : numpy.ndarray
+            The noisy input image.
         batch_axes : array_like, optional
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-
-        Returns
-        -------
-        response : numpy.ndarray
-
+        **kwargs
+            Additional keyword arguments. Supports ``'train_valid_ratio'``,
+            ``'callback_period'``, and ``'jinv'``.
         """
-        with lsection("Noise2Self train is starting..."):
+        with asection("Noise2Self train is starting..."):
 
             self.it = self.get_translator(
                 feature_generator=self.get_generator(), regressor=self.get_regressor()
@@ -279,32 +293,37 @@ class Noise2SelfFGR(DenoiseRestorationBase):
                 noisy_image,
                 batch_axes=batch_axes,
                 channel_axes=chan_axes,
-                train_valid_ratio=kwargs['train_valid_ratio']
-                if 'train_valid_ratio' in kwargs
-                else 0.1,
-                callback_period=kwargs['callback_period']
-                if 'callback_period' in kwargs
-                else 3,
+                train_valid_ratio=(
+                    kwargs['train_valid_ratio']
+                    if 'train_valid_ratio' in kwargs
+                    else 0.1
+                ),
+                callback_period=(
+                    kwargs['callback_period'] if 'callback_period' in kwargs else 3
+                ),
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
 
     def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
-        """Method to denoise an image with trained Noise2Self FGR.
+        """Denoise an image using the trained Noise2Self FGR model.
 
         Parameters
         ----------
+        noisy_image : numpy.ndarray
+            The noisy input image to denoise.
         batch_axes : array_like, optional
             Indices of batch axes.
         chan_axes : array_like, optional
             Indices of channel axes.
-        noisy_image : numpy.ndarray
+        **kwargs
+            Additional keyword arguments. Supports ``'tile_size'``.
 
         Returns
         -------
-        response : numpy.ndarray
-
+        numpy.ndarray
+            The denoised image, cast to the input image's dtype.
         """
-        with lsection("Noise2Self denoise is starting..."):
+        with asection("Noise2Self denoise is starting..."):
 
             # Predict the resulting image
             response = self.it.translate(
@@ -320,22 +339,29 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
 
 def noise2self_fgr(noisy, *, batch_axes=None, chan_axes=None, variant=None):
-    """Method to denoise an image with trained Noise2Self FGR.
+    """Denoise an image using Noise2Self FGR in a single call.
+
+    Convenience function that creates a :class:`Noise2SelfFGR` instance,
+    trains it on the noisy image, and returns the denoised result.
 
     Parameters
     ----------
     noisy : numpy.ndarray
-        Image to denoise
+        Image to denoise.
     batch_axes : array_like, optional
         Indices of batch axes.
     chan_axes : array_like, optional
         Indices of channel axes.
-    variant : str
-        Algorithm variant.
+    variant : str, optional
+        Regression algorithm variant. Available variants: ``'cb'``
+        (CatBoost, default), ``'lgbm'`` (LightGBM), ``'linear'``,
+        ``'perceptron'``, ``'random_forest'``, ``'support_vector'``.
+        When ``None``, CatBoost is used.
 
     Returns
     -------
-    Denoised image : numpy.ndarray
+    numpy.ndarray
+        Denoised image.
 
     """
     # Run N2S and save the result

@@ -1,8 +1,7 @@
-import psutil
+"""TensorFlow device selection and memory query utilities."""
 
-# from tensorflow_core.python.client import device_lib
+import psutil
 import tensorflow as tf
-from tensorflow.python.client import device_lib
 
 
 def get_best_device_name():
@@ -15,19 +14,14 @@ def get_best_device_name():
         Name of the best available GPU
 
     """
-
-    if tf.test.gpu_device_name() != "":
-        available_gpu_devices = []
-        for device in device_lib.list_local_devices():
-            if "GPU" in device.name and "XLA" not in device.name:
-                available_gpu_devices.append(device)
-        available_memory_amounts = [
-            device.memory_limit for device in available_gpu_devices
-        ]
-        best_gpu_index = available_memory_amounts.index(max(available_memory_amounts))
-        return available_gpu_devices[best_gpu_index].name
-    else:
-        return "/device:CPU:0"
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        # Get logical devices (which have the actual device names we need)
+        logical_gpus = tf.config.list_logical_devices('GPU')
+        if logical_gpus:
+            # Return the first GPU (TensorFlow handles memory allocation)
+            return logical_gpus[0].name
+    return "/device:CPU:0"
 
 
 def available_device_memory():
@@ -40,8 +34,13 @@ def available_device_memory():
         Available device memory
 
     """
-    for device in device_lib.list_local_devices():
-        if tf.test.gpu_device_name() != "" and device.name == tf.test.gpu_device_name():
-            return float(device.memory_limit)
-    else:
-        return float(psutil.virtual_memory().available)
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        try:
+            # Try to get GPU memory info (requires TF 2.5+)
+            memory_info = tf.config.experimental.get_memory_info('GPU:0')
+            return float(memory_info['total'])
+        except (RuntimeError, ValueError):
+            # Fallback: estimate based on typical GPU memory
+            return 8.0 * 1024 * 1024 * 1024  # 8GB default
+    return float(psutil.virtual_memory().available)

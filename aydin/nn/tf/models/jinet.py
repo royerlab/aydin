@@ -1,17 +1,19 @@
+"""TensorFlow/Keras JINet model for blind-spot denoising (deprecated).
+
+Hybrid CNN-perceptron model using dilated convolutions to achieve
+built-in J-invariance for Noise2Self denoising.
+"""
+
+import keras
 from deprecated import deprecated
-from tensorflow.python.keras import Input
-from tensorflow.python.keras.layers import (
-    Concatenate,
-    Conv2D,
-    Conv3D,
-    LeakyReLU,
-    Activation,
-)
-from tensorflow.python.keras.optimizer_v2.adam import Adam
-from tensorflow.python.keras.models import Model
+from keras import Input
+from keras.layers import Activation, Concatenate, Conv2D, Conv3D, LeakyReLU
+from keras.models import Model
+from keras.optimizers import Adam
 
 from aydin.nn.tf.models.utils.conv_block import conv2d_torch, conv3d_torch
 from aydin.nn.tf.models.utils.training_architectures import get_jinet_fit_args
+from aydin.util.log.log import aprint
 
 
 @deprecated(
@@ -237,7 +239,7 @@ class JINetModel(Model):
         # stack all features into one tensor:
         x = Concatenate(axis=-1)(dilated_conv_list)
 
-        print("after concat", x.shape)
+        aprint("after concat", x.shape)
         # We keep the number of features:
         self.total_num_features = total_num_features
 

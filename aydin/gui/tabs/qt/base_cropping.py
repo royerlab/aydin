@@ -1,22 +1,31 @@
+"""Base cropping tab widget with embedded napari viewer and range sliders."""
+
 import numpy
 from napari._qt.qt_viewer import QtViewer
 from napari.components.viewer_model import ViewerModel
-
-from aydin.gui._qt.custom_widgets.readmoreless_label import QReadMoreLessLabel
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
+from qtpy.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,
 )
-from aydin.gui._qt.custom_widgets.range_slider_with_labels import (
-    QRangeSliderWithLabels,
-)
+from aydin.gui._qt.custom_widgets.range_slider_with_labels import QRangeSliderWithLabels
+from aydin.gui._qt.custom_widgets.readmoreless_label import QReadMoreLessLabel
 from aydin.util.misc.units import human_readable_byte_size
 
 
 class BaseCroppingTab(QWidget):
-    """Use the sliders to select a region of the image to crop."""
+    """Base widget for image cropping tabs with a napari viewer and range sliders.
+
+    Provides an embedded napari viewer for image preview and X/Y/Z/T range
+    sliders for selecting crop regions. Subclassed by TrainingCroppingTab
+    and DenoisingCroppingTab.
+
+    Parameters
+    ----------
+    parent : MainPage
+        The parent MainPage widget.
+    """
 
     def __init__(self, parent):
         super(BaseCroppingTab, self).__init__(parent)
@@ -85,10 +94,29 @@ class BaseCroppingTab(QWidget):
 
     @property
     def images(self):
+        """Cropped images or the raw image list depending on the number of images.
+
+        Returns
+        -------
+        list
+            If a single image is loaded, returns the cropped version.
+            Otherwise returns the list of raw image arrays.
+        """
         return self.cropped_image if len(self._images) == 1 else self._images
 
     @images.setter
     def images(self, images):
+        """Set the images for this cropping tab.
+
+        Handles three cases: empty list (clears tab), single image (enables
+        viewer and sliders), or multiple images (stores arrays, disables
+        individual cropping).
+
+        Parameters
+        ----------
+        images : list
+            List of image records from the data model.
+        """
         if len(images) == 0:
             self._images = []
             self.clear_cropping_tab()
@@ -138,6 +166,14 @@ class BaseCroppingTab(QWidget):
 
     @property
     def crop_selection_slicing_object(self):
+        """Build a tuple of slices from the current crop slider positions.
+
+        Returns
+        -------
+        tuple of slice
+            Slicing tuple that can be applied to the image array to extract
+            the cropped region.
+        """
         slider_slice = [slice(None)] * len(self.image.shape)
         for idx, axis in enumerate(self._metadata.axes):
             if axis == "X":
@@ -170,6 +206,14 @@ class BaseCroppingTab(QWidget):
 
     @property
     def selection_array(self):
+        """Generate a 2D overlay array highlighting the current crop region.
+
+        Returns
+        -------
+        numpy.ndarray
+            A uint8 array with the same Y/X dimensions as the image, where
+            selected pixels are set to 100 and unselected pixels to 0.
+        """
         self.new_crop[...] = 0
         self.new_crop[
             (
@@ -181,6 +225,7 @@ class BaseCroppingTab(QWidget):
         return self.new_crop
 
     def update_sliders(self):
+        """Configure slider ranges and visibility based on the current image dimensions."""
         self.x_crop_slider.slider.setRange(
             (0, self.image.shape[self._metadata.axes.find("X")])
         )
@@ -230,6 +275,7 @@ class BaseCroppingTab(QWidget):
             self.t_crop_slider.setHidden(True)
 
     def initialize_viewer(self):
+        """Set up the napari viewer with the current image and crop overlay."""
         self.viewer_model.layers.clear()
         self.viewer_model.add_image(self._image)
 
@@ -247,9 +293,19 @@ class BaseCroppingTab(QWidget):
         self.update_summary()
 
     def update_crop_label_layer(self):
+        """Refresh the crop overlay layer with the current selection."""
         self.crop_layer.data = self.selection_array
 
     def update_current_viewer_dims(self, slider_label, value):
+        """Update the napari viewer dimension step for a given axis.
+
+        Parameters
+        ----------
+        slider_label : str
+            Axis label ('X', 'Y', 'Z', or 'T').
+        value : int or float
+            New position along the specified axis.
+        """
         dims_axis_to_update = self._metadata.axes.find(slider_label)
         current_step = list(self.viewer_model.dims.current_step)
         current_step[dims_axis_to_update] = value
@@ -257,6 +313,7 @@ class BaseCroppingTab(QWidget):
         self.viewer_model.dims.current_step = tuple(current_step)
 
     def update_summary(self):
+        """Update the voxel count and byte size labels for the current crop."""
         self.summary_nbvoxels_label.setText(
             f"Total number of voxels: {numpy.prod(self.cropped_image[0].shape)}"
         )
@@ -265,10 +322,12 @@ class BaseCroppingTab(QWidget):
         )
 
     def clear_cropping_tab(self):
+        """Clear the viewer layers and reset summary labels to N/A."""
         self.viewer_model.layers.clear()
 
         self.summary_nbvoxels_label.setText("Total number of voxels: N/A")
         self.summary_nbytes_label.setText("Total size in bytes: N/A")
 
     def on_data_model_update(self):
+        """Refresh the tab with the current images marked for denoising."""
         self.images = self.parent.data_model.images_to_denoise

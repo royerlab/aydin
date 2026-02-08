@@ -17,7 +17,8 @@ in Aydin API. You can see a quick example below using ImageTranslatorFGR:
 
 
 Similar to ImageTranslatorFGR implementation, same can be achieved with
-ImageTranslatorCNN as shown below:
+ImageTranslatorCNN as shown below (note: ``ImageTranslatorCNN`` is deprecated,
+use ``ImageTranslatorCNNTorch`` instead):
 
 .. code-block:: python
 
@@ -29,5 +30,3 @@ ImageTranslatorCNN as shown below:
 
    it.train(noisy, groundtruth)
    denoised = it.translate(noisy)
-
-

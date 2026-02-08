@@ -31,7 +31,7 @@ def demo():
     intensity = 5
     np.random.seed(0)
     noisy = np.random.poisson(image * intensity) / intensity
-    noisy = random_noise(noisy, mode='gaussian', var=0.01, seed=0)
+    noisy = random_noise(noisy, mode='gaussian', var=0.01, rng=0)
     noisy = noisy.astype(np.float32)
 
     median1 = skimage.filters.median(noisy, disk(1))

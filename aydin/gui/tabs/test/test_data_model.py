@@ -1,4 +1,9 @@
-from mock import Mock
+"""Tests for the DataModel class."""
+
+from unittest.mock import Mock
+
+import numpy
+import pytest
 
 from aydin.gui.tabs.data_model import DataModel
 from aydin.io import imread
@@ -25,7 +30,7 @@ def test_adding_files():
             if isinstance(elem1, FileMetadata):
                 assert elem1 == elem2
             else:
-                assert elem1.all() == elem2.all()
+                assert numpy.array_equal(elem1, elem2)
 
 
 def test_removing_files():
@@ -39,12 +44,13 @@ def test_removing_files():
 
 
 def test_removing_multiple_but_not_all_files():
-    pass
+    data_model = DataModel(Mock())
+    fpath1 = examples_single.noisy_fountain.get_path()
+    fpath2 = examples_single.generic_camera.get_path()
+    data_model.add_filepaths([fpath1, fpath2])
 
+    assert len(data_model.filepaths) == 2
 
-def test_hyperstack():
-    pass
-
-
-def test_hyperstack_attempt_images_of_different_shapes():
-    pass
+    data_model.remove_filepaths([fpath1])
+    assert len(data_model.filepaths) == 1
+    assert fpath2 in data_model.filepaths

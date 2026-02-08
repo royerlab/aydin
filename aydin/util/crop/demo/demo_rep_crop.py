@@ -4,16 +4,16 @@ from numpy.random import normal
 from skimage.data import camera
 
 from aydin.io.datasets import (
-    dots,
-    lizard,
-    pollen,
-    newyork,
     characters,
+    dots,
     examples_single,
+    lizard,
+    newyork,
     normalise,
+    pollen,
 )
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.log.log import Log, lsection, lprint
+from aydin.util.log.log import Log, aprint, asection
 
 
 def demo_representative_crop(
@@ -36,7 +36,7 @@ def demo_representative_crop(
     # Warmup (numba compilation)
     _crop_fun()
 
-    with lsection(f"Computing crop for image of shape: {image.shape}"):
+    with asection(f"Computing crop for image of shape: {image.shape}"):
         # for _ in range(10):
         crop = _crop_fun()
 
@@ -48,7 +48,7 @@ def demo_representative_crop(
         viewer.add_image(crop, name='crop')
         napari.run()
 
-    lprint(f"Crop size requested: {crop_size} obtained: {crop.size}")
+    aprint(f"Crop size requested: {crop_size} obtained: {crop.size}")
 
     assert crop.size >= int(crop_size * 0.75) and crop.size <= int(crop_size * 1.25)
 

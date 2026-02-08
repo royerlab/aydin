@@ -1,6 +1,14 @@
+"""N-dimensional patch extraction and image reconstruction.
+
+Provides functions to extract overlapping patches from n-dimensional
+images and reconstruct images from patch collections using mean,
+windowed, or center-pixel reconstruction modes.
+"""
+
 from itertools import product
 from math import prod
-from typing import Tuple, Optional, Union
+from typing import Optional, Tuple, Union
+
 import numpy
 from sklearn.feature_extraction.image import _extract_patches
 from sklearn.utils import check_random_state
@@ -187,6 +195,25 @@ def reconstruct_from_nd_patches(
 
 
 def _window(shape: Tuple[int], gamma: float):
+    """Generate an n-dimensional weighting window for patch reconstruction.
+
+    Creates a Blackman-based window that concentrates weight toward the
+    center of each patch. Used to reduce stitching artifacts when
+    reconstructing images from overlapping patches.
+
+    Parameters
+    ----------
+    shape : tuple of int
+        Shape of the window (same as patch shape).
+    gamma : float
+        Concentration parameter. Values near 0 give uniform weighting;
+        larger values concentrate weight at the center.
+
+    Returns
+    -------
+    numpy.ndarray
+        Normalized weighting window.
+    """
     if gamma < 0.01:
         # gamma->0 => uniform window!
         window_nd = numpy.ones(shape)

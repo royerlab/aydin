@@ -1,3 +1,5 @@
+"""Demo: Denoising and deconvolution with legacy PyTorch CNN."""
+
 # flake8: noqa
 import time
 
@@ -6,7 +8,7 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
 from aydin.analysis.image_metrics import mutual_information, spectral_mutual_information
-from aydin.io.datasets import normalise, add_noise, add_blur_2d, dots
+from aydin.io.datasets import add_blur_2d, add_noise, dots, normalise
 from aydin.it.deconvolution.lr_deconv import ImageTranslatorLRDeconv
 from aydin.nn._legacy_pytorch.it_ptcnn import PTCNNImageTranslator
 from aydin.nn._legacy_pytorch.it_ptcnn_deconv import PTCNNDeconvolution

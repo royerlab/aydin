@@ -1,5 +1,12 @@
+"""Gaussian filter denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on a simple Gaussian
+low-pass filter. Fast and effective for moderate noise levels, though it
+blurs across all frequencies unlike the band-pass-aware Butterworth denoiser.
+"""
+
 from functools import partial
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -63,7 +70,7 @@ def calibrate_denoise_gaussian(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot

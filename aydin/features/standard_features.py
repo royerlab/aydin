@@ -1,3 +1,5 @@
+"""Standard feature generator combining uniform, spatial, median, DCT, random, and lowpass features."""
+
 import numpy
 
 from aydin.features.extensible_features import ExtensibleFeatureGenerator
@@ -7,16 +9,19 @@ from aydin.features.groups.median import MedianFeatures
 from aydin.features.groups.random import RandomFeatures
 from aydin.features.groups.spatial import SpatialFeatures
 from aydin.features.groups.uniform import UniformFeatures
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class StandardFeatureGenerator(ExtensibleFeatureGenerator):
-    """
-    The standard feature generator provides the following set of features:
-    multiscale integral(uniform) features of different shapes, spatial
-    features, median features, dct features, deterministic random
-    convolutional features.
+    """Standard feature generator combining multiple feature types.
 
+    Provides a configurable combination of the following feature groups:
+    multi-scale integral (uniform) features of different shapes, spatial
+    coordinate features, median filter features, low-pass Butterworth
+    features, DCT features, and deterministic random convolutional features.
+
+    This is the recommended feature generator for most use cases with the
+    Feature Generation and Regression (FGR) denoising approach.
     """
 
     def __init__(
@@ -170,7 +175,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
         super().__init__()
 
         self.dtype = dtype
-        lprint(f"Features will be computed using dtype: {dtype}")
+        aprint(f"Features will be computed using dtype: {dtype}")
 
         uniform = UniformFeatures(
             kernel_widths=kernel_widths,

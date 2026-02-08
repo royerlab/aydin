@@ -1,8 +1,43 @@
+"""Dilated convolution layer with zero-padding and activation.
+
+Provides a dilated convolution building block used in J-invariant network
+(JINet) architectures to increase the receptive field without losing
+resolution.
+"""
+
 from torch import nn
 from torch.nn import ConstantPad2d, ConstantPad3d
 
 
 class DilatedConv(nn.Module):
+    """Dilated convolution with explicit zero-padding and activation.
+
+    Applies zero-padding followed by a dilated convolution and an
+    activation function. Supports both 2D and 3D inputs.
+
+    Parameters
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    spacetime_ndim : int
+        Number of spatial dimensions (2 or 3).
+    padding : int
+        Amount of zero-padding to apply on each side.
+    kernel_size : int
+        Size of the convolution kernel.
+    dilation : int
+        Dilation rate for the convolution.
+    activation : str
+        Activation function: ``'ReLU'``, ``'swish'``, or ``'lrel'``.
+
+    Raises
+    ------
+    ValueError
+        If ``spacetime_ndim`` is not 2 or 3.
+    """
+
     def __init__(
         self,
         in_channels,
@@ -44,6 +79,18 @@ class DilatedConv(nn.Module):
         }[self.activation]
 
     def forward(self, x):
+        """Apply zero-padding, dilated convolution, and activation.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            Output tensor after padding, convolution, and activation.
+        """
         x = self.zero_padding(x)
 
         x = self.conv(x)

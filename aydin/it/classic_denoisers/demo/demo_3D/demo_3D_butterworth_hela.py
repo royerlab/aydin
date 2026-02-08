@@ -2,9 +2,9 @@
 import numpy
 import numpy as np
 
-from aydin.io.datasets import normalise, examples_single
+from aydin.io.datasets import examples_single, normalise
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 def demo_butterworth_cognet(noisy, display=True):
@@ -14,7 +14,7 @@ def demo_butterworth_cognet(noisy, display=True):
     Log.enable_output = True
     Log.set_log_max_depth(5)
 
-    lprint(noisy.shape)
+    aprint(noisy.shape)
     noisy = normalise(noisy.astype(np.float32))
 
     function, parameters, _ = calibrate_denoise_butterworth(

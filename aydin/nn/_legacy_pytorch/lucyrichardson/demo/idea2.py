@@ -1,3 +1,5 @@
+"""Demo: Alternative Lucy-Richardson deconvolution experiments."""
+
 # flake8: noqa
 import numpy
 from scipy.fft import dct

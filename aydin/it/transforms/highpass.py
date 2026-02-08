@@ -1,10 +1,19 @@
+"""High-pass image simplification transform.
+
+Removes low-frequency content from an image before denoising to simplify
+the denoising task. The removed low-frequency component is added back during
+post-processing. Particularly useful when the challenge is separating
+high-frequency noise from high-frequency signal.
+"""
+
 import numbers
+
 import numpy
 from numpy.typing import ArrayLike
-from scipy.ndimage import median_filter, gaussian_filter
+from scipy.ndimage import gaussian_filter, median_filter
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import aprint, asection
 
 
 class HighpassTransform(ImageTransformBase):
@@ -52,7 +61,7 @@ class HighpassTransform(ImageTransformBase):
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
@@ -63,7 +72,7 @@ class HighpassTransform(ImageTransformBase):
         self._min = None
         self._max = None
 
-        lprint(f"Instanciating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -84,8 +93,20 @@ class HighpassTransform(ImageTransformBase):
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
+        """Apply a high-pass filter by subtracting a low-pass filtered version.
 
-        with lsection(
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            High-pass filtered image (low frequencies removed).
+        """
+
+        with asection(
             f"Applies high-pass filter of sigma {self.sigma} {'and median filtering' if self.median_filtering else ''} to array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             # Remember min and max:
@@ -107,11 +128,23 @@ class HighpassTransform(ImageTransformBase):
             return new_array
 
     def postprocess(self, array: ArrayLike):
+        """Add back the low-frequency content removed during preprocessing.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised high-pass image.
+
+        Returns
+        -------
+        numpy.ndarray
+            Reconstructed full-spectrum denoised image.
+        """
 
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Adds back low-pass frequencies to array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             array = array.astype(numpy.float32, copy=False)
@@ -132,8 +165,23 @@ class HighpassTransform(ImageTransformBase):
             return new_array
 
     def _low_pass_filtering(self, array: ArrayLike):
+        """Compute the low-pass filtered version of the image.
 
-        lprint(f"Sigma for high-pass filter is: {self.sigma}")
+        Optionally applies median filtering before Gaussian smoothing
+        for robustness against outliers.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Low-pass filtered image (with mean subtracted).
+        """
+
+        aprint(f"Sigma for high-pass filter is: {self.sigma}")
 
         # Median filtering if selected:
         if self.median_filtering:
@@ -150,5 +198,21 @@ class HighpassTransform(ImageTransformBase):
 
 
 def _interpolation(image, x, y):
+    """Interpolate image values using a piecewise linear mapping.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image.
+    x : numpy.ndarray
+        Source values for interpolation.
+    y : numpy.ndarray
+        Target values for interpolation.
+
+    Returns
+    -------
+    numpy.ndarray
+        Interpolated image with same shape as input.
+    """
     out = numpy.interp(image.flat, x, y)
     return out.reshape(image.shape)

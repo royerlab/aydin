@@ -1,5 +1,6 @@
 # flake8: noqa
 import numpy
+import pytest
 from scipy.ndimage import gaussian_filter
 
 from aydin.util.denoise_nd.denoise_nd import extend_nd
@@ -22,40 +23,32 @@ def test_denoise_nd():
     def wrongly_extended_function(image, sigma):
         return function(image, sigma)
 
-    image = numpy.zeros((32,))
-    image[16] = 1
+    # Test 1D image - raw function should raise RuntimeError
+    image_1d = numpy.zeros((32,))
+    image_1d[16] = 1
 
-    try:
-        function(image, sigma=1)
-        assert False
-    except RuntimeError as e:
-        # expected!
-        assert True
+    with pytest.raises(RuntimeError):
+        function(image_1d, sigma=1)
 
-    try:
-        extended_function(image, sigma=1)
-        assert True
-    except RuntimeError as e:
-        assert False
+    # extended_function should handle 1D by extending to 2D internally
+    # Note: returns shape (1, 32) because it adds a dimension for processing
+    result = extended_function(image_1d, sigma=1)
+    assert result is not None
+    assert result.size == image_1d.size  # Same number of elements
+    assert result.squeeze().shape == image_1d.shape  # Can squeeze back to original
 
-    try:
-        wrongly_extended_function(image, sigma=1)
-        assert False
-    except RuntimeError as e:
-        assert True
+    # wrongly_extended_function claims to support 1D but underlying function doesn't
+    with pytest.raises(RuntimeError):
+        wrongly_extended_function(image_1d, sigma=1)
 
-    image = numpy.zeros((32, 5, 64))
-    image[16, 2, 32] = 1
+    # Test 3D image
+    image_3d = numpy.zeros((32, 5, 64))
+    image_3d[16, 2, 32] = 1
 
-    try:
-        function(image, sigma=1)
-        assert False
-    except RuntimeError as e:
-        # expected!
-        assert True
+    with pytest.raises(RuntimeError):
+        function(image_3d, sigma=1)
 
-    try:
-        extended_function(image, sigma=1)
-        assert True
-    except RuntimeError as e:
-        assert False
+    # extended_function should handle 3D by processing 2D slices
+    result = extended_function(image_3d, sigma=1)
+    assert result is not None
+    assert result.shape == image_3d.shape

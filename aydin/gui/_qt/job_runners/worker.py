@@ -1,7 +1,9 @@
+"""Worker thread and signal classes for executing background tasks."""
+
 import sys
 import traceback
 
-from qtpy.QtCore import QRunnable, Signal, QObject, Slot
+from qtpy.QtCore import QObject, QRunnable, Signal, Slot
 
 
 class WorkerSignals(QObject):
@@ -31,10 +33,20 @@ class WorkerSignals(QObject):
 
 
 class Worker(QRunnable):
-    """
-    Worker thread
+    """QRunnable wrapper for executing a function in a background thread.
 
-    Inherits from QRunnable to handle worker thread setup, signals and wrap-up.
+    Automatically injects a ``progress_callback`` keyword argument into the
+    function call and emits signals for result, error, and completion.
+
+    Parameters
+    ----------
+    fn : callable
+        The function to execute. Will receive ``progress_callback`` as a
+        keyword argument.
+    *args
+        Positional arguments forwarded to ``fn``.
+    **kwargs
+        Keyword arguments forwarded to ``fn``.
     """
 
     def __init__(self, fn, *args, **kwargs):
@@ -51,9 +63,7 @@ class Worker(QRunnable):
 
     @Slot()
     def run(self):
-        """
-        Initialise the runner function with passed args, kwargs.
-        """
+        """Execute the wrapped function and emit result or error signals."""
 
         # Retrieve args/kwargs here; and fire processing using them
         try:

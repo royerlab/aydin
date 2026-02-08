@@ -1,37 +1,53 @@
+"""Shape normaliser for batch and channel dimension handling.
+
+Provides `ShapeNormaliser` which normalizes image arrays into a canonical
+shape of (B, C, *spatial_dims) by permuting and collapsing batch and channel
+dimensions, and denormalizes back to the original shape.
+"""
+
 from abc import ABC
 
 import numpy
 
 
 class ShapeNormaliser(ABC):
-    """Shape Normaliser"""
+    """Shape normaliser for batch and channel dimension handling.
 
-    epsilon: float
-    leave_as_float: bool
-    clip: bool
-    original_dtype: numpy.dtype
+    Normalizes image arrays into a canonical shape of
+    (B, C, *spatial_dims) by permuting and collapsing batch and
+    channel dimensions. Tracks the permutation to enable
+    denormalization back to the original shape.
+    """
 
     def __init__(self, batch_axes=None, channel_axes=None):
-        """Constructs a normalisers"""
+        """Construct a ShapeNormaliser.
+
+        Parameters
+        ----------
+        batch_axes : tuple of bool, optional
+            Boolean flags indicating which axes are batch dimensions.
+        channel_axes : tuple of bool, optional
+            Boolean flags indicating which axes are channel dimensions.
+        """
         self.batch_axes = batch_axes
         self.channel_axes = channel_axes
         self.axis_permutation = None
         self.permutated_image_shape = None
 
     def normalise(self, array):
-        """Normalises the given array in-place (if possible).
+        """Normalize the array shape to (B, C, *spatial_dims) form.
+
+        Permutes and collapses batch and channel dimensions to the front.
 
         Parameters
         ----------
-        array : numpy.ArrayLike
-            array to normalise
-        batch_dims : list
-        channel_dims : list
+        array : numpy.ndarray
+            Array to normalize.
 
         Returns
         -------
-        array : numpy.ArrayLike
-
+        numpy.ndarray
+            Shape-normalized array with shape (B, C, *spatial_dims).
         """
         (
             array,
@@ -44,16 +60,21 @@ class ShapeNormaliser(ABC):
         return array
 
     def denormalise(self, array: numpy.ndarray, **kwargs):
-        """Denormalises the given array in-place (if possible).
+        """Restore the array to its original shape before normalization.
+
+        Reverses the permutation and reshaping applied by `normalise`.
 
         Parameters
         ----------
         array : numpy.ndarray
+            Shape-normalized array to denormalize.
+        **kwargs
+            Additional keyword arguments (unused).
 
         Returns
         -------
-        array : numpy.ArrayLike
-
+        numpy.ndarray
+            Array restored to its original dimension ordering.
         """
 
         array = self.shape_denormalize(
@@ -66,20 +87,26 @@ class ShapeNormaliser(ABC):
 
     @staticmethod
     def shape_normalize(image, batch_axes=None, channel_axes=None):
-        """Permutates batch dimensions to the front and collapse into
-        one dimension. Resulting array has to be in the form of (B,...)
-        where B is the number of batch dimensions.
+        """Permute and collapse batch/channel dimensions to canonical form.
+
+        Moves batch dimensions to the front and channel dimensions next,
+        then collapses each group into a single dimension. Singleton
+        non-channel dimensions are treated as batch dimensions.
 
         Parameters
         ----------
-        image : numpy.ArrayLike
-        batch_axes : list
-        channel_axes : list
+        image : numpy.ndarray
+            Image array to normalize.
+        batch_axes : tuple of bool, optional
+            Boolean flags for batch axes. If None, no axes are batch.
+        channel_axes : tuple of bool, optional
+            Boolean flags for channel axes. If None, no axes are channels.
 
         Returns
         -------
-        Tuple of normalized_image, axes_permutation, permutated_image.shape : tuple
-
+        tuple of (numpy.ndarray, list of int, tuple of int)
+            A tuple of (normalized_image, axes_permutation,
+            permutated_image_shape) needed for denormalization.
         """
         if batch_axes is None:
             batch_axes = (False,) * len(image.shape)
@@ -131,19 +158,21 @@ class ShapeNormaliser(ABC):
 
     @staticmethod
     def shape_denormalize(image, axes_permutation, permutated_image_shape):
-        """Denormalizes the shape of an image from normalized form to the
-        original image form.
+        """Restore an image from normalized shape to its original form.
 
         Parameters
         ----------
-        image : numpy.ArrayLike
-        axes_permutation : array_like
-        permutated_image_shape : tuple
+        image : numpy.ndarray
+            Shape-normalized image to restore.
+        axes_permutation : list of int
+            Axes permutation from `shape_normalize`.
+        permutated_image_shape : tuple of int
+            Intermediate shape from `shape_normalize`.
 
         Returns
         -------
-        array : numpy.ArrayLike
-
+        numpy.ndarray
+            Image restored to its original dimension ordering and shape.
         """
         spatiotemp_shape = image.shape[2:]
 

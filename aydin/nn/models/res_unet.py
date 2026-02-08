@@ -1,3 +1,9 @@
+"""Residual UNet model architecture for image denoising in PyTorch.
+
+Implements a UNet variant that uses element-wise addition instead of
+concatenation for skip connections, reducing parameter count.
+"""
+
 import torch
 from torch import nn
 
@@ -6,6 +12,26 @@ from aydin.nn.layers.pooling_down import PoolingDown
 
 
 class ResidualUNetModel(nn.Module):
+    """Residual UNet architecture with additive skip connections.
+
+    Similar to the standard UNet but uses element-wise addition instead
+    of concatenation for merging encoder and decoder features. This
+    reduces the number of parameters in the decoder.
+
+    Parameters
+    ----------
+    spacetime_ndim : int
+        Number of spatial dimensions (2 or 3).
+    nb_unet_levels : int
+        Number of encoder/decoder levels.
+    nb_filters : int
+        Number of filters in the first encoder level.
+    learning_rate : float
+        Learning rate (stored but not used internally by the model).
+    pooling_mode : str
+        Downsampling mode: ``'max'`` or ``'ave'``.
+    """
+
     def __init__(
         self,
         spacetime_ndim,
@@ -43,18 +69,17 @@ class ResidualUNetModel(nn.Module):
             self.final_conv = nn.Conv3d(self.nb_filters, 1, 1)
 
     def forward(self, x):
-        """
-        UNet forward method.
+        """Run the forward pass through the Residual UNet.
 
         Parameters
         ----------
-        x
-        input_msk : numpy.ArrayLike
-            A mask per image must be passed with self-supervised training.
+        x : torch.Tensor
+            Input tensor with shape ``(B, 1, ...spatial_dims...)``.
 
         Returns
         -------
-
+        torch.Tensor
+            Denoised output tensor with the same spatial shape as the input.
         """
         skip_layer = []
 
@@ -79,6 +104,13 @@ class ResidualUNetModel(nn.Module):
         return x
 
     def _encoder_convolutions(self):
+        """Build the encoder convolution blocks.
+
+        Returns
+        -------
+        torch.nn.ModuleList
+            List of double convolution blocks for the encoder path.
+        """
         convolution = nn.ModuleList()
         for layer_index in range(self.nb_unet_levels):
             if layer_index == 0:
@@ -102,6 +134,13 @@ class ResidualUNetModel(nn.Module):
         return convolution
 
     def _decoder_convolutions(self):
+        """Build the decoder convolution blocks.
+
+        Returns
+        -------
+        torch.nn.ModuleList
+            List of double convolution blocks for the decoder path.
+        """
         convolutions = nn.ModuleList()
         for layer_index in range(self.nb_unet_levels):
             nb_filters_in = self.nb_filters * (

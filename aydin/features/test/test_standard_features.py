@@ -1,3 +1,5 @@
+"""Tests for the StandardFeatureGenerator class."""
+
 import numpy
 import pytest
 
@@ -18,6 +20,7 @@ from aydin.io.datasets import camera
     ],
 )
 def test_standard_features_type_conservation_test(dtype, required_dtype=None):
+    """Test that feature dtype matches input image dtype (float16 promoted to float32)."""
     image = camera().astype(dtype)
     # feature generator requires images in 'standard' form: BCTZYX
     image = image[numpy.newaxis, numpy.newaxis, ...]

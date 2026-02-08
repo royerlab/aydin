@@ -1,3 +1,5 @@
+"""Discrete Cosine Transform (DCT) feature group."""
+
 import numpy
 from numpy.linalg import norm
 from scipy.fft import idstn
@@ -37,8 +39,16 @@ class DCTFeatures(CorrelationFeatures):
         self.exclude_center: bool = False
 
     def _ensure_dct_kernels_available(self, ndim: int):
-        # Ensures that the kernels are available for subsequent steps.
-        # We can't construct the kernels until we know the dimension of the image
+        """Ensure DCT kernels are computed for the given dimensionality.
+
+        Constructs inverse DCT basis functions as correlation kernels,
+        filtered by ``max_freq`` and power-transformed by ``power``.
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions.
+        """
         if self.kernels is None or self.kernels[0].ndim != ndim:
             dct_kernels = []
             shape = tuple((self.size,) * ndim)
@@ -69,13 +79,43 @@ class DCTFeatures(CorrelationFeatures):
 
     @property
     def receptive_field_radius(self) -> int:
+        """Return the receptive field radius based on the DCT filter size.
+
+        Returns
+        -------
+        radius : int
+            Half the filter size.
+        """
         return self.size // 2
 
     def num_features(self, ndim: int) -> int:
+        """Return the number of DCT features for the given dimensionality.
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions.
+
+        Returns
+        -------
+        num : int
+            Number of DCT features (depends on ``max_freq`` and ``size``).
+        """
         self._ensure_dct_kernels_available(ndim)
         return super().num_features(ndim)
 
     def prepare(self, image, excluded_voxels=None, **kwargs):
+        """Prepare DCT features by constructing kernels for the image.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image for which features will be computed.
+        excluded_voxels : list of tuple of int, optional
+            Voxels to exclude from feature computation.
+        **kwargs
+            Additional keyword arguments passed to the parent class.
+        """
         if excluded_voxels is None:
             excluded_voxels = []
 

@@ -1,8 +1,9 @@
+"""Demo: Lucy-Richardson deconvolution with quality metric analysis."""
+
 # flake8: noqa
 # flake8: noqa
 
 import numpy
-from aydin.it.pytorch.lucyrichardson.clipped_lr import richardson_lucy_shrink
 from scipy import ndimage
 from scipy.fft import dct
 from scipy.signal import convolve2d
@@ -12,8 +13,9 @@ from skimage.metrics import structural_similarity as ssim
 
 from aydin.analysis.resolution_estimate import signal_to_noise_ratio, spectrum_2d
 from aydin.features.fast.fast_features import FastMultiscaleConvolutionalFeatures
-from aydin.io.datasets import normalise, add_noise, newyork
+from aydin.io.datasets import add_noise, newyork, normalise
 from aydin.it.it_classic import ImageTranslatorClassic
+from aydin.it.pytorch.lucyrichardson.clipped_lr import richardson_lucy_shrink
 from aydin.regression.gbm import GBMRegressor
 from aydin.util.psf.simple_microscope_psf import SimpleMicroscopePSF
 

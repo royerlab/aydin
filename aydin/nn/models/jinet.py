@@ -1,9 +1,56 @@
+"""JINet (J-Invariant Network) model architecture in PyTorch.
+
+Implements a blind-spot CNN using dilated convolutions to achieve
+J-invariance for self-supervised (Noise2Self) image denoising.
+"""
+
 import torch
 from torch import nn
+
 from aydin.nn.layers.dilated_conv import DilatedConv
 
 
 class JINetModel(nn.Module):
+    """J-Invariant Network using dilated convolutions for blind-spot denoising.
+
+    Uses a series of dilated convolutions with increasing receptive fields
+    followed by 1x1 convolutions (dense layers) with residual connections.
+    The architecture inherently excludes the center pixel from the
+    receptive field, enabling self-supervised denoising.
+
+    Parameters
+    ----------
+    spacetime_ndim : int
+        Number of spatial dimensions (2 or 3).
+    nb_in_channels : int
+        Number of input channels.
+    nb_out_channels : int
+        Number of output channels.
+    kernel_sizes : list of int or None
+        Kernel sizes for each dilated convolution scale. If ``None``,
+        uses default sizes based on ``spacetime_ndim``.
+    num_features : list of int or None
+        Number of output features per dilated convolution scale. Must
+        have the same length as ``kernel_sizes``. If ``None``, uses
+        defaults based on ``spacetime_ndim``.
+    nb_dense_layers : int
+        Number of 1x1 convolution (dense) layers after feature extraction.
+    nb_channels : int or None
+        Number of channels in the dense layers. If ``None``, defaults
+        to the sum of all ``num_features``.
+    final_relu : bool
+        Whether to apply ReLU activation to the output.
+    degressive_residuals : bool
+        Whether to apply exponentially decaying weights to residual
+        connections in the dense layers.
+
+    Raises
+    ------
+    ValueError
+        If ``kernel_sizes`` and ``num_features`` have different lengths,
+        or if ``spacetime_ndim`` is not 2 or 3.
+    """
+
     def __init__(
         self,
         spacetime_ndim,
@@ -43,9 +90,11 @@ class JINetModel(nn.Module):
 
             self.dilated_conv_functions.append(
                 DilatedConv(
-                    self.nb_in_channels
-                    if scale_index == 0
-                    else self.num_features[scale_index - 1],
+                    (
+                        self.nb_in_channels
+                        if scale_index == 0
+                        else self.num_features[scale_index - 1]
+                    ),
                     self.num_features[scale_index],
                     self.spacetime_ndim,
                     padding=dilation * radius,
@@ -97,6 +146,7 @@ class JINetModel(nn.Module):
 
     @property
     def kernel_sizes(self):
+        """list of int: Kernel sizes for each dilated convolution scale."""
         if self._kernel_sizes is None:
             if self.spacetime_ndim == 2:
                 self._kernel_sizes = [7, 5, 3, 3, 3, 3, 3, 3]
@@ -107,6 +157,7 @@ class JINetModel(nn.Module):
 
     @property
     def num_features(self):
+        """list of int: Number of features for each dilated convolution scale."""
         if self._num_features is None:
             if self.spacetime_ndim == 2:
                 self._num_features = [64, 32, 16, 8, 4, 2, 1, 1]
@@ -116,6 +167,18 @@ class JINetModel(nn.Module):
         return self._num_features
 
     def forward(self, x):
+        """Run the forward pass through the JINet.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor with shape ``(B, C, ...spatial_dims...)``.
+
+        Returns
+        -------
+        torch.Tensor
+            Denoised output tensor.
+        """
         dilated_conv_list = []
 
         # Calculate dilated convolutions

@@ -3,7 +3,7 @@ from numpy.typing import ArrayLike
 from scipy.ndimage import zoom
 
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 @cached(ttl=10, max_size=5)
@@ -55,7 +55,7 @@ def super_fast_representative_crop(
     Most representative crop, and if return_slice is True the actual slice object too.
 
     """
-    with lsection(f"Super fast cropping image of size: {image.shape}"):
+    with asection(f"Super fast cropping image of size: {image.shape}"):
 
         # Compute downscale facto per dimension:
         def _downscale(length):
@@ -64,16 +64,16 @@ def super_fast_representative_crop(
         downscale_factor = tuple(
             _downscale(s) if s >= min_length else min_length // 2 for s in image.shape
         )
-        lprint(f"Scaling by factors: {downscale_factor}")
+        aprint(f"Scaling by factors: {downscale_factor}")
 
         # Compute zoom factor
         zoom_per_axis = tuple(
             1.0 / d if s > d else 1 for d, s in zip(downscale_factor, image.shape)
         )
-        lprint(f"zoom_per_axis: {zoom_per_axis}")
+        aprint(f"zoom_per_axis: {zoom_per_axis}")
 
         # Downsample image:
-        with lsection(f"Downscaling image of shape: {image.shape}..."):
+        with asection(f"Downscaling image of shape: {image.shape}..."):
             image_d = zoom(image, zoom=zoom_per_axis, prefilter=False, order=0)
 
         # Compute overall zoom factor:

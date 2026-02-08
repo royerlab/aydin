@@ -1,7 +1,9 @@
+"""Tests for random sample patch extraction utilities."""
+
 import numpy
+from scipy.stats import entropy
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
-from scipy.stats import entropy
 
 from aydin.io import io
 from aydin.io.datasets import examples_single

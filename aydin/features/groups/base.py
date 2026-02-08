@@ -1,48 +1,50 @@
+"""Abstract base class for feature groups used by extensible feature generators."""
+
 from abc import ABC, abstractmethod
 from typing import Sequence, Tuple
 
 
 class FeatureGroupBase(ABC):
-    """
-    Feature Group base class
+    """Abstract base class for feature groups.
+
+    A feature group encapsulates a family of related features that share the
+    same computation strategy (e.g., uniform filtering, median filtering,
+    convolution with learned kernels). Feature groups are added to an
+    ``ExtensibleFeatureGenerator`` to compose the full feature set.
+
+    Subclasses must implement ``receptive_field_radius``, ``num_features``,
+    ``prepare``, and ``compute_feature``.
     """
 
     def __init__(self):
-        """
-        Constructs a feature group
-        """
+        """Construct a feature group."""
 
     @property
     @abstractmethod
     def receptive_field_radius(self) -> int:
-        """
-        Returns the receptive field radius in voxels
-
-        Parameters
-        ----------
+        """Return the receptive field radius in pixels.
 
         Returns
         -------
-        result : int
-            receptive field radius in pixels
-
+        radius : int
+            Maximum distance (in pixels) from the center voxel that
+            features in this group can reach.
         """
         raise NotImplementedError()
 
     @abstractmethod
     def num_features(self, ndim: int) -> int:
-        """
-        Returns the number of features given an image dimension
+        """Return the number of features produced for the given dimensionality.
 
         Parameters
         ----------
-        ndim : Number of dimension sof image for which features will be computed
+        ndim : int
+            Number of spatial dimensions of the image.
 
         Returns
         -------
-        result : int
-            Number of features
-
+        num : int
+            Number of features this group will produce.
         """
         raise NotImplementedError()
 
@@ -50,51 +52,44 @@ class FeatureGroupBase(ABC):
     def prepare(
         self, image, excluded_voxels: Sequence[Tuple[int, ...]] = None, **kwargs
     ):
-        """
-        Prepares the computation of the features in the group.
-        Sets the image for which features should be computed.
+        """Prepare the feature group for computation on the given image.
+
+        Pre-computes any shared state (e.g., filtered images, kernels) that
+        will be reused across individual feature computations.
 
         Parameters
         ----------
-        image : Image for which features will be computed
-        excluded_voxels : voxels to exclude from feature as list of coordinate tuples.
-        kwargs : key-value arguments for feature functions
-
-        Returns
-        -------
-
+        image : numpy.ndarray
+            Image for which features will be computed.
+        excluded_voxels : Sequence[Tuple[int, ...]], optional
+            Voxels to exclude from features, as a list of coordinate tuples
+            relative to the center voxel.
+        **kwargs
+            Additional keyword arguments for feature computation.
         """
         raise NotImplementedError()
 
     @abstractmethod
     def compute_feature(self, index: int, feature):
-        """
-        Computes feature of a given index. The feature index must be strictly less than the number of features returned
-         by get_num_features.
+        """Compute a single feature by index, storing the result in-place.
+
+        The feature index must be strictly less than the number of features
+        returned by ``num_features``.
 
         Parameters
         ----------
-        index : index for feature
-        feature : array into which to store feature
-
-        Returns
-        -------
-
-
+        index : int
+            Index of the feature to compute within this group.
+        feature : numpy.ndarray
+            Pre-allocated array into which the computed feature is stored.
         """
         raise NotImplementedError()
 
     def finish(self):
-        """
-        Cleans up and frees any resource allocated during feature computation. After cleanup this feature group can be reused to compute features for a new image.
+        """Clean up resources allocated during feature computation.
 
-        Parameters
-        ----------
-
-        Returns
-        -------
-
-
+        After cleanup, this feature group can be reused to compute features
+        for a new image. The default implementation is a no-op.
         """
         # By default there is nothing to free:
         pass

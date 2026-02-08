@@ -1,7 +1,8 @@
+"""Integration tests for PyTorch model training and denoising quality."""
+
 # flake8: noqa
 import numpy
 import pytest
-
 import torch
 
 from aydin.analysis.image_metrics import calculate_print_psnr_ssim
@@ -23,14 +24,14 @@ from aydin.nn.training_methods.n2t import n2t_train
             n2s_train,
             128,
         ),
-        (JINetModel(spacetime_ndim=2), n2s_train, 20),
+        (JINetModel(spacetime_ndim=2), n2s_train, 40),
         (
             UNetModel(
                 nb_unet_levels=2,
                 spacetime_ndim=2,
             ),
             n2t_train,
-            20,
+            128,
         ),
         (JINetModel(spacetime_ndim=2), n2t_train, 20),
     ],
@@ -48,7 +49,9 @@ def test_models_2D(model, train_method, nb_epochs):
         train_method(noisy_image, camera_image, model, nb_epochs=nb_epochs)
 
     model.cpu()
-    denoised = model(noisy_image)
+    model.eval()
+    with torch.no_grad():
+        denoised = model(noisy_image)
 
     camera_image = camera_image[0, 0, :, :]
     noisy_image = noisy_image.detach().numpy()[0, 0, :, :]
@@ -59,4 +62,4 @@ def test_models_2D(model, train_method, nb_epochs):
     )
 
     assert ssim_denoised > ssim_noisy
-    assert ssim_denoised > 0.46
+    assert ssim_denoised >= 0.55

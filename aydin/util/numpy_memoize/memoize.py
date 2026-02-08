@@ -1,4 +1,12 @@
+"""Memoization decorator that supports NumPy arrays.
+
+Provides a single-entry cache decorator that works with unhashable
+types like NumPy arrays by using object identity (``id``) for cache
+key comparison.
+"""
+
 import functools
+
 import numpy
 
 
@@ -17,6 +25,13 @@ class memoize_last(object):
     """
 
     def __init__(self, callable):
+        """Initialize the memoizer.
+
+        Parameters
+        ----------
+        callable : callable
+            The function or method to memoize.
+        """
         self._callable = callable
         self._callable_is_method = False
         self.value = None  # Cached value or derivative.
@@ -33,6 +48,20 @@ class memoize_last(object):
         return hash(x)
 
     def __call__(self, *args, **kwargs):
+        """Call the wrapped function, using cached result if arguments are unchanged.
+
+        Parameters
+        ----------
+        *args : object
+            Positional arguments.
+        **kwargs : object
+            Keyword arguments.
+
+        Returns
+        -------
+        object
+            Cached or freshly computed result.
+        """
         # The callable will be called if any single argument is new or changed.
 
         callable = self._callable
@@ -49,7 +78,7 @@ class memoize_last(object):
 
         allargs = dict(zip(argnames, argvals)) | kwargs
 
-        for (argname, argval) in allargs.items():
+        for argname, argval in allargs.items():
 
             _arg_hash = self.__get_hash(argval)
 
@@ -67,8 +96,6 @@ class memoize_last(object):
         if evaluate:
             self.value = callable(*args, **kwargs)
 
-        print(f"{tuple(f'{k}:{id(v)}' for k,v in allargs.items())} -> {id(self.value)}")
-
         return self.value
 
     def __get__(self, obj, *args):
@@ -78,4 +105,4 @@ class memoize_last(object):
 
     def __repr__(self):
         """Return the wrapped function or method's docstring."""
-        return self.method.__doc__
+        return self._callable.__doc__

@@ -1,9 +1,15 @@
-import numpy
+"""Integral stack deskewing transform.
 
+Provides a transform that applies integral (non-interpolating) shear
+transformations to correct stack skew, bringing spatially correlated
+voxels closer together to improve denoising performance.
+"""
+
+import numpy
 from numpy.typing import ArrayLike
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import aprint, asection
 
 
 class DeskewTransform(ImageTransformBase):
@@ -54,7 +60,7 @@ class DeskewTransform(ImageTransformBase):
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
@@ -63,7 +69,7 @@ class DeskewTransform(ImageTransformBase):
         self.skew_axis = skew_axis
         self.pad = pad
 
-        lprint(f"Instanciating: {self}")
+        aprint(f"Instantiating: {self}")
 
     # We exclude certain fields from saving:
     def __getstate__(self):
@@ -83,7 +89,21 @@ class DeskewTransform(ImageTransformBase):
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
-        with lsection(
+        """Deskew the image stack by applying an integral shear transform.
+
+        Only acts on images with 3 or more dimensions.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Deskewed image array.
+        """
+        with asection(
             f"Deskewing (delta={self.delta}, z_axis={self.z_axis}, skew_axis={self.skew_axis}, pad={self.pad}) array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
             if array.ndim >= 3:
@@ -92,9 +112,23 @@ class DeskewTransform(ImageTransformBase):
                 return array
 
     def postprocess(self, array: ArrayLike):
+        """Re-skew the image to undo the deskewing applied during preprocessing.
+
+        Only acts on images with 3 or more dimensions.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Re-skewed image array.
+        """
         if not self.do_postprocess:
             return array
-        with lsection(
+        with asection(
             f"Undoing deskew for array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
             if array.ndim >= 3:
@@ -103,6 +137,20 @@ class DeskewTransform(ImageTransformBase):
                 return array
 
     def deskew(self, array: ArrayLike, pad_mode='wrap'):
+        """Apply the deskew (forward shear) transformation.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input array to deskew.
+        pad_mode : str
+            Padding mode for numpy.pad (default: 'wrap').
+
+        Returns
+        -------
+        numpy.ndarray
+            Deskewed array.
+        """
         array = self._permutate(array)
         array = self._skew_transform(
             array, self.delta, pad=True, crop=False, pad_mode=pad_mode
@@ -111,6 +159,18 @@ class DeskewTransform(ImageTransformBase):
         return array
 
     def reskew(self, array: ArrayLike):
+        """Apply the reskew (inverse shear) transformation.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Array to reskew.
+
+        Returns
+        -------
+        numpy.ndarray
+            Reskewed array.
+        """
         array = self._permutate(array)
         array = self._skew_transform(
             array, -self.delta, pad=False, crop=True, pad_mode=''

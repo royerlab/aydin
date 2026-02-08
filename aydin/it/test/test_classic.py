@@ -1,10 +1,11 @@
 # flake8: noqa
 import time
+
 import numpy
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
 
-from aydin.io.datasets import normalise, add_noise, cropped_newyork
+from aydin.analysis.image_metrics import ssim
+from aydin.io.datasets import add_noise, cropped_newyork, normalise
 from aydin.it.classic import ImageDenoiserClassic
 
 

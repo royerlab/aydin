@@ -1,5 +1,7 @@
+"""Summary tab showing application overview and system information."""
+
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout
+from qtpy.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
     QHorizontalLineBreakWidget,

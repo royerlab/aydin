@@ -1,3 +1,9 @@
+"""Demo script illustrating random patch extraction from images.
+
+Demonstrates the use of ``random_sample_patches`` for extracting
+informative patches from a 3D HCR image volume.
+"""
+
 import numpy
 
 from aydin.io.datasets import camera

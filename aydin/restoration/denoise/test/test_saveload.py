@@ -1,20 +1,19 @@
-from os.path import join
 import time
+from os.path import join
 
 import numpy
 import pytest
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
 
 from aydin import Classic
-from aydin.io.datasets import normalise, add_noise
+from aydin.analysis.image_metrics import ssim
+from aydin.io.datasets import add_noise, normalise
 from aydin.io.folders import get_temp_folder
 from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.restoration.denoise.noise2selfcnn import Noise2SelfCNN
 from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
-
 
 transforms = [
     {"class": RangeTransform, "kwargs": {}},
@@ -73,7 +72,6 @@ def test_saveload(denoiser, min_psnr, min_ssim):
     assert psnr_denoised >= 19.0
     assert ssim_denoised >= 0.61
 
-    assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
 
     # if the line below fails, then the parameters of the lgbm regressor have been broken.

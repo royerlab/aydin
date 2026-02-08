@@ -1,5 +1,7 @@
+"""Expandable read more/less label widget for lengthy descriptions."""
+
 from qtpy.QtCore import Qt
-from qtpy.QtWidgets import QWidget, QHBoxLayout, QLabel
+from qtpy.QtWidgets import QHBoxLayout, QLabel, QWidget
 
 from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
     QVerticalLineBreakWidget,
@@ -7,11 +9,30 @@ from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
 
 
 class QReadMoreLessLabel(QWidget):
+    """Expandable label widget with 'Read more/less' toggle functionality.
+
+    Parses text containing ``<moreless>`` and ``<split>`` markers to create
+    a two-column layout where the right column is initially hidden and
+    revealed on click.
+
+    Parameters
+    ----------
+    parent : QWidget
+        The parent widget.
+    text : str
+        The label text, optionally containing ``<moreless>`` to mark the
+        boundary between always-visible and expandable text, and
+        ``<split>`` to divide text between left and right columns.
+    """
+
     def __init__(self, parent, text):
         QWidget.__init__(self, parent)
 
         self.text = text
         self.readmore = False
+        self.readmore_text = None
+        self.readmore_left = None
+        self.readmore_right = None
 
         # Explanation text
         self.explanation_layout = QHBoxLayout()
@@ -52,7 +73,7 @@ class QReadMoreLessLabel(QWidget):
         self.setLayout(self.explanation_layout)
 
     def state_toggle(self, *args) -> None:
-
+        """Toggle between 'Read more' and 'Read less' states on click."""
         if self.readmore_text is not None and self.readmore_right.strip() != "":
             self.readmore = not self.readmore
             if self.readmore:

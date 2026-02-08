@@ -1,35 +1,42 @@
-from deprecated import deprecated
+"""TensorFlow/Keras UNet model for image denoising (deprecated).
+
+Supports multiple self-supervised training modes: shift-convolution,
+checkerbox masking, random masking, and supervised training.
+"""
+
+import keras
 import numpy
 import tensorflow as tf
-from tensorflow.python.keras import Input
-from tensorflow.python.keras.layers import (
-    Concatenate,
+from deprecated import deprecated
+from keras import Input
+from keras.layers import (
     Add,
-    UpSampling3D,
-    Cropping3D,
-    ZeroPadding3D,
-    UpSampling2D,
-    ZeroPadding2D,
-    Cropping2D,
+    Concatenate,
     Conv2D,
     Conv3D,
+    Cropping2D,
+    Cropping3D,
+    UpSampling2D,
+    UpSampling3D,
+    ZeroPadding2D,
+    ZeroPadding3D,
 )
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.optimizer_v2.adam import Adam
-from tensorflow.python.keras.regularizers import l1
+from keras.models import Model
+from keras.optimizers import Adam
+from keras.regularizers import l1
 
-from aydin.nn.tf.layers.util import Split, Rot90
 from aydin.nn.tf.layers.maskout import Maskout
+from aydin.nn.tf.layers.util import ReflectPad3D, Rot90, Split
 from aydin.nn.tf.models.utils.conv_block import (
-    conv3d_bn,
-    pooling_down3D,
-    pooling_down2D,
     conv2d_bn,
+    conv3d_bn,
+    pooling_down2D,
+    pooling_down3D,
 )
 from aydin.nn.tf.models.utils.training_architectures import get_unet_fit_args
-from aydin.nn.tf.util.mask_generator import randmaskgen, maskedgen
+from aydin.nn.tf.util.mask_generator import maskedgen, randmaskgen
 from aydin.nn.tf.util.validation_generator import val_data_generator
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 @deprecated(
@@ -138,7 +145,7 @@ class UNetModel(Model):
         else:
             super().__init__(self.input_lyr, x)
 
-        self.compile(optimizer=Adam(lr=learning_rate), loss='mse')
+        self.compile(optimizer=Adam(learning_rate=learning_rate), loss='mse')
 
     def size(self):
         """Returns size of the model in bytes"""
@@ -312,10 +319,8 @@ class UNetModel(Model):
                     down2D_n += 1
 
             if self.zdim % 2 != 0:
-                x = tf.pad(
-                    x,
-                    tf.constant([[0, 0], [0, 1], [0, 0], [0, 0], [0, 0]]),
-                    mode='REFLECT',
+                x = ReflectPad3D(padding=((0, 1), (0, 0), (0, 0)), name=f'enc{i}_rpad')(
+                    x
                 )
                 self.zdim = (self.zdim + 1) // 2
             else:
@@ -529,7 +534,7 @@ class UNetModel(Model):
             )
         elif 'checkran' in self.training_architecture:
             # train with checkerbox first
-            lprint('Starting with checkerbox masking.')
+            aprint('Starting with checkerbox masking.')
             history_checkerbox = super().fit(
                 maskedgen(input_image, batch_size, mask_size, replace_by=replace_by),
                 epochs=max_epochs,
@@ -539,16 +544,16 @@ class UNetModel(Model):
                 ),
                 verbose=verbose,
                 callbacks=callbacks[:-2] + callbacks[-1:],
-                validation_data=maskedgen(
-                    input_image, batch_size, mask_size, replace_by=replace_by
-                )
-                if create_patches_for_validation
-                else val_data_generator(
-                    input_image,
-                    img_val,
-                    val_marker,
-                    batch_size,
-                    train_valid_ratio=train_valid_ratio,
+                validation_data=(
+                    maskedgen(input_image, batch_size, mask_size, replace_by=replace_by)
+                    if create_patches_for_validation
+                    else val_data_generator(
+                        input_image,
+                        img_val,
+                        val_marker,
+                        batch_size,
+                        train_valid_ratio=train_valid_ratio,
+                    )
                 ),
                 validation_steps=max(
                     numpy.ceil(
@@ -559,7 +564,7 @@ class UNetModel(Model):
             )
 
             # Then switch to random masking
-            lprint('Switched to random masking.')
+            aprint('Switched to random masking.')
             history_random = super().fit(
                 randmaskgen(
                     input_image,
@@ -575,19 +580,21 @@ class UNetModel(Model):
                 verbose=verbose,
                 callbacks=callbacks[:-1],
                 initial_epoch=history_checkerbox.epoch[-1] + 1,
-                validation_data=randmaskgen(
-                    input_image,
-                    batch_size,
-                    p_maskedpixels=random_mask_ratio,
-                    replace_by=replace_by,
-                )
-                if create_patches_for_validation
-                else val_data_generator(
-                    input_image,
-                    img_val,
-                    val_marker,
-                    batch_size,
-                    train_valid_ratio=train_valid_ratio,
+                validation_data=(
+                    randmaskgen(
+                        input_image,
+                        batch_size,
+                        p_maskedpixels=random_mask_ratio,
+                        replace_by=replace_by,
+                    )
+                    if create_patches_for_validation
+                    else val_data_generator(
+                        input_image,
+                        img_val,
+                        val_marker,
+                        batch_size,
+                        train_valid_ratio=train_valid_ratio,
+                    )
                 ),
                 validation_steps=max(
                     numpy.ceil(

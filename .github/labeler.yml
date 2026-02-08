@@ -1,8 +1,19 @@
 documentation:
-  - 'docs'
+  - changed-files:
+      - any-glob-to-any-file: 'docs/**'
 
 cli:
-  - 'aydin/cli'
+  - changed-files:
+      - any-glob-to-any-file: 'aydin/cli/**'
 
 gui:
-  - 'aydin/gui'
+  - changed-files:
+      - any-glob-to-any-file: 'aydin/gui/**'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file: '**/test/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'

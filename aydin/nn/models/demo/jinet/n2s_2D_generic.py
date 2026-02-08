@@ -1,14 +1,13 @@
+"""Demo: Noise2Self self-supervised training with JINet on 2D images."""
+
 # flake8: noqa
 import time
+
 import numpy
 import torch
 
 from aydin.analysis.image_metrics import calculate_print_psnr_ssim
-from aydin.io.datasets import (
-    normalise,
-    add_noise,
-    newyork,
-)
+from aydin.io.datasets import add_noise, newyork, normalise
 from aydin.nn.models.jinet import JINetModel
 from aydin.nn.training_methods.n2s import n2s_train
 from aydin.util.log.log import Log

@@ -1,19 +1,27 @@
+"""Receptive field computation utilities for CNN models.
+
+Provides functions to calculate theoretical and empirical receptive
+field sizes for convolution, pooling, and upsampling layers.
+"""
+
 import numpy
+
+from aydin.util.log.log import aprint
 
 
 def bbox_idx(x, thresh=None):
     """
-    Returns indices of bounding box of receptive filed. This is useful for visualize receptive field.
+    Returns indices of bounding box of receptive field. This is useful for visualize receptive field.
 
     Parameters
     ----------
     x
-        output image of the target model with inpulse input image
+        output image of the target model with impulse input image
     thresh
 
     Returns
     -------
-    list of indices of bounding box of receptive filed
+    list of indices of bounding box of receptive field
     """
     if thresh is None:
         thresh = 0
@@ -125,10 +133,10 @@ def receptive_field_model(model, verbose=False):
         elif 'UpSampling' in lyr_type:
             n1 = receptive_field_up(layer.size[0], n1)
         if verbose:
-            print(f'{lyr_type}: RF {n1}, shift {s}')
+            aprint(f'{lyr_type}: RF {n1}, shift {s}')
     if shift:
         n1 = (n1 + s) * 2
-        print(
+        aprint(
             f'Synthetic receptive field is {n1}^2 (with {int(n1/2 + s)}^2 empty space at 4 corners).'
         )
     return n1

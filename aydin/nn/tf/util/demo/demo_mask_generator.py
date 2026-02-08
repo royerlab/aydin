@@ -1,6 +1,9 @@
+"""Demo: Mask generation for self-supervised training."""
+
 # flake8: noqa
 import numpy as np
-from aydin.it.cnn.util.mask_generator import masker, maskedgen, randmaskgen
+
+from aydin.it.cnn.util.mask_generator import maskedgen, masker, randmaskgen
 
 
 def demo_maskgen():  # TODO: refactor this demo into a test

@@ -1,19 +1,33 @@
+"""Navigation flow diagram widget showing the Aydin Studio workflow steps."""
+
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
+    QGroupBox,
     QHBoxLayout,
-    QWidget,
+    QLabel,
     QMenu,
     QPushButton,
-    QToolButton,
     QStyle,
-    QGroupBox,
-    QLabel,
+    QToolButton,
+    QWidget,
 )
-from qtpy.QtCore import Qt
 
 from aydin.io.datasets import examples_single
 
 
 class QProgramFlowDiagramWidget(QWidget):
+    """Navigation bar widget showing the Aydin Studio workflow as a flow diagram.
+
+    Displays grouped buttons for each stage of the denoising workflow
+    (Load data, Choose image options, Process) connected by forward arrows.
+    Buttons are highlighted to indicate the currently active tab.
+
+    Parameters
+    ----------
+    parent : MainPage
+        The parent MainPage widget.
+    """
+
     def __init__(self, parent):
         super(QProgramFlowDiagramWidget, self).__init__(parent)
         self.parent = parent
@@ -126,6 +140,13 @@ class QProgramFlowDiagramWidget(QWidget):
         self.setLayout(self.main_layout)
 
     def highlight_button(self, current_tab_name):
+        """Highlight the flow diagram button(s) matching the active tab.
+
+        Parameters
+        ----------
+        current_tab_name : str
+            Name of the currently selected tab.
+        """
         self.reset_buttons()
         for button in self.highlightable_buttons:
             if current_tab_name.lower() in button.text().lower():
@@ -142,11 +163,19 @@ class QProgramFlowDiagramWidget(QWidget):
                 )
 
     def reset_buttons(self):
+        """Remove highlighting from all flow diagram buttons."""
         for button in self.highlightable_buttons:
             button.setStyleSheet("")
 
     @staticmethod
     def forward_button():
+        """Create a disabled forward-arrow button used as a visual separator.
+
+        Returns
+        -------
+        QToolButton
+            A disabled tool button with a seek-forward icon.
+        """
         button = QToolButton()
         button.setEnabled(False)
         button.setIcon(button.style().standardIcon(QStyle.SP_MediaSeekForward))

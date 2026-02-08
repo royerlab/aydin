@@ -1,22 +1,35 @@
 # flake8: noqa
+"""Demo benchmarking parallel uniform filter vs scipy implementation."""
+
 import numpy
 from scipy.ndimage import uniform_filter
 
 from aydin.io.datasets import examples_single, newyork
 from aydin.util.fast_uniform_filter.parallel_uf import parallel_uniform_filter
-from aydin.util.log.log import lsection, Log
+from aydin.util.log.log import Log, asection
 
 
 def demo_par_uniform(image_name: str, image, repeats=32):
+    """Benchmark parallel uniform filter vs scipy uniform filter.
+
+    Parameters
+    ----------
+    image_name : str
+        Label for the image being benchmarked.
+    image : numpy.ndarray
+        Input image to filter.
+    repeats : int
+        Number of repetitions for timing.
+    """
     Log.enable_output = True
 
     size = 4
 
-    with lsection(f"Par {image_name} (r={repeats}):"):
+    with asection(f"Par {image_name} (r={repeats}):"):
         for _ in range(repeats):
             par_filtered_image = parallel_uniform_filter(image, size=size)
 
-    with lsection(f"Scipy {image_name} (r={repeats}):"):
+    with asection(f"Scipy {image_name} (r={repeats}):"):
         for _ in range(repeats):
             scipy_filtered_image = uniform_filter(image, size=size, mode="nearest")
 

@@ -1,3 +1,5 @@
+"""Tests for the LowPassFeatures feature group."""
+
 import numpy
 from skimage.exposure import rescale_intensity
 
@@ -6,12 +8,14 @@ from aydin.io.datasets import camera
 
 
 def n(image):
+    """Normalize image to float32 in [0, 1] range."""
     return rescale_intensity(
         image.astype(numpy.float32), in_range='image', out_range=(0, 1)
     )
 
 
 def test_lowpass_feature_group():
+    """Test low-pass feature count, receptive field, and frequency cutoffs."""
     # get image:
     image = n(camera().astype(numpy.float32))
 
@@ -29,7 +33,7 @@ def test_lowpass_feature_group():
     # Set image:
     lowpass.prepare(image)
 
-    # compute features and check their valididty:
+    # compute features and check their validity:
     feature = numpy.empty_like(image)
     for index in range(lowpass.num_features(image.ndim)):
         lowpass.compute_feature(index=index, feature=feature)

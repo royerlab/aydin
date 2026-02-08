@@ -1,7 +1,15 @@
+"""PCA-based patch denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions that denoise images by applying
+the patch transform, performing PCA dimensionality reduction on the patches,
+and reconstructing the image from the projected patches. The number of
+retained components is controlled by a threshold parameter.
+"""
+
 import math
 from functools import partial
 from math import prod
-from typing import Optional, Union, Tuple, List
+from typing import List, Optional, Tuple, Union
 
 import numpy
 from numpy.typing import ArrayLike
@@ -64,7 +72,7 @@ def calibrate_denoise_pca(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot

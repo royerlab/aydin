@@ -1,3 +1,9 @@
+"""Parallel multi-threaded correlation using joblib and SciPy.
+
+Splits the image along its longest axis and correlates tiles in parallel
+using threading, reassembling the result afterwards.
+"""
+
 import multiprocessing
 
 import numpy
@@ -14,6 +20,29 @@ def parallel_correlate(
     output: ArrayLike = None,
     cpu_load: float = 0.95,
 ):
+    """Correlate an image with a kernel using parallel SciPy calls.
+
+    Splits the image along its longest axis into tiles, correlates each
+    tile in parallel using threading, and reassembles the result. Falls
+    back to single-threaded SciPy when parallelization would not yield
+    at least a 10% speedup.
+
+    Parameters
+    ----------
+    image : ArrayLike
+        Input image array. Will be cast to float32.
+    kernel : ArrayLike
+        Correlation kernel array.
+    output : ArrayLike, optional
+        Pre-allocated output array. If None, a new array is created.
+    cpu_load : float
+        Fraction of CPU cores to use (0.0 to 1.0).
+
+    Returns
+    -------
+    numpy.ndarray
+        Correlated image with the original dtype.
+    """
 
     # Save original image dtype:
     original_dtype = image.dtype

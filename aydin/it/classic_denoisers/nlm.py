@@ -1,5 +1,12 @@
+"""Non-Local Means (NLM) denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on the Non-Local Means
+algorithm. Denoises by averaging pixels weighted by patch similarity,
+using scikit-image's implementation extended to support n-dimensional images.
+"""
+
 from functools import partial
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -60,7 +67,7 @@ def calibrate_denoise_nlm(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -150,7 +157,7 @@ def denoise_nlm(
 
     Parameters
     ----------
-    image : ArayLike
+    image : ArrayLike
         Image to be denoised
 
     patch_size : int, optional

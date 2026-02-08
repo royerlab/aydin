@@ -1,15 +1,17 @@
+"""Activity log widget for displaying and managing console output."""
+
 from qtpy import QtGui
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QTextEdit,
-    QPushButton,
-    QHBoxLayout,
     QCheckBox,
+    QHBoxLayout,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
 
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 class ActivityWidget(QWidget):
@@ -70,43 +72,62 @@ class ActivityWidget(QWidget):
         self.setLayout(self.widget_layout)
 
     def copy_logs_to_clipboard(self):
+        """Copy the entire activity log text to the system clipboard."""
         cb = QtGui.QGuiApplication.clipboard()
         cb.setText(str(self.infoTextBox.toPlainText()))
 
     def activity_print(self, string2print):
+        """Append text to the activity log text box.
+
+        Parameters
+        ----------
+        string2print : str
+            Text to append to the log.
+        """
         self.infoTextBox.insertPlainText(string2print)
 
     def clear_activity(self):
+        """Clear all text from the activity log."""
         self.infoTextBox.clear()
 
     def handle_autoscroll_checkbox_state_changed(self):
+        """Enable or disable auto-scrolling based on the checkbox state."""
         if self.autoscroll_checkbox.isChecked():
             self.set_auto_scroll()
         else:
-            self.infoTextBox.verticalScrollBar().rangeChanged.disconnect()
+            try:
+                self.infoTextBox.verticalScrollBar().rangeChanged.disconnect()
+            except (TypeError, RuntimeError):
+                # Signal may not be connected or already disconnected
+                pass
 
     def set_auto_scroll(self):
+        """Connect the scroll bar to auto-scroll to the bottom on new content."""
         self.infoTextBox.verticalScrollBar().rangeChanged.connect(
             lambda min, max: self.infoTextBox.verticalScrollBar().setSliderPosition(max)
         )
 
     def save_activity(self):
+        """Save the activity log to a text file alongside the first denoised image."""
         log_string = str(self.infoTextBox.toPlainText())
         image_name = None
-        for idx, image2denoise in enumerate(
-            self.parent.tabs["Image(s)"].images_to_denoise
-        ):
-            if image2denoise:
-                image_name = self.parent.tabs["Image(s)"].images[idx]
-                break
+        if "Image(s)" in self.parent.tabs:
+            for idx, image2denoise in enumerate(
+                self.parent.tabs["Image(s)"].images_to_denoise
+            ):
+                if image2denoise:
+                    image_name = self.parent.tabs["Image(s)"].images[idx]
+                    break
 
         path = None
-        for idx, filename in enumerate(self.parent.tabs["File(s)"].filenames):
-            if image_name in filename:
-                path = self.parent.tabs["File(s)"].filepaths[idx]
+        if "File(s)" in self.parent.tabs and image_name is not None:
+            for idx, filename in enumerate(self.parent.tabs["File(s)"].filenames):
+                if image_name in filename:
+                    path = self.parent.tabs["File(s)"].filepaths[idx]
 
         if path is None or path == "":
-            lprint("Cannot write the logs into a file")
+            aprint("Cannot write the logs into a file")
+            return
 
         logfile_path = f"{path[:path.rfind('.')]}.txt"
 
@@ -114,5 +135,11 @@ class ActivityWidget(QWidget):
             logfile.write(log_string)
 
     def qtextedit_mousepressevent(self, event):
-        # We are using an empty press event otherwise cursor jumps to the point clicked
+        """No-op mouse press handler to prevent cursor jumping in the log.
+
+        Parameters
+        ----------
+        event : QMouseEvent
+            The mouse press event (ignored).
+        """
         pass

@@ -1,7 +1,27 @@
+"""Pooling downsampling layer supporting average and max pooling.
+
+Provides a configurable spatial downsampling module for 2D and 3D inputs
+used in encoder paths of UNet architectures.
+"""
+
 from torch import nn
 
 
 class PoolingDown(nn.Module):
+    """Spatial downsampling via average or max pooling.
+
+    Reduces spatial dimensions by a factor of 2 using either average
+    or max pooling. Supports both 2D and 3D inputs.
+
+    Parameters
+    ----------
+    spacetime_ndim : int
+        Number of spatial dimensions (2 or 3).
+    pooling_mode : str
+        Pooling mode: ``'ave'`` for average pooling or ``'max'``
+        for max pooling.
+    """
+
     def __init__(self, spacetime_ndim, pooling_mode):
         super(PoolingDown, self).__init__()
 
@@ -16,6 +36,23 @@ class PoolingDown(nn.Module):
             self.max_pooling = nn.MaxPool3d((2, 2, 2))
 
     def forward(self, x):
+        """Downsample the input tensor by a factor of 2.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor.
+
+        Returns
+        -------
+        torch.Tensor
+            Spatially downsampled tensor.
+
+        Raises
+        ------
+        ValueError
+            If ``pooling_mode`` is not ``'max'`` or ``'ave'``.
+        """
 
         if self.pooling_mode == 'ave':
             x = self.average_pooling(x)

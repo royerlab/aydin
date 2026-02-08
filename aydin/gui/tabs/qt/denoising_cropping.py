@@ -1,3 +1,5 @@
+"""Denoising crop tab for restricting the region to denoise."""
+
 from aydin.gui.tabs.qt.base_cropping import BaseCroppingTab
 
 

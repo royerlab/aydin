@@ -2,20 +2,20 @@
 import numpy
 from scipy.ndimage import shift
 
+from aydin.io.datasets import examples_single, fibsem
 from aydin.util.fast_shift.fast_shift import fast_shift
-from aydin.io.datasets import fibsem, examples_single
-from aydin.util.log.log import lsection, Log
+from aydin.util.log.log import Log, asection
 
 
 def demo_fast_shift(image_name: str, image, _shift, repeats=32):
     Log.enable_output = True
 
-    with lsection(f"shift={_shift}:"):
-        with lsection(f"Numba-CPU {image_name} (r={repeats}):"):
+    with asection(f"shift={_shift}:"):
+        with asection(f"Numba-CPU {image_name} (r={repeats}):"):
             for _ in range(repeats):
                 numba_shifted_image = fast_shift(image, shift=_shift)
 
-        with lsection(f"Scipy {image_name} (r={repeats}):"):
+        with asection(f"Scipy {image_name} (r={repeats}):"):
             for _ in range(repeats):
                 scipy_shifted_image = shift(image, shift=_shift)
 

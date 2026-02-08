@@ -1,9 +1,14 @@
-# Function to add camera noise
+"""Realistic camera noise simulation for scientific imaging.
+
+This module provides functions to simulate realistic camera noise including
+shot noise, dark current, gain variations, hot/cold pixels, and cosmic rays.
+Useful for generating synthetic noisy images for testing denoising algorithms.
+"""
+
 from typing import Optional
 
 import numpy
 from numpy.random import RandomState
-
 
 # from numpy.typing import ArrayLike
 
@@ -38,8 +43,8 @@ def simulate_camera_image(
 
     Parameters
     ----------
-    photons_per_second :
-        Image representing the number of photons received on the camera per pixel per second
+    photons_per_second : numpy.typing.ArrayLike
+        Image representing the number of photons received on the camera per pixel per second.
     exposure_time_s :
         Exposure time in seconds
     quantum_efficiency :
@@ -74,19 +79,21 @@ def simulate_camera_image(
     probability_cosmic_ray:
         Probability per pixel per second that a cosmic ray will hit a camera pixel.
     bitdepth :
-        Bit depth of each pixel fo the camera
+        Bit depth of each pixel of the camera
     baseline :
         Baseline value for camera
     shot_rnd :
         Random state for each image (time dependent)
     camera_rnd :
-            Random state for each camera (time indedependent, camera instance dependent)
+            Random state for each camera (time independent, camera instance dependent)
     dtype :
         Integral dtype to return image in
 
     Returns
     -------
-
+    adu : numpy.ndarray
+        Simulated camera image in analog-to-digital units (ADU) with the
+        specified dtype and bit depth.
     """
 
     if shot_rnd is None:
@@ -161,30 +168,33 @@ def simulate_camera_image(
         num_of_rays = exposure_time_s * probability_cosmic_ray * electrons.size
         effective_num_of_rays = shot_rnd.poisson(num_of_rays)
 
-        y_max, x_max = electrons.shape
-        ray_x = camera_rnd.randint(0, x_max, size=effective_num_of_rays)
-        ray_y = camera_rnd.randint(0, y_max, size=effective_num_of_rays)
-        dark_electrons[tuple([ray_y, ray_x])] += int(gain * 16)
+        shape = electrons.shape
+        ray_indices = tuple(
+            camera_rnd.randint(0, s, size=effective_num_of_rays) for s in shape
+        )
+        dark_electrons[ray_indices] += int(gain * 16)
 
     # Some pixels are hot:
     if num_hot_pixels > 0:
-        y_max, x_max = dark_electrons.shape
-        hot_x = camera_rnd.randint(0, x_max, size=num_hot_pixels)
-        hot_y = camera_rnd.randint(0, y_max, size=num_hot_pixels)
-        dark_electrons[tuple([hot_y, hot_x])] *= min(16, 2 ** (bitdepth - 2))
+        shape = dark_electrons.shape
+        hot_indices = tuple(
+            camera_rnd.randint(0, s, size=num_hot_pixels) for s in shape
+        )
+        dark_electrons[hot_indices] *= min(16, 2 ** (bitdepth - 2))
 
     # Some pixels are cold:
     if num_cold_pixels > 0:
-        y_max, x_max = electrons.shape
-        cold_x = camera_rnd.randint(0, x_max, size=num_cold_pixels)
-        cold_y = camera_rnd.randint(0, y_max, size=num_cold_pixels)
-        electrons[tuple([cold_y, cold_x])] /= min(16, 2 ** (bitdepth - 2))
+        shape = electrons.shape
+        cold_indices = tuple(
+            camera_rnd.randint(0, s, size=num_cold_pixels) for s in shape
+        )
+        electrons[cold_indices] /= min(16, 2 ** (bitdepth - 2))
 
     # Add dark current
     all_electrons = dark_electrons + electrons
 
     # max ADU:
-    max_adu = numpy.int(2**bitdepth - 1)
+    max_adu = int(2**bitdepth - 1)
 
     # Convert to discrete numbers (ADU):
     adu = (all_electrons * gain_image + offset_image).astype(dtype)
@@ -199,8 +209,10 @@ def simulate_camera_image(
 
 
 def _poisson(rnd: RandomState, lam, size):
+    """Draw samples from a Poisson distribution using the given random state."""
     return rnd.poisson(lam=lam, size=size)
 
 
 def _normal(rnd: RandomState, scale, size):
+    """Draw samples from a normal distribution using the given random state."""
     return rnd.normal(scale=scale, size=size)

@@ -1,8 +1,18 @@
-from qtpy.QtWidgets import QHBoxLayout, QFrame, QWidget
+"""Horizontal line separator widget."""
+
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QFrame, QHBoxLayout, QWidget
 
 
 class QHorizontalLineBreakWidget(QWidget):
+    """A horizontal line separator widget for visual grouping in layouts.
+
+    Parameters
+    ----------
+    parent : QWidget
+        The parent widget.
+    """
+
     def __init__(self, parent):
         super(QHorizontalLineBreakWidget, self).__init__(parent)
         self.parent = parent

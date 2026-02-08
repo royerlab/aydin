@@ -1,4 +1,6 @@
 # flake8: noqa
+"""Demo script showing standard feature generation on 2D and 3D images."""
+
 import numpy
 
 from aydin.features.standard_features import StandardFeatureGenerator
@@ -6,6 +8,7 @@ from aydin.io.datasets import pollen
 
 
 def demo_collect_feature_2d():
+    """Generate and visualize 2D features on a synthetic impulse image."""
     generator = StandardFeatureGenerator(
         include_corner_features=True,
         include_scale_one=False,
@@ -46,6 +49,7 @@ def demo_collect_feature_2d():
 
 
 def demo_collect_feature_3d():
+    """Generate and visualize 3D features on a synthetic impulse image."""
     generator = StandardFeatureGenerator(
         include_corner_features=True,
         include_scale_one=False,
@@ -86,6 +90,7 @@ def demo_collect_feature_3d():
 
 
 def demo_collect_feature_2d_image():
+    """Generate and visualize 2D features on a real pollen image."""
     generator = StandardFeatureGenerator(
         include_corner_features=True,
         include_scale_one=False,

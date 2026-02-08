@@ -1,4 +1,12 @@
-from typing import Optional, List, Tuple
+"""Lipschitz continuity denoiser for impulse/salt-and-pepper noise.
+
+Provides calibration and denoising functions that enforce Lipschitz
+continuity on the image. Voxels violating the continuity criterion are
+iteratively replaced by a filtered value, effectively removing impulse
+noise (salt-and-pepper) while preserving smooth variations.
+"""
+
+from typing import List, Optional, Tuple
 
 import numpy
 from numba import jit
@@ -45,7 +53,7 @@ def calibrate_denoise_lipschitz(
     max_num_iterations: int
         Maximum number of Lipschitz correction iterations to run. (advanced)
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -113,7 +121,7 @@ def denoise_lipschitz(
         (advanced)
 
     alpha : float
-        This constant controls the amount of correction per ietartion.
+        This constant controls the amount of correction per iteration.
         Should be a number within[0, 1]. (advanced)
 
     max_num_iterations: int
@@ -141,7 +149,7 @@ def denoise_lipschitz(
     wrapped_compute_error = jit(nopython=True, parallel=multi_core)(_compute_error)
 
     for i in range(max_num_iterations):
-        # lprint(f"Iteration {i}")
+        # aprint(f"Iteration {i}")
 
         # Compute median:
         median = uniform_filter(image, size=5)
@@ -161,7 +169,7 @@ def denoise_lipschitz(
 
         # count number of corrections for this round:
         num_corrections = numpy.sum(mask)
-        # lprint(f"Number of corrections: {num_corrections}")
+        # aprint(f"Number of corrections: {num_corrections}")
 
         # if no corrections made we stop iterating:
         if num_corrections == 0:
@@ -174,6 +182,25 @@ def denoise_lipschitz(
 
 
 def _compute_error(array, median, lipschitz):
+    """Compute the Lipschitz error map between an array and its median.
+
+    Values exceeding the Lipschitz threshold contribute to the error;
+    values within the threshold produce zero error.
+
+    Parameters
+    ----------
+    array : numpy.ndarray
+        Input image array.
+    median : numpy.ndarray
+        Median-filtered version of the array.
+    lipschitz : float
+        Lipschitz threshold scaled to the image.
+
+    Returns
+    -------
+    numpy.ndarray
+        Error map with zero where Lipschitz continuity is satisfied.
+    """
     # we compute the error map:
     error = median - array
     error = numpy.abs(error)

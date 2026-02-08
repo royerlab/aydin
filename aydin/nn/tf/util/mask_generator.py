@@ -1,8 +1,15 @@
+"""Mask generation utilities for self-supervised training.
+
+Provides checkerbox (grid) and random mask generators used to implement
+blind-spot training strategies in TensorFlow-based models.
+"""
+
 from copy import deepcopy
+
 import numpy as np
 from scipy.ndimage import median_filter
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def masker(batch_vol, i=None, mask_shape=None, p=None):
@@ -55,19 +62,21 @@ def masker(batch_vol, i=None, mask_shape=None, p=None):
 
 
 def med_filter(input_image):
-    """
+    """Apply a donut-shaped median filter to the input image.
+
+    Replaces each pixel value with the median of its immediate neighbors,
+    excluding the center pixel itself. Used to generate replacement values
+    for masked pixels during self-supervised training.
+
     Parameters
     ----------
-    input_image
+    input_image : numpy.ndarray
+        Input image array with shape ``(B, ...spatial_dims..., C)``.
 
     Returns
     -------
-    filtered image
-
-    Notes
-    -----
-    Spec.
-    This median filter function is used to replace validation pixels the median values of surround pixels.
+    numpy.ndarray
+        Median-filtered image with the same shape as the input.
     """
     k = [1] + [3 for _ in input_image.shape[1:-1]] + [1]
     kernel = np.ones(k)
@@ -100,7 +109,7 @@ def maskedgen(image, batch_size, mask_size, replace_by='zero'):
 
     j = 0
     num_cycle = np.ceil(img_output.shape[0] / batch_size)
-    lprint(f'Masked pixels are replaced by {replace_by}')
+    aprint(f'Masked pixels are replaced by {replace_by}')
     while True:
         i = np.mod(j, num_cycle).astype(int, copy=False)
         image_batch = img_output[batch_size * i : batch_size * (i + 1)]
@@ -161,7 +170,7 @@ def randmaskgen(
 
     j = 0
     num_cycle = np.ceil(img_output.shape[0] / batch_size)
-    lprint(f'Masked pixels are replaced by {replace_by}')
+    aprint(f'Masked pixels are replaced by {replace_by}')
     while True:
         i = np.mod(j, num_cycle).astype(int, copy=False)
         image_batch = img_output[batch_size * i : batch_size * (i + 1)]

@@ -1,11 +1,30 @@
+"""ESAdam optimizer - Adam with exploratory noise injection.
+
+Implements a modified Adam optimizer that adds decaying random noise
+to parameters during optimization, encouraging exploration of the
+loss landscape.
+"""
+
 import torch
 from torch.optim import Adam
 
 
 class ESAdam(Adam):
-    r"""Implements a modifified version of the Adam algorithm that adds noise to the
-    the .
+    """Adam optimizer with exploratory stochastic noise injection.
 
+    Extends the standard Adam optimizer by adding decaying random noise
+    to the parameters after each optimization step. The noise level
+    decreases over time as ``start_noise_level / (1 + step_counter)``,
+    encouraging exploration in early training and convergence later.
+
+    Parameters
+    ----------
+    params : iterable
+        Iterable of parameters to optimize.
+    start_noise_level : float
+        Initial noise amplitude (decays with training steps).
+    **kwargs
+        Additional keyword arguments passed to ``torch.optim.Adam``.
     """
 
     def __init__(self, params, start_noise_level=0.001, **kwargs):
@@ -15,11 +34,20 @@ class ESAdam(Adam):
         self.step_counter = 0
 
     def step(self, closure=None):
-        """Performs a single optimization step.
+        """Perform a single optimization step with noise injection.
 
-        Arguments:
-            closure (callable, optional): A closure that reevaluates the model
-                and returns the loss.
+        Runs the standard Adam update and then adds decaying random
+        noise to all non-sparse parameters.
+
+        Parameters
+        ----------
+        closure : callable or None
+            A closure that re-evaluates the model and returns the loss.
+
+        Returns
+        -------
+        loss
+            The loss value (from the parent Adam step).
         """
         loss = super().step(closure)
 

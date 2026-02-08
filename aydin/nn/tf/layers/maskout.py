@@ -1,14 +1,18 @@
+"""Maskout layer for masking architectures in Keras/TensorFlow (deprecated)."""
+
+import keras
 from deprecated import deprecated
-from tensorflow.python.keras.engine.base_layer import Layer
-from tensorflow.python.keras.layers import multiply
+from keras.layers import Layer, Multiply
 
 
 @deprecated(
     "All the Tensorflow related code and dependencies are deprecated and will be removed by v0.1.16"
 )
 class Maskout(Layer):
-    """
-    A layer that mutiply mask with image. This is for masking architecture.
+    """Keras layer that multiplies a mask with an image.
+
+    Used in masking-based self-supervised training architectures to
+    apply pixel masks to the network output.
 
     Parameters
     ----------
@@ -19,42 +23,46 @@ class Maskout(Layer):
         super(Maskout, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        """
+        """Build the layer.
+
         Parameters
         ----------
-        input_shape : tuple
-
+        input_shape : list of tuple
+            List of input shapes (image and mask shapes).
         """
         assert isinstance(input_shape, list)
         super(Maskout, self).build(input_shape)
 
     def call(self, x, **kwargs):
-        """
+        """Apply element-wise multiplication of the inputs.
 
         Parameters
         ----------
-        x
-        training
+        x : list of tf.Tensor
+            List of two tensors: [image, mask].
+        **kwargs
+            Additional keyword arguments (e.g., ``training``).
 
         Returns
         -------
-        multiply(x)
-
+        tf.Tensor
+            Element-wise product of the image and mask tensors.
         """
         assert isinstance(x, list)
-        return multiply(x)
-        # return K.in_train_phase(multiply(x), x[0], training=training)
+        return Multiply()(x)
 
     def compute_output_shape(self, input_shape):
-        """
+        """Compute the output shape of the layer.
+
         Parameters
         ----------
-        input_shape : tuple
+        input_shape : list of tuple
+            List of input shapes [shape_a, shape_b].
 
         Returns
         -------
-        output_shape : tuple
-
+        tuple
+            Output shape, equal to the first input shape.
         """
         assert isinstance(input_shape, list)
         shape_a, shape_b = input_shape

@@ -6,13 +6,13 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
 from aydin.io.datasets import (
-    normalise,
     add_noise,
-    dots,
-    newyork,
-    lizard,
-    pollen,
     characters,
+    dots,
+    lizard,
+    newyork,
+    normalise,
+    pollen,
 )
 from aydin.it.classic_denoisers.spectral import calibrate_denoise_spectral
 from aydin.util.log.log import Log
@@ -35,9 +35,9 @@ def demo_spectral(image, display=True):
     noisy = numpy.clip(noisy, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
     psnr_noisy = psnr(image, noisy)
-    ssim_noisy = ssim(image, noisy)
+    ssim_noisy = ssim(image, noisy, data_range=1.0)
     psnr_denoised = psnr(image, denoised)
-    ssim_denoised = ssim(image, denoised)
+    ssim_denoised = ssim(image, denoised, data_range=1.0)
     print("         noisy   :", psnr_noisy, ssim_noisy)
     print("spectral denoised:", psnr_denoised, ssim_denoised)
 

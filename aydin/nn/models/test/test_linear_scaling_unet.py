@@ -1,3 +1,5 @@
+"""Tests for the PyTorch Linear Scaling UNet model forward pass."""
+
 import pytest
 import torch
 

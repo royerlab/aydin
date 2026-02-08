@@ -1,11 +1,26 @@
+"""Job runner for previewing a single transform in a background thread."""
+
 import napari
-from qtpy.QtWidgets import QWidget, QPushButton, QApplication, QStyle, QHBoxLayout
+from qtpy.QtWidgets import QApplication, QHBoxLayout, QPushButton, QStyle, QWidget
 
 from aydin.gui._qt.job_runners.worker import Worker
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 class PreviewJobRunner(QWidget):
+    """Runs a single transform preview in a background thread.
+
+    Applies a transform's preprocess and postprocess steps to the training
+    images and displays the results in a napari viewer.
+
+    Parameters
+    ----------
+    parent : TransformsTabItem
+        The parent transform tab item widget.
+    threadpool : QThreadPool
+        Thread pool for executing background workers.
+    """
+
     def __init__(self, parent, threadpool):
         super(PreviewJobRunner, self).__init__(parent)
         self.parent = parent
@@ -26,6 +41,13 @@ class PreviewJobRunner(QWidget):
         self.setLayout(self.widget_layout)
 
     def start_func(self, progress_callback):
+        """Apply the transform's pre- and post-processing to each image.
+
+        Parameters
+        ----------
+        progress_callback : Signal
+            Qt signal for reporting progress text.
+        """
         Log.gui_callback = progress_callback
 
         for image in self.images:
@@ -40,18 +62,26 @@ class PreviewJobRunner(QWidget):
                 )
             except BaseException as e:
                 error_message = str(e).replace('\n', ', ')
-                lprint(
+                aprint(
                     f"Preprocessing failed for {transform_instance} with: {error_message} "
                 )
 
         Log.gui_callback = None
 
     def progress_fn(self, log_str):
+        """Append progress text to the activity log.
+
+        Parameters
+        ----------
+        log_str : str
+            Text to append.
+        """
         self.parent.parent.parent.parent.activity_widget.infoTextBox.insertPlainText(
             log_str
         )
 
     def thread_complete(self):
+        """Re-enable the preview button and open napari with the results."""
         self.start_button.setEnabled(True)
 
         if self.preprocessed != [] and self.postprocessed != []:
@@ -71,11 +101,12 @@ class PreviewJobRunner(QWidget):
         self.postprocessed = []
 
     def prep_and_run(self):
+        """Gather images and transform settings, then launch the preview worker."""
         # Get images and their related data
         self.images = self.parent.parent.parent.parent.tabs["Training Crop"].images
 
         if len(self.images) == 0:
-            lprint("Preview cannot be started with no image")
+            aprint("Preview cannot be started with no image")
             return
 
         self.transform_class = self.parent.transform_class

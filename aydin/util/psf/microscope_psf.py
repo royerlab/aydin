@@ -1,5 +1,12 @@
+"""Gibson-Lanni microscope PSF model.
+
+Implements a fast PSF solver using Fourier-Bessel series approximation
+of the Gibson & Lanni model for fluorescence microscopy.
+"""
+
 import cmath
 import math
+
 import numpy
 import scipy
 import scipy.integrate
@@ -38,7 +45,7 @@ class MicroscopePSF:
     """
 
     def __init__(self):
-        """ """
+        """Initialize with default microscope parameters for a 100x/1.4NA oil objective."""
 
         # Internal constants.
         self.num_basis = (

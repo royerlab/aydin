@@ -1,14 +1,36 @@
+"""VeryFlatNet - a shallow feature extraction and dense inference network.
+
+Provides a flat architecture with a single large-kernel feature
+extraction layer followed by 1x1 convolution dense layers.
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from aydin.util.log.log import aprint
+
 
 class VeryFlatNet(nn.Module):
+    """Shallow network with large-kernel feature extraction.
+
+    Extracts features using a single large convolution kernel and
+    then processes them through cascading 1x1 convolutions with
+    channel reduction.
+
+    Parameters
+    ----------
+    num_channels : int
+        Number of feature channels in the extraction layer.
+    kernel_size : int
+        Kernel size for the feature extraction convolution.
+    """
+
     def __init__(self, num_channels=128, kernel_size=9):
         super(VeryFlatNet, self).__init__()
 
         self.num_channels = num_channels
-        print("num_channels =%d" % num_channels)
+        aprint("num_channels =%d" % num_channels)
 
         padding = int((kernel_size - 1) / 2)
 
@@ -38,7 +60,7 @@ class VeryFlatNet(nn.Module):
         device = next(self.parameters()).device
         with torch.no_grad():
             length = weights.shape[0]
-            print(length)
+            aprint(length)
             self.convfeatures._parameters['weight'][0:length] = torch.from_numpy(
                 weights
             ).to(device)
@@ -55,7 +77,7 @@ class VeryFlatNet(nn.Module):
         )
 
     def verylastparameters(self):
-        return self.convp5.parameters()
+        return self.convpf.parameters()
 
     def forward(self, x):
         y = self.convfeatures(x)

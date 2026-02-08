@@ -1,16 +1,22 @@
+"""Representative crop extraction from n-dimensional images.
+
+Finds and extracts the most informative sub-region of an image by
+scoring candidate crops based on contrast or edge magnitude metrics.
+"""
+
 import math
 import time
 from random import randrange
-from typing import Optional, Callable
+from typing import Callable, Optional
 
 import numpy
-from numba import jit, prange, vectorize, float32
+from numba import float32, jit, prange, vectorize
 from numpy import absolute
 from numpy.typing import ArrayLike
-from scipy.ndimage import sobel, gaussian_filter
+from scipy.ndimage import gaussian_filter, sobel
 
 from aydin.util.edge_filter.fast_edge_filter import fast_edge_filter
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 def representative_crop(
@@ -62,7 +68,7 @@ def representative_crop(
     favour_odd_lengths : bool
         If possible favours crops that have odd shape lengths.
 
-    search_mode: bool
+    search_mode : str
         Search mode for best crops. Can be 'random' or 'systematic'. In
         random mode we pick random crops, in systematic mode we check every
         possible strided crop.
@@ -88,8 +94,9 @@ def representative_crop(
 
     Returns
     -------
-    Most representative crop, and if return_slice is True the actual slice object too.
-
+    numpy.ndarray or tuple
+        The most representative crop. If ``return_slice`` is True,
+        returns a tuple of (crop, slice_tuple).
     """
 
     # Debug:
@@ -106,21 +113,21 @@ def representative_crop(
     # Start time:
     start_time = time.time()
 
-    with lsection(
+    with asection(
         f"Cropping image of size: {image.shape} with at most {crop_size} voxels and mode {mode}"
     ):
 
         # save reference to original image:
         original_image = image
 
-        with lsection("Cast and normalise image..."):
+        with asection("Cast and normalise image..."):
             # Cast, if needed:
             image = image.astype(numpy.float32, copy=False)
             # Normalise:
             # image = _normalise(image)
 
         # Apply filter:
-        with lsection(f"Apply cropping filter to image of shape: {image.shape}"):
+        with asection(f"Apply cropping filter to image of shape: {image.shape}"):
 
             # Smoothing:
             sigma = tuple(
@@ -218,7 +225,7 @@ def representative_crop(
         # account the size of the crops to define a 'granularity' (
         # stride) of the translations used for search:
 
-        granularity = tuple(cs // granularity_factor for cs in cropped_shape)
+        granularity = tuple(max(1, cs // granularity_factor) for cs in cropped_shape)
 
         if search_mode == 'random':
 
@@ -266,7 +273,7 @@ def representative_crop(
                     best_crop = original_image[best_slice]
 
                 if i >= min_num_crops and time.time() > start_time + timeout_in_seconds:
-                    lprint(
+                    aprint(
                         f"Interrupting crop search because of timeout after {i} crops examined!"
                     )
                     break
@@ -310,7 +317,7 @@ def representative_crop(
                     best_crop = original_image[best_slice]
 
                 if i >= min_num_crops and time.time() > start_time + timeout_in_seconds:
-                    lprint(
+                    aprint(
                         f"Interrupting crop search because of timeout after {i} crops examined!"
                     )
                     break

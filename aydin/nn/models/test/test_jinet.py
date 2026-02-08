@@ -1,3 +1,5 @@
+"""Tests for the PyTorch JINet model forward pass."""
+
 import pytest
 import torch
 

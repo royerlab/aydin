@@ -2,5 +2,5 @@
 Ask general questions about Aydin
 ==================================
 
-If you like to ask any questions about using Aydin,
-best way to reach us is `image.sc forum <https://forum.image.sc/tag/aydin>`_.
+If you have any questions about using Aydin,
+the best way to reach us is the `image.sc forum <https://forum.image.sc/tag/aydin>`_.

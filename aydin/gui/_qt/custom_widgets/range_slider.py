@@ -1,5 +1,7 @@
+"""Custom range slider widgets with two draggable handles."""
+
 from qtpy.QtCore import Property, Qt, Signal
-from qtpy.QtGui import QPainter, QColor
+from qtpy.QtGui import QColor, QPainter
 from qtpy.QtWidgets import QWidget
 
 
@@ -103,6 +105,13 @@ class QRangeSlider(QWidget):
         return tuple([self._slider_to_data_value(v) for v in self.sliderValues()])
 
     def setValues(self, values):
+        """Set the slider min/max values in data units.
+
+        Parameters
+        ----------
+        values : 2-tuple of float
+            New (min, max) values in data units.
+        """
         self.setSliderValues([self._data_to_slider_value(v) for v in values])
 
     def sliderValues(self):
@@ -128,13 +137,34 @@ class QRangeSlider(QWidget):
         self.updateDisplayPositions()
 
     def setStep(self, step):
+        """Set the step size for slider movement.
+
+        Parameters
+        ----------
+        step : float
+            Single step size in data units.
+        """
         self._step = step
 
     @property
     def single_step(self):
+        """Step size normalized to slider scale (0-1 range).
+
+        Returns
+        -------
+        float
+            Normalized step size.
+        """
         return self._step / self.scale
 
     def mouseMoveEvent(self, event):
+        """Handle mouse drag to update the slider handle positions.
+
+        Parameters
+        ----------
+        event : QMouseEvent
+            The mouse move event.
+        """
         if not self.isEnabled():
             return
 
@@ -171,12 +201,22 @@ class QRangeSlider(QWidget):
         self.updateValuesFromDisplay()
 
     def mousePressEvent(self, event):
+        """Handle mouse press to start dragging a handle or the range bar.
+
+        Left-click selects the nearest handle or bar. Right-click toggles
+        collapse/expand if the slider is collapsible.
+
+        Parameters
+        ----------
+        event : QMouseEvent
+            The mouse press event.
+        """
         if not self.isEnabled():
             return
 
         pos = self.getPos(event)
         top = self.rangeSliderSize() + self.handle_radius
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             if not self.collapsed:
                 if abs(self.display_min - pos) <= self.handle_radius:
                     self.moving = "min"
@@ -211,12 +251,20 @@ class QRangeSlider(QWidget):
         self.focused.emit()
 
     def mouseReleaseEvent(self, event):
+        """Emit valuesChanged on mouse release and reset the moving state.
+
+        Parameters
+        ----------
+        event : QMouseEvent
+            The mouse release event.
+        """
         if self.isEnabled():
             if not (self.moving == "none"):
                 self.valuesChanged.emit(self.values())
             self.moving = "none"
 
     def collapse(self):
+        """Collapse the slider range to a single midpoint value."""
         self.bc_min, self.bc_max = self.value_min, self.value_max
         midpoint = (self.value_max + self.value_min) / 2
         min_value = midpoint
@@ -225,6 +273,7 @@ class QRangeSlider(QWidget):
         self.collapsed = True
 
     def expand(self):
+        """Expand the slider range back to its pre-collapse extent."""
         _mid = (self.bc_max - self.bc_min) / 2
         min_value = self.value_min - _mid
         max_value = self.value_min + _mid
@@ -238,10 +287,18 @@ class QRangeSlider(QWidget):
         self.collapsed = False
 
     def resizeEvent(self, event):
+        """Recalculate display positions when the widget is resized.
+
+        Parameters
+        ----------
+        event : QResizeEvent
+            The resize event.
+        """
         self.updateDisplayPositions()
         self.resized.emit()
 
     def updateDisplayPositions(self):
+        """Recalculate the pixel positions of the slider handles from values."""
         size = self.rangeSliderSize()
         range_min = int(size * self.value_min)
         range_max = int(size * self.value_max)
@@ -259,9 +316,17 @@ class QRangeSlider(QWidget):
 
     @property
     def scale(self):
+        """Total range span in data units.
+
+        Returns
+        -------
+        float
+            Difference between data range max and min.
+        """
         return self.data_range_max - self.data_range_min
 
     def updateValuesFromDisplay(self):
+        """Update the internal slider values from the current display positions."""
         size = self.rangeSliderSize()
         val_min, val_max = self.sliderValues()
         if (self.moving == "min") or (self.moving == "bar"):
@@ -275,42 +340,64 @@ class QRangeSlider(QWidget):
         self.setSliderValues((val_min, val_max))
 
     def getBarColor(self):
+        """Return the bar color."""
         return self.bar_color
 
     def setBarColor(self, barColor):
+        """Set the color of the selected range bar."""
         self.bar_color = barColor
 
     barColor = Property(QColor, getBarColor, setBarColor)
 
     def getBackgroundColor(self):
+        """Return the background color."""
         return self.background_color
 
     def setBackgroundColor(self, backgroundColor):
+        """Set the color of the slider background track."""
         self.background_color = backgroundColor
 
     backgroundColor = Property(QColor, getBackgroundColor, setBackgroundColor)
 
     @property
     def handle_width(self):
+        """Diameter of the slider handles in pixels.
+
+        Returns
+        -------
+        int
+            Handle width (2 * handle_radius).
+        """
         return self.handle_radius * 2
 
     def getHandleColor(self):
+        """Return the handle fill color."""
         return self.handle_color
 
     def setHandleColor(self, handleColor):
+        """Set the fill color of the slider handles."""
         self.handle_color = handleColor
 
     handleColor = Property(QColor, getHandleColor, setHandleColor)
 
     def getHandleBorderColor(self):
+        """Return the handle border color."""
         return self.handle_border_color
 
     def setHandleBorderColor(self, handleBorderColor):
+        """Set the border color of the slider handles."""
         self.handle_border_color = handleBorderColor
 
     handleBorderColor = Property(QColor, getHandleBorderColor, setHandleBorderColor)
 
     def setEnabled(self, bool):
+        """Enable or disable the slider and trigger a visual update.
+
+        Parameters
+        ----------
+        bool : bool
+            Whether to enable the slider.
+        """
         super().setEnabled(bool)
         self.update()
 
@@ -381,7 +468,7 @@ class QHRangeSlider(QRangeSlider):
                 self.slider_width,
             )
 
-        painter.setRenderHints(QPainter.Antialiasing)
+        painter.setRenderHints(QPainter.RenderHint.Antialiasing)
         # Splitters
         painter.setPen(self.handle_border_color)
         painter.setBrush(self.handle_color)

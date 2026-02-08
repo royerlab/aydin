@@ -5,9 +5,9 @@ import numpy
 import numpy as np
 
 from aydin.io import imread
-from aydin.io.datasets import normalise, examples_zipped
+from aydin.io.datasets import examples_zipped, normalise
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 def demo_butterworth_tribolium(noisy, display=True):
@@ -17,7 +17,7 @@ def demo_butterworth_tribolium(noisy, display=True):
     Log.enable_output = True
     Log.set_log_max_depth(5)
 
-    lprint(noisy.shape)
+    aprint(noisy.shape)
     noisy = normalise(noisy.astype(np.float32))
 
     # noisy[:,:,0:10] = 0

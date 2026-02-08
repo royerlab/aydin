@@ -1,9 +1,10 @@
 # flake8: noqa
 from math import sin
+
 import numpy
 
+from aydin.util.log.log import Log, aprint
 from aydin.util.optimizer.optimizer import Optimizer
-from aydin.util.log.log import Log, lprint
 
 
 def enable_log():

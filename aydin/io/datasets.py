@@ -1,20 +1,26 @@
+"""Example datasets for testing and demonstration.
+
+This module provides convenience functions to download, cache, and load
+example images from Google Drive for testing Aydin denoising algorithms.
+It also includes utility functions for adding synthetic noise and blur.
+"""
+
 import os
 import zipfile
 from enum import Enum
-from os.path import join, exists
+from os.path import exists, join
 from typing import Optional
 
 import gdown
 import numpy
 from scipy.ndimage import binary_dilation, zoom
-from scipy.signal import convolve
-from scipy.signal import convolve2d
+from scipy.signal import convolve, convolve2d
 from skimage.exposure import rescale_intensity
 from skimage.util import random_noise
 
 from aydin.io import io
 from aydin.io.folders import get_cache_folder
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 from aydin.util.psf.simple_microscope_psf import SimpleMicroscopePSF
 
 datasets_folder = join(get_cache_folder(), 'data')
@@ -26,6 +32,18 @@ except Exception:
 
 
 def normalise(image):
+    """Normalize an image to the [0, 1] range as float32.
+
+    Parameters
+    ----------
+    image : numpy.typing.ArrayLike
+        Input image of any numeric type.
+
+    Returns
+    -------
+    normalized : numpy.ndarray
+        Image rescaled to [0, 1] with dtype float32.
+    """
     return rescale_intensity(image, in_range='image', out_range=(0, 1)).astype(
         numpy.float32, copy=False
     )
@@ -40,19 +58,63 @@ def add_noise(
     clip=True,
     seed: Optional[int] = None,
 ):
+    """Add synthetic noise to an image.
+
+    Applies Poisson noise (shot noise), Gaussian noise, and salt-and-pepper
+    noise sequentially.
+
+    Parameters
+    ----------
+    image : numpy.typing.ArrayLike
+        Input image, ideally normalized to [0, 1].
+    intensity : float or None
+        Poisson noise intensity. Higher values mean less noise.
+        If None, Poisson noise is skipped.
+    variance : float
+        Variance of the additive Gaussian noise.
+    sap : float
+        Amount of salt-and-pepper noise (fraction of pixels affected).
+    dtype : numpy.dtype
+        Output data type.
+    clip : bool
+        If True, clips the output to the valid range.
+    seed : int, optional
+        Random seed for reproducibility.
+
+    Returns
+    -------
+    noisy : numpy.ndarray
+        Noisy image with the specified dtype.
+    """
     if seed is not None:
         seed = abs(seed)
         numpy.random.seed(seed)
     noisy = image
     if intensity is not None:
         noisy = numpy.random.poisson(image * intensity) / intensity
-    noisy = random_noise(noisy, mode="gaussian", var=variance, seed=seed, clip=clip)
-    noisy = random_noise(noisy, mode="s&p", amount=sap, seed=seed, clip=clip)
+    noisy = random_noise(noisy, mode="gaussian", var=variance, rng=seed, clip=clip)
+    noisy = random_noise(noisy, mode="s&p", amount=sap, rng=seed, clip=clip)
     noisy = noisy.astype(dtype, copy=False)
     return noisy
 
 
 def add_blur_2d(image, dz=0):
+    """Apply 2D blur to an image using a simulated microscope PSF.
+
+    Parameters
+    ----------
+    image : numpy.typing.ArrayLike
+        2D input image.
+    dz : int
+        Axial offset index into the 3D PSF to select the 2D slice.
+
+    Returns
+    -------
+    blurred : numpy.ndarray
+        Blurred image with the same shape as ``image``.
+    psf_kernel : numpy.ndarray
+        The normalized PSF kernel that was applied.
+    """
     psf = SimpleMicroscopePSF()
     psf_xyz_array = psf.generate_xyz_psf(dxy=0.406, dz=0.406, xy_size=17, z_size=17)
     psf_kernel = psf_xyz_array[dz]
@@ -61,6 +123,24 @@ def add_blur_2d(image, dz=0):
 
 
 def add_blur_3d(image, xy_size=17, z_size=17):
+    """Apply 3D blur to an image using a simulated microscope PSF.
+
+    Parameters
+    ----------
+    image : numpy.typing.ArrayLike
+        3D input image.
+    xy_size : int
+        Lateral size of the PSF kernel in pixels.
+    z_size : int
+        Axial size of the PSF kernel in pixels.
+
+    Returns
+    -------
+    blurred : numpy.ndarray
+        Blurred image with the same shape as ``image``.
+    psf_kernel : numpy.ndarray
+        The normalized 3D PSF kernel that was applied.
+    """
     psf = SimpleMicroscopePSF()
     psf_xyz_array = psf.generate_xyz_psf(
         dxy=0.406, dz=0.406, xy_size=xy_size, z_size=z_size
@@ -74,68 +154,90 @@ def add_blur_3d(image, xy_size=17, z_size=17):
 
 
 def lizard():
+    """Load the example lizard image (2D monochrome)."""
     return examples_single.generic_lizard.get_array()
 
 
 def camera():
+    """Load the example camera image (2D monochrome)."""
     return examples_single.generic_camera.get_array()
 
 
 def newyork():
+    """Load the example New York image (2D monochrome)."""
     return examples_single.generic_newyork.get_array()
 
 
 def small_newyork():
+    """Load a downscaled (0.5x) version of the New York image."""
     return zoom(newyork(), zoom=0.5)
 
 
 def cropped_newyork(crop_amount=256):
+    """Load a center-cropped version of the New York image."""
     crop_amount = min(crop_amount, 500)
     return newyork()[crop_amount:-crop_amount, crop_amount:-crop_amount]
 
 
 def newyork_noisy():
+    """Load the noisy version of the New York image."""
     return examples_single.noisy_newyork.get_array()
 
 
 def pollen():
+    """Load the example pollen image (2D monochrome)."""
     return examples_single.generic_pollen.get_array()
 
 
 def scafoldings():
+    """Load the example scaffoldings image (2D monochrome)."""
     return examples_single.generic_scafoldings.get_array()
 
 
 def characters():
+    """Load the example characters image (2D monochrome, inverted)."""
     return 1 - examples_single.generic_characters.get_array()
 
 
 def andromeda():
+    """Load the example Andromeda galaxy image (2D monochrome)."""
     return examples_single.generic_andromeda.get_array()
 
 
 def dots():
+    """Generate a synthetic sparse dots image with non-uniform background."""
     image = numpy.random.rand(512, 512) < 0.005  # andromeda()#[256:-256, 256:-256]
     image = 0.8 * binary_dilation(image).astype(numpy.float32, copy=False)
     image[0:256, 0:256] += 0.1
-    image.clip(0, 1)
+    image = image.clip(0, 1)
     return image
 
 
 def rgbtest():
+    """Load the example RGB test image."""
     return examples_single.rgbtest.get_array()
 
 
 def dmel():
+    """Load a single slice of the Keller Drosophila melanogaster dataset."""
     return examples_single.keller_dmel.get_array()[23]
 
 
 class examples_single(Enum):
+    """Enumeration of single example images available for download.
+
+    Each member is a tuple of (Google Drive file ID, filename).
+    Use ``get_path()`` to download and get the local path, or
+    ``get_array()`` to directly get the image as a numpy array.
+    """
+
     def get_path(self):
+        """Download (if needed) and return the local file path for this example."""
         download_from_gdrive(*self.value, datasets_folder)
         return join(datasets_folder, self.value[1])
 
     def get_array(self):
+        """Download (if needed), read, and return the image as a numpy array."""
         array, _ = io.imread(self.get_path())
         return array
 
@@ -258,7 +360,26 @@ class examples_single(Enum):
 def download_from_gdrive(
     id, name, dest_folder=datasets_folder, overwrite=False, unzip=False
 ):
+    """Download a file from Google Drive by its file ID.
 
+    Parameters
+    ----------
+    id : str
+        Google Drive file ID.
+    name : str
+        Filename to save the downloaded file as.
+    dest_folder : str
+        Destination folder for the downloaded file.
+    overwrite : bool
+        If True, re-downloads even if the file already exists.
+    unzip : bool
+        If True, unzips the downloaded file into ``dest_folder``.
+
+    Returns
+    -------
+    output_path : str or None
+        Path to the downloaded file, or None if the file already existed.
+    """
     try:
         os.makedirs(dest_folder)
     except Exception:
@@ -267,28 +388,42 @@ def download_from_gdrive(
     url = f'https://drive.google.com/uc?id={id}'
     output_path = join(dest_folder, name)
     if overwrite or not exists(output_path):
-        lprint(f"Downloading file {output_path} as it does not exist yet.")
+        aprint(f"Downloading file {output_path} as it does not exist yet.")
         gdown.download(url, output_path, quiet=False)
 
         if unzip:
-            lprint(f"Unzipping file {output_path}...")
+            aprint(f"Unzipping file {output_path}...")
             zip_ref = zipfile.ZipFile(output_path, 'r')
+            # Validate paths to prevent Zip Slip vulnerability
+            dest_folder_real = os.path.realpath(dest_folder)
+            for member in zip_ref.namelist():
+                member_path = os.path.realpath(os.path.join(dest_folder, member))
+                if not member_path.startswith(dest_folder_real + os.sep):
+                    raise ValueError(f"Attempted path traversal in zip file: {member}")
             zip_ref.extractall(dest_folder)
             zip_ref.close()
             # os.remove(output_path)
 
         return output_path
     else:
-        lprint(f"Not downloading file {output_path} as it already exists.")
+        aprint(f"Not downloading file {output_path} as it already exists.")
         return None
 
 
 def download_all_examples():
+    """Download all example images to the local cache."""
     for example in examples_single:
-        print(download_from_gdrive(*example.value))
+        aprint(download_from_gdrive(*example.value))
 
 
 def downloaded_example(substring):
-    for example in examples_single.get_list():
+    """Download a specific example whose filename contains the given substring.
+
+    Parameters
+    ----------
+    substring : str
+        Substring to match against example filenames.
+    """
+    for example in examples_single:
         if substring in example.value[1]:
-            print(download_from_gdrive(*example.value))
+            aprint(download_from_gdrive(*example.value))
