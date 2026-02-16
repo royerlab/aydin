@@ -17,14 +17,13 @@ in Aydin API. You can see a quick example below using ImageTranslatorFGR:
 
 
 Similar to ImageTranslatorFGR implementation, same can be achieved with
-ImageTranslatorCNN as shown below (note: ``ImageTranslatorCNN`` is deprecated,
-use ``ImageTranslatorCNNTorch`` instead):
+ImageTranslatorCNNTorch as shown below:
 
 .. code-block:: python
 
-   from aydin.it.cnn import ImageTranslatorCNN
+   from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
-   it = ImageTranslatorCNN()
+   it = ImageTranslatorCNNTorch()
    it.add_transform(RangeTransform())
    it.add_transform(PaddingTransform())
 

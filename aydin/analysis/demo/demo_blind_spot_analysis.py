@@ -1,8 +1,9 @@
+"""Demo script for blind-spot analysis and self-supervised FGR denoising."""
+
 # flake8: noqa
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import examples_single
-
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.it.transforms.range import RangeTransform
 from aydin.regression.cb import CBRegressor
@@ -10,6 +11,7 @@ from aydin.util.log.log import Log
 
 
 def demo_blind_spot_analysis():
+    """Detect blind spots automatically and denoise with FGR using CatBoost."""
     Log.enable_output = True
 
     image = examples_single.myers_tribolium.get_array()
@@ -37,11 +39,11 @@ def demo_blind_spot_analysis():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(denoised_image, name='denoised_image')
-        viewer.add_image(noise_auto, name='noise_auto')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(denoised_image, name='denoised_image')
+    viewer.add_image(noise_auto, name='noise_auto')
+    napari.run()
 
 
 if __name__ == "__main__":

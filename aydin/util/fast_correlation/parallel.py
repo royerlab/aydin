@@ -96,6 +96,7 @@ def parallel_correlate(
         )
 
         def _correlate(slice_tuple, slice_margin_tuple):
+            """Correlate a single tile and store result in the output array."""
             tile = image[slice_margin_tuple]
 
             output_tile = correlate(tile, weights=kernel)

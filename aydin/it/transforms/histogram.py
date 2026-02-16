@@ -15,11 +15,13 @@ from aydin.util.log.log import aprint, asection
 
 
 class HistogramEqualisationTransform(ImageTransformBase):
-    """Histogram Equalisation
+    """Histogram equalisation transform.
 
     For some images with extremely unbalanced histograms, applying histogram
-    equalisation will improve results. Two modes are supported: 'equalize',
-    and 'clahe'.
+    equalisation will improve results. Two modes are supported: 'equalize'
+    (standard histogram equalisation) and 'clahe' (Contrast Limited Adaptive
+    Histogram Equalisation).
+    <notgui>
     """
 
     preprocess_description = (
@@ -38,8 +40,7 @@ class HistogramEqualisationTransform(ImageTransformBase):
         priority: float = 0.12,
         **kwargs,
     ):
-        """
-        Constructs a Histogram Transform
+        """Construct a HistogramEqualisationTransform.
 
         Parameters
         ----------
@@ -63,8 +64,15 @@ class HistogramEqualisationTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_cdf``, ``_bin_centers``, and
+            ``_original_dtype``.
+        """
         state = self.__dict__.copy()
         del state['_cdf']
         del state['_bin_centers']
@@ -72,9 +80,23 @@ class HistogramEqualisationTransform(ImageTransformBase):
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name, mode, and scale.
+        """
         return f'{type(self).__name__}' f' (mode={self.mode},' f' scale={self.scale})'
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):

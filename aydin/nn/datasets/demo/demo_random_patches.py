@@ -11,6 +11,13 @@ from aydin.nn.datasets.random_patches import random_patches
 
 
 def demo_nb_patches_per_image(nb_patches_per_image):
+    """Extract random patches from a camera image and report counts.
+
+    Parameters
+    ----------
+    nb_patches_per_image : int
+        Number of patches to extract per image.
+    """
     image_array = camera()
 
     image_array = numpy.expand_dims(image_array, 0)

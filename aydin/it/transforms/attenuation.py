@@ -16,12 +16,13 @@ from aydin.util.log.log import aprint, asection
 
 
 class AttenuationTransform(ImageTransformBase):
-    """Axis-aligned attenuation correction
+    """Axis-aligned attenuation correction.
 
-    Corrects intensity attenuation of an image along a given list of axis.
+    Corrects intensity attenuation of an image along a given list of axes.
     This is useful to correct for signal attenuation over time or along
     space. Currently only linear attenuation is supported. More modes on the
     way.
+    <notgui>
     """
 
     preprocess_description = (
@@ -41,8 +42,7 @@ class AttenuationTransform(ImageTransformBase):
         priority: float = 0.321,
         **kwargs,
     ):
-        """
-        Constructs a Attenuation Corrector
+        """Construct an AttenuationTransform.
 
         Parameters
         ----------
@@ -72,8 +72,15 @@ class AttenuationTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_original_dtype``, ``_corrections``,
+            and ``_axis``.
+        """
         state = self.__dict__.copy()
         del state['_original_dtype']
         del state['_corrections']
@@ -81,9 +88,23 @@ class AttenuationTransform(ImageTransformBase):
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name and mode.
+        """
         return f'{type(self).__name__} (mode={self.mode})'
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):

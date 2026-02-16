@@ -36,16 +36,7 @@ def get_temp_folder():
         Absolute path to the temporary directory, or None if unavailable.
     """
 
-    temp_folder = None
-
-    if platform == "linux" or platform == "linux2":
-        temp_folder = tempfile.gettempdir()
-
-    elif platform == "darwin":
-        temp_folder = tempfile.gettempdir()
-
-    elif platform == "win32":
-        temp_folder = tempfile.gettempdir()
+    temp_folder = tempfile.gettempdir()
 
     try:
         makedirs(temp_folder)
@@ -80,7 +71,10 @@ def get_cache_folder():
         cache_folder = join(get_home_folder(), 'Library/Caches')
 
     elif platform == "win32":
-        cache_folder = join(get_home_folder(), os.getenv('LOCALAPPDATA'))
+        cache_folder = os.getenv('LOCALAPPDATA')
+
+    if cache_folder is None:
+        return None
 
     try:
         makedirs(cache_folder)

@@ -224,12 +224,14 @@ class DataHistogramBalancer:
             return False
 
     def get_histogram_kept_as_string(self):
-        """Returns the kept part of histogram as a string
+        """Return a Unicode bar-chart string of the kept entries histogram.
 
         Returns
         -------
         str
-
+            A single-line string representing the histogram of kept entries
+            using Unicode fill characters. Returns a placeholder message
+            when balancing is disabled.
         """
 
         if not self.balance:
@@ -247,12 +249,14 @@ class DataHistogramBalancer:
             )
 
     def get_histogram_all_as_string(self):
-        """Returns the whole histogram as a string
+        """Return a Unicode bar-chart string of the full entries histogram.
 
         Returns
         -------
         str
-
+            A single-line string representing the histogram of all offered
+            entries using Unicode fill characters. Returns a placeholder
+            message when balancing is disabled.
         """
 
         if not self.balance:
@@ -267,12 +271,14 @@ class DataHistogramBalancer:
             )
 
     def get_histogram_dropped_as_string(self):
-        """Returns the dropped part of histogram as a string
+        """Return a Unicode bar-chart string of the dropped entries histogram.
 
         Returns
         -------
         str
-
+            A single-line string representing the histogram of dropped
+            entries (all minus kept) using Unicode fill characters. Returns
+            a placeholder message when balancing is disabled.
         """
 
         if not self.balance:

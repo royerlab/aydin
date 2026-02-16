@@ -18,6 +18,7 @@ from sklearn.decomposition import PCA
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint, asection
 from aydin.util.patch_size.patch_size import default_patch_size
 from aydin.util.patch_transform.patch_transform import (
     extract_patches_nd,
@@ -101,8 +102,12 @@ def calibrate_denoise_pca(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_pca`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
 
     # Convert image to float if needed:
@@ -144,6 +149,7 @@ def calibrate_denoise_pca(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 2 * image.nbytes + 6 * image.nbytes * math.prod(patch_size)
@@ -163,6 +169,7 @@ def denoise_pca(
     transform, and then doing a PCA projection of these patches
     along the first components. The cut-off is set by a
     threshold parameter.
+    <notgui>
 
     Parameters
     ----------
@@ -190,8 +197,8 @@ def denoise_pca(
 
     Returns
     -------
-    Denoised image
-
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:
@@ -200,29 +207,24 @@ def denoise_pca(
     # Normalise patch size:
     patch_size = default_patch_size(image, patch_size, odd=True)
 
-    # First we apply the patch transform:
-    patches = extract_patches_nd(image, patch_size=patch_size)
+    with asection(
+        f"Denoise image of shape {image.shape} with PCA (patch_size={patch_size})"
+    ):
+        with asection("Extract patches"):
+            patches = extract_patches_nd(image, patch_size=patch_size)
+            original_patches_shape = patches.shape
+            patches = patches.reshape(patches.shape[0], -1)
 
-    # reshape patches as vectors:
-    original_patches_shape = patches.shape
-    patches = patches.reshape(patches.shape[0], -1)
+        with asection("PCA projection"):
+            n_components = 1 + max(0, int(threshold * (prod(patch_size) - 1)))
+            pca = PCA(n_components=n_components)
+            patches = pca.inverse_transform(pca.fit_transform(patches))
 
-    # PCA dim reduction setup:
-    n_components = 1 + max(0, int(threshold * (prod(patch_size) - 1)))
-    pca = PCA(n_components=n_components)
-
-    # Project patches:
-    patches = pca.inverse_transform(pca.fit_transform(patches))
-
-    # reshape patches back to their original shape:
-    patches = patches.reshape(original_patches_shape)
-
-    # Transform back from patches to image:
-    denoised_image = reconstruct_from_nd_patches(
-        patches, image.shape, gamma=reconstruction_gamma
-    )
-
-    # Cast back to float32 if needed:
-    denoised_image = denoised_image.astype(numpy.float32, copy=False)
+        with asection("Reconstruct image"):
+            patches = patches.reshape(original_patches_shape)
+            denoised_image = reconstruct_from_nd_patches(
+                patches, image.shape, gamma=reconstruction_gamma
+            )
+            denoised_image = denoised_image.astype(numpy.float32, copy=False)
 
     return denoised_image

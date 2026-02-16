@@ -1,10 +1,17 @@
+"""Demo of high-pass filtering transform for image denoising.
+
+Demonstrates the ``HighpassTransform`` by comparing FGR denoising
+results with and without high-pass preprocessing across multiple
+filter scales, reporting PSNR and SSIM metrics.
+"""
+
 # flake8: noqa
 import numpy
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
 from skimage.util import random_noise
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import normalise, camera
+from aydin.io.datasets import camera, normalise
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.it.transforms.highpass import HighpassTransform
 from aydin.it.transforms.range import RangeTransform
@@ -13,6 +20,7 @@ from aydin.util.log.log import Log
 
 
 def demo_high_pass_real():
+    """Compare FGR denoising with and without high-pass preprocessing at multiple scales."""
 
     Log.override_test_exclusion = True
     Log.enable_output = True
@@ -41,13 +49,12 @@ def demo_high_pass_real():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(noisy, name='noisy')
-        viewer.add_image(preprocessed, name='preprocessed')
-        viewer.add_image(postprocessed, name='postprocessed')
-
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(noisy, name='noisy')
+    viewer.add_image(preprocessed, name='preprocessed')
+    viewer.add_image(postprocessed, name='postprocessed')
+    napari.run()
     generator = StandardFeatureGenerator(
         include_corner_features=True,
         include_scale_one=True,
@@ -106,23 +113,23 @@ def demo_high_pass_real():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(preprocessed, name='preprocessed')
-        viewer.add_image(postprocessed, name='postprocessed')
-        viewer.add_image(
-            denoised_without_preprocessing, name='denoised_without_preprocessing'
-        )
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(preprocessed, name='preprocessed')
+    viewer.add_image(postprocessed, name='postprocessed')
+    viewer.add_image(
+        denoised_without_preprocessing, name='denoised_without_preprocessing'
+    )
 
-        viewer.add_image(
-            numpy.stack(denoised_images_with_preprocessing),
-            name='denoised_images_with_preprocessing',
-        )
+    viewer.add_image(
+        numpy.stack(denoised_images_with_preprocessing),
+        name='denoised_images_with_preprocessing',
+    )
 
-        viewer.add_image(numpy.stack(preprocessed_images), name='preprocessed_images')
+    viewer.add_image(numpy.stack(preprocessed_images), name='preprocessed_images')
 
-        viewer.add_image(numpy.stack(low_pass_images), name='low_pass_images')
+    viewer.add_image(numpy.stack(low_pass_images), name='low_pass_images')
+    napari.run()
 
 
 if __name__ == "__main__":

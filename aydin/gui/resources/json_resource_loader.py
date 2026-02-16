@@ -6,7 +6,7 @@ import os
 from aydin.util.log.log import aprint
 
 
-def absPath(myPath):
+def abs_path(myPath):
     """Get the absolute path to a GUI resource file.
 
     Works both during development (relative to this module) and when
@@ -57,10 +57,22 @@ class JSONResourceLoader:
     """
 
     def __init__(self, resource_file_name):
+        """Load and parse a JSON resource file.
+
+        Parameters
+        ----------
+        resource_file_name : str
+            Name of the JSON file to load (e.g. 'tooltips.json').
+
+        Raises
+        ------
+        ValueError
+            If ``resource_file_name`` is None or empty.
+        """
         if resource_file_name is None or resource_file_name == "":
             raise ValueError(
                 "JSONResourceLoader has to be initiated with a resource file name argument."
             )
 
-        with open(absPath(resource_file_name)) as json_file:
+        with open(abs_path(resource_file_name)) as json_file:
             self.json = json.load(json_file)

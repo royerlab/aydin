@@ -33,6 +33,13 @@ class FilesTab(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the Files tab.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(FilesTab, self).__init__(parent)
         self.parent = parent
 
@@ -69,7 +76,7 @@ class FilesTab(QWidget):
             ['File Name', 'Split Channels', 'axes', 'shape', 'dtype', 'Path']
         )
         self.file_list_tree_widget.header().sectionClicked.connect(
-            self.onSectionClicked
+            self.on_section_clicked
         )
         self.file_list_tree_widget.setColumnWidth(0, 400)
         self.file_list_tree_widget.setColumnWidth(3, 400)
@@ -77,14 +84,14 @@ class FilesTab(QWidget):
         self.file_list_tree_widget.dropEvent = self.dropEvent
         self.file_list_tree_widget.dragMoveEvent = self.dragMoveEvent
         self.file_list_tree_widget.dragEnterEvent = self.dragEnterEvent
-        self.file_list_tree_widget.itemChanged.connect(self.onTreeItemChanged)
+        self.file_list_tree_widget.itemChanged.connect(self.on_tree_item_changed)
         self.remove_all_button.clicked.connect(self.remove_all_items_from_tree)
 
         self.tab_layout.addWidget(self.file_list_tree_widget)
 
         # Checkbox of hyperstacking
         self.hyperstack_checkbox = QCheckBox(
-            "Merge files into a single image(Hyperstack)", self
+            "Merge files into a single image (Hyperstack)", self
         )
         self.hyperstack_checkbox.toggled.connect(self.on_hyperstack_checkbox_toggled)
         self.tab_layout.addWidget(self.hyperstack_checkbox)
@@ -93,7 +100,7 @@ class FilesTab(QWidget):
         self.setLayout(self.tab_layout)
 
     @Slot(int)
-    def onSectionClicked(self, column):
+    def on_section_clicked(self, column):
         """Toggle all checkboxes in a column when the header is clicked.
 
         Parameters
@@ -118,7 +125,7 @@ class FilesTab(QWidget):
 
             item.setCheckState(column, state_to_be_set)
 
-    def onTreeItemChanged(self, item, column):
+    def on_tree_item_changed(self, item, column):
         """Handle changes to tree widget items (e.g. split channels checkbox).
 
         Parameters
@@ -152,7 +159,7 @@ class FilesTab(QWidget):
         self.file_list_tree_widget.clear()
         self.parent.data_model.clear_filepaths()
 
-    def openFileNamesDialog(self):
+    def open_file_names_dialog(self):
         """Open a file dialog for the user to select image files to load."""
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -162,7 +169,9 @@ class FilesTab(QWidget):
 
         if files:
             self.parent.data_model.add_filepaths(files)
-            self.parent.tabwidget.setCurrentIndex(1)
+            self.parent.tabwidget.setCurrentIndex(
+                self.parent.tabwidget.indexOf(self.parent.tabs["File(s)"])
+            )
 
     def on_hyperstack_checkbox_toggled(self):
         """Handle toggling of the hyperstack checkbox.
@@ -180,21 +189,25 @@ class FilesTab(QWidget):
         """Rebuild the file list tree from the current data model."""
         filepaths = self.parent.data_model.filepaths
 
-        self.file_list_tree_widget.clear()
+        self.file_list_tree_widget.blockSignals(True)
+        try:
+            self.file_list_tree_widget.clear()
 
-        if len(filepaths) == 0:
-            return
+            if len(filepaths) == 0:
+                return
 
-        for path, (array, metadata) in filepaths.items():
-            cg1 = QTreeWidgetItem(
-                self.file_list_tree_widget,
-                [
-                    Path(path).name,
-                    ' ',
-                    metadata.axes,
-                    str(metadata.shape),
-                    str(metadata.dtype),
-                    path,
-                ],
-            )
-            cg1.setCheckState(1, Qt.Unchecked)
+            for path, (array, metadata) in filepaths.items():
+                cg1 = QTreeWidgetItem(
+                    self.file_list_tree_widget,
+                    [
+                        Path(path).name,
+                        ' ',
+                        metadata.axes,
+                        str(metadata.shape),
+                        str(metadata.dtype),
+                        path,
+                    ],
+                )
+                cg1.setCheckState(1, Qt.Unchecked)
+        finally:
+            self.file_list_tree_widget.blockSignals(False)

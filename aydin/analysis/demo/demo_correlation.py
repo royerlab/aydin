@@ -1,3 +1,5 @@
+"""Demo script for computing per-axis correlation distances on example images."""
+
 # flake8: noqa
 from aydin.analysis.correlation import correlation_distance
 from aydin.io import io
@@ -5,6 +7,7 @@ from aydin.io.datasets import examples_single
 
 
 def demo_analysis():
+    """Load each example dataset and print its correlation distances."""
     for example in examples_single:
         example_file_path = example.get_path()
 

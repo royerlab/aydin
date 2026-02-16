@@ -39,6 +39,36 @@ class ImageTranslatorBase(ABC):
     and model serialization.
 
     Subclasses must implement `_train`, `_translate`, and `_load_internals`.
+
+    Attributes
+    ----------
+    self_supervised : bool
+        Whether the translator is operating in self-supervised mode
+        (input and target are the same image).
+    monitor : object or None
+        Monitor object for tracking training progress and callbacks.
+    blind_spots : str, list of tuple of int, or None
+        Blind-spot specification for self-supervised training. Controls
+        which voxels relative to the center are excluded during training.
+    tile_max_margin : int or None
+        Maximum margin width in voxels for tiled processing.
+    tile_min_margin : int
+        Minimum margin width in voxels for tiled processing.
+    transforms_list : list of ImageTransformBase
+        Ordered list of image transforms applied as preprocessing (forward)
+        and postprocessing (reverse).
+    max_memory_usage_ratio : float
+        Maximum fraction of available memory to use (0 to 1).
+    max_tiling_overhead : float
+        Maximum allowed margin overhead fraction during tiling.
+    max_voxels_per_tile : int
+        Maximum number of voxels per tile for tiled processing.
+    callback_period : int
+        Minimum period in seconds between training progress callbacks.
+    last_callback_time_sec : float
+        Timestamp of the last callback invocation.
+    loss_history : object or None
+        Training loss history after training completes.
     """
 
     def __init__(
@@ -68,9 +98,8 @@ class ImageTranslatorBase(ABC):
             axis you can use integer indices, or 'x', 'y', 'z', and 't'
             (dimension order is tzyx with x being always the last dimension).
             If None is passed then the blindspots are automatically discovered
-            from the image content. If 'center' is passed then no additional
-            blindspots to the center pixel are considered. If 'center' is passed
-            then only the default single center voxel blind-spot is used.
+            from the image content. If 'center' is passed then only the default
+            single center voxel blind-spot is used.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.
@@ -126,7 +155,7 @@ class ImageTranslatorBase(ABC):
         """Remove all transforms from the preprocessing/postprocessing pipeline."""
         self.transforms_list.clear()
 
-    def _transform_preprocess_image(self, image):
+    def transform_preprocess_image(self, image):
         """Apply all transforms in order as preprocessing steps.
 
         Parameters
@@ -156,7 +185,7 @@ class ImageTranslatorBase(ABC):
 
         return image
 
-    def _transform_postprocess_image(self, image):
+    def transform_postprocess_image(self, image):
         """Apply all transforms in reverse order as postprocessing steps.
 
         Parameters
@@ -329,11 +358,11 @@ class ImageTranslatorBase(ABC):
                 aprint('Training is supervised.')
 
             # Let's apply the transforms:
-            input_image = self._transform_preprocess_image(input_image)
+            input_image = self.transform_preprocess_image(input_image)
             target_image = (
                 input_image
                 if self.self_supervised
-                else self._transform_preprocess_image(target_image)
+                else self.transform_preprocess_image(target_image)
             )
 
             if batch_axes is None:  # set default batch_axes value:
@@ -455,7 +484,7 @@ class ImageTranslatorBase(ABC):
         ):
 
             # Let's apply the transforms:
-            input_image = self._transform_preprocess_image(input_image)
+            input_image = self.transform_preprocess_image(input_image)
 
             # set default batch_axes and channel_axes values:
             if batch_axes is None:
@@ -590,7 +619,7 @@ class ImageTranslatorBase(ABC):
             )
 
             # Let's undo the transforms:
-            shape_denormalised_translated_image = self._transform_postprocess_image(
+            shape_denormalised_translated_image = self.transform_postprocess_image(
                 shape_denormalised_translated_image
             )
 
@@ -848,7 +877,7 @@ class ImageTranslatorBase(ABC):
     @staticmethod
     def parse_axes_args(
         batch_axes: Union[List[int], List[bool]],
-        chan_axes: Union[List[int], List[bool]],
+        channel_axes: Union[List[int], List[bool]],
         ndim: int,
     ):
         """Parse and validate batch and channel axis specifications.
@@ -860,7 +889,7 @@ class ImageTranslatorBase(ABC):
         ----------
         batch_axes : list of int or list of bool
             Batch axis specification as boolean flags or integer indices.
-        chan_axes : list of int or list of bool
+        channel_axes : list of int or list of bool
             Channel axis specification as boolean flags or integer indices.
         ndim : int
             Total number of dimensions in the image.
@@ -882,31 +911,31 @@ class ImageTranslatorBase(ABC):
             or batch_axes is None
             or all(isinstance(x, bool) for x in batch_axes)
         ) and (
-            chan_axes == []
-            or chan_axes is None
-            or all(isinstance(x, bool) for x in chan_axes)
+            channel_axes == []
+            or channel_axes is None
+            or all(isinstance(x, bool) for x in channel_axes)
         ):
             # check if it is all boolean values then check if it is correct size then return
-            batch_result, chan_result = batch_axes, chan_axes
+            batch_result, chan_result = batch_axes, channel_axes
         elif (
             batch_axes == []
             or batch_axes is None
             or all(isinstance(x, int) for x in batch_axes)
         ) and (
-            chan_axes == []
-            or chan_axes is None
-            or all(isinstance(x, int) for x in chan_axes)
+            channel_axes == []
+            or channel_axes is None
+            or all(isinstance(x, int) for x in channel_axes)
         ):
             # check if it is list of indices and can make meaningful boolean arrays, if so return
             if any(i < 0 or i >= ndim for i in batch_axes) or any(
-                i < 0 or i >= ndim for i in chan_axes
+                i < 0 or i >= ndim for i in channel_axes
             ):
                 raise Exception(
                     "No axes index can be smaller than zero or bigger than ndim-1!"
                 )
 
             batch_result = [True if i in batch_axes else False for i in range(ndim)]
-            chan_result = [True if i in chan_axes else False for i in range(ndim)]
+            chan_result = [True if i in channel_axes else False for i in range(ndim)]
         else:
             raise Exception(
                 "Axes arguments has to be boolean arrays or integer index arrays!"
@@ -926,7 +955,7 @@ class ImageTranslatorBase(ABC):
         if any(
             [batch_result[i] is True and chan_result[i] is True for i in range(ndim)]
         ):
-            raise Exception("No axes can be both batch and chan axes!")
+            raise Exception("No axes can be both batch and channel axes!")
 
         return batch_result, chan_result
 

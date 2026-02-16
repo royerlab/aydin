@@ -35,34 +35,69 @@ class DenoiseRestorationBase(ABC):
     """
 
     def __init__(self, variant: str = None):
+        """Initialise the denoising restoration base.
+
+        Parameters
+        ----------
+        variant : str, optional
+            The specific algorithm variant to use (e.g. ``'butterworth'``,
+            ``'cb'``). When ``None``, the default variant for the subclass
+            is used.
+        """
         self.variant = variant
 
         self.it = None
 
     def __repr__(self):
+        """Return a string representation of the denoiser.
+
+        Returns
+        -------
+        str
+            A string showing the class name, variant, and image translator.
+        """
         return f"<{self.__class__.__name__}, variant={self.variant}, self.it={self.it}>"
 
     @property
     @abstractmethod
     def configurable_arguments(self):
-        """Returns the configurable arguments that will be exposed
-        on GUI and CLI.
+        """Return the configurable arguments exposed on the GUI and CLI.
+
+        Returns
+        -------
+        dict
+            A nested dictionary keyed by implementation name (e.g.
+            ``'Classic-butterworth'``). Each value is a dictionary whose
+            entries describe the parameter groups (e.g. ``'calibration'``,
+            ``'it'``, ``'regressor'``) with their arguments, defaults,
+            annotations, and reference class.
         """
         raise NotImplementedError()
 
     @property
     @abstractmethod
     def implementations(self):
-        """Returns the list of discovered implementations for given method."""
+        """Return the list of discovered implementation variant names.
+
+        Returns
+        -------
+        list of str
+            Variant names prefixed with the method class name (e.g.
+            ``'Classic-butterworth'``, ``'Noise2SelfFGR-cb'``).
+        """
         raise NotImplementedError()
 
     @abstractmethod
     def stop_running(self):
-        """Method to stop running restoration instance."""
+        """Stop the currently running training or inference process.
+
+        Signals the underlying image translator to halt. Useful for
+        cancelling long-running operations from the GUI.
+        """
         raise NotImplementedError()
 
     @abstractmethod
-    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
+    def train(self, noisy_image, *, batch_axes=None, channel_axes=None, **kwargs):
         """Train the denoiser on a noisy image.
 
         Parameters
@@ -71,7 +106,7 @@ class DenoiseRestorationBase(ABC):
             The noisy input image to train on.
         batch_axes : array_like, optional
             Indices of batch axes.
-        chan_axes : array_like, optional
+        channel_axes : array_like, optional
             Indices of channel axes.
         **kwargs
             Additional keyword arguments passed to the underlying translator.
@@ -79,7 +114,7 @@ class DenoiseRestorationBase(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
+    def denoise(self, noisy_image, *, batch_axes=None, channel_axes=None, **kwargs):
         """Denoise an image using the trained model.
 
         Parameters
@@ -88,7 +123,7 @@ class DenoiseRestorationBase(ABC):
             The noisy input image to denoise.
         batch_axes : array_like, optional
             Indices of batch axes.
-        chan_axes : array_like, optional
+        channel_axes : array_like, optional
             Indices of channel axes.
         **kwargs
             Additional keyword arguments passed to the underlying translator.

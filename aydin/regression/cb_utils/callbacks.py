@@ -22,6 +22,7 @@ class CatBoostStopTrainingCallback:
     """
 
     def __init__(self):
+        """Initialise the callback with training enabled."""
         self.continue_training = True
 
     def after_iteration(self, info):

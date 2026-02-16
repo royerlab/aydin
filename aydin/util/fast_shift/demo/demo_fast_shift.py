@@ -1,3 +1,10 @@
+"""Benchmark of fast shift implementation against SciPy.
+
+Compares performance of the Numba-accelerated ``fast_shift`` function
+against ``scipy.ndimage.shift`` across different shift values and
+image dimensionalities (2D, 3D, 4D).
+"""
+
 # flake8: noqa
 import numpy
 from scipy.ndimage import shift
@@ -8,6 +15,19 @@ from aydin.util.log.log import Log, asection
 
 
 def demo_fast_shift(image_name: str, image, _shift, repeats=32):
+    """Benchmark fast_shift versus scipy.ndimage.shift.
+
+    Parameters
+    ----------
+    image_name : str
+        Descriptive name for the image being benchmarked.
+    image : numpy.ndarray
+        Input image array.
+    _shift : tuple of int
+        Shift offsets for each axis.
+    repeats : int, optional
+        Number of repeated runs for timing, by default 32.
+    """
     Log.enable_output = True
 
     with asection(f"shift={_shift}:"):

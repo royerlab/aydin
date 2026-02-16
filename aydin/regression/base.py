@@ -36,6 +36,11 @@ class RegressorBase(ABC):
     """
 
     def __init__(self):
+        """Initialise common regressor state.
+
+        Sets up empty model and loss-history containers and the
+        stop-training flag used for external interruption.
+        """
         super().__init__()
         self._stop_fit = False
         self.num_channels = None
@@ -168,11 +173,31 @@ class RegressorBase(ABC):
         """
         self._stop_fit = True
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return pickling state, excluding the non-serialisable model list.
+
+        The ``models`` attribute is excluded because per-channel models are
+        serialised separately via :meth:`save` / :meth:`load`.
+
+        Returns
+        -------
+        dict
+            Instance state with the ``models`` key removed.
+        """
         state = self.__dict__.copy()
         del state['models']
         return state
+
+    def __setstate__(self, state):
+        """Restore pickling state with an empty model list.
+
+        Parameters
+        ----------
+        state : dict
+            Pickled state (without ``models``).
+        """
+        self.__dict__.update(state)
+        self.models = []
 
     def save(self, path: str):
         """Save the regressor and all its internal models to a folder.

@@ -19,6 +19,7 @@ from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.restoration.denoise.base import DenoiseRestorationBase
 from aydin.util.log.log import asection
+from aydin.util.string.break_text import strip_notgui
 
 if os.getenv("BUNDLED_AYDIN") == "1":
     from aydin.it.classic_denoisers.bilateral import (  # noqa: F401
@@ -86,6 +87,20 @@ class Classic(DenoiseRestorationBase):
     support. Each classical algorithm (Butterworth, Gaussian, NLM, TV, etc.)
     is exposed as a variant that can be selected at construction time or
     discovered dynamically via the :attr:`implementations` property.
+
+    Attributes
+    ----------
+    disabled_modules : list of str
+        Module names that are excluded from the available implementations.
+    lower_level_args : dict or None
+        Additional low-level arguments for the image translator and
+        calibration functions.
+    input_model_path : str or None
+        Path to a previously saved model zip file.
+    use_model_flag : bool or None
+        Whether to load a pre-trained model instead of training.
+    it_transforms : list of dict
+        Image transforms to apply during training and inference.
     """
 
     disabled_modules = ["bilateral", "bmnd", "_defaults"]
@@ -140,8 +155,19 @@ class Classic(DenoiseRestorationBase):
 
     @property
     def configurable_arguments(self):
-        """Returns the configurable arguments that will be exposed
-        on GUI and CLI.
+        """Return configurable arguments for the GUI and CLI.
+
+        Discovers all available classical denoiser modules, extracts their
+        calibration function signatures, and pairs them with the
+        :class:`ImageDenoiserClassic` constructor arguments.
+
+        Returns
+        -------
+        dict
+            A nested dictionary keyed by implementation name (e.g.
+            ``'Classic-butterworth'``). Each value contains ``'calibration'``
+            and ``'it'`` sub-dictionaries with their arguments, defaults,
+            annotations, and reference class.
         """
         arguments = {}
 
@@ -152,7 +178,7 @@ class Classic(DenoiseRestorationBase):
 
         it_args = {
             "arguments": fullargspec3.args[3:],
-            "defaults": fullargspec3.defaults[2:],
+            "defaults": (fullargspec3.defaults or ())[2:],
             "annotations": fullargspec3.annotations,
             "reference_class": it,
         }
@@ -198,7 +224,17 @@ class Classic(DenoiseRestorationBase):
 
     @property
     def implementations(self):
-        """Returns the list of discovered implementations for given method."""
+        """Return the list of available Classic denoiser implementation names.
+
+        Discovers all non-disabled classical denoiser modules and returns
+        their names prefixed with ``'Classic-'``.
+
+        Returns
+        -------
+        list of str
+            Implementation variant names (e.g. ``['Classic-butterworth',
+            'Classic-gaussian', ...]``).
+        """
         method_modules = self.get_implementations_in_a_module(classic_denoisers)
 
         # Remove the disabled modules
@@ -219,8 +255,19 @@ class Classic(DenoiseRestorationBase):
 
     @property
     def implementations_description(self):
-        """Return human-readable descriptions for each Classic implementation."""
-        it_classic_description = ImageDenoiserClassic.__doc__.strip()
+        """Return human-readable descriptions for each Classic implementation.
+
+        Builds a description for each variant by combining the
+        :class:`ImageDenoiserClassic` docstring with the individual
+        denoiser function's docstring (up to its Parameters section).
+
+        Returns
+        -------
+        list of str
+            HTML-formatted description strings, one per implementation,
+            in the same order as :attr:`implementations`.
+        """
+        it_classic_description = strip_notgui(ImageDenoiserClassic.__doc__.strip())
 
         descriptions = []
 
@@ -251,15 +298,17 @@ class Classic(DenoiseRestorationBase):
                 + ": "
                 + module.name
                 + "\n\n"
-                + elem.__doc__[: elem.__doc__.find("Parameters")].replace(
-                    "\n\n", "<br><br>"
-                )
+                + strip_notgui(elem.__doc__).replace("\n\n", "<br><br>")
             )
 
         return descriptions
 
     def stop_running(self):
-        """Stop the current Classic denoiser training or inference."""
+        """Stop the current Classic denoiser training or inference.
+
+        Delegates to the underlying image translator's ``stop_training``
+        method to halt the calibration process.
+        """
         self.it.stop_training()
 
     def get_translator(self):
@@ -289,7 +338,7 @@ class Classic(DenoiseRestorationBase):
                 self.lower_level_args is not None
                 and self.lower_level_args["variant"] is not None
             ):
-                method = self.lower_level_args["variant"].split("-")[1]
+                method = self.lower_level_args["variant"].split("-", 1)[1]
 
                 it = ImageDenoiserClassic(
                     method=method,
@@ -302,14 +351,20 @@ class Classic(DenoiseRestorationBase):
         return it
 
     def add_transforms(self):
-        """Add the configured image transforms to the image translator."""
+        """Add the configured image transforms to the image translator.
+
+        Iterates over ``self.it_transforms`` and adds each transform
+        instance to ``self.it``. Transforms are applied in order during
+        training and inference (e.g. range normalisation, padding,
+        variance stabilisation).
+        """
         if self.it_transforms is not None:
             for transform in self.it_transforms:
                 transform_class = transform["class"]
                 transform_kwargs = transform["kwargs"]
                 self.it.add_transform(transform_class(**transform_kwargs))
 
-    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
+    def train(self, noisy_image, *, batch_axes=None, channel_axes=None, **kwargs):
         """Train the Classic denoiser on a noisy image.
 
         Calibrates the underlying classical denoising algorithm to find
@@ -321,7 +376,7 @@ class Classic(DenoiseRestorationBase):
             The noisy input image.
         batch_axes : array_like, optional
             Indices of batch axes.
-        chan_axes : array_like, optional
+        channel_axes : array_like, optional
             Indices of channel axes.
         **kwargs
             Additional keyword arguments. Supports ``'train_valid_ratio'``,
@@ -338,7 +393,7 @@ class Classic(DenoiseRestorationBase):
                 noisy_image,
                 noisy_image,
                 batch_axes=batch_axes,
-                channel_axes=chan_axes,
+                channel_axes=channel_axes,
                 train_valid_ratio=(
                     kwargs['train_valid_ratio']
                     if 'train_valid_ratio' in kwargs
@@ -350,7 +405,7 @@ class Classic(DenoiseRestorationBase):
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
 
-    def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
+    def denoise(self, noisy_image, *, batch_axes=None, channel_axes=None, **kwargs):
         """Denoise an image using the trained Classic denoiser.
 
         Parameters
@@ -359,7 +414,7 @@ class Classic(DenoiseRestorationBase):
             The noisy input image to denoise.
         batch_axes : array_like, optional
             Indices of batch axes.
-        chan_axes : array_like, optional
+        channel_axes : array_like, optional
             Indices of channel axes.
         **kwargs
             Additional keyword arguments. Supports ``'tile_size'``.
@@ -375,7 +430,7 @@ class Classic(DenoiseRestorationBase):
             response = self.it.translate(
                 noisy_image,
                 batch_axes=batch_axes,
-                channel_axes=chan_axes,
+                channel_axes=channel_axes,
                 tile_size=kwargs['tile_size'] if 'tile_size' in kwargs else None,
             )
 
@@ -384,7 +439,7 @@ class Classic(DenoiseRestorationBase):
             return response
 
 
-def classic_denoise(noisy, *, batch_axes=None, chan_axes=None, variant=None):
+def classic_denoise(noisy, *, batch_axes=None, channel_axes=None, variant=None):
     """Denoise an image using a classical (non-learning) algorithm.
 
     Convenience function that creates a :class:`Classic` instance,
@@ -397,7 +452,7 @@ def classic_denoise(noisy, *, batch_axes=None, chan_axes=None, variant=None):
         Image to denoise.
     batch_axes : array_like, optional
         Indices of batch axes.
-    chan_axes : array_like, optional
+    channel_axes : array_like, optional
         Indices of channel axes.
     variant : str, optional
         Algorithm variant. Available variants: ``'butterworth'``,
@@ -416,9 +471,9 @@ def classic_denoise(noisy, *, batch_axes=None, chan_axes=None, variant=None):
     classic = Classic(variant=variant)
 
     # Train
-    classic.train(noisy, batch_axes=batch_axes, chan_axes=chan_axes)
+    classic.train(noisy, batch_axes=batch_axes, channel_axes=channel_axes)
 
     # Denoise
-    denoised = classic.denoise(noisy, batch_axes=batch_axes, chan_axes=chan_axes)
+    denoised = classic.denoise(noisy, batch_axes=batch_axes, channel_axes=channel_axes)
 
     return denoised

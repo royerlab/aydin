@@ -26,33 +26,28 @@ def demo(image, model_class, do_add_noise=True):
     noisy = add_noise(image) if do_add_noise else image
     print(noisy.shape)
 
-    # noisy = models.tensor(noisy)
-    image = torch.tensor(image)
-
     model = model_class(
-        nb_unet_levels=2,
         spacetime_ndim=2,
     )
 
     print("training starts")
 
     start = time.time()
-    n2t_train(noisy, model, nb_epochs=128)
+    n2t_train(noisy, image, model, nb_epochs=128)
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 
-    noisy = torch.tensor(noisy)
+    noisy_t = torch.from_numpy(noisy)
     model.eval()
     model = model.cpu()
-    print(f"noisy tensor shape: {noisy.shape}")
-    # in case of batching we have to do this:
+    print(f"noisy tensor shape: {noisy_t.shape}")
     start = time.time()
-    denoised = model(noisy)
+    denoised = model(noisy_t)
     stop = time.time()
     print(f"inference: elapsed time:  {stop - start} ")
 
-    noisy = noisy.detach().numpy()[0, 0, :, :]
-    image = image.detach().numpy()[0, 0, :, :]
+    noisy = noisy[0, 0, :, :]
+    image = image[0, 0, :, :]
     denoised = denoised.detach().numpy()[0, 0, :, :]
 
     image = numpy.clip(image, 0, 1)
@@ -60,14 +55,6 @@ def demo(image, model_class, do_add_noise=True):
     denoised = numpy.clip(denoised, 0, 1)
 
     return calculate_print_psnr_ssim(image, noisy, denoised)
-
-    # import napari
-    #
-    # viewer = napari.Viewer()  # no prior setup needed
-    # viewer.add_image(image, name='image')
-    # viewer.add_image(noisy, name='noisy')
-    # viewer.add_image(denoised, name='denoised')
-    # napari.run()
 
 
 if __name__ == '__main__':

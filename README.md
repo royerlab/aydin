@@ -1,17 +1,17 @@
 ![image](https://user-images.githubusercontent.com/1870994/140651325-711b6c30-133d-45ba-a794-8a10a4cafbc2.png?width=200)
 
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aydin)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
-[![codecov](https://codecov.io/gh/royerlab/aydin/branch/master/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gh/royerlab/aydin)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![codecov](https://codecov.io/gh/royerlab/aydin/branch/main/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gh/royerlab/aydin)
 [![DOI](https://zenodo.org/badge/188953977.svg)](https://zenodo.org/badge/latestdoi/188953977)
 [![Downloads](https://pepy.tech/badge/aydin)](https://pepy.tech/project/aydin)
 
 
-[graphical user interface]: https://royerlab.github.io/aydin/tutorials/gui_tutorials.html
-[command line interface]: https://royerlab.github.io/aydin/tutorials/cli_tutorials.html
-[API]: https://royerlab.github.io/aydin/tutorials/api_tutorials.html
-[use cases]: https://royerlab.github.io/aydin/use_cases/introduction.html
-[install]: https://royerlab.github.io/aydin/getting_started/install.html
+[graphical user interface]: https://royerlab.github.io/aydin/v0.1.15/tutorials/gui_tutorials.html
+[command line interface]: https://royerlab.github.io/aydin/v0.1.15/tutorials/cli_tutorials.html
+[API]: https://royerlab.github.io/aydin/v0.1.15/tutorials/api_tutorials.html
+[use cases]: https://royerlab.github.io/aydin/v0.1.15/use_cases/introduction.html
+[install]: https://royerlab.github.io/aydin/v0.1.15/getting_started/install.html
 
 *Aydin* is a user-friendly, feature-rich, and fast **image denoising tool** that provides
 a number of **self-supervised, auto-tuned, and unsupervised** image denoising algorithms.
@@ -62,13 +62,16 @@ Here is the list of currently available methods:
   - Denoising via sparse decomposition (e.g. OMP) over a fixed dictionary (DCT, DST, ...)
   - Denoising via sparse decomposition (e.g. OMP) over a learned dictionary (Kmeans, PCA, ICA, SDL, ...)
 
+- **Edge-preserving:**
+  - Bilateral denoising (*bilateral*)
+
 - **Patch similarity:**
   - Non-Local Means denoising (*nlm*)
-  - BMnD (not available just yet but partly implemented!)
+  - BMnD -- Block-Matching nD denoising, a generalization of BM3D (*bmnd*)
 
 - **Machine learning based:**
   - Noise2Self-FGR: Noise2Self denoising via Feature Generation and Regression (FGR). We use specially crafted integral features. We have several variants that leverage different regressors: CatBoost(cb), lightGBM, linear, perceptron, random-forest, support vector regression)
-  - Noise2Self-CNN: Noise2Self denoising via Convolutional Neural Networks (CNN). This is the original approach of Noise2Self. In our experience this is typically slower to train, and more prone to hallucination and residual noise than FGR.
+  - Noise2Self-CNN: Noise2Self denoising via Convolutional Neural Networks (CNN) using PyTorch. This is the original approach of Noise2Self. In our experience this is typically slower to train, and more prone to hallucination and residual noise than FGR.
 
 - **Other:**
   - Lipschitz continuity denoising.
@@ -91,8 +94,6 @@ We have a long todo list of existing, modified, as well as original algorithms t
 ## Installation of *Aydin Studio*
 
 We recommend that users that are not familiar with python start with our user-friendly UI.
-Download it for your operating system here:
-
 The latest releases and standalone executables can be found on the
 [releases page](https://github.com/royerlab/aydin/releases).
 Detailed installation instructions of *Aydin Studio* for all three operating systems can be found
@@ -103,18 +104,22 @@ Detailed installation instructions of *Aydin Studio* for all three operating sys
 
 ### Install from PyPI
 
-*Aydin* requires Python 3.9 or later. We recommend using a virtual environment:
+*Aydin* requires Python 3.9 or later and NumPy 2.0+. We recommend using a virtual environment:
 ```bash
 pip install aydin
 ```
 
 ### Install for development
 
+The project uses [hatchling](https://hatch.pypa.io/) as its build backend (configured in `pyproject.toml`).
+
 ```bash
 git clone https://github.com/royerlab/aydin.git
 cd aydin
 make setup  # or: pip install -e ".[dev]"
 ```
+
+Run `make help` to see all available development commands (testing, formatting, building, etc.).
 
 ### Platform-specific dependencies
 
@@ -130,6 +135,12 @@ sudo apt install libxcb-cursor0    # Ubuntu/Debian
 sudo dnf install xcb-util-cursor   # Fedora/RHEL
 sudo pacman -S xcb-util-cursor     # Arch Linux
 ```
+
+### GPU acceleration
+
+Aydin uses PyTorch for CNN-based denoising. To enable GPU acceleration, ensure your
+PyTorch installation supports CUDA. See the [PyTorch installation guide](https://pytorch.org/get-started/locally/)
+for platform-specific instructions.
 
 ## How to run ?
 

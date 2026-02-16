@@ -30,12 +30,9 @@ dependencies = [
     # ML Libraries
     "catboost>=1.2.0,<2.0.0",
     "lightgbm>=4.0.0,<5.0.0",
-    "tensorflow>=2.18.0,<3.0.0",
-    "keras>=3.0.0,<4.0.0",
     "torch>=2.4.0,<3.0.0",
-    # CUDA support for TensorFlow XLA (Linux/Windows only, not available on macOS)
-    "nvidia-cuda-nvcc-cu12>=12.0.0; sys_platform == 'linux' or sys_platform == 'win32'",
     # Scientific Computing
+    "bm3d>=4.0.0,<5.0.0",
     "numpy>=2.0.0,<3.0.0",
     "scipy>=1.12.0,<2.0.0",
     "scikit-image>=0.22.0,<0.25.0",
@@ -43,9 +40,9 @@ dependencies = [
     "PyWavelets>=1.6.0,<2.0.0",
     # Image I/O
     "imageio>=2.34.0,<3.0.0",
-    "imagecodecs>=2024.1.0",
-    "czifile>=2019.7.2",
-    "nd2reader>=3.3.0",
+    "imagecodecs>=2024.1.0,<2026.0.0",
+    "czifile>=2019.7.2,<2025.0.0",
+    "nd2reader>=3.3.0,<4.0.0",
     "zarr>=2.17.0,<3.0.0",
     # GUI
     "napari[pyqt6]>=0.5.0,<0.7.0",
@@ -55,13 +52,12 @@ dependencies = [
     "Click>=8.1.0,<9.0.0",
     "gdown>=5.0.0,<6.0.0",
     "jsonpickle>=3.0.0,<4.0.0",
-    "memoization>=0.4.0",
-    "Deprecated>=1.2.13",
-    "docstring-parser>=0.15",
-    "arbol>=2023.1.0",
-    "pynndescent>=0.5.10",
-    "importlib-metadata>=6.0.0",
-    "protobuf>=4.0.0,<5.0.0",
+    "memoization>=0.4.0,<1.0.0",
+    "Deprecated>=1.2.13,<2.0.0",
+    "docstring-parser>=0.15,<1.0.0",
+    "arbol>=2023.1.0,<2026.0.0",
+    "pynndescent>=0.5.10,<1.0.0",
+    "importlib-metadata>=6.0.0,<8.0.0",
 ]
 
 [project.optional-dependencies]
@@ -72,6 +68,8 @@ dev = [
     "mypy>=1.8.0",
     "pytest>=8.0.0",
     "pytest-cov>=4.1.0",
+    "pytest-qt>=4.4.0",
+    "pytest-xvfb>=3.0.0",
     "mock>=5.1.0",
     "pre-commit>=3.6.0",
 ]
@@ -82,11 +80,7 @@ bundle = [
     # ML Libraries
     "catboost==1.2.7",
     "lightgbm==4.5.0",
-    "tensorflow==2.18.0",
-    "keras==3.6.0",
     "torch==2.4.1",
-    # CUDA support for TensorFlow XLA (Linux/Windows only)
-    "nvidia-cuda-nvcc-cu12==12.6.85; sys_platform == 'linux' or sys_platform == 'win32'",
     # Scientific Computing
     "numpy==2.0.2",
     "scipy==1.14.1",
@@ -116,7 +110,6 @@ bundle = [
     "docstring-parser==0.16",
     "pynndescent==0.5.13",
     "importlib-metadata==8.5.0",
-    "protobuf==4.25.5",
 ]
 docs = [
     "numpydoc>=1.6.0",
@@ -124,6 +117,7 @@ docs = [
     "sphinx-rtd-theme>=2.0.0",
     "sphinx-copybutton>=0.5.0",
     "sphinx-multiversion>=0.2.4",
+    "ghp-import>=2.1.0",
 ]
 
 [project.scripts]
@@ -150,12 +144,16 @@ markers = [
     "heavy: mark test as heavy (long-running)",
     "gpu: mark test as requiring GPU",
     "unstable: mark test as unstable/flaky",
+    "gui: mark test as requiring Qt GUI display",
 ]
+qt_api = "pyqt6"
 addopts = "--disable-pytest-warnings"
 
 [tool.coverage.run]
 source = ["aydin"]
-omit = ["aydin/**/demo/**", "aydin/**/test/**"]
+omit = ["aydin/**/demo/**", "aydin/**/tests/**"]
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+fail_under = 80
+show_missing = true

@@ -97,8 +97,12 @@ def calibrate_denoise_harmonic(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_harmonic`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
 
     # Convert image to float if needed:
@@ -187,6 +191,7 @@ def denoise_harmonic(
     \n\n
     Note: Works well in practice, but a bit slow as currently
     implemented for large images.
+    <notgui>
 
     Parameters
     ----------
@@ -218,7 +223,8 @@ def denoise_harmonic(
 
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:

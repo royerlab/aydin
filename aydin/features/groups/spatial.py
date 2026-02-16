@@ -8,11 +8,32 @@ from aydin.util.log.log import aprint
 
 
 class SpatialFeatures(FeatureGroupBase):
-    """
-    Spatial Feature Group class
+    """Spatial coordinate feature group.
 
-    These features are simply the shifted, scaled, and possibly quantised
-    coordinates of the voxels themselves.
+    Generates features consisting of the (optionally shifted, scaled, and
+    coarsened) spatial coordinates of each voxel. One feature is produced
+    per spatial dimension. When ``period > 0``, coordinates are passed
+    through a sinusoidal function, producing periodic spatial features.
+
+    Spatial features allow the denoiser to learn position-dependent
+    corrections such as illumination gradients or spatially varying noise
+    levels. They should only be used when training and inference images
+    share the same spatial structure.
+
+    Attributes
+    ----------
+    coarsening : int
+        Number of pixels that share the same coordinate value, preventing
+        identification of individual pixel positions.
+    period : float
+        If non-zero, the coordinate is transformed by a sine function
+        with this period, producing sinusoidal features.
+    image : numpy.ndarray or None
+        Reference to the current image being processed.
+    offset : tuple of float or None
+        Offset added to each spatial coordinate (one per dimension).
+    scale : tuple of float or None
+        Scale multiplied to each spatial coordinate (one per dimension).
     """
 
     def __init__(self, coarsening: int = 1, period: float = 0):

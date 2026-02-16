@@ -10,10 +10,21 @@ from aydin.features.groups.correlation import CorrelationFeatures
 
 
 class RandomFeatures(CorrelationFeatures):
-    """
-    Random Feature Group class
+    """Random convolutional feature group.
 
-    Generates features by convolving the image with a random set of filters.
+    Generates features by convolving the image with a set of deterministic
+    pseudo-random filters. Each filter is constructed by thresholding
+    uniform random noise at 0.5 and smoothing the result with a Gaussian
+    kernel. The random seed is the kernel index, ensuring reproducibility.
+
+    This is an experimental feature group of primarily academic interest.
+
+    Attributes
+    ----------
+    size : int
+        Side length of each random kernel.
+    exclude_center : Sequence[Tuple[int, ...]]
+        Voxels to exclude from features.
     """
 
     def __init__(self, size: int, num_features: Optional[int] = None):

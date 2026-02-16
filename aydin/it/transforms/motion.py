@@ -20,7 +20,7 @@ from aydin.util.log.log import aprint, asection
 
 
 class MotionStabilisationTransform(ImageTransformBase):
-    """Motion Stabilisation
+    """Motion stabilisation for timelapse images.
 
     Denoising is more effective if signal-correlated voxels are close to each
     other. When a 2D+t or 3D+t timelapse has shifts between time points,
@@ -31,8 +31,9 @@ class MotionStabilisationTransform(ImageTransformBase):
     denoising is recommended to improve denoising performance. Currently,
     we assume that all frames can be registered to a common reference frame,
     and thus that all images have a common background that can be used for
-    registration. For completeness, multiple axis can be specified and the
-    correction is applied along each in sequence.(advanced)
+    registration. For completeness, multiple axes can be specified and the
+    correction is applied along each in sequence. (advanced)
+    <notgui>
     """
 
     preprocess_description = (
@@ -56,8 +57,7 @@ class MotionStabilisationTransform(ImageTransformBase):
         priority: float = 0.45,
         **kwargs,
     ):
-        """
-        Constructs a Motion Corrector
+        """Construct a MotionStabilisationTransform.
 
         Parameters
         ----------
@@ -110,14 +110,27 @@ class MotionStabilisationTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_shifts`` and ``_original_dtype``.
+        """
         state = self.__dict__.copy()
         del state['_shifts']
         del state['_original_dtype']
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name and key parameters.
+        """
         return (
             f'{type(self).__name__}'
             f' (pad_mode={self.pad_mode},'
@@ -129,6 +142,13 @@ class MotionStabilisationTransform(ImageTransformBase):
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
@@ -212,16 +232,60 @@ class MotionStabilisationTransform(ImageTransformBase):
             return array
 
     def _permutate(self, array: ArrayLike, axis: int):
+        """Permute axes to move the specified time axis to position 0.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input array.
+        axis : int
+            Time axis index to move to the front.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array with the specified axis moved to position 0.
+        """
         permutation = self._get_permutation(array, axis=axis)
         array = numpy.transpose(array, axes=permutation)
         return array
 
     def _depermutate(self, array: ArrayLike, axis: int):
+        """Restore original axis ordering after motion correction.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Permuted array.
+        axis : int
+            Time axis index that was moved to the front.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array with original axis ordering restored.
+        """
         permutation = self._get_permutation(array, axis=axis, inverse=True)
         array = numpy.transpose(array, axes=permutation)
         return array
 
     def _get_permutation(self, array: ArrayLike, axis: int, inverse=False):
+        """Compute axis permutation to bring a given axis to position 0.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Array whose dimensions define the permutation.
+        axis : int
+            Axis to move to position 0.
+        inverse : bool
+            If True, return the inverse permutation.
+
+        Returns
+        -------
+        tuple of int or numpy.ndarray
+            Axis permutation (or its inverse).
+        """
         permutation = (axis,) + tuple(a for a in range(array.ndim) if a != axis)
         if inverse:
             permutation = numpy.argsort(permutation)
@@ -427,6 +491,27 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
         # This looks fancy and shit but is just bad.
 
         def gaussian(x, sx=0, sy=0, b=1, a=1):
+            """Evaluate a 2D Gaussian function for curve fitting.
+
+            Parameters
+            ----------
+            x : numpy.ndarray
+                2D coordinate array of shape ``(2, N)`` where ``x[0]``
+                and ``x[1]`` are the row and column coordinates.
+            sx : float
+                Center x-coordinate of the Gaussian.
+            sy : float
+                Center y-coordinate of the Gaussian.
+            b : float
+                Inverse variance (width) parameter.
+            a : float
+                Amplitude of the Gaussian.
+
+            Returns
+            -------
+            numpy.ndarray
+                Gaussian values at the given coordinates.
+            """
             return a * numpy.exp(-b * ((x[0] - sx) ** 2 + (x[1] - sy) ** 2))
 
         x = numpy.arange(0, 2 * max_pixel_shift, 1)

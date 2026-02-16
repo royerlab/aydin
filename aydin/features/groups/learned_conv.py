@@ -7,11 +7,23 @@ from aydin.features.groups.extract_kernels import extract_kernels
 
 
 class LearnedCorrelationFeatures(CorrelationFeatures):
-    """
-    Learned Convolutions Feature Group class
+    """Learned convolutional feature group.
 
-    Generates features by learning convolutional filters on the basis of the
-    image itself.
+    Generates features by learning convolutional kernels directly from the
+    image using MiniBatchKMeans clustering of image patches. The cluster
+    centers serve as representative local patterns and are used as
+    convolutional filters.
+
+    Attributes
+    ----------
+    size : int
+        Side length of each learned kernel.
+    num_kernels : int or None
+        Number of kernels to learn. If ``None``, defaults to ``size ** ndim``.
+    num_patches : int or float
+        Number of image patches used for learning the kernels.
+    exclude_center : bool
+        Whether the center pixel is excluded from features.
     """
 
     def __init__(

@@ -1,17 +1,39 @@
+"""Demo of Noise2Self LGBM denoising on New York image with fine features.
+
+Trains an ``ImageTranslatorFGR`` with ``LGBMRegressor`` using custom
+kernel widths and scales tuned for fine-detail preservation on the
+New York skyline image.
+"""
+
 # flake8: noqa
 import os
 import time
+from functools import partial
 
 import numpy
 import numpy as np
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import newyork, normalise, add_noise
+from aydin.io.datasets import add_noise, newyork, normalise
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.lgbm import LGBMRegressor
 from aydin.util.log.log import Log
+
+_DEMO_RESULTS = os.path.normpath(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        '..',
+        '..',
+        '..',
+        '..',
+        '..',
+        'demo_results',
+    )
+)
 
 
 def demo(image, name):
@@ -82,28 +104,18 @@ def demo(image, name):
     plt.axis('off')
     plt.title('Original')
     plt.subplots_adjust(left=0.01, right=0.99, top=0.95, bottom=0.01, hspace=0.1)
-    os.makedirs("../../../demo_results", exist_ok=True)
-    plt.savefig(f'../../demo_results/n2s_gbm_2D_{name}_finefeatures.png')
+    os.makedirs(_DEMO_RESULTS, exist_ok=True)
+    plt.savefig(os.path.join(_DEMO_RESULTS, f'n2s_lgbm_2D_{name}_finefeatures.png'))
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(normalise(image), name='image')
-        viewer.add_image(normalise(noisy), name='noisy')
-        viewer.add_image(normalise(denoised), name='denoised')
+    viewer = napari.Viewer()
+    viewer.add_image(normalise(image), name='image')
+    viewer.add_image(normalise(noisy), name='noisy')
+    viewer.add_image(normalise(denoised), name='denoised')
+    napari.run()
 
 
 if __name__ == "__main__":
-    # camera_image = camera()
-    # demo(camera_image, "camera")
-    # lizard_image = lizard()
-    # demo(lizard_image, "lizard")
-    # pollen_image = pollen()
-    # demo(pollen_image, "pollen")
     newyork_image = newyork()
     demo(newyork_image, "newyork")
-    # characters_image = characters()
-    # demo(characters_image, "characters")
-    # fibsem_image = fibsem()
-    # demo(fibsem_image, "fibsem")

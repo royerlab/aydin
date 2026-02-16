@@ -35,6 +35,13 @@ class SummaryTab(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the Summary tab.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(SummaryTab, self).__init__(parent)
         self.parent = parent
 

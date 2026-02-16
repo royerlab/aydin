@@ -30,6 +30,30 @@ class ImageTranslatorFGR(ImageTranslatorBase):
     combined with regression learning (CatBoost, LightGBM, etc.) to denoise
     images. This is the recommended approach for most denoising tasks as it
     provides good quality with reasonable training and inference times.
+
+    Attributes
+    ----------
+    feature_generator : FeatureGeneratorBase
+        Feature generator used to compute per-voxel feature vectors from
+        the input image (e.g. multi-scale convolutions, spatial features).
+    regressor : RegressorBase
+        Regression model used to learn the mapping from features to denoised
+        pixel values (e.g. CatBoost, LightGBM).
+    voxel_keep_ratio : float
+        Fraction of voxels to keep for training (1.0 = all voxels).
+    balance_training_data : bool
+        Whether to balance the training data histogram to avoid
+        over-representation of certain intensity values.
+    favour_bright_pixels : float
+        Bias towards bright (-1.0 to 1.0) or dark pixels during balancing.
+    max_voxels_for_training : int
+        Maximum number of voxels used for training.
+    exclude_center_feature : bool
+        Whether to exclude the center pixel from the feature set.
+    exclude_center_value_when_translating : bool
+        Whether to exclude the center pixel value during inference.
+    monitoring_datasets : list or None
+        Pre-computed features for monitoring images, used during callbacks.
     """
 
     feature_generator: FeatureGeneratorBase
@@ -104,9 +128,8 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             axis you can use integer indices, or 'x', 'y', 'z', and 't'
             (dimension order is tzyx with x being always the last dimension).
             If None is passed then the blindspots are automatically discovered
-            from the image content. If 'center' is passed then no additional
-            blindspots to the center pixel are considered.  If 'center' is passed
-            then only the default single center voxel blind-spot is used.
+            from the image content. If 'center' is passed then only the default
+            single center voxel blind-spot is used.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.
@@ -216,8 +239,10 @@ class ImageTranslatorFGR(ImageTranslatorBase):
         return state
 
     def stop_training(self):
-        """Stops currently running training within the instance by calling
-        the corresponding `stop_fit()` method on the regressor.
+        """Request early stopping of the current training process.
+
+        Delegates to the regressor's ``stop_fit()`` method to interrupt
+        the ongoing regression fitting.
         """
         self.regressor.stop_fit()
 
@@ -531,7 +556,21 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
         # Regressor callback:
         def regressor_callback(iteration, val_loss, model):
+            """Handle a regressor training progress callback.
 
+            Called periodically during regressor fitting. Normalizes the
+            validation loss, predicts on monitoring images, and updates
+            the monitor with results.
+
+            Parameters
+            ----------
+            iteration : int
+                Current training iteration number.
+            val_loss : float or None
+                Validation loss value. If None, the callback is skipped.
+            model : object
+                The current regressor model (single tree or estimator).
+            """
             if val_loss is None:
                 return
 
@@ -541,7 +580,7 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             if self.feature_generator.dtype == numpy.uint8:
                 val_loss /= 255
             elif self.feature_generator.dtype == numpy.uint16:
-                val_loss /= 255 * 255
+                val_loss /= 65535
 
             if current_time_sec > self.last_callback_time_sec + self.callback_period:
 

@@ -17,17 +17,16 @@ from aydin.util.log.log import aprint, asection
 
 
 class VarianceStabilisationTransform(ImageTransformBase):
-    """Variance Stabilization Transform (VST)
-    and other range compression functions.
+    """Variance Stabilization Transform (VST) and range compression.
 
-    Applies either the Yeo-Johnson, Box-Cox, Anscomb or some other VST
+    Applies either the Yeo-Johnson, Box-Cox, Anscombe, or another VST
     transform to the image. Variance stabilization turns an image with
     Poisson or in general non-Gaussian noise into an image with approximately
-    Gaussian noise, which often facilitates denoising.
-    Also, in general for images with very skewed histograms with for example
-    dark regions of large extent and only a few very bright regions,
-    it is often beneficial to apply a sqrt or log transformation before
-    denoising.
+    Gaussian noise, which often facilitates denoising. Also, in general for
+    images with very skewed histograms with for example dark regions of large
+    extent and only a few very bright regions, it is often beneficial to
+    apply a sqrt or log transformation before denoising.
+    <notgui>
     """
 
     preprocess_description = (
@@ -46,8 +45,7 @@ class VarianceStabilisationTransform(ImageTransformBase):
         priority: float = 0.11,
         **kwargs,
     ):
-        """
-        Constructs a Variance Stabilisation Transform
+        """Construct a VarianceStabilisationTransform.
 
         Parameters
         ----------
@@ -85,8 +83,15 @@ class VarianceStabilisationTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_original_dtype``, ``_min``, ``_max``,
+            and ``_transform``.
+        """
         state = self.__dict__.copy()
         del state['_original_dtype']
         del state['_min']
@@ -95,9 +100,23 @@ class VarianceStabilisationTransform(ImageTransformBase):
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name and mode.
+        """
         return f'{type(self).__name__}' f' (mode={self.mode})'
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):

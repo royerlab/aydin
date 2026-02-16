@@ -1,18 +1,14 @@
-Denoising an image using ImageTranslatorCNN
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. deprecated::
-   ``ImageTranslatorCNN`` uses TensorFlow/Keras and is deprecated.
-   Use :class:`~aydin.it.cnn_torch.ImageTranslatorCNNTorch` instead.
+Denoising an image using ImageTranslatorCNNTorch
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 One can use the following lines to denoise a single image with default
 options using our Object-Oriented denoising API.
 
 .. code-block:: python
 
-   from aydin.it.cnn import ImageTranslatorCNN
+   from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
-   it = ImageTranslatorCNN()
+   it = ImageTranslatorCNNTorch()
 
    it.train(noisy, noisy)
    denoised = it.translate(noisy)
@@ -24,9 +20,9 @@ denoising. One can do the following:
 
 .. code-block:: python
 
-   from aydin.it.cnn import ImageTranslatorCNN
+   from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
-   it = ImageTranslatorCNN()
+   it = ImageTranslatorCNNTorch()
    it.add_transform(RangeTransform())
    it.add_transform(PaddingTransform())
 

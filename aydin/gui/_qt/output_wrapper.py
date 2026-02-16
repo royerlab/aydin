@@ -22,14 +22,23 @@ class OutputWrapper(QtCore.QObject):
 
     Signals
     -------
-    outputWritten(text, is_stdout)
-        Emitted whenever text is written. ``text`` is the output string,
-        ``is_stdout`` is True for stdout and False for stderr.
+    outputWritten(text)
+        Emitted whenever text is written. ``text`` is the output string.
     """
 
-    outputWritten = QtCore.Signal(object, object)
+    outputWritten = QtCore.Signal(str)
 
     def __init__(self, parent, stdout=True):
+        """Initialize the output wrapper and redirect the specified stream.
+
+        Parameters
+        ----------
+        parent : QObject
+            The parent Qt object.
+        stdout : bool, optional
+            If True, wraps ``sys.stdout``. If False, wraps ``sys.stderr``.
+            Default is True.
+        """
         QtCore.QObject.__init__(self, parent)
         if stdout:
             self._stream = sys.stdout
@@ -48,12 +57,34 @@ class OutputWrapper(QtCore.QObject):
             The text to write.
         """
         self._stream.write(text)
-        self.outputWritten.emit(text, self._stdout)
+        self.outputWritten.emit(text)
 
     def __getattr__(self, name):
+        """Delegate attribute access to the original stream.
+
+        Parameters
+        ----------
+        name : str
+            Attribute name to look up on the wrapped stream.
+
+        Returns
+        -------
+        object
+            The attribute from the original stream.
+        """
         return getattr(self._stream, name)
 
-    def __del__(self):
+    def __enter__(self):
+        """Enter the context manager (stream is already redirected)."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit the context manager and restore the original stream."""
+        self._restore()
+        return False
+
+    def _restore(self):
+        """Restore the original stdout or stderr stream."""
         try:
             if self._stdout:
                 sys.stdout = self._stream
@@ -61,3 +92,7 @@ class OutputWrapper(QtCore.QObject):
                 sys.stderr = self._stream
         except AttributeError:
             pass
+
+    def __del__(self):
+        """Restore the original stdout or stderr stream on deletion."""
+        self._restore()

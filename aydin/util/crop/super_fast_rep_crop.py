@@ -1,3 +1,9 @@
+"""Super-fast representative crop extraction via downscaled search.
+
+Uses image downscaling to accelerate the representative crop search,
+then maps the result back to the original image resolution.
+"""
+
 from memoization.memoization import cached
 from numpy.typing import ArrayLike
 from scipy.ndimage import zoom
@@ -18,47 +24,46 @@ def super_fast_representative_crop(
     *args,
     **kwargs,
 ):
-    """
+    """Extract a representative crop from an image using downscaled search.
+
+    Downscales the image first for faster crop search, then maps the
+    best crop location back to the original resolution. Results are
+    cached with a 10-second TTL.
 
     Parameters
     ----------
     image : ArrayLike
-        Image to extract representative crop from
-
-    mode : str
-        Metric for picking crop. Can be : 'contrast' (fastest), 'sobel', 'sobelmin',
-        'sobelmax' We recommend 'contrast'.
-
+        Image to extract representative crop from.
     crop_size : int
-        Crop size in voxels. Default (None) is 32000.
-
-    min_length : int
-        Crop axis lengths cannot be smaller than this number.
-
-    search_mode: bool
-        Search mode for best crops. Can be 'random' or 'systematic'. In
-        random mode we pick random crops, in systematic mode we check every
-        possible strided crop.
-
-    granularity_factor: int
-        Granularity of search. higher values correspond to more overlap between candidate crops.
-
-    return_slice : bool
-        If True the slice is returned too:
-
-    min_scaling_factor: int
-        Minimal downscaling factor per axis.
-
+        Desired crop size in voxels.
+    min_length : int, optional
+        Minimum allowed axis length for the crop, by default 8.
+    search_mode : str, optional
+        Search mode for best crops: ``'random'`` or ``'systematic'``.
+        By default ``'systematic'``.
+    granularity_factor : int, optional
+        Granularity of search. Higher values correspond to more overlap
+        between candidate crops, by default 3.
+    return_slice : bool, optional
+        If True, returns a tuple of (crop, slice_tuple), by default False.
+    min_scaling_factor : int, optional
+        Minimum downscaling factor per axis, by default 2.
+    *args
+        Additional positional arguments passed to ``representative_crop``.
+    **kwargs
+        Additional keyword arguments passed to ``representative_crop``.
 
     Returns
     -------
-    Most representative crop, and if return_slice is True the actual slice object too.
-
+    numpy.ndarray or tuple
+        The most representative crop. If ``return_slice`` is True,
+        returns a tuple of (crop_array, slice_tuple).
     """
     with asection(f"Super fast cropping image of size: {image.shape}"):
 
         # Compute downscale facto per dimension:
         def _downscale(length):
+            """Compute downscale factor for a given dimension length."""
             return min(max(min_scaling_factor, length // 256), min_length)
 
         downscale_factor = tuple(

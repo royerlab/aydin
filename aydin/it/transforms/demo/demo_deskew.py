@@ -1,10 +1,18 @@
+"""Demo of the deskew transform for correcting sheared image stacks.
+
+Demonstrates the ``DeskewTransform`` by creating a synthetic sheared
+3D stack from a 2D pollen image and applying deskew preprocessing
+followed by postprocessing to verify roundtrip fidelity.
+"""
+
 import numpy
 
-from aydin.io.datasets import normalise, pollen, add_noise
+from aydin.io.datasets import add_noise, normalise, pollen
 from aydin.it.transforms.deskew import DeskewTransform
 
 
 def demo_deskew():
+    """Run the deskew transform demo with synthetic sheared data."""
     shifts = tuple((3 * i, 0) for i in range(100))
 
     image = normalise(pollen())[0:256, 0:256]
@@ -19,11 +27,11 @@ def demo_deskew():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(array, name='array')
-        viewer.add_image(ds_array, name='ds_array')
-        viewer.add_image(s_array, name='s_array')
+    viewer = napari.Viewer()
+    viewer.add_image(array, name='array')
+    viewer.add_image(ds_array, name='ds_array')
+    viewer.add_image(s_array, name='s_array')
+    napari.run()
 
 
 if __name__ == "__main__":

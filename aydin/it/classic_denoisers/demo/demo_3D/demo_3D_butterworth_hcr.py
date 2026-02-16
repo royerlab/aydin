@@ -1,3 +1,9 @@
+"""Demonstrate 3D Butterworth denoising on HCR (hybridization chain reaction) data.
+
+This demo applies auto-calibrated Butterworth low-pass filtering in z-yx mode
+to a cropped RoyerLab HCR dataset, visualizing the denoised result with napari.
+"""
+
 # flake8: noqa
 import numpy
 import numpy as np
@@ -8,8 +14,14 @@ from aydin.util.log.log import Log, aprint
 
 
 def demo_lowpass_islet(noisy, display=True):
-    """
-    Demo for self-supervised denoising using camera image with synthetic noise
+    """Denoise a 3D HCR volume using calibrated Butterworth filtering.
+
+    Parameters
+    ----------
+    noisy : numpy.ndarray
+        Input 3D noisy image array.
+    display : bool, optional
+        Whether to display results with napari, by default True.
     """
     Log.enable_output = True
     Log.set_log_max_depth(5)
@@ -28,10 +40,10 @@ def demo_lowpass_islet(noisy, display=True):
     if display:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(noisy, name='noisy')
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(noisy, name='noisy')
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
 
 if __name__ == "__main__":

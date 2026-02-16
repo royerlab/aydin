@@ -14,6 +14,13 @@ class QVerticalLineBreakWidget(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the vertical line separator.
+
+        Parameters
+        ----------
+        parent : QWidget
+            The parent widget.
+        """
         super(QVerticalLineBreakWidget, self).__init__(parent)
         self.parent = parent
 

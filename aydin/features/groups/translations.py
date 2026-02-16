@@ -9,10 +9,25 @@ from aydin.util.log.log import aprint
 
 
 class TranslationFeatures(FeatureGroupBase):
-    """
-    Translations Feature Group class
+    """Translation feature group.
 
-    These features are just the image itself translated by a set of vectors.
+    Generates features by producing shifted copies of the image, one per
+    translation vector. Each feature is the original image translated by
+    the corresponding vector, using nearest-neighbor interpolation and
+    constant (zero) boundary padding.
+
+    This provides the simplest form of spatial context: each voxel sees
+    the intensity values at a fixed set of offsets from itself.
+
+    Attributes
+    ----------
+    translations : list of tuple of int
+        Translation vectors defining each feature.
+    image : numpy.ndarray or None
+        Reference to the current image being processed.
+    excluded_voxels : list of tuple of int
+        Voxels excluded from feature computation. If a translation
+        matches an excluded voxel, that feature is skipped entirely.
     """
 
     def __init__(self, translations: Sequence[Tuple[int, ...]]):

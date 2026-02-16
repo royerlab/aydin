@@ -1,3 +1,10 @@
+"""Demonstrate 3D Butterworth denoising on HeLa cell microscopy data.
+
+This demo applies auto-calibrated Butterworth low-pass filtering to the
+Hyman HeLa 4D dataset (treating all four axes), visualizing the denoised
+result with napari.
+"""
+
 # flake8: noqa
 import numpy
 import numpy as np
@@ -8,8 +15,14 @@ from aydin.util.log.log import Log, aprint
 
 
 def demo_butterworth_cognet(noisy, display=True):
-    """
-    Demo for self-supervised denoising using camera image with synthetic noise
+    """Denoise a 3D/4D HeLa volume using calibrated Butterworth filtering.
+
+    Parameters
+    ----------
+    noisy : numpy.ndarray
+        Input noisy image array from HeLa dataset.
+    display : bool, optional
+        Whether to display results with napari, by default True.
     """
     Log.enable_output = True
     Log.set_log_max_depth(5)
@@ -28,10 +41,10 @@ def demo_butterworth_cognet(noisy, display=True):
     if display:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(noisy, name='noisy')
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(noisy, name='noisy')
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
 
 if __name__ == "__main__":

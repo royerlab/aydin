@@ -17,11 +17,7 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
     ``FeatureGroupBase`` instances. Each feature group contributes its own
     set of features, and they are all computed sequentially during the
     ``compute`` call.
-
-    Attributes
-    ----------
-    features_group_list : list of FeatureGroupBase
-        List of feature groups that have been added to this generator.
+    <notgui>
     """
 
     def __init__(self):

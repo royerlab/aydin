@@ -1,23 +1,17 @@
-import os as _os
-import sys as _sys
+"""Aydin: self-supervised, auto-tuned image denoising for n-dimensional images.
 
-# Suppress verbose TensorFlow/CUDA C++ registration warnings on import
-_os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
-_stderr_fd = _sys.stderr.fileno()
-_saved_stderr = _os.dup(_stderr_fd)
-_devnull_fd = _os.open(_os.devnull, _os.O_WRONLY)
-_os.dup2(_devnull_fd, _stderr_fd)
-_os.close(_devnull_fd)
-try:
-    from aydin.restoration.denoise.classic import Classic  # noqa: F401
-    from aydin.restoration.denoise.classic import classic_denoise  # noqa: F401
-    from aydin.restoration.denoise.noise2selfcnn import noise2self_cnn  # noqa: F401
-    from aydin.restoration.denoise.noise2selffgr import noise2self_fgr  # noqa: F401
-finally:
-    _os.dup2(_saved_stderr, _stderr_fd)
-    _os.close(_saved_stderr)
+Provides classical, patch-based, and machine-learning denoisers accessible
+through a Python API, CLI, or the Aydin Studio GUI.
+"""
 
 __version__ = "2025.2.4"
+
+_LAZY_IMPORTS = {
+    'Classic': 'aydin.restoration.denoise.classic',
+    'classic_denoise': 'aydin.restoration.denoise.classic',
+    'noise2self_cnn': 'aydin.restoration.denoise.noise2selfcnn',
+    'noise2self_fgr': 'aydin.restoration.denoise.noise2selffgr',
+}
 
 __all__ = [
     "noise2self_fgr",
@@ -26,3 +20,14 @@ __all__ = [
     "classic_denoise",
     "__version__",
 ]
+
+
+def __getattr__(name):
+    if name in _LAZY_IMPORTS:
+        import importlib
+
+        module = importlib.import_module(_LAZY_IMPORTS[name])
+        attr = getattr(module, name)
+        globals()[name] = attr  # cache for subsequent access
+        return attr
+    raise AttributeError(f"module 'aydin' has no attribute {name!r}")

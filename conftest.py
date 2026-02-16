@@ -1,33 +1,4 @@
-import numpy
 import pytest
-
-
-@pytest.fixture(autouse=True)
-def run_around_tests():
-    # A test function will be run at this point
-    yield
-
-
-@pytest.fixture(scope="session")
-def sample_2d_image():
-    """Normalized 2D test image."""
-    from skimage.data import camera
-
-    from aydin.io.datasets import normalise
-
-    return normalise(camera().astype(numpy.float32))
-
-
-@pytest.fixture(scope="session")
-def sample_2d_noisy_pair():
-    """Clean/noisy image pair for denoising tests."""
-    from skimage.data import camera
-
-    from aydin.io.datasets import add_noise, normalise
-
-    clean = normalise(camera().astype(numpy.float32))
-    noisy = add_noise(clean, seed=42)
-    return clean, noisy
 
 
 def pytest_addoption(parser):
@@ -39,6 +10,9 @@ def pytest_addoption(parser):
     )
     parser.addoption(
         "--rununstable", action="store_true", default=False, help="run unstable tests"
+    )
+    parser.addoption(
+        "--rungui", action="store_true", default=False, help="run gui tests"
     )
 
 
@@ -88,3 +62,20 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "unstable" not in item.keywords:
                 item.add_marker(skip_not_unstable)
+
+    # GUI tests: exclusive behavior
+    # Without --rungui: skip gui-marked tests
+    # With --rungui: run ONLY gui-marked tests
+    # NOTE: use get_closest_marker() instead of `"gui" in item.keywords`
+    # because keywords includes parent package names (e.g. "gui" from
+    # aydin/gui/), which would incorrectly match non-Qt tests.
+    if not config.getoption("--rungui"):
+        skip_gui = pytest.mark.skip(reason="need --rungui option to run")
+        for item in items:
+            if item.get_closest_marker("gui"):
+                item.add_marker(skip_gui)
+    else:
+        skip_not_gui = pytest.mark.skip(reason="running only gui tests (--rungui)")
+        for item in items:
+            if not item.get_closest_marker("gui"):
+                item.add_marker(skip_not_gui)

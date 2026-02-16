@@ -25,7 +25,10 @@ endif
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
-	@echo "  html       to make standalone HTML files"
+	@echo "  build              to make standalone HTML files"
+	@echo "  build-multiversion to build docs for all tagged versions"
+	@echo "  publish            to build multi-version docs with index redirect"
+	@echo "  clean              to remove all build output"
 
 clean:
 	-rm -rf $(BUILDDIR)/*

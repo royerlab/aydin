@@ -38,8 +38,12 @@ class NoisyGroundtruthDataset(Dataset):
             Device to store the tensors on.
         """
 
-        self.noisy_images = [torch.tensor(image) for image in noisy_images]
-        self.groundtruth_images = [torch.tensor(image) for image in groundtruth_images]
+        self.noisy_images = [
+            torch.as_tensor(image, dtype=torch.float32) for image in noisy_images
+        ]
+        self.groundtruth_images = [
+            torch.as_tensor(image, dtype=torch.float32) for image in groundtruth_images
+        ]
         self.device = device
 
     def __len__(self):

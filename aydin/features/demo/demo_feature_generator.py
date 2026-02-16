@@ -42,10 +42,10 @@ def demo_collect_feature_2d():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image', colormap='plasma')
-        viewer.add_image(features, name='features', colormap='plasma')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image', colormap='plasma')
+    viewer.add_image(features, name='features', colormap='plasma')
+    napari.run()
 
 
 def demo_collect_feature_3d():
@@ -83,10 +83,10 @@ def demo_collect_feature_3d():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image', colormap='plasma')
-        viewer.add_image(features, name='features', colormap='plasma')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image', colormap='plasma')
+    viewer.add_image(features, name='features', colormap='plasma')
+    napari.run()
 
 
 def demo_collect_feature_2d_image():
@@ -122,10 +122,10 @@ def demo_collect_feature_2d_image():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image', colormap='plasma')
-        viewer.add_image(features, name='features', colormap='plasma')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image', colormap='plasma')
+    viewer.add_image(features, name='features', colormap='plasma')
+    napari.run()
 
 
 if __name__ == "__main__":

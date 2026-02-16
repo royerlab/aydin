@@ -35,20 +35,17 @@ def demo_par_uniform(image_name: str, image, repeats=32):
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(
-            par_filtered_image, name='par_filtered_image', colormap='plasma'
-        )
-        viewer.add_image(
-            scipy_filtered_image, name='scipy_filtered_image', colormap='plasma'
-        )
-        viewer.add_image(
-            numpy.abs(scipy_filtered_image - par_filtered_image),
-            name='scipy_filtered_image',
-            colormap='plasma',
-        )
-
+    viewer = napari.Viewer()
+    viewer.add_image(par_filtered_image, name='par_filtered_image', colormap='plasma')
+    viewer.add_image(
+        scipy_filtered_image, name='scipy_filtered_image', colormap='plasma'
+    )
+    viewer.add_image(
+        numpy.abs(scipy_filtered_image - par_filtered_image),
+        name='scipy_filtered_image',
+        colormap='plasma',
+    )
+    napari.run()
     numpy.testing.assert_array_almost_equal(
         par_filtered_image, scipy_filtered_image, decimal=3
     )

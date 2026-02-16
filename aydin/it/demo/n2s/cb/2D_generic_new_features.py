@@ -1,28 +1,60 @@
+"""Demonstrate 2D Noise2Self denoising with CatBoost using alternative features.
+
+This demo applies self-supervised FGR denoising with CatBoost using a
+feature generator configured with sinusoidal and lowpass features instead
+of the default feature set, reporting PSNR/SSIM metrics and saving
+comparison plots.
+"""
+
 # flake8: noqa
+import os
 import time
+from functools import partial
 
 import numpy
 import numpy as np
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import (
-    normalise,
     add_noise,
-    dots,
     camera,
     cropped_newyork,
+    dots,
     newyork,
+    normalise,
 )
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.cb import CBRegressor
 from aydin.util.log.log import Log
 
+_DEMO_RESULTS = os.path.normpath(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        '..',
+        '..',
+        '..',
+        '..',
+        '..',
+        'demo_results',
+    )
+)
 
-def demo(image, do_add_noise=True):
-    """
-    Demo for self-supervised denoising using camera image with synthetic noise
+
+def demo(image, name='image', do_add_noise=True):
+    """Denoise a 2D image using FGR with CatBoost and alternative features.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input 2D image.
+    name : str, optional
+        Name used for labeling the saved output plot, by default 'image'.
+    do_add_noise : bool, optional
+        Whether to add synthetic noise to the image, by default True.
     """
 
     Log.enable_output = True
@@ -69,11 +101,30 @@ def demo(image, do_add_noise=True):
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(noisy, name='noisy')
-        viewer.add_image(denoised, name='denoised')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(noisy, name='noisy')
+    viewer.add_image(denoised, name='denoised')
+    napari.run()
+
+    import matplotlib.pyplot as plt
+
+    plt.figure(figsize=(2.7 * 5, 5))
+    plt.subplot(1, 3, 1)
+    plt.imshow(normalise(noisy), cmap='gray')
+    plt.axis('off')
+    plt.title(f'Noisy \nPSNR: {psnr_noisy:.3f}, SSIM: {ssim_noisy:.3f}')
+    plt.subplot(1, 3, 2)
+    plt.imshow(normalise(denoised), cmap='gray')
+    plt.axis('off')
+    plt.title(f'Denoised \nPSNR: {psnr_denoised:.3f}, SSIM: {ssim_denoised:.3f}')
+    plt.subplot(1, 3, 3)
+    plt.imshow(normalise(image), cmap='gray')
+    plt.axis('off')
+    plt.title('Original')
+    plt.subplots_adjust(left=0.01, right=0.99, top=0.95, bottom=0.01, hspace=0.1)
+    os.makedirs(_DEMO_RESULTS, exist_ok=True)
+    plt.savefig(os.path.join(_DEMO_RESULTS, f'n2s_cb_newfeatures_2D_{name}.png'))
 
 
 if __name__ == "__main__":
@@ -81,12 +132,8 @@ if __name__ == "__main__":
     demo(newyork_image, "newyork")
     camera_image = camera()
     demo(camera_image, "camera")
-    # lizard_image = lizard()
-    # demo(lizard_image, "lizard")
-    # pollen_image = pollen()
-    # demo(pollen_image, "pollen")
 
     newyork_image = cropped_newyork()
-    demo(newyork_image, "newyork")
+    demo(newyork_image, "newyork_cropped")
     dots_image = dots()
     demo(dots_image, "dots")

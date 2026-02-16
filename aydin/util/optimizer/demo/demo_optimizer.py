@@ -1,3 +1,10 @@
+"""Demo of the Optimizer utility on standard test functions.
+
+Demonstrates the ``Optimizer`` class by minimizing several well-known
+test functions (McCormick, Himmelblau, Beale, Matyas, Goldstein-Price,
+Rosenbrock, Sphere, and Booth) and verifying convergence to known optima.
+"""
+
 # flake8: noqa
 from math import sin
 
@@ -8,6 +15,7 @@ from aydin.util.optimizer.optimizer import Optimizer
 
 
 def enable_log():
+    """Enable verbose logging for demo output."""
     # DO NOT REMOVE, FOR DEBUGGING PUPROSES!
     Log.enable_output = True
     Log.set_log_max_depth(5)
@@ -15,11 +23,12 @@ def enable_log():
 
 
 def demo_optimizer_mccormik():
+    """Optimize the McCormick test function."""
     enable_log()
 
     # function to optimise:
     def mccormik(x, y):
-        # https://en.wikipedia.org/wiki/Test_functions_for_optimization
+        """Negated McCormick function; global minimum near (-0.547, -1.547)."""
         return -(sin(x + y) + (x - y) ** 2 - 1.5 * x + 2.5 * y + 1) - 1.9133
 
     x, v = Optimizer().optimize(
@@ -36,11 +45,12 @@ def demo_optimizer_mccormik():
 
 
 def demo_optimizer_himmelblau():
+    """Optimize the Himmelblau test function."""
     enable_log()
 
     # function to optimise:
     def himmelblau(x, y):
-        # https://en.wikipedia.org/wiki/Test_functions_for_optimization
+        """Negated Himmelblau function; four global minima at value 0."""
         return -((x**2 + y - 11) ** 2 + (x + y**2 - 7) ** 2)
 
     x, v = Optimizer().optimize(
@@ -57,11 +67,12 @@ def demo_optimizer_himmelblau():
 
 
 def demo_optimizer_beale():
+    """Optimize the Beale test function."""
     enable_log()
 
     # function to optimise:
     def beale(x, y):
-        # https://en.wikipedia.org/wiki/Test_functions_for_optimization
+        """Negated Beale function; global minimum at (3, 0.5)."""
         return -(
             (1.5 - x + x * y) ** 2
             + (2.25 - x + x * (y**2)) ** 2
@@ -82,11 +93,12 @@ def demo_optimizer_beale():
 
 
 def demo_optimizer_matyas():
+    """Optimize the Matyas test function."""
     enable_log()
 
     # function to optimise:
     def matyas(x, y):
-        # https://en.wikipedia.org/wiki/Test_functions_for_optimization
+        """Negated Matyas function; global minimum at (0, 0)."""
         return -(0.26 * (x**2 + y**2) - 0.48 * x * y)
 
     x, v = Optimizer().optimize(
@@ -103,11 +115,12 @@ def demo_optimizer_matyas():
 
 
 def demo_optimizer_goldsteinprice():
+    """Optimize the Goldstein-Price test function."""
     enable_log()
 
     # function to optimise:
     def goldsteinprice(x, y):
-        # https://en.wikipedia.org/wiki/Test_functions_for_optimization
+        """Goldstein-Price function; global minimum of 3 at (0, -1)."""
         return (
             1
             + (x + y + 1) ** 2
@@ -131,11 +144,12 @@ def demo_optimizer_goldsteinprice():
 
 
 def demo_optimizer_rosenbrock():
+    """Optimize the Rosenbrock test function."""
     enable_log()
 
     # function to optimise:
     def rosenbrock(x, y):
-        # https://en.wikipedia.org/wiki/Test_functions_for_optimization
+        """Negated Rosenbrock function; global minimum at (1, 1)."""
         return -(100 * (y - x**2) ** 2 + (1 - x) ** 2)
 
     x, v = Optimizer().optimize(
@@ -153,11 +167,12 @@ def demo_optimizer_rosenbrock():
 
 
 def demo_optimizer_sphere():
+    """Optimize the Sphere test function."""
     enable_log()
 
     # function to optimise:
     def sphere(x, y):
-        # https://en.wikipedia.org/wiki/Test_functions_for_optimization
+        """Negated shifted Sphere function; minimum at (0.54321, -0.332211)."""
         return -((x - 0.54321) ** 2 + (y + 0.332211) ** 2)
 
     x, v = Optimizer().optimize(
@@ -174,11 +189,12 @@ def demo_optimizer_sphere():
 
 
 def demo_optimizer_booth():
+    """Optimize the Booth test function."""
     enable_log()
 
     # function to optimise:
     def booth(x, y):
-        # https://en.wikipedia.org/wiki/Test_functions_for_optimization
+        """Negated Booth function; global minimum at (1, 3)."""
         return -((x + 2 * y - 7) ** 2 + (2 * x + y - 5) ** 2)
 
     x, v = Optimizer().optimize(
@@ -195,6 +211,7 @@ def demo_optimizer_booth():
 
 
 def demo_optimizer():
+    """Run all optimizer demos on standard test functions."""
     demo_optimizer_beale()
     demo_optimizer_mccormik()
     demo_optimizer_booth()

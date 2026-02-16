@@ -1,12 +1,8 @@
-ImageTranslatorCNN - Convolutional Neural Network (Deprecated)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ImageTranslatorCNNTorch - Convolutional Neural Network (PyTorch)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. deprecated:: 0.1.16
-   ``ImageTranslatorCNN`` uses TensorFlow/Keras and is deprecated.
-   Use :class:`~aydin.it.cnn_torch.ImageTranslatorCNNTorch` instead.
+.. currentmodule:: aydin.it.cnn_torch
 
-.. currentmodule:: aydin.it.cnn
-
-.. autoclass:: ImageTranslatorCNN
+.. autoclass:: ImageTranslatorCNNTorch
     :members:
     :inherited-members:

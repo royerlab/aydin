@@ -10,10 +10,22 @@ from aydin.util.log.log import aprint
 
 
 class MedianFeatures(FeatureGroupBase):
-    """
-    Median Feature Group class
+    """Median filter feature group.
 
-    Generates features by applying median filters of increasing sizes (radii).
+    Generates features by applying median filters of increasing sizes
+    (radii). Median filters are robust to outliers and salt-and-pepper
+    noise, making these features useful for recovering smooth structures
+    in heavily corrupted images.
+
+    Attributes
+    ----------
+    radii : tuple of int
+        Radii of the median filters. Each radius produces one feature
+        with a ``(2*radius+1)``-sized hypercubic footprint.
+    image : numpy.ndarray or None
+        Reference to the current image being processed.
+    excluded_voxels : list of tuple of int
+        Voxels excluded from filter footprints for blind-spot denoising.
     """
 
     def __init__(self, radii: Sequence[int]):

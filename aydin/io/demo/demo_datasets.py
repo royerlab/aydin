@@ -1,34 +1,36 @@
+"""Demo script for listing, downloading, and viewing example datasets."""
+
 import napari
 
 from aydin.io import io
 from aydin.io.datasets import (
+    datasets_folder,
+    download_all_examples,
     download_from_gdrive,
     examples_single,
-    download_all_examples,
-    datasets_folder,
 )
 
 
 def demo_examples_single():
+    """Print all available single-image example datasets."""
     for dataset in examples_single:
         print(dataset)
 
 
 def demo_download():
+    """Download a single example dataset (mandrill) from Google Drive."""
     print(
         download_from_gdrive(*examples_single.generic_mandrill.value, datasets_folder)
     )
 
 
 def demo_all_download():
+    """Download all available example datasets."""
     download_all_examples()
 
 
 def demo_examples():
-    """
-    ....
-    """
-
+    """Load and display each example dataset in a napari viewer."""
     for example in examples_single:
         example_file_path = example.get_path()
 
@@ -36,9 +38,9 @@ def demo_examples():
 
         array, metadata = io.imread(example_file_path)
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(array, name='image')
+        viewer = napari.Viewer()
+        viewer.add_image(array, name='image')
+        napari.run()
 
 
 if __name__ == "__main__":

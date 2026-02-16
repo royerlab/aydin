@@ -41,6 +41,13 @@ class DimensionsTab(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the Dimensions tab.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(DimensionsTab, self).__init__(parent)
         self.parent = parent
 
@@ -57,7 +64,7 @@ class DimensionsTab(QWidget):
         # Dimension list, batch and channel dimension selections
         self.dimensions_tree = QTreeWidget()
         self.dimensions_tree.setHeaderLabels(['Dimensions', 'T', 'Z', 'Y', 'X'])
-        self.dimensions_tree.itemClicked.connect(self.onTreeClicked)
+        self.dimensions_tree.itemClicked.connect(self.on_tree_clicked)
         self.dimensions_tree.setColumnWidth(0, 150)
 
         self.tab_layout.addWidget(self.dimensions_tree)
@@ -174,13 +181,13 @@ class DimensionsTab(QWidget):
 
         self.dimensions_tree.clear()
 
-        for _ in range(len(dimensions_metadata.shape) + 1):
-            self.dimensions_tree.header().showSection(_)
+        for i in range(len(dimensions_metadata.shape) + 1):
+            self.dimensions_tree.header().showSection(i)
 
-        for _ in range(
+        for i in range(
             len(dimensions_metadata.shape) + 1, self.dimensions_tree.header().count()
         ):
-            self.dimensions_tree.header().hideSection(_)
+            self.dimensions_tree.header().hideSection(i)
 
         self.dimensions_tree.setHeaderLabels(
             ['Dimensions'] + [axis for axis in dimensions_metadata.axes]
@@ -222,7 +229,7 @@ class DimensionsTab(QWidget):
         self.handle_special_cases()
 
     @Slot(QTreeWidgetItem, int)
-    def onTreeClicked(self, it, col):
+    def on_tree_clicked(self, it, col):
         """Handle clicks on dimension tree checkboxes.
 
         Enforces mutual exclusivity between spatiotemporal, batch, and
@@ -319,7 +326,7 @@ class DimensionsTab(QWidget):
         denoising; otherwise clears the tree.
         """
         self.dimensions = (
-            self.parent.data_model.images_to_denoise[0][2]
+            self.parent.data_model.images_to_denoise[0].metadata
             if len(self.parent.data_model.images_to_denoise) == 1
             else None
         )

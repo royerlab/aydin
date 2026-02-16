@@ -17,20 +17,27 @@ from aydin.util.log.log import aprint, asection
 
 
 class HighpassTransform(ImageTransformBase):
-    """Highpass Image Simplification
+    """High-pass image simplification transform.
 
-    For images with little noise, applying a high-pass filter can help denoise the image by removing some of the
-    image complexity. The low-frequency parts of the image do not need to be denoised because sometimes the challenge
-    is disentangling the (high-frequency) noise from the high-frequencies in the image. The scale parameter must be
-    chosen with care. The lesser the noise, the smaller the value. Values around 1 work well but must be tuned
-    depending on the image. If the scale parameter is too low, some noise might be left untouched. The best is to
-    keep the parameter as low as possible while still achieving good denoising performance. It is also possible to
-    apply median filtering when computing the low-pass image which helps reducing the impact of outlier voxel values,
-    for example salt&pepper noise. Note: when median filtering is on, larger values of sigma (e.g. >= 1) are
-    recommended, unless when the level of noise is very low in which case a sigma of 0 (no Gaussian blur) may be
-    advantageous. To recover the original denoised image the filtering is undone during post-processing. Note: this
-    is ideal for treating <a href='https://en.wikipedia.org/wiki/Colors_of_noise'>'blue' noise</a> that is
+    For images with little noise, applying a high-pass filter can help
+    denoise the image by removing some of the image complexity. The
+    low-frequency parts of the image do not need to be denoised because
+    sometimes the challenge is disentangling the (high-frequency) noise from
+    the high-frequencies in the image. The scale parameter must be chosen
+    with care. The lesser the noise, the smaller the value. Values around 1
+    work well but must be tuned depending on the image. If the scale
+    parameter is too low, some noise might be left untouched. The best is to
+    keep the parameter as low as possible while still achieving good
+    denoising performance. It is also possible to apply median filtering
+    when computing the low-pass image which helps reducing the impact of
+    outlier voxel values, for example salt-and-pepper noise. Note: when
+    median filtering is on, larger values of sigma (e.g. >= 1) are
+    recommended, unless when the level of noise is very low in which case a
+    sigma of 0 (no Gaussian blur) may be advantageous. To recover the
+    original denoised image the filtering is undone during post-processing.
+    Note: this is ideal for treating <a href='https://en.wikipedia.org/wiki/Colors_of_noise'>'blue' noise</a> that is
     characterised by a high-frequency support.
+    <notgui>
     """
 
     preprocess_description = (
@@ -49,8 +56,7 @@ class HighpassTransform(ImageTransformBase):
         priority: float = 0.1,
         **kwargs,
     ):
-        """
-        Constructs a Highpass Transform
+        """Construct a HighpassTransform.
 
         Parameters
         ----------
@@ -74,8 +80,15 @@ class HighpassTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_low_pass_image``, ``_original_dtype``,
+            ``_min``, and ``_max``.
+        """
         state = self.__dict__.copy()
         del state['_low_pass_image']
         del state['_original_dtype']
@@ -84,12 +97,26 @@ class HighpassTransform(ImageTransformBase):
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name, sigma, and median filtering flag.
+        """
         return (
             f'{type(self).__name__}'
             f' (sigma={self.sigma}, median_filtering={self.median_filtering})'
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):

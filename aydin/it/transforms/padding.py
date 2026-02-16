@@ -14,7 +14,7 @@ from aydin.util.log.log import aprint, asection
 
 
 class PaddingTransform(ImageTransformBase):
-    """Padding (and then Cropping)
+    """Padding (and then cropping) transform.
 
     Adds a border to the image before denoising and then removes that border
     from the denoised image. This reduces border artifacts when denoising
@@ -30,6 +30,7 @@ class PaddingTransform(ImageTransformBase):
     of the vector along each axis, 'median': Pads with the median value of
     all or part of the vector along each axis, 'minimum': Pads with the
     minimum value of all or part of the vector along each axis.
+    <notgui>
     """
 
     preprocess_description = "Pads image" + ImageTransformBase.preprocess_description
@@ -45,8 +46,7 @@ class PaddingTransform(ImageTransformBase):
         priority: float = 0.9,
         **kwargs,
     ):
-        """
-        Constructs a Padding Transform
+        """Construct a PaddingTransform.
 
         Parameters
         ----------
@@ -72,13 +72,26 @@ class PaddingTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_pad_width``.
+        """
         state = self.__dict__.copy()
         del state['_pad_width']
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name and key parameters.
+        """
         return (
             f'{type(self).__name__}'
             f' (pad_width={self.pad_width},'
@@ -87,6 +100,13 @@ class PaddingTransform(ImageTransformBase):
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):

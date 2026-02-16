@@ -24,10 +24,26 @@ class NormaliserBase(ABC):
     Provides the interface and shared implementation for normalizing image
     values to the [0, 1] range and denormalizing back to the original range
     and dtype. Uses Numba JIT compilation for performance.
+
+    Attributes
+    ----------
+    epsilon : float
+        Small value added to the range denominator to prevent division by zero.
+    clip : bool
+        If True, clip normalized values to the [0, 1] range.
+    rmin : float or None
+        Calibrated minimum value for normalization.
+    rmax : float or None
+        Calibrated maximum value for normalization.
+    original_dtype : numpy.dtype
+        Original data type of the calibration array, set during ``calibrate()``.
+    axis_permutation : list of int or None
+        Axis permutation used during shape normalization.
+    permutated_image_shape : tuple of int or None
+        Intermediate shape used during shape normalization.
     """
 
     epsilon: float
-    leave_as_float: bool
     clip: bool
     original_dtype: numpy.dtype
 

@@ -21,6 +21,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
     Wraps classical denoising algorithms and automatically calibrates their
     parameters using J-invariance. Each channel is calibrated independently
     by selecting the batch with highest variance for parameter optimization.
+    <notgui>
     """
 
     def __init__(
@@ -66,9 +67,8 @@ class ImageDenoiserClassic(ImageTranslatorBase):
             axis you can use integer indices, or 'x', 'y', 'z', and 't'
             (dimension order is tzyx with x being always the last dimension).
             If None is passed then the blindspots are automatically discovered
-            from the image content. If 'center' is passed then no additional
-            blindspots to the center pixel are considered.  If 'center' is passed
-            then only the default single center voxel blind-spot is used.
+            from the image content. If 'center' is passed then only the default
+            single center voxel blind-spot is used.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.
@@ -217,6 +217,7 @@ class ImageDenoiserClassic(ImageTranslatorBase):
                 self.denoising_functions.append(denoising_function)
                 self.best_parameters.append(best_parameters)
                 self._memory_needed = memory_requirements
+                aprint(f"Best parameters: {best_parameters}")
 
     def _estimate_memory_needed_and_available(self, image):
         """Estimate memory requirements for the classical denoiser.

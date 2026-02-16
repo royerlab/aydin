@@ -29,6 +29,13 @@ class QProgramFlowDiagramWidget(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the flow diagram with grouped stage buttons and arrows.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(QProgramFlowDiagramWidget, self).__init__(parent)
         self.parent = parent
         self.highlightable_buttons = []
@@ -153,14 +160,14 @@ class QProgramFlowDiagramWidget(QWidget):
                 button.setStyleSheet(
                     "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
                 )
-        else:
-            if "processing" in current_tab_name.lower():
-                self.preprocess_button.setStyleSheet(
-                    "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
-                )
-                self.postprocess_button.setStyleSheet(
-                    "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
-                )
+
+        if "processing" in current_tab_name.lower():
+            self.preprocess_button.setStyleSheet(
+                "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
+            )
+            self.postprocess_button.setStyleSheet(
+                "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
+            )
 
     def reset_buttons(self):
         """Remove highlighting from all flow diagram buttons."""

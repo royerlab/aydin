@@ -1,3 +1,5 @@
+"""Demo script for Fourier Shell Correlation (FSC) between two noisy images."""
+
 # flake8: noqa
 # import pytest
 import matplotlib.pyplot as plt
@@ -10,6 +12,7 @@ from aydin.util.log.log import Log, aprint
 
 
 def demo_fsc(display: bool = True):
+    """Compute and plot FSC between two independently noised camera images."""
     Log.enable_output = True
 
     clean_image = normalise(camera())

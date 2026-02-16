@@ -11,23 +11,25 @@ import os
 import shutil
 from typing import Optional
 
+import aydin.nn.models as models
 from aydin.it.base import ImageTranslatorBase
-
-# from aydin.it.cnn_torch import ImageTranslatorCNNTorch
-from aydin.it.cnn import ImageTranslatorCNN
+from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
-from aydin.nn.tf import models
 from aydin.restoration.denoise.base import DenoiseRestorationBase
 from aydin.util.log.log import asection
+from aydin.util.string.break_text import strip_notgui
 
 
 class Noise2SelfCNN(DenoiseRestorationBase):
     """Noise2Self image denoising using Convolutional Neural Networks (CNN).
 
-    Follows from the theory exposed in the
-    `Noise2Self paper <https://arxiv.org/abs/1901.11365>`_.
+    Follows from the theory exposed in the <a
+    href="https://arxiv.org/abs/1901.11365">Noise2Self paper</a>.
+    Uses self-supervised blind-spot CNN architectures (UNet, JiNet) that
+    learn to denoise images without requiring clean ground-truth data.
+    <notgui>
     """
 
     def __init__(
@@ -77,18 +79,29 @@ class Noise2SelfCNN(DenoiseRestorationBase):
 
     @property
     def configurable_arguments(self):
-        """Returns the configurable arguments that will be exposed
-        on GUI and CLI.
+        """Return configurable arguments for the GUI and CLI.
+
+        Discovers all available CNN model architectures and extracts their
+        constructor signatures, paired with the :class:`ImageTranslatorCNNTorch`
+        constructor arguments.
+
+        Returns
+        -------
+        dict
+            A nested dictionary keyed by implementation name (e.g.
+            ``'Noise2SelfCNN-unet'``). Each value contains ``'model'``
+            and ``'it'`` sub-dictionaries with their arguments, defaults,
+            annotations, and reference class.
         """
 
         # IT CNN
-        it = ImageTranslatorCNN
+        it = ImageTranslatorCNNTorch
 
-        fullargspec3 = inspect.getfullargspec(ImageTranslatorCNN.__init__)
+        fullargspec3 = inspect.getfullargspec(ImageTranslatorCNNTorch.__init__)
 
         it_args = {
             "arguments": fullargspec3.args[1:],
-            "defaults": fullargspec3.defaults,
+            "defaults": fullargspec3.defaults or (),
             "annotations": fullargspec3.annotations,
             "reference_class": it,
         }
@@ -99,8 +112,16 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         arguments = {}
 
         for module in model_modules:
+            # Find the actual model class name (e.g. ResidualUNetModel)
+            # since module filenames don't always match class names directly
+            response = importlib.import_module(models.__name__ + '.' + module.name)
+            class_name = [
+                x
+                for x in dir(response)
+                if x.endswith('Model') and not x.startswith('_')
+            ][0]
             model_args = self.get_class_implementation_kwargs(
-                models, module, module.name + "Model"
+                models, module, class_name
             )
             arguments["Noise2SelfCNN-" + module.name] = {
                 "model": model_args,
@@ -111,7 +132,17 @@ class Noise2SelfCNN(DenoiseRestorationBase):
 
     @property
     def implementations(self):
-        """Returns the list of discovered implementations for given method."""
+        """Return the list of available CNN implementation names.
+
+        Discovers all CNN model modules and returns their names prefixed
+        with ``'Noise2SelfCNN-'``.
+
+        Returns
+        -------
+        list of str
+            Implementation variant names (e.g. ``['Noise2SelfCNN-unet',
+            'Noise2SelfCNN-jinet']``).
+        """
         return [
             "Noise2SelfCNN-" + x.name
             for x in self.get_implementations_in_a_module(models)
@@ -119,22 +150,37 @@ class Noise2SelfCNN(DenoiseRestorationBase):
 
     @property
     def implementations_description(self):
-        """Return human-readable descriptions for each CNN implementation."""
-        cnn_description = Noise2SelfCNN.__doc__.strip()
+        """Return human-readable descriptions for each CNN implementation.
+
+        Builds a description for each variant by combining the
+        :class:`Noise2SelfCNN` docstring with the individual model
+        class docstring.
+
+        Returns
+        -------
+        list of str
+            HTML-formatted description strings, one per implementation,
+            in the same order as :attr:`implementations`.
+        """
+        cnn_description = strip_notgui(Noise2SelfCNN.__doc__.strip())
 
         descriptions = []
 
         for module in self.get_implementations_in_a_module(models):
             response = importlib.import_module(models.__name__ + '.' + module.name)
+            # Find the model class by looking for a class ending with "Model"
+            # This handles naming mismatches like res_unet -> ResidualUNetModel
             elem = [
-                x for x in dir(response) if module.name.replace("_", "") in x.lower()
-            ][
-                0
-            ]  # class name
+                x
+                for x in dir(response)
+                if x.endswith('Model') and not x.startswith('_')
+            ][0]
 
-            elem_class = response.__getattribute__(elem)
+            elem_class = getattr(response, elem)
             # model_name = elem_class.__name__
-            model_description = elem_class.__doc__.replace("\n\n", "<br><br>")
+            model_description = strip_notgui(elem_class.__doc__).replace(
+                "\n\n", "<br><br>"
+            )
 
             descriptions.append(cnn_description + f"<br><br>{model_description}")
 
@@ -143,19 +189,29 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         return descriptions
 
     def stop_running(self):
-        """Stop the current Noise2Self CNN training or inference."""
+        """Stop the current Noise2Self CNN training or inference.
+
+        Delegates to the underlying image translator's ``stop_training``
+        method to halt the training loop.
+        """
         self.it.stop_training()
 
     def get_translator(self):
-        """Returns the corresponding translator instance for given selections.
+        """Return the image translator for the current configuration.
+
+        If ``variant`` is set, creates a new :class:`ImageTranslatorCNNTorch`
+        with the specified model architecture. If ``use_model_flag`` is
+        set, loads a pre-trained model from disk. Otherwise, creates a
+        new translator using ``lower_level_args``.
 
         Returns
         -------
-        it : ImageTranslatorBase
-
+        ImageTranslatorBase
+            Configured image translator instance ready for training or
+            inference.
         """
         if self.variant:
-            return ImageTranslatorCNN(model_architecture=self.variant)
+            return ImageTranslatorCNNTorch(model=self.variant)
 
         # Use a pre-saved model or train a new one from scratch and save it
         if self.use_model_flag:
@@ -165,7 +221,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             )
             it = ImageTranslatorBase.load(self.input_model_path[:-4])
         else:
-            it = ImageTranslatorCNN(
+            it = ImageTranslatorCNNTorch(
                 **(
                     self.lower_level_args["it"]["kwargs"]
                     if self.lower_level_args is not None
@@ -176,14 +232,20 @@ class Noise2SelfCNN(DenoiseRestorationBase):
         return it
 
     def add_transforms(self):
-        """Add the configured image transforms to the image translator."""
+        """Add the configured image transforms to the image translator.
+
+        Iterates over ``self.it_transforms`` and adds each transform
+        instance to ``self.it``. Transforms are applied in order during
+        training and inference (e.g. range normalisation, padding,
+        variance stabilisation).
+        """
         if self.it_transforms is not None:
             for transform in self.it_transforms:
                 transform_class = transform["class"]
                 transform_kwargs = transform["kwargs"]
                 self.it.add_transform(transform_class(**transform_kwargs))
 
-    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
+    def train(self, noisy_image, *, batch_axes=None, channel_axes=None, **kwargs):
         """Train the Noise2Self CNN denoiser on a noisy image.
 
         Parameters
@@ -192,14 +254,14 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             The noisy input image.
         batch_axes : array_like, optional
             Indices of batch axes.
-        chan_axes : array_like, optional
+        channel_axes : array_like, optional
             Indices of channel axes.
         **kwargs
             Additional keyword arguments. Supports ``'train_valid_ratio'``,
             ``'callback_period'``, and ``'jinv'``.
         """
         with asection("Noise2Self train is starting..."):
-            if chan_axes is not None and len(chan_axes) > 0 and any(chan_axes):
+            if channel_axes is not None and len(channel_axes) > 0 and any(channel_axes):
                 pass  # Channel axes provided, continue with training
 
             self.it = self.get_translator()
@@ -211,7 +273,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
                 noisy_image,
                 noisy_image,
                 batch_axes=batch_axes,
-                channel_axes=chan_axes,
+                channel_axes=channel_axes,
                 train_valid_ratio=(
                     kwargs['train_valid_ratio']
                     if 'train_valid_ratio' in kwargs
@@ -223,7 +285,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
 
-    def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
+    def denoise(self, noisy_image, *, batch_axes=None, channel_axes=None, **kwargs):
         """Denoise an image using the trained Noise2Self CNN model.
 
         Parameters
@@ -232,7 +294,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             The noisy input image to denoise.
         batch_axes : array_like, optional
             Indices of batch axes.
-        chan_axes : array_like, optional
+        channel_axes : array_like, optional
             Indices of channel axes.
         **kwargs
             Additional keyword arguments. Supports ``'tile_size'``.
@@ -248,7 +310,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             response = self.it.translate(
                 noisy_image,
                 batch_axes=batch_axes,
-                channel_axes=chan_axes,
+                channel_axes=channel_axes,
                 tile_size=kwargs['tile_size'] if 'tile_size' in kwargs else None,
             )
 
@@ -257,7 +319,7 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             return response
 
 
-def noise2self_cnn(image, *, batch_axes=None, chan_axes=None, variant=None):
+def noise2self_cnn(image, *, batch_axes=None, channel_axes=None, variant=None):
     """Denoise an image using Noise2Self CNN in a single call.
 
     Convenience function that creates a :class:`Noise2SelfCNN` instance,
@@ -269,7 +331,7 @@ def noise2self_cnn(image, *, batch_axes=None, chan_axes=None, variant=None):
         Image to denoise.
     batch_axes : array_like, optional
         Indices of batch axes.
-    chan_axes : array_like, optional
+    channel_axes : array_like, optional
         Indices of channel axes.
     variant : str, optional
         CNN architecture variant. Available variants: ``'unet'``,
@@ -285,9 +347,9 @@ def noise2self_cnn(image, *, batch_axes=None, chan_axes=None, variant=None):
     n2s = Noise2SelfCNN(variant=variant)
 
     # Train
-    n2s.train(image, batch_axes=batch_axes, chan_axes=chan_axes)
+    n2s.train(image, batch_axes=batch_axes, channel_axes=channel_axes)
 
     # Denoise
-    denoised = n2s.denoise(image, batch_axes=batch_axes, chan_axes=chan_axes)
+    denoised = n2s.denoise(image, batch_axes=batch_axes, channel_axes=channel_axes)
 
     return denoised

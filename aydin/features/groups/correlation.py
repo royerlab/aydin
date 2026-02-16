@@ -12,10 +12,28 @@ from aydin.util.log.log import aprint
 
 
 class CorrelationFeatures(FeatureGroupBase):
-    """
-    Correlation (convolutional) Feature Group class
+    """Correlation (convolutional) feature group.
 
-    Generates correlative features given a set of kernels.
+    Generates features by correlating (convolving) the image with a set of
+    kernels. Each kernel produces one feature. Kernels can optionally be
+    applied as separable 1-D filters along each axis for efficiency.
+
+    When excluded voxels are specified (for blind-spot denoising), the
+    corresponding kernel weights are zeroed out and their contribution is
+    redistributed to neighboring voxels via Gaussian smoothing, ensuring
+    J-invariance.
+
+    Attributes
+    ----------
+    kernels : list of numpy.ndarray or None
+        List of correlation kernels. May be ``None`` before ``prepare`` is
+        called if kernels are generated lazily by a subclass.
+    image : numpy.ndarray or None
+        Reference to the current image being processed (set during ``prepare``).
+    excluded_voxels : list of tuple of int
+        Voxels excluded from feature computation for blind-spot denoising.
+    separable : bool
+        Whether to apply kernels as separable 1-D filters.
     """
 
     def __init__(
@@ -206,7 +224,9 @@ class CorrelationFeatures(FeatureGroupBase):
         image : ArrayLike
             Input image to correlate.
         kernel : ArrayLike
-            Correlation kernel. Must be 1D if ``separable=True``.
+            Correlation kernel. Should be 1D for separable filtering
+            to take effect; if ``separable=True`` but the kernel is not
+            1D, standard (non-separable) correlation is used instead.
         separable : bool
             If True, applies the 1D kernel along each axis sequentially.
         output : ArrayLike

@@ -4,24 +4,31 @@ Grayscale BM3D denoising demo file, based on Y. Mäkinen, L. Azzari, A. Foi, 201
 Exact Transform-Domain Noise Variance for Collaborative Filtering of Stationary Correlated Noise.
 In IEEE International Conference on Image Processing (ICIP), pp. 185-189
 """
+
+import matplotlib.pyplot as plt
 import numpy
 import numpy as np
-import matplotlib.pyplot as plt
 from bm3d import bm3d
 
 from aydin.features.fast.fast_features import FastFeatureGenerator
-from aydin.io.datasets import camera, cropped_newyork, newyork, characters, pollen
+from aydin.io.datasets import camera, characters, cropped_newyork, newyork, pollen
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.cb import CBRegressor
 from aydin.regression.lgbm import LGBMRegressor
 from aydin.util.bm3d.experiment_funcs import (
+    get_cropped_psnr,
     get_experiment_noise,
     get_psnr,
-    get_cropped_psnr,
 )
 
 
 def main():
+    """Run BM3D denoising demo comparing BM3D with Aydin's FGR approach.
+
+    Loads a test image, adds spatially correlated Gaussian noise, denoises
+    with both BM3D and Aydin's FGR (Feature Generation & Regression) method,
+    then reports PSNR and SSIM for each and displays results in napari.
+    """
 
     # Load noise-free image
     y = np.array(characters()) / 255
@@ -78,8 +85,12 @@ def main():
     z = numpy.clip(z, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
 
+    from functools import partial
+
     from skimage.metrics import peak_signal_noise_ratio as psnr
-    from skimage.metrics import structural_similarity as ssim
+    from skimage.metrics import structural_similarity
+
+    ssim = partial(structural_similarity, data_range=1.0)
 
     psnr = get_psnr(y, y_est)
     ssim_value = ssim(y, y_est)
@@ -93,12 +104,12 @@ def main():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(y, name='y')
-        viewer.add_image(z, name='z')
-        viewer.add_image(y_est, name='y_est')
-        viewer.add_image(denoised, name='denoised')
+    viewer = napari.Viewer()
+    viewer.add_image(y, name='y')
+    viewer.add_image(z, name='z')
+    viewer.add_image(y_est, name='y_est')
+    viewer.add_image(denoised, name='denoised')
+    napari.run()
 
 
 if __name__ == '__main__':

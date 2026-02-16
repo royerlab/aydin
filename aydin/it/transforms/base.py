@@ -11,14 +11,27 @@ from numpy.typing import ArrayLike
 
 
 class ImageTransformBase(ABC):
-    """Image Transforms base class
+    """Image Transforms base class.
 
     Transforms take an array, apply a transformation that is meant to
     facilitate denoising (or another image restoration task), and then
     optionally, offer a way to go back by undoing the transformation. For
     example, motion correction can be applied to facilitate denoising,
-    and then after denoising has ben performed, the motion can be reapplied,
+    and then after denoising has been performed, the motion can be reapplied,
     if really needed.
+
+    Attributes
+    ----------
+    preprocess_description : str
+        Human-readable description of the preprocessing step.
+    postprocess_description : str
+        Human-readable description of the postprocessing step.
+    postprocess_supported : bool or None
+        Whether this transform supports postprocessing (inverse).
+    priority : float
+        Ordering priority in [0, 1] for applying transforms.
+    do_postprocess : bool
+        Whether postprocessing should be performed.
     """
 
     preprocess_description = " (before denoising)"

@@ -1,3 +1,9 @@
+"""Demo of Noise2Self CNN denoising on batched 3D HeLa cell data.
+
+Loads a 4D HeLa dataset, treats the first axis as a batch dimension,
+and trains an ``ImageTranslatorCNNTorch`` for self-supervised 3D denoising.
+"""
+
 import time
 
 import numpy as np
@@ -5,13 +11,22 @@ from skimage.exposure import rescale_intensity
 
 from aydin.io import io
 from aydin.io.datasets import examples_single
-from aydin.it.cnn import ImageTranslatorCNN
+from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
 
 def demo(image, max_epochs=10):
+    """Run Noise2Self CNN denoising on batched 3D HeLa image data.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        4D array where the first axis is the batch dimension.
+    max_epochs : int, optional
+        Maximum number of training epochs.
+    """
     batch_dims = (True, False, False, False)
 
-    it = ImageTranslatorCNN(
+    it = ImageTranslatorCNNTorch(
         training_architecture='random',
         nb_unet_levels=2,
         batch_norm='instance',  # None,  #
@@ -36,13 +51,13 @@ def demo(image, max_epochs=10):
     print(f"inference: elapsed time:  {stop - start} ")
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(
-            rescale_intensity(denoised, in_range='image', out_range=(0, 1)),
-            name='denoised',
-        )
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(
+        rescale_intensity(denoised, in_range='image', out_range=(0, 1)),
+        name='denoised',
+    )
+    napari.run()
 
 
 if __name__ == "__main__":

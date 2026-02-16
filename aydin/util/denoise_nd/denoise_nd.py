@@ -33,7 +33,38 @@ def extend_nd(available_dims: Sequence[int] = (2,)):
 
     # Actual decorator that varies given the parameters
     def decorator(function):
+        """Wrap a denoising function to extend its dimensionality support.
+
+        Parameters
+        ----------
+        function : callable
+            Denoising function whose first argument is an image array.
+
+        Returns
+        -------
+        callable
+            Wrapped function that accepts images of any dimensionality.
+        """
+
         def wrapper(*args, **kwargs):
+            """Dispatch the wrapped denoiser to handle arbitrary dimensions.
+
+            Adds singleton dimensions for under-dimensional images, or
+            iterates over sub-hyperplanes for over-dimensional images,
+            delegating to the original denoising function.
+
+            Parameters
+            ----------
+            *args : tuple
+                Positional arguments; the first must be the image array.
+            **kwargs : dict
+                Keyword arguments forwarded to the denoising function.
+
+            Returns
+            -------
+            numpy.ndarray
+                Denoised image with the same shape as the input.
+            """
 
             # The first argument must be the image:
             image = args[0]

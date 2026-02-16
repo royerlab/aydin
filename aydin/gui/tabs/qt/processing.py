@@ -25,6 +25,13 @@ class ProcessingTab(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the Pre/Post-Processing tab.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(ProcessingTab, self).__init__(parent)
         self.parent = parent
 
@@ -36,7 +43,9 @@ class ProcessingTab(QWidget):
         self.explanation_layout.addWidget(self.explanation_text, 90)
         self.explanation_layout.addStretch()
 
-        self.previewall_job_runner = PreviewAllJobRunner(self, self.parent.threadpool)
+        self.previewall_job_runner = PreviewAllJobRunner(
+            self, self.parent.threadpool, self.parent
+        )
         self.explanation_layout.addWidget(self.previewall_job_runner, 10)
 
         self.tab_layout.addLayout(self.explanation_layout)

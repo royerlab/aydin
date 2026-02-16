@@ -25,6 +25,13 @@ class SystemSummaryWidget(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the system summary by querying CPU, memory, and GPU info.
+
+        Parameters
+        ----------
+        parent : QWidget
+            The parent widget.
+        """
         QWidget.__init__(self, parent)
 
         self.main_layout = QHBoxLayout()
@@ -38,24 +45,28 @@ class SystemSummaryWidget(QWidget):
         self.cpu_group_box.setLayout(self.cpu_group_box_layout)
 
         # CPU freq
+        cpu_freq = psutil.cpu_freq()
+        freq_text = f"{round(cpu_freq.current, 2)} Mhz" if cpu_freq else "N/A"
         self.cpu_freq_stats_label = QLabel(
-            f"Current CPU frequency:\t {round(psutil.cpu_freq().current, 2)} Mhz", self
+            f"Current CPU frequency:\t {freq_text}", self
         )
         self.cpu_group_box_layout.addWidget(self.cpu_freq_stats_label)
 
         # Number of cores
-        self.nb_cores_label = QLabel(
-            f"Number of CPU cores:\t {os.cpu_count() // 2}", self
-        )
+        physical_cores = psutil.cpu_count(logical=False) or os.cpu_count() or 1
+        self.nb_cores_label = QLabel(f"Number of CPU cores:\t {physical_cores}", self)
         self.cpu_group_box_layout.addWidget(self.nb_cores_label)
-        if (os.cpu_count() // 2) < 4:
+        if physical_cores < 4:
             self.nb_cores_label.setStyleSheet("QLabel {color: red;}")
-        elif (os.cpu_count() // 2) <= 6:
+        elif physical_cores <= 6:
             self.nb_cores_label.setStyleSheet("QLabel {color: orange;}")
         else:
             self.nb_cores_label.setStyleSheet("QLabel {color: green;}")
 
-        self.cpu_load_values = [(elem * 16) for elem in psutil.getloadavg()]
+        cpu_count = os.cpu_count() or 1
+        self.cpu_load_values = [
+            (elem / cpu_count) * 100 for elem in psutil.getloadavg()
+        ]
 
         self.cpu_load_label0 = QLabel(
             f"CPU load over last 1min:\t {'100.0+' if self.cpu_load_values[0] >= 100.0 else round(self.cpu_load_values[0], 2)}%",

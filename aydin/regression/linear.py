@@ -11,10 +11,22 @@ from aydin.util.log.log import aprint, asection
 
 
 class LinearRegressor(RegressorBase):
-    """
-    The Linear Regressor is the simplest of all regressors, and in general
-    performs poorly. However, it is also very fast and can be advantageous in
-    some 'simple' situations.
+    """Simple linear regressor wrapping scikit-learn estimators.
+
+    The simplest of all regressors. In general it performs poorly compared
+    to gradient boosting or neural network approaches, but it is also very
+    fast and can be advantageous for easy denoising tasks where a linear
+    relationship between features and target is a reasonable approximation.
+
+    Three modes are supported:
+
+    * ``'linear'`` -- ordinary least-squares via
+      :class:`~sklearn.linear_model.LinearRegression`.
+    * ``'huber'`` -- robust regression via
+      :class:`~sklearn.linear_model.HuberRegressor`.
+    * ``'lasso'`` -- L1-regularised regression via
+      :class:`~sklearn.linear_model.Lasso`.
+    <notgui>
     """
 
     def __init__(
@@ -58,6 +70,7 @@ class LinearRegressor(RegressorBase):
             aprint(f"alpha: {self.alpha}")
 
     def __repr__(self):
+        """Return a concise string representation of the regressor."""
         return f"<{self.__class__.__name__}, mode={self.mode}, max_num_iterations={self.max_num_iterations}>"
 
     def _fit(
@@ -115,15 +128,34 @@ class _LinearModel:
     """
 
     def __init__(self, model):
+        """Initialise the linear model wrapper.
+
+        Parameters
+        ----------
+        model : sklearn.base.BaseEstimator
+            Fitted scikit-learn linear estimator.
+        """
         self.model = model
         self.loss_history = {'training': [], 'validation': []}
 
     def _save_internals(self, path: str):
-        """Save model internals (no-op for scikit-learn models)."""
+        """Save model internals (no-op for scikit-learn models).
+
+        Parameters
+        ----------
+        path : str
+            Directory path (unused).
+        """
         pass
 
     def _load_internals(self, path: str):
-        """Load model internals (no-op for scikit-learn models)."""
+        """Load model internals (no-op for scikit-learn models).
+
+        Parameters
+        ----------
+        path : str
+            Directory path (unused).
+        """
         pass
 
     def predict(self, x):

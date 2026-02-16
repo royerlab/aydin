@@ -17,6 +17,7 @@ from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.denoise_nd.denoise_nd import extend_nd
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_bilateral(
@@ -93,11 +94,12 @@ def calibrate_denoise_bilateral(
 
     Returns
     -------
-    tuple
-        A tuple of (denoising_function, best_parameters, memory_needed) where
-        denoising_function is the callable for denoising, best_parameters is
-        a dict of optimal parameters, and memory_needed is the estimated
-        memory in bytes.
+    denoise_function : callable
+        The ``denoise_bilateral`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -130,6 +132,7 @@ def calibrate_denoise_bilateral(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 2 * image.nbytes
@@ -153,6 +156,7 @@ def denoise_bilateral(
     weighted average of intensity values from nearby pixels. The
     weighting is inversely related to the pixel distance in space but
     also in the pixels value differences.
+    <notgui>
 
     Parameters
     ----------
@@ -175,8 +179,9 @@ def denoise_bilateral(
         Number of discrete values for Gaussian weights of color filtering.
         A larger value results in improved accuracy.
 
-    kwargs: dict
-        Other parameters.
+    **kwargs : dict
+        Other parameters forwarded to the underlying scikit-image
+        bilateral filter.
 
     Returns
     -------

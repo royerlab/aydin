@@ -41,14 +41,39 @@ def _remove_duplicates(seq):
 
 
 class UniformFeatures(FeatureGroupBase):
-    """
-    Uniform Feature Group class
+    """Uniform (box / integral) feature group.
 
-    Computes 'uniform' features that are obtained by summing up the
-    values of voxels over nD rectangular blocks of voxels.The blocks are
-    defined relative to each voxel. These features can have different scales
-    (size), shapes (aspect ratios), and offsets (shifts relative to the center
-    voxel).
+    Computes multi-scale features by summing voxel values over n-dimensional
+    rectangular blocks centered at (or near) each voxel. The blocks are
+    defined by three parameters per feature: a translation (shift relative
+    to the center voxel), a negative extent, and a positive extent. Features
+    can span different scales, shapes (aspect ratios), and offsets, providing
+    a rich multi-resolution representation of local image structure.
+
+    Uniform features are the backbone of the FGR (Feature Generation and
+    Regression) denoising approach. They are highly efficient to compute
+    thanks to pre-computed uniform filters that are then shifted and
+    corrected for excluded voxels.
+
+    Attributes
+    ----------
+    kernel_widths : list
+        Widths of the feature kernels at each scale level.
+    kernel_scales : list
+        Scale factors for each feature level.
+    kernel_shapes : list of str
+        Shape codes controlling the geometry of each feature level
+        (e.g., ``'l1'``, ``'l2'``, ``'li'``, ``'#l1nc'``).
+    min_level : int
+        Minimum scale level included.
+    max_level : int
+        Maximum scale level included.
+    dtype : numpy.dtype
+        Data type used for feature arrays.
+    image : numpy.ndarray or None
+        Reference to the current image being processed.
+    excluded_voxels : list of tuple of int
+        Voxels excluded from features for blind-spot denoising.
     """
 
     def __init__(
@@ -72,7 +97,6 @@ class UniformFeatures(FeatureGroupBase):
 
         Parameters
         ----------
-
         kernel_widths : numpy.typing.ArrayLike
             ArrayLike of kernel widths.
             (advanced)
@@ -139,8 +163,8 @@ class UniformFeatures(FeatureGroupBase):
             scale features makes these feature cover more pixels by
             overlapping pixels at the center of the receptive field. (advanced)
 
-        dtype
-            Datatype of the features
+        dtype : numpy.dtype
+            Data type for computed feature arrays (e.g., ``numpy.float32``).
             (advanced)
 
         """
@@ -616,6 +640,17 @@ class UniformFeatures(FeatureGroupBase):
         """
 
         def no_cuda_cpu_mode():
+            """Compute the uniform filter on CPU using Numba or parallel scipy.
+
+            Falls back to this method when CUDA is unavailable or unsuitable.
+            Selects Numba for large filter sizes (>128) and parallel scipy
+            for smaller ones.
+
+            Returns
+            -------
+            numpy.ndarray
+                Filtered image array.
+            """
             # No CUDA? we use CPU mode instead:
             # Different methods perform differently based on filter size:
             max_size = max(size) if isinstance(size, tuple) else size

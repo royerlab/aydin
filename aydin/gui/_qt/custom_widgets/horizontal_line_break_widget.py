@@ -14,6 +14,13 @@ class QHorizontalLineBreakWidget(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the horizontal line separator.
+
+        Parameters
+        ----------
+        parent : QWidget
+            The parent widget.
+        """
         super(QHorizontalLineBreakWidget, self).__init__(parent)
         self.parent = parent
 

@@ -60,6 +60,33 @@ def break_text(
     return output_text
 
 
+def strip_notgui(text: str) -> str:
+    """Remove content after ``<notgui>`` for GUI display.
+
+    Docstrings may contain a ``<notgui>`` marker that separates the
+    GUI-visible portion (before the tag) from API-only documentation
+    (after the tag). This function returns only the GUI-visible part.
+
+    Parameters
+    ----------
+    text : str
+        Docstring text, possibly containing a ``<notgui>`` tag.
+
+    Returns
+    -------
+    str
+        Text before the ``<notgui>`` tag (trailing whitespace stripped),
+        or the full text if the tag is absent. Returns ``''`` for
+        ``None`` or empty input.
+    """
+    if not text:
+        return ''
+    idx = text.find('<notgui>')
+    if idx == -1:
+        return text
+    return text[:idx].rstrip()
+
+
 _html_clean_re = re.compile('<.*?>')
 
 

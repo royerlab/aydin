@@ -13,9 +13,25 @@ from aydin.util.log.log import aprint
 
 
 def _format_eval_result(value, show_stdv=True):
-    """Format evaluation result for display.
+    """Format a single LightGBM evaluation result tuple for display.
 
-    Compatible with both LightGBM 3.x and 4.x.
+    Compatible with both LightGBM 3.x (4-element tuples) and 4.x
+    (5-element tuples with optional standard deviation).
+
+    Parameters
+    ----------
+    value : tuple
+        Evaluation result tuple from LightGBM's ``evaluation_result_list``.
+        Length 4: ``(dataset_name, metric_name, metric_value, is_higher_better)``.
+        Length 5: adds a standard deviation element at index 4.
+    show_stdv : bool
+        If ``True`` and the tuple contains a non-empty standard deviation,
+        include it in the formatted string.
+
+    Returns
+    -------
+    str
+        Human-readable evaluation result string.
     """
     if len(value) == 4:
         return f"{value[0]}'s {value[1]}: {value[2]:.6f}"
@@ -30,8 +46,8 @@ def _format_eval_result(value, show_stdv=True):
 def early_stopping(gbm_regressor, stopping_rounds):
     """Create a callback that activates early stopping.
 
-    Note
-    ----
+    Notes
+    -----
     Activates early stopping.
     The model will train until the validation score stops improving.
     Validation score needs to improve at least every ``early_stopping_rounds`` round(s)
@@ -41,7 +57,6 @@ def early_stopping(gbm_regressor, stopping_rounds):
 
     Parameters
     ----------
-
     gbm_regressor : LGBMRegressor
         Parent regressor instance. Its ``_stop_fit`` attribute is checked
         each iteration to support external stop requests.
@@ -62,6 +77,7 @@ def early_stopping(gbm_regressor, stopping_rounds):
     enabled = [True]
 
     def _init(env):
+        """Initialize early stopping state from the training environment."""
         enabled[0] = not any(
             (boost_alias in env.params and env.params[boost_alias] == 'dart')
             for boost_alias in ('boosting', 'boosting_type', 'boost')
@@ -89,6 +105,7 @@ def early_stopping(gbm_regressor, stopping_rounds):
                 cmp_op.append(lt)
 
     def _callback(env):
+        """Check validation scores and trigger early stopping if needed."""
         if not cmp_op:
             _init(env)
         if not enabled[0]:

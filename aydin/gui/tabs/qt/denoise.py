@@ -53,6 +53,13 @@ class DenoiseTab(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the Denoise tab.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(DenoiseTab, self).__init__(parent)
         self.parent = parent
 
@@ -195,13 +202,15 @@ class DenoiseTab(QWidget):
             self.advance_enabled = enable
 
     def load_pretrained_model(self, pretrained_model_files):
-        """
+        """Load pretrained model files and add them as backend options.
+
+        Unpacks each zip archive, loads the image translator model, and
+        adds it to the list of available pretrained backends.
 
         Parameters
         ----------
-        pretrained_model_files : list
-            list of paths to the loaded pretrained model files
-
+        pretrained_model_files : list of str
+            File paths to pretrained model archives (zip files).
         """
         for file in pretrained_model_files:
             shutil.unpack_archive(file, os.path.dirname(file), "zip")

@@ -15,33 +15,35 @@ import scipy.special
 
 
 class MicroscopePSF:
-    """
-    Generate a PSF using the Gibson and Lanni model.
+    """Generate a PSF using the Gibson and Lanni model.
 
-    Note: All distance units are microns.
+    All distance units are microns.
 
-    This is slightly reworked version of the Python code provided by Kyle
-    Douglass, "Implementing a fast Gibson-Lanni PSF solver in Python".
+    Implements a fast PSF solver using Fourier-Bessel series approximation
+    of the Gibson & Lanni optical path difference model. Based on the
+    Python code provided by Kyle Douglass [1]_.
 
-    http://kmdouglass.github.io/posts/implementing-a-fast-gibson-lanni-psf-solver-in-python.html
+    Attributes
+    ----------
+    num_basis : int
+        Number of rescaled Bessel functions used to approximate the phase.
+    rho_samples : int
+        Number of pupil samples along the radial direction.
+    parameters : dict
+        Dictionary of microscope optical parameters (magnification, NA,
+        refractive indices, thicknesses, tube length).
 
-    Object refactored by Loic Royer,
-    Original here: https://github.com/MicroscPSF/MicroscPSF-Py
-
-    References:
-
-    1. Li et al, "Fast and accurate three-dimensional point spread function computation
-       for fluorescence microscopy", JOSA, 2017.
-
-    2. Gibson, S. & Lanni, F. "Experimental test of an analytical model of
+    References
+    ----------
+    .. [1] K. Douglass, "Implementing a fast Gibson-Lanni PSF solver in Python".
+       http://kmdouglass.github.io/posts/implementing-a-fast-gibson-lanni-psf-solver-in-python.html
+    .. [2] Li et al, "Fast and accurate three-dimensional point spread function
+       computation for fluorescence microscopy", JOSA, 2017.
+    .. [3] Gibson, S. & Lanni, F., "Experimental test of an analytical model of
        aberration in an oil-immersion objective lens used in three-dimensional
-       light microscopy", J. Opt. Soc. Am. A 9, 154-166 (1992), [Originally
-       published in J. Opt. Soc. Am. A 8, 1601-1613 (1991)].
-
-    3. Kirshner et al, "3-D PSF fitting for fluorescence microscopy: implementation
-       and localization application", Journal of Microscopy, 2012.
-
-    Hazen 04/18
+       light microscopy", J. Opt. Soc. Am. A 9, 154-166 (1992).
+    .. [4] Kirshner et al, "3-D PSF fitting for fluorescence microscopy:
+       implementation and localization application", Journal of Microscopy, 2012.
     """
 
     def __init__(self):
@@ -70,14 +72,39 @@ class MicroscopePSF:
         }  # microscope tube length (in microns).
 
     def _calcRv(self, dxy, xy_size, sampling=2):
-        """
-        Calculate rv vector, this is 2x up-sampled.
+        """Calculate the radial distance vector (oversampled).
+
+        Parameters
+        ----------
+        dxy : float
+            Pixel size in microns.
+        xy_size : int
+            Number of pixels along x/y.
+        sampling : int
+            Oversampling factor for the radial vector.
+
+        Returns
+        -------
+        numpy.ndarray
+            Radial distance values in microns.
         """
         rv_max = math.sqrt(0.5 * xy_size * xy_size) + 1
         return numpy.arange(0, rv_max * dxy, dxy / sampling)
 
     def _configure(self, wvl):
+        """Configure scaling factors and maximum rho for a given wavelength.
 
+        Parameters
+        ----------
+        wvl : float
+            Light wavelength in microns.
+
+        Returns
+        -------
+        list
+            [scaling_factor, max_rho] where scaling_factor is a 1D array
+            and max_rho is the maximum normalized pupil radius.
+        """
         mp = self.parameters
 
         # Scaling factors for the Fourier-Bessel series expansion
@@ -100,11 +127,17 @@ class MicroscopePSF:
         return [scaling_factor, max_rho]
 
     def deltaFocus(self, zd):
-        """
-        Return focal offset needed to compensate for the camera being at zd.
+        """Return focal offset needed to compensate for camera position.
 
-        mp - The microscope parameters dictionary.
-        zd - Actual camera position in microns.
+        Parameters
+        ----------
+        zd : float
+            Actual camera position in microns.
+
+        Returns
+        -------
+        float
+            Focal offset in microns.
         """
         mp = self.parameters
 
@@ -114,23 +147,31 @@ class MicroscopePSF:
     def gLXYZCameraScan(
         self, dxy, xy_size, zd, normalize=True, pz=0.0, wvl=0.6, zv=0.0
     ):
-        """
-        NOTE: Does not work!
+        """Calculate 3D G-L PSF by scanning the camera position.
 
-        Calculate 3D G-L PSF. This is models the PSF you would measure by scanning the
-        camera position (changing the microscope tube length).
+        .. warning:: This method does not work correctly.
 
-        This will return a numpy array with of size (zv.size, xy_size, xy_size). Note that z
-        is the zeroth dimension of the PSF.
+        Parameters
+        ----------
+        dxy : float
+            Step size in the XY plane in microns.
+        xy_size : int
+            Number of pixels in X/Y.
+        zd : numpy.ndarray
+            Camera positions in microns.
+        normalize : bool
+            If True, normalize PSF to unit height.
+        pz : float
+            Particle z position above the coverslip in microns.
+        wvl : float
+            Light wavelength in microns.
+        zv : float
+            Relative z offset of the coverslip in microns.
 
-        dxy - Step size in the XY plane.
-        xy_size - Number of pixels in X/Y.
-        zd - A numpy array containing the camera positions in microns.
-
-        normalize - Normalize the PSF to unit height.
-        pz - Particle z position above the coverslip (positive values only).
-        wvl - Light wavelength in microns.
-        zv - The (relative) z offset value of the coverslip (negative is closer to the objective).
+        Returns
+        -------
+        numpy.ndarray
+            3D PSF array with shape ``(zd.size, xy_size, xy_size)``.
         """
         # Calculate rv vector, this is 2x up-sampled.
         rv = self._calcRv(dxy, xy_size)
@@ -144,21 +185,31 @@ class MicroscopePSF:
     def gLXYZFocalScan(
         self, dxy, xy_size, zv, normalize=True, pz=0.0, wvl=0.6, zd=None
     ):
-        """
-        Calculate 3D G-L PSF. This is models the PSF you would measure by scanning the microscopes
-        focus.
+        """Calculate 3D G-L PSF by scanning the microscope focus.
 
-        This will return a numpy array with of size (zv.size, xy_size, xy_size). Note that z
-        is the zeroth dimension of the PSF.
+        Parameters
+        ----------
+        dxy : float
+            Step size in the XY plane in microns.
+        xy_size : int
+            Number of pixels in X/Y.
+        zv : numpy.ndarray
+            Relative z offset values of the coverslip in microns
+            (negative is closer to the objective).
+        normalize : bool
+            If True, normalize PSF to unit height.
+        pz : float
+            Particle z position above the coverslip in microns.
+        wvl : float
+            Light wavelength in microns.
+        zd : float or None
+            Actual camera position in microns. If None, the microscope
+            tube length is used.
 
-        dxy - Step size in the XY plane.
-        xy_size - Number of pixels in X/Y.
-        zv - A numpy array containing the (relative) z offset values of the coverslip (negative is closer to the objective).
-
-        normalize - Normalize the PSF to unit height.
-        pz - Particle z position above the coverslip (positive values only).
-        wvl - Light wavelength in microns.
-        zd - Actual camera position in microns. If not specified the microscope tube length is used.
+        Returns
+        -------
+        numpy.ndarray
+            3D PSF array with shape ``(zv.size, xy_size, xy_size)``.
         """
         # Calculate rv vector, this is 2x up-sampled.
         rv = self._calcRv(dxy, xy_size)
@@ -172,22 +223,31 @@ class MicroscopePSF:
     def gLXYZParticleScan(
         self, dxy, xy_size, pz, normalize=True, wvl=0.6, zd=None, zv=0.0
     ):
-        """
-        Calculate 3D G-L PSF. This is models the PSF you would measure by scanning a particle
-        through the microscopes focus.
+        """Calculate 3D G-L PSF by scanning a particle through the focus.
 
-        This will return a numpy array with of size (zv.size, xy_size, xy_size). Note that z
-        is the zeroth dimension of the PSF.
+        Parameters
+        ----------
+        dxy : float
+            Step size in the XY plane in microns.
+        xy_size : int
+            Number of pixels in X/Y.
+        pz : numpy.ndarray
+            Particle z positions above the coverslip in microns
+            (positive values only).
+        normalize : bool
+            If True, normalize PSF to unit height.
+        wvl : float
+            Light wavelength in microns.
+        zd : float or None
+            Actual camera position in microns. If None, the microscope
+            tube length is used.
+        zv : float
+            Relative z offset of the coverslip in microns.
 
-        dxy - Step size in the XY plane.
-        xy_size - Number of pixels in X/Y.
-        pz - A numpy array containing the particle z position above the coverslip (positive values only)
-             in microns.
-
-        normalize - Normalize the PSF to unit height.
-        wvl - Light wavelength in microns.
-        zd - Actual camera position in microns. If not specified the microscope tube length is used.
-        zv - The (relative) z offset value of the coverslip (negative is closer to the objective).
+        Returns
+        -------
+        numpy.ndarray
+            3D PSF array with shape ``(pz.size, xy_size, xy_size)``.
         """
         # Calculate rv vector, this is 2x up-sampled.
         rv = self._calcRv(dxy, xy_size)
@@ -201,20 +261,32 @@ class MicroscopePSF:
         return self.psfRZToPSFXYZ(dxy, xy_size, rv, PSF_rz)
 
     def gLZRScan(self, pz, rv, zd, zv, normalize=True, wvl=0.6):
-        """
-        Calculate radial G-L at specified radius. This function is primarily designed
-        for internal use. Note that only one pz, zd and zv should be a numpy array
-        with more than one element. You can simulate scanning the focus, the particle
-        or the camera but not 2 or 3 of these values at the same time.
+        """Calculate radial G-L PSF at specified radius and z positions.
 
-        mp - The microscope parameters dictionary.
-        pz - A numpy array containing the particle z position above the coverslip (positive values only).
-        rv - A numpy array containing the radius values.
-        zd - A numpy array containing the actual camera position in microns.
-        zv - A numpy array containing the relative z offset value of the coverslip (negative is closer to the objective).
+        Internal function for computing the radial/axial PSF. Only one of
+        ``pz``, ``zd``, or ``zv`` should be a multi-element array (the
+        scanning variable).
 
-        normalize - Normalize the PSF to unit height.
-        wvl - Light wavelength in microns.
+        Parameters
+        ----------
+        pz : numpy.ndarray
+            Particle z positions above the coverslip in microns.
+        rv : numpy.ndarray
+            Radial distance values in microns.
+        zd : numpy.ndarray
+            Camera positions in microns.
+        zv : numpy.ndarray
+            Relative z offset values of the coverslip in microns.
+        normalize : bool
+            If True, normalize PSF to unit height.
+        wvl : float
+            Light wavelength in microns.
+
+        Returns
+        -------
+        numpy.ndarray
+            2D PSF array with shape ``(n_z, n_r)`` where z is the
+            scanning variable.
         """
 
         mp = self.parameters
@@ -273,20 +345,29 @@ class MicroscopePSF:
         return PSF_rz
 
     def gLZRCameraScan(self, rv, zd, normalize=True, pz=0.0, wvl=0.6, zv=0.0):
-        """
-        NOTE: Does not work!
+        """Calculate radial G-L PSF by scanning the camera position.
 
-        Calculate radial G-L at specified radius and z values. This is models the PSF
-        you would measure by scanning the camera position (changing the microscope
-        tube length).
+        .. warning:: This method does not work correctly.
 
-        rv - A numpy array containing the radius values.
-        zd - A numpy array containing the camera positions in microns.
+        Parameters
+        ----------
+        rv : numpy.ndarray
+            Radial distance values in microns.
+        zd : numpy.ndarray
+            Camera positions in microns.
+        normalize : bool
+            If True, normalize PSF to unit height.
+        pz : float
+            Particle z position above the coverslip in microns.
+        wvl : float
+            Light wavelength in microns.
+        zv : float
+            Relative z offset of the coverslip in microns.
 
-        normalize - Normalize the PSF to unit height.
-        pz - Particle z position above the coverslip (positive values only).
-        wvl - Light wavelength in microns.
-        zv - The (relative) z offset value of the coverslip (negative is closer to the objective).
+        Returns
+        -------
+        numpy.ndarray
+            2D PSF array with shape ``(zd.size, rv.size)``.
         """
         pz = numpy.array([pz])
         zv = numpy.array([zv])
@@ -294,19 +375,29 @@ class MicroscopePSF:
         return self.gLZRScan(pz, rv, zd, zv, normalize=normalize, wvl=wvl)
 
     def gLZRFocalScan(self, rv, zv, normalize=True, pz=0.0, wvl=0.6, zd=None):
-        """
-        Calculate radial G-L at specified radius and z values. This is models the PSF
-        you would measure by scanning the microscopes focus.
+        """Calculate radial G-L PSF by scanning the microscope focus.
 
-        mp - The microscope parameters dictionary.
-        rv - A numpy array containing the radius values.
-        zv - A numpy array containing the (relative) z offset values of the coverslip (negative is
-             closer to the objective) in microns.
+        Parameters
+        ----------
+        rv : numpy.ndarray
+            Radial distance values in microns.
+        zv : numpy.ndarray
+            Relative z offset values of the coverslip in microns
+            (negative is closer to the objective).
+        normalize : bool
+            If True, normalize PSF to unit height.
+        pz : float
+            Particle z position above the coverslip in microns.
+        wvl : float
+            Light wavelength in microns.
+        zd : float or None
+            Actual camera position in microns. If None, the microscope
+            tube length is used.
 
-        normalize - Normalize the PSF to unit height.
-        pz - Particle z position above the coverslip (positive values only).
-        wvl - Light wavelength in microns.
-        zd - Actual camera position in microns. If not specified the microscope tube length is used.
+        Returns
+        -------
+        numpy.ndarray
+            2D PSF array with shape ``(zv.size, rv.size)``.
         """
 
         mp = self.parameters
@@ -320,19 +411,29 @@ class MicroscopePSF:
         return self.gLZRScan(pz, rv, zd, zv, normalize=normalize, wvl=wvl)
 
     def gLZRParticleScan(self, rv, pz, normalize=True, wvl=0.6, zd=None, zv=0.0):
-        """
-        Calculate radial G-L at specified radius and z values. This is models the PSF
-        you would measure by scanning the particle relative to the microscopes focus.
+        """Calculate radial G-L PSF by scanning the particle position.
 
-        mp - The microscope parameters dictionary.
-        rv - A numpy array containing the radius values.
-        pz - A numpy array containing the particle z position above the coverslip (positive values only)
-             in microns.
+        Parameters
+        ----------
+        rv : numpy.ndarray
+            Radial distance values in microns.
+        pz : numpy.ndarray
+            Particle z positions above the coverslip in microns
+            (positive values only).
+        normalize : bool
+            If True, normalize PSF to unit height.
+        wvl : float
+            Light wavelength in microns.
+        zd : float or None
+            Actual camera position in microns. If None, the microscope
+            tube length is used.
+        zv : float
+            Relative z offset of the coverslip in microns.
 
-        normalize - Normalize the PSF to unit height.
-        wvl - Light wavelength in microns.
-        zd - Actual camera position in microns. If not specified the microscope tube length is used.
-        zv - The (relative) z offset value of the coverslip (negative is closer to the objective).
+        Returns
+        -------
+        numpy.ndarray
+            2D PSF array with shape ``(pz.size, rv.size)``.
         """
 
         mp = self.parameters
@@ -346,15 +447,28 @@ class MicroscopePSF:
         return self.gLZRScan(pz, rv, zd, zv, normalize=normalize, wvl=wvl)
 
     def OPD(self, rho, ti, pz, wvl, zd):
-        """
-        Calculate phase aberration term.
+        """Calculate optical path difference (phase aberration) term.
 
-        mp - The microscope parameters dictionary.
-        rho - Rho term.
-        ti - Coverslip z offset in microns.
-        pz - Particle z position above the coverslip in microns.
-        wvl - Light wavelength in microns.
-        zd - Actual camera position in microns.
+        Computes the total OPD as the sum of contributions from the
+        sample, immersion medium, coverslip, and camera position.
+
+        Parameters
+        ----------
+        rho : numpy.ndarray
+            Normalized pupil radius values.
+        ti : numpy.ndarray
+            Immersion medium thickness in microns.
+        pz : numpy.ndarray
+            Particle z position above the coverslip in microns.
+        wvl : float
+            Light wavelength in microns.
+        zd : numpy.ndarray
+            Actual camera position in microns.
+
+        Returns
+        -------
+        numpy.ndarray
+            Phase aberration values (k * OPD).
         """
 
         mp = self.parameters
@@ -387,8 +501,23 @@ class MicroscopePSF:
         return k * (OPDs + OPDi + OPDg + OPDt)
 
     def psfRZToPSFXYZ(self, dxy, xy_size, rv, PSF_rz):
-        """
-        Use interpolation to create a 3D XYZ PSF from a 2D ZR PSF.
+        """Convert a radial/axial PSF to a full 3D XYZ PSF by interpolation.
+
+        Parameters
+        ----------
+        dxy : float
+            Pixel size in microns.
+        xy_size : int
+            Number of pixels along x/y.
+        rv : numpy.ndarray
+            Radial distance values in microns.
+        PSF_rz : numpy.ndarray
+            2D radial/axial PSF with shape ``(n_z, n_r)``.
+
+        Returns
+        -------
+        numpy.ndarray
+            3D PSF array with shape ``(n_z, xy_size, xy_size)``.
         """
         # Create XY grid of radius values.
         c_xy = float(xy_size) * 0.5
@@ -406,18 +535,30 @@ class MicroscopePSF:
         return PSF_xyz
 
     def slowGL(self, max_rho, rv, zv, pz, wvl, zd):
-        """
-        Calculate a single point in the G-L PSF using integration. This
-        is primarily provided for testing / reference purposes. As the
-        function name implies, this is going to be slow.
+        """Calculate a single G-L PSF point using numerical integration.
 
-        mp - The microscope parameters dictionary.
-        max_rho - The maximum rho value.
-        rv - A radius value in microns.
-        zv - A z offset value (of the coverslip) in microns.
-        pz - Particle z position above the coverslip in microns.
-        wvl - Light wavelength in microns.
-        zd - Actual camera position in microns.
+        Primarily for testing and reference. Very slow compared to the
+        Fourier-Bessel approximation.
+
+        Parameters
+        ----------
+        max_rho : float
+            Maximum normalized pupil radius.
+        rv : float
+            Radial distance in microns.
+        zv : float
+            Relative z offset of the coverslip in microns.
+        pz : float
+            Particle z position above the coverslip in microns.
+        wvl : float
+            Light wavelength in microns.
+        zd : float
+            Camera position in microns.
+
+        Returns
+        -------
+        float
+            PSF intensity value at the specified point.
         """
 
         mp = self.parameters
@@ -431,12 +572,36 @@ class MicroscopePSF:
         rv = rv * mp["M"]
 
         def integral_fn_imag(rho):
+            """Return the imaginary part of the PSF integrand at pupil radius ``rho``.
+
+            Parameters
+            ----------
+            rho : float
+                Normalized pupil radius.
+
+            Returns
+            -------
+            float
+                Imaginary part of the integrand.
+            """
             t1 = k * a * rho * rv / zd
             t2 = scipy.special.jv(0, t1)
             t3 = t2 * cmath.exp(1j * self.OPD(rho, ti, pz, wvl, zd)) * rho
             return t3.imag
 
         def integral_fn_real(rho):
+            """Return the real part of the PSF integrand at pupil radius ``rho``.
+
+            Parameters
+            ----------
+            rho : float
+                Normalized pupil radius.
+
+            Returns
+            -------
+            float
+                Real part of the integrand.
+            """
             t1 = k * a * rho * rv / zd
             t2 = scipy.special.jv(0, t1)
             t3 = t2 * cmath.exp(1j * self.OPD(rho, ti, pz, wvl, zd)) * rho
@@ -449,17 +614,29 @@ class MicroscopePSF:
         return t1 * (int_r * int_r + int_i * int_i)
 
     def gLZRFocalScanSlow(self, rv, zv, normalize=True, pz=0.0, wvl=0.6, zd=None):
-        """
-        This is the integration version of gLZRFocalScan.
+        """Calculate radial G-L PSF by focal scan using numerical integration.
 
-        mp - The microscope parameters dictionary.
-        rv - A numpy array containing the radius values.
-        zv - A numpy array containing the (relative) z offset values of the coverslip (negative is closer to the objective).
+        Slow reference implementation of ``gLZRFocalScan``.
 
-        normalize - Normalize the PSF to unit height.
-        pz - Particle z position above the coverslip (positive values only).
-        wvl - Light wavelength in microns.
-        zd - Actual camera position in microns. If not specified the microscope tube length is used.
+        Parameters
+        ----------
+        rv : numpy.ndarray
+            Radial distance values in microns.
+        zv : numpy.ndarray
+            Relative z offset values of the coverslip in microns.
+        normalize : bool
+            If True, normalize PSF to unit height.
+        pz : float
+            Particle z position above the coverslip in microns.
+        wvl : float
+            Light wavelength in microns.
+        zd : float or None
+            Camera position in microns. If None, uses the tube length.
+
+        Returns
+        -------
+        numpy.ndarray
+            2D PSF array with shape ``(zv.size, rv.size)``.
         """
 
         mp = self.parameters
@@ -480,18 +657,29 @@ class MicroscopePSF:
         return psf_rz
 
     def gLZRParticleScanSlow(self, rv, pz, normalize=True, wvl=0.6, zd=None, zv=0.0):
-        """
-        This is the integration version of gLZRParticleScan.
+        """Calculate radial G-L PSF by particle scan using numerical integration.
 
-        mp - The microscope parameters dictionary.
-        rv - A numpy array containing the radius values.
-        pz - A numpy array containing the particle z position above the coverslip (positive values only)
-             in microns.
+        Slow reference implementation of ``gLZRParticleScan``.
 
-        normalize - Normalize the PSF to unit height.
-        wvl - Light wavelength in microns.
-        zd - Actual camera position in microns. If not specified the microscope tube length is used.
-        zv - The (relative) z offset value of the coverslip (negative is closer to the objective).
+        Parameters
+        ----------
+        rv : numpy.ndarray
+            Radial distance values in microns.
+        pz : numpy.ndarray
+            Particle z positions above the coverslip in microns.
+        normalize : bool
+            If True, normalize PSF to unit height.
+        wvl : float
+            Light wavelength in microns.
+        zd : float or None
+            Camera position in microns. If None, uses the tube length.
+        zv : float
+            Relative z offset of the coverslip in microns.
+
+        Returns
+        -------
+        numpy.ndarray
+            2D PSF array with shape ``(pz.size, rv.size)``.
         """
 
         mp = self.parameters
