@@ -48,56 +48,45 @@ def calibrate_denoiser(
 
     Parameters
     ----------
-    image: ArrayLike
+    image : ArrayLike
         Image to calibrate denoiser with.
-
-    denoise_function: Callable
+    denoise_function : Callable
         Denoising function to calibrate. Should take an image as first parameter,
-        all other parameters should have defaults
-
-    denoise_parameters:
+        all other parameters should have defaults.
+    denoise_parameters : Dict[str, Union[Tuple[float, float], List[Any]]]
         Dictionary with keys corresponding to parameters of the denoising function.
         Values are either: (i) a list of possible values (categorical parameter),
         or (ii) a tuple of floats defining the bounds of that numerical parameter.
-
-    mode: str
+    mode : str
         Algorithm to use. Can be 'smart' and 'l-bfgs-b'.
-
-    max_num_evaluations: int
+    max_num_evaluations : int
         Max number of function evaluations. This is per the size of the cartesian
         product of categorical parameters.
-
     patience : int
-        After 'patience' evaluations we stop the optimiser
-
-    interpolation_mode: str
+        After 'patience' evaluations we stop the optimiser.
+    interpolation_mode : str
         When masking we need to use a value for replacing the masked values.
         One approach is to replace by zero: 'zero', or apply a Gaussian
-        filter: 'gaussian', or apply a median filter: 'median'
-
-    stride: int
+        filter: 'gaussian', or apply a median filter: 'median'.
+    stride : int
         Stride to compute self-supervised loss.
-
-    loss_function: str
-        Loss/Error function: Can be:  'L1', 'L2', 'SSIM'
-
-    blind_spots: Optional[List[Tuple[int]]]
+    loss_function : str
+        Loss/Error function. Can be: 'L1', 'L2', 'SSIM'.
+    blind_spots : Optional[List[Tuple[int]]]
         Set to None to enable automatic blind-spot detection.
         Otherwise provide list of blindspots. For example:
         [(0,0,0),(1,0,0),(-1,0,0)].
-
-    display_images: bool
+    display_images : bool
         If True the denoised images for each parameter tested are displayed.
-        this _will_ be slow.
-
-    other_fixed_parameters: dict
+        This will be slow.
+    other_fixed_parameters : dict
         Other fixed parameters to pass to the denoiser function.
-
 
     Returns
     -------
-    Dictionary with optimal parameters
-
+    dict
+        Dictionary mapping parameter names to their optimal values,
+        including both optimised and fixed parameters.
     """
 
     # Loss function:
@@ -178,6 +167,24 @@ def calibrate_denoiser(
 
                     # This is the function to optimize:
                     def opt_function(*point):
+                        """Evaluate the J-invariant loss for a given parameter point.
+
+                        Constructs a parameter dictionary from the categorical
+                        combination and the numerical point, then computes the
+                        self-supervised J-invariant loss. The return value is
+                        negated because the optimizer maximizes.
+
+                        Parameters
+                        ----------
+                        *point : float
+                            Numerical parameter values in the order of
+                            ``numerical_parameters_names``.
+
+                        Returns
+                        -------
+                        float
+                            Negated J-invariant loss (higher is better).
+                        """
 
                         # Given a point, we build the parameter dict:
                         param = dict(combination)
@@ -238,6 +245,13 @@ def calibrate_denoiser(
                             ):
 
                                 def callback(x):
+                                    """Log the current parameter vector during optimization.
+
+                                    Parameters
+                                    ----------
+                                    x : numpy.ndarray
+                                        Current parameter vector from the optimizer.
+                                    """
                                     aprint(x)
 
                                 # x0 = numpy.asarray(tuple((0.5 * (v[1] - v[0]) for (n, v) in
@@ -248,6 +262,23 @@ def calibrate_denoiser(
 
                                 # Impedance mismatch:
                                 def __function(_denoiser_args):
+                                    """Adapter that negates ``opt_function`` for scipy minimizers.
+
+                                    Converts from ``scipy.optimize`` array-input convention
+                                    to the ``opt_function`` starred-args convention and
+                                    negates the result (since scipy minimizes while
+                                    ``opt_function`` returns negated loss for maximization).
+
+                                    Parameters
+                                    ----------
+                                    _denoiser_args : numpy.ndarray
+                                        Parameter vector from the scipy optimizer.
+
+                                    Returns
+                                    -------
+                                    float
+                                        Positive loss value suitable for minimization.
+                                    """
                                     return -opt_function(*tuple(_denoiser_args))
 
                                 # First we optimise with a global optimiser:

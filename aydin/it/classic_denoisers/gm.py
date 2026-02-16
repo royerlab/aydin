@@ -16,6 +16,7 @@ from scipy.signal import medfilt2d
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_gm(
@@ -86,8 +87,12 @@ def calibrate_denoise_gm(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_gm`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
 
     # Convert image to float if needed:
@@ -137,6 +142,7 @@ def calibrate_denoise_gm(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 3 * image.nbytes
@@ -162,6 +168,7 @@ def denoise_gm(
     \n\n
     Note: We recommend applying a variance stabilisation transform
     to improve results for images with non-Gaussian noise.
+    <notgui>
 
     Parameters
     ----------
@@ -192,7 +199,8 @@ def denoise_gm(
 
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:

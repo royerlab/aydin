@@ -20,7 +20,7 @@ of the Aydin API.
 
    Denoise an image using ImageDenoiserClassic <api_tutorials/image_translator/classic>
    Denoise an image using ImageTranslatorFGR <api_tutorials/image_translator/fgr>
-   Denoise an image using ImageTranslatorCNN  <api_tutorials/image_translator/cnn>
+   Denoise an image using ImageTranslatorCNNTorch  <api_tutorials/image_translator/cnn>
    How to implement Noise2Noise using ImageTranslatorFGR <api_tutorials/image_translator/noise2noise>
    How to implement supervised denoising using image translators <api_tutorials/image_translator/supervised>
 

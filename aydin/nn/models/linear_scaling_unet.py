@@ -17,19 +17,7 @@ class LinearScalingUNetModel(nn.Module):
     Unlike the standard UNet where filter counts double at each level,
     this variant increases filters linearly (e.g., 8, 16, 24, 32),
     resulting in a more parameter-efficient model.
-
-    Parameters
-    ----------
-    spacetime_ndim : int
-        Number of spatial dimensions (2 or 3).
-    nb_unet_levels : int
-        Number of encoder/decoder levels.
-    nb_filters : int
-        Number of filters in the first encoder level.
-    learning_rate : float
-        Learning rate (stored but not used internally by the model).
-    pooling_mode : str
-        Downsampling mode: ``'max'`` or ``'ave'``.
+    <notgui>
     """
 
     def __init__(
@@ -37,15 +25,26 @@ class LinearScalingUNetModel(nn.Module):
         spacetime_ndim,
         nb_unet_levels: int = 4,
         nb_filters: int = 8,
-        learning_rate=0.01,
         pooling_mode: str = 'max',
     ):
+        """Initialize the Linear Scaling UNet model.
+
+        Parameters
+        ----------
+        spacetime_ndim : int
+            Number of spatial dimensions (2 or 3).
+        nb_unet_levels : int
+            Number of encoder/decoder levels.
+        nb_filters : int
+            Number of filters in the first encoder level.
+        pooling_mode : str
+            Downsampling mode: ``'max'`` or ``'ave'``.
+        """
         super(LinearScalingUNetModel, self).__init__()
 
         self.spacetime_ndim = spacetime_ndim
         self.nb_unet_levels = nb_unet_levels
         self.nb_filters = nb_filters
-        self.learning_rate = learning_rate
         self.pooling_down = PoolingDown(spacetime_ndim, pooling_mode)
         self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
 
@@ -93,7 +92,15 @@ class LinearScalingUNetModel(nn.Module):
         # Decoder
         for layer_index in range(self.nb_unet_levels):
             x = self.upsampling(x)
-            x = torch.cat([x, skip_layer.pop()], dim=1)
+            skip = skip_layer.pop()
+            # Pad upsampled tensor to match skip connection size when
+            # floor-division pooling caused an odd-to-even size drop
+            if x.shape != skip.shape:
+                pad = []
+                for s_x, s_skip in zip(reversed(x.shape[2:]), reversed(skip.shape[2:])):
+                    pad.extend([0, s_skip - s_x])
+                x = torch.nn.functional.pad(x, pad, mode='replicate')
+            x = torch.cat([x, skip], dim=1)
             x = self.double_conv_blocks_decoder[layer_index](x)
 
         # Final convolution

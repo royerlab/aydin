@@ -28,6 +28,13 @@ class BaseCroppingTab(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the cropping tab with napari viewer and range sliders.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(BaseCroppingTab, self).__init__(parent)
         self.parent = parent
 
@@ -125,32 +132,32 @@ class BaseCroppingTab(QWidget):
             self.clear_cropping_tab()
             self.parent.enable_disable_a_tab(self.__class__, True)
             self._images = images
-            self._metadata = images[0][2]
-            self.image = images[0][1]
+            self._metadata = images[0].metadata
+            self.image = images[0].array
         else:
-            self._images = [image[1] for image in images]
+            self._images = [image.array for image in images]
             self.clear_cropping_tab()
             self.parent.enable_disable_a_tab(self.__class__, False)
 
     @property
     def image(self):
-        """image property
+        """The current full-resolution image loaded in this cropping tab.
 
         Returns
         -------
-        Returns the image with downscaled and padded spatiotemporal axes
-
+        numpy.ndarray or None
+            The image array, or None if no image is loaded.
         """
         return self._image
 
     @image.setter
     def image(self, image):
-        """image property setter.
+        """Set the image and initialize the viewer and crop sliders.
 
         Parameters
         ----------
-        image
-
+        image : numpy.ndarray
+            The image array to display and crop.
         """
         self._image = image
         self.new_crop = numpy.zeros(
@@ -193,12 +200,12 @@ class BaseCroppingTab(QWidget):
 
     @property
     def cropped_image(self):
-        """Takes the image apply crop and returns the cropped image.
+        """Apply the current crop sliders and return the cropped image.
 
         Returns
         -------
-        Single image in a list
-
+        list of numpy.ndarray
+            A single-element list containing the cropped image array.
         """
         image = self._image[self.crop_selection_slicing_object]
 
@@ -224,55 +231,35 @@ class BaseCroppingTab(QWidget):
 
         return self.new_crop
 
+    def _configure_axis_slider(self, slider_widget, axis_char, optional=False):
+        """Configure a single axis slider's range and visibility.
+
+        Parameters
+        ----------
+        slider_widget : QRangeSliderWithLabels
+            The slider widget to configure.
+        axis_char : str
+            Axis character to look up (e.g. 'X', 'Y', 'Z', 'T').
+        optional : bool
+            If True, hide the slider when the axis is absent.
+        """
+        axis_idx = self._metadata.axes.find(axis_char)
+        if optional and axis_idx == -1:
+            slider_widget.setHidden(True)
+            return
+        if optional:
+            slider_widget.setHidden(False)
+        dim_size = self.image.shape[axis_idx]
+        slider_widget.slider.set_range((0, dim_size))
+        slider_widget.slider.set_values((0, dim_size))
+        slider_widget.upper_limit_label.setText(str(dim_size))
+
     def update_sliders(self):
         """Configure slider ranges and visibility based on the current image dimensions."""
-        self.x_crop_slider.slider.setRange(
-            (0, self.image.shape[self._metadata.axes.find("X")])
-        )
-        self.x_crop_slider.slider.setValues(
-            (0, self.image.shape[self._metadata.axes.find("X")])
-        )
-        self.x_crop_slider.upper_limit_label.setText(
-            str(self.image.shape[self._metadata.axes.find("X")])
-        )
-
-        self.y_crop_slider.slider.setRange(
-            (0, self.image.shape[self._metadata.axes.find("Y")])
-        )
-        self.y_crop_slider.slider.setValues(
-            (0, self.image.shape[self._metadata.axes.find("Y")])
-        )
-        self.y_crop_slider.upper_limit_label.setText(
-            str(self.image.shape[self._metadata.axes.find("Y")])
-        )
-
-        if "Z" in self._metadata.axes:
-            self.z_crop_slider.setHidden(False)
-            self.z_crop_slider.slider.setRange(
-                (0, self.image.shape[self._metadata.axes.find("Z")])
-            )
-            self.z_crop_slider.slider.setValues(
-                (0, self.image.shape[self._metadata.axes.find("Z")])
-            )
-            self.z_crop_slider.upper_limit_label.setText(
-                str(self.image.shape[self._metadata.axes.find("Z")])
-            )
-        else:
-            self.z_crop_slider.setHidden(True)
-
-        if "T" in self._metadata.axes:
-            self.t_crop_slider.setHidden(False)
-            self.t_crop_slider.slider.setRange(
-                (0, self.image.shape[self._metadata.axes.find("T")])
-            )
-            self.t_crop_slider.slider.setValues(
-                (0, self.image.shape[self._metadata.axes.find("T")])
-            )
-            self.t_crop_slider.upper_limit_label.setText(
-                str(self.image.shape[self._metadata.axes.find("T")])
-            )
-        else:
-            self.t_crop_slider.setHidden(True)
+        self._configure_axis_slider(self.x_crop_slider, "X")
+        self._configure_axis_slider(self.y_crop_slider, "Y")
+        self._configure_axis_slider(self.z_crop_slider, "Z", optional=True)
+        self._configure_axis_slider(self.t_crop_slider, "T", optional=True)
 
     def initialize_viewer(self):
         """Set up the napari viewer with the current image and crop overlay."""

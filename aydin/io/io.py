@@ -111,6 +111,11 @@ class FileMetadata:
     """
 
     def __init__(self):
+        """Initialize a FileMetadata instance with all attributes set to None.
+
+        All attributes default to None (or False for ``splitted``), and are
+        populated after reading an image file via :func:`imread`.
+        """
         self.is_folder = None
         self.extension = None
         self.axes = None
@@ -123,9 +128,32 @@ class FileMetadata:
         self.splitted = False
 
     def __str__(self) -> str:
+        """Return a human-readable string representation of the metadata.
+
+        Returns
+        -------
+        str
+            Formatted string showing all metadata fields.
+        """
         return f" is_folder={self.is_folder}, ext={self.extension}, axes={self.axes}, shape={self.shape}, batch_axes={self.batch_axes}, channel_axes={self.channel_axes}, dtype={self.dtype}, format={self.format} "
 
     def __eq__(self, other):
+        """Check equality between two FileMetadata instances.
+
+        Compares all metadata fields except ``splitted``.
+
+        Parameters
+        ----------
+        other : FileMetadata
+            The other metadata object to compare against.
+
+        Returns
+        -------
+        bool or NotImplemented
+            True if all compared fields are equal, False otherwise.
+            Returns ``NotImplemented`` if ``other`` is not a
+            :class:`FileMetadata` instance.
+        """
         if not isinstance(other, FileMetadata):
             return NotImplemented  # don't attempt to compare against unrelated types
 

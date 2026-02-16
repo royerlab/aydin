@@ -1,3 +1,10 @@
+"""Demo of variance stabilisation transform (VST) modes.
+
+Demonstrates the ``VarianceStabilisationTransform`` by applying each
+available VST mode (Yeo-Johnson, Box-Cox, quantile, Anscombe, log,
+sqrt, identity) to a simulated camera image with Poisson noise.
+"""
+
 import numpy
 
 from aydin.analysis.camera_simulation import simulate_camera_image
@@ -6,6 +13,7 @@ from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTran
 
 
 def demo_vst():
+    """Apply all VST modes to a simulated noisy camera image."""
 
     image = characters()
     image = image.astype(numpy.float32) * 0.1
@@ -13,28 +21,28 @@ def demo_vst():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(image, name='noisy')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(image, name='noisy')
 
-        for mode in [
-            'yeo-johnson',
-            'box-cox',
-            'quantile',
-            'anscomb',
-            'log',
-            'sqrt',
-            'identity',
-        ]:
-            print(f"testing mode: {mode}")
-            vst = VarianceStabilisationTransform(mode=mode)
+    for mode in [
+        'yeo-johnson',
+        'box-cox',
+        'quantile',
+        'anscomb',
+        'log',
+        'sqrt',
+        'identity',
+    ]:
+        print(f"testing mode: {mode}")
+        vst = VarianceStabilisationTransform(mode=mode)
 
-            preprocessed = vst.preprocess(noisy)
-            postprocessed = vst.postprocess(preprocessed)
+        preprocessed = vst.preprocess(noisy)
+        postprocessed = vst.postprocess(preprocessed)
 
-            viewer.add_image(preprocessed, name='preprocessed_' + mode)
-            viewer.add_image(postprocessed, name='postprocessed_' + mode)
+        viewer.add_image(preprocessed, name='preprocessed_' + mode)
+        viewer.add_image(postprocessed, name='postprocessed_' + mode)
+    napari.run()
 
 
 if __name__ == "__main__":

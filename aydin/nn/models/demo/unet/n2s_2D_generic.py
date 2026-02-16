@@ -27,7 +27,7 @@ def demo(image, model_class, do_add_noise=True):
     print(noisy.shape)
 
     # noisy = models.tensor(noisy)
-    image = torch.tensor(image)
+    image = torch.from_numpy(image)
 
     model = model_class(
         nb_unet_levels=2,
@@ -41,7 +41,7 @@ def demo(image, model_class, do_add_noise=True):
     stop = time.time()
     print(f"Training: elapsed time:  {stop - start} ")
 
-    noisy = torch.tensor(noisy)
+    noisy = torch.from_numpy(noisy)
     model.eval()
     model = model.cpu()
     print(f"noisy tensor shape: {noisy.shape}")

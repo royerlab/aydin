@@ -1,3 +1,10 @@
+"""Demonstrate 3D batched Noise2Self denoising with CatBoost on HeLa data.
+
+This demo applies self-supervised FGR denoising with CatBoost to the Hyman
+HeLa 4D dataset, treating the first axis as a batch dimension so that each
+time point is denoised independently, with napari visualization.
+"""
+
 # flake8: noqa
 import time
 
@@ -12,6 +19,7 @@ from aydin.regression.cb import CBRegressor
 
 
 def demo():
+    """Denoise 3D HeLa volumes in batch mode using FGR with CatBoost."""
     image_path = examples_single.hyman_hela.get_path()
     image, metadata = io.imread(image_path)
     # image = image[0:10, 15:35, 130:167, 130:177]
@@ -38,13 +46,13 @@ def demo():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(
-            rescale_intensity(denoised, in_range='image', out_range=(0, 1)),
-            name='denoised',
-        )
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(
+        rescale_intensity(denoised, in_range='image', out_range=(0, 1)),
+        name='denoised',
+    )
+    napari.run()
 
 
 if __name__ == "__main__":

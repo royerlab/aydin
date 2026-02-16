@@ -1,3 +1,10 @@
+"""Demo of Noise2Self perceptron denoising on batched 3D HeLa cell data.
+
+Loads a 4D HeLa dataset, treats the first axis as a batch dimension,
+and trains an ``ImageTranslatorFGR`` with ``PerceptronRegressor`` for
+self-supervised 3D denoising.
+"""
+
 # flake8: noqa
 import time
 
@@ -12,6 +19,7 @@ from aydin.regression.perceptron import PerceptronRegressor
 
 
 def demo():
+    """Run Noise2Self perceptron denoising on batched 3D HeLa image data."""
     image_path = examples_single.hyman_hela.get_path()
     image, metadata = io.imread(image_path)
     # image = image[0:10, 15:35, 130:167, 130:177]
@@ -38,13 +46,13 @@ def demo():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(
-            rescale_intensity(denoised, in_range='image', out_range=(0, 1)),
-            name='denoised',
-        )
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(
+        rescale_intensity(denoised, in_range='image', out_range=(0, 1)),
+        name='denoised',
+    )
+    napari.run()
 
 
 if __name__ == "__main__":

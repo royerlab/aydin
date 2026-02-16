@@ -1,9 +1,20 @@
+"""Demo of periodic noise suppression transform.
+
+Demonstrates the ``PeriodicNoiseSuppressionTransform`` by adding
+synthetic periodic noise to a camera image and comparing FGR denoising
+results with and without periodic noise suppression preprocessing.
+"""
+
+from functools import partial
+
 import numpy
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import normalise, camera, add_noise
+from aydin.io.datasets import add_noise, camera, normalise
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.it.transforms.periodic import PeriodicNoiseSuppressionTransform
 from aydin.it.transforms.range import RangeTransform
@@ -12,6 +23,7 @@ from aydin.util.log.log import Log
 
 
 def demo_high_pass_real():
+    """Compare FGR denoising with and without periodic noise suppression."""
 
     Log.override_test_exclusion = True
     Log.enable_output = True
@@ -36,13 +48,12 @@ def demo_high_pass_real():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(noisy, name='noisy')
-        viewer.add_image(preprocessed, name='preprocessed')
-        viewer.add_image(postprocessed, name='postprocessed')
-
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(noisy, name='noisy')
+    viewer.add_image(preprocessed, name='preprocessed')
+    viewer.add_image(postprocessed, name='postprocessed')
+    napari.run()
     generator = StandardFeatureGenerator(
         include_corner_features=True,
         include_scale_one=True,
@@ -74,17 +85,15 @@ def demo_high_pass_real():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(preprocessed, name='preprocessed')
-        viewer.add_image(postprocessed, name='postprocessed')
-        viewer.add_image(
-            denoised_without_preprocessing, name='denoised_without_preprocessing'
-        )
-        viewer.add_image(
-            denoised_with_preprocessing, name='denoised_with_preprocessing'
-        )
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(preprocessed, name='preprocessed')
+    viewer.add_image(postprocessed, name='postprocessed')
+    viewer.add_image(
+        denoised_without_preprocessing, name='denoised_without_preprocessing'
+    )
+    viewer.add_image(denoised_with_preprocessing, name='denoised_with_preprocessing')
+    napari.run()
 
 
 if __name__ == "__main__":

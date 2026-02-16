@@ -1,3 +1,10 @@
+"""Demo of Noise2Self perceptron denoising on a large 3D islet volume.
+
+Loads a large 3D islet image, trains an ``ImageTranslatorFGR`` with
+``PerceptronRegressor``, and writes the denoised result to a
+memory-mapped TIFF file.
+"""
+
 # flake8: noqa
 import time
 from os.path import join
@@ -14,6 +21,7 @@ from aydin.regression.perceptron import PerceptronRegressor
 
 
 def demo():
+    """Run Noise2Self perceptron denoising on a large 3D islet volume."""
     # (3, 320, 865, 1014)
     image_path = examples_single.royerlab_hcr.get_path()
     array, metadata = io.imread(image_path)
@@ -63,12 +71,12 @@ def demo():
 
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(train, name='train')
-            viewer.add_image(infer, name='infer')
-            print(f"Inference: elapsed time:  {stop - start} ")
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(train, name='train')
+        viewer.add_image(infer, name='infer')
+        print(f"Inference: elapsed time:  {stop - start} ")
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
 
 if __name__ == "__main__":

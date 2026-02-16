@@ -90,6 +90,7 @@ def _numba_cpu_correlation_1d(
     khl0 = kl0 // 2
 
     def image_get(u):
+        """Get image value at index ``u`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         return image[u]
@@ -116,6 +117,7 @@ def _numba_cpu_correlation_2d(
     khl0, khl1 = kl0 // 2, kl1 // 2
 
     def image_get(u, v):
+        """Get image value at ``(u, v)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v
@@ -146,6 +148,7 @@ def _numba_cpu_correlation_3d(
     khl0, khl1, khl2 = kl0 // 2, kl1 // 2, kl2 // 2
 
     def image_get(u, v, w):
+        """Get image value at ``(u, v, w)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v
@@ -180,6 +183,7 @@ def _numba_cpu_correlation_4d(
     khl0, khl1, khl2, khl3 = kl0 // 2, kl1 // 2, kl2 // 2, kl3 // 2
 
     def image_get(u, v, w, x):
+        """Get image value at ``(u, v, w, x)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v
@@ -222,6 +226,7 @@ def _numba_cpu_correlation_5d(
     khl0, khl1, khl2, khl3, khl4 = kl0 // 2, kl1 // 2, kl2 // 2, kl3 // 2, kl4 // 2
 
     def image_get(u, v, w, x, y):
+        """Get image value at ``(u, v, w, x, y)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v
@@ -283,6 +288,7 @@ def _numba_cpu_correlation_6d(
     )
 
     def image_get(u, v, w, x, y, z):
+        """Get image value at ``(u, v, w, x, y, z)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v

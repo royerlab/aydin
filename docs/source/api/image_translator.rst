@@ -14,4 +14,4 @@ implementations in aydin currently:
    ImageTranslatorBase <image_translators/base>
    ImageDenoiserClassic <image_translators/classic>
    ImageTranslatorFGR <image_translators/fgr>
-   ImageTranslatorCNN <image_translators/cnn>
+   ImageTranslatorCNNTorch <image_translators/cnn>

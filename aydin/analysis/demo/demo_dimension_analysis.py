@@ -1,5 +1,7 @@
+"""Demo script for dimension analysis on various example datasets."""
+
 # flake8: noqa
-from aydin.analysis.test.test_dimension_analysis import (
+from aydin.analysis.tests.test_dimension_analysis import (
     test_dimension_analysis,
     test_dimension_analysis_flybrain,
     test_dimension_analysis_hela,
@@ -9,7 +11,7 @@ from aydin.util.log.log import Log
 
 
 def demo_dimension_analysis(display=False):
-
+    """Run dimension analysis on New York, MaiTre mouse, fly brain, and HeLa datasets."""
     Log.enable_output = True
     Log.set_log_max_depth(8)
 

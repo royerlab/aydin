@@ -1,3 +1,10 @@
+"""Demo of Noise2Self perceptron denoising on a small 3D islet volume.
+
+Loads a small cropped region of a 3D islet image, trains an
+``ImageTranslatorFGR`` with ``PerceptronRegressor``, and visualizes
+the result in napari.
+"""
+
 # flake8: noqa
 import time
 
@@ -12,6 +19,7 @@ from aydin.regression.perceptron import PerceptronRegressor
 
 
 def demo():
+    """Run Noise2Self perceptron denoising on a small 3D islet sub-volume."""
     # (3, 320, 865, 1014)
     image_path = examples_single.royerlab_hcr.get_path()
     image, metadata = io.imread(image_path)
@@ -42,10 +50,10 @@ def demo():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(denoised, name='denoised')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(denoised, name='denoised')
+    napari.run()
 
 
 if __name__ == "__main__":

@@ -43,6 +43,13 @@ def random_patches(
     """
     list_of_slice_objects = []
 
+    # Compute histogram range from the actual image data (guard constant images)
+    img_min = float(image.min())
+    img_max = float(image.max())
+    if img_min == img_max:
+        img_max = img_min + 1.0
+    hist_range = (img_min, img_max)
+
     # Calculate total number of possible patches for a given image and patch_size
     possible_positions = numpy.asarray(image.shape[2:]) - patch_size + 1
 
@@ -85,7 +92,7 @@ def random_patches(
 
             # Calculate histogram and entropy
             hist, _ = numpy.histogram(
-                current_patch, range=(0, 1), bins=255, density=True
+                current_patch, range=hist_range, bins=255, density=True
             )
             entropies.append(entropy(hist))
 

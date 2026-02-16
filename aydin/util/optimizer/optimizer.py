@@ -44,7 +44,7 @@ class Optimizer:
     """
 
     def __init__(self):
-
+        """Initialize the optimizer with empty evaluation history."""
         self.function = None
         self.bounds = None
         self.x = []
@@ -71,41 +71,32 @@ class Optimizer:
 
         Parameters
         ----------
-        function: Callable
+        function : Callable
             Function to optimize.
-
-        bounds: List[Union[Tuple[int, ...], Tuple[float, ...]]]
-            Bounds for function parameters
-
-        init_strategies: str
+        bounds : List[Union[Tuple[int, ...], Tuple[float, ...]]]
+            Bounds for function parameters.
+        init_strategies : str or None
             Initialisation strategies. Can contain: 'two', 'three', xor 'four',
             and 'random'. If None a default combination is used.
-
-        exploration_rate: float
-            Rate at which to explore
-
-        patience: int
-            Patience: how many iterations with no progress before optimiser gives up.
-
-        max_num_evaluations: int
-            Maximum number of evaluations of the /a priori/ costly given function.
-
-        num_interpolated_evaluations: int
+        exploration_rate : float
+            Rate at which to explore.
+        patience : int
+            How many iterations with no progress before optimiser gives up.
+        max_num_evaluations : int
+            Maximum number of evaluations of the a priori costly given function.
+        num_interpolated_evaluations : int
             Max number of evaluations of the interpolated function.
-
-        workers: int
+        workers : int
             Number of workers, if -1 the maximum is used.
-
-        backend: str
+        backend : str
             Backend to use for joblib parallelism.
-
 
         Returns
         -------
-        optimal_point, optimal_value
-        optimal_point: Optimal value for parameters
-        optimal_value: Corresponding function value
-
+        optimal_point : tuple of float
+            Parameter values at the optimum found.
+        optimal_value : float
+            Function value at the optimal point.
         """
         # First we figure out the dimensionality of the problem:
         n = len(bounds)
@@ -185,7 +176,7 @@ class Optimizer:
                     has_new_best = self._add_points([new_point])
 
                     aprint(
-                        f"{i}{'!' if has_new_best else' '}: {' Exploring' if do_explore else 'Optimizing'}, Best point: {self.best_point}, best value: {self.best_value}, new point: {new_point})"
+                        f"{i}{'!' if has_new_best else ' '}: {' Exploring' if do_explore else 'Optimizing'}, Best point: {self.best_point}, best value: {self.best_value}, new point: {new_point})"
                     )
 
                     # Are we running out of patience?
@@ -213,13 +204,31 @@ class Optimizer:
         backend: str = 'loky',
         display_points=False,
     ):
+        """Evaluate the objective function at multiple points and update the cache.
 
+        Parameters
+        ----------
+        point_list : list of array-like
+            Points at which to evaluate the function.
+        workers : int
+            Number of parallel workers for evaluation.
+        backend : str
+            Joblib backend for parallelism.
+        display_points : bool
+            If True, print each evaluation result.
+
+        Returns
+        -------
+        bool
+            True if a new best point was found.
+        """
         # Normalise points:
         point_list = list(
             numpy.array(point, dtype=numpy.float32) for point in point_list
         )
 
         def _function(*_point):
+            """Evaluate the objective function at a point, optionally logging."""
             _value = self.function(*_point)
             if display_points:
                 aprint(f"New point: {_point} -> {_value}")
@@ -256,6 +265,25 @@ class Optimizer:
     def _delegated_optimizer(
         self, do_explore: bool, num_evaluations: int = 128, workers: int = -1
     ):
+        """Find the next point to evaluate using the surrogate model.
+
+        Either optimizes the interpolated surrogate (exploitation) or
+        maximizes distance from existing points (exploration).
+
+        Parameters
+        ----------
+        do_explore : bool
+            If True, perform exploration rather than exploitation.
+        num_evaluations : int
+            Maximum number of surrogate function evaluations.
+        workers : int
+            Number of parallel workers for nearest-neighbor queries.
+
+        Returns
+        -------
+        numpy.ndarray
+            The next candidate point to evaluate.
+        """
         # If we ran out of evaluations (recursive call!), then let's return immediately with None:
         if num_evaluations <= 0:
             return None
@@ -265,6 +293,22 @@ class Optimizer:
 
         # This is the function to optimize:
         def function(point):
+            """Evaluate the surrogate or exploration objective at a point.
+
+            In exploitation mode, evaluates the RBF interpolator. In
+            exploration mode, returns the distance to the nearest
+            previously evaluated point.
+
+            Parameters
+            ----------
+            point : numpy.ndarray
+                Candidate parameter vector.
+
+            Returns
+            -------
+            float
+                Objective value (higher is better).
+            """
 
             value = 0
 
@@ -341,6 +385,16 @@ class Optimizer:
         return point
 
     def _compute_lipschitz(self):
+        """Estimate per-dimension Lipschitz constants near the best point.
+
+        Uses nearest-neighbor pairs to compute empirical slope estimates
+        and returns the median as a robust Lipschitz constant estimate.
+
+        Returns
+        -------
+        numpy.ndarray
+            Per-dimension Lipschitz constant estimates.
+        """
         # point coordinates translated for usage with teh kd-tree:
         point_for_tree = numpy.array(self.best_point)[numpy.newaxis, ...]
 
@@ -380,6 +434,20 @@ class Optimizer:
         return lipschitz
 
     def _random_optimizer(self, function, num_evaluations: int = 128):
+        """Find the best point by random sampling.
+
+        Parameters
+        ----------
+        function : callable
+            Function to maximize.
+        num_evaluations : int
+            Number of random samples to try.
+
+        Returns
+        -------
+        numpy.ndarray
+            Best point found by random sampling.
+        """
         # We keep track of the best values:
         best_point = None
         best_value = -math.inf
@@ -403,6 +471,13 @@ class Optimizer:
         return best_point
 
     def _random_sample(self):
+        """Generate a uniformly random point within the parameter bounds.
+
+        Returns
+        -------
+        numpy.ndarray
+            Random point with each coordinate within its respective bounds.
+        """
         # First we figure out the dimensionality of the problem:
         n = len(self.bounds)
 
@@ -426,6 +501,20 @@ class Optimizer:
         return numpy.array(point)
 
     def _add_noise(self, point, sigma: float = 1e-6):
+        """Add Gaussian noise to a point, clipped to parameter bounds.
+
+        Parameters
+        ----------
+        point : numpy.ndarray
+            Point to perturb.
+        sigma : float
+            Standard deviation of noise relative to parameter range width.
+
+        Returns
+        -------
+        numpy.ndarray
+            Perturbed point clipped to the parameter bounds.
+        """
         # range widths:
         widths = numpy.array(tuple(abs(float(u - v)) for u, v in self.bounds))
 
@@ -444,6 +533,20 @@ class Optimizer:
 
 
 def _is_in(array, array_list):
+    """Check if any element in array_list shares a coordinate value with array.
+
+    Parameters
+    ----------
+    array : numpy.ndarray
+        Point to check.
+    array_list : list of numpy.ndarray
+        List of existing points.
+
+    Returns
+    -------
+    bool
+        True if any existing point shares a coordinate value with ``array``.
+    """
     for a in array_list:
         # RBF interpolator hates it when two coordinates of two points have the same values...
         if (a == array).any():

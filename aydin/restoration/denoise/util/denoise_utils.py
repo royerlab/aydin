@@ -74,14 +74,19 @@ def get_denoiser_class_instance(variant, lower_level_args=None, it_transforms=No
         An instance of the appropriate denoiser class configured with
         the specified variant and arguments.
     """
-    method_name_and_approach, implementation_name = variant.split("-")
+    method_name_and_approach, implementation_name = variant.split("-", 1)
     response = importlib.import_module(
         denoise.__name__ + '.' + method_name_and_approach.lower()
     )
 
-    elem = [x for x in dir(response) if method_name_and_approach.lower() in x.lower()][
-        0
-    ]  # class name
+    candidates = [
+        x for x in dir(response) if method_name_and_approach.lower() in x.lower()
+    ]
+    if not candidates:
+        raise ValueError(
+            f"No denoiser class found for method '{method_name_and_approach}'"
+        )
+    elem = candidates[0]  # class name
 
     denoiser_class = response.__getattribute__(elem)
 
@@ -117,9 +122,12 @@ def get_list_of_denoiser_implementations():
     for module in DenoiseRestorationBase.get_implementations_in_a_module(denoise):
         response = importlib.import_module(denoise.__name__ + '.' + module.name)
 
-        elem = [x for x in dir(response) if module.name.replace('_', '') in x.lower()][
-            0
-        ]  # class name
+        candidates = [
+            x for x in dir(response) if module.name.replace('_', '') in x.lower()
+        ]
+        if not candidates:
+            continue
+        elem = candidates[0]  # class name
 
         denoiser_class = response.__getattribute__(elem)
         denoiser_implementations += denoiser_class().implementations

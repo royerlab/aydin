@@ -1,3 +1,10 @@
+"""Demo of super-fast representative crop extraction from n-dimensional images.
+
+Demonstrates the ``super_fast_representative_crop`` function by
+extracting informative crops of specified sizes from various 2D, 3D,
+and 4D test images and verifying the crop size constraints.
+"""
+
 # flake8: noqa
 import numpy
 from numpy.random import normal
@@ -17,8 +24,16 @@ from aydin.util.log.log import Log, aprint, asection
 
 
 def demo_super_fast_representative_crop(image, crop_size=64000, display: bool = True):
-    """
-    Demo for self-supervised denoising using camera image with synthetic noise
+    """Extract a super-fast representative crop from an image and verify its size.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image.
+    crop_size : int, optional
+        Target crop size in number of elements, by default 64000.
+    display : bool, optional
+        Whether to display results in napari, by default True.
     """
     Log.enable_output = True
     Log.set_log_max_depth(5)
@@ -27,6 +42,7 @@ def demo_super_fast_representative_crop(image, crop_size=64000, display: bool = 
     image += 0.1 * normal(size=image.shape, scale=0.1)
 
     def _crop_fun():
+        """Compute super-fast representative crop with current settings."""
         return super_fast_representative_crop(
             image, crop_size=crop_size, display_crop=False
         )

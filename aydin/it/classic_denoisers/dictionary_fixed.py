@@ -137,8 +137,13 @@ def calibrate_denoise_dictionary_fixed(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_dictionary_fixed`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters, including the chosen
+        sparse coding mode, sparsity level, and the fixed dictionary.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -155,6 +160,7 @@ def calibrate_denoise_dictionary_fixed(
     def _denoise_dictionary(
         image, max_freq: float = 0.5, coding_mode: str = 'omp', **parameters
     ):
+        """Build a fixed dictionary at the given max_freq and denoise."""
         dictionary = fixed_dictionary(
             image, patch_size=patch_size, dictionaries=dictionaries, max_freq=max_freq
         )
@@ -229,12 +235,11 @@ def calibrate_denoise_dictionary_fixed(
     if display_dictionary:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(
-                dictionary.reshape(len(dictionary), *patch_size), name='dictionary'
-            )
-
+        viewer = napari.Viewer()
+        viewer.add_image(
+            dictionary.reshape(len(dictionary), *patch_size), name='dictionary'
+        )
+        napari.run()
     # Memory needed:
     memory_needed = 2 * image.nbytes + 6 * image.nbytes * math.prod(patch_size)
 
@@ -254,6 +259,7 @@ def denoise_dictionary_fixed(
     Denoises the given image using sparse-coding over a fixed
     dictionary of nD image patches. The dictionary learning and
     patch sparse coding uses scikit-learn's Batch-OMP implementation.
+    <notgui>
 
     Parameters
     ----------
@@ -284,7 +290,8 @@ def denoise_dictionary_fixed(
 
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:

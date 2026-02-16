@@ -61,7 +61,7 @@ def extract_patches_nd(
     """
 
     # Normalises patch size to tuple:
-    if type(patch_size) != tuple:
+    if not isinstance(patch_size, tuple):
         patch_size = (patch_size,) * image.ndim
 
     # Check patch size versus image size:

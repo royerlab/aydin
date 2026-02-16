@@ -1,5 +1,13 @@
+"""Demonstrate stopping CNN training from another thread.
+
+This demo shows how to programmatically stop a CNN (Torch) training session
+from a separate thread using a timer, which is useful for implementing
+training time limits or user-triggered cancellation.
+"""
+
 # flake8: noqa
 import time
+from functools import partial
 
 import napari
 import numpy
@@ -7,22 +15,23 @@ import numpy as np
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 from skimage.util import random_noise
 
-from aydin.it.cnn import ImageTranslatorCNN
+from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
 
 def n(image):
+    """Normalise image intensity to [0, 1] range."""
     return rescale_intensity(
         image.astype(numpy.float32), in_range='image', out_range=(0, 1)
     )
 
 
 def demo():
-    """
-    Demo for how to stop training from an other thread.
-    """
+    """Train a CNN on noisy data and stop training after 30 seconds."""
 
     image = camera().astype(np.float32)
     image = n(image)
@@ -33,11 +42,12 @@ def demo():
     noisy = random_noise(noisy, mode='gaussian', var=0.01, rng=0)
     noisy = noisy.astype(np.float32)
     noisy = numpy.expand_dims(numpy.expand_dims(noisy, axis=-1), axis=0)
-    it = ImageTranslatorCNN()
+    it = ImageTranslatorCNNTorch()
 
     from threading import Timer
 
     def stop_training():
+        """Signal the CNN trainer to stop from a background timer thread."""
         print("!!STOPPING TRAINING NOW FROM ANOTHER THREAD!!")
         it.stop_training()
 
@@ -71,11 +81,11 @@ def demo():
     print("noisy       :", psnr(image, noisy), ssim(noisy, image))
     print("denoised_inf:", psnr(image, denoised_inf), ssim(denoised_inf, image))
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(n(image), name='image')
-        viewer.add_image(n(noisy), name='noisy')
-        viewer.add_image(n(denoised_inf), name='denoised_inf')
+    viewer = napari.Viewer()
+    viewer.add_image(n(image), name='image')
+    viewer.add_image(n(noisy), name='noisy')
+    viewer.add_image(n(denoised_inf), name='denoised_inf')
+    napari.run()
 
 
 if __name__ == "__main__":

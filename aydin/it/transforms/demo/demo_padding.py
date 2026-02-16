@@ -1,3 +1,10 @@
+"""Demo of the padding transform for image boundary handling.
+
+Demonstrates the ``PaddingTransform`` by applying padding to a 3D
+binary blobs image and verifying that postprocessing recovers the
+original shape and values.
+"""
+
 import numpy
 from skimage.data import binary_blobs
 
@@ -6,6 +13,7 @@ from aydin.it.transforms.padding import PaddingTransform
 
 
 def demo_padding():
+    """Apply padding to a 3D image and verify roundtrip reconstruction."""
     image = binary_blobs(length=128, rng=1, n_dim=3).astype(numpy.float32)
     image = normalise(image)
 
@@ -16,12 +24,11 @@ def demo_padding():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(preprocessed, name='preprocessed')
-        viewer.add_image(postprocessed, name='postprocessed')
-
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(preprocessed, name='preprocessed')
+    viewer.add_image(postprocessed, name='postprocessed')
+    napari.run()
     assert postprocessed.shape == image.shape
     assert numpy.abs(postprocessed - image).mean() < 1e-8
 

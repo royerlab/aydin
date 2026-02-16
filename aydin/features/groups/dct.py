@@ -8,10 +8,24 @@ from aydin.features.groups.correlation import CorrelationFeatures
 
 
 class DCTFeatures(CorrelationFeatures):
-    """
-    DCT Feature Group class
+    """Discrete Cosine Transform (DCT) feature group.
 
-    Generates Discrete Cosine Transform (DCT) features.
+    Generates features by correlating the image with inverse DCT basis
+    functions. Each basis function corresponds to a different spatial
+    frequency up to ``max_freq``. The kernels are optionally power-
+    transformed to alter their spatial sensitivity profile.
+
+    Attributes
+    ----------
+    size : int
+        Side length of each square DCT kernel.
+    max_freq : float
+        Maximum normalized frequency (in [0, 1]) included in the feature set.
+    power : float
+        Exponent applied to the absolute value of each kernel to reshape
+        its frequency response.
+    exclude_center : bool
+        Whether the center pixel is excluded from features.
     """
 
     def __init__(self, size: int, max_freq: float = 0.75, power: float = 0.5):

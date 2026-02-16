@@ -126,8 +126,7 @@ Cropping selection
 
 Cropping your image before passing to train a model can shorten your training duration significantly.
 To address this need, we built two cropping tabs: one for training crop and one for inference crop
-respectively. Currently, we are only supporting cropping across X, Y, Z and T dimensions. Looking
-forward to support cropping over Z in near future as well.
+respectively. Currently, we support cropping across X, Y, Z and T dimensions.
 
 
 Pre and post processing

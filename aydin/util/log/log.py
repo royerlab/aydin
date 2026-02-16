@@ -81,6 +81,7 @@ class Log(metaclass=_LogMeta):
     max_depth = math.inf
 
     def __init__(self):
+        """Initialize a Log instance (no-op; all state is class-level)."""
         return
 
     @staticmethod

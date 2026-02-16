@@ -25,6 +25,15 @@ class BlindSpotTransform:
     """
 
     def __init__(self, blind_spots):
+        """Initialize the blind-spot transform.
+
+        Parameters
+        ----------
+        blind_spots : list of tuple of int
+            List of coordinate offset tuples defining the blind-spot
+            pattern. Each tuple specifies a relative pixel offset,
+            e.g. ``[(0,0), (1,0), (-1,0)]``.
+        """
         super().__init__()
 
         self.blind_spots = blind_spots

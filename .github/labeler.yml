@@ -12,7 +12,7 @@ gui:
 
 tests:
   - changed-files:
-      - any-glob-to-any-file: '**/test/**'
+      - any-glob-to-any-file: '**/tests/**'
 
 ci:
   - changed-files:

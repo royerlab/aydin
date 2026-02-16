@@ -7,7 +7,9 @@ and training methods.
 
 import importlib
 import inspect
+import json
 import pkgutil
+from os.path import join
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import torch
@@ -17,6 +19,7 @@ import aydin.nn.models as nnmodels
 from aydin.it.base import ImageTranslatorBase
 from aydin.nn.training_methods.n2s import n2s_train
 from aydin.nn.training_methods.n2t import n2t_train
+from aydin.nn.utils.center_smoothing import apply_center_smoothing
 from aydin.util.log.log import aprint, asection
 
 
@@ -26,6 +29,23 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
     Provides a flexible framework for CNN-based image translation using PyTorch.
     Supports pluggable model architectures (e.g. JINet) and training methods
     (e.g. Noise2Self, Noise2Target).
+
+    Attributes
+    ----------
+    model : torch.nn.Module or None
+        The PyTorch model instance used for training and inference.
+    model_class : type
+        The PyTorch model class, either passed directly or resolved from
+        a string name.
+    model_kwargs : dict or None
+        Additional keyword arguments passed to the model constructor.
+    training_method : callable or None
+        Training function (e.g. ``n2s_train`` or ``n2t_train``). If None,
+        automatically selected based on whether training is self-supervised.
+    training_method_kwargs : dict or None
+        Additional keyword arguments passed to the training method.
+    spacetime_ndim : int
+        Number of spatio-temporal dimensions (2 or 3), set during training.
     """
 
     def __init__(
@@ -34,6 +54,7 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         model_kwargs: Dict = None,
         training_method: Callable = None,
         training_method_kwargs: Dict = None,
+        center_smoothing: bool = False,
         blind_spots: Optional[Union[str, List[Tuple[int]]]] = None,
         tile_min_margin: int = 8,
         tile_max_margin: Optional[int] = None,
@@ -56,6 +77,9 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             n2s_train (self-supervised) or n2t_train (supervised).
         training_method_kwargs : dict, optional
             Additional keyword arguments passed to the training method.
+        center_smoothing : bool
+            If True, apply post-training center pixel smoothing to
+            JINet-style models with DilatedConv layers.
         blind_spots : str or list of tuple of int, optional
             Blind-spot specification. See `ImageTranslatorBase` for details.
         tile_min_margin : int
@@ -89,10 +113,13 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         self.model_kwargs = model_kwargs
         self.training_method = training_method
         self.training_method_kwargs = training_method_kwargs
+        self.center_smoothing = center_smoothing
+        self.stop_fitting = False
+        self._stop_flag = None
 
     def __repr__(self):
         """Return a string representation of the PyTorch CNN translator."""
-        return f"<{self.__class__.__name__}, model={self.model}, training_method={self.training_method}"
+        return f"<{self.__class__.__name__}, model={self.model}, training_method={self.training_method}>"
 
     def save(self, path: str):
         """Save the PyTorch CNN translator model to disk.
@@ -113,67 +140,108 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         return frozen
 
     def save_cnn(self, path: str):
-        """Save the PyTorch CNN model weights to disk.
+        """Save the PyTorch CNN model weights and metadata to disk.
+
+        Saves model metadata (class name, module, spacetime_ndim,
+        model_kwargs) as JSON and model weights via ``torch.save``.
 
         Parameters
         ----------
         path : str
             Directory path to save the model files to.
-
-        Raises
-        ------
-        NotImplementedError
-            This method is not yet implemented.
         """
         if self.model is not None:
-            # serialize model to JSON:
-            raise NotImplementedError()
+            from aydin.nn.training_methods.n2s_shiftconv import ShiftConvWrapper
+
+            is_shiftconv = isinstance(self.model, ShiftConvWrapper)
+            base_model = self.model.base_model if is_shiftconv else self.model
+
+            # Save model metadata as JSON
+            metadata = {
+                'class_name': self.model_class.__name__,
+                'module_name': self.model_class.__module__,
+                'spacetime_ndim': getattr(self, 'spacetime_ndim', None),
+                'model_kwargs': self.model_kwargs,
+                'shiftconv': is_shiftconv,
+            }
+            with open(join(path, 'torch_model_metadata.json'), 'w') as f:
+                json.dump(metadata, f, indent=2)
+
+            # Save base model state dict (not wrapper state dict)
+            torch.save(base_model.state_dict(), join(path, 'torch_model_weights.pth'))
+            aprint("PyTorch CNN model saved.")
         else:
             aprint("There is no model to save yet.")
 
     def __getstate__(self):
-        """Customize pickle state for serialization.
+        """Customize pickle state to exclude non-serializable fields.
 
-        Raises
-        ------
-        NotImplementedError
-            This method is not yet implemented.
+        Returns
+        -------
+        dict
+            Object state with nn.Module and function references excluded.
         """
-        # exclude fields below that should/cannot be saved properly:
-        # del state['early_stopping']
-        # del state['reduce_learning_rate']
-        # del state['checkpoint']
-        # del state['model']
-        # del state['loss_history']
-        # del state['infmodel']
-        # del state['validation_images']
-        raise NotImplementedError()
+        state = super().__getstate__()
+        # Remove non-JSON-serializable fields
+        state.pop('model', None)
+        state.pop('training_method', None)
+        state.pop('_stop_flag', None)
+        return state
 
     def _load_internals(self, path: str):
         """Load PyTorch model state from disk.
+
+        Reads JSON metadata to reconstruct the model architecture, then
+        loads saved weights via ``model.load_state_dict``.
 
         Parameters
         ----------
         path : str
             Directory path to load the model from.
-
-        Raises
-        ------
-        NotImplementedError
-            This method is not yet implemented.
         """
         with asection(f"Loading 'cnn' image translator from {path}"):
-            # load JSON and create model:
-            # self.model =
-            raise NotImplementedError()
+            # Load metadata
+            with open(join(path, 'torch_model_metadata.json'), 'r') as f:
+                metadata = json.load(f)
+
+            # Reconstruct model class
+            module = importlib.import_module(metadata['module_name'])
+            model_class = getattr(module, metadata['class_name'])
+            self.model_class = model_class
+
+            # Build model kwargs
+            model_args = {'spacetime_ndim': metadata['spacetime_ndim']}
+            if metadata.get('model_kwargs'):
+                model_args.update(metadata['model_kwargs'])
+
+            # Instantiate model and load weights
+            base_model = model_class(**model_args)
+            base_model.load_state_dict(
+                torch.load(join(path, 'torch_model_weights.pth'), weights_only=True)
+            )
+
+            # Wrap with ShiftConvWrapper if the model was trained with shiftconv
+            if metadata.get('shiftconv'):
+                from aydin.nn.training_methods.n2s_shiftconv import ShiftConvWrapper
+
+                self.model = ShiftConvWrapper(
+                    base_model, spacetime_ndim=metadata['spacetime_ndim']
+                )
+            else:
+                self.model = base_model
+
+            self.model.eval()
+            aprint("PyTorch CNN model loaded.")
 
     def stop_training(self):
-        """Stops currently running training within the instance by turning the flag
-        true for early stop callback.
+        """Request early stopping of the current training process.
 
+        Sets the ``stop_fitting`` flag and the shared mutable stop flag
+        dict that is passed to the training method.
         """
-        # self.stop_fitting = True
-        raise NotImplementedError()
+        self.stop_fitting = True
+        if self._stop_flag is not None:
+            self._stop_flag['stop'] = True
 
     @staticmethod
     def _get_model_class_from_string(model_name):
@@ -202,9 +270,13 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             "aydin.nn.models" + '.' + module_of_interest.name
         )
 
-        class_name = [x for x in dir(response) if model_name + "model" in x.lower()][0]
+        # Find the model class: look for a class ending with "Model"
+        # This handles naming mismatches like res_unet -> ResidualUNetModel
+        class_name = [
+            x for x in dir(response) if x.endswith('Model') and not x.startswith('_')
+        ][0]
 
-        model_class = response.__getattribute__(class_name)
+        model_class = getattr(response, class_name)
 
         return model_class
 
@@ -282,6 +354,10 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         jinv : bool or tuple of bool, optional
             J-invariance flag.
         """
+        # Reset stop flags
+        self.stop_fitting = False
+        self._stop_flag = {'stop': False}
+
         # Little heuristic to decide on training method if it is not specified
         if not self.training_method:
             self.training_method = (
@@ -292,11 +368,17 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         if not self.model:
             self.model = self.model_class(**self._get_model_args(input_image))
 
-        # Generate a dict of all arguments we can pass
+        # Generate a dict of all arguments we can pass.
+        # Include both singular/plural forms so the argument filter matches
+        # whichever the training method expects (n2s uses input_image,
+        # n2t uses input_images).
         training_method_args = {
             "input_image": input_image,
+            "input_images": input_image,
             "target_image": target_image,
+            "target_images": target_image,
             "model": self.model,
+            "stop_fitting_flag": self._stop_flag,
         }
         if self.training_method_kwargs:
             training_method_args |= self.training_method_kwargs
@@ -310,6 +392,25 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
 
         # Start training
         self.training_method(**filtered_training_method_args)
+
+        # For shiftconv training, wrap the model so inference uses the
+        # same rotate-shift-unrotate pipeline the model was trained with.
+        from aydin.nn.training_methods.n2s_shiftconv import (
+            ShiftConvWrapper,
+            n2s_shiftconv_train,
+        )
+
+        if self.training_method is n2s_shiftconv_train:
+            self.model = ShiftConvWrapper(
+                self.model, spacetime_ndim=self.spacetime_ndim
+            )
+
+        # Apply center smoothing after training if requested
+        if self.center_smoothing and self.model is not None:
+            apply_center_smoothing(
+                self.model,
+                spacetime_ndim=self.spacetime_ndim,
+            )
 
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
         """Translate (denoise) an input image using the trained PyTorch CNN.
@@ -334,15 +435,38 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             If no trained model is available.
         """
         if self.model:
-            return (
-                self.model(
-                    torch.Tensor(input_image).to(
-                        next(self.model.parameters()).device
-                    )  # Trick to get the model device
-                )
-                .cpu()
-                .detach()
-                .numpy()
-            )
+            device = next(self.model.parameters()).device
+            x = torch.as_tensor(input_image, dtype=torch.float32).to(device)
+
+            # Determine required spatial alignment from model.
+            # If model is a ShiftConvWrapper, look at the base_model.
+            base = getattr(self.model, 'base_model', self.model)
+            nb_unet_levels = getattr(base, 'nb_unet_levels', 3)
+            divisor = 2**nb_unet_levels
+            spatial_dims = x.shape[2:]  # skip B, C
+
+            # Compute padding needed for each spatial dim
+            pad_amounts = []
+            for s in reversed(spatial_dims):
+                remainder = s % divisor
+                pad = (divisor - remainder) % divisor
+                pad_amounts.extend([0, pad])  # (before, after) for this dim
+
+            needs_padding = any(p > 0 for p in pad_amounts)
+            if needs_padding:
+                x = torch.nn.functional.pad(x, pad_amounts, mode='replicate')
+
+            self.model.eval()
+            with torch.no_grad():
+                result = self.model(x)
+
+            # Crop back to original spatial shape
+            if needs_padding:
+                slices = [slice(None), slice(None)]  # B, C
+                for i, s in enumerate(spatial_dims):
+                    slices.append(slice(0, s))
+                result = result[tuple(slices)]
+
+            return result.cpu().numpy()
         else:
             raise ValueError("A model is needed to infer on...")

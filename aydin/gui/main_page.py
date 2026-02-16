@@ -3,7 +3,6 @@
 import sys
 import traceback
 
-import napari
 from qtpy.QtCore import QSize, Qt
 from qtpy.QtWidgets import (
     QApplication,
@@ -54,6 +53,17 @@ class MainPage(QWidget):
     """
 
     def __init__(self, parent, threadpool, status_bar):
+        """Initialize the main page with tabs, navigation, and job runners.
+
+        Parameters
+        ----------
+        parent : QMainWindow
+            The parent App window.
+        threadpool : QThreadPool
+            Thread pool used for running denoising jobs in background threads.
+        status_bar : QStatusBar
+            The application status bar for displaying messages.
+        """
         super(MainPage, self).__init__(parent)
         self.parent = parent
         self.threadpool = threadpool
@@ -98,7 +108,7 @@ class MainPage(QWidget):
         self.navbar_layout_center.addWidget(self.flow_diagram_widget)
 
         self.flow_diagram_widget.add_files_button.clicked.connect(
-            self.tabs["File(s)"].openFileNamesDialog
+            self.tabs["File(s)"].open_file_names_dialog
         )
         self.flow_diagram_widget.add_files_button.setIcon(
             QApplication.style().standardIcon(QStyle.SP_DirIcon)
@@ -108,28 +118,44 @@ class MainPage(QWidget):
         )
 
         self.flow_diagram_widget.files_button.clicked.connect(
-            lambda: self.tabwidget.setCurrentIndex(1)
+            lambda: self.tabwidget.setCurrentIndex(
+                self.tabwidget.indexOf(self.tabs["File(s)"])
+            )
         )
         self.flow_diagram_widget.images_button.clicked.connect(
-            lambda: self.tabwidget.setCurrentIndex(2)
+            lambda: self.tabwidget.setCurrentIndex(
+                self.tabwidget.indexOf(self.tabs["Image(s)"])
+            )
         )
         self.flow_diagram_widget.dimensions_button.clicked.connect(
-            lambda: self.tabwidget.setCurrentIndex(3)
+            lambda: self.tabwidget.setCurrentIndex(
+                self.tabwidget.indexOf(self.tabs["Dimensions"])
+            )
         )
         self.flow_diagram_widget.training_crop_button.clicked.connect(
-            lambda: self.tabwidget.setCurrentIndex(4)
+            lambda: self.tabwidget.setCurrentIndex(
+                self.tabwidget.indexOf(self.tabs["Training Crop"])
+            )
         )
         self.flow_diagram_widget.inference_crop_button.clicked.connect(
-            lambda: self.tabwidget.setCurrentIndex(5)
+            lambda: self.tabwidget.setCurrentIndex(
+                self.tabwidget.indexOf(self.tabs["Denoising Crop"])
+            )
         )
         self.flow_diagram_widget.preprocess_button.clicked.connect(
-            lambda: self.tabwidget.setCurrentIndex(6)
+            lambda: self.tabwidget.setCurrentIndex(
+                self.tabwidget.indexOf(self.tabs["Pre/Post-Processing"])
+            )
         )
         self.flow_diagram_widget.postprocess_button.clicked.connect(
-            lambda: self.tabwidget.setCurrentIndex(6)
+            lambda: self.tabwidget.setCurrentIndex(
+                self.tabwidget.indexOf(self.tabs["Pre/Post-Processing"])
+            )
         )
         self.flow_diagram_widget.denoise_button.clicked.connect(
-            lambda: self.tabwidget.setCurrentIndex(7)
+            lambda: self.tabwidget.setCurrentIndex(
+                self.tabwidget.indexOf(self.tabs["Denoise"])
+            )
         )
 
         self.start_button = QPushButton(
@@ -183,7 +209,7 @@ class MainPage(QWidget):
 
         # TabWidget
         self.tabwidget = QTabWidget(self)
-        self.tabwidget.currentChanged.connect(self.onTabChange)
+        self.tabwidget.currentChanged.connect(self.on_tab_change)
         for key, value in self.tabs.items():
             self.tabwidget.addTab(value, key)
 
@@ -199,7 +225,7 @@ class MainPage(QWidget):
         self.tabs["Training Crop"].images = []
         self.tabs["Denoising Crop"].images = []
 
-    def onTabChange(self, current_tab_index):
+    def on_tab_change(self, current_tab_index):
         """Highlight the corresponding flow diagram button when a tab is selected.
 
         Parameters
@@ -246,7 +272,7 @@ class MainPage(QWidget):
         e : QDragEnterEvent
             The drag enter event.
         """
-        if e.mimeData().hasUrls:
+        if e.mimeData().hasUrls():
             e.accept()
         else:
             e.ignore()
@@ -259,7 +285,7 @@ class MainPage(QWidget):
         e : QDragMoveEvent
             The drag move event.
         """
-        if e.mimeData().hasUrls:
+        if e.mimeData().hasUrls():
             e.accept()
         else:
             e.ignore()
@@ -275,7 +301,7 @@ class MainPage(QWidget):
         e : QDropEvent
             The drop event containing file URLs.
         """
-        if e.mimeData().hasUrls:
+        if e.mimeData().hasUrls():
             e.setDropAction(Qt.CopyAction)
             e.accept()
             fnames = []
@@ -283,7 +309,7 @@ class MainPage(QWidget):
             for url in e.mimeData().urls():
                 fnames.append(str(url.toLocalFile()))
 
-            self.tabwidget.setCurrentIndex(1)
+            self.tabwidget.setCurrentIndex(self.tabwidget.indexOf(self.tabs["File(s)"]))
             self.data_model.add_filepaths(fnames)
         else:
             e.ignore()
@@ -298,7 +324,7 @@ class MainPage(QWidget):
         """
         try:
             self.data_model.add_filepaths([sample.get_path()])
-            self.tabwidget.setCurrentIndex(1)
+            self.tabwidget.setCurrentIndex(self.tabwidget.indexOf(self.tabs["File(s)"]))
         except Exception:
             # Download failed:
             # printing stack trace
@@ -375,6 +401,8 @@ class MainPage(QWidget):
             else self.tabs["Training Crop"].images
         )
 
+        import napari
+
         viewer = napari.Viewer()
         viewer.show()
 
@@ -415,7 +443,8 @@ class MainPage(QWidget):
 
         if path is None:
             image_paths = [
-                get_options_json_path(i[4]) for i in self.data_model.images_to_denoise
+                get_options_json_path(i.filepath)
+                for i in self.data_model.images_to_denoise
             ]
         else:
             image_paths = [path]

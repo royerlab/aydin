@@ -122,7 +122,8 @@ def dimension_analysis_on_image(
 
         threshold = 1 - epsilon
         for _ in range(len(sorted_values) - 1):
-            if 2 * sorted_values[_] < sorted_values[_ + 1]:
+            absolute_gap = sorted_values[_ + 1] - sorted_values[_]
+            if absolute_gap > 0.3 and 2 * sorted_values[_] < sorted_values[_ + 1]:
                 threshold = sorted_values[_]
                 break
 

@@ -20,6 +20,7 @@ from aydin.it.classic_denoisers import _defaults
 from aydin.util.array.outer import outer_sum
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint, asection
 from aydin.util.patch_size.patch_size import default_patch_size
 from aydin.util.patch_transform.patch_transform import (
     extract_patches_nd,
@@ -125,8 +126,12 @@ def calibrate_denoise_spectral(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_spectral`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -189,6 +194,7 @@ def calibrate_denoise_spectral(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 2 * image.nbytes + 8 * image.nbytes * math.prod(patch_size)
@@ -218,6 +224,7 @@ def denoise_spectral(
     Note: This seems like a lot of parameters, but thanks to our
     auto-tuning approach these parameters are all automatically
     determined 😊.
+    <notgui>
 
     Parameters
     ----------
@@ -253,16 +260,20 @@ def denoise_spectral(
     reconstruction_gamma: float
         Patch reconstruction parameter
 
-    multi_core: bool
+    multi_core : bool
         By default we use as many cores as possible, in some cases, for small
         (test) images, it might be faster to run on a single core instead of
         starting the whole parallelization machinery.
 
-
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
 
+    Raises
+    ------
+    ValueError
+        If ``mode`` is not one of 'dct', 'dst', or 'fft'.
     """
 
     # Convert image to float if needed:
@@ -308,72 +319,68 @@ def denoise_spectral(
     if type(freq_cutoff) is not tuple:
         freq_cutoff = tuple((freq_cutoff,) * image.ndim)
 
-    # First we apply the patch transform:
-    patches = extract_patches_nd(image, patch_size=patch_size)
+    with asection(
+        f"Denoise image of shape {image.shape} with spectral filter (mode={mode})"
+    ):
+        with asection("Extract patches"):
+            patches = extract_patches_nd(image, patch_size=patch_size)
 
-    # ### PART 1: apply Butterworth filter to patches:
+        with asection(f"Forward spectral transform ({mode})"):
+            patches = transform(patches)
 
-    # Then we apply the sparsifying transform:
-    patches = transform(patches)
+        with asection("Apply Butterworth filter and threshold coefficients"):
+            # Compute adequate squared distance image and chose filter implementation:
+            if mode == 'fft':
+                f = _compute_distance_image_for_fft(
+                    freq_cutoff, patch_size, selected_axes
+                )
+            elif mode == 'dct' or mode == 'dst':
+                f = _compute_distance_image_for_dxt(
+                    freq_cutoff, patch_size, selected_axes
+                )
+            else:
+                raise ValueError(f"Unsupported mode: {mode}")
 
-    # Compute adequate squared distance image and chose filter implementation:
-    if mode == 'fft':
-        f = _compute_distance_image_for_fft(freq_cutoff, patch_size, selected_axes)
-    elif mode == 'dct' or mode == 'dst':
-        f = _compute_distance_image_for_dxt(freq_cutoff, patch_size, selected_axes)
-    else:
-        raise ValueError(f"Unsupported mode: {mode}")
+            # Configure filter function:
+            filter_wrapped = jit(nopython=True, parallel=multi_core)(_filter)
 
-    # Configure filter function:
-    filter_wrapped = jit(nopython=True, parallel=multi_core)(_filter)
+            # Apply filter:
+            patches = filter_wrapped(patches, f, order)
 
-    # Apply filter:
-    patches = filter_wrapped(patches, f, order)
+            # Window for frequency bias:
+            freq_bias = _freq_bias_window(patch_size, freq_bias_stength)
 
-    # ### PART 2: apply thresholding:
+            # We use this value to estimate power per coefficient:
+            power = numpy.absolute(patches)
+            power *= freq_bias
 
-    # Window for frequency bias:
-    freq_bias = _freq_bias_window(patch_size, freq_bias_stength)
+            # What is the max coefficient in the transforms:
+            max_value = numpy.max(power)
 
-    # We use this value to estimate power per coefficient:
-    power = numpy.absolute(patches)
-    power *= freq_bias
+            # We derive from that the threshold:
+            threshold *= max_value
 
-    # import napari
-    # with napari.gui_qt():
-    #     viewer = napari.Viewer()
-    #     viewer.add_image(image, name='image')
-    #     viewer.add_image(patches, name='patches')
-    #     viewer.add_image(f_patches, name='f_patches')
-    #     viewer.add_image(power, name='power')
-    #     viewer.add_image(freq_bias, name='freq_bias')
+            # Here are the entries that are below the threshold:
+            below = power < threshold
 
-    # What is the max coefficient in the transforms:
-    max_value = numpy.max(power)
+            # Thresholding:
+            patches[below] = 0
 
-    # We derive from that the threshold:
-    threshold *= max_value
+        with asection("Inverse transform and reconstruct"):
+            # Transform back to real space:
+            patches = i_transform(patches)
 
-    # Here are the entries that are below the threshold:
-    below = power < threshold
+            # convert to real:
+            if numpy.iscomplexobj(patches):
+                patches = numpy.real(patches)
 
-    # Thresholding:
-    patches[below] = 0
+            # Transform back from patches to image:
+            denoised_image = reconstruct_from_nd_patches(
+                patches, image.shape, gamma=reconstruction_gamma
+            )
 
-    # Transform back to real space:
-    patches = i_transform(patches)
-
-    # convert to real:
-    if numpy.iscomplexobj(patches):
-        patches = numpy.real(patches)
-
-    # Transform back from patches to image:
-    denoised_image = reconstruct_from_nd_patches(
-        patches, image.shape, gamma=reconstruction_gamma
-    )
-
-    # Cast back to float32 if needed:
-    denoised_image = denoised_image.astype(numpy.float32, copy=False)
+            # Cast back to float32 if needed:
+            denoised_image = denoised_image.astype(numpy.float32, copy=False)
 
     return denoised_image
 

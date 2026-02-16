@@ -1,7 +1,7 @@
 """Data model managing loaded images, file paths, and their transformations."""
 
-import pathlib
 from copy import deepcopy
+from dataclasses import dataclass
 from os import listdir
 from os.path import isdir, isfile, join
 from pathlib import Path
@@ -9,6 +9,34 @@ from pathlib import Path
 from aydin.io import imread
 from aydin.io.utils import hyperstack_arrays, split_image_channels
 from aydin.util.log.log import aprint
+
+
+@dataclass
+class ImageRecord:
+    """A single image entry in the data model.
+
+    Attributes
+    ----------
+    filename : str
+        Display name of the image file.
+    array : object
+        The image data as a numpy ndarray.
+    metadata : object
+        A ``FileMetadata`` instance with axes, shape, and dtype info.
+    denoise : bool
+        Whether this image is marked for denoising.
+    filepath : str
+        Full file path on disk.
+    output_folder : str
+        Directory where denoised output will be saved.
+    """
+
+    filename: str
+    array: object
+    metadata: object
+    denoise: bool
+    filepath: str
+    output_folder: str
 
 
 class DataModel:
@@ -25,6 +53,13 @@ class DataModel:
     """
 
     def __init__(self, parent=None):
+        """Initialize the data model with empty file paths and image lists.
+
+        Parameters
+        ----------
+        parent : MainPage, optional
+            The parent MainPage widget that owns the tab views.
+        """
         self.parent = parent
         self._filepaths = dict()
         self._images = []
@@ -43,23 +78,26 @@ class DataModel:
         return self._filepaths
 
     def clear_filepaths(self):
-        """Clears the self._filepaths attribute and images of
-        the model and triggers needed updates on files view.
+        """Clear all file paths and images from the model.
+
+        Resets the internal file path dictionary, triggers updates on the
+        files tab view, and clears all loaded images.
         """
         self._filepaths = dict()
         self.update_files_tabview()
         self.clear_images()
 
     def add_filepaths(self, file_paths):
-        """Adds filepaths to the model if they do not already
-        exist in the current state of the model. If any file
-        path is added, method also triggers addition of the
-        corresponding images to the model too.
+        """Add file paths to the model if not already present.
+
+        Reads each file, stores the (array, metadata) pair, and triggers
+        updates to the files and images tab views. Directories are expanded
+        to include their contained files.
 
         Parameters
         ----------
-        file_paths : List[str]
-
+        file_paths : list of str
+            File paths or directory paths to add.
         """
         new_paths_added = False
         new_images = {}
@@ -78,23 +116,22 @@ class DataModel:
                 array, metadata = imread(file_path)
                 if array is None and metadata is None:
                     continue
-                else:
-                    new_paths_added = True
-                    self._filepaths[file_path] = (array, metadata)
-                    new_images[file_path] = (array, metadata)
+
+                new_paths_added = True
+                self._filepaths[file_path] = (array, metadata)
+                new_images[file_path] = (array, metadata)
 
         if new_paths_added:
             self.update_files_tabview()
             self.add_images(new_images)
 
     def remove_filepaths(self, fpaths):
-        """Removes given file paths and their corresponding
-        images from the model.
+        """Remove the given file paths and their corresponding images from the model.
 
         Parameters
         ----------
-        fpaths : List[str]
-
+        fpaths : list of str
+            File paths to remove from the model.
         """
         for fpath in fpaths:
             del self._filepaths[fpath]
@@ -104,64 +141,58 @@ class DataModel:
     def images(self):
         """List of image records currently in the model.
 
-        Each record is a list of:
-        ``[filename, array, metadata, denoise_flag, filepath, output_folder]``.
-
         Returns
         -------
-        list
-            List of image record lists.
+        list of ImageRecord
+            List of :class:`ImageRecord` dataclass instances.
         """
         return self._images
 
     def clear_images(self):
-        """Clears the self._images attribute and triggers
-        needed updates on images view.
-        """
+        """Clear all images from the model and update the images tab view."""
         self._images.clear()
         self.update_images_tabview()
 
     def add_images(self, new_images, denoise=True):
-        """Adds images to the model. Method also triggers
-        needed updates on images view.
+        """Add images to the model and update the images tab view.
 
         Parameters
         ----------
         new_images : dict
-            Expects a particular dict format where key is
-            the filepath and value is tuple of corresponding
-            array and metadata.
+            Mapping of file path strings to ``(array, metadata)`` tuples
+            where ``array`` is a numpy ndarray and ``metadata`` is a
+            ``FileMetadata`` instance.
         denoise : bool, optional
-
+            Whether to mark the images for denoising. Default is True.
         """
         for path, (array, metadata) in new_images.items():
             self._images.append(
-                [
-                    Path(path).name,
-                    array,
-                    metadata,
-                    denoise,
-                    path,
-                    str(pathlib.Path(path).resolve().parent),
-                ]
+                ImageRecord(
+                    filename=Path(path).name,
+                    array=array,
+                    metadata=metadata,
+                    denoise=denoise,
+                    filepath=path,
+                    output_folder=str(Path(path).resolve().parent),
+                )
             )
 
         self.update_images_tabview()
 
     def remove_image(self, image_filepath):
-        """Removes all images from the model for the given
-        file path.
+        """Remove all images associated with the given file path from the model.
 
         Parameters
         ----------
         image_filepath : str
-
+            File path whose associated images should be removed.
         """
         indices2remove = []
         for idx, imagelist_item in enumerate(self._images):
             if (
-                Path(image_filepath).parents[0] == Path(imagelist_item[4]).parents[0]
-                and Path(image_filepath).name in imagelist_item[0]
+                Path(image_filepath).parents[0]
+                == Path(imagelist_item.filepath).parents[0]
+                and Path(image_filepath).name in imagelist_item.filename
             ):
                 indices2remove.append(idx)
 
@@ -179,21 +210,24 @@ class DataModel:
         list
             Image records where the denoise flag is True.
         """
-        return list(filter(lambda image: image[3], self.images))
+        return list(filter(lambda image: image.denoise, self.images))
 
     def set_image_to_denoise(self, filename, new_value):
-        """Method to mark/unmark to denoise an image the with
-        corresponding filename.
+        """Mark or unmark an image for denoising by its filename.
+
+        Updates the denoise flag and triggers dimension and cropping tab
+        refreshes.
 
         Parameters
         ----------
         filename : str
+            The display name of the image to update.
         new_value : bool
-
+            True to mark the image for denoising, False to unmark it.
         """
         for imagelist_item in self._images:
-            if imagelist_item[0] == filename:
-                imagelist_item[3] = new_value
+            if imagelist_item.filename == filename:
+                imagelist_item.denoise = new_value
                 self.update_dimensions_tabview()
                 self.update_cropping_tabview()
 
@@ -208,27 +242,33 @@ class DataModel:
             The new output folder path.
         """
         for imagelist_item in self._images:
-            if imagelist_item[0] == filename:
-                imagelist_item[5] = new_value
+            if imagelist_item.filename == filename:
+                imagelist_item.output_folder = new_value
 
     def set_split_channels(self, filename, filepath, new_value: bool):
-        """Method to split/de-split channels of an image with
-        corresponding filename.
+        """Split or re-merge channels of an image by its filename.
+
+        When ``new_value`` is True, splits the image along its channel axis
+        into separate single-channel images. When False, re-merges previously
+        split channels back into the original multi-channel image.
 
         Parameters
         ----------
         filename : str
+            The display name of the image.
         filepath : str
+            The full file path of the image.
         new_value : bool
+            True to split channels, False to re-merge.
 
         Returns
         -------
-        int
-            returns -1 if the image doesn't have a channel axis.
-
+        int or None
+            Returns -1 if the image has no channel axis. Returns None
+            otherwise.
         """
         # Fetch the self._images elements that are associated by their file names
-        imagelist_items = [elem for elem in self._images if filename in elem[0]]
+        imagelist_items = [elem for elem in self._images if filename in elem.filename]
 
         if new_value:  # if the split checkbox value is True, we try to split
 
@@ -238,7 +278,7 @@ class DataModel:
 
             imagelist_item = imagelist_items[0]
 
-            if imagelist_item[2].axes.find("C") == -1:
+            if imagelist_item.metadata.axes.find("C") == -1:
                 aprint("Array has no channel axis detected")
                 return -1
 
@@ -246,16 +286,18 @@ class DataModel:
 
             # Split the array and collect new arrays and metadatas
             splitted_arrays, metadatas = split_image_channels(
-                imagelist_item[1], deepcopy(imagelist_item[2])
+                imagelist_item.array, deepcopy(imagelist_item.metadata)
             )
 
             # Prepare new file names for the splitted images
-            filenames = [f"channel_{_}_{filename}" for _ in range(len(splitted_arrays))]
+            filenames = [
+                f"channel_{ch_idx}_{filename}" for ch_idx in range(len(splitted_arrays))
+            ]
 
             # Add the splitted images to the model
             new_images = {}
             for filename, array, metadata in zip(filenames, splitted_arrays, metadatas):
-                new_images[filepath.replace(Path(filepath).name, filename)] = (
+                new_images[str(Path(filepath).with_name(filename))] = (
                     array,
                     metadata,
                 )
@@ -275,17 +317,20 @@ class DataModel:
                 self.update_images_tabview()  # update the images view
 
     def set_hyperstack(self, hyperstack_checkbox_value: bool):
-        """Method to hyperstack/de-hyperstack files in the model.
+        """Stack or unstack all loaded images into a single hyperstack.
+
+        When True, combines all loaded images along a new dimension.
+        When False, restores the original individual images.
 
         Parameters
         ----------
         hyperstack_checkbox_value : bool
+            True to hyperstack, False to restore originals.
 
         Returns
         -------
-        int
-            returns -1 if hyperstacking fails for any reason.
-
+        int or None
+            Returns -1 if hyperstacking fails. Returns None on success.
         """
         if hyperstack_checkbox_value:  # We try to hyperstack
             try:
@@ -303,10 +348,10 @@ class DataModel:
                 )
 
                 # Prepare file name and path for the hyperstacked image
-                hyperstacked_filename = f"hyperstack_{self.images[0][0]}"
-                filepath = self.images[0][4]
-                hyperstacked_filepath = filepath.replace(
-                    Path(filepath).name, hyperstacked_filename
+                hyperstacked_filename = f"hyperstack_{self.images[0].filename}"
+                filepath = self.images[0].filepath
+                hyperstacked_filepath = str(
+                    Path(filepath).with_name(hyperstacked_filename)
                 )
 
                 # Update images
@@ -325,19 +370,19 @@ class DataModel:
             self.add_filepaths(filepaths)  # Add the original file list back
 
     def update_files_tabview(self):
-        """Method to trigger updating files tab view."""
+        """Trigger a refresh of the File(s) tab view."""
         self.parent.filestab_changed()
 
     def update_images_tabview(self):
-        """Method to trigger updating images tab view."""
+        """Trigger a refresh of the Image(s), Dimensions, and Cropping tab views."""
         self.parent.imagestab_changed()
         self.update_dimensions_tabview()
         self.update_cropping_tabview()
 
     def update_dimensions_tabview(self):
-        """Method to trigger updating dimensions tab view."""
+        """Trigger a refresh of the Dimensions tab view."""
         self.parent.dimensionstab_changed()
 
     def update_cropping_tabview(self):
-        """Method to trigger updating cropping tab view."""
+        """Trigger a refresh of the Training Crop and Denoising Crop tab views."""
         self.parent.croppingtabs_changed()

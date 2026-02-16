@@ -15,6 +15,7 @@ from scipy.ndimage import gaussian_filter
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_gaussian(
@@ -96,8 +97,12 @@ def calibrate_denoise_gaussian(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_gaussian`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -138,6 +143,7 @@ def calibrate_denoise_gaussian(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 2 * image.nbytes
@@ -167,6 +173,7 @@ def denoise_gaussian(
     \n\n
     Note: We recommend applying a variance stabilisation transform
     to improve results for images with non-Gaussian noise.
+    <notgui>
 
     Parameters
     ----------
@@ -185,7 +192,8 @@ def denoise_gaussian(
 
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:

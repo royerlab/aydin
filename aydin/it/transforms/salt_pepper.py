@@ -17,22 +17,23 @@ from aydin.util.log.log import aprint, asection
 
 
 class SaltPepperTransform(ImageTransformBase):
-    """Salt And Pepper Correction
+    """Salt-and-pepper noise correction transform.
 
     Detectors such as cameras have 'broken' pixels that blink, are very dim,
     or very bright. Other phenomena cause voxels to have very different
     values from their neighbors, this is often called 'impulse' or
     'salt-and-pepper' noise. While self-supervised denoising can solve many of
-    these issues, there is no reason to not to alleviate the task, especially
+    these issues, there is no reason not to alleviate the task, especially
     when there are simple and fast approaches that can tackle this kind of
-    noise. This preprocessing replaces voxels with the median of its
+    noise. This preprocessing replaces voxels with the median of their
     neighbors if the voxel value is too different from its neighbors. This
     difference is proportional to the local second-derivative of the image.
     Increase the threshold parameter to tolerate more variation, decrease it
-    to be more aggressive in removing salt & pepper noise. The algorithm is
+    to be more aggressive in removing salt-and-pepper noise. The algorithm is
     iterative, starting with the most offending pixels, until no pixels are
     corrected. You can set the max proportion of pixels that are allowed to
     be corrected if you can give a good estimate for that.
+    <notgui>
     """
 
     preprocess_description = (
@@ -53,8 +54,7 @@ class SaltPepperTransform(ImageTransformBase):
         priority: float = 0.08,
         **kwargs,
     ):
-        """
-        Constructs a Salt And Pepper Transform
+        """Construct a SaltPepperTransform.
 
         Parameters
         ----------
@@ -101,13 +101,26 @@ class SaltPepperTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_original_dtype``.
+        """
         state = self.__dict__.copy()
         del state['_original_dtype']
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name and key parameters.
+        """
         return (
             f'{type(self).__name__} (fix_lipschitz={self.fix_lipschitz},'
             f' num_iterations={self.num_iterations},'
@@ -118,6 +131,13 @@ class SaltPepperTransform(ImageTransformBase):
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
@@ -178,6 +198,23 @@ class SaltPepperTransform(ImageTransformBase):
         return array
 
     def _repeated_value_method(self, array: ArrayLike):
+        """Correct pixels whose values are over-represented in the image.
+
+        Identifies pixel values that appear far more frequently than
+        expected under a uniform distribution, treats them as erroneous,
+        and replaces them by iterative uniform-filter interpolation from
+        surrounding good pixels.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array (float32).
+
+        Returns
+        -------
+        numpy.ndarray
+            Corrected array with over-represented values replaced.
+        """
         with asection(
             "Correcting for wrong pixels values using the 'repeated-value' approach:"
         ):
@@ -255,6 +292,21 @@ class SaltPepperTransform(ImageTransformBase):
         return array
 
     def _lipschitz_method(self, array):
+        """Correct salt-and-pepper noise by enforcing Lipschitz continuity.
+
+        Iteratively replaces voxels that violate the Lipschitz continuity
+        constraint with smoothed values from their neighborhood.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Input image array (float32).
+
+        Returns
+        -------
+        numpy.ndarray
+            Corrected array with Lipschitz continuity enforced.
+        """
         # Iterations:
         with asection(
             "Correcting for wrong pixels values using the Lipschitz approach:"
@@ -319,6 +371,23 @@ class SaltPepperTransform(ImageTransformBase):
             #     total_number_of_corrections += num_corrections
 
     def _compute_error(self, array, median, lipschitz):
+        """Compute the Lipschitz error map between an array and its median.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Original image array.
+        median : numpy.ndarray
+            Median-filtered version of the array.
+        lipschitz : float
+            Lipschitz threshold value.
+
+        Returns
+        -------
+        tuple of (numpy.ndarray, numpy.ndarray)
+            A tuple of (median, error) where error contains the
+            thresholded absolute difference.
+        """
         # we compute the error map:
         error = median.copy()
         error -= array

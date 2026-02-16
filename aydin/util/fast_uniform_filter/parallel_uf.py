@@ -95,6 +95,7 @@ def parallel_uniform_filter(
         output = numpy.empty_like(image)
 
         def _uniform_filter(slice_tuple, slice_margin_tuple):
+            """Apply uniform filter to a single tile and store result."""
             tile = image[slice_margin_tuple]
 
             output_tile = uniform_filter(

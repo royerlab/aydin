@@ -17,13 +17,13 @@ from aydin.util.log.log import aprint, asection
 
 
 class FixedPatternTransform(ImageTransformBase):
-    """Fixed Axis-Aligned Pattern Suppression
+    """Fixed axis-aligned pattern suppression.
 
-    Suppresses fixed, axis aligned, offset patterns along any combination of
-    axis. Given a list of lists of axis that defines axis-aligned volumes,
+    Suppresses fixed, axis-aligned, offset patterns along any combination of
+    axes. Given a list of lists of axes that defines axis-aligned volumes,
     intensity fluctuations of these volumes are stabilised. You can suppress
     intensity fluctuation over time, suppress fixed offsets per pixel over
-    time, suppress intensity fluctuations per row, per column, and more...
+    time, suppress intensity fluctuations per row, per column, and more.
 
     For example, assume an image with dimensions tyx (t+2D), and you want to
     suppress fluctuations of intensity along the t axis, then you provide:
@@ -35,6 +35,7 @@ class FixedPatternTransform(ImageTransformBase):
     specified by the list of axis combinations. It is not recommended to
     reapply the pattern after denoising, unless the pattern itself is of
     value and is not considered noise.
+    <notgui>
     """
 
     preprocess_description = (
@@ -54,8 +55,7 @@ class FixedPatternTransform(ImageTransformBase):
         priority: float = 0.09,
         **kwargs,
     ):
-        """
-        Constructs a Background Correction
+        """Construct a FixedPatternTransform.
 
         Parameters
         ----------
@@ -97,13 +97,26 @@ class FixedPatternTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient correction data.
+
+        Returns
+        -------
+        dict
+            Object state without ``_corrections``.
+        """
         state = self.__dict__.copy()
         del state['_corrections']
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name, percentile, and sigma.
+        """
         return (
             f'{type(self).__name__}'
             f' (percentile={self.percentile},'
@@ -111,6 +124,13 @@ class FixedPatternTransform(ImageTransformBase):
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):

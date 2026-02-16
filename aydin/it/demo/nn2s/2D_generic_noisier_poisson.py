@@ -1,14 +1,26 @@
+"""Demo of Noisier2Noise denoising with additional Poisson noise.
+
+Demonstrates the noisier-to-noise approach where the model is trained
+on an even noisier version of the input (added uniform noise simulating
+Poisson-like degradation) and the original noisy image, comparing
+against standard Noise2Self results.
+"""
+
 # flake8: noqa
+
+from functools import partial
 
 import numpy
 import numpy as np
 from numpy.random.mtrand import uniform
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import newyork, pollen, normalise, add_noise, lizard, dots
+from aydin.io.datasets import add_noise, dots, lizard, newyork, normalise, pollen
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.cb import CBRegressor
 from aydin.util.log.log import Log
@@ -103,15 +115,15 @@ def demo(image, name):
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(noisy, name='noisy')
-        viewer.add_image(noisier, name='noisier')
-        viewer.add_image(n2s_denoised, name='denoised (classic_denoisers)')
-        viewer.add_image(denoised, name='denoised (noiser3noise)')
-        viewer.add_image(denoised_corrected, name='denoised (noiser3noise corrected)')
-        viewer.add_image(numpy.stack(denoised_images), name=f'denoised images')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(noisy, name='noisy')
+    viewer.add_image(noisier, name='noisier')
+    viewer.add_image(n2s_denoised, name='denoised (classic_denoisers)')
+    viewer.add_image(denoised, name='denoised (noiser3noise)')
+    viewer.add_image(denoised_corrected, name='denoised (noiser3noise corrected)')
+    viewer.add_image(numpy.stack(denoised_images), name=f'denoised images')
+    napari.run()
 
 
 if __name__ == "__main__":

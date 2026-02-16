@@ -1,9 +1,8 @@
 Denoising an image using Noise2SelfCNN restoration API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. deprecated:: 0.1.16
-   ``Noise2SelfCNN`` uses TensorFlow/Keras internally and is deprecated.
-   Consider using the FGR-based approach (:class:`~aydin.restoration.denoise.noise2selffgr.Noise2SelfFGR`) instead.
+``Noise2SelfCNN`` uses PyTorch-based CNN architectures internally via
+:class:`~aydin.it.cnn_torch.ImageTranslatorCNNTorch`.
 
 One can use the following lines to denoise a single image with default
 options using our Object-Oriented denoising API.
@@ -23,6 +22,8 @@ denoising. One can do the following:
 .. code-block:: python
 
    from aydin.restoration.denoise.noise2selfcnn import Noise2SelfCNN
+   from aydin.it.transforms.range import RangeTransform
+   from aydin.it.transforms.padding import PaddingTransform
 
    transforms = [
         {"class": RangeTransform, "kwargs": {}},

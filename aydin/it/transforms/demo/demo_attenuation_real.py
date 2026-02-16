@@ -1,3 +1,10 @@
+"""Demo of attenuation correction transform on real microscopy data.
+
+Demonstrates the ``AttenuationTransform`` preprocessing step on an HCR
+image volume and compares FGR denoising results with and without
+attenuation correction.
+"""
+
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import examples_single
 from aydin.it.fgr import ImageTranslatorFGR
@@ -8,6 +15,7 @@ from aydin.util.log.log import Log
 
 
 def demo_attenuation_correction_real():
+    """Apply attenuation correction to a real HCR image and compare denoising results."""
 
     Log.override_test_exclusion = True
     Log.enable_output = True
@@ -22,12 +30,11 @@ def demo_attenuation_correction_real():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(preprocessed, name='preprocessed')
-        viewer.add_image(postprocessed, name='postprocessed')
-
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(preprocessed, name='preprocessed')
+    viewer.add_image(postprocessed, name='postprocessed')
+    napari.run()
     generator = StandardFeatureGenerator(
         include_corner_features=True,
         include_scale_one=True,
@@ -47,17 +54,15 @@ def demo_attenuation_correction_real():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(preprocessed, name='preprocessed')
-        viewer.add_image(postprocessed, name='postprocessed')
-        viewer.add_image(
-            denoised_without_preprocessing, name='denoised_without_preprocessing'
-        )
-        viewer.add_image(
-            denoised_with_preprocessing, name='denoised_with_preprocessing'
-        )
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(preprocessed, name='preprocessed')
+    viewer.add_image(postprocessed, name='postprocessed')
+    viewer.add_image(
+        denoised_without_preprocessing, name='denoised_without_preprocessing'
+    )
+    viewer.add_image(denoised_with_preprocessing, name='denoised_with_preprocessing')
+    napari.run()
 
 
 if __name__ == "__main__":

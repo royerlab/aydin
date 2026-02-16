@@ -23,14 +23,19 @@ from aydin.util.log.log import aprint, asection
 
 
 class LGBMRegressor(RegressorBase):
-    """
-    The LightGBM Regressor uses the gradient boosting library <a
-    href="https://github.com/microsoft/LightGBM">LightGBM</a> to perform
-    regression from a set of feature vectors and target values. LightGBM is a
-    solid library but we do not yet support GPU training and inference. Because
-    of lack of GPU support LightGBM is slower than CatBoost, sometimes
-    LightGBM gives better results than CatBoost, but not often enough to
-    justify the loss of speed.
+    """LightGBM gradient-boosted decision-tree regressor.
+
+    Uses the <a href="https://github.com/microsoft/LightGBM">LightGBM</a>
+    library to perform regression from a set of feature vectors and target
+    values. LightGBM is a solid library but GPU training and inference are
+    not yet supported in this wrapper. Because of the lack of GPU support,
+    LightGBM is slower than CatBoost in most scenarios. LightGBM sometimes
+    gives better results than CatBoost, but not often enough to justify the
+    loss of speed.
+
+    Optionally, the `lleaves <https://github.com/siboehm/lleaves>`_ library
+    can be used for LLVM-compiled accelerated inference on Linux and macOS.
+    <notgui>
     """
 
     def __init__(
@@ -50,61 +55,56 @@ class LGBMRegressor(RegressorBase):
 
         Parameters
         ----------
-        num_leaves
+        num_leaves : int, optional
             Number of leaves in the decision trees.
             We recommend values between 128 and 512.
             (advanced)
-
-        max_num_estimators
-            Maximum number of estimators (trees). Typical values range from 1024
-            to 4096. Use larger values for more difficult datasets. If training
-            stops exactly at these values that is a sign you need to increase this
-            number. Quality of the results typically increases with the number of
-            estimators, but so does computation time too.
-            We do not recommend using a value of more than 10000.
-
-        max_bin
-            Maximum number of allowed bins. The features are quantised into that
-            many bins. Higher values achieve better quantisation of features but
-            also leads to longer training and more memory consumption. We do not
-            recommend changing this parameter.
+        max_num_estimators : int, optional
+            Maximum number of estimators (trees). Typical values range from
+            1024 to 4096. Use larger values for more difficult datasets. If
+            training stops exactly at these values that is a sign you need
+            to increase this number. Quality of the results typically
+            increases with the number of estimators, but so does computation
+            time too. We do not recommend using a value of more than 10000.
+        max_bin : int
+            Maximum number of allowed bins. The features are quantised into
+            that many bins. Higher values achieve better quantisation of
+            features but also leads to longer training and more memory
+            consumption. We do not recommend changing this parameter.
             (advanced)
-
-        learning_rate
-            Learning rate for the LightGBM model. The learning rate is determined
-            automatically if the value None is given. We recommend values around 0.01.
+        learning_rate : float, optional
+            Learning rate for the LightGBM model. The learning rate is
+            determined automatically if the value ``None`` is given. We
+            recommend values around 0.01.
             (advanced)
-
-        loss
-            Type of loss to be used. Can be 'l1' for L1 loss (MAE), and 'l2' for
-            L2 loss (RMSE), 'huber' for Huber loss, 'poisson' for Poisson loss,
-            and 'quantile' for Quantile loss. We recommend using: 'l1'.
+        loss : str
+            Type of loss to be used. Can be ``'l1'`` for L1 loss (MAE),
+            ``'l2'`` for L2 loss (RMSE), ``'huber'`` for Huber loss,
+            ``'poisson'`` for Poisson loss, and ``'quantile'`` for Quantile
+            loss. We recommend using ``'l1'``.
             (advanced)
-
-        patience
-            Number of rounds after which training stops if no improvement occurs.
+        patience : int
+            Number of rounds after which training stops if no improvement
+            occurs.
             (advanced)
-
-        verbosity
+        verbosity : int
             Verbosity setting of LightGBM.
             (advanced)
-
-        compute_load
-            Allowed load on computational resources in percentage, typically used
-            for CPU training when deciding on how many available cores to use.
+        compute_load : float
+            Allowed load on computational resources as a fraction (0--1),
+            typically used for CPU training when deciding on how many
+            available cores to use.
             (advanced)
-
-        inference_mode : str
-            Chooses inference mode: can be 'lleaves' for the very fast lleaves
-            library (only OSX and Linux), 'lgbm' for the standard lightGBM
-            inference engine, and 'auto' (or None) tries the best/fastest
-            options first and fallback to lightGBM default inference.
+        inference_mode : str, optional
+            Chooses inference mode: ``'lleaves'`` for the very fast lleaves
+            library (Linux and macOS only), ``'lgbm'`` for the standard
+            LightGBM inference engine, and ``'auto'`` (or ``None``) tries
+            the best/fastest options first and falls back to LightGBM
+            default inference.
             (advanced)
-
         compute_training_loss : bool
-            Flag to tell LightGBM whether to compute training loss or not
+            Flag to tell LightGBM whether to compute training loss or not.
             (advanced)
-
         """
         super().__init__()
 
@@ -132,6 +132,7 @@ class LGBMRegressor(RegressorBase):
             aprint(f"inference_mode: {self.inference_mode}")
 
     def __repr__(self):
+        """Return a concise string representation of the regressor."""
         return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}>"
 
     def _get_params(self, num_samples, dtype=numpy.float32):
@@ -245,6 +246,18 @@ class LGBMRegressor(RegressorBase):
             # This avoids propagating annoying 'evaluation_result_list[0][2]'
             # throughout the codebase...
             def lgbm_callback(env):
+                """LightGBM callback that forwards metrics to the regressor callback.
+
+                Extracts the validation loss from the LightGBM environment
+                object and delegates to ``regressor_callback`` if provided,
+                otherwise logs the loss directly.
+
+                Parameters
+                ----------
+                env : lightgbm.callback.CallbackEnv
+                    LightGBM callback environment containing ``iteration``,
+                    ``evaluation_result_list``, and ``model``.
+                """
                 try:
                     val_loss = env.evaluation_result_list[0][2]
                 except Exception as e:
@@ -321,6 +334,17 @@ class _LGBMModel:
     """
 
     def __init__(self, model, inference_mode, loss_history):
+        """Initialise the LightGBM model wrapper.
+
+        Parameters
+        ----------
+        model : lightgbm.Booster
+            Trained LightGBM Booster model.
+        inference_mode : str
+            Inference backend: ``'lgbm'``, ``'lleaves'``, or ``'auto'``.
+        loss_history : dict
+            Dictionary of training/validation loss arrays.
+        """
         self.model: Booster = model
         self.inference_mode = inference_mode
         self.loss_history = loss_history
@@ -348,11 +372,28 @@ class _LGBMModel:
         lgbm_model_file = join(path, 'lgbm_model.txt')
         self.model = Booster(model_file=lgbm_model_file)
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return pickling state, excluding the non-serialisable Booster model.
+
+        Returns
+        -------
+        dict
+            Instance state with the ``model`` key removed.
+        """
         state = self.__dict__.copy()
         del state['model']
         return state
+
+    def __setstate__(self, state):
+        """Restore pickling state with a safe default for the excluded model.
+
+        Parameters
+        ----------
+        state : dict
+            Pickled state (without ``model``).
+        """
+        self.__dict__.update(state)
+        self.model = None
 
     def predict(self, x):
         """Predict target values for the given feature vectors.

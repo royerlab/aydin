@@ -1,3 +1,10 @@
+"""Benchmark of fast uniform filter implementations against SciPy.
+
+Compares performance and numerical accuracy of Numba CPU, Numba CUDA,
+parallel, and SciPy uniform filter implementations across different
+kernel sizes and image dimensionalities.
+"""
+
 # flake8: noqa
 import numpy
 from scipy.ndimage import uniform_filter
@@ -10,6 +17,19 @@ from aydin.util.log.log import Log, asection
 
 
 def demo_par_uniform(image_name: str, image, size=128, repeats=32):
+    """Benchmark uniform filter implementations for a given image and kernel size.
+
+    Parameters
+    ----------
+    image_name : str
+        Descriptive name for the image being benchmarked.
+    image : numpy.ndarray
+        Input image array.
+    size : int, optional
+        Uniform filter kernel size, by default 128.
+    repeats : int, optional
+        Number of repeated runs for timing, by default 32.
+    """
     Log.enable_output = True
 
     with asection(f"size={size}:"):

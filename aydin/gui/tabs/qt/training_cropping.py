@@ -34,6 +34,13 @@ class TrainingCroppingTab(BaseCroppingTab):
     """
 
     def __init__(self, parent):
+        """Initialize the training crop tab with a 'use same crop' checkbox.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(TrainingCroppingTab, self).__init__(parent)
         self.parent = parent
 
@@ -66,7 +73,7 @@ class TrainingCroppingTab(BaseCroppingTab):
         super(TrainingCroppingTab, self.__class__).images.fset(self, images)
 
         if len(images) == 1:
-            image = images[0][1]
+            image = images[0].array
             response = super_fast_representative_crop(
                 image,
                 mode='contrast',
@@ -79,7 +86,7 @@ class TrainingCroppingTab(BaseCroppingTab):
 
             if isinstance(response, tuple):
                 best_slice = response[1]
-                axes = images[0][2].axes
+                axes = images[0].metadata.axes
 
                 t_idx = axes.find("T")
                 z_idx = axes.find("Z")
@@ -88,16 +95,16 @@ class TrainingCroppingTab(BaseCroppingTab):
 
                 if t_idx >= 0:
                     t_slice = best_slice[t_idx]
-                    self.t_crop_slider.slider.setValues((t_slice.start, t_slice.stop))
+                    self.t_crop_slider.slider.set_values((t_slice.start, t_slice.stop))
                 if z_idx >= 0:
                     z_slice = best_slice[z_idx]
-                    self.z_crop_slider.slider.setValues((z_slice.start, z_slice.stop))
+                    self.z_crop_slider.slider.set_values((z_slice.start, z_slice.stop))
                 if y_idx >= 0:
                     y_slice = best_slice[y_idx]
-                    self.y_crop_slider.slider.setValues((y_slice.start, y_slice.stop))
+                    self.y_crop_slider.slider.set_values((y_slice.start, y_slice.stop))
                 if x_idx >= 0:
                     x_slice = best_slice[x_idx]
-                    self.x_crop_slider.slider.setValues((x_slice.start, x_slice.stop))
+                    self.x_crop_slider.slider.set_values((x_slice.start, x_slice.stop))
 
     def update_summary(self):
         """Update the crop summary and show a warning if the crop is very large."""

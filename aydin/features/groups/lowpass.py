@@ -7,10 +7,25 @@ from aydin.it.classic_denoisers.butterworth import denoise_butterworth
 
 
 class LowPassFeatures(CorrelationFeatures):
-    """
-    Low-Pass Feature Group class
+    """Low-pass Butterworth filter feature group.
 
-    Generates Low-Pass features using Butterworth filtering.
+    Generates features by convolving the image with Butterworth low-pass
+    impulse-response kernels at regularly spaced frequency cutoffs. Each
+    kernel captures progressively lower frequency information, making this
+    feature group highly effective for images where Butterworth denoising
+    already works well.
+
+    Attributes
+    ----------
+    sizes : list of int
+        Spatial sizes (odd integers) for each Butterworth kernel.
+    freq_cutoffs : list of float
+        Frequency cutoff for each kernel, linearly spaced between
+        ``max_freq`` and ``min_freq``.
+    order : float
+        Butterworth filter order controlling roll-off steepness.
+    exclude_center : bool
+        Whether the center pixel is excluded from features.
     """
 
     def __init__(

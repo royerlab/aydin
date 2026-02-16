@@ -1,9 +1,12 @@
 """Activity log widget for displaying and managing console output."""
 
+from pathlib import Path
+
 from qtpy import QtGui
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QCheckBox,
+    QFileDialog,
     QHBoxLayout,
     QPushButton,
     QTextEdit,
@@ -15,19 +18,35 @@ from aydin.util.log.log import Log, aprint
 
 
 class ActivityWidget(QWidget):
-    """Qt dialog window for displaying logs.
+    """Widget for displaying and managing the activity log output.
+
+    Provides a scrollable text area that captures console output via the
+    logging system, with buttons for copying, clearing, and saving the log
+    content, and an auto-scroll toggle.
+
+    Parameters
+    ----------
+    parent : MainPage
+        The parent MainPage widget.
 
     Attributes
     ----------
-    info_layout : qtpy.QtWidgets.QHBoxLayout
-        Layout widget.
-    infoTextBox : qtpy.QtWidgets.QTextEdit
-        Text box.
-    widget_layout : qtpy.QtWidgets.QVBoxLayout
-        Layout widget for the entire the dialog.
+    infoTextBox : QTextEdit
+        Text area displaying the log output.
+    widget_layout : QVBoxLayout
+        Main layout for the widget.
+    info_layout : QHBoxLayout
+        Layout containing the text box and action buttons.
     """
 
     def __init__(self, parent):
+        """Initialize the activity widget with log text area and control buttons.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(ActivityWidget, self).__init__(parent)
 
         self.parent = parent
@@ -110,28 +129,29 @@ class ActivityWidget(QWidget):
     def save_activity(self):
         """Save the activity log to a text file alongside the first denoised image."""
         log_string = str(self.infoTextBox.toPlainText())
-        image_name = None
-        if "Image(s)" in self.parent.tabs:
-            for idx, image2denoise in enumerate(
-                self.parent.tabs["Image(s)"].images_to_denoise
-            ):
-                if image2denoise:
-                    image_name = self.parent.tabs["Image(s)"].images[idx]
-                    break
+
+        # Navigate to data_model via parent (MainPage)
+        data_model = self.parent.data_model
+        images_to_denoise = data_model.images_to_denoise
 
         path = None
-        if "File(s)" in self.parent.tabs and image_name is not None:
-            for idx, filename in enumerate(self.parent.tabs["File(s)"].filenames):
-                if image_name in filename:
-                    path = self.parent.tabs["File(s)"].filepaths[idx]
+        if images_to_denoise:
+            # images_to_denoise items: [filename, array, metadata, denoise, filepath, output_folder]
+            path = images_to_denoise[0].filepath
 
-        if path is None or path == "":
-            aprint("Cannot write the logs into a file")
-            return
+        if not path:
+            # Fallback: ask the user to choose a save location
+            save_path, _ = QFileDialog.getSaveFileName(
+                self, "Save Activity Log", "aydin_log.txt", "Text Files (*.txt)"
+            )
+            if not save_path:
+                aprint("Cannot write the logs into a file")
+                return
+            logfile_path = save_path
+        else:
+            logfile_path = str(Path(path).with_suffix('.txt'))
 
-        logfile_path = f"{path[:path.rfind('.')]}.txt"
-
-        with open(logfile_path, "w+") as logfile:
+        with open(logfile_path, "w") as logfile:
             logfile.write(log_string)
 
     def qtextedit_mousepressevent(self, event):

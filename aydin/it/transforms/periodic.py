@@ -18,12 +18,13 @@ from aydin.util.log.log import aprint, asection
 
 
 class PeriodicNoiseSuppressionTransform(ImageTransformBase):
-    """Periodic Noise Suppression
+    """Periodic noise suppression transform.
 
     Some images have a form of periodic noise that can be seen as strong
     peaks in their power spectral density. Suppressing these peaks before and
     after denoising is often a good idea. This is tricky to use, use with
-    care. Works with non-axis aligned periodic patterns.(advanced)
+    care. Works with non-axis-aligned periodic patterns. (advanced)
+    <notgui>
     """
 
     preprocess_description = (
@@ -44,8 +45,7 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         priority: float = 0.30,
         **kwargs,
     ):
-        """
-        Constructs a Periodic Noise Suppression Transform
+        """Construct a PeriodicNoiseSuppressionTransform.
 
         Parameters
         ----------
@@ -76,14 +76,27 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_original_dtype`` and ``_coordinates``.
+        """
         state = self.__dict__.copy()
         del state['_original_dtype']
         del state['_coordinates']
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name and key parameters.
+        """
         return (
             f'{type(self).__name__}'
             f' (mask_radius={self.mask_radius},'
@@ -92,6 +105,13 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
@@ -146,6 +166,23 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
             return new_array
 
     def _suppress_periodic_patterns(self, array: ArrayLike):
+        """Detect and suppress periodic noise peaks in the Fourier spectrum.
+
+        Identifies peaks in the power spectral density via local maximum
+        detection and attenuates them using a locally estimated correction
+        factor. Stores the peak coordinates and correction factors for
+        potential inverse application.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Image with periodic noise peaks suppressed.
+        """
         self._original_dtype = array.dtype
         array = array.astype(numpy.float32, copy=False)
 
@@ -221,6 +258,21 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         return new_array
 
     def _reapply_periodic_patterns(self, array: ArrayLike):
+        """Restore the periodic patterns that were suppressed during preprocessing.
+
+        Applies the inverse of the Fourier-domain correction factors stored
+        during suppression.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Image with periodic patterns restored.
+        """
         array = array.astype(numpy.float32, copy=False)
         ft = scipy.fft.fftn(array, workers=-1)
         ft = scipy.fft.fftshift(ft)

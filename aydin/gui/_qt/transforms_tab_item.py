@@ -20,7 +20,7 @@ from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
     QVerticalLineBreakWidget,
 )
 from aydin.gui._qt.job_runners.preview_job_runner import PreviewJobRunner
-from aydin.util.string.break_text import break_text
+from aydin.util.string.break_text import break_text, strip_notgui
 
 
 class TransformsTabItem(QWidget):
@@ -43,6 +43,8 @@ class TransformsTabItem(QWidget):
         Type annotations for each constructor argument.
     transform_class : type, optional
         The transform class from ``aydin.it.transforms``.
+    main_page : MainPage, optional
+        Reference to the main page widget for accessing shared resources.
     """
 
     def __init__(
@@ -53,10 +55,31 @@ class TransformsTabItem(QWidget):
         arg_defaults=None,
         arg_annotations=None,
         transform_class=None,
+        main_page=None,
     ):
+        """Initialize the transform item widget with description and controls.
+
+        Parameters
+        ----------
+        parent : TransformsTabWidget
+            The parent tab widget.
+        name : str, optional
+            Display name for the transform enable checkbox.
+        arg_names : list of str, optional
+            Constructor argument names.
+        arg_defaults : tuple, optional
+            Default values for each constructor argument.
+        arg_annotations : dict, optional
+            Type annotations for each constructor argument.
+        transform_class : type, optional
+            The transform class from ``aydin.it.transforms``.
+        main_page : MainPage, optional
+            Reference to the main page widget for accessing shared resources.
+        """
         super(TransformsTabItem, self).__init__(parent)
 
         self.parent = parent
+        self.main_page = main_page
         self.arg_names = arg_names
         self.annotations = []
         self.transform_class = transform_class
@@ -64,7 +87,7 @@ class TransformsTabItem(QWidget):
 
         self.main_layout = QHBoxLayout()
 
-        explanation_text_string = self.transform_class.__doc__
+        explanation_text_string = strip_notgui(self.transform_class.__doc__)
         explanation_text_string = break_text(explanation_text_string)
         explanation_text_string = explanation_text_string.replace('\n', '<br>')
         self.explanation_text = QLabel(explanation_text_string, self)
@@ -87,7 +110,7 @@ class TransformsTabItem(QWidget):
         self.enabling_checkboxes_layout.addStretch()
 
         self.preview_job_runner = PreviewJobRunner(
-            self, self.parent.parent.parent.threadpool
+            self, self.main_page.threadpool, self.main_page
         )
         self.enabling_checkboxes_layout.addWidget(self.preview_job_runner)
 
@@ -105,9 +128,9 @@ class TransformsTabItem(QWidget):
             self.transform_class.postprocess_recommended
         )
         self.preprocess_checkbox.stateChanged.connect(
-            self.preprocess_chechbox_on_state_changed
+            self.preprocess_checkbox_on_state_changed
         )
-        self.preprocess_chechbox_on_state_changed()
+        self.preprocess_checkbox_on_state_changed()
         self.transform_details_layout.addWidget(self.postprocess_checkbox)
 
         self.transform_details_layout.addWidget(QHorizontalLineBreakWidget(self))
@@ -132,7 +155,7 @@ class TransformsTabItem(QWidget):
         self.main_layout.setAlignment(Qt.AlignTop)
         self.setLayout(self.main_layout)
 
-    def preprocess_chechbox_on_state_changed(self):
+    def preprocess_checkbox_on_state_changed(self):
         """Enable the postprocess checkbox only when preprocessing is enabled."""
         self.postprocess_checkbox.setEnabled(self.preprocess_checkbox.isChecked())
 

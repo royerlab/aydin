@@ -48,6 +48,30 @@ class DilatedConv(nn.Module):
         dilation,
         activation="ReLU",
     ):
+        """Initialize the DilatedConv layer.
+
+        Parameters
+        ----------
+        in_channels : int
+            Number of input channels.
+        out_channels : int
+            Number of output channels.
+        spacetime_ndim : int
+            Number of spatial dimensions (2 or 3).
+        padding : int
+            Amount of zero-padding to apply on each side.
+        kernel_size : int
+            Size of the convolution kernel.
+        dilation : int
+            Dilation rate for the convolution.
+        activation : str
+            Activation function: ``'ReLU'``, ``'swish'``, or ``'lrel'``.
+
+        Raises
+        ------
+        ValueError
+            If ``spacetime_ndim`` is not 2 or 3.
+        """
         super(DilatedConv, self).__init__()
 
         self.in_channels = in_channels

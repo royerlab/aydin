@@ -21,15 +21,16 @@ from aydin.util.log.log import aprint, asection
 
 
 class CBRegressor(RegressorBase):
-    """
-    The CatBoost Regressor uses the gradient boosting library <a
-    href="https://github.com/catboost">CatBoost</a> to perform regression
-    from a set of feature vectors and target values. CatBoost main advantage
-    is that it is very fast compared to other gradient boosting libraries --
-    in particular when GPU acceleration is available. Compared to other
-    libraries (lightGBM, XGBoost) it is much easier to ship the GPU enabled
-    version because it just works. It performs comparably and sometimes
-    better than other libraries like LightGBM.
+    """CatBoost gradient-boosted decision-tree regressor.
+
+    Uses the <a href="https://github.com/catboost">CatBoost</a> library to
+    perform regression from a set of feature vectors and target values.
+    CatBoost's main advantage is speed -- in particular when GPU acceleration
+    is available. Compared to other gradient boosting libraries (LightGBM,
+    XGBoost) it is much easier to ship the GPU-enabled version because it
+    works out of the box. It performs comparably to, and sometimes better
+    than, LightGBM.
+    <notgui>
     """
 
     model: CatBoostRegressor
@@ -121,8 +122,6 @@ class CBRegressor(RegressorBase):
             set to '0-3' for example for all devices 0,1,2,3. It is recommended
             to only use together similar or ideally identical GPU devices.
             (advanced)
-
-
         """
         super().__init__()
 
@@ -172,6 +171,7 @@ class CBRegressor(RegressorBase):
             aprint(f"gpu: {self.gpu}")
 
     def __repr__(self):
+        """Return a concise string representation of the regressor."""
         return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}, gpu={self.gpu}>"
 
     def recommended_max_num_datapoints(self) -> int:
@@ -364,7 +364,22 @@ class CBRegressor(RegressorBase):
 
                         # Logging callback:
                         class MetricsCheckerCallback:
+                            """CatBoost callback that logs metrics after each iteration."""
+
                             def after_iteration(self, info):
+                                """Log training metrics after a CatBoost iteration.
+
+                                Parameters
+                                ----------
+                                info : catboost.MetricCalcInfo
+                                    Object containing ``iteration`` index and
+                                    ``metrics`` dictionary for the current round.
+
+                                Returns
+                                -------
+                                bool
+                                    Always returns ``True`` to continue training.
+                                """
                                 iteration = info.iteration
                                 metrics = info.metrics
                                 aprint(f"Iteration: {iteration} metrics: {metrics}")
@@ -475,6 +490,16 @@ class _CBModel:
     """
 
     def __init__(self, model, loss_history):
+        """Initialise the CatBoost model wrapper.
+
+        Parameters
+        ----------
+        model : CatBoostRegressor
+            Trained CatBoost model (may be ``None`` if training was
+            interrupted).
+        loss_history : dict
+            Dictionary with ``'training'`` and ``'validation'`` loss arrays.
+        """
         self.model: CatBoostRegressor = model
         self.loss_history = loss_history
 
@@ -502,11 +527,28 @@ class _CBModel:
         self.model = CatBoostRegressor()
         self.model.load_model(cb_model_file)
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return pickling state, excluding the non-serialisable CatBoost model.
+
+        Returns
+        -------
+        dict
+            Instance state with the ``model`` key removed.
+        """
         state = self.__dict__.copy()
         del state['model']
         return state
+
+    def __setstate__(self, state):
+        """Restore pickling state with a safe default for the excluded model.
+
+        Parameters
+        ----------
+        state : dict
+            Pickled state (without ``model``).
+        """
+        self.__dict__.update(state)
+        self.model = None
 
     def predict(self, x):
         """Predict target values for the given feature vectors.
@@ -533,6 +575,7 @@ class _CBModel:
             x_pool = Pool(data=x)
 
             def _predict(task_type):
+                """Run CatBoost prediction with given task type (CPU/GPU)."""
                 return self.model.predict(
                     x_pool,
                     thread_count=-1 if task_type == 'CPU' else 1,

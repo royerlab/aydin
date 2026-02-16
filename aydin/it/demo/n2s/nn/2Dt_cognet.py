@@ -1,3 +1,10 @@
+"""Demo of Noise2Self perceptron denoising on 2D+time COGNET nanotube data.
+
+Loads a time-series COGNET nanotube dataset, trains an
+``ImageTranslatorFGR`` with ``PerceptronRegressor`` and writes the
+denoised result to a memory-mapped TIFF.
+"""
+
 # flake8: noqa
 import time
 from datetime import date
@@ -15,6 +22,7 @@ from aydin.regression.perceptron import PerceptronRegressor
 
 
 def demo():
+    """Run Noise2Self perceptron denoising on COGNET nanotube time-series data."""
     today = date.today()
     filename = f"result_{today.strftime('%m_%d_%Y_%H_%M_%S')}.tiff"
 
@@ -68,12 +76,12 @@ def demo():
 
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(train, name='train')
-            viewer.add_image(infer, name='infer')
-            print(f"Inference: elapsed time:  {stop - start} ")
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(train, name='train')
+        viewer.add_image(infer, name='infer')
+        print(f"Inference: elapsed time:  {stop - start} ")
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
 
 if __name__ == "__main__":

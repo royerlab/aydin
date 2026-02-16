@@ -1,5 +1,13 @@
+"""Demonstrate stopping FGR training from another thread.
+
+This demo shows how to programmatically stop an FGR training session from
+a separate thread using a timer, which is useful for implementing training
+time limits or user-triggered cancellation.
+"""
+
 # flake8: noqa
 import time
+from functools import partial
 
 import napari
 import numpy
@@ -7,7 +15,9 @@ import numpy as np
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 from skimage.util import random_noise
 
 from aydin.features.fast.fast_features import FastFeatureGenerator
@@ -17,9 +27,7 @@ from aydin.util.log.log import Log
 
 
 def demo():
-    """
-    Demo for how to stop training from an other thread.
-    """
+    """Train FGR on noisy data and stop training after 20 seconds."""
 
     Log.set_log_max_depth(5)
 
@@ -44,6 +52,7 @@ def demo():
     from threading import Timer
 
     def stop_training():
+        """Signal the FGR trainer to stop from a background timer thread."""
         print("!!STOPPING TRAINING NOW FROM ANOTHER THREAD!!")
         it.stop_training()
 
@@ -72,12 +81,12 @@ def demo():
     print("denoised    :", psnr(image, denoised), ssim(denoised, image))
     print("denoised_inf:", psnr(image, denoised_inf), ssim(denoised_inf, image))
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(n(image), name='image')
-        viewer.add_image(n(noisy), name='noisy')
-        viewer.add_image(n(denoised), name='denoised')
-        viewer.add_image(n(denoised_inf), name='denoised_inf')
+    viewer = napari.Viewer()
+    viewer.add_image(n(image), name='image')
+    viewer.add_image(n(noisy), name='noisy')
+    viewer.add_image(n(denoised), name='denoised')
+    viewer.add_image(n(denoised_inf), name='denoised_inf')
+    napari.run()
 
 
 if __name__ == "__main__":

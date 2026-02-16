@@ -18,7 +18,7 @@ from aydin.util.log.log import aprint, asection
 
 
 class RangeTransform(ImageTransformBase):
-    """Range Normalisation
+    """Range normalisation transform.
 
     Images come in all sorts of formats, and pixels can be represented as 8,
     16, 32 bit integers as well as 16, 32, 64 bit floats. More crucially,
@@ -35,6 +35,7 @@ class RangeTransform(ImageTransformBase):
     Optionally, the image can be left as float after denormalisation,
     and values can be clipped to the range during both normalisation and
     denormalisation.
+    <notgui>
     """
 
     preprocess_description = (
@@ -55,8 +56,7 @@ class RangeTransform(ImageTransformBase):
         priority: float = 0.2,
         **kwargs,
     ):
-        """
-        Constructs a Range Transform
+        """Construct a RangeTransform.
 
         Parameters
         ----------
@@ -91,8 +91,15 @@ class RangeTransform(ImageTransformBase):
 
         aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_normaliser``, ``_min_value``, and
+            ``_max_value``.
+        """
         state = self.__dict__.copy()
         del state['_normaliser']
         del state['_min_value']
@@ -100,6 +107,13 @@ class RangeTransform(ImageTransformBase):
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name and key parameters.
+        """
         return (
             f'{type(self).__name__}'
             f' (mode={self.mode},'
@@ -109,6 +123,13 @@ class RangeTransform(ImageTransformBase):
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):

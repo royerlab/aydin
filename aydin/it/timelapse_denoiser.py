@@ -30,6 +30,19 @@ class TimelapseDenoiser:
     denoiser is trained per time point. It is advised to turn on spatial
     features. For timelapses with very large 3D stacks, it is recommended
     to use tiling.
+
+    Attributes
+    ----------
+    translator : ImageTranslatorBase
+        The underlying image translator used for per-timepoint denoising.
+    fine_temporal_window : int
+        Number of neighboring timepoints on each side used as fine-grained
+        temporal features.
+    coarse_temporal_window : int
+        Number of exponentially-spaced long-range temporal windows on each
+        side used as coarse temporal features.
+    use_median : bool
+        If True, use median for coarse temporal aggregation; otherwise use mean.
     """
 
     def __init__(
@@ -207,6 +220,18 @@ class TimelapseDenoiser:
             ):
 
                 def get_relative_timpepoint(rel_index):
+                    """Retrieve a timepoint frame relative to the current one.
+
+                    Parameters
+                    ----------
+                    rel_index : int
+                        Relative offset from the current timepoint index.
+
+                    Returns
+                    -------
+                    numpy.ndarray
+                        The image frame at the clamped index.
+                    """
                     index = tpi + rel_index
                     index = min(num_time_points - 1, index)
                     index = max(0, index)
@@ -223,7 +248,25 @@ class TimelapseDenoiser:
             ):
 
                 def get_average(extent):
+                    """Compute temporal average or median over a range of frames.
 
+                    For positive extents, averages frames from (tpi+1) to
+                    (tpi+extent). For negative extents, averages frames from
+                    (tpi+extent) to (tpi-1). Uses median or mean depending
+                    on the ``use_median`` setting.
+
+                    Parameters
+                    ----------
+                    extent : int
+                        Signed distance from the current timepoint. Positive
+                        for future frames, negative for past frames.
+
+                    Returns
+                    -------
+                    numpy.ndarray
+                        Aggregated (averaged or median) image frame, or
+                        zeros if the range is empty.
+                    """
                     if extent > 0:
                         index = tpi + extent
                         index = min(num_time_points - 1, index)

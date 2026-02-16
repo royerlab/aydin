@@ -9,14 +9,18 @@ from aydin.util.log.log import aprint
 
 
 def download_and_extract_zipresource(url, targetdir='.'):
-    """
-    Method to download and extract a zipresource from a url.
+    """Download a zip file from a URL and extract it to a target directory.
+
+    If the extracted resource already exists, the download is skipped.
+    The zip file is deleted after successful extraction.
 
     Parameters
     ----------
     url : str
-    targetdir : str
-
+        URL of the zip resource to download.
+    targetdir : str or Path
+        Directory to extract the zip contents into. Created if it does
+        not exist. Defaults to the current directory.
     """
 
     # Check if target directory exists, if not create

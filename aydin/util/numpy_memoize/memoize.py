@@ -11,17 +11,28 @@ import numpy
 
 
 class memoize_last(object):
-    """Decorator class used to cache the most recent value of a function
-    or method based on the signature of its arguments. If any single
-    argument changes, the function or method is evaluated afresh.
+    """Single-entry memoization decorator supporting NumPy arrays.
 
-    Importantly: works even for numpy arrays although they are not hashable.
-    We use the object id, so great care has to be taken when using this!!
+    Caches the most recent return value of a function or method based on
+    its argument signatures. If any single argument changes, the function
+    is re-evaluated. Supports NumPy arrays (which are not hashable) by
+    comparing object identity via ``id()``.
 
+    .. warning::
+       Because NumPy array caching relies on ``id()``, the cache may
+       produce stale results if an array is modified in-place or if a
+       new array is allocated at the same memory address as a previous one.
+
+    Attributes
+    ----------
+    value : object or None
+        The cached return value.
+
+    References
+    ----------
     Original implementation from:
     https://gist.github.com/dpo/1222577
     https://github.com/numpy/numpy/issues/14294
-
     """
 
     def __init__(self, callable):
@@ -39,7 +50,21 @@ class memoize_last(object):
         return
 
     def __get_hash(self, x):
-        # Return signature of argument.
+        """Compute a hash-like signature for an argument.
+
+        For NumPy arrays, returns ``id(x)`` since arrays are not hashable.
+        For all other types, returns ``hash(x)``.
+
+        Parameters
+        ----------
+        x : object
+            Argument to compute signature for.
+
+        Returns
+        -------
+        int
+            Hash or identity value.
+        """
         if isinstance(x, numpy.ndarray):
             # _x = x.view(numpy.uint8)
             # return hash(hashlib.sha1(_x).hexdigest())

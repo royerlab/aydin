@@ -22,6 +22,7 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
 
     This is the recommended feature generator for most use cases with the
     Feature Generation and Regression (FGR) denoising approach.
+    <notgui>
     """
 
     def __init__(
@@ -167,9 +168,8 @@ class StandardFeatureGenerator(ExtensibleFeatureGenerator):
             This is experimental and of academic interest only.
             (advanced)
 
-
-        dtype
-            Datatype of the features
+        dtype : numpy.dtype
+            Data type for computed feature arrays (e.g., ``numpy.float32``).
             (advanced)
         """
         super().__init__()

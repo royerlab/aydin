@@ -50,7 +50,7 @@ Once you're ready to share your contribution with us you should submit it as a P
 
 #### Do
 
-* Use our own internal logging [API](https://github.com/royerlab/aydin/blob/master/aydin/util/log/log.py)
+* Use our own internal logging [API](https://github.com/royerlab/aydin/blob/main/aydin/util/log/log.py)
 * Use pep8 style guidelines + our preferences with `black` formatter
 * Use only NumPy style docstrings
 * Comment your code where necessary

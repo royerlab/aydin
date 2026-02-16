@@ -243,21 +243,36 @@ def _cpu_line_uniform_filter_with_3d_loop(image, output, filter_size, parallelis
 
 @jit(nopython=True, error_model=__error_model, fastmath=__fastmath)
 def _cpu_line_filter(input_line, output_line, filter_size):
-    """
-    Numba jitted line filter implementation. Doesn't return anything,
-    output array should be provided as an argument.
+    """Apply sliding-window uniform filter to a 1D array in-place.
+
+    Uses a running sum accumulator for O(n) filtering regardless of
+    filter size. Boundary handling uses nearest-neighbor clamping.
 
     Parameters
     ----------
-    input_line
-        1D input array
-    output_line
-        1D output array
-    filter_size
-        Size of the uniform filter
+    input_line : numpy.ndarray
+        1D input array.
+    output_line : numpy.ndarray
+        1D output array (pre-allocated, same length as ``input_line``).
+    filter_size : int
+        Window size for the uniform filter.
     """
 
     def safe_index(index, size):
+        """Clamp an index to the valid range ``[0, size-1]``.
+
+        Parameters
+        ----------
+        index : int
+            Index to clamp.
+        size : int
+            Array length.
+
+        Returns
+        -------
+        int
+            Clamped index.
+        """
         if index < 0:
             return 0
         elif index >= size:

@@ -14,6 +14,7 @@ from numpy.typing import ArrayLike
 from scipy.ndimage import median_filter, uniform_filter
 
 from aydin.it.classic_denoisers import _defaults
+from aydin.util.log.log import aprint, asection
 
 __fastmath = {'contract', 'afn', 'reassoc'}
 __error_model = 'numpy'
@@ -65,8 +66,12 @@ def calibrate_denoise_lipschitz(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_lipschitz`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
 
     # Convert image to float if needed:
@@ -81,6 +86,7 @@ def calibrate_denoise_lipschitz(
     }
 
     best_parameters = other_fixed_parameters
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 3 * image.nbytes  # complex numbers and more
@@ -99,12 +105,12 @@ def denoise_lipschitz(
     """
     Denoises the given image by correcting voxel values that violate
     <a href="https://en.wikipedia.org/wiki/Lipschitz_continuity">Lipschitz
-    continuity</a> criterion. These voxels get replaced
+    continuity</a> criterion. These voxels get
     iteratively replaced by the median. This is repeated for a number
     of iterations (max_num_iterations), until no more changes to
     the image occurs, and making sure that the proportion of
     corrected voxels remains below a given level (max_corrections argument).
-
+    <notgui>
 
     Parameters
     ----------
@@ -135,8 +141,8 @@ def denoise_lipschitz(
 
     Returns
     -------
-    Denoised image
-
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:
@@ -148,35 +154,40 @@ def denoise_lipschitz(
     # Wrap compute_error function:
     wrapped_compute_error = jit(nopython=True, parallel=multi_core)(_compute_error)
 
-    for i in range(max_num_iterations):
-        # aprint(f"Iteration {i}")
+    with asection(
+        f"Lipschitz denoising (lipschitz={lipschitz}, max_iterations={max_num_iterations})"
+    ):
+        for i in range(max_num_iterations):
 
-        # Compute median:
-        median = uniform_filter(image, size=5)
+            # Compute median:
+            median = uniform_filter(image, size=5)
 
-        # We scale the lipschitz threshold to the image std at '3 sigma' :
-        _lipschitz = lipschitz * 6 * image.std()
+            # We scale the lipschitz threshold to the image std at '3 sigma' :
+            _lipschitz = lipschitz * 6 * image.std()
 
-        # We compute the 'error':
-        error = wrapped_compute_error(image, median=median, lipschitz=_lipschitz)
+            # We compute the 'error':
+            error = wrapped_compute_error(image, median=median, lipschitz=_lipschitz)
 
-        # We compute the threshold on the basis of the errors,
-        # we first tackle the most offending voxels:
-        threshold = numpy.percentile(error, q=100 * (1 - percentile))
+            # We compute the threshold on the basis of the errors,
+            # we first tackle the most offending voxels:
+            threshold = numpy.percentile(error, q=100 * (1 - percentile))
 
-        # We compute the mask:
-        mask = error > threshold
+            # We compute the mask:
+            mask = error > threshold
 
-        # count number of corrections for this round:
-        num_corrections = numpy.sum(mask)
-        # aprint(f"Number of corrections: {num_corrections}")
+            # count number of corrections for this round:
+            num_corrections = numpy.sum(mask)
 
-        # if no corrections made we stop iterating:
-        if num_corrections == 0:
-            break
+            # if no corrections made we stop iterating:
+            if num_corrections == 0:
+                aprint(f"Converged after {i} iterations")
+                break
 
-        # We use the median to correct pixels:
-        image[mask] = (alpha) * image[mask] + (1 - alpha) * median_ref[mask]
+            # We use the median to correct pixels:
+            image[mask] = (alpha) * image[mask] + (1 - alpha) * median_ref[mask]
+
+        else:
+            aprint(f"Reached maximum iterations ({max_num_iterations})")
 
     return image
 

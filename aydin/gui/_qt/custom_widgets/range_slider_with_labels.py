@@ -26,6 +26,19 @@ class QRangeSliderWithLabels(QWidget):
     """
 
     def __init__(self, parent, label="N/A", size=100, min_length=32):
+        """Initialize the labeled range slider with axis label and limit displays.
+
+        Parameters
+        ----------
+        parent : BaseCroppingTab
+            The parent cropping tab widget.
+        label : str, optional
+            Axis label displayed next to the slider. Default is 'N/A'.
+        size : int, optional
+            Initial slider range maximum. Default is 100.
+        min_length : int, optional
+            Minimum allowed range length for X and Y axes. Default is 32.
+        """
         super(QRangeSliderWithLabels, self).__init__(parent)
         self.parent = parent
         self.size = size
@@ -43,7 +56,7 @@ class QRangeSliderWithLabels(QWidget):
             initial_values=(0, size), data_range=(0, size), collapsible=False
         )
 
-        self.slider.setStep(1.0)
+        self.slider.set_step(1.0)
         self.slider.rangeChanged.connect(self.slider_range_changed)
         self.slider.valuesChanged.connect(self.slider_value_changed)
 
@@ -59,7 +72,7 @@ class QRangeSliderWithLabels(QWidget):
 
         self.select_all_button = QPushButton("Select All")
         self.select_all_button.clicked.connect(
-            lambda: self.slider.setValues(self.slider.range())
+            lambda: self.slider.set_values(self.slider.range())
         )
         self.widget_layout.addWidget(self.select_all_button)
 
@@ -117,7 +130,7 @@ class QRangeSliderWithLabels(QWidget):
 
         if self.slider_label.text() in ["X", "Y"] and upper - lower <= self.min_length:
 
-            self.slider.setValues((self.lower_cutoff, self.upper_cutoff))
+            self.slider.set_values((self.lower_cutoff, self.upper_cutoff))
             return
 
         if self.slider_label.text() not in ["X", "Y"]:

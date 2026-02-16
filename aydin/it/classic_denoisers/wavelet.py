@@ -16,6 +16,7 @@ from skimage.restoration import denoise_wavelet as skimage_denoise_wavelet
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_wavelet(
@@ -31,10 +32,9 @@ def calibrate_denoise_wavelet(
     display_crop: bool = False,
     **other_fixed_parameters,
 ):
-    """
-    Calibrates a <a href="https://en.wikipedia.org/wiki/Wavelet_transform
-    ">wavelet</a> denoiser for the given image and returns the optimal
-    parameters obtained using the N2S loss.
+    """Calibrates a <a href="https://en.wikipedia.org/wiki/Wavelet_transform">wavelet</a>
+    denoiser for the given image and returns the optimal parameters obtained
+    using the N2S loss.
 
     Note: we use the scikit-image implementation of wavelet denoising.
 
@@ -100,8 +100,12 @@ def calibrate_denoise_wavelet(
 
     Returns
     -------
-    Denoising function and dictionary containing optimal parameters.
-
+    denoise_function : callable
+        The ``denoise_wavelet`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -177,6 +181,7 @@ def calibrate_denoise_wavelet(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters (pass 1): {best_parameters}")
 
     # Next pass we optimise the mode and method:
     parameter_ranges = {
@@ -200,6 +205,7 @@ def calibrate_denoise_wavelet(
         )
         | other_fixed_parameters
     )
+    aprint(f"Final best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = image.nbytes * 3  # transform
@@ -215,12 +221,11 @@ def denoise_wavelet(
     method: str = 'BayesShrink',
     **kwargs,
 ):
-    """
-    Denoises the given image using the scikit-image
-    implementation of <a href="https://en.wikipedia.org/wiki/Wavelet_transform ">
-    wavelet</a> denoising.
+    """Denoises the given image using the scikit-image
+    implementation of <a href="https://en.wikipedia.org/wiki/Wavelet_transform">wavelet</a> denoising.
     \n\n
     Note: we use the scikit-image implementation of wavelet denoising.
+    <notgui>
 
     Parameters
     ----------
@@ -252,8 +257,8 @@ def denoise_wavelet(
 
     Returns
     -------
-    Denoised image as ndarray
-
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:

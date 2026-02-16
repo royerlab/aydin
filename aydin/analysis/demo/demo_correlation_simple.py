@@ -1,3 +1,5 @@
+"""Demo script illustrating correlation analysis on synthetic and natural images."""
+
 # flake8: noqa
 import random
 from math import cos, pi, sin
@@ -13,6 +15,7 @@ from aydin.io.datasets import examples_single
 
 
 def discs(shape=(512, 512), radius=10, num=512, fill=True, image=None):
+    """Generate an image with randomly placed discs or circles."""
     if image is None:
         image = np.zeros(shape, dtype=np.float64)
 
@@ -32,6 +35,7 @@ def discs(shape=(512, 512), radius=10, num=512, fill=True, image=None):
 
 
 def lines(shape=(512, 512), length=10, num=512, fill=False, image=None):
+    """Generate an image with randomly placed anti-aliased line segments."""
     if image is None:
         image = np.zeros(shape, dtype=np.float64)
 
@@ -51,6 +55,7 @@ plot_length = 256
 
 
 def noise_example():
+    """Show correlation analysis on a pure random noise image."""
     image = np.random.random((1500, 1500))
     plt.imshow(image)
     plt.show()
@@ -64,6 +69,7 @@ def noise_example():
 
 
 def camera_example():
+    """Show correlation analysis on the scikit-image camera image."""
     camera = data.camera()
     plt.imshow(camera)
     plt.show()
@@ -77,6 +83,7 @@ def camera_example():
 
 
 def astronaut_example():
+    """Show correlation analysis on the scikit-image astronaut image."""
     astronaut = rgb2gray(data.astronaut())
     plt.imshow(astronaut)
     plt.show()
@@ -90,6 +97,7 @@ def astronaut_example():
 
 
 def clock_example():
+    """Show correlation analysis on a cropped scikit-image clock image."""
     clock = data.clock()[70:220, 150:270]
     plt.imshow(clock)
     plt.show()
@@ -103,6 +111,7 @@ def clock_example():
 
 
 def coins_example():
+    """Show correlation analysis on the scikit-image coins image."""
     coins = data.coins()
     plt.imshow(coins)
     plt.show()
@@ -116,6 +125,7 @@ def coins_example():
 
 
 def discs_example():
+    """Show correlation analysis on synthetic disc images of varying radii."""
     discs1 = discs(shape=(1500, 1500), radius=40, num=90)
     discs2 = discs(shape=(1500, 1500), radius=20, num=160)
     discs3 = discs(shape=(1500, 1500), radius=10, num=420)
@@ -142,6 +152,7 @@ def discs_example():
 
 
 def lines_example():
+    """Show correlation analysis on synthetic line images of varying lengths."""
     lines1 = lines(shape=(1500, 1500), length=40, num=3000)
     lines2 = lines(shape=(1500, 1500), length=20, num=6000)
     lines3 = lines(shape=(1500, 1500), length=10, num=12000)
@@ -165,6 +176,7 @@ def lines_example():
 
 
 def maitre_example():
+    """Show correlation analysis on a multi-dimensional MaiTre mouse dataset."""
     image = examples_single.maitre_mouse.get_array()
 
     plt.plot(correlation(image)[0][:plot_length], label='t')

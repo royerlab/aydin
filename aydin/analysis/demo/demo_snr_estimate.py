@@ -1,3 +1,5 @@
+"""Demo script for estimating signal-to-noise ratio (SNR) at various noise levels."""
+
 # flake8: noqa
 # import pytest
 import pytest
@@ -9,6 +11,7 @@ from aydin.util.log.log import Log, aprint
 
 
 def demo_snr_estimate(display: bool = True, run_as_demo=True):
+    """Estimate SNR in dB for images with varying amounts of additive Gaussian noise."""
     Log.enable_output = True
 
     clean_image = normalise(camera())

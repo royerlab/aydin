@@ -1,11 +1,21 @@
+"""Demo of Noise2Self LGBM denoising with tiled feature generation.
+
+Trains an ``ImageTranslatorFGR`` with ``LGBMRegressor`` using a low
+``max_memory_usage_ratio`` to force tiled feature generation, and
+compares the denoised result against NLM and median filters.
+"""
+
 # flake8: noqa
 import time
+from functools import partial
 
 import numpy
 import numpy as np
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 from skimage.util import random_noise
 
 from aydin.features.standard_features import StandardFeatureGenerator
@@ -52,20 +62,16 @@ def demo():
     noisy = numpy.clip(noisy, 0, 1)
     denoised = numpy.clip(denoised, 0, 1)
 
-    image = numpy.clip(image, 0, 1)
-    noisy = numpy.clip(noisy, 0, 1)
-    denoised = numpy.clip(denoised, 0, 1)
-
     print("noisy       :", psnr(image, noisy), ssim(noisy, image))
     print("denoised    :", psnr(image, denoised), ssim(denoised, image))
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(normalise(image), name='image')
-        viewer.add_image(normalise(noisy), name='noisy')
-        viewer.add_image(normalise(denoised), name='denoised')
+    viewer = napari.Viewer()
+    viewer.add_image(normalise(image), name='image')
+    viewer.add_image(normalise(noisy), name='noisy')
+    viewer.add_image(normalise(denoised), name='denoised')
+    napari.run()
 
 
 if __name__ == "__main__":

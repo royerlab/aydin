@@ -1,15 +1,25 @@
+"""Demo of Noise2Self perceptron denoising on a 2D camera image.
+
+Trains an ``ImageTranslatorFGR`` with ``PerceptronRegressor`` on the
+camera image with synthetic noise, demonstrating basic self-supervised
+denoising with a neural network regressor.
+"""
+
 # flake8: noqa
 import time
+from functools import partial
 
 import napari
 import numpy
 import numpy as np
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import normalise, add_noise
+from aydin.io.datasets import add_noise, normalise
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.perceptron import PerceptronRegressor
 
@@ -46,11 +56,11 @@ def demo():
     print("denoised", psnr(denoised, image), ssim(denoised, image))
     # print("denoised_predict", psnr(denoised_predict, image), ssim(denoised_predict, image))
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(noisy, name='noisy')
-        viewer.add_image(denoised, name='denoised')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(noisy, name='noisy')
+    viewer.add_image(denoised, name='denoised')
+    napari.run()
 
 
 if __name__ == "__main__":

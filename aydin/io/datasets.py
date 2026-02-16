@@ -154,58 +154,137 @@ def add_blur_3d(image, xy_size=17, z_size=17):
 
 
 def lizard():
-    """Load the example lizard image (2D monochrome)."""
+    """Load the example lizard image (2D monochrome).
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D monochrome lizard image.
+    """
     return examples_single.generic_lizard.get_array()
 
 
 def camera():
-    """Load the example camera image (2D monochrome)."""
+    """Load the example camera image (2D monochrome).
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D monochrome camera image.
+    """
     return examples_single.generic_camera.get_array()
 
 
 def newyork():
-    """Load the example New York image (2D monochrome)."""
+    """Load the example New York image (2D monochrome).
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D monochrome New York cityscape image.
+    """
     return examples_single.generic_newyork.get_array()
 
 
 def small_newyork():
-    """Load a downscaled (0.5x) version of the New York image."""
+    """Load a downscaled (0.5x) version of the New York image.
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D monochrome New York image downscaled by a factor of 0.5
+        using spline interpolation.
+    """
     return zoom(newyork(), zoom=0.5)
 
 
 def cropped_newyork(crop_amount=256):
-    """Load a center-cropped version of the New York image."""
+    """Load a center-cropped version of the New York image.
+
+    Parameters
+    ----------
+    crop_amount : int, optional
+        Number of pixels to crop from each edge, clamped to a
+        maximum of 500. Default is 256.
+
+    Returns
+    -------
+    image : numpy.ndarray
+        Center-cropped 2D monochrome New York image.
+    """
     crop_amount = min(crop_amount, 500)
     return newyork()[crop_amount:-crop_amount, crop_amount:-crop_amount]
 
 
 def newyork_noisy():
-    """Load the noisy version of the New York image."""
+    """Load the noisy version of the New York image.
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D monochrome noisy New York image.
+    """
     return examples_single.noisy_newyork.get_array()
 
 
 def pollen():
-    """Load the example pollen image (2D monochrome)."""
+    """Load the example pollen image (2D monochrome).
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D monochrome pollen image.
+    """
     return examples_single.generic_pollen.get_array()
 
 
 def scafoldings():
-    """Load the example scaffoldings image (2D monochrome)."""
+    """Load the example scaffoldings image (2D monochrome).
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D monochrome scaffoldings image.
+    """
     return examples_single.generic_scafoldings.get_array()
 
 
 def characters():
-    """Load the example characters image (2D monochrome, inverted)."""
+    """Load the example characters image (2D monochrome, inverted).
+
+    The raw image is inverted so that characters appear bright on a dark
+    background.
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D monochrome inverted characters image.
+    """
     return 1 - examples_single.generic_characters.get_array()
 
 
 def andromeda():
-    """Load the example Andromeda galaxy image (2D monochrome)."""
+    """Load the example Andromeda galaxy image (2D monochrome).
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D monochrome Andromeda galaxy image.
+    """
     return examples_single.generic_andromeda.get_array()
 
 
 def dots():
-    """Generate a synthetic sparse dots image with non-uniform background."""
+    """Generate a synthetic sparse dots image with non-uniform background.
+
+    Creates a 512x512 image with randomly placed sparse dots (dilated) and
+    a brighter quadrant in the upper-left corner.
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D float32 image of shape (512, 512) with values in [0, 1].
+    """
     image = numpy.random.rand(512, 512) < 0.005  # andromeda()#[256:-256, 256:-256]
     image = 0.8 * binary_dilation(image).astype(numpy.float32, copy=False)
     image[0:256, 0:256] += 0.1
@@ -214,12 +293,26 @@ def dots():
 
 
 def rgbtest():
-    """Load the example RGB test image."""
+    """Load the example RGB test image.
+
+    Returns
+    -------
+    image : numpy.ndarray
+        RGB test image with a channel axis.
+    """
     return examples_single.rgbtest.get_array()
 
 
 def dmel():
-    """Load a single slice of the Keller Drosophila melanogaster dataset."""
+    """Load a single slice of the Keller Drosophila melanogaster dataset.
+
+    Returns the 24th Z-slice (index 23) from the 3D stack.
+
+    Returns
+    -------
+    image : numpy.ndarray
+        2D slice from the Drosophila melanogaster light-sheet dataset.
+    """
     return examples_single.keller_dmel.get_array()[23]
 
 
@@ -232,12 +325,24 @@ class examples_single(Enum):
     """
 
     def get_path(self):
-        """Download (if needed) and return the local file path for this example."""
+        """Download (if needed) and return the local file path for this example.
+
+        Returns
+        -------
+        path : str
+            Absolute path to the downloaded example image file.
+        """
         download_from_gdrive(*self.value, datasets_folder)
         return join(datasets_folder, self.value[1])
 
     def get_array(self):
-        """Download (if needed), read, and return the image as a numpy array."""
+        """Download (if needed), read, and return the image as a numpy array.
+
+        Returns
+        -------
+        array : numpy.ndarray
+            The example image data as a NumPy array.
+        """
         array, _ = io.imread(self.get_path())
         return array
 
@@ -379,6 +484,12 @@ def download_from_gdrive(
     -------
     output_path : str or None
         Path to the downloaded file, or None if the file already existed.
+
+    Raises
+    ------
+    ValueError
+        If ``unzip`` is True and the zip archive contains paths that would
+        escape the destination folder (Zip Slip vulnerability protection).
     """
     try:
         os.makedirs(dest_folder)
@@ -411,18 +522,26 @@ def download_from_gdrive(
 
 
 def download_all_examples():
-    """Download all example images to the local cache."""
+    """Download all example images defined in :class:`examples_single` to the local cache.
+
+    Files are saved to the ``datasets_folder`` directory inside the
+    platform-specific cache folder. Already-downloaded files are skipped.
+    """
     for example in examples_single:
         aprint(download_from_gdrive(*example.value))
 
 
 def downloaded_example(substring):
-    """Download a specific example whose filename contains the given substring.
+    """Download all examples whose filename contains the given substring.
+
+    Iterates over all members of :class:`examples_single` and downloads
+    each one whose filename contains ``substring``. If no filenames match,
+    nothing is downloaded.
 
     Parameters
     ----------
     substring : str
-        Substring to match against example filenames.
+        Substring to match against example filenames (case-sensitive).
     """
     for example in examples_single:
         if substring in example.value[1]:

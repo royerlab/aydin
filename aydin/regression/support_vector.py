@@ -12,9 +12,14 @@ from aydin.util.log.log import aprint, asection
 
 
 class SupportVectorRegressor(RegressorBase):
-    """
-    The Support Vector Regressor is too slow and does not in our experience
-    perform better than random forests or gradient boosting.
+    """Support vector regression (SVR) wrapper for scikit-learn.
+
+    Wraps :class:`~sklearn.svm.LinearSVR` (fast, linear kernel) and
+    :class:`~sklearn.svm.SVR` (RBF kernel). In practice this regressor is
+    too slow for large-scale image denoising and does not outperform random
+    forests or gradient boosting methods. It is included primarily for
+    benchmarking and completeness.
+    <notgui>
     """
 
     def __init__(self, linear: bool = True):
@@ -31,6 +36,7 @@ class SupportVectorRegressor(RegressorBase):
         self.linear = linear
 
     def __repr__(self):
+        """Return a concise string representation of the regressor."""
         return f"<{self.__class__.__name__}, linear={self.linear}>"
 
     def _fit(
@@ -79,15 +85,34 @@ class _SVRModel:
     """
 
     def __init__(self, model):
+        """Initialise the SVR model wrapper.
+
+        Parameters
+        ----------
+        model : sklearn.svm.SVR or sklearn.svm.LinearSVR
+            Fitted scikit-learn SVR estimator.
+        """
         self.model = model
         self.loss_history = {'training': [], 'validation': []}
 
     def _save_internals(self, path: str):
-        """Save model internals (no-op for scikit-learn models)."""
+        """Save model internals (no-op for scikit-learn SVR models).
+
+        Parameters
+        ----------
+        path : str
+            Directory path (unused).
+        """
         pass
 
     def _load_internals(self, path: str):
-        """Load model internals (no-op for scikit-learn models)."""
+        """Load model internals (no-op for scikit-learn SVR models).
+
+        Parameters
+        ----------
+        path : str
+            Directory path (unused).
+        """
         pass
 
     def predict(self, x):

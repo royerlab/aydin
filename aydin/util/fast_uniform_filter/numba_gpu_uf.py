@@ -435,6 +435,18 @@ def gpu_line_filter(input_line, output_line, current_size):
     )
 
     def safe_index(index):
+        """Clamp an index to the valid range ``[0, array_size-1]``.
+
+        Parameters
+        ----------
+        index : int
+            Index to clamp.
+
+        Returns
+        -------
+        int
+            Clamped index.
+        """
         if index < 0:
             return 0
         elif index >= array_size:

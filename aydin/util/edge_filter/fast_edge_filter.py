@@ -151,6 +151,7 @@ def fast_edge_filter(array: ArrayLike, axis: int = 0, gpu: bool = True):
     _kernel = _STENCIL_KERNELS[kernel_key]
 
     def _fast_edge_filter(array: ArrayLike):
+        """Apply selected stencil kernel to compute edge response."""
         array = _kernel(array)
         return array
 

@@ -132,6 +132,11 @@ def get_output_image_path(
         Unique output file path.
     counter : int or None
         Numeric suffix used to avoid collision, or None if no collision occurred.
+
+    Raises
+    ------
+    ValueError
+        If ``operation_type`` is not one of the supported values.
     """
     if operation_type not in ["denoised", "hyperstacked"]:
         raise ValueError(

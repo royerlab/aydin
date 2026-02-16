@@ -35,7 +35,7 @@ Download the latest bundle for your platform from the
 Getting started, with pip:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Aydin requires Python 3.9 or later. You can install Aydin with the following line:
+Aydin requires Python 3.9 or later and NumPy 2.0+. You can install Aydin with the following line:
 
 .. code-block:: bash
 

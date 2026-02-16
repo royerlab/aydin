@@ -1,13 +1,16 @@
+"""Demo script for estimating image resolution from frequency content."""
+
 # flake8: noqa
 import numpy
 from scipy.ndimage import gaussian_filter
 
 from aydin.analysis.resolution_estimate import resolution_estimate
-from aydin.io.datasets import normalise, add_noise, cropped_newyork, newyork
+from aydin.io.datasets import add_noise, cropped_newyork, newyork, normalise
 from aydin.util.log.log import Log
 
 
 def demo_resolution_estimate(display: bool = True):
+    """Compare resolution estimates on high-res vs low-res images, with and without noise."""
     Log.enable_output = True
 
     image = newyork()[:-3, 0:-7]

@@ -10,7 +10,7 @@ from random import randrange
 from typing import Callable, Optional
 
 import numpy
-from numba import float32, jit, prange, vectorize
+from numba import jit, prange
 from numpy import absolute
 from numpy.typing import ArrayLike
 from scipy.ndimage import gaussian_filter, sobel
@@ -24,7 +24,7 @@ def representative_crop(
     mode: str = 'contrast',
     crop_size: Optional[int] = None,
     min_length: int = 32,
-    smoothing_sigma: int = 0.5,
+    smoothing_sigma: float = 0.5,
     equal_sides: bool = False,
     favour_odd_lengths: bool = False,
     search_mode: str = 'random',
@@ -58,7 +58,7 @@ def representative_crop(
     min_length : int
         Crop axis lengths cannot be smaller than this number.
 
-    smoothing_sigma : int
+    smoothing_sigma : float
         Sigma value for Gaussian filter smoothing to achieve some crude denoising and thus
         make it a bit easier to estimate the score per crop.
 
@@ -73,24 +73,28 @@ def representative_crop(
         random mode we pick random crops, in systematic mode we check every
         possible strided crop.
 
-    granularity_factor: int
-        Granularity of search. higher values correspond to more overlap between candidate crops.
+    granularity_factor : int
+        Granularity of search. Higher values correspond to more overlap between candidate crops.
 
-    random_search_mode_num_crops: int
+    random_search_mode_num_crops : int
         Number of crops to check in 'random' search mode.
 
     min_num_crops : int
         Min number of crops to examine.
 
-    timeout_in_seconds: float
+    timeout_in_seconds : float
         Maximum amount of time in seconds that this function should run for.
         This avoids excessive computation for very large images.
 
     return_slice : bool
-        If True the slice is returned too:
+        If True the slice is returned too.
 
-    display_crop: bool
-        Displays crop, for debugging purposes...
+    display_crop : bool
+        Displays crop, for debugging purposes.
+
+    std_fun : callable, optional
+        Function to compute the contrast score for a crop.
+        Defaults to a fast parallel standard deviation estimator.
 
     Returns
     -------
@@ -246,6 +250,7 @@ def representative_crop(
 
                 # function to get crop slice:
                 def _crop_slice(translation, cropped_shape, downscale: int = 1):
+                    """Build a slice tuple for cropping at a given translation."""
                     return tuple(
                         slice(t, t + s, downscale)
                         for t, s in zip(translation, cropped_shape)
@@ -324,6 +329,8 @@ def representative_crop(
         else:
             raise ValueError(f"Unsupported search mode: {search_mode}")
 
+        aprint(f"Selected crop: shape={best_crop.shape}, score={best_score:.4f}")
+
         if display_crop:
 
             import napari
@@ -344,6 +351,18 @@ def representative_crop(
 
 
 def _sobel_magnitude(image):
+    """Compute the Sobel gradient magnitude across all large-enough axes.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array.
+
+    Returns
+    -------
+    numpy.ndarray
+        Root-sum-of-squares of per-axis Sobel gradients.
+    """
     magnitude = numpy.zeros_like(image)
     for axis in range(image.ndim):
         if image.shape[axis] < 32:
@@ -353,6 +372,18 @@ def _sobel_magnitude(image):
 
 
 def _sobel_minimum(image):
+    """Compute the element-wise minimum of absolute Sobel gradients across axes.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array.
+
+    Returns
+    -------
+    numpy.ndarray
+        Per-pixel minimum of absolute Sobel gradients.
+    """
     minimum = None
     for axis in range(image.ndim):
         if image.shape[axis] < 32:
@@ -369,6 +400,18 @@ def _sobel_minimum(image):
 
 
 def _sobel_maximum(image):
+    """Compute the element-wise maximum of absolute edge filter responses across axes.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array.
+
+    Returns
+    -------
+    numpy.ndarray
+        Per-pixel maximum of absolute edge filter responses.
+    """
     maximum = None
     for axis in range(image.ndim):
         if image.shape[axis] < 32:
@@ -385,33 +428,88 @@ def _sobel_maximum(image):
 
 
 def _sobel_fast(image):
+    """Compute an absolute edge filter along the longest axis only.
 
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array.
+
+    Returns
+    -------
+    numpy.ndarray
+        Absolute edge filter response along the longest axis.
+    """
     longest_axis = max(image.shape)
     axis = image.shape.index(longest_axis)
 
     return absolute(fast_edge_filter(image, axis=axis))
 
 
-@jit(nopython=True, parallel=True, fastmath=True)
 def _normalise(image):
+    """Normalise an image to the [0, 1] range using min-max scaling.
 
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array of float32 values.
+
+    Returns
+    -------
+    numpy.ndarray
+        Normalised image with values in [0, 1].
+    """
     # Normalise:
-    image_min = float32(image.min())
-    image_max = float32(image.max())
+    image_min = numpy.float32(image.min())
+    image_max = numpy.float32(image.max())
     if image_max - image_min > 0:
         return _rescale(image, image_min, image_max)
     else:
-        return image - image_min
+        return (image - image_min).astype(numpy.float32)
 
 
-@vectorize([float32(float32, float32, float32)])
 def _rescale(x, min_value, max_value):
-    return (x - min_value) / (max_value - min_value)
+    """Rescale values from [min_value, max_value] to [0, 1].
+
+    Parameters
+    ----------
+    x : array_like
+        Values to rescale.
+    min_value : float
+        Minimum of the original range.
+    max_value : float
+        Maximum of the original range.
+
+    Returns
+    -------
+    numpy.ndarray
+        Rescaled values in [0, 1], dtype float32.
+    """
+    return ((x - min_value) / (max_value - min_value)).astype(numpy.float32)
 
 
 @jit(nopython=True, parallel=True, fastmath=True)
 def _fast_std(image: ArrayLike, workers=16, decimation=1):
+    """Compute a fast approximate standard deviation using parallel chunks.
 
+    Splits the flattened array into chunks and returns the maximum
+    per-chunk standard deviation, providing a fast lower bound on
+    local contrast.
+
+    Parameters
+    ----------
+    image : ArrayLike
+        Input image array.
+    workers : int, optional
+        Number of parallel chunks to process, by default 16.
+    decimation : int, optional
+        Decimation factor for sub-sampling within each chunk, by default 1.
+
+    Returns
+    -------
+    float
+        Maximum standard deviation across all chunks.
+    """
     array = image.ravel()
     length = array.size
     num_chunks = workers

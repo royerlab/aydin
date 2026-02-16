@@ -1,4 +1,5 @@
-"""
+"""Semi-transparent loading overlay widget with animated dots.
+
 Adapted from https://wiki.python.org/moin/PyQt/A%20full%20widget%20waiting%20indicator
 """
 
@@ -20,7 +21,13 @@ class Overlay(QWidget):
     """
 
     def __init__(self, parent=None):
+        """Initialize the overlay with a transparent background palette.
 
+        Parameters
+        ----------
+        parent : QWidget, optional
+            The parent widget.
+        """
         QWidget.__init__(self, parent)
         palette = QPalette(self.palette())
         # Use ColorRole.Window for Qt6 compatibility (was Background in Qt5)
@@ -87,4 +94,3 @@ class Overlay(QWidget):
         if self.timer is not None:
             self.killTimer(self.timer)
             self.timer = None
-        self.hide()

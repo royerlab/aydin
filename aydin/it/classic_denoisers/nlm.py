@@ -17,6 +17,7 @@ from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.denoise_nd.denoise_nd import extend_nd
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_nlm(
@@ -32,9 +33,9 @@ def calibrate_denoise_nlm(
     display_crop: bool = False,
     **other_fixed_parameters,
 ):
-    """
-    Calibrates the Non-Local Means (NLM) denoiser for the given image and
-    returns the optimal parameters obtained using the N2S loss.
+    """Calibrate the Non-Local Means (NLM) denoiser for the given image.
+
+    Returns the optimal parameters obtained using the N2S loss.
 
     Parameters
     ----------
@@ -92,8 +93,12 @@ def calibrate_denoise_nlm(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_nlm`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
 
     # Convert image to float if needed:
@@ -136,6 +141,7 @@ def calibrate_denoise_nlm(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 3 * image.nbytes
@@ -150,10 +156,9 @@ def denoise_nlm(
     cutoff_distance: float = 0.1,
     sigma=0.0,
 ):
-    """
-    Denoise given image using either scikit-image implementation
+    """Denoise the given image using the scikit-image implementation
     of <a href="https://en.wikipedia.org/wiki/Non-local_means">Non-Local-Means (NLM)</a>.
-
+    <notgui>
 
     Parameters
     ----------
@@ -180,8 +185,8 @@ def denoise_nlm(
 
     Returns
     -------
-    Denoised image as ndarray.
-
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:
