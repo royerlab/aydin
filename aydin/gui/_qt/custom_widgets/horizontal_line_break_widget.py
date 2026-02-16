@@ -1,17 +1,34 @@
-from qtpy.QtWidgets import QHBoxLayout, QFrame, QWidget
+"""Horizontal line separator widget."""
+
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QFrame, QHBoxLayout, QWidget
 
 
 class QHorizontalLineBreakWidget(QWidget):
+    """A horizontal line separator widget for visual grouping in layouts.
+
+    Parameters
+    ----------
+    parent : QWidget
+        The parent widget.
+    """
+
     def __init__(self, parent):
+        """Initialize the horizontal line separator.
+
+        Parameters
+        ----------
+        parent : QWidget
+            The parent widget.
+        """
         super(QHorizontalLineBreakWidget, self).__init__(parent)
         self.parent = parent
 
-        self.layout = QHBoxLayout()
+        self.main_layout = QHBoxLayout()
 
         self.horizontal_line_break = QFrame(
             frameShape=QFrame.HLine, frameShadow=QFrame.Sunken
         )
-        self.layout.addWidget(self.horizontal_line_break)
-        self.layout.setAlignment(Qt.AlignTop)
-        self.setLayout(self.layout)
+        self.main_layout.addWidget(self.horizontal_line_break)
+        self.main_layout.setAlignment(Qt.AlignTop)
+        self.setLayout(self.main_layout)

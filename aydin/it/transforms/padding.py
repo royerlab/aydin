@@ -1,13 +1,20 @@
-import numpy
+"""Padding and cropping transform for border artifact reduction.
 
+Adds a configurable border to images before denoising and removes it
+afterward. Helps reduce edge artifacts, especially with convolution-based
+denoisers. Care must be taken with blind-spot denoisers to avoid padding
+modes that leak neighbor values.
+"""
+
+import numpy
 from numpy.typing import ArrayLike
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import aprint, asection
 
 
 class PaddingTransform(ImageTransformBase):
-    """Padding (and then Cropping)
+    """Padding (and then cropping) transform.
 
     Adds a border to the image before denoising and then removes that border
     from the denoised image. This reduces border artifacts when denoising
@@ -23,6 +30,7 @@ class PaddingTransform(ImageTransformBase):
     of the vector along each axis, 'median': Pads with the median value of
     all or part of the vector along each axis, 'minimum': Pads with the
     minimum value of all or part of the vector along each axis.
+    <notgui>
     """
 
     preprocess_description = "Pads image" + ImageTransformBase.preprocess_description
@@ -38,8 +46,7 @@ class PaddingTransform(ImageTransformBase):
         priority: float = 0.9,
         **kwargs,
     ):
-        """
-        Constructs a Padding Transform
+        """Construct a PaddingTransform.
 
         Parameters
         ----------
@@ -54,7 +61,7 @@ class PaddingTransform(ImageTransformBase):
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
@@ -63,15 +70,28 @@ class PaddingTransform(ImageTransformBase):
         self.min_length_to_pad = min_length_to_pad
         self._pad_width = None
 
-        lprint(f"Instanciating: {self}")
+        aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_pad_width``.
+        """
         state = self.__dict__.copy()
         del state['_pad_width']
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name and key parameters.
+        """
         return (
             f'{type(self).__name__}'
             f' (pad_width={self.pad_width},'
@@ -80,10 +100,31 @@ class PaddingTransform(ImageTransformBase):
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
-        with lsection(
+        """Pad the image with a border of the specified width and mode.
+
+        Dimensions shorter than ``min_length_to_pad`` are not padded.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Padded image array.
+        """
+        with asection(
             f"Padding array of shape: {array.shape} with {self.pad_width} voxels and mode: {self.mode}:"
         ):
             padded_array, self._pad_width = _pad(
@@ -92,10 +133,22 @@ class PaddingTransform(ImageTransformBase):
             return padded_array
 
     def postprocess(self, array: ArrayLike):
+        """Remove the padding added during preprocessing.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Padded denoised image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Cropped image with original dimensions.
+        """
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Cropping array of shape: {array.shape} by removing padding of {self.pad_width} voxels:"
         ):
             new_array = _unpad(array, pad_width=self._pad_width)
@@ -103,6 +156,30 @@ class PaddingTransform(ImageTransformBase):
 
 
 def _pad(array: ArrayLike, mode: str, pad_width: int, min_length_to_pad: int):
+    """Pad an array with a uniform border width on all qualifying dimensions.
+
+    Parameters
+    ----------
+    array : ArrayLike
+        Input array.
+    mode : str
+        Padding mode (e.g. 'reflect', 'constant', 'symmetric').
+    pad_width : int
+        Border width in voxels.
+    min_length_to_pad : int
+        Minimum dimension length required for padding to be applied.
+
+    Returns
+    -------
+    tuple
+        A tuple of (padded_array, pad_width) where pad_width is a tuple
+        of (before, after) pairs per dimension.
+
+    Raises
+    ------
+    ValueError
+        If pad_width is not a positive integer.
+    """
 
     # Compute pad width:
     if isinstance(pad_width, int):
@@ -116,13 +193,28 @@ def _pad(array: ArrayLike, mode: str, pad_width: int, min_length_to_pad: int):
         )
 
     # Do padding:
-    lprint(f"Effective padding widths: {pad_width}")
+    aprint(f"Effective padding widths: {pad_width}")
     padded_array = numpy.pad(array, pad_width=pad_width, mode=mode)
 
     return padded_array, pad_width
 
 
 def _unpad(array: ArrayLike, pad_width):
+    """Remove padding from an array.
+
+    Parameters
+    ----------
+    array : ArrayLike
+        Padded array.
+    pad_width : tuple
+        Tuple of (before, after) padding pairs per dimension, as returned
+        by ``_pad``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Cropped array with padding removed.
+    """
 
     # Compute slice:
     slices = []
@@ -131,7 +223,7 @@ def _unpad(array: ArrayLike, pad_width):
         slices.append(slice(before, after))
 
     # Crop to 'unpad':
-    lprint(f"Effective cropping widths: {pad_width}")
+    aprint(f"Effective cropping widths: {pad_width}")
     cropped_array = array[tuple(slices)]
 
     return cropped_array

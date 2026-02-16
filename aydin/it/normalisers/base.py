@@ -1,39 +1,62 @@
+"""Base class for value normalisers.
+
+This module defines `NormaliserBase`, the abstract base class for all value
+normalisers that map image intensities to a standard [0, 1] range. Includes
+Numba-accelerated normalization and denormalization operations.
+"""
+
 import os
 from abc import ABC, abstractmethod
 from os.path import join
 from typing import Tuple
-import jsonpickle
-import numexpr
-import numpy
 
+import jsonpickle
+import numpy
+from numba import jit, prange
+
+from aydin.util.log.log import aprint
 from aydin.util.misc.json import encode_indent
-from aydin.util.log.log import lprint
 
 
 class NormaliserBase(ABC):
-    """Normaliser base class
+    """Abstract base class for value normalisers.
 
-    Parameters
+    Provides the interface and shared implementation for normalizing image
+    values to the [0, 1] range and denormalizing back to the original range
+    and dtype. Uses Numba JIT compilation for performance.
+
+    Attributes
     ----------
-    clip : bool
     epsilon : float
-    shape_normalisation : bool
-    transform : str
-
+        Small value added to the range denominator to prevent division by zero.
+    clip : bool
+        If True, clip normalized values to the [0, 1] range.
+    rmin : float or None
+        Calibrated minimum value for normalization.
+    rmax : float or None
+        Calibrated maximum value for normalization.
+    original_dtype : numpy.dtype
+        Original data type of the calibration array, set during ``calibrate()``.
+    axis_permutation : list of int or None
+        Axis permutation used during shape normalization.
+    permutated_image_shape : tuple of int or None
+        Intermediate shape used during shape normalization.
     """
 
     epsilon: float
-    leave_as_float: bool
     clip: bool
     original_dtype: numpy.dtype
 
     def __init__(self, clip=True, epsilon=1e-21):
-        """Constructs a normalisers
+        """Construct a NormaliserBase.
 
         Parameters
         ----------
         clip : bool
+            If True, clip normalized values to [0, 1] range.
         epsilon : float
+            Small value added to the range denominator to prevent
+            division by zero. Default is 1e-21.
         """
         self.epsilon = epsilon
         self.clip = clip
@@ -45,24 +68,25 @@ class NormaliserBase(ABC):
         self.permutated_image_shape = None
 
     def save(self, path: str, name='default'):
-        """Saves an 'all-batteries-included' normalisers at a given path (folder).
+        """Save the normaliser state to a JSON file.
 
         Parameters
         ----------
         path : str
-            path to save to
+            Directory path to save to.
         name : str
+            Name suffix for the JSON file. Default is 'default'.
 
         Returns
         -------
-        json
-            frozen
+        str
+            JSON string of the serialized normaliser.
         """
         os.makedirs(path, exist_ok=True)
 
         frozen = encode_indent(self)
 
-        lprint(f"Saving normalisers to: {path}")
+        aprint(f"Saving normalisers to: {path}")
         with open(join(path, f"normaliser_{name}.json"), "w") as json_file:
             json_file.write(frozen)
 
@@ -70,21 +94,21 @@ class NormaliserBase(ABC):
 
     @staticmethod
     def load(path: str, name='default'):
-        """Returns an 'all-batteries-included' normalisers from a given path (folder).
+        """Load a normaliser from a JSON file.
 
         Parameters
         ----------
         path : str
-            path to load from.
+            Directory path to load from.
         name : str
+            Name suffix for the JSON file. Default is 'default'.
 
         Returns
         -------
-        str
-            thawed
-
+        NormaliserBase
+            The restored normaliser instance.
         """
-        lprint(f"Loading normalisers from: {path}")
+        aprint(f"Loading normalisers from: {path}")
         with open(join(path, f"normaliser_{name}.json"), "r") as json_file:
             frozen = json_file.read()
 
@@ -94,34 +118,37 @@ class NormaliserBase(ABC):
 
     @abstractmethod
     def calibrate(self, array) -> Tuple[float, float]:
-        """Calibrates this normalisers given an array.
+        """Calibrate the normaliser from the given array.
+
+        Subclasses must implement this to compute the normalization
+        range (rmin, rmax) from the input data.
 
         Parameters
         ----------
         array : numpy.ndarray
-            array to use for calibration
+            Array to use for calibration.
 
         Returns
         -------
-        array : numpy.ndarray
-
+        tuple of (float, float)
+            The computed (min_value, max_value) range.
         """
         raise NotImplementedError()
 
     def normalise(self, array):
-        """Normalises the given array in-place (if possible).
+        """Normalize array values to the [0, 1] range.
+
+        Uses the calibrated min/max range. Optionally clips to [0, 1].
 
         Parameters
         ----------
         array : numpy.ndarray
-            array to normalise
-        batch_dims : list
-        channel_dims : list
+            Array to normalise.
 
         Returns
         -------
-        array : numpy.ndarray
-
+        numpy.ndarray
+            Normalized array as float32.
         """
         array = array.astype(numpy.float32, copy=True)
 
@@ -131,15 +158,10 @@ class NormaliserBase(ABC):
             epsilon = numpy.float32(self.epsilon)
 
             try:
-                # We perform operation in-place with numexpr if possible:
-                numexpr.evaluate(
-                    "((array - min_value) / ( max_value - min_value + epsilon ))",
-                    out=array,
-                )
+                self.normalize_numba(array, min_value, max_value, epsilon)
+
                 if self.clip:
-                    numexpr.evaluate(
-                        "where(array<0,0,where(array>1,1,array))", out=array
-                    )
+                    array = numpy.where(array < 0, 0, numpy.where(array > 1, 1, array))
 
             except ValueError:
                 array -= min_value
@@ -156,19 +178,26 @@ class NormaliserBase(ABC):
         leave_as_float=False,
         clip=True,
     ):
-        """Denormalises the given array in-place (if possible).
+        """Denormalize array values back to the original range and dtype.
 
         Parameters
         ----------
         array : numpy.ndarray
+            Normalized array to denormalize.
         denormalise_values : bool
+            If True, reverse the value normalization. Default is True.
         leave_as_float : bool
+            If True, keep result as float even if original was integer.
+            Default is False.
         clip : bool
+            If True, clip values to [0, 1] before denormalization.
+            Default is True.
 
         Returns
         -------
-        array : numpy.ndarray
-
+        numpy.ndarray
+            Denormalized array, cast back to original dtype unless
+            leave_as_float is True.
         """
 
         # we copy the array to preserve the original array:
@@ -182,20 +211,12 @@ class NormaliserBase(ABC):
                 epsilon = numpy.float32(self.epsilon)
 
                 try:
-                    # We perform operation in-place with numexpr if possible:
-
                     if self.clip and clip:
-                        numexpr.evaluate(
-                            "where(array<0,0,where(array>1,1,array))",
-                            out=array,
-                            casting='unsafe',
+                        array = numpy.where(
+                            array < 0, 0, numpy.where(array > 1, 1, array)
                         )
 
-                    numexpr.evaluate(
-                        "array * (max_value - min_value + epsilon) + min_value ",
-                        out=array,
-                        casting='unsafe',
-                    )
+                    self.denormalize_numba(array, min_value, max_value, epsilon)
 
                 except ValueError:
                     if self.clip and clip:
@@ -216,3 +237,43 @@ class NormaliserBase(ABC):
                 array = array.astype(self.original_dtype)
 
         return array
+
+    @staticmethod
+    @jit(nopython=True, parallel=True, error_model='numpy')
+    def normalize_numba(array, min_value, max_value, epsilon):
+        """Numba-accelerated in-place normalization to [0, 1] range.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to normalize in-place.
+        min_value : float
+            Minimum value of the normalization range.
+        max_value : float
+            Maximum value of the normalization range.
+        epsilon : float
+            Small value to prevent division by zero.
+        """
+        for _ in prange(numpy.prod(numpy.array(array.shape))):
+            array.flat[_] -= min_value
+            array.flat[_] /= max_value - min_value + epsilon
+
+    @staticmethod
+    @jit(nopython=True, parallel=True, error_model='numpy')
+    def denormalize_numba(array, min_value, max_value, epsilon):
+        """Numba-accelerated in-place denormalization from [0, 1] range.
+
+        Parameters
+        ----------
+        array : numpy.ndarray
+            Array to denormalize in-place.
+        min_value : float
+            Minimum value of the original range.
+        max_value : float
+            Maximum value of the original range.
+        epsilon : float
+            Small value used during normalization (for consistency).
+        """
+        for _ in prange(numpy.prod(numpy.array(array.shape))):
+            array.flat[_] *= max_value - min_value + epsilon
+            array.flat[_] += min_value

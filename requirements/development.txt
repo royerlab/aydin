@@ -1,6 +1,0 @@
-black
-flake8==4.0.1
-mock==4.0.3
-pytest==6.2.5
-pyinstaller==4.8
-distributed

@@ -1,3 +1,10 @@
+"""Demo of motion stabilisation transform for time-lapse images.
+
+Demonstrates the ``MotionStabilisationTransform`` on a synthetic
+time-lapse stack with known shifts, verifying roundtrip fidelity and
+comparing FGR denoising results with and without motion correction.
+"""
+
 from pprint import pprint
 
 import numpy
@@ -13,6 +20,7 @@ from aydin.util.log.log import Log
 
 
 def demo_motion():
+    """Run motion stabilisation on synthetic shifted image stack."""
 
     Log.enable_output = True
 
@@ -33,12 +41,11 @@ def demo_motion():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(array, name='array')
-        viewer.add_image(preprocessed_array, name='corrected_array')
-        viewer.add_image(postprocessed_array, name='uncorrected_array')
-
+    viewer = napari.Viewer()
+    viewer.add_image(array, name='array')
+    viewer.add_image(preprocessed_array, name='corrected_array')
+    viewer.add_image(postprocessed_array, name='uncorrected_array')
+    napari.run()
     # assert not (array == corrected_array).all()
     assert (array == postprocessed_array).all()
 
@@ -61,20 +68,34 @@ def demo_motion():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(array, name='array')
-        viewer.add_image(preprocessed_array, name='preprocessed_array')
-        viewer.add_image(postprocessed_array, name='postprocessed_array')
-        viewer.add_image(
-            denoised_without_preprocessing, name='denoised_without_preprocessing'
-        )
-        viewer.add_image(
-            denoised_with_preprocessing, name='denoised_with_preprocessing'
-        )
+    viewer = napari.Viewer()
+    viewer.add_image(array, name='array')
+    viewer.add_image(preprocessed_array, name='preprocessed_array')
+    viewer.add_image(postprocessed_array, name='postprocessed_array')
+    viewer.add_image(
+        denoised_without_preprocessing, name='denoised_without_preprocessing'
+    )
+    viewer.add_image(denoised_with_preprocessing, name='denoised_with_preprocessing')
+    napari.run()
 
 
 def add_noise(image, intensity=4, variance=0.4):
+    """Add synthetic Poisson and Gaussian noise to an image.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image.
+    intensity : int, optional
+        Poisson noise intensity parameter, by default 4.
+    variance : float, optional
+        Gaussian noise variance, by default 0.4.
+
+    Returns
+    -------
+    numpy.ndarray
+        Noisy image.
+    """
     noisy = image
     if intensity is not None:
         noisy = numpy.random.poisson(image * intensity) / intensity

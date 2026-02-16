@@ -1,3 +1,10 @@
+"""Demonstrate 3D Butterworth denoising on Tribolium embryo data.
+
+This demo applies auto-calibrated Butterworth low-pass filtering in z-yx mode
+to a CARE Tribolium training stack, visualizing the noisy and denoised
+volumes with napari.
+"""
+
 # flake8: noqa
 from os.path import join
 
@@ -5,19 +12,25 @@ import numpy
 import numpy as np
 
 from aydin.io import imread
-from aydin.io.datasets import normalise, examples_zipped
+from aydin.io.datasets import examples_zipped, normalise
 from aydin.it.classic_denoisers.butterworth import calibrate_denoise_butterworth
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 def demo_butterworth_tribolium(noisy, display=True):
-    """
-    Demo for self-supervised denoising using camera image with synthetic noise
+    """Denoise a 3D Tribolium volume using calibrated Butterworth filtering.
+
+    Parameters
+    ----------
+    noisy : numpy.ndarray
+        Input 3D noisy image array from Tribolium dataset.
+    display : bool, optional
+        Whether to display results with napari, by default True.
     """
     Log.enable_output = True
     Log.set_log_max_depth(5)
 
-    lprint(noisy.shape)
+    aprint(noisy.shape)
     noisy = normalise(noisy.astype(np.float32))
 
     # noisy[:,:,0:10] = 0
@@ -40,10 +53,10 @@ def demo_butterworth_tribolium(noisy, display=True):
     if display:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(noisy, name='noisy')
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(noisy, name='noisy')
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
 
 if __name__ == "__main__":

@@ -1,3 +1,10 @@
+"""Correlation analysis for images.
+
+This module provides functions to compute correlation curves and distances
+along each axis of an image. Useful for analyzing the spatial structure
+of signals and noise.
+"""
+
 import random
 
 import numpy
@@ -5,18 +12,28 @@ import scipy
 
 
 def correlation_distance(input_image, target_image=None, method: str = 'firstmin'):
-    """Computes correlation distances
+    """Compute correlation distances along each axis of an image.
+
+    For each spatial dimension, estimates the distance at which the
+    correlation drops to zero or reaches a minimum, depending on the method.
 
     Parameters
     ----------
     input_image : numpy.typing.ArrayLike
-    target_image : numpy.typing.ArrayLike
+        Input image to analyze.
+    target_image : numpy.typing.ArrayLike, optional
+        Target image for cross-correlation. If None, the input image
+        is correlated with itself (autocorrelation).
     method : str
+        Method to determine the correlation distance. One of:
+        - ``'zerocross'``: distance at first zero crossing.
+        - ``'firstmin'``: distance at the first local minimum below zero.
+        - ``'min'``: distance at the global minimum below zero.
 
     Returns
     -------
-    Tuple of correlation_distances : tuple
-
+    correlation_distances : tuple
+        Tuple of correlation distances, one per spatial dimension.
     """
 
     correlation_curves_list = correlation(input_image, target_image)
@@ -72,20 +89,32 @@ def correlation(
     max_length: int = 256,
     smooth: bool = True,
 ):
-    """Computes correlation
+    """Compute correlation curves along each axis of an image.
+
+    Estimates the 1D correlation function along each dimension by sampling
+    random lines from the image and averaging their correlations.
 
     Parameters
     ----------
     input_image : numpy.typing.ArrayLike
-    target_image : numpy.typing.ArrayLike
+        Input image to analyze.
+    target_image : numpy.typing.ArrayLike, optional
+        Target image for cross-correlation. If None, the input image
+        is correlated with itself (autocorrelation).
     nb_samples : int
+        Number of random line samples per dimension.
     max_length : int
+        Maximum length of sampled lines in pixels.
     smooth : bool
+        If True, applies smoothing (convolution and median filters) to
+        the averaged correlation curve.
 
     Returns
     -------
-    Tuple of correlations : tuple
-
+    correlation_curves : tuple
+        Tuple of 1D numpy arrays (or None), one per dimension. Each array
+        contains the normalized correlation as a function of distance.
+        None is returned for dimensions shorter than 3 pixels.
     """
 
     # Determine image(s)  shape:
@@ -126,8 +155,8 @@ def correlation(
                 line_array_input = input_image[tuple(slice_list)]
                 line_array_target = target_image[tuple(slice_list)]
 
-                line_array_input = line_array_input.astype(numpy.float, copy=False)
-                line_array_target = line_array_target.astype(numpy.float, copy=False)
+                line_array_input = line_array_input.astype(numpy.float64, copy=False)
+                line_array_target = line_array_target.astype(numpy.float64, copy=False)
 
                 line_array_input = line_array_input - (
                     line_array_input.sum() / line_array_input.shape[0]

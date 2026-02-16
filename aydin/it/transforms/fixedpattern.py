@@ -1,22 +1,29 @@
-import itertools
-from typing import List, Tuple, Any, Sequence, Union
-import numpy
+"""Fixed axis-aligned pattern suppression transform.
 
+Corrects intensity fluctuations along axis-aligned volumes by stabilizing
+the percentile-based brightness estimates. Useful for suppressing row/column
+offsets, temporal intensity drift, and other structured noise patterns.
+"""
+
+import itertools
+from typing import Any, List, Sequence, Tuple, Union
+
+import numpy
 from numpy.typing import ArrayLike
 from scipy.ndimage import gaussian_filter
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import aprint, asection
 
 
 class FixedPatternTransform(ImageTransformBase):
-    """Fixed Axis-Aligned Pattern Suppression
+    """Fixed axis-aligned pattern suppression.
 
-    Suppresses fixed, axis aligned, offset patterns along any combination of
-    axis. Given a list of lists of axis that defines axis-aligned volumes,
+    Suppresses fixed, axis-aligned, offset patterns along any combination of
+    axes. Given a list of lists of axes that defines axis-aligned volumes,
     intensity fluctuations of these volumes are stabilised. You can suppress
     intensity fluctuation over time, suppress fixed offsets per pixel over
-    time, suppress intensity fluctuations per row, per column, and more...
+    time, suppress intensity fluctuations per row, per column, and more.
 
     For example, assume an image with dimensions tyx (t+2D), and you want to
     suppress fluctuations of intensity along the t axis, then you provide:
@@ -28,6 +35,7 @@ class FixedPatternTransform(ImageTransformBase):
     specified by the list of axis combinations. It is not recommended to
     reapply the pattern after denoising, unless the pattern itself is of
     value and is not considered noise.
+    <notgui>
     """
 
     preprocess_description = (
@@ -47,9 +55,7 @@ class FixedPatternTransform(ImageTransformBase):
         priority: float = 0.09,
         **kwargs,
     ):
-
-        """
-        Constructs a Background Correction
+        """Construct a FixedPatternTransform.
 
         Parameters
         ----------
@@ -66,17 +72,17 @@ class FixedPatternTransform(ImageTransformBase):
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
 
         # In case a single integer is passed:
-        if axes is not None and type(axes) == int:
+        if axes is not None and isinstance(axes, int):
             axes = list((axes,))
 
         # In case only one axis combination is given:
-        if axes is not None and len(axes) > 0 and type(axes[0]) == int:
+        if axes is not None and len(axes) > 0 and isinstance(axes[0], int):
             axes = list((axes,))
 
         # normalise to tuple:
@@ -89,15 +95,28 @@ class FixedPatternTransform(ImageTransformBase):
         self.sigma = sigma
         self._corrections = {}
 
-        lprint(f"Instanciating: {self}")
+        aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient correction data.
+
+        Returns
+        -------
+        dict
+            Object state without ``_corrections``.
+        """
         state = self.__dict__.copy()
         del state['_corrections']
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name, percentile, and sigma.
+        """
         return (
             f'{type(self).__name__}'
             f' (percentile={self.percentile},'
@@ -105,11 +124,30 @@ class FixedPatternTransform(ImageTransformBase):
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
+        """Remove axis-aligned fixed patterns from the image.
 
-        with lsection(
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Pattern-corrected image as float32.
+        """
+
+        with asection(
             f"Removing axis-aligned fixed patterns for array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
             self._original_dtype = array.dtype
@@ -133,7 +171,7 @@ class FixedPatternTransform(ImageTransformBase):
             self._corrections = {}
 
             for axis_combination in axis_combinations:
-                lprint(f"Suppressing variations across hyperplane: {axis_combination}")
+                aprint(f"Suppressing variations across hyperplane: {axis_combination}")
                 value = numpy.percentile(
                     new_array, q=self.percentile, axis=axis_combination, keepdims=True
                 )
@@ -149,11 +187,23 @@ class FixedPatternTransform(ImageTransformBase):
             return new_array
 
     def postprocess(self, array: ArrayLike):
+        """Add back the axis-aligned patterns removed during preprocessing.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Image with original patterns restored.
+        """
 
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Adding back axis-aligned fixed pattern to array of shape: {array.shape} and dtype: {array.dtype}:"
         ):
 
@@ -171,10 +221,38 @@ class FixedPatternTransform(ImageTransformBase):
 
 
 def _axis_combinations(ndim: int, n: int) -> List[Tuple[Any, ...]]:
+    """Return all combinations of n axes from ndim dimensions.
+
+    Parameters
+    ----------
+    ndim : int
+        Number of dimensions.
+    n : int
+        Number of axes per combination.
+
+    Returns
+    -------
+    List[Tuple[Any, ...]]
+        List of axis combination tuples.
+    """
     return list(itertools.combinations(range(ndim), n))
 
 
 def _all_axis_combinations(ndim: int):
+    """Return all non-trivial axis combinations for the given dimensionality.
+
+    Generates combinations of 1, 2, ..., ndim-1 axes.
+
+    Parameters
+    ----------
+    ndim : int
+        Number of dimensions.
+
+    Returns
+    -------
+    list
+        List of all axis combination tuples.
+    """
     axis_combinations = []
     for dim in range(1, ndim):
         combinations = _axis_combinations(ndim, dim)

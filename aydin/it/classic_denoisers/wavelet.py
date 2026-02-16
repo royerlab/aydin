@@ -1,5 +1,12 @@
+"""Wavelet denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on wavelet thresholding.
+Uses scikit-image's wavelet denoising implementation with support for
+multiple wavelet families and thresholding methods (BayesShrink, VisuShrink).
+"""
+
 from functools import partial
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy
 import pywt
@@ -9,6 +16,7 @@ from skimage.restoration import denoise_wavelet as skimage_denoise_wavelet
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_wavelet(
@@ -24,12 +32,11 @@ def calibrate_denoise_wavelet(
     display_crop: bool = False,
     **other_fixed_parameters,
 ):
-    """
-    Calibrates a <a href="https://en.wikipedia.org/wiki/Wavelet_transform
-    ">wavelet</a> denoiser for the given image and returns the optimal
-    parameters obtained using the N2S loss.
+    """Calibrates a <a href="https://en.wikipedia.org/wiki/Wavelet_transform">wavelet</a>
+    denoiser for the given image and returns the optimal parameters obtained
+    using the N2S loss.
 
-    Note: we use the scikt-image implementation of wavelet denoising.
+    Note: we use the scikit-image implementation of wavelet denoising.
 
     Parameters
     ----------
@@ -68,7 +75,7 @@ def calibrate_denoise_wavelet(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -93,8 +100,12 @@ def calibrate_denoise_wavelet(
 
     Returns
     -------
-    Denoising function and dictionary containing optimal parameters.
-
+    denoise_function : callable
+        The ``denoise_wavelet`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -170,6 +181,7 @@ def calibrate_denoise_wavelet(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters (pass 1): {best_parameters}")
 
     # Next pass we optimise the mode and method:
     parameter_ranges = {
@@ -193,6 +205,7 @@ def calibrate_denoise_wavelet(
         )
         | other_fixed_parameters
     )
+    aprint(f"Final best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = image.nbytes * 3  # transform
@@ -208,12 +221,11 @@ def denoise_wavelet(
     method: str = 'BayesShrink',
     **kwargs,
 ):
-    """
-    Denoises the given image using the scikit-image
-    implementation of <a href="https://en.wikipedia.org/wiki/Wavelet_transform ">
-    wavelet</a> denoising.
+    """Denoises the given image using the scikit-image
+    implementation of <a href="https://en.wikipedia.org/wiki/Wavelet_transform">wavelet</a> denoising.
     \n\n
-    Note: we use the scikt-image implementation of wavelet denoising.
+    Note: we use the scikit-image implementation of wavelet denoising.
+    <notgui>
 
     Parameters
     ----------
@@ -245,8 +257,8 @@ def denoise_wavelet(
 
     Returns
     -------
-    Denoised image as ndarray
-
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:

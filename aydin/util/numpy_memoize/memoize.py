@@ -1,22 +1,48 @@
+"""Memoization decorator that supports NumPy arrays.
+
+Provides a single-entry cache decorator that works with unhashable
+types like NumPy arrays by using object identity (``id``) for cache
+key comparison.
+"""
+
 import functools
+
 import numpy
 
 
 class memoize_last(object):
-    """Decorator class used to cache the most recent value of a function
-    or method based on the signature of its arguments. If any single
-    argument changes, the function or method is evaluated afresh.
+    """Single-entry memoization decorator supporting NumPy arrays.
 
-    Importantly: works even for numpy arrays although they are not hashable.
-    We use the object id, so great care has to be taken when using this!!
+    Caches the most recent return value of a function or method based on
+    its argument signatures. If any single argument changes, the function
+    is re-evaluated. Supports NumPy arrays (which are not hashable) by
+    comparing object identity via ``id()``.
 
+    .. warning::
+       Because NumPy array caching relies on ``id()``, the cache may
+       produce stale results if an array is modified in-place or if a
+       new array is allocated at the same memory address as a previous one.
+
+    Attributes
+    ----------
+    value : object or None
+        The cached return value.
+
+    References
+    ----------
     Original implementation from:
     https://gist.github.com/dpo/1222577
     https://github.com/numpy/numpy/issues/14294
-
     """
 
     def __init__(self, callable):
+        """Initialize the memoizer.
+
+        Parameters
+        ----------
+        callable : callable
+            The function or method to memoize.
+        """
         self._callable = callable
         self._callable_is_method = False
         self.value = None  # Cached value or derivative.
@@ -24,7 +50,21 @@ class memoize_last(object):
         return
 
     def __get_hash(self, x):
-        # Return signature of argument.
+        """Compute a hash-like signature for an argument.
+
+        For NumPy arrays, returns ``id(x)`` since arrays are not hashable.
+        For all other types, returns ``hash(x)``.
+
+        Parameters
+        ----------
+        x : object
+            Argument to compute signature for.
+
+        Returns
+        -------
+        int
+            Hash or identity value.
+        """
         if isinstance(x, numpy.ndarray):
             # _x = x.view(numpy.uint8)
             # return hash(hashlib.sha1(_x).hexdigest())
@@ -33,6 +73,20 @@ class memoize_last(object):
         return hash(x)
 
     def __call__(self, *args, **kwargs):
+        """Call the wrapped function, using cached result if arguments are unchanged.
+
+        Parameters
+        ----------
+        *args : object
+            Positional arguments.
+        **kwargs : object
+            Keyword arguments.
+
+        Returns
+        -------
+        object
+            Cached or freshly computed result.
+        """
         # The callable will be called if any single argument is new or changed.
 
         callable = self._callable
@@ -49,7 +103,7 @@ class memoize_last(object):
 
         allargs = dict(zip(argnames, argvals)) | kwargs
 
-        for (argname, argval) in allargs.items():
+        for argname, argval in allargs.items():
 
             _arg_hash = self.__get_hash(argval)
 
@@ -67,15 +121,13 @@ class memoize_last(object):
         if evaluate:
             self.value = callable(*args, **kwargs)
 
-        print(f"{tuple(f'{k}:{id(v)}' for k,v in allargs.items())} -> {id(self.value)}")
-
         return self.value
 
-    def __get__(self, obj, objtype):
-        "Support instance methods."
+    def __get__(self, obj, *args):
+        """Support instance methods."""
         self._callable_is_method = True
         return functools.partial(self.__call__, obj)
 
     def __repr__(self):
-        "Return the wrapped function or method's docstring."
-        return self.method.__doc__
+        """Return the wrapped function or method's docstring."""
+        return self._callable.__doc__

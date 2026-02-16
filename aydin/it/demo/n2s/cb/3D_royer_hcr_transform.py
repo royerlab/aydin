@@ -1,3 +1,11 @@
+"""Demonstrate 3D Noise2Self denoising with CatBoost and attenuation correction on HCR data.
+
+This demo applies self-supervised FGR denoising with CatBoost to a
+RoyerLab HCR dataset, comparing results with and without attenuation
+correction along the z-axis (useful for light-sheet microscopy data),
+with napari visualization.
+"""
+
 # flake8: noqa
 
 from aydin.features.standard_features import StandardFeatureGenerator
@@ -9,11 +17,18 @@ from aydin.util.log.log import Log
 
 
 def demo(image):
-    """
-    In some cases it might be usefull to append a compression transform (sqrt) after normalisation,
-    something akin to a VST transform but without the exact variance stabilisation, and more as a way
-    to deskew the histogram. There are only a few situations where this truly helps, and there are not many.
-    So by default this is off.
+    """Denoise a 3D HCR volume using FGR with CatBoost and attenuation correction.
+
+    Demonstrates the effect of applying an attenuation correction transform
+    along the z-axis before denoising, compared to denoising the raw data.
+    A sqrt normaliser transform is used to deskew the histogram, which can
+    help in some situations (akin to a VST without exact variance
+    stabilisation).
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input 3D noisy image array from HCR dataset.
     """
 
     Log.enable_output = True
@@ -48,12 +63,12 @@ def demo(image):
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(corrected, name='noisy')
-        viewer.add_image(denoised, name='denoised')
-        viewer.add_image(denoised_corrected, name='denoised_corrected')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(corrected, name='noisy')
+    viewer.add_image(denoised, name='denoised')
+    viewer.add_image(denoised_corrected, name='denoised_corrected')
+    napari.run()
 
 
 if __name__ == "__main__":

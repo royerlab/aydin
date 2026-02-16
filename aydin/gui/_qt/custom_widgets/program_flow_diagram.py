@@ -1,29 +1,47 @@
+"""Navigation flow diagram widget showing the Aydin Studio workflow steps."""
+
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
+    QGroupBox,
     QHBoxLayout,
-    QWidget,
+    QLabel,
     QMenu,
     QPushButton,
-    QToolButton,
     QStyle,
-    QGroupBox,
-    QLabel,
+    QToolButton,
+    QWidget,
 )
-from qtpy.QtCore import Qt
 
 from aydin.io.datasets import examples_single
 
 
 class QProgramFlowDiagramWidget(QWidget):
+    """Navigation bar widget showing the Aydin Studio workflow as a flow diagram.
+
+    Displays grouped buttons for each stage of the denoising workflow
+    (Load data, Choose image options, Process) connected by forward arrows.
+    Buttons are highlighted to indicate the currently active tab.
+
+    Parameters
+    ----------
+    parent : MainPage
+        The parent MainPage widget.
+    """
+
     def __init__(self, parent):
+        """Initialize the flow diagram with grouped stage buttons and arrows.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(QProgramFlowDiagramWidget, self).__init__(parent)
         self.parent = parent
         self.highlightable_buttons = []
 
-        self.layout = QHBoxLayout()
-
-        # self.main_group_box = QGroupBox("Program Flow")
-        self.layout = QHBoxLayout()
-        self.layout.setSpacing(5)
+        self.main_layout = QHBoxLayout()
+        self.main_layout.setSpacing(5)
 
         self.load_data_group_box = QGroupBox("Load data")
         self.load_data_group_box_layout = QHBoxLayout()
@@ -48,6 +66,7 @@ class QProgramFlowDiagramWidget(QWidget):
             "Blastocyst Fracking (Maitre)": examples_single.maitre_mouse,
             "OpenCell ARHGAP21 (Leonetti)": examples_single.leonetti_arhgap21,
             "OpenCell ANKRD11  (Leonetti)": examples_single.leonetti_ankrd11,
+            "Drosophila Egg Chamber (Machado et al.)": examples_single.machado_drosophile_egg_chamber,
         }
         for item in menu_items.keys():
             action = menu.addAction(item)
@@ -60,9 +79,9 @@ class QProgramFlowDiagramWidget(QWidget):
         self.load_data_group_box_layout.addWidget(self.load_sample_image_button)
 
         self.load_data_group_box.setLayout(self.load_data_group_box_layout)
-        self.layout.addWidget(self.load_data_group_box)
+        self.main_layout.addWidget(self.load_data_group_box)
 
-        self.layout.addWidget(self.forward_button())
+        self.main_layout.addWidget(self.forward_button())
 
         # choose image options
         self.choose_image_options_group_box = QGroupBox("Choose image options")
@@ -94,9 +113,9 @@ class QProgramFlowDiagramWidget(QWidget):
             self.choose_image_options_group_box_layout
         )
 
-        self.layout.addWidget(self.choose_image_options_group_box)
+        self.main_layout.addWidget(self.choose_image_options_group_box)
 
-        self.layout.addWidget(self.forward_button())
+        self.main_layout.addWidget(self.forward_button())
 
         self.processing_group_box = QGroupBox("Process")
         self.processing_group_box_layout = QHBoxLayout()
@@ -121,34 +140,49 @@ class QProgramFlowDiagramWidget(QWidget):
 
         self.processing_group_box.setLayout(self.processing_group_box_layout)
 
-        self.layout.addWidget(self.processing_group_box)
+        self.main_layout.addWidget(self.processing_group_box)
 
-        self.layout.setAlignment(Qt.AlignHCenter)
+        self.main_layout.setAlignment(Qt.AlignHCenter)
 
-        self.setLayout(self.layout)
+        self.setLayout(self.main_layout)
 
     def highlight_button(self, current_tab_name):
+        """Highlight the flow diagram button(s) matching the active tab.
+
+        Parameters
+        ----------
+        current_tab_name : str
+            Name of the currently selected tab.
+        """
         self.reset_buttons()
         for button in self.highlightable_buttons:
             if current_tab_name.lower() in button.text().lower():
                 button.setStyleSheet(
                     "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
                 )
-        else:
-            if "processing" in current_tab_name.lower():
-                self.preprocess_button.setStyleSheet(
-                    "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
-                )
-                self.postprocess_button.setStyleSheet(
-                    "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
-                )
+
+        if "processing" in current_tab_name.lower():
+            self.preprocess_button.setStyleSheet(
+                "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
+            )
+            self.postprocess_button.setStyleSheet(
+                "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
+            )
 
     def reset_buttons(self):
+        """Remove highlighting from all flow diagram buttons."""
         for button in self.highlightable_buttons:
             button.setStyleSheet("")
 
     @staticmethod
     def forward_button():
+        """Create a disabled forward-arrow button used as a visual separator.
+
+        Returns
+        -------
+        QToolButton
+            A disabled tool button with a seek-forward icon.
+        """
         button = QToolButton()
         button.setEnabled(False)
         button.setIcon(button.style().standardIcon(QStyle.SP_MediaSeekForward))

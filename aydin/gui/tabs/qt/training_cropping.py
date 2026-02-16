@@ -1,4 +1,7 @@
+"""Training crop tab for selecting the image region used for training."""
+
 import math
+
 from qtpy.QtWidgets import QCheckBox
 
 from aydin.gui.tabs.qt.base_cropping import BaseCroppingTab
@@ -31,6 +34,13 @@ class TrainingCroppingTab(BaseCroppingTab):
     """
 
     def __init__(self, parent):
+        """Initialize the training crop tab with a 'use same crop' checkbox.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(TrainingCroppingTab, self).__init__(parent)
         self.parent = parent
 
@@ -44,14 +54,26 @@ class TrainingCroppingTab(BaseCroppingTab):
 
     @property
     def images(self):
+        """Cropped training images (delegates to base class).
+
+        Returns
+        -------
+        list
+            Cropped image arrays from the base class implementation.
+        """
         return super().images
 
     @images.setter
     def images(self, images):
+        """Set images and auto-suggest a representative crop region.
+
+        Calls the base class setter, then uses a fast representative crop
+        algorithm to suggest initial slider positions based on image content.
+        """
         super(TrainingCroppingTab, self.__class__).images.fset(self, images)
 
         if len(images) == 1:
-            image = images[0][1]
+            image = images[0].array
             response = super_fast_representative_crop(
                 image,
                 mode='contrast',
@@ -62,19 +84,30 @@ class TrainingCroppingTab(BaseCroppingTab):
                 timeout_in_seconds=1.5,
             )
 
-            if type(response) == tuple:
+            if isinstance(response, tuple):
                 best_slice = response[1]
+                axes = images[0].metadata.axes
 
-                t_slice = best_slice[images[0][2].axes.find("T")]
-                z_slice = best_slice[images[0][2].axes.find("Z")]
-                y_slice = best_slice[images[0][2].axes.find("Y")]
-                x_slice = best_slice[images[0][2].axes.find("X")]
-                self.t_crop_slider.slider.setValues((t_slice.start, t_slice.stop))
-                self.z_crop_slider.slider.setValues((z_slice.start, z_slice.stop))
-                self.y_crop_slider.slider.setValues((y_slice.start, y_slice.stop))
-                self.x_crop_slider.slider.setValues((x_slice.start, x_slice.stop))
+                t_idx = axes.find("T")
+                z_idx = axes.find("Z")
+                y_idx = axes.find("Y")
+                x_idx = axes.find("X")
+
+                if t_idx >= 0:
+                    t_slice = best_slice[t_idx]
+                    self.t_crop_slider.slider.set_values((t_slice.start, t_slice.stop))
+                if z_idx >= 0:
+                    z_slice = best_slice[z_idx]
+                    self.z_crop_slider.slider.set_values((z_slice.start, z_slice.stop))
+                if y_idx >= 0:
+                    y_slice = best_slice[y_idx]
+                    self.y_crop_slider.slider.set_values((y_slice.start, y_slice.stop))
+                if x_idx >= 0:
+                    x_slice = best_slice[x_idx]
+                    self.x_crop_slider.slider.set_values((x_slice.start, x_slice.stop))
 
     def update_summary(self):
+        """Update the crop summary and show a warning if the crop is very large."""
         super().update_summary()
 
         self.parent._toggle_spatial_features()
@@ -90,6 +123,17 @@ class TrainingCroppingTab(BaseCroppingTab):
             self.size_warning_label.setText("")
 
     def disable_spatial_features(self):
+        """Check whether spatial features should be disabled.
+
+        Spatial features are disabled when any visible crop slider has been
+        adjusted away from its full range, since spatial coordinates would
+        not be meaningful for a cropped sub-region.
+
+        Returns
+        -------
+        bool
+            True if spatial features should be disabled.
+        """
         return (
             (
                 not self.x_crop_slider.isHidden()

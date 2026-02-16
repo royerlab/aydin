@@ -1,13 +1,22 @@
-from typing import Optional, Tuple, List
+"""Gaussian-Median mix denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions that combine median filtering
+and Gaussian filtering at two different scales. The mixing coefficients
+are calibrated automatically. Simple, fast, and effective for low to
+moderate noise levels with band-limited signals.
+"""
+
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
-from scipy.ndimage import median_filter, gaussian_filter
+from scipy.ndimage import gaussian_filter, median_filter
 from scipy.signal import medfilt2d
 
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_gm(
@@ -53,7 +62,7 @@ def calibrate_denoise_gm(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -78,8 +87,12 @@ def calibrate_denoise_gm(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_gm`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
 
     # Convert image to float if needed:
@@ -129,6 +142,7 @@ def calibrate_denoise_gm(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 3 * image.nbytes
@@ -154,6 +168,7 @@ def denoise_gm(
     \n\n
     Note: We recommend applying a variance stabilisation transform
     to improve results for images with non-Gaussian noise.
+    <notgui>
 
     Parameters
     ----------
@@ -170,18 +185,22 @@ def denoise_gm(
         Ratio between the scales of the two scales
 
     alpha: float
-        First mixing coefficient.
+        Overall mixing coefficient between median and Gaussian filtering.
+        A value of 1 uses only median, 0 uses only Gaussian.
 
     beta: float
-        First mixing coefficient.
+        Mixing coefficient between fine-scale and coarse-scale median
+        filtering. A value of 1 uses only fine-scale median.
 
     gamma: float
-        First mixing coefficient.
+        Mixing coefficient between fine-scale and coarse-scale Gaussian
+        filtering. A value of 1 uses only fine-scale Gaussian.
 
 
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:

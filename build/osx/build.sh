@@ -1,22 +1,37 @@
 #!/usr/bin/env bash
-echo "removing old files..."
-rm -rf build
-rm -rf dist
+# Aydin PyInstaller build script for macOS
+set -e
 
-# Check if error introducing packages are still there
-pip uninstall enum34
-pip uninstall imagecodecs
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
-echo "building app..."
-#onefolder
-pyinstaller -D -y --clean aydin.spec # -D -y --clean
+echo "=== Aydin macOS Build ==="
+echo "Working directory: $(pwd)"
 
+# Get version dynamically
+VERSION=$(python3 -c "import aydin; print(aydin.__version__)")
+echo "Building Aydin v${VERSION}..."
 
-mkdir -p dist/aydin_0.1.5rc12.app/Contents/MacOS
-mkdir -p dist/aydin_0.1.5rc12.app/Contents/Resources
+echo ""
+echo "Cleaning old build artifacts..."
+rm -rf build dist
 
-cp /PATH/TO/sklearn/cluster/*.so dist/aydin/sklearn/cluster/.
-cp Info.plist dist/aydin_0.1.5rc12.app/Contents/.
-cp icon-windowed.icns dist/aydin_0.1.5rc12.app/Contents/Resources/.
-cp -rf -p dist/aydin/* dist/aydin_0.1.5rc12.app/Contents/MacOS/.
-cp aydin_0.1.5rc3 dist/aydin_0.1.5rc12.app/Contents/MacOS/.
+echo ""
+echo "Checking problematic packages..."
+pip uninstall -y enum34 2>/dev/null || true
+pip uninstall -y imagecodecs 2>/dev/null || true
+
+echo ""
+echo "Building with PyInstaller..."
+pyinstaller -y --clean aydin.spec
+
+echo ""
+echo "=== Build complete! ==="
+echo "Output directory: $(pwd)/dist"
+echo ""
+echo "App bundle: dist/Aydin.app"
+echo "Directory build: dist/aydin/"
+echo ""
+echo "To run Aydin:"
+echo "  open dist/Aydin.app"
+echo "  # or: ./dist/aydin/aydin"

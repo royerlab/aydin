@@ -1,0 +1,73 @@
+"""Demo: Noise2Truth supervised training with UNet on 2D images."""
+
+# flake8: noqa
+import time
+
+import numpy
+import torch
+
+from aydin.analysis.image_metrics import calculate_print_psnr_ssim
+from aydin.io.datasets import add_noise, camera, normalise
+from aydin.nn.models.unet import UNetModel
+from aydin.nn.training_methods.n2t import n2t_train
+from aydin.util.log.log import Log
+
+
+def demo(image, model_class, do_add_noise=True):
+    """
+    Demo for self-supervised denoising using camera image with synthetic noise
+    """
+    Log.enable_output = True
+    Log.set_log_max_depth(8)
+
+    image = normalise(image)
+    image = numpy.expand_dims(image, axis=0)
+    image = numpy.expand_dims(image, axis=0)
+    noisy = add_noise(image) if do_add_noise else image
+    print(noisy.shape)
+
+    model = model_class(
+        nb_unet_levels=2,
+        spacetime_ndim=2,
+    )
+
+    print("training starts")
+
+    start = time.time()
+    n2t_train(noisy, image, model, nb_epochs=128)
+    stop = time.time()
+    print(f"Training: elapsed time:  {stop - start} ")
+
+    noisy_t = torch.from_numpy(noisy)
+    model.eval()
+    model = model.cpu()
+    print(f"noisy tensor shape: {noisy_t.shape}")
+    start = time.time()
+    denoised = model(noisy_t)
+    stop = time.time()
+    print(f"inference: elapsed time:  {stop - start} ")
+
+    noisy = noisy[0, 0, :, :]
+    image = image[0, 0, :, :]
+    denoised = denoised.detach().numpy()[0, 0, :, :]
+
+    image = numpy.clip(image, 0, 1)
+    noisy = numpy.clip(noisy, 0, 1)
+    denoised = numpy.clip(denoised, 0, 1)
+
+    return calculate_print_psnr_ssim(image, noisy, denoised)
+
+
+if __name__ == '__main__':
+    # image = newyork()
+    # image = lizard()
+    # image = characters()
+    image = camera()
+    # image = pollen()
+    # image = dots()
+
+    model_class = UNetModel
+    # model_class = ResidualUNetModel
+    # model_class = LinearScalingUNetModel
+
+    demo(image, model_class)

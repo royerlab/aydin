@@ -1,17 +1,37 @@
+"""Base class for image transforms used in the denoising pipeline.
+
+Defines the abstract interface that all image transforms must implement.
+Transforms apply a preprocessing step to facilitate denoising and optionally
+offer a postprocessing step to undo the transformation.
+"""
+
 from abc import ABC, abstractmethod
 
 from numpy.typing import ArrayLike
 
 
 class ImageTransformBase(ABC):
-    """Image Transforms base class
+    """Image Transforms base class.
 
     Transforms take an array, apply a transformation that is meant to
     facilitate denoising (or another image restoration task), and then
     optionally, offer a way to go back by undoing the transformation. For
     example, motion correction can be applied to facilitate denoising,
-    and then after denoising has ben performed, the motion can be reapplied,
+    and then after denoising has been performed, the motion can be reapplied,
     if really needed.
+
+    Attributes
+    ----------
+    preprocess_description : str
+        Human-readable description of the preprocessing step.
+    postprocess_description : str
+        Human-readable description of the postprocessing step.
+    postprocess_supported : bool or None
+        Whether this transform supports postprocessing (inverse).
+    priority : float
+        Ordering priority in [0, 1] for applying transforms.
+    do_postprocess : bool
+        Whether postprocessing should be performed.
     """
 
     preprocess_description = " (before denoising)"
@@ -19,30 +39,54 @@ class ImageTransformBase(ABC):
     postprocess_supported = None
 
     def __init__(self, priority: float = -1, do_postprocess: bool = True, **kwargs):
-        """
+        """Initialize the image transform.
 
         Parameters
         ----------
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
 
-        do_postprocess : bool When True, post-processing will occur,
-        when False, no post-processing is done.
+        do_postprocess : bool
+            When True, post-processing will occur. When False, no
+            post-processing is done.
 
-        kwargs
+        **kwargs
+            Additional keyword arguments.
         """
         self.priority = priority
         self.do_postprocess = do_postprocess
 
     @abstractmethod
     def preprocess(self, array: ArrayLike):
-        """ """
+        """Apply the preprocessing transform to the given array.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input array to transform.
+
+        Returns
+        -------
+        ArrayLike
+            Transformed array.
+        """
         raise NotImplementedError()
 
     @abstractmethod
     def postprocess(self, array: ArrayLike):
-        """ """
+        """Apply the postprocessing (inverse) transform to the given array.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Array to reverse-transform.
+
+        Returns
+        -------
+        ArrayLike
+            Reverse-transformed array.
+        """
         raise NotImplementedError()

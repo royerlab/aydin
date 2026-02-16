@@ -1,19 +1,26 @@
+"""Motion stabilisation transform for timelapse images.
+
+Provides phase-correlation-based motion correction for 2D+t and 3D+t
+timelapse images. Registers frames to a reference using center-of-mass
+estimation on the correlation peak, applying integral shifts to avoid
+interpolation artifacts.
+"""
+
 import math
-from typing import Union, Optional, Sequence
+from typing import Optional, Sequence, Union
 
 import numpy
 import scipy
-
 from numpy.typing import ArrayLike
 from scipy.ndimage import gaussian_filter
 from scipy.optimize import curve_fit
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class MotionStabilisationTransform(ImageTransformBase):
-    """Motion Stabilisation
+    """Motion stabilisation for timelapse images.
 
     Denoising is more effective if signal-correlated voxels are close to each
     other. When a 2D+t or 3D+t timelapse has shifts between time points,
@@ -24,8 +31,9 @@ class MotionStabilisationTransform(ImageTransformBase):
     denoising is recommended to improve denoising performance. Currently,
     we assume that all frames can be registered to a common reference frame,
     and thus that all images have a common background that can be used for
-    registration. For completeness, multiple axis can be specified and the
-    correction is applied along each in sequence.(advanced)
+    registration. For completeness, multiple axes can be specified and the
+    correction is applied along each in sequence. (advanced)
+    <notgui>
     """
 
     preprocess_description = (
@@ -49,8 +57,7 @@ class MotionStabilisationTransform(ImageTransformBase):
         priority: float = 0.45,
         **kwargs,
     ):
-        """
-        Constructs a Motion Corrector
+        """Construct a MotionStabilisationTransform.
 
         Parameters
         ----------
@@ -81,7 +88,7 @@ class MotionStabilisationTransform(ImageTransformBase):
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
@@ -101,16 +108,29 @@ class MotionStabilisationTransform(ImageTransformBase):
         self._shifts = {}
         self._original_dtype = None
 
-        lprint(f"Instanciating: {self}")
+        aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_shifts`` and ``_original_dtype``.
+        """
         state = self.__dict__.copy()
         del state['_shifts']
         del state['_original_dtype']
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name and key parameters.
+        """
         return (
             f'{type(self).__name__}'
             f' (pad_mode={self.pad_mode},'
@@ -122,10 +142,29 @@ class MotionStabilisationTransform(ImageTransformBase):
         )
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
-        with lsection(f"Motion-correcting array of shape: {array.shape}:"):
+        """Stabilise motion by registering frames to a reference.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input timelapse image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Motion-stabilised image as float32.
+        """
+        with asection(f"Motion-correcting array of shape: {array.shape}:"):
 
             self._original_dtype = array.dtype
 
@@ -136,7 +175,7 @@ class MotionStabilisationTransform(ImageTransformBase):
 
             self._shifts = {}
             for axis in axes:
-                lprint(f"Correcting along axis: {axis}")
+                aprint(f"Correcting along axis: {axis}")
                 array = self._permutate(array, axis=axis)
                 shifts, mean_shift = _measure_shifts(
                     array,
@@ -146,7 +185,7 @@ class MotionStabilisationTransform(ImageTransformBase):
                     mode='com',
                     sigma=self.sigma,
                 )
-                lprint(f"Mean shift: {mean_shift}")
+                aprint(f"Mean shift: {mean_shift}")
                 array = _shift_transform(
                     array, -shifts, pad=self.pad, crop=False, pad_mode=self.pad_mode
                 )
@@ -155,11 +194,23 @@ class MotionStabilisationTransform(ImageTransformBase):
             return array
 
     def postprocess(self, array: ArrayLike):
+        """Reapply the motion that was corrected during preprocessing.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Image with original motion restored.
+        """
 
         if not self.do_postprocess:
             return array
 
-        with lsection(f"Undoing motion-correction for array of shape: {array.shape}:"):
+        with asection(f"Undoing motion-correction for array of shape: {array.shape}:"):
 
             # We need a copy because the shift-transfrom is in-place
             array = array.astype(numpy.float32, copy=True)
@@ -167,7 +218,7 @@ class MotionStabilisationTransform(ImageTransformBase):
             axes = range(array.ndim) if self.axes is None else self.axes
 
             for axis in reversed(axes):
-                lprint(f"Correcting along axis: {axis}")
+                aprint(f"Correcting along axis: {axis}")
                 array = self._permutate(array, axis=axis)
                 shifts = self._shifts[axis]
                 array = _shift_transform(
@@ -181,16 +232,60 @@ class MotionStabilisationTransform(ImageTransformBase):
             return array
 
     def _permutate(self, array: ArrayLike, axis: int):
+        """Permute axes to move the specified time axis to position 0.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Input array.
+        axis : int
+            Time axis index to move to the front.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array with the specified axis moved to position 0.
+        """
         permutation = self._get_permutation(array, axis=axis)
         array = numpy.transpose(array, axes=permutation)
         return array
 
     def _depermutate(self, array: ArrayLike, axis: int):
+        """Restore original axis ordering after motion correction.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Permuted array.
+        axis : int
+            Time axis index that was moved to the front.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array with original axis ordering restored.
+        """
         permutation = self._get_permutation(array, axis=axis, inverse=True)
         array = numpy.transpose(array, axes=permutation)
         return array
 
     def _get_permutation(self, array: ArrayLike, axis: int, inverse=False):
+        """Compute axis permutation to bring a given axis to position 0.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Array whose dimensions define the permutation.
+        axis : int
+            Axis to move to position 0.
+        inverse : bool
+            If True, return the inverse permutation.
+
+        Returns
+        -------
+        tuple of int or numpy.ndarray
+            Axis permutation (or its inverse).
+        """
         permutation = (axis,) + tuple(a for a in range(array.ndim) if a != axis)
         if inverse:
             permutation = numpy.argsort(permutation)
@@ -198,15 +293,34 @@ class MotionStabilisationTransform(ImageTransformBase):
 
 
 def _shift_transform(array: ArrayLike, shifts, pad, crop, pad_mode='wrap'):
-    """ """
+    """Apply integral pixel shifts to each frame along the first axis.
+
+    Parameters
+    ----------
+    array : ArrayLike
+        Timelapse array where the first dimension indexes frames.
+    shifts : numpy.ndarray
+        Array of shape (num_frames, ndim-1) with integer shifts per frame.
+    pad : bool
+        Whether to pad the array before shifting.
+    crop : bool
+        Whether to crop the array after shifting to remove padding.
+    pad_mode : str
+        Padding mode (e.g. 'wrap', 'mean_constant', 'min_constant').
+
+    Returns
+    -------
+    numpy.ndarray
+        Shifted array.
+    """
 
     min_shift = abs(numpy.min(shifts, axis=0))
     max_shift = abs(numpy.max(shifts, axis=0))
-    lprint(f"min_shift: {min_shift}, max_shift: {max_shift}")
+    aprint(f"min_shift: {min_shift}, max_shift: {max_shift}")
 
     if pad:
         padding = tuple((mi, ma) for mi, ma in zip(min_shift, max_shift))
-        lprint(f"Padding: {padding}")
+        aprint(f"Padding: {padding}")
 
         value = 0
         value = array.mean() if pad_mode == 'mean_constant' else value
@@ -218,7 +332,7 @@ def _shift_transform(array: ArrayLike, shifts, pad, crop, pad_mode='wrap'):
         array = numpy.pad(array, pad_width=((0, 0),) + padding, mode=pad_mode, **kwargs)
 
     for ti, shift in enumerate(shifts):
-        lprint(f"Motion correcting {ti} by {shift}")
+        aprint(f"Motion correcting {ti} by {shift}")
         array[ti, ...] = numpy.roll(
             array[ti, ...], shift=shift, axis=tuple(range(0, array.ndim - 1))
         )
@@ -241,6 +355,32 @@ def _measure_shifts(
     mode: str = 'com',
     sigma: float = 7,
 ):
+    """Measure frame-to-frame shifts using phase correlation.
+
+    Parameters
+    ----------
+    array : ArrayLike
+        Timelapse array where the first dimension indexes frames.
+    reference_index : Optional[int]
+        Index of the reference frame. If None, uses the middle frame.
+        Negative values indicate relative (sequential) registration.
+    center : bool
+        If True, center the shifts by subtracting the mean shift.
+    max_pixel_shift : Optional[int]
+        Maximum expected shift in pixels. If None, set to 1/3 of the
+        largest spatial dimension.
+    mode : str
+        Shift estimation mode: 'com' (center of mass) or 'gfit'
+        (Gaussian fit).
+    sigma : float
+        Gaussian blur sigma used to denoise images before correlation.
+
+    Returns
+    -------
+    tuple
+        A tuple of (shifts, mean_shift) where shifts is an array of
+        integer shifts per frame and mean_shift is the mean shift vector.
+    """
     shifts = []
     correlations = []
 
@@ -265,7 +405,7 @@ def _measure_shifts(
         )
         shifts.append(shift)
         correlations.append(correlation)
-        lprint(f"Measured shift of {shift} for image {i}.")
+        aprint(f"Measured shift of {shift} for image {i}.")
 
     shifts = numpy.array(shifts)
     if reference_index < 0:
@@ -281,20 +421,41 @@ def _measure_shifts(
     # Center shifts:
     if center:
         mean_shift = numpy.round(numpy.mean(shifts, axis=0))
-        mean_shift = mean_shift.astype(numpy.int)
+        mean_shift = mean_shift.astype(numpy.intp)
         shifts = shifts - mean_shift
     else:
         mean_shift = numpy.array((0,) * (array.ndim - 1))
 
     # Convert to int:
-    shifts = numpy.round(shifts).astype(numpy.int)
+    shifts = numpy.round(shifts).astype(numpy.intp)
 
     return shifts, mean_shift
 
 
 def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float = 7):
+    """Find the spatial shift between two images using phase correlation.
+
+    Parameters
+    ----------
+    a : numpy.ndarray
+        First image.
+    b : numpy.ndarray
+        Second (reference) image.
+    max_pixel_shift : int
+        Maximum search radius in pixels.
+    mode : str
+        Estimation mode: 'com' (center of mass) or 'gfit' (Gaussian fit).
+    sigma : float
+        Gaussian blur sigma for pre-filtering.
+
+    Returns
+    -------
+    tuple
+        A tuple of (shift, correlation) where shift is a 1D array of
+        per-axis shift values and correlation is the cropped correlogram.
+    """
     # Basic idea: We just need to low-pass filter the heck of it, and it works.
-    lprint(f"max_pixel_shift: {max_pixel_shift}, mode: {mode}, sigma: {sigma}")
+    aprint(f"max_pixel_shift: {max_pixel_shift}, mode: {mode}, sigma: {sigma}")
 
     # First we blur the input images:
     a = _fast_denoise(a, sigma=sigma)
@@ -330,6 +491,27 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
         # This looks fancy and shit but is just bad.
 
         def gaussian(x, sx=0, sy=0, b=1, a=1):
+            """Evaluate a 2D Gaussian function for curve fitting.
+
+            Parameters
+            ----------
+            x : numpy.ndarray
+                2D coordinate array of shape ``(2, N)`` where ``x[0]``
+                and ``x[1]`` are the row and column coordinates.
+            sx : float
+                Center x-coordinate of the Gaussian.
+            sy : float
+                Center y-coordinate of the Gaussian.
+            b : float
+                Inverse variance (width) parameter.
+            a : float
+                Amplitude of the Gaussian.
+
+            Returns
+            -------
+            numpy.ndarray
+                Gaussian values at the given coordinates.
+            """
             return a * numpy.exp(-b * ((x[0] - sx) ** 2 + (x[1] - sy) ** 2))
 
         x = numpy.arange(0, 2 * max_pixel_shift, 1)
@@ -370,7 +552,7 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
             )
             for rs, s in zip(rough_shift, correlation.shape)
         )
-        lprint(f"Cropped correlation: {cropped_correlation_slice}")
+        aprint(f"Cropped correlation: {cropped_correlation_slice}")
         cropped_correlation = correlation[cropped_correlation_slice]
 
         # We compute the signed rough shift
@@ -397,11 +579,39 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
 
 
 def _fast_denoise(array: ArrayLike, sigma):
+    """Apply a Gaussian filter with wrap mode for quick denoising.
+
+    Parameters
+    ----------
+    array : ArrayLike
+        Input array.
+    sigma : float
+        Standard deviation for the Gaussian kernel.
+
+    Returns
+    -------
+    numpy.ndarray
+        Gaussian-filtered array.
+    """
     denoised = gaussian_filter(array, sigma=sigma, mode='wrap')
     return denoised
 
 
 def _phase_correlation(image, reference_image):
+    """Compute the phase correlation between two images.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image.
+    reference_image : numpy.ndarray
+        Reference image to correlate against.
+
+    Returns
+    -------
+    numpy.ndarray
+        Phase correlation map (real-valued).
+    """
     G_a = scipy.fft.fftn(image, workers=-1)
     G_b = scipy.fft.fftn(reference_image, workers=-1)
     conj_b = numpy.ma.conjugate(G_b)

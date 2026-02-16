@@ -1,3 +1,10 @@
+"""Demonstrate 2D+t Noise2Self denoising with CatBoost on CogNet time-lapse data.
+
+This demo applies self-supervised FGR denoising with CatBoost to a CogNet
+nanotube 400fps time-lapse dataset, training on a subset of frames and
+writing the denoised result to a TIFF file, with napari visualization.
+"""
+
 # flake8: noqa
 import time
 from datetime import date
@@ -14,6 +21,7 @@ from aydin.util.log.log import Log
 
 
 def demo():
+    """Denoise CogNet time-lapse data using FGR with CatBoost regression."""
     Log.enable_output = True
 
     today = date.today()
@@ -67,12 +75,12 @@ def demo():
 
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(train, name='train')
-            viewer.add_image(infer, name='infer')
-            print(f"Inference: elapsed time:  {stop - start} ")
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(train, name='train')
+        viewer.add_image(infer, name='infer')
+        print(f"Inference: elapsed time:  {stop - start} ")
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
 
 if __name__ == "__main__":

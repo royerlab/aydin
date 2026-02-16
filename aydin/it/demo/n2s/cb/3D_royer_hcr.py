@@ -1,3 +1,11 @@
+"""Demonstrate 3D Noise2Self denoising with CatBoost on HCR data.
+
+This demo applies self-supervised FGR denoising with CatBoost to a
+RoyerLab HCR (hybridization chain reaction) dataset, using variance
+stabilisation, range normalisation, and padding transforms, with napari
+visualization.
+"""
+
 # flake8: noqa
 
 
@@ -12,7 +20,13 @@ from aydin.util.log.log import Log
 
 
 def demo(image):
-    """ """
+    """Denoise a 3D HCR volume using FGR with CatBoost and VST transforms.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input 3D noisy image array from HCR dataset.
+    """
 
     Log.enable_output = True
     # Log.set_log_max_depth(5)
@@ -33,10 +47,10 @@ def demo(image):
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(denoised, name='denoised')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(denoised, name='denoised')
+    napari.run()
 
 
 if __name__ == "__main__":

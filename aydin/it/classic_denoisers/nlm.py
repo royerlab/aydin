@@ -1,5 +1,12 @@
+"""Non-Local Means (NLM) denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on the Non-Local Means
+algorithm. Denoises by averaging pixels weighted by patch similarity,
+using scikit-image's implementation extended to support n-dimensional images.
+"""
+
 from functools import partial
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -10,6 +17,7 @@ from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.denoise_nd.denoise_nd import extend_nd
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_nlm(
@@ -25,9 +33,9 @@ def calibrate_denoise_nlm(
     display_crop: bool = False,
     **other_fixed_parameters,
 ):
-    """
-    Calibrates the Non-Local Means (NLM) denoiser for the given image and
-    returns the optimal parameters obtained using the N2S loss.
+    """Calibrate the Non-Local Means (NLM) denoiser for the given image.
+
+    Returns the optimal parameters obtained using the N2S loss.
 
     Parameters
     ----------
@@ -60,7 +68,7 @@ def calibrate_denoise_nlm(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -85,8 +93,12 @@ def calibrate_denoise_nlm(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_nlm`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
 
     # Convert image to float if needed:
@@ -129,6 +141,7 @@ def calibrate_denoise_nlm(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 3 * image.nbytes
@@ -143,14 +156,13 @@ def denoise_nlm(
     cutoff_distance: float = 0.1,
     sigma=0.0,
 ):
-    """
-    Denoise given image using either scikit-image implementation
+    """Denoise the given image using the scikit-image implementation
     of <a href="https://en.wikipedia.org/wiki/Non-local_means">Non-Local-Means (NLM)</a>.
-
+    <notgui>
 
     Parameters
     ----------
-    image : ArayLike
+    image : ArrayLike
         Image to be denoised
 
     patch_size : int, optional
@@ -173,8 +185,8 @@ def denoise_nlm(
 
     Returns
     -------
-    Denoised image as ndarray.
-
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:

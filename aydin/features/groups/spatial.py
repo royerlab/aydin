@@ -1,16 +1,39 @@
-from math import sin, pi
+"""Spatial coordinate feature group for position-dependent denoising."""
+
+from math import pi, sin
 from typing import Optional, Tuple
 
 from aydin.features.groups.base import FeatureGroupBase
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class SpatialFeatures(FeatureGroupBase):
-    """
-    Spatial Feature Group class
+    """Spatial coordinate feature group.
 
-    These features are simply the shifted, scaled, and possibly quantised
-    coordinates of the voxels themselves.
+    Generates features consisting of the (optionally shifted, scaled, and
+    coarsened) spatial coordinates of each voxel. One feature is produced
+    per spatial dimension. When ``period > 0``, coordinates are passed
+    through a sinusoidal function, producing periodic spatial features.
+
+    Spatial features allow the denoiser to learn position-dependent
+    corrections such as illumination gradients or spatially varying noise
+    levels. They should only be used when training and inference images
+    share the same spatial structure.
+
+    Attributes
+    ----------
+    coarsening : int
+        Number of pixels that share the same coordinate value, preventing
+        identification of individual pixel positions.
+    period : float
+        If non-zero, the coordinate is transformed by a sine function
+        with this period, producing sinusoidal features.
+    image : numpy.ndarray or None
+        Reference to the current image being processed.
+    offset : tuple of float or None
+        Offset added to each spatial coordinate (one per dimension).
+    scale : tuple of float or None
+        Scale multiplied to each spatial coordinate (one per dimension).
     """
 
     def __init__(self, coarsening: int = 1, period: float = 0):
@@ -37,9 +60,28 @@ class SpatialFeatures(FeatureGroupBase):
 
     @property
     def receptive_field_radius(self) -> int:
+        """Return the receptive field radius (always 0 for spatial features).
+
+        Returns
+        -------
+        radius : int
+            Always 0, since spatial features do not depend on neighboring pixels.
+        """
         return 0
 
     def num_features(self, ndim: int) -> int:
+        """Return the number of spatial features (one per spatial dimension).
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions.
+
+        Returns
+        -------
+        num : int
+            Equal to ``ndim``.
+        """
         return ndim
 
     def prepare(
@@ -49,13 +91,39 @@ class SpatialFeatures(FeatureGroupBase):
         scale: Optional[Tuple[float, ...]] = None,
         **kwargs,
     ):
+        """Prepare spatial feature computation for the given image.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image whose shape determines the spatial feature dimensions.
+        offset : tuple of float, optional
+            Offset to add to each spatial coordinate (one per dimension).
+        scale : tuple of float, optional
+            Scale factor to multiply each spatial coordinate (one per dimension).
+        **kwargs
+            Additional keyword arguments (unused).
+        """
         self.image = image
         self.offset = offset
         self.scale = scale
         self.kwargs = kwargs
 
     def compute_feature(self, index: int, feature):
-        lprint(
+        """Compute a spatial coordinate feature for the given axis.
+
+        Each feature contains the (optionally shifted, scaled, and quantised)
+        coordinate values along one spatial dimension. When ``period > 0``,
+        the coordinates are passed through a sinusoidal function.
+
+        Parameters
+        ----------
+        index : int
+            Index of the spatial dimension to generate a feature for.
+        feature : numpy.ndarray
+            Pre-allocated array for storing the computed feature.
+        """
+        aprint(
             f"Spatial feature {index}, offset={self.offset}, scale={self.scale}, coarsening={self.coarsening}, period={self.period} "
         )
 
@@ -97,5 +165,6 @@ class SpatialFeatures(FeatureGroupBase):
             feature[tuple(slicing)] = value
 
     def finish(self):
+        """Clean up references from the last feature computation."""
         # Here we cleanup any resource allocated for the last feature computation:
         self.image = None

@@ -1,5 +1,13 @@
+"""Bilateral filter denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on the bilateral filter,
+an edge-preserving smoothing filter that weights pixels by both spatial
+distance and intensity similarity. Uses scikit-image's bilateral filter
+implementation, extended to support n-dimensional images.
+"""
+
 from functools import partial
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -9,6 +17,7 @@ from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.denoise_nd.denoise_nd import extend_nd
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_bilateral(
@@ -59,7 +68,7 @@ def calibrate_denoise_bilateral(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -73,20 +82,24 @@ def calibrate_denoise_bilateral(
 
     display_images: bool
         When True the denoised images encountered during
-        optimisation are shown
+        optimisation are shown.
         (advanced) (hidden)
 
     display_crop: bool
-        Displays crop, for debugging purposes...
+        Displays crop, for debugging purposes.
         (advanced) (hidden)
 
     other_fixed_parameters: dict
-        Any other fixed parameters
+        Any other fixed parameters.
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_bilateral`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -119,6 +132,7 @@ def calibrate_denoise_bilateral(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 2 * image.nbytes
@@ -142,6 +156,7 @@ def denoise_bilateral(
     weighted average of intensity values from nearby pixels. The
     weighting is inversely related to the pixel distance in space but
     also in the pixels value differences.
+    <notgui>
 
     Parameters
     ----------
@@ -164,12 +179,14 @@ def denoise_bilateral(
         Number of discrete values for Gaussian weights of color filtering.
         A larger value results in improved accuracy.
 
-    kwargs: dict
-        Other parameters
+    **kwargs : dict
+        Other parameters forwarded to the underlying scikit-image
+        bilateral filter.
 
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
 
     """
 

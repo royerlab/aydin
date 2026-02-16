@@ -1,0 +1,166 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Aydin is a self-supervised, auto-tuned image denoising tool for n-dimensional images. It provides three interfaces: GUI (Aydin Studio), CLI, and Python API. Supports classical denoisers, patch-based methods, and machine learning approaches (CNN, Gradient Boosting).
+
+## Common Commands
+
+### Development Setup
+```bash
+pip install -e ".[dev]"
+# Or use the Makefile (also installs docs deps + pre-commit hooks):
+make setup
+```
+
+### Testing
+```bash
+# Run all tests (excludes heavy, gpu, unstable by default)
+make test
+
+# Run a single test file (use hatch run to ensure correct environment)
+hatch run pytest aydin/path/to/test_file.py --disable-pytest-warnings
+
+# Run a single test function
+hatch run pytest aydin/path/to/test_file.py::test_function_name --disable-pytest-warnings
+
+# Run heavy tests only (marked @pytest.mark.heavy)
+make test-heavy
+
+# Run GPU tests only (marked @pytest.mark.gpu)
+make test-gpu
+```
+
+### Code Style
+```bash
+# Format code (isort + black)
+make format
+
+# Check formatting and lint
+make check
+```
+
+### Running the Application
+```bash
+aydin                       # Launch GUI (Aydin Studio)
+aydin denoise image.tif     # CLI denoising
+aydin -h                    # Help
+```
+
+### Documentation
+```bash
+make docs                   # Build HTML docs (current version)
+make docs-build             # Build multi-version docs (all tags)
+make docs-publish           # Build and deploy to GitHub Pages
+```
+
+## Architecture
+
+### Core Components
+
+**Image Translator Framework** (`aydin/it/`):
+- `base.py` - Core `ImageTranslatorBase` class that handles multi-dimensional arrays with batch/channel/spatial dimensions, training/inference slicing, transforms, and normalization
+- `classic.py`, `cnn_torch.py`, `fgr.py` - Implementations wrapping different denoising approaches
+
+**Denoising Algorithms** (`aydin/restoration/denoise/`):
+- `classic.py` - Classical denoisers (Butterworth, Gaussian, NLM, Total Variation)
+- `noise2selffgr.py` - Self-supervised Feature Generation & Regression (recommended approach)
+- `noise2selfcnn.py` - Self-supervised CNN approach
+
+**Regression Methods** (`aydin/regression/`):
+- `cb.py` - CatBoost (default for FGR)
+- `lgbm.py` - LightGBM
+- Other: linear, perceptron, random forest, SVM
+
+**Feature Engineering** (`aydin/features/`):
+- `standard_features.py`, `extensible_features.py` - Feature generation for ML denoisers
+
+**Transforms** (`aydin/it/transforms/`):
+- Image preprocessing/postprocessing: deskew, motion correction, high-pass, range normalization, histogram stretching, VST, padding
+
+**I/O** (`aydin/io/`):
+- `io.py` - Image reading/writing supporting TIFF, CZI, ND2, Zarr formats
+
+**Interfaces**:
+- `aydin/gui/` - PyQt6-based GUI (Aydin Studio)
+- `aydin/cli/cli.py` - Click-based CLI
+
+### Build System
+
+- **Build backend**: hatchling (configured in `pyproject.toml`)
+- **Makefile**: Orchestrates common commands (`make help` for full list)
+  - `make setup` / `make install-dev` - Install for development
+  - `make test` / `make test-heavy` / `make test-gpu` - Run tests
+  - `make format` / `make check` - Code formatting and linting
+  - `make build` / `make clean` - Build and clean artifacts
+  - `make publish` / `make publish-patch` - Version bump and publish
+
+### Test Markers
+
+Tests use pytest markers defined in `pyproject.toml`:
+- `@pytest.mark.heavy` - Long-running tests
+- `@pytest.mark.gpu` - Requires NVIDIA GPU
+- `@pytest.mark.unstable` - Flaky tests
+
+### Logging
+
+Use the internal logging API at `aydin/util/log/log.py` instead of print statements.
+
+## Code Style Guidelines
+
+- Follow PEP8 + Black formatter (config in pyproject.toml, single quotes preserved)
+- Use NumPy-style docstrings
+- Flake8 ignores: E501 (line length), E203, E741, W503
+
+## GUI Docstring Conventions (CRITICAL)
+
+**The Aydin GUI (Aydin Studio) renders Python docstrings as HTML using Qt's RichText.** Docstrings in certain modules contain intentional HTML markup that MUST be preserved. Removing or converting these tags breaks the GUI display.
+
+### HTML Tags Used in Docstrings
+
+1. **`<a href="...">text</a>`** - Clickable hyperlinks rendered in the GUI. Found in:
+   - `aydin/it/classic_denoisers/*.py` - Wikipedia links for algorithm names (Butterworth, NLM, Wavelet, Lipschitz, Bilateral, BM3D/ND, Harmonic, TV)
+   - `aydin/it/transforms/highpass.py` - Wikipedia link for 'blue' noise
+   - `aydin/restoration/denoise/noise2self*.py` - arXiv link to Noise2Self paper
+   - `aydin/regression/cb.py`, `lgbm.py`, `random_forest.py` - GitHub links to libraries
+   - `aydin/gui/tabs/qt/summary.py` - DOI, GitHub, and forum links
+
+2. **`<moreless>`** - Custom tag that creates an expandable "Read more/Read less" UI section. Used in GUI tab class docstrings:
+   - `aydin/gui/tabs/qt/denoise.py`
+   - `aydin/gui/tabs/qt/processing.py`
+   - `aydin/gui/tabs/qt/dimensions.py`
+   - `aydin/gui/tabs/qt/summary.py`
+   - `aydin/gui/tabs/qt/base_cropping.py`
+
+3. **`<split>`** - Used with `<moreless>` to create a two-column layout in the expanded section.
+
+4. **`<br>` / `<br><br>`** - HTML line breaks. Also, literal `\n\n` in docstrings is converted to `<br><br>` at runtime by the restoration modules.
+
+5. **`\n\n`** (literal backslash-n) - Used as explicit paragraph break markers in classic denoiser docstrings. The GUI code converts these to `<br><br>` via `.replace("\n\n", "<br><br>")`.
+
+6. **`<notgui>`** - Marks the boundary between GUI-visible content and API-only content. Everything before this tag is shown in the GUI; everything after (Parameters, Attributes, etc.) is only visible via `help()`, Sphinx, and IDEs. Stripped at runtime by `strip_notgui()` in `aydin/util/string/break_text.py`. Used in:
+   - `aydin/it/classic_denoisers/*.py` - In `denoise_*` function docstrings, before `Parameters`
+   - `aydin/it/transforms/*.py` - In transform class docstrings
+   - `aydin/regression/*.py` - In regressor class docstrings
+   - `aydin/nn/models/*.py` - In model class docstrings
+   - `aydin/features/standard_features.py`, `extensible_features.py` - In feature generator class docstrings
+   - `aydin/it/classic.py`, `aydin/restoration/denoise/noise2self*.py` - In denoiser class docstrings
+
+### How Docstrings Flow to the GUI
+
+- **Classic denoisers**: `aydin/restoration/denoise/classic.py` reads `denoise_*.__doc__`, applies `strip_notgui()`, and converts `\n\n` to `<br><br>`
+- **FGR regressors**: `aydin/restoration/denoise/noise2selffgr.py` reads regressor class `__doc__`, applies `strip_notgui()`, and converts `\n\n` to `<br><br>`
+- **CNN models**: `aydin/restoration/denoise/noise2selfcnn.py` reads model class `__doc__`, applies `strip_notgui()`, and converts `\n\n` to `<br><br>`
+- **Transforms**: `aydin/gui/_qt/transforms_tab_item.py` reads transform class `__doc__`, applies `strip_notgui()`, and converts `\n` to `<br>`
+- **Tab descriptions**: `QReadMoreLessLabel` widget parses `<moreless>` and `<split>` markers
+
+### Rules When Editing Docstrings
+
+- **NEVER remove `<a href>` links** from docstrings in the modules listed above
+- **NEVER remove `<moreless>`, `<split>`, `<br>`, or `<notgui>` tags** from GUI tab docstrings
+- **NEVER convert HTML links to RST/Markdown format** - the GUI needs raw HTML
+- **Preserve literal `\n\n`** paragraph markers in classic denoiser docstrings
+- When improving docstrings, keep the HTML tags intact and only modify the surrounding text
+- **Use `<notgui>`** to separate GUI-visible content from API-only sections (Attributes, Parameters, etc.). Place `<notgui>` on its own line before any section you want hidden from the GUI

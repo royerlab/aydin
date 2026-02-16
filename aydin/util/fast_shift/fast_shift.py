@@ -1,5 +1,11 @@
+"""Numba-accelerated array shifting for 1D to 4D arrays.
+
+Provides fast, parallel shift operations with zero-fill boundary
+handling and optional additive accumulation mode.
+"""
+
 from math import ceil
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import numba
 import numpy
@@ -12,6 +18,36 @@ __error_model = 'numpy'
 def fast_shift(
     image, shift: Tuple[int], output=None, add=False, parallelism: Optional[int] = 8
 ):
+    """Shift an array by integer offsets using Numba-accelerated code.
+
+    Shifts the input image by the specified integer offsets along each
+    axis. Regions that fall outside the array boundaries are filled
+    with zeros. Supports 1D to 4D arrays.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input array to shift (1D to 4D).
+    shift : tuple of int
+        Integer shift amounts for each axis.
+    output : numpy.ndarray, optional
+        Pre-allocated output array. If None, a zeros array is created.
+    add : bool
+        If True, shifted values are added to the output array instead
+        of replacing existing values.
+    parallelism : int, optional
+        Number of parallel threads. If None, uses all available threads.
+
+    Returns
+    -------
+    numpy.ndarray
+        Shifted array with the original dtype.
+
+    Raises
+    ------
+    ValueError
+        If the image has more than 4 dimensions.
+    """
 
     # Save original image dtype:
     original_dtype = image.dtype
@@ -44,7 +80,7 @@ def fast_shift(
 
 @jit(nopython=True, parallel=True, error_model=__error_model, fastmath=__fastmath)
 def _fast_shift_1d(image, shift: Tuple[int], output, add: bool, parallelism: int):
-
+    """Numba JIT-compiled 1D shift with zero-fill boundary handling."""
     width = image.shape[0]
     chunk_width = int(ceil(width / parallelism))
     shift_x = shift[0]
@@ -64,7 +100,7 @@ def _fast_shift_1d(image, shift: Tuple[int], output, add: bool, parallelism: int
 
 @jit(nopython=True, parallel=True, error_model=__error_model, fastmath=__fastmath)
 def _fast_shift_2d(image, shift: Tuple[int], output, add: bool, parallelism: int):
-
+    """Numba JIT-compiled 2D shift with zero-fill boundary handling."""
     height = image.shape[0]
     width = image.shape[1]
     chunk_height = int(ceil(height / parallelism))
@@ -88,7 +124,7 @@ def _fast_shift_2d(image, shift: Tuple[int], output, add: bool, parallelism: int
 
 @jit(nopython=True, parallel=True, error_model=__error_model, fastmath=__fastmath)
 def _fast_shift_3d(image, shift: Tuple[int], output, add: bool, parallelism: int):
-
+    """Numba JIT-compiled 3D shift with zero-fill boundary handling."""
     depth = image.shape[0]
     height = image.shape[1]
     width = image.shape[2]
@@ -121,7 +157,7 @@ def _fast_shift_3d(image, shift: Tuple[int], output, add: bool, parallelism: int
 
 @jit(nopython=True, parallel=True, error_model=__error_model, fastmath=__fastmath)
 def _fast_shift_4d(image, shift: Tuple[int], output, add: bool, parallelism: int):
-
+    """Numba JIT-compiled 4D shift with zero-fill boundary handling."""
     length = image.shape[0]
     depth = image.shape[1]
     height = image.shape[2]

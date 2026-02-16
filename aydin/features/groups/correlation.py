@@ -1,4 +1,6 @@
-from typing import Sequence, Optional, Tuple, Callable
+"""Correlation (convolution) feature group for kernel-based image features."""
+
+from typing import Callable, Optional, Sequence, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -6,14 +8,32 @@ from scipy.ndimage import gaussian_filter
 
 from aydin.features.groups.base import FeatureGroupBase
 from aydin.util.fast_correlation.correlation import correlate as fast_correlate
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class CorrelationFeatures(FeatureGroupBase):
-    """
-    Correlation (convolutional) Feature Group class
+    """Correlation (convolutional) feature group.
 
-    Generates correlative features given a set of kernels.
+    Generates features by correlating (convolving) the image with a set of
+    kernels. Each kernel produces one feature. Kernels can optionally be
+    applied as separable 1-D filters along each axis for efficiency.
+
+    When excluded voxels are specified (for blind-spot denoising), the
+    corresponding kernel weights are zeroed out and their contribution is
+    redistributed to neighboring voxels via Gaussian smoothing, ensuring
+    J-invariance.
+
+    Attributes
+    ----------
+    kernels : list of numpy.ndarray or None
+        List of correlation kernels. May be ``None`` before ``prepare`` is
+        called if kernels are generated lazily by a subclass.
+    image : numpy.ndarray or None
+        Reference to the current image being processed (set during ``prepare``).
+    excluded_voxels : list of tuple of int
+        Voxels excluded from feature computation for blind-spot denoising.
+    separable : bool
+        Whether to apply kernels as separable 1-D filters.
     """
 
     def __init__(
@@ -28,12 +48,14 @@ class CorrelationFeatures(FeatureGroupBase):
         Parameters
         ----------
         kernels : Optional[Sequence[ArrayLike]]
-            Sequence of kernels to use to compute features.
-
+            Sequence of kernels to use to compute features. Can be None if
+            kernels will be set later (e.g., by a subclass).
         separable : bool
-            If True the kernels are assumed to be separable as identical 1d
+            If True the kernels are assumed to be separable as identical 1D
             kernels for each axis.
-
+        _correlate_func : callable, optional
+            Custom correlation function. If None, uses the fast internal
+            correlate implementation.
         """
         super().__init__()
         self.kernels = kernels if kernels is None else list(kernels)
@@ -50,13 +72,50 @@ class CorrelationFeatures(FeatureGroupBase):
 
     @property
     def receptive_field_radius(self) -> int:
+        """Return the receptive field radius based on the largest kernel.
+
+        Returns
+        -------
+        radius : int
+            Half the size of the largest kernel dimension, or 0 if no
+            kernels are available.
+        """
+        if not self.kernels:
+            return 0
         radius = max(max(s // 2 for s in k.shape) for k in self.kernels)
         return radius
 
     def num_features(self, ndim: int) -> int:
+        """Return the number of correlation features (one per kernel).
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions (unused, included for API consistency).
+
+        Returns
+        -------
+        num : int
+            Number of kernels, or 0 if no kernels are set.
+        """
+        if not self.kernels:
+            return 0
         return len(self.kernels)
 
     def prepare(self, image, excluded_voxels=None, **kwargs):
+        """Prepare the correlation feature group for computation.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image for which features will be computed.
+        excluded_voxels : list of tuple of int, optional
+            Voxels to exclude from feature computation. Excluded voxels are
+            zeroed out in each kernel and their weight is redistributed to
+            neighboring voxels using a Gaussian estimate.
+        **kwargs
+            Additional keyword arguments (unused).
+        """
         if excluded_voxels is None:
             excluded_voxels = []
 
@@ -65,8 +124,21 @@ class CorrelationFeatures(FeatureGroupBase):
         self.kwargs = kwargs
 
     def compute_feature(self, index: int, feature):
+        """Compute a single correlation feature using the indexed kernel.
+
+        If there are excluded voxels, the kernel is modified to zero out
+        those positions and redistribute their weight to nearby voxels
+        using a Gaussian approximation.
+
+        Parameters
+        ----------
+        index : int
+            Index of the kernel to use for this feature.
+        feature : numpy.ndarray
+            Pre-allocated array for storing the correlation result.
+        """
         kernel = self.kernels[index]
-        lprint(
+        aprint(
             f"Correlative feature: {index} of shape={kernel.shape}, excluded_voxels={self.excluded_voxels}"
         )
 
@@ -106,7 +178,7 @@ class CorrelationFeatures(FeatureGroupBase):
             for aslice, weight in zip(slices, center_weights):
                 missing[aslice] = weight
 
-            # We apply a Gaussian filter to find neighbooring voxels from which we can estimate the missing values:
+            # We apply a Gaussian filter to find neighboring voxels from which we can estimate the missing values:
             missing = gaussian_filter(missing, sigma=0.5)
 
             # Save the sum so:
@@ -136,6 +208,7 @@ class CorrelationFeatures(FeatureGroupBase):
         #     napari.run()
 
     def finish(self):
+        """Clean up references and release kernels."""
         self.image = None
         self.excluded_voxels = None
         self.kwargs = None
@@ -144,6 +217,21 @@ class CorrelationFeatures(FeatureGroupBase):
     def _correlate(
         self, image: ArrayLike, kernel: ArrayLike, separable: bool, output: ArrayLike
     ):
+        """Correlate the image with a kernel, optionally using separable filtering.
+
+        Parameters
+        ----------
+        image : ArrayLike
+            Input image to correlate.
+        kernel : ArrayLike
+            Correlation kernel. Should be 1D for separable filtering
+            to take effect; if ``separable=True`` but the kernel is not
+            1D, standard (non-separable) correlation is used instead.
+        separable : bool
+            If True, applies the 1D kernel along each axis sequentially.
+        output : ArrayLike
+            Pre-allocated output array for the result.
+        """
 
         if separable and kernel.ndim == 1:
 

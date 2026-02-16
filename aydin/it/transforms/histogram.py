@@ -1,18 +1,27 @@
-import numpy
+"""Histogram equalisation transform.
 
+Applies histogram equalisation or CLAHE (Contrast Limited Adaptive Histogram
+Equalisation) to images with extremely unbalanced histograms, improving
+denoising performance. The transform can be reversed during post-processing
+(for the 'equalize' mode).
+"""
+
+import numpy
 from numpy.typing import ArrayLike
-from skimage.exposure import equalize_adapthist, cumulative_distribution
+from skimage.exposure import cumulative_distribution, equalize_adapthist
 
 from aydin.it.transforms.base import ImageTransformBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import aprint, asection
 
 
 class HistogramEqualisationTransform(ImageTransformBase):
-    """Histogram Equalisation
+    """Histogram equalisation transform.
 
     For some images with extremely unbalanced histograms, applying histogram
-    equalisation will improve results. Two modes are supported: 'equalize',
-    and 'clahe'.
+    equalisation will improve results. Two modes are supported: 'equalize'
+    (standard histogram equalisation) and 'clahe' (Contrast Limited Adaptive
+    Histogram Equalisation).
+    <notgui>
     """
 
     preprocess_description = (
@@ -31,9 +40,7 @@ class HistogramEqualisationTransform(ImageTransformBase):
         priority: float = 0.12,
         **kwargs,
     ):
-
-        """
-        Constructs a Histogram Transform
+        """Construct a HistogramEqualisationTransform.
 
         Parameters
         ----------
@@ -45,7 +52,7 @@ class HistogramEqualisationTransform(ImageTransformBase):
         priority : float
             The priority is a value within [0,1] used to determine the order in
             which to apply the pre- and post-processing transforms. Transforms
-            are sorted and applied in ascending order during preprocesing and in
+            are sorted and applied in ascending order during preprocessing and in
             the reverse, descending, order during post-processing.
         """
         super().__init__(priority=priority, **kwargs)
@@ -55,10 +62,17 @@ class HistogramEqualisationTransform(ImageTransformBase):
         self._bin_centers = None
         self._original_dtype = None
 
-        lprint(f"Instanciating: {self}")
+        aprint(f"Instantiating: {self}")
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Return picklable state, excluding transient fields.
+
+        Returns
+        -------
+        dict
+            Object state without ``_cdf``, ``_bin_centers``, and
+            ``_original_dtype``.
+        """
         state = self.__dict__.copy()
         del state['_cdf']
         del state['_bin_centers']
@@ -66,14 +80,40 @@ class HistogramEqualisationTransform(ImageTransformBase):
         return state
 
     def __str__(self):
+        """Return a human-readable string representation.
+
+        Returns
+        -------
+        str
+            String showing the class name, mode, and scale.
+        """
         return f'{type(self).__name__}' f' (mode={self.mode},' f' scale={self.scale})'
 
     def __repr__(self):
+        """Return a detailed string representation.
+
+        Returns
+        -------
+        str
+            Same as ``__str__``.
+        """
         return self.__str__()
 
     def preprocess(self, array: ArrayLike):
+        """Apply histogram equalisation to the image.
 
-        with lsection(
+        Parameters
+        ----------
+        array : ArrayLike
+            Input image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Histogram-equalised image.
+        """
+
+        with asection(
             f"Equalises histogram for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
 
@@ -94,11 +134,27 @@ class HistogramEqualisationTransform(ImageTransformBase):
             return new_array
 
     def postprocess(self, array: ArrayLike):
+        """Undo histogram equalisation applied during preprocessing.
+
+        For 'equalize' mode, applies inverse interpolation. For 'clahe'
+        mode, the inverse is not currently supported and the array is
+        returned unchanged.
+
+        Parameters
+        ----------
+        array : ArrayLike
+            Denoised image array.
+
+        Returns
+        -------
+        numpy.ndarray
+            Image with original histogram characteristics restored.
+        """
 
         if not self.do_postprocess:
             return array
 
-        with lsection(
+        with asection(
             f"Undoing histogram equalisation for array of shape: {array.shape} and dtype: {array.dtype}"
         ):
             array = array.astype(numpy.float32, copy=False)
@@ -120,5 +176,21 @@ class HistogramEqualisationTransform(ImageTransformBase):
 
 
 def _interpolation(image, x, y):
+    """Interpolate image values using a piecewise linear mapping.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image.
+    x : numpy.ndarray
+        Source values for interpolation.
+    y : numpy.ndarray
+        Target values for interpolation.
+
+    Returns
+    -------
+    numpy.ndarray
+        Interpolated image with same shape as input.
+    """
     out = numpy.interp(image.flat, x, y)
     return out.reshape(image.shape)

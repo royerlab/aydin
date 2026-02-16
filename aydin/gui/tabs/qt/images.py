@@ -1,12 +1,14 @@
+"""Images tab for inspecting loaded images and selecting which to denoise."""
+
 import numpy
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
-    QLabel,
-    QTreeWidgetItem,
-    QTreeWidget,
     QAbstractItemView,
+    QLabel,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
 from aydin.gui._qt.custom_widgets.horizontal_line_break_widget import (
@@ -27,6 +29,13 @@ class ImagesTab(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the Images tab.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(ImagesTab, self).__init__(parent)
         self.parent = parent
 
@@ -49,17 +58,17 @@ class ImagesTab(QWidget):
 
         self.image_list_tree_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
-        self.image_list_tree_widget.itemDoubleClicked.connect(self.onItemDoubleClick)
+        self.image_list_tree_widget.itemDoubleClicked.connect(self.on_item_double_click)
 
         self.image_list_tree_widget.header().sectionClicked.connect(
-            self.onSectionClicked
+            self.on_section_clicked
         )
         self.image_list_tree_widget.header().setSectionsClickable(True)
 
         self.image_list_tree_widget.setColumnWidth(0, 400)
         self.image_list_tree_widget.setColumnWidth(3, 300)
         self.image_list_tree_widget.setColumnWidth(5, 200)
-        self.image_list_tree_widget.itemChanged.connect(self.onTreeItemChanged)
+        self.image_list_tree_widget.itemChanged.connect(self.on_tree_item_changed)
         self.tab_layout.addWidget(self.image_list_tree_widget)
 
         self.tab_layout.setAlignment(Qt.AlignTop)
@@ -67,17 +76,31 @@ class ImagesTab(QWidget):
 
     @property
     def images2denoise(self):
+        """Boolean list of which images are marked for denoising.
+
+        Returns
+        -------
+        list of bool
+            One boolean per image in the tree, True if denoise is checked.
+        """
         response = []
         root = self.image_list_tree_widget.invisibleRootItem()
         child_count = root.childCount()
         for i in range(child_count):
             item = root.child(i)
-            response.append(bool(item.checkState(1)))
+            response.append(item.checkState(1) == Qt.Checked)
 
         return response
 
     @Slot(int)
-    def onSectionClicked(self, column):
+    def on_section_clicked(self, column):
+        """Handle column header clicks to bulk-toggle checkboxes or copy output paths.
+
+        Parameters
+        ----------
+        column : int
+            The column index of the clicked header section.
+        """
         if column == 0:
             return
         elif column == 1:
@@ -95,23 +118,47 @@ class ImagesTab(QWidget):
 
                 item.setCheckState(column, state_to_be_set)
         elif column == 6:
+            selected = self.image_list_tree_widget.selectedItems()
+            if not selected:
+                return
             for idx, item in enumerate(
                 iter_tree_widget(self.image_list_tree_widget.invisibleRootItem())
             ):
                 if idx == 0:
                     continue
-                item.setText(6, self.image_list_tree_widget.selectedItems()[0].text(6))
+                item.setText(6, selected[0].text(6))
 
     @Slot(QTreeWidgetItem, int)
-    def onItemDoubleClick(self, item, column):
+    def on_item_double_click(self, item, column):
+        """Allow editing of the output folder column on double-click.
+
+        Parameters
+        ----------
+        item : QTreeWidgetItem
+            The double-clicked tree item.
+        column : int
+            The column index that was double-clicked.
+        """
         item.setFlags(item.flags() | Qt.ItemIsEditable)
         if column == 6:
             self.image_list_tree_widget.editItem(item, column)
 
-    def onTreeItemChanged(self, item, column):
+    def on_tree_item_changed(self, item, column):
+        """Propagate tree item changes to the data model.
+
+        Updates the denoise flag (column 1) or output folder (column 6)
+        in the data model when the user modifies them in the tree.
+
+        Parameters
+        ----------
+        item : QTreeWidgetItem
+            The changed tree item.
+        column : int
+            The column index that changed.
+        """
         if column == 1:
             self.parent.data_model.set_image_to_denoise(
-                item.text(0), item.checkState(1)
+                item.text(0), item.checkState(1) == Qt.Checked
             )
         elif column == 6:
             self.parent.data_model.update_image_output_folder(
@@ -119,35 +166,40 @@ class ImagesTab(QWidget):
             )
 
     def remove_items_from_tree(self):
+        """Clear all items from the image list tree widget."""
         self.image_list_tree_widget.clear()
 
-    def setFollowingThreeTabsEnabled(self, bool):
-        for _ in range(3, 6):
-            self.parent.tabwidget.setTabEnabled(_, bool)
-
     def on_data_model_update(self):
+        """Rebuild the image list tree from the current data model."""
         imagelist = self.parent.data_model.images
         if imagelist is None or imagelist == []:
             self.remove_items_from_tree()
             return
 
-        self.image_list_tree_widget.clear()
+        self.image_list_tree_widget.blockSignals(True)
+        try:
+            self.image_list_tree_widget.clear()
 
-        for (filename, array, metadata, denoise, path, output_folder) in imagelist:
-            qtree_widget_item = QTreeWidgetItem(
-                self.image_list_tree_widget,
-                [
-                    filename,
-                    ' ',
-                    str(metadata.axes),
-                    str(metadata.shape),
-                    str(metadata.dtype),
-                    human_readable_byte_size(
-                        metadata.dtype.itemsize * numpy.prod(metadata.shape)
-                    ),
-                    output_folder,
-                ],
-            )
+            for record in imagelist:
+                qtree_widget_item = QTreeWidgetItem(
+                    self.image_list_tree_widget,
+                    [
+                        record.filename,
+                        ' ',
+                        str(record.metadata.axes),
+                        str(record.metadata.shape),
+                        str(record.metadata.dtype),
+                        human_readable_byte_size(
+                            record.metadata.dtype.itemsize
+                            * numpy.prod(record.metadata.shape)
+                        ),
+                        record.output_folder,
+                    ],
+                )
 
-            qtree_widget_item.setCheckState(1, Qt.Checked if denoise else Qt.Unchecked)
-            qtree_widget_item.setToolTip(0, path)
+                qtree_widget_item.setCheckState(
+                    1, Qt.Checked if record.denoise else Qt.Unchecked
+                )
+                qtree_widget_item.setToolTip(0, record.filepath)
+        finally:
+            self.image_list_tree_widget.blockSignals(False)

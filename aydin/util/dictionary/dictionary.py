@@ -1,19 +1,25 @@
+"""Dictionary learning and fixed dictionaries for patch-based denoising.
+
+Provides functions to learn overcomplete dictionaries from images using
+algorithms such as K-means, PCA, ICA, and sparse dictionary learning, as
+well as to generate fixed DCT/DST dictionaries for patch-based denoising.
+"""
+
 from math import prod
 from typing import Optional, Tuple
+
 import numpy
 from numba import jit
 from numpy.linalg import norm
-from scipy.fft import idstn, idctn
-from scipy.ndimage import convolve
-from scipy.ndimage import median_filter, gaussian_filter
-from sklearn.decomposition import FastICA, PCA
+from scipy.fft import idctn, idstn
+from scipy.ndimage import convolve, gaussian_filter, median_filter
 from sklearn.cluster import MiniBatchKMeans as KMeans
+from sklearn.decomposition import PCA, FastICA
 from sklearn.decomposition import MiniBatchDictionaryLearning as DictLearning
 
-
+from aydin.util.log.log import asection
 from aydin.util.patch_size.patch_size import default_patch_size
 from aydin.util.patch_transform.patch_transform import extract_patches_nd
-from aydin.util.log.log import lsection
 
 
 def learn_dictionary(
@@ -39,59 +45,49 @@ def learn_dictionary(
 
     Parameters
     ----------
-    image: ArrayLike
-        nD image to be denoised
-
-    patch_size: int
-        Patch size
-
-    max_patches: Optional[int]
+    image : ArrayLike
+        nD image to be denoised.
+    patch_size : int
+        Patch size.
+    max_patches : int or None
         Max number of patches to extract for dictionary learning.
         If None there is no limit.
-
-    dictionary_size: int
+    dictionary_size : int or None
         Dictionary size in 'atoms'. If None the dictionary size is inferred from
-        the over_completeness parameter
-
-    over_completeness: float
+        the over_completeness parameter.
+    over_completeness : float
         Given a certain patch size p and image dimension n, a complete basis
-        has p^n elements, the over completeness factor oc determintes the size
-        of the dictionary relative to that by the formula: ox*p^n
-
-    max_dictionary_size: int
+        has p^n elements, the over completeness factor oc determines the size
+        of the dictionary relative to that by the formula: oc*p^n.
+    max_dictionary_size : int
         Independently of any other parameter, we limit the
         size of the dictionary to this provided number.
-
-    algorithm: str
+    algorithm : str
         Algorithm used to compute the dictionary.
         Can be: 'sdl' (sparse dictionary learning),
-         'ica' (independent component analysis),
-         or 'kmeans' or 'pca'
-
-    num_iterations: int
-        Number of iterations for learning dictionary
-
-    batch_size: int
-        Size of batches during batched dictionary learning
-
-    alpha: int
+        'ica' (independent component analysis),
+        'kmeans', or 'pca'.
+    num_iterations : int
+        Number of iterations for learning dictionary.
+    batch_size : int
+        Size of batches during batched dictionary learning.
+    alpha : int
         Sparsity prior strength.
-
-    cleanup_dictionary: bool
+    cleanup_dictionary : bool
         Removes dictionary entries that are likely pure noise or have impulses
         or very high-frequencies or checkerboard patterns that are unlikely
         needed to reconstruct the true signal.
-
-    denoise_dictionary: bool
-        Applies denosing to the dictionary atoms. Can be 'median' or 'gaussian'.
-
-    display_dictionary: bool
+    denoise_dictionary : bool or str
+        Applies denoising to the dictionary atoms. Can be False, 'median',
+        or 'gaussian'.
+    display_dictionary : bool
         If True displays dictionary with napari -- for debug purposes.
 
     Returns
     -------
-    Learned dictionary as a list of patches of shape: (n,)+path_size
-    where n is the number of patches in the dictionary
+    numpy.ndarray
+        Learned dictionary as an array of shape ``(n, *patch_size)``
+        where ``n`` is the number of atoms in the dictionary.
     """
 
     # Normalise patch size:
@@ -116,7 +112,7 @@ def learn_dictionary(
         image, patch_size=patch_size, max_patches=max_patches, normalise_stds=True
     )
 
-    with lsection(
+    with asection(
         f"Learning dictionary of {dictionary_size} atoms from {len(patches)} patches using algorithm '{algorithm}'."
     ):
 
@@ -166,12 +162,9 @@ def learn_dictionary(
         if display_dictionary:
             import napari
 
-            with napari.gui_qt():
-                viewer = napari.Viewer()
-                viewer.add_image(
-                    atoms.reshape(len(atoms), *patch_size), name='dictionary'
-                )
-
+            viewer = napari.Viewer()
+            viewer.add_image(atoms.reshape(len(atoms), *patch_size), name='dictionary')
+            napari.run()
     return atoms
 
 
@@ -183,6 +176,33 @@ def extract_normalised_vectorised_patches(
     normalise_stds: bool = True,
     output_norm_values: bool = False,
 ):
+    """Extract patches from an image, vectorise them, and optionally normalise.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image from which to extract patches.
+    patch_size : tuple of int
+        Size of each patch along each dimension.
+    max_patches : int or None
+        Maximum number of patches to extract. If None, no limit.
+    normalise_means : bool, optional
+        If True, subtract the mean of each patch element across the
+        dataset, by default True.
+    normalise_stds : bool, optional
+        If True, divide by the standard deviation of each patch element
+        across the dataset, by default True.
+    output_norm_values : bool, optional
+        If True, also return the mean and std values used for normalisation,
+        by default False.
+
+    Returns
+    -------
+    numpy.ndarray or tuple
+        Vectorised patches of shape ``(n_patches, prod(patch_size))``.
+        If ``output_norm_values`` is True, returns
+        ``(patches, means, stds)``.
+    """
     # extracts patches:
     patches = extract_patches_nd(image, patch_size=patch_size, max_patches=max_patches)
 
@@ -225,25 +245,22 @@ def fixed_dictionary(
 
     Parameters
     ----------
-    image: ArrayLike
-        nD image to be denoised
-
-    patch_size: int
-        Patch size
-
-    dictionaries: str
-        Fixed dictionaries to be included. Can be: 'dct', 'dst'
-
-    max_freq: float
-        Maximal allowed frequency for dct and dst
-
-    display_dictionary: bool
+    image : ArrayLike
+        nD image to be denoised.
+    patch_size : int
+        Patch size.
+    dictionaries : str
+        Fixed dictionaries to be included. Can be: 'dct', 'dst'.
+    max_freq : float
+        Maximal allowed frequency for dct and dst.
+    display_dictionary : bool
         If True displays dictionary with napari -- for debug purposes.
 
     Returns
     -------
-    Learned dictionary as a list of patches of shape: (n,)+path_size
-    where n is the number of patches in the dictionary
+    numpy.ndarray
+        Fixed dictionary as an array of shape ``(n, *patch_size)``
+        where ``n`` is the number of atoms in the dictionary.
     """
 
     # Normalise patch size:
@@ -282,10 +299,9 @@ def fixed_dictionary(
     if display_dictionary:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(atoms.reshape(len(atoms), *patch_size), name='dct_atoms')
-
+        viewer = napari.Viewer()
+        viewer.add_image(atoms.reshape(len(atoms), *patch_size), name='dct_atoms')
+        napari.run()
     return atoms
 
 
@@ -302,21 +318,19 @@ def dictionary_cleanup(
     Parameters
     ----------
     patches : ArrayLike
-        Patches to filter
-
-    filters: str
-        Filters to remove.
-
-    truncate: float
-        Percentage of the worst patches to remove.
-
-    display: bool
-        Display patches
+        Patches to filter.
+    filters : str
+        Filters to apply. Can contain 'impulse', 'fractured', 'lipschitz'.
+    truncate : float
+        Fraction of the worst patches to remove.
+    display : bool
+        If True, display patches using napari.
 
     Returns
     -------
-    Patches to remove.
-
+    numpy.ndarray
+        Filtered patches with noise-like, impulse, fractured, or
+        high-Lipschitz-error entries removed.
     """
 
     # First we make a list:
@@ -336,16 +350,27 @@ def dictionary_cleanup(
     if display:
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(numpy.stack(patches), name='patches')
-            viewer.add_image(numpy.stack(filtered_patches), name='filtered_patches')
-
+        viewer = napari.Viewer()
+        viewer.add_image(numpy.stack(patches), name='patches')
+        viewer.add_image(numpy.stack(filtered_patches), name='filtered_patches')
+        napari.run()
     return numpy.stack(filtered_patches)
 
 
 @jit(nopython=True, parallel=True)
 def _is_impulse(patch):
+    """Check whether a patch is an impulse (single non-zero element).
+
+    Parameters
+    ----------
+    patch : numpy.ndarray
+        Patch array to check.
+
+    Returns
+    -------
+    bool
+        True if the patch contains only a single positive or negative element.
+    """
     if patch.min() < patch.max():
         patch = patch.copy()
         patch -= patch.min()
@@ -358,6 +383,21 @@ def _is_impulse(patch):
 
 
 def _fracture_measure(patch):
+    """Compute a fracture measure indicating checkerboard-like patterns.
+
+    Higher values indicate more high-frequency alternating patterns
+    that are unlikely to represent real signal content.
+
+    Parameters
+    ----------
+    patch : numpy.ndarray
+        Patch array to measure.
+
+    Returns
+    -------
+    float
+        Maximum absolute difference between even and odd convolution responses.
+    """
     # Footprint:
     footprint_shape = (3,) * patch.ndim
     footprint_a = numpy.zeros(footprint_shape, dtype=numpy.float32)
@@ -381,6 +421,24 @@ def _fracture_measure(patch):
 
 
 def _lipschitz_error(patch, lipschitz: float = 0.2):
+    """Compute the Lipschitz-based error for a patch.
+
+    Measures how much the patch deviates from its median-filtered
+    version, penalising patches with sharp discontinuities.
+
+    Parameters
+    ----------
+    patch : numpy.ndarray
+        Patch array to measure.
+    lipschitz : float, optional
+        Lipschitz threshold below which deviations are ignored,
+        by default 0.2.
+
+    Returns
+    -------
+    float
+        Maximum Lipschitz error after subtracting the threshold.
+    """
     # we compute the error map:
     median = median_filter(patch, size=3)
     error = median.copy()

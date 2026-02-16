@@ -15,10 +15,10 @@ Robust Denoising
 
 TODO: Comparison table
 
-Less Halucinations, More Useful Data
+Less Hallucinations, More Useful Data
 ------------------------------------------
 
-TODO: Figure for less halucinations
+TODO: Figure for less hallucinations
 
 Accessible via API, CLI, GUI
 ----------------------------
@@ -37,12 +37,6 @@ Denoising quality can be -- in some cases -- dramatically improved by applying s
 crafted transformations. You can find here all these transformations and their parameters.
 We recommend you test the effect of each individually, as well as the combined effect of all selected
 before starting the denoising.
-
-Deconvolution
--------------
-
-Currently Aydin implements Lucy-Richardson Deconvolution method only and can be run with a
-custom PSF provided. This can be used via CLI and API currently, not supported on GUI.
 
 Viewing Images
 --------------

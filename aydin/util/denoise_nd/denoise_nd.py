@@ -1,24 +1,70 @@
+"""Decorator to extend limited-dimension denoisers to arbitrary dimensions.
+
+Provides a decorator that wraps denoising functions limited to specific
+dimensionalities (e.g. 2D only) so they can handle images of any number
+of dimensions by iterating over hyperplanes or adding extra dimensions.
+"""
+
 from typing import Sequence
+
 import numpy
 
 
 def extend_nd(available_dims: Sequence[int] = (2,)):
-    """
-    Decorator that extends to nD a denoising function that is limited to images
-    of a few dimensions (e.g. 2 or 3).
+    """Decorator that extends a denoiser to handle n-dimensional images.
+
+    Wraps a denoising function that only supports a limited set of
+    image dimensions (e.g. 2D or 3D) so that it can process images
+    of any dimensionality. For higher-dimensional images, it iterates
+    over sub-hyperplanes; for lower-dimensional images, it adds
+    singleton dimensions.
 
     Parameters
     ----------
-    available_dims: Tuple[int]
+    available_dims : sequence of int
+        Dimensions natively supported by the wrapped denoiser
+        (e.g. ``(2,)`` or ``(2, 3)``).
 
     Returns
     -------
-
+    callable
+        Decorator function.
     """
 
     # Actual decorator that varies given the parameters
     def decorator(function):
+        """Wrap a denoising function to extend its dimensionality support.
+
+        Parameters
+        ----------
+        function : callable
+            Denoising function whose first argument is an image array.
+
+        Returns
+        -------
+        callable
+            Wrapped function that accepts images of any dimensionality.
+        """
+
         def wrapper(*args, **kwargs):
+            """Dispatch the wrapped denoiser to handle arbitrary dimensions.
+
+            Adds singleton dimensions for under-dimensional images, or
+            iterates over sub-hyperplanes for over-dimensional images,
+            delegating to the original denoising function.
+
+            Parameters
+            ----------
+            *args : tuple
+                Positional arguments; the first must be the image array.
+            **kwargs : dict
+                Keyword arguments forwarded to the denoising function.
+
+            Returns
+            -------
+            numpy.ndarray
+                Denoised image with the same shape as the input.
+            """
 
             # The first argument must be the image:
             image = args[0]

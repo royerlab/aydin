@@ -1,5 +1,12 @@
+"""Gaussian filter denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on a simple Gaussian
+low-pass filter. Fast and effective for moderate noise levels, though it
+blurs across all frequencies unlike the band-pass-aware Butterworth denoiser.
+"""
+
 from functools import partial
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -8,6 +15,7 @@ from scipy.ndimage import gaussian_filter
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_gaussian(
@@ -63,7 +71,7 @@ def calibrate_denoise_gaussian(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -89,8 +97,12 @@ def calibrate_denoise_gaussian(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_gaussian`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -131,6 +143,7 @@ def calibrate_denoise_gaussian(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 2 * image.nbytes
@@ -160,6 +173,7 @@ def denoise_gaussian(
     \n\n
     Note: We recommend applying a variance stabilisation transform
     to improve results for images with non-Gaussian noise.
+    <notgui>
 
     Parameters
     ----------
@@ -178,7 +192,8 @@ def denoise_gaussian(
 
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:

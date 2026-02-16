@@ -72,7 +72,7 @@ two dimensions of a four-dimensional image as batch dimensions shown below:
 
 .. code-block:: bash
 
-   $ aydin denoise image.tif --batch-axis "[True, True, False, False]"
+   $ aydin denoise image.tif --batch-axes "[True, True, False, False]"
 
 
 Denoising a single image with a pre-trained Aydin model
@@ -105,38 +105,103 @@ Or alternatively one can use glob patterns such as:
    $ aydin denoise image*.tif
 
 
-Deconvolving a single image
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You can use the following line to deconvolve a single image with default
-options. Passed psf file assumed to be a single psf image
-in a lossless format.
-
-.. code-block:: bash
-
-   $ aydin lucyrichardson image.tif psf.tif
-
-
 Specifying your own output folder
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use the following lines to specify your desired output folder to
-Aydin for both denoising and deconvolution runs:
+You can use the following line to specify your desired output folder:
 
 .. code-block:: bash
 
    $ aydin denoise image.tif --output-folder=/PATH/TO/YOUR/FOLDER
-   $ aydin lucyrichardson image.tif  psf.tif --output-folder=/PATH/TO/YOUR/FOLDER
 
 
 
-Choosing the computational backend
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Choosing the denoiser variant
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use the following line to denoise or deconvolve a single image
-with their choice of computational backend.
+You can use the following line to denoise a single image
+with your choice of denoiser variant.  Use the ``-d`` / ``--denoiser``
+flag followed by the variant name:
 
 .. code-block:: bash
 
-   $ aydin denoise image.tif --backend="noise2selffgr-nn"
-   $ aydin lucyrichardson image.tif --backend="cupy"
+   $ aydin denoise image.tif -d noise2selffgr-cb
+
+To see all available denoiser variants, use:
+
+.. code-block:: bash
+
+   $ aydin denoise --list-denoisers
+
+
+Image Quality Metrics
+~~~~~~~~~~~~~~~~~~~~~
+
+Aydin provides commands to compare two images using standard quality metrics.
+All metric commands normalise images to [0, 1] before computing.
+
+**SSIM** (Structural Similarity Index):
+
+.. code-block:: bash
+
+   $ aydin ssim reference.tif test.tif
+
+**PSNR** (Peak Signal-to-Noise Ratio):
+
+.. code-block:: bash
+
+   $ aydin psnr reference.tif test.tif
+
+**MSE** (Mean Squared Error):
+
+.. code-block:: bash
+
+   $ aydin mse reference.tif test.tif
+
+
+Generating Fourier Shell Correlations (FSC) Plot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use the ``fsc`` command to calculate Fourier Shell Correlations
+between two images. The result is saved as a plot:
+
+.. code-block:: bash
+
+   $ aydin fsc image1.tif image2.tif
+
+By default the plot is saved to ``fsc.png`` in the current directory.
+Use ``-o`` to specify a different output path:
+
+.. code-block:: bash
+
+   $ aydin fsc image1.tif image2.tif -o correlation_plot.png
+
+
+Splitting channels
+~~~~~~~~~~~~~~~~~~~
+
+Split a multi-channel image into separate single-channel files:
+
+.. code-block:: bash
+
+   $ aydin split-channels multichannel.tif
+
+
+Hyperstacking images
+~~~~~~~~~~~~~~~~~~~~~
+
+Stack multiple images into a single higher-dimensional image:
+
+.. code-block:: bash
+
+   $ aydin hyperstack image1.tif image2.tif image3.tif
+
+
+Citing Aydin
+~~~~~~~~~~~~~
+
+Print the citation information for use in publications:
+
+.. code-block:: bash
+
+   $ aydin cite

@@ -1,21 +1,18 @@
 # Aydin documentation
 
-Aydin documentation dependencies can be installed as shown(assuming you are inside `aydin/docs` folder already):
+Aydin documentation dependencies can be installed as shown (assuming you are inside the `docs` folder already):
 
-```shell script
-# Create a new environment
-conda create -y -n aydindocs python=3.9
-
-# Activate the environment
-conda activate aydindocs
-
-# Install Aydin
-pip install -e ../.
-
-# Install Aydin documentation dependencies
-pip install -r requirements-docs.txt
+```bash
+# Install Aydin with documentation dependencies
+pip install -e ".[docs]"
 ```
 
-After running ``make html`` the generated HTML documentation can be found in
+Or using the Makefile from the project root:
+
+```bash
+make setup  # installs dev + docs dependencies
+```
+
+After running ``make publish`` the generated HTML documentation can be found in
 the ``build/html`` directory. Open ``build/html/index.html`` to view the home
 page for the documentation.

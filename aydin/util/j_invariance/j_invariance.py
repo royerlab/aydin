@@ -1,17 +1,24 @@
+"""Self-supervised denoiser calibration via J-invariance.
+
+Implements the calibration method from Batson & Royer (Noise2Self, ICML 2019)
+for automatically tuning denoiser parameters without ground truth.
+"""
+
 import math
 from functools import partial
-from typing import Callable, Dict, Union, Tuple, List, Any, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+
 import numpy
 from scipy.optimize import minimize, shgo
 
-from aydin.util.j_invariance.losses import mean_squared_error, mean_absolute_error
+from aydin.util.j_invariance.losses import mean_absolute_error, mean_squared_error
 from aydin.util.j_invariance.util import (
     _generate_mask,
-    _product_from_dict,
-    _j_invariant_loss,
     _interpolate_image,
+    _j_invariant_loss,
+    _product_from_dict,
 )
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import aprint, asection
 from aydin.util.optimizer.optimizer import Optimizer
 
 
@@ -41,56 +48,45 @@ def calibrate_denoiser(
 
     Parameters
     ----------
-    image: ArrayLike
-        Image to calibate denoiser with.
-
-    denoise_function: Callable
-        Denosing function to calibrate. Should take an image as first parameter,
-        all other parameters should have defaults
-
-    denoise_parameters:
+    image : ArrayLike
+        Image to calibrate denoiser with.
+    denoise_function : Callable
+        Denoising function to calibrate. Should take an image as first parameter,
+        all other parameters should have defaults.
+    denoise_parameters : Dict[str, Union[Tuple[float, float], List[Any]]]
         Dictionary with keys corresponding to parameters of the denoising function.
         Values are either: (i) a list of possible values (categorical parameter),
         or (ii) a tuple of floats defining the bounds of that numerical parameter.
-
-    mode: str
+    mode : str
         Algorithm to use. Can be 'smart' and 'l-bfgs-b'.
-
-    max_num_evaluations: int
+    max_num_evaluations : int
         Max number of function evaluations. This is per the size of the cartesian
         product of categorical parameters.
-
     patience : int
-        After 'patience' evaluations we stop the optimiser
-
-    interpolation_mode: str
+        After 'patience' evaluations we stop the optimiser.
+    interpolation_mode : str
         When masking we need to use a value for replacing the masked values.
         One approach is to replace by zero: 'zero', or apply a Gaussian
-        filter: 'gaussian', or apply a median filter: 'median'
-
-    stride: int
+        filter: 'gaussian', or apply a median filter: 'median'.
+    stride : int
         Stride to compute self-supervised loss.
-
-    loss_function: str
-        Loss/Error function: Can be:  'L1', 'L2', 'SSIM'
-
-    blind_spots: Optional[List[Tuple[int]]]
+    loss_function : str
+        Loss/Error function. Can be: 'L1', 'L2', 'SSIM'.
+    blind_spots : Optional[List[Tuple[int]]]
         Set to None to enable automatic blind-spot detection.
         Otherwise provide list of blindspots. For example:
         [(0,0,0),(1,0,0),(-1,0,0)].
-
-    display_images: bool
+    display_images : bool
         If True the denoised images for each parameter tested are displayed.
-        this _will_ be slow.
-
-    other_fixed_parameters: dict
+        This will be slow.
+    other_fixed_parameters : dict
         Other fixed parameters to pass to the denoiser function.
-
 
     Returns
     -------
-    Dictionary with optimal parameters
-
+    dict
+        Dictionary mapping parameter names to their optimal values,
+        including both optimised and fixed parameters.
     """
 
     # Loss function:
@@ -109,7 +105,7 @@ def calibrate_denoiser(
     # for display purposes:
     denoised_images = []
 
-    with lsection("Calibrating denoiser:"):
+    with asection("Calibrating denoiser:"):
 
         # Convert image to float if that is not already the case:
         image = image.astype(dtype=numpy.float32, copy=False)
@@ -126,7 +122,7 @@ def calibrate_denoiser(
         masked_input_image = interpolation.copy()
 
         # We backup the masked input image to make sure that it is unchanged after optimisation,
-        # which would indicate a 'non-behaving' denoiser that ioperates 'in-place'...
+        # which would indicate a 'non-behaving' denoiser that operates 'in-place'...
         masked_input_image_backup = masked_input_image.copy()
 
         # first we separate the categorical from numerical parameters;
@@ -145,8 +141,8 @@ def calibrate_denoiser(
         numerical_parameters_bounds = list(
             numerical_parameters[n] for n in numerical_parameters_names
         )
-        lprint(f"Parameter names : {numerical_parameters_names}")
-        lprint(f"Parameter bounds: {numerical_parameters_bounds}")
+        aprint(f"Parameter names : {numerical_parameters_names}")
+        aprint(f"Parameter bounds: {numerical_parameters_bounds}")
 
         # number of numerical parameters:
         n = len(numerical_parameters_names)
@@ -162,15 +158,33 @@ def calibrate_denoiser(
         best_loss_value = -math.inf
 
         # we optimise for each such combination of categorical parameters:
-        with lsection(f"Going through {n} combinations of categorical parameters:"):
+        with asection(f"Going through {n} combinations of categorical parameters:"):
 
             for combination in expanded_categorical_parameters:
-                with lsection(
+                with asection(
                     f"Optimising categorical parameters combination: {combination}"
                 ):
 
                     # This is the function to optimize:
                     def opt_function(*point):
+                        """Evaluate the J-invariant loss for a given parameter point.
+
+                        Constructs a parameter dictionary from the categorical
+                        combination and the numerical point, then computes the
+                        self-supervised J-invariant loss. The return value is
+                        negated because the optimizer maximizes.
+
+                        Parameters
+                        ----------
+                        *point : float
+                            Numerical parameter values in the order of
+                            ``numerical_parameters_names``.
+
+                        Returns
+                        -------
+                        float
+                            Negated J-invariant loss (higher is better).
+                        """
 
                         # Given a point, we build the parameter dict:
                         param = dict(combination)
@@ -190,7 +204,7 @@ def calibrate_denoiser(
                         if math.isnan(loss) or math.isinf(loss):
                             loss = math.inf
 
-                        # lprint(f"({point}) -> {loss}")
+                        # aprint(f"({point}) -> {loss}")
                         # denoise image and store it, if needed:
                         if display_images:
                             denoised_image = denoise_function(image, **param)
@@ -204,11 +218,11 @@ def calibrate_denoiser(
                         # If there is no numerical parameters to optimise, we just get the value for that categorical combination:
                         new_parameters = {}
                         new_loss_value = opt_function(new_parameters)
-                        lprint(f"Loss: {new_loss_value}")
+                        aprint(f"Loss: {new_loss_value}")
                     else:
 
                         if mode == "smart":
-                            with lsection(
+                            with asection(
                                 f"Searching by 'smart optimiser' the best denoising parameters among: {numerical_parameters}"
                             ):
 
@@ -226,12 +240,19 @@ def calibrate_denoiser(
                                 pass
 
                         elif mode == "fast":
-                            with lsection(
+                            with asection(
                                 f"Searching by SHGO followed by L-BFGS-B the best denoising parameters among: {numerical_parameters}"
                             ):
 
                                 def callback(x):
-                                    lprint(x)
+                                    """Log the current parameter vector during optimization.
+
+                                    Parameters
+                                    ----------
+                                    x : numpy.ndarray
+                                        Current parameter vector from the optimizer.
+                                    """
+                                    aprint(x)
 
                                 # x0 = numpy.asarray(tuple((0.5 * (v[1] - v[0]) for (n, v) in
                                 #            numerical_parameters.items())))
@@ -241,6 +262,23 @@ def calibrate_denoiser(
 
                                 # Impedance mismatch:
                                 def __function(_denoiser_args):
+                                    """Adapter that negates ``opt_function`` for scipy minimizers.
+
+                                    Converts from ``scipy.optimize`` array-input convention
+                                    to the ``opt_function`` starred-args convention and
+                                    negates the result (since scipy minimizes while
+                                    ``opt_function`` returns negated loss for maximization).
+
+                                    Parameters
+                                    ----------
+                                    _denoiser_args : numpy.ndarray
+                                        Parameter vector from the scipy optimizer.
+
+                                    Returns
+                                    -------
+                                    float
+                                        Positive loss value suitable for minimization.
+                                    """
                                     return -opt_function(*tuple(_denoiser_args))
 
                                 # First we optimise with a global optimiser:
@@ -254,18 +292,18 @@ def calibrate_denoiser(
                                     },
                                     callback=callback,
                                 )
-                                lprint(f"Global optimisation success: {result.success}")
-                                lprint(
+                                aprint(f"Global optimisation success: {result.success}")
+                                aprint(
                                     f"Global optimisation convergence message: {result.message}"
                                 )
-                                lprint(
+                                aprint(
                                     f"Global optimisation number of function evaluations: {result.nfev}"
                                 )
-                                lprint(
+                                aprint(
                                     f"Best parameters until now: {result.x} for loss: {result.fun}"
                                 )
 
-                                # starting point for next ioptimkisation round is result of previous step:
+                                # starting point for next optimisation round is result of previous step:
                                 x0 = result.x
 
                                 # local optimisation using L-BFGS-B:
@@ -293,14 +331,14 @@ def calibrate_denoiser(
                                     x0 = result.x
                                     eps *= 100
 
-                                lprint(f"Local optimisation success: {result.success}")
-                                lprint(
+                                aprint(f"Local optimisation success: {result.success}")
+                                aprint(
                                     f"Local optimisation convergence message: {result.message}"
                                 )
-                                lprint(
+                                aprint(
                                     f"Local optimisation number of function evaluations: {result.nfev}"
                                 )
-                                lprint(
+                                aprint(
                                     f"Best parameters until now: {result.x} for loss: {result.fun}"
                                 )
 
@@ -319,7 +357,7 @@ def calibrate_denoiser(
                         best_combination = combination
                         best_loss_value = new_loss_value
 
-                    lprint(
+                    aprint(
                         f"Best numerical parameters: {best_numerical_parameters} for combination: {combination}"
                     )
 
@@ -331,7 +369,7 @@ def calibrate_denoiser(
                 )
             }
 
-            lprint(f"Best parameters: {best_parameters}")
+            aprint(f"Best parameters: {best_parameters}")
 
         # We check that the masked input image is unchanged:
         if not numpy.array_equal(masked_input_image_backup, masked_input_image):
@@ -349,7 +387,7 @@ def calibrate_denoiser(
             viewer.add_image(numpy.stack(denoised_images), name='denoised')
             napari.run()
         except Exception:
-            lprint(
+            aprint(
                 "Problem while trying to display images obtained during optimization"
             )
 

@@ -1,9 +1,15 @@
+"""Super-fast representative crop extraction via downscaled search.
+
+Uses image downscaling to accelerate the representative crop search,
+then maps the result back to the original image resolution.
+"""
+
 from memoization.memoization import cached
 from numpy.typing import ArrayLike
 from scipy.ndimage import zoom
 
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 @cached(ttl=10, max_size=5)
@@ -18,40 +24,61 @@ def super_fast_representative_crop(
     *args,
     **kwargs,
 ):
-    """
+    """Extract a representative crop from an image using downscaled search.
+
+    Downscales the image first for faster crop search, then maps the
+    best crop location back to the original resolution. Results are
+    cached with a 10-second TTL.
 
     Parameters
     ----------
-    Same parameters as 'representative_crop' with the addition of:
-
-    min_scaling_factor: int
-        Minimal downscaling factor per axis.
-
+    image : ArrayLike
+        Image to extract representative crop from.
+    crop_size : int
+        Desired crop size in voxels.
+    min_length : int, optional
+        Minimum allowed axis length for the crop, by default 8.
+    search_mode : str, optional
+        Search mode for best crops: ``'random'`` or ``'systematic'``.
+        By default ``'systematic'``.
+    granularity_factor : int, optional
+        Granularity of search. Higher values correspond to more overlap
+        between candidate crops, by default 3.
+    return_slice : bool, optional
+        If True, returns a tuple of (crop, slice_tuple), by default False.
+    min_scaling_factor : int, optional
+        Minimum downscaling factor per axis, by default 2.
+    *args
+        Additional positional arguments passed to ``representative_crop``.
+    **kwargs
+        Additional keyword arguments passed to ``representative_crop``.
 
     Returns
     -------
-    Most representative crop, and if return_slice is True the actual slice object too.
-
+    numpy.ndarray or tuple
+        The most representative crop. If ``return_slice`` is True,
+        returns a tuple of (crop_array, slice_tuple).
     """
-    with lsection(f"Super fast cropping image of size: {image.shape}"):
+    with asection(f"Super fast cropping image of size: {image.shape}"):
 
         # Compute downscale facto per dimension:
         def _downscale(length):
+            """Compute downscale factor for a given dimension length."""
             return min(max(min_scaling_factor, length // 256), min_length)
 
         downscale_factor = tuple(
             _downscale(s) if s >= min_length else min_length // 2 for s in image.shape
         )
-        lprint(f"Scaling by factors: {downscale_factor}")
+        aprint(f"Scaling by factors: {downscale_factor}")
 
         # Compute zoom factor
         zoom_per_axis = tuple(
             1.0 / d if s > d else 1 for d, s in zip(downscale_factor, image.shape)
         )
-        lprint(f"zoom_per_axis: {zoom_per_axis}")
+        aprint(f"zoom_per_axis: {zoom_per_axis}")
 
         # Downsample image:
-        with lsection(f"Downscaling image of shape: {image.shape}..."):
+        with asection(f"Downscaling image of shape: {image.shape}..."):
             image_d = zoom(image, zoom=zoom_per_axis, prefilter=False, order=0)
 
         # Compute overall zoom factor:

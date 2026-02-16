@@ -1,6 +1,9 @@
 Denoising an image using Noise2SelfCNN restoration API
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+``Noise2SelfCNN`` uses PyTorch-based CNN architectures internally via
+:class:`~aydin.it.cnn_torch.ImageTranslatorCNNTorch`.
+
 One can use the following lines to denoise a single image with default
 options using our Object-Oriented denoising API.
 
@@ -14,11 +17,13 @@ options using our Object-Oriented denoising API.
 
 
 It is also easy to pass specific transforms to use before and/or after
-denoising. One can do the the following:
+denoising. One can do the following:
 
 .. code-block:: python
 
    from aydin.restoration.denoise.noise2selfcnn import Noise2SelfCNN
+   from aydin.it.transforms.range import RangeTransform
+   from aydin.it.transforms.padding import PaddingTransform
 
    transforms = [
         {"class": RangeTransform, "kwargs": {}},
@@ -36,5 +41,3 @@ options using our procedural denoising endpoint.
    from aydin.restoration.denoise.noise2selfcnn import noise2self_cnn
 
    denoised_image = noise2self_cnn(noisy_image)
-
-

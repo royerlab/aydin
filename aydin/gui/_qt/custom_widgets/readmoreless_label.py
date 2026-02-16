@@ -1,6 +1,7 @@
+"""Expandable read more/less label widget for lengthy descriptions."""
+
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QMouseEvent
-from qtpy.QtWidgets import QWidget, QHBoxLayout, QLabel
+from qtpy.QtWidgets import QHBoxLayout, QLabel, QWidget
 
 from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
     QVerticalLineBreakWidget,
@@ -8,11 +9,40 @@ from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
 
 
 class QReadMoreLessLabel(QWidget):
+    """Expandable label widget with 'Read more/less' toggle functionality.
+
+    Parses text containing ``<moreless>`` and ``<split>`` markers to create
+    a two-column layout where the right column is initially hidden and
+    revealed on click.
+
+    Parameters
+    ----------
+    parent : QWidget
+        The parent widget.
+    text : str
+        The label text, optionally containing ``<moreless>`` to mark the
+        boundary between always-visible and expandable text, and
+        ``<split>`` to divide text between left and right columns.
+    """
+
     def __init__(self, parent, text):
+        """Initialize the expandable label by parsing text markers.
+
+        Parameters
+        ----------
+        parent : QWidget
+            The parent widget.
+        text : str
+            The label text, optionally containing ``<moreless>`` and
+            ``<split>`` markers to create expandable sections.
+        """
         QWidget.__init__(self, parent)
 
         self.text = text
         self.readmore = False
+        self.readmore_text = None
+        self.readmore_left = None
+        self.readmore_right = None
 
         # Explanation text
         self.explanation_layout = QHBoxLayout()
@@ -20,17 +50,20 @@ class QReadMoreLessLabel(QWidget):
         self.mousePressEvent = self.state_toggle
 
         if "<moreless>" in text:
-            self.readless_text, self.readmore_text = text.split("<moreless>")
+            self.readless_text, self.readmore_text = text.split("<moreless>", 1)
             self.readmore_text = text
             self.readmore_left, self.readmore_right = self.readmore_text.split(
-                "<split>"
+                "<split>", 1
             )
             text_left = self.readless_text + (
                 "" if self.readmore_right.strip() == "" else "<b>Read more...</b>"
             )
             text_right = ""
         else:
-            text_left, text_right = text.split("<split>")
+            if "<split>" in text:
+                text_left, text_right = text.split("<split>", 1)
+            else:
+                text_left, text_right = text, ""
 
         self.explanation_text_left = QLabel(text_left, self)
         self.explanation_text_left.setWordWrap(True)
@@ -52,8 +85,8 @@ class QReadMoreLessLabel(QWidget):
 
         self.setLayout(self.explanation_layout)
 
-    def state_toggle(self, a0: QMouseEvent) -> None:
-
+    def state_toggle(self, *args) -> None:
+        """Toggle between 'Read more' and 'Read less' states on click."""
         if self.readmore_text is not None and self.readmore_right.strip() != "":
             self.readmore = not self.readmore
             if self.readmore:

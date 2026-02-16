@@ -1,17 +1,9 @@
-from __future__ import print_function
-
-
-import sys
+# PyInstaller hook for aydin (macOS)
 import os
+import sys
 
-from build.osx.hooks.hook_utils import _my_collect_data_files
-
-sys.path.append(os.path.split(os.path.abspath(__file__))[0])
-
+# Add common hooks to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'common'))
+from hook_utils import _my_collect_data_files
 
 datas = _my_collect_data_files("aydin", flatten_dirs=True)
-
-
-print("\n"*5)
-print(datas)
-print("\n"*5)

@@ -1,14 +1,32 @@
-from sklearn.linear_model import LinearRegression, HuberRegressor, Lasso
+"""Linear regression methods for Aydin's FGR pipeline.
+
+This module provides :class:`LinearRegressor`, which wraps scikit-learn's
+LinearRegression, HuberRegressor, and Lasso into a unified interface.
+"""
+
+from sklearn.linear_model import HuberRegressor, Lasso, LinearRegression
 
 from aydin.regression.base import RegressorBase
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import aprint, asection
 
 
 class LinearRegressor(RegressorBase):
-    """
-    The Linear Regressor is the simplest of all repressors, and in general
-    performs poorly. However, it is also very fast and can be advantageous in
-    some 'simple' situations.
+    """Simple linear regressor wrapping scikit-learn estimators.
+
+    The simplest of all regressors. In general it performs poorly compared
+    to gradient boosting or neural network approaches, but it is also very
+    fast and can be advantageous for easy denoising tasks where a linear
+    relationship between features and target is a reasonable approximation.
+
+    Three modes are supported:
+
+    * ``'linear'`` -- ordinary least-squares via
+      :class:`~sklearn.linear_model.LinearRegression`.
+    * ``'huber'`` -- robust regression via
+      :class:`~sklearn.linear_model.HuberRegressor`.
+    * ``'lasso'`` -- L1-regularised regression via
+      :class:`~sklearn.linear_model.Lasso`.
+    <notgui>
     """
 
     def __init__(
@@ -37,7 +55,9 @@ class LinearRegressor(RegressorBase):
             Regularisation weight for Huber regression (mode='huber').
 
 
-        kwargs
+        **kwargs
+            Additional keyword arguments (unused, accepted for interface
+            compatibility).
         """
         super().__init__()
         self.mode = mode
@@ -45,15 +65,42 @@ class LinearRegressor(RegressorBase):
         self.alpha = alpha
         self.beta = beta
 
-        with lsection("Linear Regressor"):
-            lprint(f"mode : {self.mode}")
-            lprint(f"alpha: {self.alpha}")
+        with asection("Linear Regressor"):
+            aprint(f"mode : {self.mode}")
+            aprint(f"alpha: {self.alpha}")
+
+    def __repr__(self):
+        """Return a concise string representation of the regressor."""
+        return f"<{self.__class__.__name__}, mode={self.mode}, max_num_iterations={self.max_num_iterations}>"
 
     def _fit(
         self, x_train, y_train, x_valid=None, y_valid=None, regressor_callback=None
     ):
-        """Fits function y=f(x) given training pairs (x_train, y_train).
-        Stops when performance stops improving on the test dataset: (x_test, y_test).
+        """Fit a single-channel linear model.
+
+        Parameters
+        ----------
+        x_train : numpy.ndarray
+            Training feature vectors of shape ``(n_samples, n_features)``.
+        y_train : numpy.ndarray
+            Training target values of shape ``(n_samples,)``.
+        x_valid : numpy.ndarray, optional
+            Validation feature vectors (unused by linear models).
+        y_valid : numpy.ndarray, optional
+            Validation target values (unused by linear models).
+        regressor_callback : callable, optional
+            Callback (unused by linear models).
+
+        Returns
+        -------
+        _LinearModel
+            Fitted linear model wrapper.
+
+        Raises
+        ------
+        Exception
+            If ``self.mode`` is not one of ``'lasso'``, ``'huber'``, or
+            ``'linear'``.
         """
         if self.mode == 'lasso':
             model = Lasso(alpha=self.alpha, max_iter=self.max_num_iterations)
@@ -70,25 +117,67 @@ class LinearRegressor(RegressorBase):
 
 
 class _LinearModel:
+    """Internal wrapper around a fitted scikit-learn linear model.
+
+    Attributes
+    ----------
+    model : object
+        The underlying scikit-learn estimator.
+    loss_history : dict
+        Empty loss history (linear models do not track iterative loss).
+    """
+
     def __init__(self, model):
+        """Initialise the linear model wrapper.
+
+        Parameters
+        ----------
+        model : sklearn.base.BaseEstimator
+            Fitted scikit-learn linear estimator.
+        """
         self.model = model
         self.loss_history = {'training': [], 'validation': []}
 
     def _save_internals(self, path: str):
+        """Save model internals (no-op for scikit-learn models).
+
+        Parameters
+        ----------
+        path : str
+            Directory path (unused).
+        """
         pass
 
     def _load_internals(self, path: str):
+        """Load model internals (no-op for scikit-learn models).
+
+        Parameters
+        ----------
+        path : str
+            Directory path (unused).
+        """
         pass
 
     def predict(self, x):
+        """Predict target values for the given feature vectors.
 
-        with lsection("Linear regressor prediction"):
+        Parameters
+        ----------
+        x : numpy.ndarray
+            Feature vectors of shape ``(n_samples, n_features)``.
 
-            lprint(f"Number of data points             : {x.shape[0]}")
-            lprint(f"Number of features per data points: {x.shape[-1]}")
+        Returns
+        -------
+        numpy.ndarray
+            Predicted values.
+        """
+        with asection("Linear regressor prediction"):
 
-            with lsection("Linear prediction now"):
+            aprint(f"Number of data points             : {x.shape[0]}")
+            aprint(f"Number of features per data points: {x.shape[-1]}")
+
+            with asection("Linear prediction now"):
                 prediction = self.model.predict(x)
 
-            lprint("Linear regressor predicting done!")
+            aprint("Linear regressor predicting done!")
             return prediction

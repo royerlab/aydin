@@ -1,12 +1,21 @@
+"""Demo of Noise2Self LGBM denoising on the camera image with range normalization.
+
+Trains an ``ImageTranslatorFGR`` with a ``LGBMRegressor`` and
+``RangeTransform`` on a noisy camera image and evaluates PSNR/SSIM.
+"""
+
 # flake8: noqa
 import time
+from functools import partial
 
 import napari
 import numpy
 from skimage.data import camera
 from skimage.exposure import rescale_intensity
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 from skimage.util import random_noise
 
 from aydin.features.standard_features import StandardFeatureGenerator
@@ -29,7 +38,7 @@ def demo():
     noisy = image.astype(numpy.float32)
     noisy = rescale_intensity(noisy, in_range='image', out_range=(0, 1))
     noisy = numpy.random.poisson(noisy * intensity) / intensity
-    noisy = random_noise(noisy, mode='gaussian', var=0.01, seed=0)
+    noisy = random_noise(noisy, mode='gaussian', var=0.01, rng=0)
     noisy *= 255
     noisy = noisy.astype(numpy.uint16)
 
@@ -64,11 +73,11 @@ def demo():
     print("noisy", psnr(image, noisy), ssim(noisy, image))
     print("denoised", psnr(image, denoised), ssim(denoised, image))
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(noisy, name='noisy')
-        viewer.add_image(denoised, name='denoised')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(noisy, name='noisy')
+    viewer.add_image(denoised, name='denoised')
+    napari.run()
 
 
 if __name__ == "__main__":

@@ -1,21 +1,35 @@
+"""Demo of salt-and-pepper noise correction transform.
+
+Demonstrates the ``SaltPepperTransform`` on various test images with
+synthetic salt-and-pepper noise, comparing the result to median
+filtering.
+"""
+
 # flake8: noqa
 from scipy.ndimage import median_filter
 
 from aydin.io.datasets import (
-    normalise,
-    newyork,
-    characters,
-    pollen,
-    lizard,
-    dots,
-    camera,
     add_noise,
+    camera,
+    characters,
+    dots,
+    lizard,
+    newyork,
+    normalise,
+    pollen,
 )
 from aydin.it.transforms.salt_pepper import SaltPepperTransform
 from aydin.util.log.log import Log
 
 
 def demo_salt_and_pepper(image=newyork()):
+    """Apply salt-and-pepper correction and compare with median filtering.
+
+    Parameters
+    ----------
+    image : numpy.ndarray, optional
+        Input test image, by default the New York image.
+    """
     Log.override_test_exclusion = True
     Log.enable_output = True
 
@@ -32,12 +46,12 @@ def demo_salt_and_pepper(image=newyork()):
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image')
-        viewer.add_image(noisy, name='noisy')
-        viewer.add_image(median, name='median_filtered')
-        viewer.add_image(corrected, name='corrected')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image')
+    viewer.add_image(noisy, name='noisy')
+    viewer.add_image(median, name='median_filtered')
+    viewer.add_image(corrected, name='corrected')
+    napari.run()
 
 
 if __name__ == "__main__":

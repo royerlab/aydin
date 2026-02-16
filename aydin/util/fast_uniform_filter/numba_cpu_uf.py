@@ -1,3 +1,9 @@
+"""Numba-accelerated CPU uniform (box) filter for n-dimensional arrays.
+
+Implements a separable uniform filter using a sliding-window accumulator
+approach for each axis, parallelized across slices using Numba JIT.
+"""
+
 from math import ceil
 
 import numba
@@ -11,6 +17,31 @@ __error_model = 'numpy'
 def numba_cpu_uniform_filter(
     image, size=3, output=None, mode="nearest", cval=0.0, origin=0
 ):
+    """Apply a uniform (box) filter using Numba-accelerated separable filtering.
+
+    Applies the filter axis-by-axis using an efficient sliding-window
+    accumulator. Supports arrays up to 4D.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array (up to 4D).
+    size : int or tuple of int
+        Filter window size. If a tuple, specifies size per axis.
+    output : numpy.ndarray, optional
+        Not used directly; kept for API compatibility.
+    mode : str
+        Boundary mode. Only 'nearest' is supported.
+    cval : float
+        Not used (kept for API compatibility).
+    origin : int
+        Not used (kept for API compatibility).
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered image with the original dtype.
+    """
     # Save original image dtype:
     original_dtype = image.dtype
 
@@ -38,11 +69,11 @@ def numba_cpu_uniform_filter(
 
             filter_size = size[axis] if isinstance(size, tuple) else size
 
-            # lprint(f"axis: {axis}, filter_size: {filter_size}")
+            # aprint(f"axis: {axis}, filter_size: {filter_size}")
 
             # set the parallelism:
             parallelism = numba.get_num_threads()
-            # lprint(f"Number of threads: {parallelism}")
+            # aprint(f"Number of threads: {parallelism}")
             # max(1, int(0.9*multiprocessing.cpu_count()))
 
             uniform_filter1d_with_conditionals(
@@ -66,6 +97,25 @@ def numba_cpu_uniform_filter(
 
 
 def uniform_filter1d_with_conditionals(image, output, filter_size, axis, parallelism=8):
+    """Apply 1D uniform filter along a specific axis with axis swapping.
+
+    Dispatches to the appropriate Numba kernel based on the number
+    of array dimensions, swapping axes as needed so the filter always
+    operates along the last axis.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array.
+    output : numpy.ndarray
+        Output array (must be pre-allocated, same shape as image).
+    filter_size : int
+        Window size for the uniform filter.
+    axis : int
+        Axis along which to apply the filter.
+    parallelism : int
+        Number of parallel threads.
+    """
     if image.ndim == 1:
         _cpu_line_uniform_filter_without_loops(image, output, filter_size, parallelism)
     elif image.ndim == 2:
@@ -95,18 +145,18 @@ def uniform_filter1d_with_conditionals(image, output, filter_size, axis, paralle
 
 @jit(nopython=True, parallel=True, error_model=__error_model, fastmath=__fastmath)
 def _cpu_line_uniform_filter_without_loops(image, output, filter_size, parallelism=8):
-    """
-    Numba jitted and parallelized method to apply uniform filter across
-    last axis of the image provided. Doesn't return anything, output array
-    should be provided as an argument.
+    """Apply uniform filter along the last axis of a 2D array in parallel.
 
     Parameters
     ----------
-    image
-    output
-    filter_size
-    parallelism
-
+    image : numpy.ndarray
+        2D input array.
+    output : numpy.ndarray
+        2D output array (pre-allocated, same shape as image).
+    filter_size : int
+        Window size for the uniform filter.
+    parallelism : int
+        Number of parallel chunks to process.
     """
 
     length = image.shape[0]
@@ -125,17 +175,18 @@ def _cpu_line_uniform_filter_without_loops(image, output, filter_size, paralleli
 
 @jit(nopython=True, parallel=True, error_model=__error_model, fastmath=__fastmath)
 def _cpu_line_uniform_filter_with_2d_loop(image, output, filter_size, parallelism=8):
-    """
-    Numba jitted and parallelized method to apply uniform filter across
-    last axis of the image provided. Doesn't return anything, output array
-    should be provided as an argument.
+    """Apply uniform filter along the last axis of a 3D array in parallel.
 
     Parameters
     ----------
-    image
-    output
-    filter_size
-
+    image : numpy.ndarray
+        3D input array.
+    output : numpy.ndarray
+        3D output array (pre-allocated, same shape as image).
+    filter_size : int
+        Window size for the uniform filter.
+    parallelism : int
+        Number of parallel chunks to process.
     """
 
     height = image.shape[0]
@@ -156,17 +207,18 @@ def _cpu_line_uniform_filter_with_2d_loop(image, output, filter_size, parallelis
 
 @jit(nopython=True, parallel=True, error_model=__error_model, fastmath=__fastmath)
 def _cpu_line_uniform_filter_with_3d_loop(image, output, filter_size, parallelism=8):
-    """
-    Numba jitted and parallelized method to apply uniform filter across
-    last axis of the image provided. Doesn't return anything, output array
-    should be provided as an argument.
+    """Apply uniform filter along the last axis of a 4D array in parallel.
 
     Parameters
     ----------
-    image
-    output
-    filter_size
-
+    image : numpy.ndarray
+        4D input array.
+    output : numpy.ndarray
+        4D output array (pre-allocated, same shape as image).
+    filter_size : int
+        Window size for the uniform filter.
+    parallelism : int
+        Number of parallel chunks to process.
     """
 
     depth = image.shape[0]
@@ -191,21 +243,36 @@ def _cpu_line_uniform_filter_with_3d_loop(image, output, filter_size, parallelis
 
 @jit(nopython=True, error_model=__error_model, fastmath=__fastmath)
 def _cpu_line_filter(input_line, output_line, filter_size):
-    """
-    Numba jitted line filter implementation. Doesn't return anything,
-    output array should be provided as an argument.
+    """Apply sliding-window uniform filter to a 1D array in-place.
+
+    Uses a running sum accumulator for O(n) filtering regardless of
+    filter size. Boundary handling uses nearest-neighbor clamping.
 
     Parameters
     ----------
-    input_line
-        1D input array
-    output_line
-        1D output array
-    filter_size
-        Size of the uniform filter
+    input_line : numpy.ndarray
+        1D input array.
+    output_line : numpy.ndarray
+        1D output array (pre-allocated, same length as ``input_line``).
+    filter_size : int
+        Window size for the uniform filter.
     """
 
     def safe_index(index, size):
+        """Clamp an index to the valid range ``[0, size-1]``.
+
+        Parameters
+        ----------
+        index : int
+            Index to clamp.
+        size : int
+            Array length.
+
+        Returns
+        -------
+        int
+            Clamped index.
+        """
         if index < 0:
             return 0
         elif index >= size:

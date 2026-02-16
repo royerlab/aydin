@@ -1,3 +1,5 @@
+"""Demo script for simulating camera images with varying exposure times."""
+
 # flake8: noqa
 import numpy
 
@@ -5,10 +7,11 @@ from aydin.analysis.camera_simulation import simulate_camera_image
 from aydin.analysis.resolution_estimate import resolution_estimate
 from aydin.analysis.snr_estimate import snr_estimate
 from aydin.io.datasets import camera
-from aydin.util.log.log import lprint, Log
+from aydin.util.log.log import Log, aprint
 
 
 def demo_camera_simulation():
+    """Simulate a noisy video with varying exposure and estimate resolution and SNR."""
     Log.enable_output = True
 
     clean_image = camera()
@@ -22,17 +25,18 @@ def demo_camera_simulation():
     fc, _ = resolution_estimate(noisy_video[16])
     snr = snr_estimate(noisy_video[16])
 
-    lprint(f"Resolution: {fc}, snr: {snr}")
+    aprint(f"Resolution: {fc}, snr: {snr}")
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(clean_image, name='clean_image')
-        viewer.add_image(noisy_video, name='noisy_video')
+    viewer = napari.Viewer()
+    viewer.add_image(clean_image, name='clean_image')
+    viewer.add_image(noisy_video, name='noisy_video')
+    napari.run()
 
 
 def demo_camera_simulation_video():
+    """Simulate a noisy video from repeated low-exposure camera captures."""
     clean_image = camera()
     noisy_video = numpy.stack(
         (simulate_camera_image(clean_image // 32) for _ in range(64))
@@ -40,10 +44,10 @@ def demo_camera_simulation_video():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(clean_image, name='clean_image')
-        viewer.add_image(noisy_video, name='noisy_video')
+    viewer = napari.Viewer()
+    viewer.add_image(clean_image, name='clean_image')
+    viewer.add_image(noisy_video, name='noisy_video')
+    napari.run()
 
 
 if __name__ == "__main__":

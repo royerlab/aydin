@@ -1,33 +1,43 @@
+"""Utility functions for image I/O operations.
+
+This module provides helper functions for zarr file handling, output path
+generation, channel splitting, and hyperstacking of image arrays.
+"""
+
 import os
 from collections import Counter
 from copy import deepcopy
 from os.path import exists
 from pathlib import Path
 from typing import List, Tuple
+
+import dask.array as da
 import numpy
 import zarr
-import dask.array as da
 
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def is_zarr_storage(input_path):
-    """Method to check if given file is a zarr storage or not.
+    """Check if the given path points to a valid Zarr storage.
+
+    Attempts to open the path as a Zarr array. If successful, the path
+    is considered a Zarr storage.
 
     Parameters
     ----------
     input_path : str
+        Path to check.
 
     Returns
     -------
     bool
-        Result of whether the file in the given path is a zarr storage or not.
-
+        True if the path is a valid Zarr storage, False otherwise.
     """
     try:
         z = zarr.open(input_path)
         if len(z.shape) >= 0:
-            lprint(f"This path is a ZARR storage: {input_path}")
+            aprint(f"This path is a ZARR storage: {input_path}")
         else:
             raise Exception
         # IF we reach this point, then we could open the file and therefore it is a Zarr file...
@@ -37,20 +47,23 @@ def is_zarr_storage(input_path):
 
 
 def read_zarr_array(input_path):
-    """Method that reads a zarr file. If the file is a zarr.Array, this will
-    read as an zarr.Array. If the file is a zarr.Group, this method can only
-    read it if it is in dexp-zarr group format.
+    """Read a Zarr file as a dask array.
+
+    If the file is a ``zarr.Array``, reads it directly. If it is a
+    ``zarr.Group``, reads it assuming dexp-zarr group format (stacking
+    all non-MIP arrays along axis 0).
 
     Parameters
     ----------
     input_path : str
+        Path to the Zarr file or directory.
 
     Returns
     -------
-    numpy.typing.ArrayLike
-
+    array : dask.array.Array
+        The image data as a dask array.
     """
-    g = zarr.open(input_path, mode='a')
+    g = zarr.open(input_path, mode='r')
     if isinstance(g, zarr.Array):
         return da.from_zarr(input_path)
     else:
@@ -64,17 +77,20 @@ def read_zarr_array(input_path):
 
 
 def get_files_with_most_frequent_extension(path) -> List[str]:
-    """Method that looks into the given path and return the list of files with
-    the most frequent file extension.
+    """Return files with the most common extension in a directory.
+
+    Scans the given directory and returns all files whose extension
+    matches the most frequently occurring extension.
 
     Parameters
     ----------
     path : str
+        Path to the directory to scan.
 
     Returns
     -------
-    List[str]
-
+    files : List[str]
+        List of filenames (not full paths) with the most common extension.
     """
 
     files_in_folder = os.listdir(path)
@@ -95,22 +111,34 @@ def get_files_with_most_frequent_extension(path) -> List[str]:
 def get_output_image_path(
     path: str, operation_type: str = "denoised", output_folder: str = None
 ) -> Tuple[str, int]:
-    """Method to get correct output path for given input path and operation type.
+    """Generate a unique output file path for a given input image and operation.
+
+    Appends the operation type to the filename and adds a numeric suffix
+    if the output path already exists to avoid overwriting.
 
     Parameters
     ----------
     path : str
+        Original input image file path.
     operation_type : str
-        Currently supported values: 'denoised', 'deconvolved', 'hyperstacked'.
-    output_folder : str
+        Type of operation. Supported values: ``'denoised'``, ``'hyperstacked'``.
+    output_folder : str, optional
+        If provided, places the output file in this folder instead of
+        alongside the input.
 
     Returns
     -------
-    Tuple
-        (Correct output path, counter).
+    output_path : str
+        Unique output file path.
+    counter : int or None
+        Numeric suffix used to avoid collision, or None if no collision occurred.
 
+    Raises
+    ------
+    ValueError
+        If ``operation_type`` is not one of the supported values.
     """
-    if operation_type not in ["denoised", "deconvolved", "hyperstacked"]:
+    if operation_type not in ["denoised", "hyperstacked"]:
         raise ValueError(
             f"invalud value for operation_type parameter: {operation_type}"
         )
@@ -138,7 +166,7 @@ def get_output_image_path(
             output_image_format = image_format
             break
     else:  # means no break in this context
-        lprint("Image file format is not supported, will be writing result as tif")
+        aprint("Image file format is not supported, will be writing result as tif")
         output_path = f"{path[:path.rfind('.')]}_{operation_type}.tif"
         output_image_format = ".tif"
 
@@ -155,6 +183,22 @@ def get_output_image_path(
 def get_options_json_path(
     path: str, passed_counter: int = None, output_folder: str = None
 ) -> str:
+    """Generate a path for saving denoising options as a JSON file.
+
+    Parameters
+    ----------
+    path : str
+        Original input image file path.
+    passed_counter : int, optional
+        Numeric suffix to use. If None, auto-increments to avoid overwriting.
+    output_folder : str, optional
+        If provided, places the options file in this folder.
+
+    Returns
+    -------
+    options_path : str
+        Path for the options JSON file.
+    """
     if output_folder:
         path = os.path.join(output_folder, Path(path).name)
 
@@ -176,6 +220,22 @@ def get_options_json_path(
 def get_save_model_path(
     path: str, passed_counter: int = None, output_folder: str = None
 ) -> str:
+    """Generate a path for saving a trained denoiser model.
+
+    Parameters
+    ----------
+    path : str
+        Original input image file path.
+    passed_counter : int, optional
+        Numeric suffix to use. If None, auto-increments to avoid overwriting.
+    output_folder : str, optional
+        If provided, places the model in this folder.
+
+    Returns
+    -------
+    model_path : str
+        Path for the model directory.
+    """
     if output_folder:
         path = os.path.join(output_folder, Path(path).name)
 
@@ -193,24 +253,29 @@ def get_save_model_path(
 
 
 def split_image_channels(image_array, metadata):
-    """Method that takes a multichannel image and its metadata and splits
-    into single channel images.
+    """Split a multi-channel image into separate single-channel images.
+
+    Splits along the channel axis ('C') and updates the metadata to
+    reflect the reduced dimensionality.
 
     Parameters
     ----------
     image_array : numpy.typing.ArrayLike
+        Multi-channel image array.
     metadata : FileMetadata
+        Metadata for the image, must have a 'C' axis in ``metadata.axes``.
 
     Returns
     -------
-    tuple(List[numpy.typing.ArrayLike], List[FileMetadata])
-        Tuple of splitted_arrays and metadatas.
-
+    splitted_arrays : list of numpy.ndarray
+        List of single-channel image arrays.
+    metadatas : list of FileMetadata
+        List of updated metadata objects, one per channel.
     """
     channel_axis = metadata.axes.find("C")
 
     if channel_axis == -1:
-        lprint("Array has no channel axis detected")
+        aprint("Array has no channel axis detected")
         return
 
     # Handle image splitting
@@ -232,28 +297,38 @@ def split_image_channels(image_array, metadata):
     )
     metadata.splitted = True
 
-    metadatas = [metadata] * len(splitted_arrays)
+    metadatas = [deepcopy(metadata) for _ in splitted_arrays]
 
     return splitted_arrays, metadatas
 
 
 def hyperstack_arrays(image_arrays, metadatas):
-    """Method that takes a list of arrays of same shape and their corresponding
-    metadatas, then hyperstacks those into a single image.
+    """Stack multiple same-shape images into a single higher-dimensional array.
+
+    Adds a new batch axis ('B') as the leading dimension and updates the
+    metadata accordingly.
 
     Parameters
     ----------
     image_arrays : List[numpy.typing.ArrayLike]
+        List of image arrays, all with the same shape.
     metadatas : List[FileMetadata]
+        List of corresponding metadata objects.
 
     Returns
     -------
-    tuple(numpy.typing.ArrayLike, FileMetadata)
-        Tuple of hyperstacked image array and its metadata.
+    image_array : numpy.ndarray
+        Hyperstacked image array with a new leading batch axis.
+    metadata : FileMetadata
+        Updated metadata for the stacked image.
 
+    Raises
+    ------
+    Exception
+        If images have different shapes.
     """
     if len(image_arrays) < 2:
-        lprint("Need at least two images to hyperstack.")
+        aprint("Need at least two images to hyperstack.")
         return image_arrays, metadatas
 
     shape_of_first_image = ()

@@ -1,18 +1,39 @@
+"""Demo of Noise2Self denoising with a linear (Huber) regressor on 2D images.
+
+Trains an ``ImageTranslatorFGR`` with ``LinearRegressor`` in Huber mode
+on multiple standard test images and evaluates PSNR/SSIM.
+"""
+
 # flake8: noqa
 import os
 import time
+from functools import partial
 
 import napari
 import numpy
 import numpy as np
 from skimage.data import camera
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 
 from aydin.features.standard_features import StandardFeatureGenerator
-from aydin.io.datasets import pollen, newyork, normalise, add_noise, lizard, characters
+from aydin.io.datasets import add_noise, characters, lizard, newyork, normalise, pollen
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.linear import LinearRegressor
+
+_DEMO_RESULTS = os.path.normpath(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        '..',
+        '..',
+        '..',
+        '..',
+        '..',
+        'demo_results',
+    )
+)
 
 
 def demo(image, name):
@@ -65,14 +86,14 @@ def demo(image, name):
     plt.axis('off')
     plt.title('Original')
     plt.subplots_adjust(left=0.01, right=0.99, top=0.95, bottom=0.01, hspace=0.1)
-    os.makedirs("../../../demo_results", exist_ok=True)
-    plt.savefig(f'../../demo_results/n2s_lin_2D_{name}.png')
+    os.makedirs(_DEMO_RESULTS, exist_ok=True)
+    plt.savefig(os.path.join(_DEMO_RESULTS, f'n2s_lin_2D_{name}.png'))
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(normalise(image), name='image')
-        viewer.add_image(normalise(noisy), name='noisy')
-        viewer.add_image(normalise(denoised), name='denoised')
+    viewer = napari.Viewer()
+    viewer.add_image(normalise(image), name='image')
+    viewer.add_image(normalise(noisy), name='noisy')
+    viewer.add_image(normalise(denoised), name='denoised')
+    napari.run()
 
 
 if __name__ == "__main__":

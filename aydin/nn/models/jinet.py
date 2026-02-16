@@ -1,281 +1,336 @@
-from tensorflow.python.keras import Input
-from tensorflow.python.keras.layers import (
-    Concatenate,
-    Conv2D,
-    Conv3D,
-    LeakyReLU,
-    Activation,
-)
-from tensorflow.python.keras.optimizer_v2.adam import Adam
-from tensorflow.python.keras.models import Model
+"""JINet (J-Invariant Network) model architecture in PyTorch.
 
-from aydin.nn.models.utils.conv_block import conv2d_torch, conv3d_torch
-from aydin.nn.models.utils.training_architectures import get_jinet_fit_args
+Implements a blind-spot CNN using dilated convolutions to achieve
+J-invariance for self-supervised (Noise2Self) image denoising.
+"""
+
+import numpy
+import torch
+import torch.nn.functional as F
+from torch import nn
+
+from aydin.nn.layers.dilated_conv import DilatedConv
 
 
-class JINetModel(Model):
-    """
-    The JINet model is a hybrid CNN-perceptron model that leverages dilated
-    convolutions to incorporate a built-in 'blind-spot' as required for N2S
-    denoising. Supports both 2D and 3D images.
+class JINetModel(nn.Module):
+    """J-Invariant Network using dilated convolutions for blind-spot denoising.
+
+    Uses a series of dilated convolutions with increasing receptive fields
+    followed by 1x1 convolutions (dense layers) with residual connections.
+    The architecture inherently excludes the center pixel from the
+    receptive field, enabling self-supervised denoising.
+    <notgui>
     """
 
     def __init__(
         self,
-        input_layer_size,
         spacetime_ndim,
-        num_output_channels: int = 1,
-        kernel_sizes: int = None,
-        num_features: int = None,
-        num_dense_layers: int = 3,
-        num_channels: int = None,
+        nb_in_channels: int = 1,
+        nb_out_channels: int = 1,
+        kernel_sizes=None,
+        num_features=None,
+        nb_dense_layers: int = 3,
+        nb_channels: int = None,
         final_relu: bool = False,
         degressive_residuals: bool = True,
-        learning_rate: float = 0.01,
-        **kwargs,
+        kernel_continuity_regularisation: bool = True,
     ):
-        """
+        """Initialize the JINet model.
 
         Parameters
         ----------
-        input_layer_size :
-            TODO: missing!
-        spacetime_ndim :
-            TODO: missing!
-        num_output_channels : int
-            number of output channels
-            (advanced)
-        kernel_sizes : int
-            a list of kernel sizes; corresponding to num_features
-            (advanced)
-        num_features : int
-            a list of number of channels; corresponding to kernel_sizes
-            (advanced)
-        num_dense_layers : int
-            number of dense layers after feature extraction
-            (advanced)
-        num_channels : int
-            number of channels in the dense layer
-            (advanced)
+        spacetime_ndim : int
+            Number of spatial dimensions (2 or 3).
+        nb_in_channels : int
+            Number of input channels.
+        nb_out_channels : int
+            Number of output channels.
+        kernel_sizes : list of int or None
+            Kernel sizes for each dilated convolution scale. If ``None``,
+            uses default sizes based on ``spacetime_ndim``.
+        num_features : list of int or None
+            Number of output features per dilated convolution scale.
+            Must have the same length as ``kernel_sizes``. If ``None``,
+            uses defaults based on ``spacetime_ndim``.
+        nb_dense_layers : int
+            Number of 1x1 convolution (dense) layers after feature
+            extraction.
+        nb_channels : int or None
+            Number of channels in the dense layers. If ``None``,
+            defaults to the sum of all ``num_features``.
         final_relu : bool
-            whether having the final ReLU or not
-            (advanced)
+            Whether to apply ReLU activation to the output.
         degressive_residuals : bool
-            whether having weight decay in the dense layers
-            (advanced)
-        learning_rate : float
-            TODO: missing!
-            (advanced)
-        kwargs
+            Whether to apply exponentially decaying weights to residual
+            connections in the dense layers.
+        kernel_continuity_regularisation : bool
+            Whether to apply kernel smoothing regularization when
+            ``post_optimisation()`` is called.
+
+        Raises
+        ------
+        ValueError
+            If ``kernel_sizes`` and ``num_features`` have different
+            lengths, or if ``spacetime_ndim`` is not 2 or 3.
         """
-        if spacetime_ndim != 2 and spacetime_ndim != 3:
-            raise Exception("Currently only JINet2D and JINet3D is supported.")
+        super(JINetModel, self).__init__()
 
         self.spacetime_ndim = spacetime_ndim
-        self.num_dense_layers = num_dense_layers
-        self.num_channels = num_channels
-        self.num_output_channels = num_output_channels
+        self.nb_in_channels = nb_in_channels
+        self.nb_out_channels = nb_out_channels
+        self._kernel_sizes = kernel_sizes
+        self._num_features = num_features
+        self.nb_dense_layers = nb_dense_layers
+        self.nb_channels = nb_channels
         self.final_relu = final_relu
         self.degressive_residuals = degressive_residuals
+        self.kernel_continuity_regularisation = kernel_continuity_regularisation
 
-        if type(input_layer_size) is int:
-            input_layer_size = (input_layer_size,) * self.spacetime_ndim + (1,)
-
-        # These are the scales and associated kernel sizes and number of features
-        if kernel_sizes is None:
-            if self.spacetime_ndim == 2:
-                kernel_sizes = [7, 5, 3, 3, 3, 3, 3, 3]
-            elif self.spacetime_ndim == 3:
-                kernel_sizes = [7, 5, 3, 3]
-        if num_features is None:
-            if self.spacetime_ndim == 2:
-                num_features = [64, 32, 16, 8, 4, 2, 1, 1]
-            elif self.spacetime_ndim == 3:
-                num_features = [10, 8, 4, 2]
-        self.kernel_sizes = kernel_sizes
-        self.num_features = num_features
-        if len(kernel_sizes) != len(num_features):
+        if len(self.kernel_sizes) != len(self.num_features):
             raise ValueError("Number of kernel sizes and features does not match.")
 
-        # Construct a model
-        input_lyr = Input(input_layer_size, name='input')
-        y = self.jinet_core(input_lyr)
-        super().__init__(input_lyr, y)
-
-        # Compile the model
-        self.compile(optimizer=Adam(learning_rate=learning_rate), loss='mse')
-        self.compiled = True
-
-    def size(self):
-        """Returns size of the model in bytes"""
-        return self.count_params() * 4
-
-    def fit(
-        self,
-        input_image,
-        target_image,
-        batch_size,
-        callbacks,
-        verbose=None,
-        max_epochs=None,
-        total_num_patches=None,
-        img_val=None,
-        create_patches_for_validation=None,
-        train_valid_ratio=None,
-    ):
-        """
-
-        Parameters
-        ----------
-        input_image
-        target_image
-        batch_size
-        callbacks
-        verbose
-        max_epochs
-        total_num_patches
-        img_val
-        create_patches_for_validation
-        train_valid_ratio
-
-        Returns
-        -------
-        loss_history
-
-        """
-        validation_data = get_jinet_fit_args(
-            input_image,
-            batch_size,
-            total_num_patches,
-            img_val,
-            create_patches_for_validation,
-            train_valid_ratio,
-        )
-
-        loss_history = super().fit(
-            input_image,
-            target_image,
-            epochs=max_epochs,
-            callbacks=callbacks,
-            verbose=verbose,
-            batch_size=batch_size,
-            validation_data=validation_data,
-        )
-
-        return loss_history
-
-    def predict(
-        self,
-        x,
-        batch_size=None,
-        verbose=0,
-        steps=None,
-        callbacks=None,
-        max_queue_size=10,
-        workers=1,
-        use_multiprocessing=False,
-    ):
-        """Overwritten model predict method.
-
-        Parameters
-        ----------
-        x
-        batch_size
-        verbose
-        steps
-        callbacks
-        max_queue_size
-        workers
-        use_multiprocessing
-
-        Returns
-        -------
-
-        """
-        # TODO: move as much as you can from it cnn _translate
-        return super().predict(x, batch_size=batch_size, verbose=verbose)
-
-    def jinet_core(self, input_lyr):
-        dilated_conv_list = []
-        total_num_features = 0
+        self.dilated_conv_functions = nn.ModuleList()
         current_receptive_field_radius = 0
-        x = input_lyr
         for scale_index in range(len(self.kernel_sizes)):
             # Get kernel size and number of features:
-            size = self.kernel_sizes[scale_index]
-            num = self.num_features[scale_index]
+            kernel_size = self.kernel_sizes[scale_index]
 
             # radius and dilation:
-            radius = (size - 1) // 2
+            radius = (kernel_size - 1) // 2
             dilation = 1 + current_receptive_field_radius
 
-            # Setup dilated convolution:
-            if self.spacetime_ndim == 2:
-                dilated_conv_method = conv2d_torch
-            elif self.spacetime_ndim == 3:
-                dilated_conv_method = conv3d_torch
-
-            x = dilated_conv_method(
-                x,  # current_num_channels,  # channel_in
-                num,  # number of filters: channel_out
-                kernel_size=size,
-                padding=dilation * radius,
-                dilation_rate=dilation,
-                lyrname=f'dilcv{scale_index}',
-                act='lrel',
-                leaky_alpha=0.01,
+            self.dilated_conv_functions.append(
+                DilatedConv(
+                    (
+                        self.nb_in_channels
+                        if scale_index == 0
+                        else self.num_features[scale_index - 1]
+                    ),
+                    self.num_features[scale_index],
+                    self.spacetime_ndim,
+                    padding=dilation * radius,
+                    kernel_size=kernel_size,
+                    dilation=dilation,
+                    activation="lrel",
+                )
             )
 
-            # We keep track of the total number of features until now:
-            total_num_features += num
-
-            # we update the current receptive field radius:
+            # update receptive field radius
             current_receptive_field_radius += dilation * radius
 
-            # append convolution ton the list:
-            dilated_conv_list.append(x)
+        if spacetime_ndim == 2:
+            self.conv = nn.Conv2d
+        elif spacetime_ndim == 3:
+            self.conv = nn.Conv3d
+        else:
+            raise ValueError("spacetime_ndim can not be anything other than 2 or 3...")
 
-        # stack all features into one tensor:
-        x = Concatenate(axis=-1)(dilated_conv_list)
+        if self.nb_channels is None:
+            self.nb_channels = sum(self.num_features)  # * 2
 
-        # We keep the number of features:
-        self.total_num_features = total_num_features
+        nb_out = self.nb_channels
+        self.kernel_one_conv_functions = nn.ModuleList()
+        for index in range(self.nb_dense_layers):
+            nb_in = nb_out
+            nb_out = self.nb_channels
 
-        # By default the number of channels for the deep layers is the total number of spatial features generated
-        if self.num_channels is None:
-            num_channels = 2 * total_num_features
-
-        y = None
-        f = 1
-        for level_index in range(self.num_dense_layers):
-            # number of input and output channels:
-            # num_in = total_num_features if level == 0 else num_channels
-            num_out = (
-                self.num_output_channels
-                if level_index == self.num_dense_layers - 1
-                else num_channels
+            self.kernel_one_conv_functions.append(
+                self.conv(
+                    in_channels=nb_in,
+                    out_channels=nb_out,
+                    kernel_size=(1,) * spacetime_ndim,
+                )
             )
 
-            # Setup of channel-wise dense layer (1x1 convolution)
+        self.final_kernel_one_conv = self.conv(
+            in_channels=self.nb_channels,
+            out_channels=1,
+            kernel_size=(1,) * spacetime_ndim,
+        )
+
+        self.relu = nn.ReLU()
+        self.lrelu = nn.LeakyReLU(negative_slope=0.01)
+
+    @property
+    def kernel_sizes(self):
+        """list of int: Kernel sizes for each dilated convolution scale."""
+        if self._kernel_sizes is None:
             if self.spacetime_ndim == 2:
-                channel_wise_dense_layer_type = Conv2D
+                self._kernel_sizes = [7, 5, 3, 3, 3, 3, 3, 3]
             elif self.spacetime_ndim == 3:
-                channel_wise_dense_layer_type = Conv3D
+                self._kernel_sizes = [7, 5, 3, 3]
 
-            x = channel_wise_dense_layer_type(
-                num_out, kernel_size=1, padding='valid', name=f'dense_cv{level_index}'
-            )(x)
-            x = LeakyReLU(alpha=0.01)(x)
+        return self._kernel_sizes
 
-            if y is None:
-                y = x
-            else:
-                y = y + f * x
+    @property
+    def num_features(self):
+        """list of int: Number of features for each dilated convolution scale."""
+        if self._num_features is None:
+            if self.spacetime_ndim == 2:
+                self._num_features = [64, 32, 16, 8, 4, 2, 1, 1]
+            elif self.spacetime_ndim == 3:
+                self._num_features = [10, 8, 4, 2]
 
-        y = channel_wise_dense_layer_type(
-            self.num_output_channels, kernel_size=1, padding='same', name='final_cv'
-        )(y)
+        return self._num_features
 
+    def forward(self, x):
+        """Run the forward pass through the JINet.
+
+        Parameters
+        ----------
+        x : torch.Tensor
+            Input tensor with shape ``(B, C, ...spatial_dims...)``.
+
+        Returns
+        -------
+        torch.Tensor
+            Denoised output tensor.
+        """
+        dilated_conv_list = []
+
+        # Calculate dilated convolutions
+        for index in range(len(self.kernel_sizes)):
+            x = self.dilated_conv_functions[index](x)
+            dilated_conv_list.append(x)
+
+        # Concat the results
+        x = torch.cat(dilated_conv_list, dim=1)
+
+        # First kernel size one conv
+        x = self.kernel_one_conv_functions[0](x)
+        x = self.lrelu(x)
+        y = x
+        f = 1
+
+        # Rest of the kernel size one convolutions
+        for index in range(1, self.nb_dense_layers):
+            x = self.kernel_one_conv_functions[index](x)
+            x = self.lrelu(x)
+            y = y + f * x
+
+            if self.degressive_residuals:
+                f = f * 0.5
+
+        # Final kernel size one convolution
+        y = self.final_kernel_one_conv(y)
+
+        # Final ReLU
         if self.final_relu:
-            y = Activation('relu', name='final_relu')(y)
+            y = self.relu(y)
+
         return y
+
+    def enforce_blind_spot(self):
+        """Zero out the center pixel weight to enforce J-invariance.
+
+        Must be called after each optimization step to guarantee the
+        blind-spot property required for self-supervised denoising.
+        Sets the center kernel weight of the first dilated convolution
+        layer to zero.
+        """
+        with torch.no_grad():
+            first_conv = self.dilated_conv_functions[0].conv
+            center = tuple((k - 1) // 2 for k in first_conv.kernel_size)
+            if self.spacetime_ndim == 2:
+                first_conv.weight[:, :, center[0], center[1]] = 0
+            elif self.spacetime_ndim == 3:
+                first_conv.weight[:, :, center[0], center[1], center[2]] = 0
+
+    def post_optimisation(self):
+        """Apply kernel smoothing regularization after each optimization step.
+
+        When ``kernel_continuity_regularisation`` is enabled, smooths
+        the dilated convolution kernels by convolving them with a small
+        averaging filter. The smoothing strength decreases for deeper layers.
+        """
+        if not self.kernel_continuity_regularisation:
+            return
+
+        b = 0.0005
+        with torch.no_grad():
+            for dilated_conv_module in self.dilated_conv_functions:
+                weights = dilated_conv_module.conv.weight
+                num_channels = weights.shape[1]
+
+                if self.spacetime_ndim == 2:
+                    kernel = numpy.array(
+                        [[b, b, b], [b, 1, b], [b, b, b]], dtype=numpy.float32
+                    )
+                    kernel = kernel[numpy.newaxis, numpy.newaxis, ...]
+                    kernel_t = torch.from_numpy(kernel).to(weights.device)
+                    kernel_t = kernel_t / kernel_t.sum()
+                    kernel_t = kernel_t.expand(num_channels, 1, -1, -1)
+                    new_weights = F.conv2d(
+                        weights, kernel_t, groups=num_channels, padding=1
+                    )
+                elif self.spacetime_ndim == 3:
+                    kernel = numpy.full((3, 3, 3), b, dtype=numpy.float32)
+                    kernel[1, 1, 1] = 1.0
+                    kernel = kernel[numpy.newaxis, numpy.newaxis, ...]
+                    kernel_t = torch.from_numpy(kernel).to(weights.device)
+                    kernel_t = kernel_t / kernel_t.sum()
+                    kernel_t = kernel_t.expand(num_channels, 1, -1, -1, -1)
+                    new_weights = F.conv3d(
+                        weights, kernel_t, groups=num_channels, padding=1
+                    )
+
+                dilated_conv_module.conv.weight.data.copy_(new_weights)
+
+                # Decrease smoothing for deeper layers
+                b *= 0.5
+
+    def fill_blind_spot(self):
+        """Interpolate the blind-spot center weight after training.
+
+        Must be called after training to fill in the zeroed center
+        pixel weight. Uses a neighbor-average filter to estimate the
+        missing center weight, then rescales the kernel to preserve
+        the original weight sum.
+        """
+        with torch.no_grad():
+            first_conv = self.dilated_conv_functions[0].conv
+            weights = first_conv.weight
+            num_channels = weights.shape[1]
+            out_ch = weights.shape[0]
+
+            # Save per-output-channel sums before modification
+            original_sums = [weights[oc].sum().item() for oc in range(out_ch)]
+
+            if self.spacetime_ndim == 2:
+                b = 1.0
+                kernel = numpy.array(
+                    [[b, b, b], [b, 0, b], [b, b, b]], dtype=numpy.float32
+                )
+                kernel = kernel[numpy.newaxis, numpy.newaxis, ...]
+                kernel_t = torch.from_numpy(kernel).to(weights.device)
+                kernel_t = kernel_t / kernel_t.sum()
+                kernel_t = kernel_t.expand(num_channels, 1, -1, -1)
+                filtered = F.conv2d(weights, kernel_t, groups=num_channels, padding=1)
+
+                center = tuple((k - 1) // 2 for k in first_conv.kernel_size)
+                weights[:, :, center[0], center[1]] = filtered[
+                    :, :, center[0], center[1]
+                ]
+
+            elif self.spacetime_ndim == 3:
+                b = 1.0
+                kernel = numpy.full((3, 3, 3), b, dtype=numpy.float32)
+                kernel[1, 1, 1] = 0.0
+                kernel = kernel[numpy.newaxis, numpy.newaxis, ...]
+                kernel_t = torch.from_numpy(kernel).to(weights.device)
+                kernel_t = kernel_t / kernel_t.sum()
+                kernel_t = kernel_t.expand(num_channels, 1, -1, -1, -1)
+                filtered = F.conv3d(weights, kernel_t, groups=num_channels, padding=1)
+
+                center = tuple((k - 1) // 2 for k in first_conv.kernel_size)
+                weights[:, :, center[0], center[1], center[2]] = filtered[
+                    :, :, center[0], center[1], center[2]
+                ]
+
+            # Rescale per output channel to preserve per-channel weight sums
+            for oc in range(out_ch):
+                new_sum = weights[oc].sum().item()
+                if abs(new_sum) > 1e-10:
+                    weights[oc] *= original_sums[oc] / new_sum
+
+            first_conv.weight.data.copy_(weights)

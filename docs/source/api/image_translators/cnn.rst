@@ -1,8 +1,8 @@
-ImageTranslatorCNN - Convolutional Neural Network
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ImageTranslatorCNNTorch - Convolutional Neural Network (PyTorch)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. currentmodule:: aydin.it.cnn
+.. currentmodule:: aydin.it.cnn_torch
 
-.. autoclass:: ImageTranslatorCNN
+.. autoclass:: ImageTranslatorCNNTorch
     :members:
     :inherited-members:

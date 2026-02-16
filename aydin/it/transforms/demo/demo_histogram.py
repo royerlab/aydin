@@ -1,3 +1,10 @@
+"""Demo of histogram equalisation transform.
+
+Demonstrates the ``HistogramEqualisationTransform`` by applying it to
+a camera image and verifying that postprocessing recovers the original
+image.
+"""
+
 import numpy
 
 from aydin.io.datasets import camera
@@ -5,6 +12,7 @@ from aydin.it.transforms.histogram import HistogramEqualisationTransform
 
 
 def demo_histogram():
+    """Apply histogram equalisation and verify roundtrip reconstruction."""
     image = camera()
 
     ht = HistogramEqualisationTransform()

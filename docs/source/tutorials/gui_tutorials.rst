@@ -126,8 +126,7 @@ Cropping selection
 
 Cropping your image before passing to train a model can shorten your training duration significantly.
 To address this need, we built two cropping tabs: one for training crop and one for inference crop
-respectively. Currently, we are only supporting cropping across X, Y, Z and T dimensions. Looking
-forward to support cropping over Z in near future as well.
+respectively. Currently, we support cropping across X, Y, Z and T dimensions.
 
 
 Pre and post processing
@@ -166,6 +165,18 @@ We implemented numerous denoising algorithms using different computation librari
 We refer to those different implementations as variants. We expose an extensive list of arguments
 for each provided variant. Users can find default value and a small explanation for each argument
 in the list.
+
+
+Basic and Advanced modes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, ``Aydin Studio`` provides selected lists of denoiser variants in ``Denoise`` tab and pre-processing
+options in ``Pre/Post-Processing`` tab. This is helpful to everyday users of ``Aydin Studio`` in finding
+what they need quickly. It is called the basic mode of ``Aydin Studio``. There is also an advanced mode
+of ``Aydin Studio`` where all denoiser variants and all pre-processing options in their corresponding tabs
+are enabled. One can toggle between basic and advanced modes of ``Aydin Studio`` using the ``Preferences``
+menu tab on the application window.
+
 
 Saving denoising options and trained model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

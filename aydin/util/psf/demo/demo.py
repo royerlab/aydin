@@ -2,6 +2,7 @@
 """
 Test focal scan G-L PSF.
 """
+
 from pprint import pprint
 
 from aydin.util.psf.simple_microscope_psf import SimpleMicroscopePSF
@@ -20,9 +21,9 @@ def demo_xyz():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(psf_xyz_array, name='fast_rz')
+    viewer = napari.Viewer()
+    viewer.add_image(psf_xyz_array, name='fast_rz')
+    napari.run()
 
 
 if __name__ == "__main__":

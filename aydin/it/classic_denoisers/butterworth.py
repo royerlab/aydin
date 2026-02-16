@@ -1,5 +1,13 @@
+"""Butterworth low-pass filter denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on the Butterworth low-pass
+filter. Supports isotropic and anisotropic frequency cutoffs for n-dimensional
+images, with configurable filter order and padding. Particularly effective for
+band-limited signals such as microscopy images.
+"""
+
 from functools import partial
-from typing import Sequence, Union, Optional, Tuple, List
+from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy
 from numba import jit
@@ -11,6 +19,7 @@ from scipy.special import eval_chebyt
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint, asection
 
 __fastmath = {'contract', 'afn', 'reassoc'}
 __error_model = 'numpy'
@@ -38,9 +47,9 @@ def calibrate_denoise_butterworth(
     display_crop: bool = False,
     **other_fixed_parameters,
 ):
-    """
-    Calibrates the Butterworth denoiser for the given image and returns the optimal
-    parameters obtained using the N2S loss.
+    """Calibrate the Butterworth denoiser for the given image.
+
+    Returns the optimal parameters obtained using the N2S loss.
 
     Parameters
     ----------
@@ -51,8 +60,13 @@ def calibrate_denoise_butterworth(
         Possible modes are: 'isotropic' for isotropic, meaning only one
         frequency cut-off is calibrated for all axes , 'z-yx' (or 'xy-z') for 3D
         stacks where the cut-off frequency for the x and y axes is the same but
-        different for the z axis, and 'full' for which all frequency cut-offs are
-        different. Use 'z-yx' for axes are ordered as: z, y and then x (default).
+        different for the z axis, 't-z-yx' (or 'xy-z-t') for 3D+t
+        timelapse where the cut-off frequency for the x and y axes is the same but
+        different for the z and t axis, and 'full' for which all frequency cut-offs are
+        different. Use 'z-yx' or 't-z-yx' for axes are ordered as: t, z, y and then x which is the default.
+        If for some reason the axis order is reversed you can use 'xy-z' or 'xy-z-t'.
+        Note: for 2D+t timelapses where the resolution over x and y are expected to be the same,
+        simply use: 'z-yx' (or 'xy-z').
 
     axes: Optional[Tuple[int,...]]
         Axes over which to apply low-pass filtering.
@@ -90,7 +104,6 @@ def calibrate_denoise_butterworth(
         also improve the appearance of the images by avoiding the impression
         that the images have been 'over-blurred'. Increase this value by
         small steps of 0.05 to reduce blurring if the image seems too fuzzy.
-
 
     min_order: float
         Minimal order for the Butterworth filter to use for calibration.
@@ -143,13 +156,23 @@ def calibrate_denoise_butterworth(
         Displays crop, for debugging purposes...
         (advanced) (hidden)
 
-    other_fixed_parameters: dict
+    other_fixed_parameters : dict
         Any other fixed parameters. (advanced)
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_butterworth`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
+
+    Raises
+    ------
+    ValueError
+        If ``mode`` is unsupported for the given image dimensionality, or
+        if ``min_order`` > ``max_order``.
     """
 
     # Convert image to float if needed:
@@ -187,6 +210,7 @@ def calibrate_denoise_butterworth(
     elif (mode == 'xy-z' or mode == 'z-yx') and image.ndim == 3:
         # Partial function with parameter impedance match:
         def _denoise_butterworth(*args, **kwargs):
+            """Wrapper mapping separate xy/z cutoff params to a freq_cutoff tuple."""
             freq_cutoff_xy = kwargs.pop('freq_cutoff_xy')
             freq_cutoff_z = kwargs.pop('freq_cutoff_z')
 
@@ -207,9 +231,46 @@ def calibrate_denoise_butterworth(
             'freq_cutoff_z': freq_cutoff_range,
         }
 
+    elif (mode == 'xy-z-t' or mode == 't-z-yx') and image.ndim == 4:
+        # Partial function with parameter impedance match:
+        def _denoise_butterworth(*args, **kwargs):
+            """Wrapper mapping separate xy/z/t cutoff params to a freq_cutoff tuple."""
+            freq_cutoff_xy = kwargs.pop('freq_cutoff_xy')
+            freq_cutoff_z = kwargs.pop('freq_cutoff_z')
+            freq_cutoff_t = kwargs.pop('freq_cutoff_t')
+
+            if mode == 't-z-yx':
+                _freq_cutoff = (
+                    freq_cutoff_t,
+                    freq_cutoff_z,
+                    freq_cutoff_xy,
+                    freq_cutoff_xy,
+                )
+            elif mode == 'xy-z-t':
+                _freq_cutoff = (
+                    freq_cutoff_xy,
+                    freq_cutoff_xy,
+                    freq_cutoff_z,
+                    freq_cutoff_t,
+                )
+
+            return denoise_butterworth(
+                *args,
+                freq_cutoff=_freq_cutoff,
+                **(kwargs | other_fixed_parameters | {'multi_core': multi_core}),
+            )
+
+        # Parameters to test when calibrating the denoising algorithm
+        parameter_ranges = {
+            'freq_cutoff_xy': freq_cutoff_range,
+            'freq_cutoff_z': freq_cutoff_range,
+            'freq_cutoff_t': freq_cutoff_range,
+        }
+
     elif mode == 'full':
         # Partial function with parameter impedance match:
         def _denoise_butterworth(*args, **kwargs):
+            """Wrapper mapping per-axis cutoff params to a freq_cutoff tuple."""
             _freq_cutoff = tuple(
                 kwargs.pop(f'freq_cutoff_{i}') for i in range(image.ndim)
             )
@@ -266,6 +327,7 @@ def calibrate_denoise_butterworth(
             )
             | other_fixed_parameters
         )
+        aprint(f"Best parameters (pass 1): {best_parameters}")
 
     else:
         # Calibrate denoiser using smart approach:
@@ -282,6 +344,7 @@ def calibrate_denoise_butterworth(
             )
             | other_fixed_parameters
         )
+        aprint(f"Best parameters (pass 1): {best_parameters}")
 
     # Second optimisation pass, for the order, if not fixed:
     if max_order > min_order:
@@ -304,6 +367,7 @@ def calibrate_denoise_butterworth(
             )
             | other_fixed_parameters
         )
+        aprint(f"Best parameters (pass 2, order): {best_parameters}")
 
     # Below we adjust the parameters because denoise_butterworth function (without underscore)
     # uses a different set of parameters...
@@ -323,6 +387,19 @@ def calibrate_denoise_butterworth(
 
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
+    elif (mode == 'xy-z-t' or mode == 't-z-yx') and image.ndim == 4:
+        # We need to adjust a bit the type of parameters passed to the denoising function:
+        freq_cutoff_xy = best_parameters.pop('freq_cutoff_xy')
+        freq_cutoff_z = best_parameters.pop('freq_cutoff_z')
+        freq_cutoff_t = best_parameters.pop('freq_cutoff_t')
+
+        if mode == 't-z-yx':
+            freq_cutoff = (freq_cutoff_t, freq_cutoff_z, freq_cutoff_xy, freq_cutoff_xy)
+        elif mode == 'xy-z-t':
+            freq_cutoff = (freq_cutoff_xy, freq_cutoff_xy, freq_cutoff_z, freq_cutoff_t)
+
+        best_parameters |= {'freq_cutoff': freq_cutoff}
+
     elif mode == 'full':
         # We need to adjust a bit the type of parameters passed to the denoising function:
         freq_cutoff = tuple(
@@ -332,6 +409,7 @@ def calibrate_denoise_butterworth(
 
     # function to add freq. tol.:
     def _add_freq_tol(f):
+        """Clamp ``f + frequency_tolerance`` to the [0, 1] interval."""
         return min(1.0, max(0.0, f + frequency_tolerance))
 
     # Add frequency_tolerance to all cutoff frequencies:
@@ -360,19 +438,18 @@ def denoise_butterworth(
     max_padding: int = 32,
     multi_core: bool = True,
 ):
-    """
-    Denoises the given image by applying a configurable <a
+    """Denoises the given image by applying a configurable <a
     href="https://en.wikipedia.org/wiki/Butterworth_filter">Butterworth
-    lowpass filter</a>. Remarkably good when your signal
-    does not have high-frequencies beyond a certain cutoff frequency.
-    This is probably the first algorithm that should be tried of all
-    currently available in Aydin. It is actually quite impressive how
-    well this performs in practice. If the signal in your images is
-    band-limited as is often the case for microscopy images, this
-    denoiser will work great.
+    lowpass filter</a>. Remarkably good when your signal does not have
+    high-frequencies beyond a certain cutoff frequency. This is probably the
+    first algorithm that should be tried of all currently available in Aydin.
+    It is actually quite impressive how well this performs in practice. If the
+    signal in your images is band-limited as is often the case for microscopy
+    images, this denoiser will work great.
     \n\n
-    Note: We recommend applying a variance stabilisation transform
-    to improve results for images with non-Gaussian noise.
+    Note: We recommend applying a variance stabilisation transform to improve
+    results for images with non-Gaussian noise.
+    <notgui>
 
     Parameters
     ----------
@@ -401,16 +478,15 @@ def denoise_butterworth(
     max_padding: int
         Maximum amount of padding to be added to avoid edge effects.
 
-    multi_core: bool
+    multi_core : bool
         By default we use as many cores as possible, in some cases, for small
         (test) images, it might be faster to run on a single core instead of
         starting the whole parallelization machinery.
 
-
     Returns
     -------
-    Denoised image
-
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:
@@ -430,65 +506,58 @@ def denoise_butterworth(
     # Number of workers:
     workers = -1 if multi_core else 1
 
-    # First we need to pad the image.
-    # By how much? this depends on how much low filtering we need to do:
-    pad_width = tuple(
-        (
+    with asection(
+        f"Denoise image of shape {image.shape} with Butterworth filter (cutoff={freq_cutoff}, order={order})"
+    ):
+        # First we need to pad the image.
+        # By how much? this depends on how much low filtering we need to do:
+        pad_width = tuple(
             (
-                _apw(s, fc, min_padding, max_padding),
-                _apw(s, fc, min_padding, max_padding),
+                (
+                    _apw(s, fc, min_padding, max_padding),
+                    _apw(s, fc, min_padding, max_padding),
+                )
+                if sa
+                else (0, 0)
             )
-            if sa
-            else (0, 0)
+            for sa, fc, s in zip(selected_axes, freq_cutoff, image.shape)
         )
-        for sa, fc, s in zip(selected_axes, freq_cutoff, image.shape)
-    )
 
-    # pad image:
-    image = numpy.pad(image, pad_width=pad_width, mode='reflect')
+        with asection("Pad image"):
+            image = numpy.pad(image, pad_width=pad_width, mode='reflect')
 
-    # Move to frequency space:
-    image_f = fftn(image, workers=workers, axes=axes)
+        with asection("Forward FFT"):
+            image_f = fftn(image, workers=workers, axes=axes)
+            image_f = fftshift(image_f, axes=axes)
 
-    # Center frequencies:
-    image_f = fftshift(image_f, axes=axes)
+        with asection(f"Apply {filter_type} filter"):
+            # Compute squared distance image:
+            f = _compute_distance_image(freq_cutoff, image, selected_axes)
 
-    # Compute squared distance image:
-    f = _compute_distance_image(freq_cutoff, image, selected_axes)
+            # Choose filter type:
+            if filter_type == 'butterworth':
+                _filter = _filter_butterworth
+                filter = jit(nopython=True, parallel=multi_core)(_filter)
+                image_f = filter(image_f, f, order)
 
-    # Choose filter type:
-    if filter_type == 'butterworth':
-        # Prepare filter:
-        _filter = _filter_butterworth
-        filter = jit(nopython=True, parallel=multi_core)(_filter)
+            elif filter_type == 'chebyshev2':
+                _filter = _filter_chebyshev
+                filter = jit(nopython=True, parallel=multi_core)(_filter)
+                n = 5
+                epsilon = 1 / order
+                f = numpy.maximum(1e-6, f)
+                chebyshev = eval_chebyt(n, 1.0 / f)
+                image_f = filter(image_f, epsilon, chebyshev)
 
-        # Apply filter:
-        image_f = filter(image_f, f, order)
-
-    elif filter_type == 'chebyshev2':
-        # Prepare filter:
-        _filter = _filter_chebyshev
-        filter = jit(nopython=True, parallel=multi_core)(_filter)
-
-        # Apply filter:
-        n = 5
-        epsilon = 1 / order
-        f = numpy.maximum(1e-6, f)
-        chebyshev = eval_chebyt(n, 1.0 / f)
-        image_f = filter(image_f, epsilon, chebyshev)
-
-    # Shift back:
-    image_f = ifftshift(image_f, axes=axes)
-
-    # Back in real space:
-    denoised = numpy.real(ifftn(image_f, workers=workers, axes=axes))
-
-    # Crop to remove padding:
-    denoised = denoised[
-        tuple(
-            (slice(u, -v) if (u != 0 and v != 0) else slice(None)) for u, v in pad_width
-        )
-    ]
+        with asection("Inverse FFT and crop"):
+            image_f = ifftshift(image_f, axes=axes)
+            denoised = numpy.real(ifftn(image_f, workers=workers, axes=axes))
+            denoised = denoised[
+                tuple(
+                    (slice(u, -v) if (u != 0 and v != 0) else slice(None))
+                    for u, v in pad_width
+                )
+            ]
 
     return denoised
 
@@ -496,6 +565,25 @@ def denoise_butterworth(
 # Todo: write a jitted version of this!
 # @jit(nopython=True, parallel=True)
 def _compute_distance_image(freq_cutoff, image, selected_axes):
+    """Compute squared normalized distance image for Butterworth filtering.
+
+    Builds an n-dimensional grid of squared distances from the origin,
+    scaled by the per-axis frequency cutoffs.
+
+    Parameters
+    ----------
+    freq_cutoff : tuple of float
+        Per-axis frequency cutoff values.
+    image : numpy.ndarray
+        Image whose shape determines the grid dimensions.
+    selected_axes : tuple of bool
+        Which axes are active for filtering.
+
+    Returns
+    -------
+    numpy.ndarray
+        Squared normalized distance array (float32).
+    """
     f = numpy.zeros_like(image, dtype=numpy.float32)
     axis_grid = tuple(
         (numpy.linspace(-1, 1, s) if sa else numpy.zeros((s,)))
@@ -507,6 +595,28 @@ def _compute_distance_image(freq_cutoff, image, selected_axes):
 
 
 def _apw(dim_size, freq_cutoff, min_padding, max_padding):
+    """Compute adaptive padding width for a single dimension.
+
+    The padding is inversely proportional to the frequency cutoff,
+    clamped between min_padding and max_padding, and at most half the
+    dimension size.
+
+    Parameters
+    ----------
+    dim_size : int
+        Size of the image along this dimension.
+    freq_cutoff : float
+        Frequency cutoff for this dimension.
+    min_padding : int
+        Minimum padding width.
+    max_padding : int
+        Maximum padding width.
+
+    Returns
+    -------
+    int
+        Computed padding width for this dimension.
+    """
     return min(
         dim_size // 2,
         min(max_padding, max(min_padding, int(1.0 / (1e-10 + freq_cutoff)))),
@@ -514,10 +624,42 @@ def _apw(dim_size, freq_cutoff, min_padding, max_padding):
 
 
 def _filter_chebyshev(image_f, epsilon, chebyshev):
+    """Apply a Type II Chebyshev low-pass filter in the frequency domain.
+
+    Parameters
+    ----------
+    image_f : numpy.ndarray
+        Image in the frequency domain (complex).
+    epsilon : float
+        Ripple control parameter (inverse of filter order).
+    chebyshev : numpy.ndarray
+        Pre-computed Chebyshev polynomial values.
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered frequency-domain image.
+    """
     image_f /= numpy.sqrt(1 + 1 / ((epsilon * chebyshev) ** 2))
     return image_f
 
 
 def _filter_butterworth(image_f, f, order):
+    """Apply a Butterworth low-pass filter in the frequency domain.
+
+    Parameters
+    ----------
+    image_f : numpy.ndarray
+        Image in the frequency domain (complex).
+    f : numpy.ndarray
+        Squared normalized distance array.
+    order : float
+        Filter order controlling the sharpness of the cutoff.
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered frequency-domain image.
+    """
     image_f /= numpy.sqrt(1 + f**order)
     return image_f

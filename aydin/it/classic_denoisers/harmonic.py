@@ -1,23 +1,31 @@
+"""Harmonic prior denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions based on a non-linear harmonic
+prior. The gradient of the prior is a Laplace-like operator scaled by the
+local value range, making it effective at smoothing uniform regions while
+preserving edges.
+"""
+
 import math
 from functools import partial
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.linalg import norm
 from numpy.typing import ArrayLike
 from scipy.ndimage import (
+    gaussian_filter,
+    maximum_filter,
     median_filter,
     minimum_filter,
-    maximum_filter,
-    uniform_filter,
     rank_filter,
-    gaussian_filter,
+    uniform_filter,
 )
 
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 def calibrate_denoise_harmonic(
@@ -64,7 +72,7 @@ def calibrate_denoise_harmonic(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -89,8 +97,12 @@ def calibrate_denoise_harmonic(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_harmonic`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
 
     # Convert image to float if needed:
@@ -179,6 +191,7 @@ def denoise_harmonic(
     \n\n
     Note: Works well in practice, but a bit slow as currently
     implemented for large images.
+    <notgui>
 
     Parameters
     ----------
@@ -206,11 +219,12 @@ def denoise_harmonic(
         Starting step used for gradient descent
 
     max_gradient: float
-        Maximum gradient tolerated -- usefull to avoid 'numerical explosions' ;-)
+        Maximum gradient tolerated -- useful to avoid 'numerical explosions' ;-)
 
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
     """
 
     # Convert image to float if needed:
@@ -249,31 +263,47 @@ def denoise_harmonic(
             # If gradient jumps around turn down the heat:
             step *= 0.95
         else:
-            # if teh gradient goes down, turn up the heat:
+            # if the gradient goes down, turn up the heat:
             step *= 1.01
 
         # Stopping if convergence or stabilisation:
         if gradient_norm < epsilon:
-            lprint("Converged!")
+            aprint("Converged!")
             break
 
         # Stopping if convergence or stabilisation:
         if last_gradient_norm == gradient_norm:
             counter += 1
             if counter > 8:
-                lprint("Gradient stabilised! converged!")
+                aprint("Gradient stabilised! converged!")
                 break
 
         # We save the last gradient:
         last_gradient_norm = gradient_norm
 
         # if i % 32 == 0:
-        #    lprint(f"gradient magnitude: {gradient_norm}, step: {step}")
+        #    aprint(f"gradient magnitude: {gradient_norm}, step: {step}")
 
     return denoised
 
 
 def _laplace(image, filter: str = 'uniform', rank: bool = False):
+    """Compute a range-normalized Laplace-like operator on the image.
+
+    Parameters
+    ----------
+    image : ArrayLike
+        Input image.
+    filter : str
+        Type of smoothing filter: 'uniform', 'gaussian', or 'median'.
+    rank : bool
+        If True, uses rank filters for more robust min/max estimation.
+
+    Returns
+    -------
+    numpy.ndarray
+        The Laplace-like response normalized by local value range.
+    """
     if rank:
         min_value = rank_filter(image, size=3, rank=1)
         max_value = rank_filter(image, size=3, rank=-2)
@@ -281,11 +311,11 @@ def _laplace(image, filter: str = 'uniform', rank: bool = False):
         min_value = minimum_filter(image, size=3)
         max_value = maximum_filter(image, size=3)
 
-    range = max_value - min_value + 1e-6
+    value_range = max_value - min_value + 1e-6
 
     if filter == 'uniform':
-        return (uniform_filter(image, size=3) - image) / range
+        return (uniform_filter(image, size=3) - image) / value_range
     elif filter == 'gaussian':
-        return (gaussian_filter(image, sigma=1, truncate=2) - image) / range
+        return (gaussian_filter(image, sigma=1, truncate=2) - image) / value_range
     elif filter == 'median':
-        return (median_filter(image, size=3) - image) / range
+        return (median_filter(image, size=3) - image) / value_range

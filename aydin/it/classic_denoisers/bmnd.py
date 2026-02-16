@@ -1,11 +1,20 @@
+"""Block-Matching nD (BMnD) denoiser.
+
+Provides calibration and denoising functions using the Block-Matching nD
+approach, a generalization of BM3D. Patches are extracted, transformed
+to the DCT domain, grouped by nearest-neighbor search, and aggregated
+(via median or mean) to produce denoised patches.
+"""
+
 import math
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy
 from numpy.typing import ArrayLike
 from pynndescent import NNDescent
 from scipy.fft import dctn, idctn
 
+from aydin.util.log.log import aprint, asection
 from aydin.util.patch_size.patch_size import default_patch_size
 from aydin.util.patch_transform.patch_transform import (
     extract_patches_nd,
@@ -26,22 +35,26 @@ def calibrate_denoise_bmnd(
     image: ArrayLike
         Image to calibrate spectral denoiser for.
 
-    patch_size: int
+    patch_size : int, tuple of int, or None
         Patch size for the 'image-to-patch' transform.
         Can be an int s that corresponds to isotropic
         patches of shape: (s,)*image.ndim, or a tuple
         of ints. By default (None) the patch size is
         chosen automatically to give the best results.
 
-
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_bmnd`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
 
     # Default patch sizes vary with image dimension:
     patch_size = default_patch_size(image, patch_size, odd=True)
+    aprint(f"BMnD calibration: patch_size={patch_size}")
 
     best_parameters = {}
 
@@ -67,8 +80,8 @@ def denoise_bmnd(
     \n\n
     Note: This is currently only usable for small images, even for
     moderately sized images the computation time is prohibitive. We
-    are planning to implement a GPU version to make it more usefull.
-
+    are planning to implement a GPU version to make it more useful.
+    <notgui>
 
     Parameters
     ----------
@@ -83,37 +96,31 @@ def denoise_bmnd(
         to give the best results.
 
     block_depth: int or None for default
-        Block depth.
+        Block depth, i.e. number of nearest-neighbor patches to aggregate.
+        If None, defaults to the maximum of the patch size dimensions.
 
     mode: str
-        Possible modes are: 'median', 'mean'.
-
-    threshold: float
-        Threshold between 0 and 1
-
-    freq_bias_stength: float
-        Frequency bias: closer to zero: no bias against high frequencies,
-        closer to one and above: stronger bias towards high-frequencies.
-
-    freq_cutoff: float
-        Cutoff frequency, must be within [0, 1]. In addition
-
-    order: float
-        Filter order, typically an integer above 1.
+        Aggregation mode for matched blocks. Possible modes are:
+        'median' and 'mean'.
 
     reconstruction_gamma: float
-        Patch reconstruction parameter
+        Patch reconstruction parameter that controls blending of
+        overlapping patches. A value of 0 gives uniform weighting.
 
-    multi_core: bool
+    multi_core : bool
         By default we use as many cores as possible, in some cases, for small
         (test) images, it might be faster to run on a single core instead of
         starting the whole parallelization machinery.
 
-
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
 
+    Raises
+    ------
+    ValueError
+        If ``mode`` is not 'median' or 'mean'.
     """
 
     # Convert image to float if needed:
@@ -129,45 +136,36 @@ def denoise_bmnd(
         else:
             block_depth = max(patch_size)
 
-    # First we apply the patch transform:
-    patches = extract_patches_nd(image, patch_size=patch_size)
+    with asection(
+        f"Denoise image of shape {image.shape} with BMnD (patch_size={patch_size}, block_depth={block_depth})"
+    ):
+        with asection("Extract patches and DCT"):
+            patches = extract_patches_nd(image, patch_size=patch_size)
+            axes = tuple(1 + a for a in range(image.ndim))
+            patches = dctn(patches, axes=axes, workers=-1 if multi_core else 1)
 
-    axes = tuple(1 + a for a in range(image.ndim))
-    patches = dctn(patches, axes=axes, workers=-1 if multi_core else 1)
+        with asection("Nearest-neighbor search"):
+            original_patches_shape = patches.shape
+            patches = patches.reshape(patches.shape[0], -1)
+            nn = NNDescent(patches, n_jobs=-1 if multi_core else 1)
+            indices, distances = nn.query(patches, k=block_depth)
+            patches = patches.reshape(original_patches_shape)
 
-    # reshape patches as vectors:
-    original_patches_shape = patches.shape
-    patches = patches.reshape(patches.shape[0], -1)
+        with asection(f"Aggregate matched blocks ({mode})"):
+            blocks = patches[indices]
+            if mode == 'median':
+                patches = numpy.median(blocks, axis=1)
+            elif mode == 'mean':
+                patches = numpy.mean(blocks, axis=1)
+            else:
+                raise ValueError(f"Unsupported mode: {mode}")
+            del blocks
 
-    # Build the data structure for nearest neighbor search:
-    nn = NNDescent(patches, n_jobs=-1 if multi_core else 1)
-
-    # for each patch we query for the nearest patch:
-    indices, distances = nn.query(patches, k=block_depth)
-
-    # reshape patches back to their original shape:
-    patches = patches.reshape(original_patches_shape)
-
-    # Extract blocks:
-    blocks = patches[indices]
-
-    # Denoise blocks:
-    if mode == 'median':
-        patches = numpy.median(blocks, axis=1)
-    elif mode == 'mean':
-        patches = numpy.mean(blocks, axis=1)
-    else:
-        raise ValueError(f"Unsupported mode: {mode}")
-    del blocks
-
-    patches = idctn(patches, axes=axes, workers=-1 if multi_core else 1)
-
-    # Transform back from patches to image:
-    denoised_image = reconstruct_from_nd_patches(
-        patches, image.shape, gamma=reconstruction_gamma
-    )
-
-    # Cast back to float32 if needed:
-    denoised_image = denoised_image.astype(numpy.float32, copy=False)
+        with asection("Inverse DCT and reconstruct"):
+            patches = idctn(patches, axes=axes, workers=-1 if multi_core else 1)
+            denoised_image = reconstruct_from_nd_patches(
+                patches, image.shape, gamma=reconstruction_gamma
+            )
+            denoised_image = denoised_image.astype(numpy.float32, copy=False)
 
     return denoised_image

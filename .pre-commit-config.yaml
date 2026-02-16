@@ -1,9 +1,25 @@
 repos:
--   repo: https://github.com/python/black
-    rev: 21.6b0
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+    - id: check-yaml
+    - id: check-toml
+    - id: check-merge-conflict
+    - id: trailing-whitespace
+    - id: end-of-file-fixer
+
+-   repo: https://github.com/psf/black
+    rev: 24.1.0
     hooks:
     - id: black
-      language_version: python3
-      pass_filenames: false
-      args: [.]
 
+-   repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+    - id: isort
+
+-   repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+    - id: flake8
+      args: ['--ignore=E501,E203,E741,W503,E402,F401,E721,E275,E731,E226,F821']

@@ -1,3 +1,9 @@
+"""Parallel multi-threaded uniform filter using joblib and SciPy.
+
+Splits the image along its longest axis and applies SciPy's uniform
+filter to tiles in parallel, then reassembles the result.
+"""
+
 import multiprocessing
 
 import numpy
@@ -10,6 +16,33 @@ from aydin.util.array.nd import nd_split_slices, remove_margin_slice
 def parallel_uniform_filter(
     image, size=3, output=None, mode="nearest", cval=0.0, origin=0
 ):
+    """Apply a uniform (box) filter using parallel SciPy calls.
+
+    Splits the image along its longest axis, applies the filter to each
+    tile in parallel using threading, and reassembles. Falls back to
+    single-threaded SciPy when parallelization would not yield at
+    least a 10% speedup.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image array.
+    size : int or tuple of int
+        Filter window size.
+    output : numpy.ndarray, optional
+        Not used directly; output is always freshly allocated.
+    mode : str
+        Boundary handling mode. Default is 'nearest'.
+    cval : float
+        Constant value for 'constant' boundary mode.
+    origin : int
+        Filter origin offset.
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered image with the original dtype.
+    """
     # Save original image dtype:
     original_dtype = image.dtype
 
@@ -62,6 +95,7 @@ def parallel_uniform_filter(
         output = numpy.empty_like(image)
 
         def _uniform_filter(slice_tuple, slice_margin_tuple):
+            """Apply uniform filter to a single tile and store result."""
             tile = image[slice_margin_tuple]
 
             output_tile = uniform_filter(

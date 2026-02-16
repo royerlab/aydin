@@ -1,4 +1,6 @@
-from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout
+"""Pre/Post-Processing tab for configuring image transforms."""
+
+from qtpy.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
 from aydin.gui._qt.custom_widgets.readmoreless_label import QReadMoreLessLabel
 from aydin.gui._qt.job_runners.previewall_job_runner import PreviewAllJobRunner
@@ -23,6 +25,13 @@ class ProcessingTab(QWidget):
     """
 
     def __init__(self, parent):
+        """Initialize the Pre/Post-Processing tab.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        """
         super(ProcessingTab, self).__init__(parent)
         self.parent = parent
 
@@ -34,7 +43,9 @@ class ProcessingTab(QWidget):
         self.explanation_layout.addWidget(self.explanation_text, 90)
         self.explanation_layout.addStretch()
 
-        self.previewall_job_runner = PreviewAllJobRunner(self, self.parent.threadpool)
+        self.previewall_job_runner = PreviewAllJobRunner(
+            self, self.parent.threadpool, self.parent
+        )
         self.explanation_layout.addWidget(self.previewall_job_runner, 10)
 
         self.tab_layout.addLayout(self.explanation_layout)
@@ -49,6 +60,14 @@ class ProcessingTab(QWidget):
 
     @property
     def transforms(self):
+        """List of enabled transform parameter dictionaries.
+
+        Returns
+        -------
+        list of dict or None
+            Each dict contains 'class' and 'kwargs' keys for constructing
+            the transform. Returns None if no transforms are configured.
+        """
         if len(self.panes_widget.list_of_item_widgets) < 1:
             return None
 
@@ -61,4 +80,11 @@ class ProcessingTab(QWidget):
         return transforms
 
     def set_advanced_enabled(self, enable: bool = False):
+        """Toggle visibility of advanced transforms and parameters.
+
+        Parameters
+        ----------
+        enable : bool, optional
+            If True, show advanced transforms. Default is False.
+        """
         self.panes_widget.set_advanced_enabled(enable=enable)

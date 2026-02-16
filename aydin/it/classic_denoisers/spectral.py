@@ -1,17 +1,26 @@
+"""Spectral patch denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions that denoise images by applying
+a patch transform followed by spectral thresholding (DCT, DST, or FFT).
+Combines Butterworth filtering with coefficient thresholding and configurable
+frequency bias to suppress noise while preserving signal.
+"""
+
 import math
 from functools import partial
-from typing import Optional, Union, Tuple, Sequence, List
+from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy
 from numba import jit, prange
 from numpy.fft import fftshift, ifftshift
 from numpy.typing import ArrayLike
-from scipy.fft import fftn, ifftn, dctn, idctn, dstn, idstn
+from scipy.fft import dctn, dstn, fftn, idctn, idstn, ifftn
 
 from aydin.it.classic_denoisers import _defaults
 from aydin.util.array.outer import outer_sum
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint, asection
 from aydin.util.patch_size.patch_size import default_patch_size
 from aydin.util.patch_transform.patch_transform import (
     extract_patches_nd,
@@ -24,7 +33,7 @@ def calibrate_denoise_spectral(
     axes: Optional[Tuple[int, ...]] = None,
     patch_size: Optional[Union[int, Tuple[int], str]] = None,
     try_dct: bool = True,
-    try_fft: bool = True,
+    try_fft: bool = False,
     try_dst: bool = False,
     max_order: float = 6.0,
     crop_size_in_voxels: Optional[int] = _defaults.default_crop_size_normal.value,
@@ -64,7 +73,7 @@ def calibrate_denoise_spectral(
         Tries FFT transform during optimisation.
 
     try_dst: bool
-        Tries DST ransform during optimisation.
+        Tries DST transform during optimisation.
 
     max_order: float
         Maximal order for the Butterworth filter.
@@ -88,7 +97,7 @@ def calibrate_denoise_spectral(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -117,8 +126,12 @@ def calibrate_denoise_spectral(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_spectral`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -181,6 +194,7 @@ def calibrate_denoise_spectral(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 2 * image.nbytes + 8 * image.nbytes * math.prod(patch_size)
@@ -210,6 +224,7 @@ def denoise_spectral(
     Note: This seems like a lot of parameters, but thanks to our
     auto-tuning approach these parameters are all automatically
     determined 😊.
+    <notgui>
 
     Parameters
     ----------
@@ -217,7 +232,7 @@ def denoise_spectral(
         Image to denoise
 
     axes: Optional[Tuple[int,...]]
-        Axes over which to apply the spetcral transform (dct, dst, fft) for denoising each patch.
+        Axes over which to apply the spectral transform (dct, dst, fft) for denoising each patch.
 
     patch_size: int
         Patch size for the 'image-to-patch' transform.
@@ -245,16 +260,20 @@ def denoise_spectral(
     reconstruction_gamma: float
         Patch reconstruction parameter
 
-    multi_core: bool
+    multi_core : bool
         By default we use as many cores as possible, in some cases, for small
         (test) images, it might be faster to run on a single core instead of
         starting the whole parallelization machinery.
 
-
     Returns
     -------
-    Denoised image
+    numpy.ndarray
+        Denoised image as a float32 array.
 
+    Raises
+    ------
+    ValueError
+        If ``mode`` is not one of 'dct', 'dst', or 'fft'.
     """
 
     # Convert image to float if needed:
@@ -300,78 +319,93 @@ def denoise_spectral(
     if type(freq_cutoff) is not tuple:
         freq_cutoff = tuple((freq_cutoff,) * image.ndim)
 
-    # First we apply the patch transform:
-    patches = extract_patches_nd(image, patch_size=patch_size)
+    with asection(
+        f"Denoise image of shape {image.shape} with spectral filter (mode={mode})"
+    ):
+        with asection("Extract patches"):
+            patches = extract_patches_nd(image, patch_size=patch_size)
 
-    # ### PART 1: apply Butterworth filter to patches:
+        with asection(f"Forward spectral transform ({mode})"):
+            patches = transform(patches)
 
-    # Then we apply the sparsifying transform:
-    patches = transform(patches)
+        with asection("Apply Butterworth filter and threshold coefficients"):
+            # Compute adequate squared distance image and chose filter implementation:
+            if mode == 'fft':
+                f = _compute_distance_image_for_fft(
+                    freq_cutoff, patch_size, selected_axes
+                )
+            elif mode == 'dct' or mode == 'dst':
+                f = _compute_distance_image_for_dxt(
+                    freq_cutoff, patch_size, selected_axes
+                )
+            else:
+                raise ValueError(f"Unsupported mode: {mode}")
 
-    # Compute adequate squared distance image and chose filter implementation:
-    if mode == 'fft':
-        f = _compute_distance_image_for_fft(freq_cutoff, patch_size, selected_axes)
-    elif mode == 'dct' or mode == 'dst':
-        f = _compute_distance_image_for_dxt(freq_cutoff, patch_size, selected_axes)
-    else:
-        raise ValueError(f"Unsupported mode: {mode}")
+            # Configure filter function:
+            filter_wrapped = jit(nopython=True, parallel=multi_core)(_filter)
 
-    # Configure filter function:
-    filter_wrapped = jit(nopython=True, parallel=multi_core)(_filter)
+            # Apply filter:
+            patches = filter_wrapped(patches, f, order)
 
-    # Apply filter:
-    patches = filter_wrapped(patches, f, order)
+            # Window for frequency bias:
+            freq_bias = _freq_bias_window(patch_size, freq_bias_stength)
 
-    # ### PART 2: apply thresholding:
+            # We use this value to estimate power per coefficient:
+            power = numpy.absolute(patches)
+            power *= freq_bias
 
-    # Window for frequency bias:
-    freq_bias = _freq_bias_window(patch_size, freq_bias_stength)
+            # What is the max coefficient in the transforms:
+            max_value = numpy.max(power)
 
-    # We use this value to estimate power per coefficient:
-    power = numpy.absolute(patches)
-    power *= freq_bias
+            # We derive from that the threshold:
+            threshold *= max_value
 
-    # import napari
-    # with napari.gui_qt():
-    #     viewer = napari.Viewer()
-    #     viewer.add_image(image, name='image')
-    #     viewer.add_image(patches, name='patches')
-    #     viewer.add_image(f_patches, name='f_patches')
-    #     viewer.add_image(power, name='power')
-    #     viewer.add_image(freq_bias, name='freq_bias')
+            # Here are the entries that are below the threshold:
+            below = power < threshold
 
-    # What is the max coefficient in the transforms:
-    max_value = numpy.max(power)
+            # Thresholding:
+            patches[below] = 0
 
-    # We derive from that the threshold:
-    threshold *= max_value
+        with asection("Inverse transform and reconstruct"):
+            # Transform back to real space:
+            patches = i_transform(patches)
 
-    # Here are the entries that are below the threshold:
-    below = power < threshold
+            # convert to real:
+            if numpy.iscomplexobj(patches):
+                patches = numpy.real(patches)
 
-    # Thresholding:
-    patches[below] = 0
+            # Transform back from patches to image:
+            denoised_image = reconstruct_from_nd_patches(
+                patches, image.shape, gamma=reconstruction_gamma
+            )
 
-    # Transform back to real space:
-    patches = i_transform(patches)
-
-    # convert to real:
-    if numpy.iscomplexobj(patches):
-        patches = numpy.real(patches)
-
-    # Transform back from patches to image:
-    denoised_image = reconstruct_from_nd_patches(
-        patches, image.shape, gamma=reconstruction_gamma
-    )
-
-    # Cast back to float32 if needed:
-    denoised_image = denoised_image.astype(numpy.float32, copy=False)
+            # Cast back to float32 if needed:
+            denoised_image = denoised_image.astype(numpy.float32, copy=False)
 
     return denoised_image
 
 
 # @jit(nopython=True, parallel=True)
 def _freq_bias_window(shape: Tuple[int], alpha: float = 1):
+    """Compute a frequency bias window for spectral thresholding.
+
+    Creates an n-dimensional window that assigns higher weight to lower
+    frequencies, raised to the power alpha. Used to bias the thresholding
+    towards suppressing high-frequency coefficients.
+
+    Parameters
+    ----------
+    shape : Tuple[int]
+        Shape of the window (typically the patch size).
+    alpha : float
+        Strength of the frequency bias. Values closer to 0 give no bias,
+        values of 1 and above produce stronger bias against high frequencies.
+
+    Returns
+    -------
+    numpy.ndarray
+        Frequency bias window of the given shape, normalized to [0, 1].
+    """
     window_tuple = tuple(numpy.linspace(0, 1, s) ** 2 for s in shape)
     window_nd = numpy.sqrt(outer_sum(*window_tuple)) + 1e-6
     window_nd = 1.0 / (1.0 + window_nd)
@@ -383,6 +417,22 @@ def _freq_bias_window(shape: Tuple[int], alpha: float = 1):
 
 # @jit(nopython=True, parallel=True)
 def _compute_distance_image_for_dxt(freq_cutoff, shape, selected_axes):
+    """Compute squared normalized distance image for DCT/DST transforms.
+
+    Parameters
+    ----------
+    freq_cutoff : tuple
+        Per-axis frequency cutoff values.
+    shape : tuple
+        Shape of the patch.
+    selected_axes : tuple of bool
+        Which axes are active for filtering.
+
+    Returns
+    -------
+    numpy.ndarray
+        Squared normalized distance array for Butterworth filtering.
+    """
     # Normalise selected axes:
     if selected_axes is None:
         selected_axes = (a for a in range(len(shape)))
@@ -397,8 +447,27 @@ def _compute_distance_image_for_dxt(freq_cutoff, shape, selected_axes):
     return f
 
 
-@jit(nopython=True, parallel=True)
+# @jit(nopython=True, parallel=True)
 def _compute_distance_image_for_fft(freq_cutoff, shape, selected_axes):
+    """Compute squared normalized distance image for FFT transform.
+
+    Unlike the DCT/DST version, frequencies range from -1 to 1 since the
+    FFT spectrum is centered via fftshift.
+
+    Parameters
+    ----------
+    freq_cutoff : tuple
+        Per-axis frequency cutoff values.
+    shape : tuple
+        Shape of the patch.
+    selected_axes : tuple of bool
+        Which axes are active for filtering.
+
+    Returns
+    -------
+    numpy.ndarray
+        Squared normalized distance array for Butterworth filtering.
+    """
     f = numpy.zeros(shape=shape, dtype=numpy.float32)
     axis_grid = tuple(
         (numpy.linspace(-1, 1, s) if sa else numpy.zeros((s,)))
@@ -410,6 +479,22 @@ def _compute_distance_image_for_fft(freq_cutoff, shape, selected_axes):
 
 
 def _filter(image_f, f, order):
+    """Apply Butterworth-like low-pass filter to spectral coefficients.
+
+    Parameters
+    ----------
+    image_f : numpy.ndarray
+        Batch of spectral coefficient arrays (first dimension is batch).
+    f : numpy.ndarray
+        Squared normalized distance array.
+    order : float
+        Filter order controlling the sharpness of the cutoff.
+
+    Returns
+    -------
+    numpy.ndarray
+        Filtered spectral coefficients.
+    """
     factor = 1 / numpy.sqrt(1.0 + f**order)
     factor = factor.astype(numpy.float32)
     n = image_f.shape[0]

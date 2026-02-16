@@ -1,19 +1,39 @@
+"""Blind-spot transform for self-supervised image denoising.
+
+Provides forward and inverse transforms that reorganize image pixels
+according to blind-spot patterns, enabling Noise2Self-style training.
+"""
+
 from functools import reduce
 from math import ceil
+
 import numpy
 
 
 class BlindSpotTransform:
-    """
-    'BlindSpot' Transform (and inverse)
+    """Transform (and inverse) for blind-spot-based self-supervised denoising.
+
+    Reorganizes image pixels according to a set of blind-spot offsets,
+    producing batched multi-channel input/target pairs suitable for
+    self-supervised training.
 
     Parameters
     ----------
-    blind_spots : list
-
+    blind_spots : list of tuple of int
+        List of coordinate offset tuples defining the blind-spot pattern.
+        Each tuple specifies a relative pixel offset, e.g. [(0,0), (1,0), (-1,0)].
     """
 
     def __init__(self, blind_spots):
+        """Initialize the blind-spot transform.
+
+        Parameters
+        ----------
+        blind_spots : list of tuple of int
+            List of coordinate offset tuples defining the blind-spot
+            pattern. Each tuple specifies a relative pixel offset,
+            e.g. ``[(0,0), (1,0), (-1,0)]``.
+        """
         super().__init__()
 
         self.blind_spots = blind_spots
@@ -29,21 +49,24 @@ class BlindSpotTransform:
         )
 
     def get_mask(self, blind_spot_for_channel, image_shape):
-        """
-        Get mask method
+        """Generate a tiled boolean mask for a single blind-spot channel.
 
         Parameters
         ----------
-        blind_spot_for_channel : tuple
-        image_shape : tuple
+        blind_spot_for_channel : tuple of int
+            Coordinate offset for the specific blind-spot channel.
+        image_shape : tuple of int
+            Shape of the image to generate the mask for.
 
         Returns
         -------
-        Tuple of (mask, shape)
-
+        mask : numpy.ndarray
+            Boolean mask array at least as large as the image.
+        shape : tuple of int
+            Shape of the downsampled result after masking.
         """
         # First we prepare the mask:
-        footprint = numpy.zeros(shape=self.footprint_shape, dtype=numpy.bool)
+        footprint = numpy.zeros(shape=self.footprint_shape, dtype=numpy.bool_)
         coordinates = tuple(
             int(x - m) for x, m in zip(blind_spot_for_channel, self.min_bounds)
         )
@@ -55,18 +78,26 @@ class BlindSpotTransform:
         return mask, shape
 
     def transform(self, input_image, target_image):
-        """
-        Transform method
+        """Apply the blind-spot transform to input and target images.
+
+        Produces batched, multi-channel arrays where each batch element
+        corresponds to a blind-spot offset and each channel to a shifted
+        view of the input.
 
         Parameters
         ----------
         input_image : numpy.ndarray
-        target_image : numpy.ndarray
+            Input image array.
+        target_image : numpy.ndarray or None
+            Target image array, or None for inference mode.
 
         Returns
         -------
-        Tuple of (transformed_input_image, transformed_target_image) or (transformed_input_image, None)
-
+        transformed_input_image : numpy.ndarray
+            Transformed input with shape (n_spots, n_spots, *downsampled_shape).
+        transformed_target_image : numpy.ndarray or None
+            Transformed target with shape (n_spots, 1, *downsampled_shape),
+            or None if ``target_image`` is None.
         """
 
         input_batch_list = []
@@ -115,17 +146,21 @@ class BlindSpotTransform:
             return transformed_input_image, None
 
     def inverse_transform(self, translated_transformed_image):
-        """
-        Inverse transform method
+        """Apply the inverse blind-spot transform to reconstruct the image.
+
+        Reassembles a full image from the batched, blind-spot-transformed
+        representation produced by a denoising model.
 
         Parameters
         ----------
         translated_transformed_image : numpy.ndarray
+            Transformed and translated image array with shape
+            (n_spots, 1, *downsampled_shape).
 
         Returns
         -------
-        translated_image : numpy.ndarray
-
+        numpy.ndarray
+            Reconstructed image with the original shape and dtype.
         """
 
         translated_image = numpy.empty(

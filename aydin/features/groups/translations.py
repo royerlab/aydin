@@ -1,16 +1,33 @@
-from typing import Tuple, Sequence
+"""Translation feature group that generates shifted copies of the image."""
+
+from typing import Sequence, Tuple
 
 from scipy.ndimage import shift
 
 from aydin.features.groups.base import FeatureGroupBase
-from aydin.util.log.log import lprint
+from aydin.util.log.log import aprint
 
 
 class TranslationFeatures(FeatureGroupBase):
-    """
-    Translations Feature Group class
+    """Translation feature group.
 
-    These features are just the image itself translated by a set of vectors.
+    Generates features by producing shifted copies of the image, one per
+    translation vector. Each feature is the original image translated by
+    the corresponding vector, using nearest-neighbor interpolation and
+    constant (zero) boundary padding.
+
+    This provides the simplest form of spatial context: each voxel sees
+    the intensity values at a fixed set of offsets from itself.
+
+    Attributes
+    ----------
+    translations : list of tuple of int
+        Translation vectors defining each feature.
+    image : numpy.ndarray or None
+        Reference to the current image being processed.
+    excluded_voxels : list of tuple of int
+        Voxels excluded from feature computation. If a translation
+        matches an excluded voxel, that feature is skipped entirely.
     """
 
     def __init__(self, translations: Sequence[Tuple[int, ...]]):
@@ -32,13 +49,44 @@ class TranslationFeatures(FeatureGroupBase):
 
     @property
     def receptive_field_radius(self) -> int:
+        """Return the receptive field radius based on the largest translation.
+
+        Returns
+        -------
+        radius : int
+            Maximum absolute translation component across all vectors.
+        """
         radius = max(max(abs(d) for d in t) for t in self.translations)
         return radius
 
     def num_features(self, ndim: int) -> int:
+        """Return the number of translation features (one per translation vector).
+
+        Parameters
+        ----------
+        ndim : int
+            Number of spatial dimensions (unused, included for API consistency).
+
+        Returns
+        -------
+        num : int
+            Number of translation vectors.
+        """
         return len(self.translations)
 
     def prepare(self, image, excluded_voxels=None, **kwargs):
+        """Prepare the translation feature group for computation.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image for which features will be computed.
+        excluded_voxels : list of tuple of int, optional
+            Voxels to exclude. If a translation matches an excluded voxel,
+            that feature produces no output.
+        **kwargs
+            Additional keyword arguments (unused).
+        """
         if excluded_voxels is None:
             excluded_voxels = []
 
@@ -47,8 +95,20 @@ class TranslationFeatures(FeatureGroupBase):
         self.kwargs = kwargs
 
     def compute_feature(self, index: int, feature):
+        """Compute a translated copy of the image as a feature.
+
+        If the translation matches any excluded voxel, the feature is
+        skipped (the output array is left unchanged).
+
+        Parameters
+        ----------
+        index : int
+            Index of the translation vector to apply.
+        feature : numpy.ndarray
+            Pre-allocated array for storing the translated image.
+        """
         translation = self.translations[index]
-        lprint(
+        aprint(
             f"translation feature: {index}, translation={translation}, exclude_center={self.excluded_voxels}"
         )
 
@@ -67,7 +127,8 @@ class TranslationFeatures(FeatureGroupBase):
         )
 
     def finish(self):
-        # Here we cleanup any resource alocated for the last feature computation:
+        """Clean up references from the last feature computation."""
+        # Here we cleanup any resource allocated for the last feature computation:
         self.image = None
         self.excluded_voxels = None
         self.kwargs = None

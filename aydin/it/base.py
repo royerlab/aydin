@@ -1,9 +1,17 @@
+"""Base classes for the Image Translator framework.
+
+This module defines the abstract base class `ImageTranslatorBase` that provides
+the core interface and shared functionality for all image translation implementations,
+including training, inference, tiling, transform management, and serialization.
+"""
+
 import gc
 import math
 import os
 from abc import ABC, abstractmethod
 from os.path import join
-from typing import Union, List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
+
 import jsonpickle
 import numpy
 import psutil
@@ -14,17 +22,53 @@ from aydin.it.exceptions.base import ArrayShapeDoesNotMatchError
 from aydin.it.normalisers.shape import ShapeNormaliser
 from aydin.it.transforms.base import ImageTransformBase
 from aydin.util.array.nd import nd_split_slices, remove_margin_slice
+from aydin.util.log.log import aprint, asection
 from aydin.util.misc.json import encode_indent
-from aydin.util.log.log import lprint, lsection
 from aydin.util.offcore.offcore import offcore_array
+
+# Maximum number of voxels per tile for tiled processing
+_MAX_VOXELS_PER_TILE = 768**3
 
 
 class ImageTranslatorBase(ABC):
-    """Image Translator base class
+    """Abstract base class for image translators.
 
-    Notes
-    -----
+    Provides the core interface for training and translating (denoising) images.
+    Handles batch/channel axis normalization, tiled inference for large images,
+    image transforms (preprocessing/postprocessing), blind-spot specification,
+    and model serialization.
 
+    Subclasses must implement `_train`, `_translate`, and `_load_internals`.
+
+    Attributes
+    ----------
+    self_supervised : bool
+        Whether the translator is operating in self-supervised mode
+        (input and target are the same image).
+    monitor : object or None
+        Monitor object for tracking training progress and callbacks.
+    blind_spots : str, list of tuple of int, or None
+        Blind-spot specification for self-supervised training. Controls
+        which voxels relative to the center are excluded during training.
+    tile_max_margin : int or None
+        Maximum margin width in voxels for tiled processing.
+    tile_min_margin : int
+        Minimum margin width in voxels for tiled processing.
+    transforms_list : list of ImageTransformBase
+        Ordered list of image transforms applied as preprocessing (forward)
+        and postprocessing (reverse).
+    max_memory_usage_ratio : float
+        Maximum fraction of available memory to use (0 to 1).
+    max_tiling_overhead : float
+        Maximum allowed margin overhead fraction during tiling.
+    max_voxels_per_tile : int
+        Maximum number of voxels per tile for tiled processing.
+    callback_period : int
+        Minimum period in seconds between training progress callbacks.
+    last_callback_time_sec : float
+        Timestamp of the last callback invocation.
+    loss_history : object or None
+        Training loss history after training completes.
     """
 
     def __init__(
@@ -36,11 +80,12 @@ class ImageTranslatorBase(ABC):
         max_memory_usage_ratio: float = 0.9,
         max_tiling_overhead: float = 0.1,
     ):
-        """Image Translator base class
+        """Construct an ImageTranslatorBase.
 
         Parameters
         ----------
-        monitor
+        monitor : object, optional
+            Monitor object for tracking training progress and callbacks.
 
         blind_spots : Optional[Union[str,List[Tuple[int]]]]
             List of voxel coordinates (relative to receptive field center) to
@@ -53,9 +98,8 @@ class ImageTranslatorBase(ABC):
             axis you can use integer indices, or 'x', 'y', 'z', and 't'
             (dimension order is tzyx with x being always the last dimension).
             If None is passed then the blindspots are automatically discovered
-            from the image content. If 'center' is passed then no additional
-            blindspots to the center pixel are considered. If 'center' is passed
-            then only the default single center voxel blind-spot is used.
+            from the image content. If 'center' is passed then only the default
+            single center voxel blind-spot is used.
 
         tile_min_margin : int
             Minimal width of tile margin in voxels.
@@ -84,7 +128,7 @@ class ImageTranslatorBase(ABC):
 
         self.max_memory_usage_ratio = max_memory_usage_ratio
         self.max_tiling_overhead = max_tiling_overhead
-        self.max_voxels_per_tile = 768**3
+        self.max_voxels_per_tile = _MAX_VOXELS_PER_TILE
 
         self.callback_period = 3
         self.last_callback_time_sec = -math.inf
@@ -92,12 +136,14 @@ class ImageTranslatorBase(ABC):
         self.loss_history = None
 
     def add_transform(self, transform: ImageTransformBase, sort: bool = True):
-        """Adds the given transform to the self.transforms_list
+        """Add a transform to the preprocessing/postprocessing pipeline.
 
         Parameters
         ----------
         transform : ImageTransformBase
-
+            The image transform to add.
+        sort : bool
+            If True, re-sort transforms by priority after adding.
         """
         self.transforms_list.append(transform)
         if sort:
@@ -106,40 +152,64 @@ class ImageTranslatorBase(ABC):
             )
 
     def clear_transforms(self):
-        """Clears the transforms list"""
+        """Remove all transforms from the preprocessing/postprocessing pipeline."""
         self.transforms_list.clear()
 
-    def _transform_preprocess_image(self, image):
-        with lsection("transform preprocess:"):
+    def transform_preprocess_image(self, image):
+        """Apply all transforms in order as preprocessing steps.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Input image to preprocess.
+
+        Returns
+        -------
+        numpy.ndarray
+            Preprocessed image.
+        """
+        with asection("transform preprocess:"):
             for transform in self.transforms_list:
-                lprint(f"applying transform: {transform}")
+                aprint(f"applying transform: {transform}")
                 try:
                     image = transform.preprocess(image)
-                except BaseException as e:
+                except Exception as e:
                     error_message = str(e).replace('\n', ', ')
-                    lprint(
+                    aprint(
                         f"Preprocessing failed for {transform} with: {error_message} "
                     )
-                    import traceback
                     import sys
+                    import traceback
 
                     traceback.print_exception(*sys.exc_info())
 
         return image
 
-    def _transform_postprocess_image(self, image):
-        with lsection("transform postprocess"):
+    def transform_postprocess_image(self, image):
+        """Apply all transforms in reverse order as postprocessing steps.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            Image to postprocess.
+
+        Returns
+        -------
+        numpy.ndarray
+            Postprocessed image.
+        """
+        with asection("transform postprocess"):
             for transform in reversed(self.transforms_list):
-                lprint(f"applying transform: {transform}")
+                aprint(f"applying transform: {transform}")
                 try:
                     image = transform.postprocess(image)
-                except BaseException as e:
+                except Exception as e:
                     error_message = str(e).replace('\n', ', ')
-                    lprint(
+                    aprint(
                         f"Postprocessing failed for {transform} with: {error_message}"
                     )
-                    import traceback
                     import sys
+                    import traceback
 
                     traceback.print_exception(*sys.exc_info())
 
@@ -149,56 +219,81 @@ class ImageTranslatorBase(ABC):
     def _train(
         self, input_image, target_image, train_valid_ratio, callback_period, jinv
     ):
-        """This function supposed to take normalized input image only
+        """Train the model on shape-normalized input and target images.
+
+        Subclasses must implement this method to define their training logic.
 
         Parameters
         ----------
-        input_image
-        target_image
-        train_valid_ratio
-        callback_period
-        jinv
-
-        Returns
-        -------
-
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        target_image : numpy.ndarray
+            Shape-normalized target image with same shape as input_image.
+        train_valid_ratio : float
+            Fraction of data to use for validation (e.g. 0.1 for 10%).
+        callback_period : int
+            Period in seconds between progress callbacks.
+        jinv : bool or tuple of bool, optional
+            Controls J-invariance (blind-spot) behavior during training.
         """
         raise NotImplementedError()
 
     def stop_training(self):
+        """Request early stopping of an ongoing training process.
+
+        The default implementation is a no-op. Subclasses should override
+        this to support interrupting training.
+        """
         pass
 
     @abstractmethod
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
-        """Translates an input image into an output image according to the learned function
+        """Translate an input image tile into a denoised output image.
+
+        Subclasses must implement this method to define their inference logic.
 
         Parameters
         ----------
-        input_image
-            input image
-        image_slice
-        whole_image_shape
+        input_image : numpy.ndarray
+            Shape-normalized input image with shape (B, C, *spatial_dims).
+        image_slice : tuple of slice, optional
+            Slice tuple indicating where this tile sits within the whole image.
+        whole_image_shape : tuple of int, optional
+            Shape of the full image (before tiling).
 
         Returns
         -------
-
+        numpy.ndarray
+            Translated (denoised) output image with same shape as input.
         """
         raise NotImplementedError()
 
     @abstractmethod
     def _load_internals(self, path: str):
-        raise NotImplementedError()
+        """Load model-specific internal state from disk.
 
-    def _estimate_memory_needed_and_available(self, image):
-        """
+        Subclasses must implement this to restore any state not captured
+        by JSON serialization (e.g., neural network weights).
 
         Parameters
         ----------
-        image
+        path : str
+            Directory path to load from.
+        """
+        raise NotImplementedError()
+
+    def _estimate_memory_needed_and_available(self, image):
+        """Estimate memory requirements and availability for translating an image.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            The image to estimate memory requirements for.
 
         Returns
         -------
-
+        tuple of (float, float)
+            A tuple of (memory_needed, memory_available) in bytes.
         """
         # TODO: make sure if this makes sense with GPU too
         # By default there is no memory needed and all memory is available
@@ -214,34 +309,60 @@ class ImageTranslatorBase(ABC):
         callback_period=3,
         jinv=None,
     ):
-        """Train to translate a given input image to a given output image.
-        This has a lot of the machinery for batching and more...
+        """Train the translator to map input images to target images.
+
+        Handles batch/channel axis parsing, shape normalization,
+        blind-spot auto-detection, transform preprocessing, and
+        delegates to the subclass-specific `_train` method.
+
+        Parameters
+        ----------
+        input_image : numpy.ndarray
+            Input image array of arbitrary dimensionality.
+        target_image : numpy.ndarray, optional
+            Target image array. If None, uses input_image (self-supervised).
+        batch_axes : tuple of bool or list of int, optional
+            Specifies which axes are batch dimensions.
+        channel_axes : tuple of bool or list of int, optional
+            Specifies which axes are channel dimensions.
+        train_valid_ratio : float
+            Fraction of data reserved for validation. Default is 0.1.
+        callback_period : int
+            Period in seconds between monitoring callbacks. Default is 3.
+        jinv : bool or tuple of bool, optional
+            Controls J-invariance behavior. None means auto-detect.
+
+        Raises
+        ------
+        ArrayShapeDoesNotMatchError
+            If batch_axes length does not match image dimensions, or if
+            input and target spatial dimensions do not match.
         """
 
         if target_image is None:
             target_image = input_image
 
-        with lsection(
+        with asection(
             f"Learning to translate from image of dimensions {str(input_image.shape)} to {str(target_image.shape)}, batch_axes={batch_axes}, channel_axes={channel_axes}, jinv={jinv}."
         ):
 
-            lprint('Running garbage collector...')
+            aprint('Running garbage collector...')
             gc.collect()
 
             # If we use the same image for input and output then we are in a self-supervised setting:
             self.self_supervised = input_image is target_image
 
             if self.self_supervised:
-                lprint('Training is self-supervised.')
+                aprint('Training is self-supervised.')
             else:
-                lprint('Training is supervised.')
+                aprint('Training is supervised.')
 
             # Let's apply the transforms:
-            input_image = self._transform_preprocess_image(input_image)
+            input_image = self.transform_preprocess_image(input_image)
             target_image = (
                 input_image
                 if self.self_supervised
-                else self._transform_preprocess_image(target_image)
+                else self.transform_preprocess_image(target_image)
             )
 
             if batch_axes is None:  # set default batch_axes value:
@@ -274,13 +395,13 @@ class ImageTranslatorBase(ABC):
 
             # Automatic blind-spot discovery:
             if self.blind_spots is None:
-                lprint(
+                aprint(
                     "Automatic discovery of noise autocorrelation and specification of N2S blind-spots activated!"
                 )
                 self.blind_spots, autocorrelogram = auto_detect_blindspots(
                     shape_normalised_input_image[0, 0]
                 )
-                lprint(f"Blind spots: {self.blind_spots}")
+                aprint(f"Blind spots: {self.blind_spots}")
                 autocorrelogram_values = numpy.unique(autocorrelogram)
                 autocorrelogram_values = numpy.sort(autocorrelogram_values)[::-1][:5]
                 auto_str = array2string(
@@ -292,8 +413,8 @@ class ImageTranslatorBase(ABC):
                     edgeitems=16,
                     sign='+',
                 )
-                lprint(f"Autocorrelogram unique values in decreasing order: {auto_str}")
-            elif type(self.blind_spots) == str:
+                aprint(f"Autocorrelogram unique values in decreasing order: {auto_str}")
+            elif isinstance(self.blind_spots, str):
                 # Number of spatio-temporal dims:
                 st_ndim = shape_normalised_input_image.ndim - 2
                 # Parse:
@@ -328,13 +449,42 @@ class ImageTranslatorBase(ABC):
         channel_axes=None,
         tile_size=None,
     ):
+        """Translate (denoise) an input image using the trained model.
 
-        with lsection(
+        Handles tiled inference for large images, shape normalization,
+        and transform postprocessing.
+
+        Parameters
+        ----------
+        input_image : numpy.ndarray
+            Input image to translate.
+        translated_image : numpy.ndarray, optional
+            Pre-allocated output array. If None, a new array is created.
+        batch_axes : tuple of bool or list of int, optional
+            Specifies which axes are batch dimensions.
+        channel_axes : tuple of bool or list of int, optional
+            Specifies which axes are channel dimensions.
+        tile_size : int, optional
+            Suggested tile size for tiled inference. Use 0 to disable tiling.
+            If None, tiling is determined automatically.
+
+        Returns
+        -------
+        numpy.ndarray
+            The translated (denoised) image.
+
+        Raises
+        ------
+        ArrayShapeDoesNotMatchError
+            If batch_axes length does not match image dimensions.
+        """
+
+        with asection(
             f"Predicting output image from input image of dimension {input_image.shape}, batch_axes={batch_axes}, channel_axes={channel_axes}"
         ):
 
             # Let's apply the transforms:
-            input_image = self._transform_preprocess_image(input_image)
+            input_image = self.transform_preprocess_image(input_image)
 
             # set default batch_axes and channel_axes values:
             if batch_axes is None:
@@ -397,8 +547,8 @@ class ImageTranslatorBase(ABC):
                     self.tile_max_margin,
                     suggested_tile_size=tile_size,
                 )
-                lprint(f"Tilling strategy: {tilling_strategy}")
-                lprint(f"Margins for tiles: {margins} .")
+                aprint(f"Tilling strategy: {tilling_strategy}")
+                aprint(f"Margins for tiles: {margins} .")
 
                 # tile slice objects (with and without margins):
                 tile_slices_margins = list(
@@ -412,14 +562,14 @@ class ImageTranslatorBase(ABC):
 
                 # Number of tiles:
                 number_of_tiles = len(tile_slices)
-                lprint(f"Number of tiles (slices): {number_of_tiles}")
+                aprint(f"Number of tiles (slices): {number_of_tiles}")
 
                 # We create slice list:
                 slicezip = zip(tile_slices_margins, tile_slices)
 
                 counter = 1
                 for slice_margin_tuple, slice_tuple in slicezip:
-                    with lsection(
+                    with asection(
                         f"Current tile: {counter}/{number_of_tiles}, slice: {slice_tuple} "
                     ):
 
@@ -429,7 +579,7 @@ class ImageTranslatorBase(ABC):
                         ].copy()
 
                         # We do the actual translation:
-                        lprint("Translating...")
+                        aprint("Translating...")
                         translated_image_tile = self._translate(
                             input_image_tile,
                             image_slice=slice_margin_tuple,
@@ -437,7 +587,7 @@ class ImageTranslatorBase(ABC):
                         )
 
                         # We compute the slice needed to cut out the margins:
-                        lprint("Removing margins...")
+                        aprint("Removing margins...")
                         remove_margin_slice_tuple = remove_margin_slice(
                             normalised_input_shape, slice_margin_tuple, slice_tuple
                         )
@@ -456,10 +606,10 @@ class ImageTranslatorBase(ABC):
                             )
 
                         # We plug in the batch without margins into the destination image:
-                        lprint("Inserting translated batch into result image...")
-                        shape_normalised_translated_image[
-                            slice_tuple
-                        ] = translated_image_tile[remove_margin_slice_tuple]
+                        aprint("Inserting translated batch into result image...")
+                        shape_normalised_translated_image[slice_tuple] = (
+                            translated_image_tile[remove_margin_slice_tuple]
+                        )
 
                         counter += 1
 
@@ -469,7 +619,7 @@ class ImageTranslatorBase(ABC):
             )
 
             # Let's undo the transforms:
-            shape_denormalised_translated_image = self._transform_postprocess_image(
+            shape_denormalised_translated_image = self.transform_postprocess_image(
                 shape_denormalised_translated_image
             )
 
@@ -488,9 +638,34 @@ class ImageTranslatorBase(ABC):
         max_margin,
         suggested_tile_size=None,
     ):
+        """Determine the optimal tiling strategy and margins for inference.
+
+        Computes how to split an image into tiles based on memory constraints,
+        maximum voxels per tile, and suggested tile sizes.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            The image to compute the tiling strategy for.
+        max_voxels_per_tile : int
+            Maximum number of voxels allowed per tile.
+        min_margin : int
+            Minimum margin width in voxels around each tile.
+        max_margin : int or None
+            Maximum margin width in voxels around each tile.
+        suggested_tile_size : int, optional
+            Suggested tile size. If None, determined automatically.
+
+        Returns
+        -------
+        tuple of (tuple of int, tuple of int)
+            A tuple of (tiling_strategy, margins) where tiling_strategy
+            specifies the number of splits per dimension and margins
+            specifies the overlap per dimension.
+        """
 
         # We will store the batch strategy as a list of integers representing the number of chunks per dimension:
-        with lsection("Determine tilling strategy:"):
+        with asection("Determine tilling strategy:"):
 
             suggested_tile_size = (
                 math.inf if suggested_tile_size is None else suggested_tile_size
@@ -500,32 +675,32 @@ class ImageTranslatorBase(ABC):
             shape = image.shape
             num_spatio_temp_dim = num_spatiotemp_dim = len(shape) - 2
 
-            lprint(f"image shape             = {shape}")
-            lprint(f"max_voxels_per_tile     = {max_voxels_per_tile}")
+            aprint(f"image shape             = {shape}")
+            aprint(f"max_voxels_per_tile     = {max_voxels_per_tile}")
 
             # Estimated amount of memory needed for storing all features:
             (
                 estimated_memory_needed,
                 total_memory_available,
             ) = self._estimate_memory_needed_and_available(image)
-            lprint(f"Estimated amount of memory needed: {estimated_memory_needed}")
+            aprint(f"Estimated amount of memory needed: {estimated_memory_needed}")
 
             # Available physical memory :
             total_memory_available *= self.max_memory_usage_ratio
 
-            lprint(
+            aprint(
                 f"Available memory (we reserve 10% for 'comfort'): {total_memory_available}"
             )
 
             # How much do we need to tile because of memory, if at all?
             split_factor_mem = estimated_memory_needed / total_memory_available
-            lprint(
+            aprint(
                 f"How much do we need to tile because of memory? : {split_factor_mem} times."
             )
 
             # how much do we have to tile because of the limit on the number of voxels per tile?
             split_factor_max_voxels = image.size / max_voxels_per_tile
-            lprint(
+            aprint(
                 f"How much do we need to tile because of the limit on the number of voxels per tile? : {split_factor_max_voxels} times."
             )
 
@@ -533,7 +708,7 @@ class ImageTranslatorBase(ABC):
             split_factor_suggested_tile_size = image.size / (
                 suggested_tile_size**num_spatio_temp_dim
             )
-            lprint(
+            aprint(
                 f"How much do we need to tile because of the suggested tile size? : {split_factor_suggested_tile_size} times."
             )
 
@@ -545,7 +720,7 @@ class ImageTranslatorBase(ABC):
             )
             # We cannot split less than 1 time:
             desired_split_factor = max(1, int(math.ceil(desired_split_factor)))
-            lprint(f"Desired split factor: {desired_split_factor}")
+            aprint(f"Desired split factor: {desired_split_factor}")
 
             # Number of batches:
             num_batches = shape[0]
@@ -555,7 +730,7 @@ class ImageTranslatorBase(ABC):
                 # Not enough splitting happening along the batch dimension, we need to split further:
                 # how much?
                 rest_split_factor = desired_split_factor / num_batches
-                lprint(
+                aprint(
                     f"Not enough splitting happening along the batch dimension, we need to split spatio-temp dims by: {rest_split_factor}"
                 )
 
@@ -563,7 +738,7 @@ class ImageTranslatorBase(ABC):
                 split_per_dim = (rest_split_factor / numpy.prod(shape[2:])) ** (
                     1 / num_spatio_temp_dim
                 )
-                lprint(f"Splitting per dimension: {split_per_dim}")
+                aprint(f"Splitting per dimension: {split_per_dim}")
 
                 # We split proportionally to each axis but do not exceed the rest_split_factor per axis:
                 spatiotemp_tilling_strategy = tuple(
@@ -572,7 +747,7 @@ class ImageTranslatorBase(ABC):
                 )
 
                 tilling_strategy = (num_batches, 1) + spatiotemp_tilling_strategy
-                lprint(f"Preliminary tilling strategy is: {tilling_strategy}")
+                aprint(f"Preliminary tilling strategy is: {tilling_strategy}")
 
                 # We correct for eventual oversplitting by favouring splitting over the front dimensions:
                 current_splitting_factor = 1
@@ -596,7 +771,7 @@ class ImageTranslatorBase(ABC):
                     1 for s in shape[2:]
                 )
 
-            lprint(f"Tilling strategy is: {tilling_strategy}")
+            aprint(f"Tilling strategy is: {tilling_strategy}")
 
             # Handles defaults:
             if max_margin is None:
@@ -609,7 +784,7 @@ class ImageTranslatorBase(ABC):
             estimated_tile_shape = tuple(
                 int(round(s / ts)) for s, ts in zip(shape[2:], tilling_strategy[2:])
             )
-            lprint(f"The estimated tile shape is: {estimated_tile_shape}")
+            aprint(f"The estimated tile shape is: {estimated_tile_shape}")
 
             # Limit margins:
             # We automatically set the margin of the tile size:
@@ -635,23 +810,26 @@ class ImageTranslatorBase(ABC):
             return tilling_strategy, margins
 
     def save(self, path: str):
-        """
-        Saves a 'all-batteries-included' image translation model at a given path (folder).
+        """Save the image translator model to disk.
+
+        Serializes the translator state as JSON and writes it to
+        the specified directory.
 
         Parameters
         ----------
         path : str
-            path to save to
+            Directory path to save the model to.
 
         Returns
         -------
-
+        str
+            JSON string of the serialized model.
         """
         os.makedirs(path, exist_ok=True)
 
         frozen = encode_indent(self)
 
-        lprint(f"Saving image translator to: {path}")
+        aprint(f"Saving image translator to: {path}")
         with open(join(path, "image_translation.json"), "w") as json_file:
             json_file.write(frozen)
 
@@ -659,19 +837,19 @@ class ImageTranslatorBase(ABC):
 
     @staticmethod
     def load(path: str):
-        """
-        Returns an 'all-batteries-included' image translation model at a given path (folder).
+        """Load a previously saved image translator model from disk.
 
         Parameters
         ----------
         path : str
-            path to load from.
+            Directory path to load the model from.
 
         Returns
         -------
-
+        ImageTranslatorBase
+            The restored image translator instance.
         """
-        lprint(f"Loading image translator from: {path}")
+        aprint(f"Loading image translator from: {path}")
         with open(join(path, "image_translation.json"), "r") as json_file:
             frozen = json_file.read()
 
@@ -681,62 +859,83 @@ class ImageTranslatorBase(ABC):
 
         return thawed
 
-    # We exclude certain fields from saving:
     def __getstate__(self):
+        """Customize pickle state to exclude non-serializable normaliser fields.
+
+        Returns
+        -------
+        dict
+            Object state dictionary with normalisers excluded.
+        """
         state = self.__dict__.copy()
-        del state['input_normaliser']
-        del state['target_normaliser']
+        if 'input_normaliser' in state:
+            del state['input_normaliser']
+        if 'target_normaliser' in state:
+            del state['target_normaliser']
         return state
 
     @staticmethod
     def parse_axes_args(
         batch_axes: Union[List[int], List[bool]],
-        chan_axes: Union[List[int], List[bool]],
+        channel_axes: Union[List[int], List[bool]],
         ndim: int,
     ):
-        """
+        """Parse and validate batch and channel axis specifications.
 
+        Accepts either boolean arrays or integer index arrays and converts
+        them into a consistent boolean array representation.
 
         Parameters
         ----------
-        batch_axes : Union[List[int], List[bool]]
-        chan_axes : Union[List[int], List[bool]]
+        batch_axes : list of int or list of bool
+            Batch axis specification as boolean flags or integer indices.
+        channel_axes : list of int or list of bool
+            Channel axis specification as boolean flags or integer indices.
         ndim : int
+            Total number of dimensions in the image.
 
         Returns
         -------
+        tuple of (list of bool, list of bool)
+            Validated boolean arrays for batch and channel axes.
 
+        Raises
+        ------
+        Exception
+            If axes indices are out of range, axes types are mixed,
+            the number of spacetime axes is invalid (not 1-4),
+            or any axis is marked as both batch and channel.
         """
         if (
             batch_axes == []
             or batch_axes is None
             or all(isinstance(x, bool) for x in batch_axes)
         ) and (
-            chan_axes == []
-            or chan_axes is None
-            or all(isinstance(x, bool) for x in chan_axes)
+            channel_axes == []
+            or channel_axes is None
+            or all(isinstance(x, bool) for x in channel_axes)
         ):
             # check if it is all boolean values then check if it is correct size then return
-            batch_result, chan_result = batch_axes, chan_axes
+            batch_result, chan_result = batch_axes, channel_axes
         elif (
             batch_axes == []
             or batch_axes is None
             or all(isinstance(x, int) for x in batch_axes)
         ) and (
-            chan_axes == []
-            or chan_axes is None
-            or all(isinstance(x, int) for x in chan_axes)
+            channel_axes == []
+            or channel_axes is None
+            or all(isinstance(x, int) for x in channel_axes)
         ):
             # check if it is list of indices and can make meaningful boolean arrays, if so return
             if any(i < 0 or i >= ndim for i in batch_axes) or any(
-                i < 0 or i >= ndim for i in chan_axes
+                i < 0 or i >= ndim for i in channel_axes
             ):
                 raise Exception(
                     "No axes index can be smaller than zero or bigger than ndim-1!"
                 )
 
             batch_result = [True if i in batch_axes else False for i in range(ndim)]
-            chan_result = [True if i in chan_axes else False for i in range(ndim)]
+            chan_result = [True if i in channel_axes else False for i in range(ndim)]
         else:
             raise Exception(
                 "Axes arguments has to be boolean arrays or integer index arrays!"
@@ -744,9 +943,9 @@ class ImageTranslatorBase(ABC):
 
         ndim_spacetime = ndim - (batch_result.count(True) + chan_result.count(True))
         if ndim_spacetime > 4 or ndim_spacetime < 1:
-            print(batch_result)
-            print(chan_result)
-            print(
+            aprint(batch_result)
+            aprint(chan_result)
+            aprint(
                 ndim, batch_result.count(True), chan_result.count(True), ndim_spacetime
             )
             raise Exception(
@@ -756,13 +955,32 @@ class ImageTranslatorBase(ABC):
         if any(
             [batch_result[i] is True and chan_result[i] is True for i in range(ndim)]
         ):
-            raise Exception("No axes can be both batch and chan axes!")
+            raise Exception("No axes can be both batch and channel axes!")
 
         return batch_result, chan_result
 
     @staticmethod
     def _parse_blind_spot_shorthand_notation(blind_spots: str, st_ndim: int):
-        lprint(f"Blindspot shorthand notation detected: {blind_spots} ")
+        """Parse blind-spot shorthand notation into a list of coordinate tuples.
+
+        Converts shorthand strings like 'x#1,y#2' into explicit lists of
+        relative voxel coordinates for the blind-spot mask.
+
+        Parameters
+        ----------
+        blind_spots : str
+            Shorthand notation string. Use '<axis>#<radius>' format
+            (e.g. 'x#1' or 'x#1,y#2'). Use 'center' for only the
+            center voxel.
+        st_ndim : int
+            Number of spatio-temporal dimensions.
+
+        Returns
+        -------
+        list of tuple of int
+            List of relative voxel coordinate tuples for the blind-spot.
+        """
+        aprint(f"Blindspot shorthand notation detected: {blind_spots} ")
         # Replace commas with spaces:
         blind_spots = blind_spots.replace(',', ' ')
         # First split by white space:
@@ -804,6 +1022,6 @@ class ImageTranslatorBase(ABC):
 
         blind_spots = list(blind_spots_set)
 
-        lprint(f"Parsed blindspot from shorthand notation: {blind_spots} ")
+        aprint(f"Parsed blindspot from shorthand notation: {blind_spots} ")
 
         return blind_spots

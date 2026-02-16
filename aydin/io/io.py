@@ -1,9 +1,14 @@
-"""
-Axis codes:
-       'X' width, 'Y' height, 'S' sample, 'I' image series|page|plane,
-       'Z' depth, 'C' color|em-wavelength|channel, 'E' ex-wavelength|lambda,
-       'T' time, 'R' region|tile, 'A' angle, 'P' phase, 'H' lifetime,
-       'L' exposure, 'V' event, 'Q' unknown, '_' missing
+"""Image reading and writing for multiple file formats.
+
+This module provides ``imread`` and ``imwrite`` functions that support TIFF,
+CZI, PNG, JPEG, NPY, NPZ, ND2, Zarr, and file glob patterns. Metadata
+(axes, shape, dtype, batch/channel classification) is extracted automatically.
+
+Axis codes used in metadata:
+    'X' width, 'Y' height, 'S' sample, 'I' image series|page|plane,
+    'Z' depth, 'C' color|em-wavelength|channel, 'E' ex-wavelength|lambda,
+    'T' time, 'R' region|tile, 'A' angle, 'P' phase, 'H' lifetime,
+    'L' exposure, 'V' event, 'Q' unknown, '_' missing
 """
 
 import os
@@ -12,31 +17,39 @@ import traceback
 from contextlib import contextmanager
 from os.path import exists
 from pathlib import Path
+
 import numpy
 import skimage
 import zarr
-from czifile import czifile, CziFile
+from czifile import CziFile, czifile
 from nd2reader import ND2Reader
 from numpy import array_equal
-from tifffile import tifffile, TiffFile, memmap
+from tifffile import TiffFile, memmap, tifffile
 
 from aydin.io.utils import is_zarr_storage, read_zarr_array
-from aydin.util.log.log import lsection, lprint
+from aydin.util.log.log import aprint, asection
 
 
 def is_batch(code, shape, axes):
-    """Method to check if given axis code belongs to a batch dimension.
+    """Check if a given axis code belongs to a batch dimension.
+
+    An axis is considered a batch dimension if its code is not one of the
+    spatial/temporal codes (X, Y, Z, T, Q, C), with a special case for
+    the 'I' code in 3D XY images.
 
     Parameters
     ----------
     code : str
-    shape : tuple
+        Single-character axis code (e.g., 'X', 'Y', 'T', 'I').
+    shape : tuple of int
+        Shape of the image array.
     axes : str
+        String of axis codes for all dimensions (e.g., 'TZCYX').
 
     Returns
     -------
     bool
-
+        True if the axis is a batch dimension.
     """
     # special case:
     if len(shape) == 3 and 'X' in axes and 'Y' in axes and 'I' == code:
@@ -46,27 +59,63 @@ def is_batch(code, shape, axes):
 
 
 def is_channel(code, length):
-    """Method to check if given axis code belongs to channel dimension.
+    """Check if a given axis code belongs to a channel dimension.
+
+    An axis is considered a channel dimension if its code is 'C' and
+    the dimension length is 8 or fewer.
 
     Parameters
     ----------
-    code :
+    code : str
+        Single-character axis code.
+    length : int
+        Length of the axis (number of entries along this dimension).
 
     Returns
     -------
     bool
-
+        True if the axis is a channel dimension.
     """
     return code == "C" and not length > 8
 
 
 class FileMetadata:
-    """Metadata class used across aydin package.
+    """Metadata container for image files used across the Aydin package.
 
-    # TODO: make this docstring more detailed
+    Stores information about the image file including format, shape, dtype,
+    axis codes, and the classification of each axis as batch, channel, or
+    spatial/temporal.
+
+    Attributes
+    ----------
+    is_folder : bool or None
+        Whether the source path is a directory.
+    extension : str or None
+        File extension (without leading dot), lowercased.
+    axes : str or None
+        String of axis codes (e.g., 'TZCYX').
+    shape : tuple of int or None
+        Shape of the image array.
+    dtype : numpy.dtype or None
+        Data type of the image.
+    format : str or None
+        Image format identifier (e.g., 'tiff', 'zarr', 'czi').
+    batch_axes : tuple of bool or None
+        Boolean tuple indicating which axes are batch dimensions.
+    channel_axes : tuple of bool or None
+        Boolean tuple indicating which axes are channel dimensions.
+    other : dict or None
+        Additional format-specific metadata (e.g., ImageJ metadata).
+    splitted : bool
+        Whether the image has been split along the channel axis.
     """
 
     def __init__(self):
+        """Initialize a FileMetadata instance with all attributes set to None.
+
+        All attributes default to None (or False for ``splitted``), and are
+        populated after reading an image file via :func:`imread`.
+        """
         self.is_folder = None
         self.extension = None
         self.axes = None
@@ -79,9 +128,32 @@ class FileMetadata:
         self.splitted = False
 
     def __str__(self) -> str:
+        """Return a human-readable string representation of the metadata.
+
+        Returns
+        -------
+        str
+            Formatted string showing all metadata fields.
+        """
         return f" is_folder={self.is_folder}, ext={self.extension}, axes={self.axes}, shape={self.shape}, batch_axes={self.batch_axes}, channel_axes={self.channel_axes}, dtype={self.dtype}, format={self.format} "
 
     def __eq__(self, other):
+        """Check equality between two FileMetadata instances.
+
+        Compares all metadata fields except ``splitted``.
+
+        Parameters
+        ----------
+        other : FileMetadata
+            The other metadata object to compare against.
+
+        Returns
+        -------
+        bool or NotImplemented
+            True if all compared fields are equal, False otherwise.
+            Returns ``NotImplemented`` if ``other`` is not a
+            :class:`FileMetadata` instance.
+        """
         if not isinstance(other, FileMetadata):
             return NotImplemented  # don't attempt to compare against unrelated types
 
@@ -99,24 +171,26 @@ class FileMetadata:
 
 
 def imread(input_path):
-    """Image reading method.
+    """Read an image file and return its array data and metadata.
 
-    Method takes the image path as a string argument. Upon certain
-    checks and decisions it returns the image array and its
-    corresponding metadata.
+    Supports TIFF, CZI, PNG, JPEG, NPY, NPZ, ND2, Zarr, and file
+    glob patterns. Automatically detects the file format from the
+    extension and extracts axis, shape, and dtype metadata.
 
     Parameters
     ----------
     input_path : str
+        Path to the image file or directory.
 
     Returns
     -------
-    tuple(numpy.typing.ArrayLike, FileMetadata)
-        Returns tuple of (array, metadata).
-
+    array : numpy.ndarray or None
+        The image data as a NumPy array. None if reading fails.
+    metadata : FileMetadata or None
+        Metadata about the image file. None if reading fails.
     """
 
-    with lsection(f"Reading image file at: {input_path}"):
+    with asection(f"Reading image file at: {input_path}"):
 
         metadata = FileMetadata()
 
@@ -135,22 +209,20 @@ def imread(input_path):
 
         try:
             if is_zarr:
-                g = zarr.open(
-                    input_path, mode='r'
-                )  # TODO: fix this, it crashes with zarr arrays
+                g = zarr.open(input_path, mode='r')
                 if isinstance(g, zarr.Array):
-                    lprint(f"Reading file {input_path} as ZARR array")
+                    aprint(f"Reading file {input_path} as ZARR array")
 
                     if 'axes' in g.attrs:
                         metadata.axes = g.attrs['axes']
                 else:
                     # Then we treat it as dexp-convention zarr group
-                    lprint(f"Reading file {input_path} as ZARR group")
+                    aprint(f"Reading file {input_path} as ZARR group")
                     nb_arrays = 0
                     for key in g.group_keys():
                         nb_arrays += 1
                         if 'axes' in g[key][key].attrs:
-                            metadata.axes = g.attrs['axes']
+                            metadata.axes = g[key][key].attrs['axes']
 
                 metadata.format = 'zarr'
                 array = read_zarr_array(input_path)
@@ -158,7 +230,7 @@ def imread(input_path):
                 metadata.dtype = array.dtype
 
             elif is_tiff:
-                lprint(f"Reading file {input_path} as TIFF file")
+                aprint(f"Reading file {input_path} as TIFF file")
                 with TiffFile(input_path) as tif:
                     if len(tif.series) >= 1:
                         serie = tif.series[0]
@@ -167,24 +239,24 @@ def imread(input_path):
                         metadata.axes = serie.axes
                         metadata.other = tif.imagej_metadata
                     else:
-                        lprint(f'There is no series in file: {input_path}')
+                        aprint(f'There is no series in file: {input_path}')
 
                 metadata.format = 'tiff'
                 array = tifffile.imread(input_path)
 
             elif is_czi:
-                lprint(f"Reading file {input_path} as CZI file")
+                aprint(f"Reading file {input_path} as CZI file")
                 with CziFile(input_path) as czi:
                     metadata.format = 'czi'
                     metadata.axes = czi.axes
                     metadata.other = czi.metadata(raw=False)
+                    metadata.shape = czi.shape
+                    metadata.dtype = czi.dtype
 
                 array = czifile.imread(input_path)
-                metadata.shape = czi.shape
-                metadata.dtype = czi.dtype
 
             elif is_png or is_jpg:
-                lprint(f"Reading file {input_path} as PNG file")
+                aprint(f"Reading file {input_path} as PNG file")
                 array = skimage.io.imread(input_path)
 
                 # We check if this is a gray level image:
@@ -209,11 +281,11 @@ def imread(input_path):
                     metadata.axes = "ZYXC"
                 else:
                     metadata.axes = "ZYXC"
-                    lprint(
+                    aprint(
                         f"Warning: Can't interpret {'png' if is_png else 'jpg'} structure, might be incorrect!"
                     )
             elif is_npy:
-                lprint(f"Reading file {input_path} as NPY file")
+                aprint(f"Reading file {input_path} as NPY file")
 
                 array = numpy.load(input_path)
                 metadata.format = 'npy'
@@ -222,30 +294,31 @@ def imread(input_path):
                 metadata.axes = ''.join(('Q',) * len(array.shape))
 
             elif is_npz:
-                lprint(f"Reading file {input_path} as NPZ file")
+                aprint(f"Reading file {input_path} as NPZ file")
 
                 data = numpy.load(input_path)
-                lprint(data.files)
+                aprint(data.files)
 
                 # this could contain several arrays, we read the one with the most voxels (good heuristic):
                 # We read the largest array:
                 biggest_size = 0
+                file = None
                 for _file in data.files:
                     _array = data[_file]
                     size = numpy.size(_array)
-                    lprint(
+                    aprint(
                         f"Reading array of name: {_file}, shape: {_array.shape}, and dtype: {_array.dtype}, size: {size}"
                     )
 
                     if biggest_size < size:
-                        lprint("Bigger!")
+                        aprint("Bigger!")
                         file = _file
                         biggest_size = size
                         array = _array
 
                 # makse sure the array is 'clean':
                 array = numpy.asarray(array)
-                lprint(
+                aprint(
                     f"Selected array: name: {file}, shape: {array.shape}, and dtype: {array.dtype}"
                 )
                 metadata.format = 'npz'
@@ -256,7 +329,7 @@ def imread(input_path):
                 ]
 
             elif is_nd2:
-                lprint(f"Reading file {input_path} as ND2 file")
+                aprint(f"Reading file {input_path} as ND2 file")
                 import pims
 
                 n2image = ND2Reader(input_path)
@@ -270,7 +343,7 @@ def imread(input_path):
                 metadata.dtype = array.dtype
 
             elif is_globlist:
-                lprint(f"Reading file {input_path} as file list")
+                aprint(f"Reading file {input_path} as file list")
                 import pims
 
                 array = pims.ImageSequence(input_path)
@@ -325,17 +398,17 @@ def imread(input_path):
                         0 : array.ndim
                     ]
                 except Exception as error:
-                    lprint(error)
-                    lprint(traceback.format_exc())
-                    lprint(
+                    aprint(error)
+                    aprint(traceback.format_exc())
+                    aprint(
                         f"Tried to open file {input_path} with skimage io but failed to obtain image."
                     )
                     return None, None
 
         except Exception as error:
-            lprint(error)
-            lprint(traceback.format_exc())
-            lprint(f"Could not read file {input_path} !")
+            aprint(error)
+            aprint(traceback.format_exc())
+            aprint(f"Could not read file {input_path} !")
             return None, None
 
         if metadata.axes:
@@ -347,7 +420,7 @@ def imread(input_path):
                 is_channel(axis, s) for axis, s in zip(metadata.axes, metadata.shape)
             )
 
-        lprint(f"Metadata: {metadata}")
+        aprint(f"Metadata: {metadata}")
 
         _sync_array_with_metadata(array, metadata)
 
@@ -355,6 +428,18 @@ def imread(input_path):
 
 
 def _sync_array_with_metadata(array, metadata):
+    """Synchronize metadata with the actual array shape and dtype.
+
+    Updates metadata if the actual array shape or dtype differs from
+    what was reported in the file headers (e.g., for multi-part TIFF files).
+
+    Parameters
+    ----------
+    array : numpy.ndarray or None
+        The loaded image array.
+    metadata : FileMetadata or None
+        Metadata to update in place.
+    """
     # We need to check if the metadata matches what we actually get, otherwise we need to update it.
     # This can happen for tiff files that are multi-part.
     if metadata is not None and array is not None:
@@ -365,15 +450,21 @@ def _sync_array_with_metadata(array, metadata):
 
 
 def imwrite(array, output_path, metadata=None, overwrite=True):
-    """Image writing method.
+    """Write an image array to a file.
+
+    Automatically handles format selection based on the output path extension.
+    Falls back to TIFF format if the requested format fails or is unsupported.
 
     Parameters
     ----------
     array : numpy.typing.ArrayLike
+        Image data to write.
     output_path : str
-    metadata : FileMetadata
+        Destination file path. Format is inferred from the extension.
+    metadata : FileMetadata, optional
+        Metadata to include in the output file (used for TIFF files).
     overwrite : bool
-
+        If False, skips writing when the output file already exists.
     """
 
     if not overwrite and exists(output_path):
@@ -383,7 +474,7 @@ def imwrite(array, output_path, metadata=None, overwrite=True):
         len(array.shape) > 3
         or (len(array.shape) == 3 and array.shape[-1] not in [3, 4])
     ):
-        lprint(
+        aprint(
             "png images with more than 2 dimensions are not supported, will be writing the result as a tif"
         )
         output_path = f"{output_path[:output_path.rfind('.')]}.tif"
@@ -400,14 +491,16 @@ def imwrite(array, output_path, metadata=None, overwrite=True):
 
 
 def _write_tiff(output_path, array, metadata):
-    """Internal method to write .tiff files with given array and metadata.
+    """Write an array to a TIFF file with optional ImageJ metadata.
 
     Parameters
     ----------
-    array : numpy.typing.ArrayLike
     output_path : str
-    metadata : FileMetadata
-
+        Destination file path.
+    array : numpy.typing.ArrayLike
+        Image data to write.
+    metadata : FileMetadata or None
+        Metadata containing ImageJ-compatible metadata in its ``other`` attribute.
     """
     # We get the ij metadata:
     ijmetadata = None if metadata is None else metadata.other
@@ -420,17 +513,24 @@ def _write_tiff(output_path, array, metadata):
 
 @contextmanager
 def mapped_tiff(output_path, shape, dtype):
-    """Mapped tiff context manager.
+    """Context manager for memory-mapped TIFF file writing.
+
+    Creates a memory-mapped TIFF file that can be written to incrementally.
+    The file is flushed and finalized when the context manager exits.
 
     Parameters
     ----------
-    output_path
-    shape
-    dtype
+    output_path : str
+        Destination file path for the TIFF file.
+    shape : tuple of int
+        Shape of the output image array.
+    dtype : numpy.dtype
+        Data type of the output image.
 
     Yields
     ------
-
+    array : numpy.ndarray
+        Memory-mapped array that can be written to.
     """
     array = memmap(output_path, shape=shape, dtype=dtype)
     try:
@@ -438,6 +538,6 @@ def mapped_tiff(output_path, shape, dtype):
         array.flush()
     finally:
         del array
-        lprint(
+        aprint(
             f"Flushing and writing all bytes to TIFF file {output_path}  (shape={shape}, dtype={dtype})"
         )

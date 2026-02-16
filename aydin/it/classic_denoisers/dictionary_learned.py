@@ -1,5 +1,13 @@
+"""Learned-dictionary sparse coding denoiser with auto-calibration via J-invariance.
+
+Provides calibration and denoising functions that use sparse coding over a
+learned dictionary of n-dimensional image patches. Supports multiple dictionary
+learning algorithms (K-Means, PCA, ICA, SDL) and sparse coding methods
+(OMP, LASSO, LARS, threshold).
+"""
+
 import math
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import numpy
 from numpy.typing import ArrayLike
@@ -9,6 +17,7 @@ from aydin.it.classic_denoisers.dictionary_fixed import denoise_dictionary_fixed
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.dictionary.dictionary import learn_dictionary
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint, asection
 from aydin.util.patch_size.patch_size import default_patch_size
 
 
@@ -55,7 +64,7 @@ def calibrate_denoise_dictionary_learned(
 
     patch_size : int
         Patch size. If None it is automatically adjusted
-        to teh number of dimensions of the image to
+        to the number of dimensions of the image to
         ensure a reasonable computational effort.
         (advanced)
 
@@ -141,14 +150,19 @@ def calibrate_denoise_dictionary_learned(
         Sparsity prior strength.
         (advanced)
 
-    do_cleanup_dictionary: bool
+    do_cleanup_dictionary : bool
         Removes dictionary entries that are likely pure
         noise or have impulses or very high-frequencies
         or checkerboard patterns that are unlikely
         needed to reconstruct the true signal.
         (advanced)
 
-    crop_size_in_voxels: int or None for default
+    do_denoise_dictionary : bool
+        If True, applies denoising to the learned dictionary atoms
+        themselves before using them for sparse coding.
+        (advanced)
+
+    crop_size_in_voxels : int or None
         Number of voxels for crop used to calibrate denoiser.
         Increase this number by factors of two if denoising quality is
         unsatisfactory -- this can be important for very noisy images.
@@ -166,7 +180,7 @@ def calibrate_denoise_dictionary_learned(
         Increase this number by factors of two if denoising quality is
         unsatisfactory.
 
-    blind_spots: bool
+    blind_spots: Optional[List[Tuple[int]]]
         List of voxel coordinates (relative to receptive field center) to
         be included in the blind-spot. For example, you can give a list of
         3 tuples: [(0,0,0), (0,1,0), (0,-1,0)] to extend the blind spot
@@ -197,8 +211,13 @@ def calibrate_denoise_dictionary_learned(
 
     Returns
     -------
-    Denoising function, dictionary containing optimal parameters,
-    and free memory needed in bytes for computation.
+    denoise_function : callable
+        The ``denoise_dictionary_learned`` function.
+    best_parameters : dict
+        Dictionary of optimal denoising parameters, including the chosen
+        sparse coding mode, sparsity level, and the learned dictionary.
+    memory_needed : int
+        Estimated memory needed in bytes for denoising the full image.
     """
     # Convert image to float if needed:
     image = image.astype(dtype=numpy.float32, copy=False)
@@ -226,24 +245,24 @@ def calibrate_denoise_dictionary_learned(
     dictionaries = {}
 
     for algorithm in algorithms:
-        # learn dictionary:
-        dictionary = learn_dictionary(
-            image,
-            patch_size=patch_size,
-            max_patches=max_patches,
-            dictionary_size=dictionary_size,
-            over_completeness=over_completeness,
-            max_dictionary_size=max_dictionary_size,
-            algorithm=algorithm,
-            num_iterations=num_iterations,
-            batch_size=batch_size,
-            alpha=alpha,
-            cleanup_dictionary=do_cleanup_dictionary,
-            denoise_dictionary=do_denoise_dictionary,
-            display_dictionary=display_dictionary,
-            **other_fixed_parameters,
-        )
-        dictionaries[algorithm] = dictionary
+        with asection(f"Learning dictionary with algorithm: {algorithm}"):
+            dictionary = learn_dictionary(
+                image,
+                patch_size=patch_size,
+                max_patches=max_patches,
+                dictionary_size=dictionary_size,
+                over_completeness=over_completeness,
+                max_dictionary_size=max_dictionary_size,
+                algorithm=algorithm,
+                num_iterations=num_iterations,
+                batch_size=batch_size,
+                alpha=alpha,
+                cleanup_dictionary=do_cleanup_dictionary,
+                denoise_dictionary=do_denoise_dictionary,
+                display_dictionary=display_dictionary,
+                **other_fixed_parameters,
+            )
+            dictionaries[algorithm] = dictionary
 
     # coding modes to try:
     coding_modes = []
@@ -268,6 +287,7 @@ def calibrate_denoise_dictionary_learned(
 
     # Partial function:
     def _denoise_dictionary(image, dictlearn_algorithm, *args, **kwargs):
+        """Denoise using the pre-learned dictionary for the given algorithm."""
         return denoise_dictionary_learned(
             image,
             *args,
@@ -290,6 +310,7 @@ def calibrate_denoise_dictionary_learned(
         )
         | other_fixed_parameters
     )
+    aprint(f"Best parameters: {best_parameters}")
 
     # Memory needed:
     memory_needed = 2 * image.nbytes + 6 * image.nbytes * math.prod(patch_size)
@@ -298,18 +319,25 @@ def calibrate_denoise_dictionary_learned(
 
 
 def denoise_dictionary_learned(*args, **kwargs):
-    """
-    Denoises the given image using sparse-coding over a fixed
-    dictionary of nD image patches. The dictionary learning and
-    patch sparse coding uses scikit-learn's Batch-OMP implementation.
+    """Denoise an image using sparse coding over a learned dictionary.
+
+    Delegates to ``denoise_dictionary_fixed`` with the provided arguments.
+    The dictionary should have been learned during calibration and passed
+    as a keyword argument.
+    <notgui>
 
     Parameters
     ----------
-    args
-    kwargs
+    *args
+        Positional arguments forwarded to ``denoise_dictionary_fixed``.
+    **kwargs
+        Keyword arguments forwarded to ``denoise_dictionary_fixed``.
+        Typically includes ``dictionary``, ``coding_mode``, ``sparsity``,
+        ``gamma``, and ``multi_core``.
 
     Returns
     -------
-    denoised image
+    numpy.ndarray
+        Denoised image.
     """
     return denoise_dictionary_fixed(*args, **kwargs)

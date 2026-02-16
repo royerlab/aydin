@@ -1,4 +1,11 @@
+"""Nearest Self Image computation for self-supervised denoising.
+
+Replaces each patch in an image with its nearest (non-identical) neighbor
+patch from the same image, producing a denoised approximation.
+"""
+
 from typing import Tuple, Union
+
 import numpy
 from pynndescent import NNDescent
 
@@ -7,14 +14,25 @@ from aydin.util.patch_transform.patch_transform import reconstruct_from_nd_patch
 
 
 def nearest_self_image(image, patch_shape: Union[int, Tuple[int, ...]] = 5):
-    """
-    This function computes the 'nearest self image' which is obtained by
-    replacing for each patch the nearest patch within the same image.
+    """Compute the nearest self image by replacing each patch with its nearest neighbor.
+
+    For each overlapping patch in the image, finds the most similar
+    (non-identical) patch within the same image using approximate
+    nearest neighbor search, and reconstructs the image from these
+    neighbor patches.
 
     Parameters
     ----------
-    image: ArrayLike
-        Nearest image to build.
+    image : numpy.ndarray
+        Input image to compute the nearest self image for.
+    patch_shape : int or tuple of int
+        Patch size. If int, used for all dimensions. Default is 5.
+
+    Returns
+    -------
+    numpy.ndarray
+        Reconstructed image where each patch has been replaced by its
+        nearest non-identical neighbor patch.
     """
 
     # Normalise patch shape:

@@ -1,3 +1,10 @@
+"""Signal-to-noise ratio estimation for images.
+
+This module estimates the signal-to-noise ratio (SNR) of an image in decibels
+by first estimating the resolution limit and then partitioning the frequency
+spectrum into signal and noise domains.
+"""
+
 import math
 
 import numpy
@@ -8,24 +15,30 @@ from aydin.analysis.resolution_estimate import resolution_estimate
 
 
 def snr_estimate(image, display_images: bool = False) -> float:
-    """Estimates the signal to noise ratio of an image in DB.
+    """Estimate the signal-to-noise ratio (SNR) of an image in decibels.
+
+    First estimates the resolution limit of the image, then partitions the
+    DCT spectrum into signal and noise domains based on that frequency
+    cutoff. The noise energy is corrected for the fact that noise is
+    uniformly distributed across the spectrum.
 
     A value of 0 means that the signal and noise have roughly the same energy,
     a negative value means that the noise is stronger than the signal,
-    and reciprocally, a positive value means that the signal is stronger
-    than the noise.
+    and a positive value means that the signal is stronger than the noise.
 
     Parameters
     ----------
     image : numpy.typing.ArrayLike
         Image to compute SNR estimate for.
 
-    display_images: bool
-        If true displays the spectrum in a napari window.
+    display_images : bool
+        If True, displays the spectrum and signal/noise domains in a
+        napari viewer window.
 
     Returns
     -------
-    Returns an estimate of the image's signal-to-noise ratio in dB.
+    noise_ratio : float
+        Estimated signal-to-noise ratio in dB.
     """
 
     # First we estimate resolution:

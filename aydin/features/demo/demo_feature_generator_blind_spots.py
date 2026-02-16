@@ -1,9 +1,12 @@
+"""Demo script showing feature generation with blind-spot (excluded voxel) support."""
+
 import numpy
 
 from aydin.features.standard_features import StandardFeatureGenerator
 
 
 def demo_collect_feature_2d():
+    """Generate and visualize 2D features with excluded voxels for blind-spot denoising."""
     generator = StandardFeatureGenerator(
         include_corner_features=True,
         include_scale_one=True,
@@ -38,10 +41,10 @@ def demo_collect_feature_2d():
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image', colormap='plasma')
-        viewer.add_image(features, name='features', colormap='plasma')
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image', colormap='plasma')
+    viewer.add_image(features, name='features', colormap='plasma')
+    napari.run()
 
 
 if __name__ == "__main__":

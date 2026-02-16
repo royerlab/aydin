@@ -1,26 +1,39 @@
+"""Empirical noise model estimation and sampling.
+
+This module provides functions to build an empirical noise model from paired
+clean/noisy images, and to sample realistic noise from that model. The model
+maps each possible clean pixel value to a distribution of observed noisy values.
+"""
+
 import numpy
 from numpy.random import randint
 
+from aydin.util.log.log import aprint
+
 
 def distill_noise_model(clean_array, noisy_array, nb_samples: int = 2**18):
-    """
-    Given a clean array and a corresponding noisy array,
-    this function analyses for each value in the clean array all the possible observed noisy values.
-    A table is drawn that maps for each clean value the 'nb_samples' possible noisy values.
-    This empirical noise model can be used to sample a noisy array from a clean one.
+    """Build an empirical noise model from paired clean and noisy arrays.
 
-    Note: This function assumes unsigned int 16bit arrays.
+    For each possible clean pixel value, collects all observed noisy values
+    and stores a random sample of them. The resulting table can be used to
+    generate realistic noise by looking up clean pixel values.
+
+    Note: This function assumes unsigned 16-bit integer arrays.
 
     Parameters
     ----------
     clean_array : numpy.typing.ArrayLike
+        The clean (ground truth) image array.
     noisy_array : numpy.typing.ArrayLike
+        The corresponding noisy image array, same shape as ``clean_array``.
     nb_samples : int
+        Number of noisy value samples to store per clean value.
 
     Returns
     -------
     noise_model : numpy.ndarray
-
+        Array of shape ``(max_clean_value + 1, nb_samples)`` with dtype
+        uint16. Each row contains sampled noisy values for that clean value.
     """
 
     x = clean_array.ravel()
@@ -41,7 +54,7 @@ def distill_noise_model(clean_array, noisy_array, nb_samples: int = 2**18):
     for clean_value in range(0, clean_max + 1):
 
         if clean_value % 128 == 0:
-            print(f"... analysing values: [{clean_value}, {clean_value + 128}]")
+            aprint(f"... analysing values: [{clean_value}, {clean_value + 128}]")
 
         (indices,) = numpy.where(x == clean_value)
 
@@ -60,17 +73,23 @@ def distill_noise_model(clean_array, noisy_array, nb_samples: int = 2**18):
 
 
 def sample_noise_from_model(clean_array, noise_model):
-    """Sample noise from model
+    """Generate a noisy image by sampling from an empirical noise model.
+
+    Each pixel in the clean array is used as an index into the noise model
+    to look up a random noisy value.
 
     Parameters
     ----------
     clean_array : numpy.typing.ArrayLike
+        The clean image array to add noise to. Values are clipped to
+        non-negative and cast to uint16.
     noise_model : numpy.typing.ArrayLike
+        Noise model array as returned by ``distill_noise_model``.
 
     Returns
     -------
     noisy : numpy.ndarray
-
+        Noisy image with the same shape as ``clean_array``, dtype uint16.
     """
 
     shape = clean_array.shape

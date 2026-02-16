@@ -1,9 +1,14 @@
-# Function to add camera noise
+"""Realistic camera noise simulation for scientific imaging.
+
+This module provides functions to simulate realistic camera noise including
+shot noise, dark current, gain variations, hot/cold pixels, and cosmic rays.
+Useful for generating synthetic noisy images for testing denoising algorithms.
+"""
+
 from typing import Optional
 
 import numpy
 from numpy.random import RandomState
-
 
 # from numpy.typing import ArrayLike
 
@@ -30,63 +35,81 @@ def simulate_camera_image(
     camera_rnd: Optional[RandomState] = None,
     dtype=numpy.int32,
 ):
-    """
-    Realistic noise simulation for scientific cameras.
-    Adapted from Kyle Douglas blog: http://kmdouglass.github.io/posts/modeling-noise-for-image-simulations/
-    With additional ideas from: https://mwcraig.github.io/ccd-as-book/01-03-Construction-of-an-artificial-but-realistic-image.html
+    """Simulate a realistic scientific camera image with multiple noise sources.
 
+    Models the full imaging pipeline including photon shot noise, dark current,
+    gain variations, hot/cold pixels, cosmic rays, readout offset, and pixel
+    saturation. Adapted from Kyle Douglas's blog [1]_ with additional ideas
+    from [2]_.
 
     Parameters
     ----------
-    photons_per_second :
-        Image representing the number of photons received on the camera per pixel per second
-    exposure_time_s :
-        Exposure time in seconds
-    quantum_efficiency :
-        Quantum efficiency - i.e. conversion factor between photons and electrons
-    gain :
-        Conversion factor between electrons and Analog-Digital-Units (ADU)
-    gain_sigma :
-        Unfortunately, not all gains are identical across the camera pixels,
-        This parameter controls the spread of the gain.
-    gain_column_sigma :
-        And often each column of the detector has its own electronics that induce another source of column-dependent noise.
-        This parameter controls the additional spread of the gain per column.
-    offset_mean :
-        Pixel  amplification offset noise mean value.
-    offset_sigma :
-        Pixel amplification offset noise sigma value.
-    dark_current :
-        Dark current, in electrons per pixel per second, which is the way manufacturers typically
-        report it.
-    dark_current_sigma :
-        Unfortunately, the dark current is not identical for each and every pixel.
-        This parameter controls the spread of the dark current.
-    dark_current_column_sigma :
-        And often each column of the detector has its own electronics that induce another source of column-dependent noise.
-        This parameter controls the additional spread of the dark current per column.
-    min_exposure_dark_current:
-        Minimal exposure for the purpose of dark photons. The effects of the dark current do not completely vanish for very short exposures...
-    num_hot_pixels:
-        Number of hot pixels.
-    num_cold_pixels:
-        Number of cold pixels.
-    probability_cosmic_ray:
-        Probability per pixel per second that a cosmic ray will hit a camera pixel.
-    bitdepth :
-        Bit depth of each pixel fo the camera
-    baseline :
-        Baseline value for camera
-    shot_rnd :
-        Random state for each image (time dependent)
-    camera_rnd :
-            Random state for each camera (time indedependent, camera instance dependent)
-    dtype :
-        Integral dtype to return image in
+    photons_per_second : numpy.typing.ArrayLike
+        Image representing the number of photons received on the camera
+        per pixel per second.
+    exposure_time_s : float
+        Exposure time in seconds.
+    quantum_efficiency : float
+        Quantum efficiency, i.e. conversion factor between photons and
+        electrons. Typically in the range [0, 1].
+    gain : float
+        Conversion factor between electrons and Analog-Digital Units (ADU).
+    gain_sigma : float
+        Standard deviation of per-pixel gain variation. Not all gains are
+        identical across the camera pixels; this parameter controls the
+        spread of the gain.
+    gain_column_sigma : float
+        Standard deviation of per-column gain variation. Each column of
+        the detector often has its own electronics that induce another
+        source of column-dependent noise.
+    offset_mean : float
+        Mean value of the pixel amplification offset noise.
+    offset_sigma : float
+        Standard deviation of the pixel amplification offset noise.
+    dark_current : float
+        Dark current in electrons per pixel per second, as typically
+        reported by manufacturers.
+    dark_current_sigma : float
+        Standard deviation of per-pixel dark current variation.
+    dark_current_column_sigma : float
+        Standard deviation of per-column dark current variation.
+    min_exposure_dark_current : float
+        Minimal effective exposure time for dark current accumulation.
+        The effects of dark current do not completely vanish for very
+        short exposures.
+    num_hot_pixels : int
+        Number of hot pixels to simulate.
+    num_cold_pixels : int
+        Number of cold pixels to simulate.
+    probability_cosmic_ray : float
+        Probability per pixel per second that a cosmic ray will hit a
+        camera pixel.
+    bitdepth : int
+        Bit depth of each pixel of the camera (e.g., 12 for 12-bit).
+    baseline : int
+        Baseline ADU value added to the image.
+    shot_rnd : numpy.random.RandomState, optional
+        Random state for shot-noise generation (time-dependent noise).
+        If None, a new unseeded RandomState is created.
+    camera_rnd : numpy.random.RandomState, optional
+        Random state for camera-specific noise (time-independent, camera
+        instance-dependent). If None, a seeded RandomState (seed=42) is
+        created for reproducibility.
+    dtype : numpy.dtype
+        Integer dtype for the output image.
 
     Returns
     -------
+    adu : numpy.ndarray
+        Simulated camera image in analog-to-digital units (ADU) with the
+        specified dtype and bit depth.
 
+    References
+    ----------
+    .. [1] Kyle Douglas, "Modeling Noise for Image Simulations",
+       http://kmdouglass.github.io/posts/modeling-noise-for-image-simulations/
+    .. [2] Matt Craig, "Construction of an artificial but realistic image",
+       https://mwcraig.github.io/ccd-as-book/01-03-Construction-of-an-artificial-but-realistic-image.html
     """
 
     if shot_rnd is None:
@@ -161,30 +184,33 @@ def simulate_camera_image(
         num_of_rays = exposure_time_s * probability_cosmic_ray * electrons.size
         effective_num_of_rays = shot_rnd.poisson(num_of_rays)
 
-        y_max, x_max = electrons.shape
-        ray_x = camera_rnd.randint(0, x_max, size=effective_num_of_rays)
-        ray_y = camera_rnd.randint(0, y_max, size=effective_num_of_rays)
-        dark_electrons[tuple([ray_y, ray_x])] += int(gain * 16)
+        shape = electrons.shape
+        ray_indices = tuple(
+            camera_rnd.randint(0, s, size=effective_num_of_rays) for s in shape
+        )
+        dark_electrons[ray_indices] += int(gain * 16)
 
     # Some pixels are hot:
     if num_hot_pixels > 0:
-        y_max, x_max = dark_electrons.shape
-        hot_x = camera_rnd.randint(0, x_max, size=num_hot_pixels)
-        hot_y = camera_rnd.randint(0, y_max, size=num_hot_pixels)
-        dark_electrons[tuple([hot_y, hot_x])] *= min(16, 2 ** (bitdepth - 2))
+        shape = dark_electrons.shape
+        hot_indices = tuple(
+            camera_rnd.randint(0, s, size=num_hot_pixels) for s in shape
+        )
+        dark_electrons[hot_indices] *= min(16, 2 ** (bitdepth - 2))
 
     # Some pixels are cold:
     if num_cold_pixels > 0:
-        y_max, x_max = electrons.shape
-        cold_x = camera_rnd.randint(0, x_max, size=num_cold_pixels)
-        cold_y = camera_rnd.randint(0, y_max, size=num_cold_pixels)
-        electrons[tuple([cold_y, cold_x])] /= min(16, 2 ** (bitdepth - 2))
+        shape = electrons.shape
+        cold_indices = tuple(
+            camera_rnd.randint(0, s, size=num_cold_pixels) for s in shape
+        )
+        electrons[cold_indices] /= min(16, 2 ** (bitdepth - 2))
 
     # Add dark current
     all_electrons = dark_electrons + electrons
 
     # max ADU:
-    max_adu = numpy.int(2**bitdepth - 1)
+    max_adu = int(2**bitdepth - 1)
 
     # Convert to discrete numbers (ADU):
     adu = (all_electrons * gain_image + offset_image).astype(dtype)
@@ -199,8 +225,40 @@ def simulate_camera_image(
 
 
 def _poisson(rnd: RandomState, lam, size):
+    """Draw samples from a Poisson distribution using the given random state.
+
+    Parameters
+    ----------
+    rnd : numpy.random.RandomState
+        Random state instance to use for sampling.
+    lam : float or numpy.typing.ArrayLike
+        Expected number of events (lambda parameter). Must be >= 0.
+    size : int or tuple of int
+        Output shape.
+
+    Returns
+    -------
+    samples : numpy.ndarray
+        Array of Poisson-distributed samples with the given shape.
+    """
     return rnd.poisson(lam=lam, size=size)
 
 
 def _normal(rnd: RandomState, scale, size):
+    """Draw samples from a zero-mean normal distribution using the given random state.
+
+    Parameters
+    ----------
+    rnd : numpy.random.RandomState
+        Random state instance to use for sampling.
+    scale : float
+        Standard deviation of the normal distribution.
+    size : int or tuple of int
+        Output shape.
+
+    Returns
+    -------
+    samples : numpy.ndarray
+        Array of normally-distributed samples with the given shape.
+    """
     return rnd.normal(scale=scale, size=size)

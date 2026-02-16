@@ -110,6 +110,7 @@ venv.bak/
 
 # Runtime folders
 data/
+demo_results/
 
 # OS specific
 .DS_Store
@@ -122,3 +123,6 @@ build/win/build/
 *.png
 
 aydin/_version.py
+
+# Temporary working directories
+delme/

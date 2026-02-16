@@ -1,27 +1,54 @@
+"""Job runner for executing denoising operations in a background thread."""
+
 import traceback
 
-from qtpy.QtWidgets import QWidget, QHBoxLayout
+from qtpy.QtCore import QMutex
+from qtpy.QtWidgets import QHBoxLayout, QWidget
 
 from aydin.gui._qt.custom_widgets.denoise_tab_pretrained_method import (
     DenoiseTabPretrainedMethodWidget,
 )
-from aydin.gui._qt.output_wrapper import OutputWrapper
 from aydin.gui._qt.job_runners.worker import Worker
+from aydin.gui._qt.output_wrapper import OutputWrapper
 from aydin.io.io import imwrite
 from aydin.io.utils import (
-    get_output_image_path,
     get_options_json_path,
+    get_output_image_path,
     get_save_model_path,
 )
-from aydin.restoration.denoise.util.denoise_utils import (
-    get_denoiser_class_instance,
-    get_pretrained_denoiser_class_instance,
-)
-from aydin.util.log.log import Log, lprint
+from aydin.util.log.log import Log, aprint
 
 
 class DenoiseJobRunner(QWidget):
+    """Manages the execution of denoising jobs in a background thread.
+
+    Coordinates gathering images, configuration, and batch/channel axes from
+    the GUI tabs, instantiates the appropriate denoiser, runs training and
+    inference in a worker thread, writes results to disk, and opens napari
+    to display the results when complete.
+
+    Parameters
+    ----------
+    parent : MainPage
+        The parent MainPage widget.
+    threadpool : QThreadPool
+        Thread pool for executing background workers.
+    start_button : QPushButton
+        The Start button that triggers denoising.
+    """
+
     def __init__(self, parent, threadpool, start_button):
+        """Initialize the denoising job runner and connect the start button.
+
+        Parameters
+        ----------
+        parent : MainPage
+            The parent MainPage widget.
+        threadpool : QThreadPool
+            Thread pool for executing background workers.
+        start_button : QPushButton
+            The Start button that triggers denoising.
+        """
         super(DenoiseJobRunner, self).__init__(parent)
         self.parent = parent
         self.threadpool = threadpool
@@ -32,8 +59,9 @@ class DenoiseJobRunner(QWidget):
         stderr = OutputWrapper(self, False)
         stderr.outputWritten.connect(self.progress_fn)
 
-        self.result_images = []
-        self.early_stopped = False
+        self._mutex = QMutex()
+        self._result_images = []
+        self._early_stopped = False
 
         self.widget_layout = QHBoxLayout()
 
@@ -41,11 +69,56 @@ class DenoiseJobRunner(QWidget):
 
         self.setLayout(self.widget_layout)
 
+    def _append_results(self, images):
+        """Thread-safe append to result images list."""
+        self._mutex.lock()
+        try:
+            self._result_images += images
+        finally:
+            self._mutex.unlock()
+
+    def _clear_results(self):
+        """Thread-safe clear of result images list."""
+        self._mutex.lock()
+        try:
+            self._result_images = []
+        finally:
+            self._mutex.unlock()
+
+    def _set_early_stopped(self, val):
+        """Thread-safe setter for early_stopped flag."""
+        self._mutex.lock()
+        try:
+            self._early_stopped = val
+        finally:
+            self._mutex.unlock()
+
+    def _is_early_stopped(self):
+        """Thread-safe getter for early_stopped flag."""
+        self._mutex.lock()
+        try:
+            return self._early_stopped
+        finally:
+            self._mutex.unlock()
+
     def stop_running(self):
-        self.early_stopped = True
+        """Signal the denoiser to stop early."""
+        self._set_early_stopped(True)
         self.denoiser.stop_running()
 
     def start_func(self, progress_callback):
+        """Worker function that runs training and inference for each image.
+
+        Parameters
+        ----------
+        progress_callback : Signal
+            Qt signal for reporting progress text to the GUI.
+
+        Returns
+        -------
+        list
+            List of denoised image arrays.
+        """
         Log.gui_callback = progress_callback
 
         results = []
@@ -60,14 +133,14 @@ class DenoiseJobRunner(QWidget):
                 self.denoiser.train(
                     training_image,
                     batch_axes=self.batch_axes,
-                    chan_axes=self.channel_axes,
+                    channel_axes=self.channel_axes,
                 )
 
             if self.denoiser.it:
                 denoised = self.denoiser.denoise(
                     inference_image,
                     batch_axes=self.batch_axes,
-                    chan_axes=self.channel_axes,
+                    channel_axes=self.channel_axes,
                 )
                 results.append(denoised)
 
@@ -83,7 +156,7 @@ class DenoiseJobRunner(QWidget):
                         output_folder=output_folder,
                     )
                     self.parent.save_options_json(json_path)
-                    lprint(f"DONE, options json written in {json_path}")
+                    aprint(f"DONE, options json written in {json_path}")
 
                 if self.save_model:
                     model_path = get_save_model_path(
@@ -92,38 +165,75 @@ class DenoiseJobRunner(QWidget):
                         output_folder=output_folder,
                     )
                     self.denoiser.save(model_path)
-                    lprint(f"DONE, trained model written in {model_path}")
+                    aprint(f"DONE, trained model written in {model_path}")
 
-                lprint(f"DONE, results written in {output_path}")
+                aprint(f"DONE, results written in {output_path}")
             else:
-                self.early_stopped = True
-                lprint("DONE, failed to run...")
+                self._set_early_stopped(True)
+                aprint("DONE, failed to run...")
 
         Log.gui_callback = None
         return results
 
     def progress_fn(self, log_str):
+        """Append progress text to the activity log.
+
+        Parameters
+        ----------
+        log_str : str
+            Text to append.
+        """
         self.parent.activity_widget.infoTextBox.insertPlainText(log_str)
 
+    def error_fn(self, error_tuple):
+        """Handle worker thread errors by logging and re-enabling the UI.
+
+        Parameters
+        ----------
+        error_tuple : tuple
+            Tuple of (exctype, value, formatted_traceback).
+        """
+        exctype, value, tb_str = error_tuple
+        self._set_early_stopped(True)
+        aprint(f"Denoising failed: {value}\n{tb_str}")
+        self.parent.activity_widget.infoTextBox.insertPlainText(
+            f"ERROR: {value}\n{tb_str}"
+        )
+
     def result_callback(self, results):
-        self.result_images += results
+        """Store denoised result images from the worker thread.
+
+        Parameters
+        ----------
+        results : list
+            List of denoised image arrays from the worker.
+        """
+        self._append_results(results)
 
     def thread_complete(self):
+        """Handle worker thread completion by re-enabling the UI and showing results."""
         self.start_button.setEnabled(True)
 
         # Turn the overlay off
         self.parent.overlay.hide()
 
         # Open napari with input and output images
-        if not self.early_stopped:
+        if not self._is_early_stopped():
             self.parent.open_images_with_napari()
 
     def prep_and_run(self):
+        """Gather settings from the GUI and launch the denoising worker thread."""
+        self._set_early_stopped(False)
+
         # Get images and their related data
-        self.image_paths = [i[4] for i in self.parent.data_model.images_to_denoise]
-        self.output_folders = [i[5] for i in self.parent.data_model.images_to_denoise]
+        self.image_paths = [
+            i.filepath for i in self.parent.data_model.images_to_denoise
+        ]
+        self.output_folders = [
+            i.output_folder for i in self.parent.data_model.images_to_denoise
+        ]
         if len(self.image_paths) == 0:
-            lprint("Aydin cannot be started with no image")
+            aprint("Aydin cannot be started with no image")
             return
 
         self.training_images = self.parent.tabs["Training Crop"].images
@@ -146,6 +256,10 @@ class DenoiseJobRunner(QWidget):
         self.it_transforms = self.parent.tabs["Pre/Post-Processing"].transforms
 
         if self.pretrained:
+            from aydin.restoration.denoise.util.denoise_utils import (
+                get_pretrained_denoiser_class_instance,
+            )
+
             self.denoiser = get_pretrained_denoiser_class_instance(
                 self.parent.tabs["Denoise"].current_backend_widget.loaded_it
             )
@@ -162,21 +276,25 @@ class DenoiseJobRunner(QWidget):
 
             try:
                 lower_level_args = self.parent.tabs["Denoise"].lower_level_args
-            except Exception:
+            except Exception as e:
                 self.parent.status_bar.showMessage(
-                    "There is a mistake with given parameter values..."
+                    f"There is a mistake with given parameter values: {e}"
                 )
                 traceback.print_exc()
                 return
 
             # Initialize required restoration instances
+            from aydin.restoration.denoise.util.denoise_utils import (
+                get_denoiser_class_instance,
+            )
+
             self.denoiser = get_denoiser_class_instance(
                 variant=self.denoise_backend,
                 lower_level_args=lower_level_args,
                 it_transforms=self.it_transforms,
             )
 
-        Log.gui_statusbar = self.parent.parent.statusBar
+        Log.gui_statusbar = self.parent.parent.status_bar
 
         # Show activity widget
         self.parent.activity_dock.setHidden(False)
@@ -192,10 +310,11 @@ class DenoiseJobRunner(QWidget):
         worker.signals.result.connect(self.result_callback)
         worker.signals.finished.connect(self.thread_complete)
         worker.signals.progress.connect(self.progress_fn)
+        worker.signals.error.connect(self.error_fn)
 
         self.parent.activity_widget.clear_activity()
 
-        self.result_images = []
+        self._clear_results()
 
         self.start_button.setEnabled(False)
 
@@ -203,4 +322,15 @@ class DenoiseJobRunner(QWidget):
         self.threadpool.start(worker)
 
     def result_image_arrays(self):
-        return self.result_images
+        """Return the list of denoised result image arrays (thread-safe).
+
+        Returns
+        -------
+        list
+            List of numpy arrays, one per denoised image.
+        """
+        self._mutex.lock()
+        try:
+            return list(self._result_images)
+        finally:
+            self._mutex.unlock()

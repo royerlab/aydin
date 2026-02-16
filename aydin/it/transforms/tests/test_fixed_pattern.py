@@ -1,0 +1,54 @@
+"""Tests for the fixed pattern noise removal transform."""
+
+import numpy
+from scipy.ndimage import gaussian_filter
+from skimage.data import binary_blobs
+from skimage.util import random_noise
+
+from aydin.it.transforms.fixedpattern import FixedPatternTransform
+
+
+def add_patterned_noise(image, n):
+    """Add multiplicative and additive fixed-pattern noise to an image.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image.
+    n : int
+        Size of the random noise pattern to add.
+
+    Returns
+    -------
+    numpy.ndarray
+        Image with fixed-pattern noise added.
+    """
+    image = image.copy()
+    image *= 1 + 0.1 * (numpy.random.rand(n, n) - 0.5)
+    image += 0.1 * numpy.random.rand(n, n)
+    # image += 0.1*numpy.random.rand(n)[]
+    image = random_noise(image, mode="gaussian", var=0.00001, rng=0)
+    image = random_noise(image, mode="s&p", amount=0.000001, rng=0)
+    return image
+
+
+def test_fixed_pattern_real():
+    """Test fixed pattern removal on a 3D image with synthetic pattern noise."""
+    n = 128
+    image = binary_blobs(length=n, rng=1, n_dim=3, volume_fraction=0.01).astype(
+        numpy.float32
+    )
+    image = gaussian_filter(image, sigma=4)
+    noisy = add_patterned_noise(image, n).astype(numpy.float32)
+
+    bs = FixedPatternTransform(sigma=0)
+
+    preprocessed = bs.preprocess(noisy)
+    postprocessed = bs.postprocess(preprocessed)
+
+    assert image.shape == postprocessed.shape
+    assert image.dtype == postprocessed.dtype
+    assert numpy.abs(preprocessed - image).mean() < 0.007
+
+    assert preprocessed.dtype == postprocessed.dtype
+    assert numpy.abs(postprocessed - noisy).mean() < 1e-8

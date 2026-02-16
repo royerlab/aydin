@@ -1,29 +1,25 @@
+"""Demo script for dimension analysis on various example datasets."""
+
 # flake8: noqa
-from aydin.analysis.test.test_dimension_analysis import (
-    test_dimension_analysis_maitre,
-    test_dimension_analysis_hela,
-    test_dimension_analysis_cognet,
-    test_dimension_analysis_royer,
-    test_dimension_analysis_leonetti,
-    test_dimension_analysis_myers,
+from aydin.analysis.tests.test_dimension_analysis import (
+    test_dimension_analysis,
     test_dimension_analysis_flybrain,
+    test_dimension_analysis_hela,
 )
+from aydin.io.datasets import examples_single
 from aydin.util.log.log import Log
 
 
 def demo_dimension_analysis(display=False):
-
+    """Run dimension analysis on New York, MaiTre mouse, fly brain, and HeLa datasets."""
     Log.enable_output = True
     Log.set_log_max_depth(8)
 
-    # test_dimension_analysis_huang(display=display)
-    test_dimension_analysis_leonetti(display=display)
-    test_dimension_analysis_maitre(display=display)
-    test_dimension_analysis_cognet(display=display)
+    # Run parametrized test with different inputs
+    test_dimension_analysis(examples_single.noisy_newyork.get_array(), [], [])
+    test_dimension_analysis(examples_single.maitre_mouse.get_array(), [0, 1], [])
     test_dimension_analysis_flybrain(display=display)
-    test_dimension_analysis_myers(display=display)
     test_dimension_analysis_hela(display=display)
-    test_dimension_analysis_royer(display=display)
 
 
 if __name__ == "__main__":

@@ -1,11 +1,20 @@
+"""Demo of Noise2Self LGBM denoising on RGB color images.
+
+Trains an ``ImageTranslatorFGR`` with ``LGBMRegressor`` on noisy RGB
+images using channel axes, denoising each color channel jointly.
+"""
+
 # flake8: noqa
 import time
+from functools import partial
 
 import numpy
 import numpy as np
 from skimage.data import astronaut
 from skimage.metrics import peak_signal_noise_ratio as psnr
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import structural_similarity
+
+ssim = partial(structural_similarity, data_range=1.0)
 
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import rgbtest
@@ -51,28 +60,28 @@ def demo(image):
     print(
         "noisy",
         psnr(image, noisy, data_range=255),
-        ssim(noisy, image, multichannel=True),
+        ssim(noisy, image, channel_axis=-1),
     )
     print(
         "denoised",
         psnr(image, denoised, data_range=255),
-        ssim(denoised, image, multichannel=True),
+        ssim(denoised, image, channel_axis=-1),
     )
     # print("denoised_predict", psnr(denoised_predict, image), ssim(denoised_predict, image))
 
     import napari
 
-    with napari.gui_qt():
-        viewer = napari.Viewer()
-        viewer.add_image(image, name='image', rgb=True)
-        viewer.add_image(noisy, name='noisy', rgb=True)
-        viewer.add_image(denoised, name='denoised', rgb=True)
+    viewer = napari.Viewer()
+    viewer.add_image(image, name='image', rgb=True)
+    viewer.add_image(noisy, name='noisy', rgb=True)
+    viewer.add_image(denoised, name='denoised', rgb=True)
 
-        cm = {0: 'r', 1: 'g', 2: 'b'}
-        for i in range(3):
-            viewer.add_image(image[..., i], name=f'image {cm[i]}')
-            viewer.add_image(noisy[..., i], name=f'noisy {cm[i]}')
-            viewer.add_image(denoised[..., i], name=f'denoised {cm[i]}')
+    cm = {0: 'r', 1: 'g', 2: 'b'}
+    for i in range(3):
+        viewer.add_image(image[..., i], name=f'image {cm[i]}')
+        viewer.add_image(noisy[..., i], name=f'noisy {cm[i]}')
+        viewer.add_image(denoised[..., i], name=f'denoised {cm[i]}')
+    napari.run()
 
 
 if __name__ == "__main__":

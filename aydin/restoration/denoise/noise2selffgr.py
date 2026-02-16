@@ -1,7 +1,16 @@
+"""Noise2Self Feature Generation and Regression (FGR) denoising module.
+
+Provides the :class:`Noise2SelfFGR` denoising class and the convenience
+function :func:`noise2self_fgr`. This approach combines feature generation
+with gradient boosting or other regression methods for self-supervised
+image denoising.
+"""
+
 import importlib
 import inspect
 import os
 import shutil
+from typing import Optional
 
 from aydin import regression
 from aydin.features.standard_features import StandardFeatureGenerator
@@ -11,53 +20,67 @@ from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
 from aydin.regression.cb import CBRegressor
+from aydin.regression.lgbm import LGBMRegressor
+from aydin.regression.linear import LinearRegressor
+from aydin.regression.perceptron import PerceptronRegressor
+from aydin.regression.random_forest import RandomForestRegressor
+from aydin.regression.support_vector import SupportVectorRegressor
 from aydin.restoration.denoise.base import DenoiseRestorationBase
-from aydin.util.log.log import lsection
-
-
-if os.getenv("BUNDLED_AYDIN") == "1":
-    from aydin.regression.lgbm import LGBMRegressor  # noqa: F401
-    from aydin.regression.linear import LinearRegressor  # noqa: F401
-    from aydin.regression.perceptron import PerceptronRegressor  # noqa: F401
-    from aydin.regression.random_forest import RandomForestRegressor  # noqa: F401
-    from aydin.regression.support_vector import SupportVectorRegressor  # noqa: F401
+from aydin.util.log.log import asection
+from aydin.util.string.break_text import strip_notgui
 
 
 class Noise2SelfFGR(DenoiseRestorationBase):
-    """
-    Noise2Self image denoising using the "Feature Generation & Regression" (
-    FGR) approach. Follows from the theory exposed in the <a
+    """Noise2Self image denoising using Feature Generation & Regression (FGR).
+
+    Follows from the theory exposed in the <a
     href="https://arxiv.org/abs/1901.11365">Noise2Self paper</a>.
+    Combines feature extraction (spatial, frequency-domain, correlation-based)
+    with gradient boosting or other regression methods to predict clean pixel
+    values in a self-supervised manner.
+    <notgui>
     """
 
     def __init__(
         self,
         *,
+        variant: Optional[str] = None,
         use_model=None,
         input_model_path=None,
         lower_level_args=None,
         it_transforms=None,
     ):
-        """
+        """Construct a Noise2Self FGR denoiser.
+
         Parameters
         ----------
-        use_model : bool
-            Flag to choose to train a new model or infer from a
-            previously trained model. By default it is None.
-        input_model_path : str
-            Path to model that is desired to be used for inference.
-            By default it is None.
-        lower_level_args : args
-            Additional 'low-level' arguments to be passed.
-        it_transforms :
-            Transforms to be applied.
+        variant : str, optional
+            Regression algorithm variant to use. Supersedes the regressor
+            option in ``lower_level_args``. The :attr:`implementations`
+            property returns a complete list of available variants (prefixed
+            with ``'Noise2SelfFGR-'``). Example variants: ``'cb'``,
+            ``'lgbm'``, ``'linear'``, ``'perceptron'``, ``'random_forest'``,
+            ``'support_vector'``.
+        use_model : bool, optional
+            If ``True``, load and use a previously trained model instead of
+            training a new one.
+        input_model_path : str, optional
+            Path to a saved model zip file for inference.
+        lower_level_args : dict, optional
+            Additional low-level arguments passed to the underlying feature
+            generator, regressor, and image translator constructors. Expected
+            keys include ``'feature_generator'``, ``'regressor'``, and
+            ``'it'``, each containing ``'class'`` and ``'kwargs'`` entries.
+        it_transforms : list of dict, optional
+            Custom list of transforms to apply. Each entry should have keys
+            ``'class'`` and ``'kwargs'``. Defaults to Range, Padding, and
+            Variance Stabilisation transforms.
         """
-        super().__init__()
+        super().__init__(variant=variant)
         self.use_model_flag = use_model
         self.input_model_path = input_model_path
         self.lower_level_args = lower_level_args
 
-        self.it = None
         self.it_transforms = (
             [
                 {"class": RangeTransform, "kwargs": {}},
@@ -70,8 +93,20 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
     @property
     def configurable_arguments(self):
-        """Returns the configurable arguments that will be exposed
-        on GUI and CLI.
+        """Return configurable arguments for the GUI and CLI.
+
+        Discovers all available regressor modules, extracts their constructor
+        signatures, and pairs them with the :class:`StandardFeatureGenerator`
+        and :class:`ImageTranslatorFGR` constructor arguments.
+
+        Returns
+        -------
+        dict
+            A nested dictionary keyed by implementation name (e.g.
+            ``'Noise2SelfFGR-cb'``). Each value contains
+            ``'feature_generator'``, ``'regressor'``, and ``'it'``
+            sub-dictionaries with their arguments, defaults, annotations,
+            and reference class.
         """
         arguments = {}
 
@@ -81,7 +116,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
         feature_generator_args = {
             "arguments": fullargspec2.args[4:],
-            "defaults": fullargspec2.defaults[3:],
+            "defaults": (fullargspec2.defaults or ())[3:],
             "annotations": fullargspec2.annotations,
             "reference_class": feature_generator,
         }
@@ -93,7 +128,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
         it_args = {
             "arguments": fullargspec3.args[3:],
-            "defaults": fullargspec3.defaults[2:],
+            "defaults": (fullargspec3.defaults or ())[2:],
             "annotations": fullargspec3.annotations,
             "reference_class": it,
         }
@@ -104,7 +139,7 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         )
 
         for module in regression_modules:
-            regressor_args = self.get_class_implementation_kwonlyargs(
+            regressor_args = self.get_class_implementation_kwargs(
                 regression, module, module.name.replace("_", "") + "Regressor"
             )
 
@@ -118,7 +153,17 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
     @property
     def implementations(self):
-        """Returns the list of discovered implementations for given method."""
+        """Return the list of available FGR implementation names.
+
+        Discovers all regressor modules and returns their names prefixed
+        with ``'Noise2SelfFGR-'``.
+
+        Returns
+        -------
+        list of str
+            Implementation variant names (e.g. ``['Noise2SelfFGR-cb',
+            'Noise2SelfFGR-lgbm', ...]``).
+        """
         return [
             "Noise2SelfFGR-" + x.name
             for x in self.get_implementations_in_a_module(regression)
@@ -126,12 +171,26 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
     @property
     def implementations_description(self):
-        fgr_description = Noise2SelfFGR.__doc__.strip()
+        """Return human-readable descriptions for each FGR implementation.
+
+        Builds a description for each variant by combining the
+        :class:`Noise2SelfFGR` docstring, the feature generator
+        description, and the individual regressor class docstring.
+
+        Returns
+        -------
+        list of str
+            HTML-formatted description strings, one per implementation,
+            in the same order as :attr:`implementations`.
+        """
+        fgr_description = strip_notgui(Noise2SelfFGR.__doc__.strip())
 
         feature_generator_name = StandardFeatureGenerator.__name__.replace(
             "FeatureGenerator", ""
         )
-        feature_generator_description = StandardFeatureGenerator.__doc__.strip()
+        feature_generator_description = strip_notgui(
+            StandardFeatureGenerator.__doc__.strip()
+        )
 
         descriptions = []
 
@@ -147,7 +206,9 @@ class Noise2SelfFGR(DenoiseRestorationBase):
 
             elem_class = response.__getattribute__(elem)
             regressor_name = elem_class.__name__.replace("Regressor", "")
-            regressor_description = elem_class.__doc__.replace("\n\n", "<br><br>")
+            regressor_description = strip_notgui(elem_class.__doc__).replace(
+                "\n\n", "<br><br>"
+            )
 
             descriptions.append(
                 fgr_description
@@ -159,18 +220,25 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         return descriptions
 
     def stop_running(self):
-        """Method to stop running N2S instance"""
+        """Stop the current Noise2Self FGR training or inference.
+
+        Delegates to the underlying image translator's ``stop_training``
+        method to halt the training process.
+        """
         self.it.stop_training()
 
     def get_generator(self):
-        """Returns the corresponding generator instance for given selections.
+        """Return the feature generator for the current configuration.
+
+        If ``lower_level_args`` provides a feature generator class and
+        keyword arguments, those are used. Otherwise, a default
+        :class:`StandardFeatureGenerator` is created.
 
         Returns
         -------
-        generator : FeatureGeneratorBase
-
+        FeatureGeneratorBase
+            Configured feature generator instance.
         """
-        # print(self.lower_level_args)
         if self.lower_level_args is not None:
             generator = self.lower_level_args["feature_generator"]["class"](
                 **self.lower_level_args["feature_generator"]["kwargs"]
@@ -181,35 +249,58 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         return generator
 
     def get_regressor(self):
-        """Returns the corresponding regressor instance for given selections.
+        """Return the regressor for the current configuration.
+
+        If ``variant`` is set, returns the corresponding regressor class
+        instance (e.g. :class:`CBRegressor` for ``'cb'``). If
+        ``lower_level_args`` provides a regressor class and keyword
+        arguments, those are used. Otherwise, defaults to
+        :class:`CBRegressor`.
 
         Returns
         -------
-        regressor : RegressorBase
-
+        RegressorBase
+            Configured regressor instance.
         """
+        if self.variant:
+            regressors = {
+                "cb": CBRegressor,
+                "lgbm": LGBMRegressor,
+                "linear": LinearRegressor,
+                "perceptron": PerceptronRegressor,
+                "random_forest": RandomForestRegressor,
+                "support_vector": SupportVectorRegressor,
+            }
+            return regressors[self.variant]()
 
-        if self.lower_level_args is not None:
+        if self.lower_level_args is None:
+            regressor = CBRegressor()
+        else:
             regressor = self.lower_level_args["regressor"]["class"](
                 **self.lower_level_args["regressor"]["kwargs"]
             )
-        else:
-            regressor = CBRegressor()
 
         return regressor
 
     def get_translator(self, feature_generator, regressor):
-        """Returns the corresponding translator instance for given selections.
+        """Return the image translator for the current configuration.
+
+        If ``use_model_flag`` is set, loads a pre-trained model from disk.
+        Otherwise, creates a new :class:`ImageTranslatorFGR` with the
+        provided feature generator and regressor.
 
         Parameters
         ----------
         feature_generator : FeatureGeneratorBase
+            The feature generator to use for extracting features from images.
         regressor : RegressorBase
+            The regressor to use for mapping features to denoised values.
 
         Returns
         -------
-        it : ImageTranslatorBase
-
+        ImageTranslatorBase
+            Configured image translator instance ready for training or
+            inference.
         """
         # Use a pre-saved model or train a new one from scratch and save it
         if self.use_model_flag:
@@ -222,37 +313,48 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             it = ImageTranslatorFGR(
                 feature_generator=feature_generator,
                 regressor=regressor,
-                **self.lower_level_args["it"]["kwargs"]
-                if self.lower_level_args is not None
-                else {},
+                **(
+                    self.lower_level_args["it"]["kwargs"]
+                    if self.lower_level_args is not None
+                    else {}
+                ),
             )
 
         return it
 
     def add_transforms(self):
+        """Add the configured image transforms to the image translator.
+
+        Iterates over ``self.it_transforms`` and adds each transform
+        instance to ``self.it``. Transforms are applied in order during
+        training and inference (e.g. range normalisation, padding,
+        variance stabilisation).
+        """
         if self.it_transforms is not None:
             for transform in self.it_transforms:
                 transform_class = transform["class"]
                 transform_kwargs = transform["kwargs"]
                 self.it.add_transform(transform_class(**transform_kwargs))
 
-    def train(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
-        """Method to run training for Noise2Self FGR.
+    def train(self, noisy_image, *, batch_axes=None, channel_axes=None, **kwargs):
+        """Train the Noise2Self FGR denoiser on a noisy image.
+
+        Generates features from the noisy image and trains a regression
+        model to predict clean pixel values in a self-supervised manner.
 
         Parameters
         ----------
         noisy_image : numpy.ndarray
+            The noisy input image.
         batch_axes : array_like, optional
             Indices of batch axes.
-        chan_axes : array_like, optional
+        channel_axes : array_like, optional
             Indices of channel axes.
-
-        Returns
-        -------
-        response : numpy.ndarray
-
+        **kwargs
+            Additional keyword arguments. Supports ``'train_valid_ratio'``,
+            ``'callback_period'``, and ``'jinv'``.
         """
-        with lsection("Noise2Self train is starting..."):
+        with asection("Noise2Self train is starting..."):
 
             self.it = self.get_translator(
                 feature_generator=self.get_generator(), regressor=self.get_regressor()
@@ -265,39 +367,44 @@ class Noise2SelfFGR(DenoiseRestorationBase):
                 noisy_image,
                 noisy_image,
                 batch_axes=batch_axes,
-                channel_axes=chan_axes,
-                train_valid_ratio=kwargs['train_valid_ratio']
-                if 'train_valid_ratio' in kwargs
-                else 0.1,
-                callback_period=kwargs['callback_period']
-                if 'callback_period' in kwargs
-                else 3,
+                channel_axes=channel_axes,
+                train_valid_ratio=(
+                    kwargs['train_valid_ratio']
+                    if 'train_valid_ratio' in kwargs
+                    else 0.1
+                ),
+                callback_period=(
+                    kwargs['callback_period'] if 'callback_period' in kwargs else 3
+                ),
                 jinv=kwargs['jinv'] if 'jinv' in kwargs else None,
             )
 
-    def denoise(self, noisy_image, *, batch_axes=None, chan_axes=None, **kwargs):
-        """Method to denoise an image with trained Noise2Self FGR.
+    def denoise(self, noisy_image, *, batch_axes=None, channel_axes=None, **kwargs):
+        """Denoise an image using the trained Noise2Self FGR model.
 
         Parameters
         ----------
+        noisy_image : numpy.ndarray
+            The noisy input image to denoise.
         batch_axes : array_like, optional
             Indices of batch axes.
-        chan_axes : array_like, optional
+        channel_axes : array_like, optional
             Indices of channel axes.
-        noisy_image : numpy.ndarray
+        **kwargs
+            Additional keyword arguments. Supports ``'tile_size'``.
 
         Returns
         -------
-        response : numpy.ndarray
-
+        numpy.ndarray
+            The denoised image, cast to the input image's dtype.
         """
-        with lsection("Noise2Self denoise is starting..."):
+        with asection("Noise2Self denoise is starting..."):
 
             # Predict the resulting image
             response = self.it.translate(
                 noisy_image,
                 batch_axes=batch_axes,
-                channel_axes=chan_axes,
+                channel_axes=channel_axes,
                 tile_size=kwargs['tile_size'] if 'tile_size' in kwargs else None,
             )
 
@@ -306,32 +413,39 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             return response
 
 
-def noise2self_fgr(noisy, *, batch_axes=None, chan_axes=None, variant=None):
-    """Method to denoise an image with trained Noise2Self FGR.
+def noise2self_fgr(noisy, *, batch_axes=None, channel_axes=None, variant=None):
+    """Denoise an image using Noise2Self FGR in a single call.
+
+    Convenience function that creates a :class:`Noise2SelfFGR` instance,
+    trains it on the noisy image, and returns the denoised result.
 
     Parameters
     ----------
     noisy : numpy.ndarray
-        Image to denoise
+        Image to denoise.
     batch_axes : array_like, optional
         Indices of batch axes.
-    chan_axes : array_like, optional
+    channel_axes : array_like, optional
         Indices of channel axes.
-    variant : str
-        Algorithm variant.
+    variant : str, optional
+        Regression algorithm variant. Available variants: ``'cb'``
+        (CatBoost, default), ``'lgbm'`` (LightGBM), ``'linear'``,
+        ``'perceptron'``, ``'random_forest'``, ``'support_vector'``.
+        When ``None``, CatBoost is used.
 
     Returns
     -------
-    Denoised image : numpy.ndarray
+    numpy.ndarray
+        Denoised image.
 
     """
     # Run N2S and save the result
     n2s = Noise2SelfFGR(variant=variant)
 
     # Train
-    n2s.train(noisy, batch_axes=batch_axes, chan_axes=chan_axes)
+    n2s.train(noisy, batch_axes=batch_axes, channel_axes=channel_axes)
 
     # Denoise
-    denoised = n2s.denoise(noisy, batch_axes=batch_axes, chan_axes=chan_axes)
+    denoised = n2s.denoise(noisy, batch_axes=batch_axes, channel_axes=channel_axes)
 
     return denoised

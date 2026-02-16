@@ -1,3 +1,10 @@
+"""Image resolution estimation using self-supervised calibration.
+
+This module estimates the isotropic resolution of an image by calibrating a
+Butterworth denoiser and finding the optimal frequency cutoff. The cutoff
+frequency serves as a proxy for the resolution limit of the image.
+"""
+
 from functools import partial
 
 import numpy
@@ -6,28 +13,35 @@ from numpy import random
 from aydin.it.classic_denoisers.butterworth import denoise_butterworth
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.j_invariance.j_invariance import calibrate_denoiser
+from aydin.util.log.log import aprint, asection
 
 
 def resolution_estimate(image, precision: int = 2, display_images: bool = False):
-    """Estimation of isotropic resolution in normalised frequency (within [0, 1]).
-    Work best
+    """Estimate the isotropic resolution of an image in normalized frequency.
+
+    Uses self-supervised calibration of a Butterworth denoiser to find the
+    optimal frequency cutoff, which serves as a resolution estimate.
+    Works best on images with a clear distinction between signal and noise
+    in the frequency domain.
 
     Parameters
     ----------
     image : numpy.typing.ArrayLike
-        Image to estimate (isotropic) resolution from
-    precision: int
-        Precision in decimal digits
-    display_images: bool
-        Display image, for debugging purposes.
+        Image to estimate (isotropic) resolution from.
+    precision : int
+        Precision in decimal digits. Each additional digit of precision
+        requires an additional round of optimization.
+    display_images : bool
+        If True, displays intermediate images for debugging purposes.
 
     Returns
     -------
-    Estimate of resolution in normalised frequency -- which assumes that the
-    sampling frequency is 1. Values are between 0 and 1, with 0 meaning no
-    resolution at all, and 1 means full resolution.
-    Also returns the crop used for the estimate.
-
+    frequency : float
+        Estimated resolution as a normalized frequency in [0, 1], where
+        the sampling frequency is 1. A value of 0 means no resolution,
+        and 1 means full (Nyquist) resolution.
+    crop_original : numpy.ndarray
+        The representative crop of the image used for the estimate.
     """
 
     # obtain representative crop, to speed things up...
@@ -43,42 +57,42 @@ def resolution_estimate(image, precision: int = 2, display_images: bool = False)
     step = 0.1
     frequency = 0.5
 
-    for i in range(precision):
+    with asection("Estimating resolution..."):
+        for i in range(precision):
 
-        # Start and stop of range:
-        start = max(0.0001, frequency - 5 * step)
-        stop = min(1.0, frequency + 5 * step)
+            # Start and stop of range:
+            start = max(0.0001, frequency - 5 * step)
+            stop = min(1.0, frequency + 5 * step)
 
-        # ranges:
-        freq_cutoff_range = list(numpy.arange(start, stop, step))
+            # ranges:
+            freq_cutoff_range = list(numpy.arange(start, stop, step))
 
-        # Parameters to test when calibrating the denoising algorithm
-        parameter_ranges = {'freq_cutoff': freq_cutoff_range}
+            # Parameters to test when calibrating the denoising algorithm
+            parameter_ranges = {'freq_cutoff': freq_cutoff_range}
 
-        # Partial function:
-        _denoise_function = partial(denoise_butterworth, multi_core=True, order=5)
+            # Partial function:
+            _denoise_function = partial(denoise_butterworth, multi_core=True, order=5)
 
-        # import napari
-        # viewer = napari.Viewer()
-        # viewer.add_image(image, name='image')
-        # viewer.add_image(crop_original, name='crop_original')
-        # viewer.add_image(crop, name='crop')
-        # napari.run()
+            # Calibrate denoiser
+            best_parameters = calibrate_denoiser(
+                crop,
+                _denoise_function,
+                denoise_parameters=parameter_ranges,
+                display_images=display_images,
+                max_num_evaluations=256,
+                patience=64,
+                loss_function='L1',
+                interpolation_mode='gaussian',
+                blind_spots=[],
+            )
 
-        # Calibrate denoiser
-        best_parameters = calibrate_denoiser(
-            crop,
-            _denoise_function,
-            denoise_parameters=parameter_ranges,
-            display_images=display_images,
-            max_num_evaluations=256,
-            patience=64,
-            loss_function='L1',
-            interpolation_mode='gaussian',
-            blind_spots=[],
-        )
+            frequency = best_parameters.pop('freq_cutoff')
+            step *= 0.1
 
-        frequency = best_parameters.pop('freq_cutoff')
-        step *= 0.1
+            aprint(
+                f"Pass {i + 1}/{precision}, frequency={frequency:.6f}, step={step:.6f}"
+            )
+
+        aprint(f"Final resolution estimate: {frequency:.6f}")
 
     return frequency, crop_original

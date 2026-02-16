@@ -1,3 +1,10 @@
+"""Demo of Noise2Self LGBM denoising on 2D+time COGNET nanotube data.
+
+Loads a time-series COGNET nanotube dataset, trains an
+``ImageTranslatorFGR`` with ``LGBMRegressor`` and custom feature
+kernels, and writes the denoised result to a memory-mapped TIFF.
+"""
+
 # flake8: noqa
 import time
 from datetime import date
@@ -14,6 +21,7 @@ from aydin.util.log.log import Log
 
 
 def demo():
+    """Run Noise2Self LGBM denoising on COGNET nanotube time-series data."""
     Log.enable_output = True
 
     today = date.today()
@@ -67,12 +75,12 @@ def demo():
 
         import napari
 
-        with napari.gui_qt():
-            viewer = napari.Viewer()
-            viewer.add_image(train, name='train')
-            viewer.add_image(infer, name='infer')
-            print(f"Inference: elapsed time:  {stop - start} ")
-            viewer.add_image(denoised, name='denoised')
+        viewer = napari.Viewer()
+        viewer.add_image(train, name='train')
+        viewer.add_image(infer, name='infer')
+        print(f"Inference: elapsed time:  {stop - start} ")
+        viewer.add_image(denoised, name='denoised')
+        napari.run()
 
 
 if __name__ == "__main__":

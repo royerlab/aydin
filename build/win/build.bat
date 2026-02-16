@@ -1,13 +1,40 @@
-version=`python3 -c "import os, sys;tmp = sys.stdout;sys.stdout = open(os.devnull,'w');sys.stderr= open(os.devnull,'w');import aydin;sys.stdout = tmp;print(aydin.__version__)"`
+@echo off
+REM Aydin PyInstaller build script for Windows
+setlocal EnableDelayedExpansion
 
-del -rf build
-del -rf dist
+cd /d "%~dp0"
 
-pip uninstall imagecodecs
-pip uninstall enum34
+echo === Aydin Windows Build ===
+echo Working directory: %CD%
 
-pyinstaller.exe -w -D -y --clean aydin.spec
+REM Get version dynamically
+for /f "tokens=*" %%i in ('python -c "import aydin; print(aydin.__version__)"') do set VERSION=%%i
+echo Building Aydin v%VERSION%...
 
-copy run_aydin.bat dist\run_aydin.bat
-mkdir -p dist\aydin\numba\experimental\jitclass
-copy \PATH\TO\numba\experimental\jitclass\_box.cp39-win_amd64.pyd dist\aydin\numba\experimental\jitclass\_box.cp39-win_amd64.pyd
+echo.
+echo Cleaning old build artifacts...
+if exist build rmdir /s /q build
+if exist dist rmdir /s /q dist
+
+echo.
+echo Checking problematic packages...
+pip uninstall -y enum34 2>nul
+pip uninstall -y imagecodecs 2>nul
+
+echo.
+echo Building with PyInstaller...
+pyinstaller.exe -y --clean aydin.spec
+
+echo.
+echo Copying launcher script...
+copy run_aydin.bat dist\
+
+echo.
+echo === Build complete! ===
+echo Output directory: %CD%\dist\aydin
+echo.
+echo To run Aydin:
+echo   cd dist ^&^& run_aydin.bat
+echo   or: dist\aydin\aydin.exe
+
+endlocal

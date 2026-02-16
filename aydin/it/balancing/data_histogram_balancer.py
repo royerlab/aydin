@@ -1,14 +1,27 @@
+"""Data histogram balancer for training data sampling.
+
+This module provides `DataHistogramBalancer`, a utility that prevents
+over-representation of certain pixel intensities in the training data
+by balancing the histogram of sampled data entries.
+"""
+
 import math
 import random
 
 import numpy
 from skimage.transform import downscale_local_mean
 
-from aydin.util.log.log import lprint, lsection
+from aydin.util.log.log import aprint, asection
 
 
 class DataHistogramBalancer:
-    """Training data balancer : Avoids having an excess of one class (y values) in the training data"""
+    """Training data histogram balancer.
+
+    Prevents over-representation of certain pixel intensities in the training
+    data by maintaining a histogram of accepted entries and limiting the number
+    of entries per histogram bin. Supports optional favouring of bright or dark
+    pixels via a linear weighting slope.
+    """
 
     def __init__(
         self,
@@ -18,15 +31,24 @@ class DataHistogramBalancer:
         use_median: bool = False,
         favour_bright_pixels: float = 0,
     ):
-        """Constructs DataHistogramBalancer.
+        """Construct a DataHistogramBalancer.
 
         Parameters
         ----------
         number_of_bins : int
+            Number of histogram bins for intensity tracking.
         keep_ratio : float
+            Target ratio of data entries to keep (0 to 1).
         balance : bool
+            If True, enable histogram-based balancing. If False,
+            use uniform random decimation.
         use_median : bool
+            If True, use median for batch intensity estimation.
+            If False, use mean.
         favour_bright_pixels : float
+            Value within [-1.0, 1.0] controlling brightness bias.
+            Positive values allow more bright pixels; negative values
+            allow more dark pixels. Zero treats all intensities equally.
         """
 
         self.favour_bright_pixels = favour_bright_pixels
@@ -42,22 +64,28 @@ class DataHistogramBalancer:
     def calibrate(
         self, array, batch_length, percentile=0.000001, num_batches_to_sample=128 * 1024
     ):
-        """Calibrates the histogram balancer
+        """Calibrate the histogram balancer by estimating the data value range.
+
+        Samples random batches from the array to estimate the effective
+        min and max values for histogram binning.
 
         Parameters
         ----------
-        array
-        batch_length
-        percentile
-        num_batches_to_sample
-
+        array : numpy.ndarray
+            Flat array of all target values to calibrate on.
+        batch_length : int
+            Length of each random batch sample.
+        percentile : float
+            Percentile for clipping extreme values. Default is 0.000001.
+        num_batches_to_sample : int
+            Number of random batches to sample for range estimation.
         """
 
         array = array.ravel()
 
         # Calibration is not needed if we don't balance
         if not self.balance:
-            lprint("Balancer: no calibration needed ")
+            aprint("Balancer: no calibration needed ")
             self.total_kept_counter = 0
             return
 
@@ -69,7 +97,7 @@ class DataHistogramBalancer:
             full_min_value = array.min()
             full_max_value = array.max()
 
-        with lsection("Balancer: sampling to estimate min and max values for entries"):
+        with asection("Balancer: sampling to estimate min and max values for entries"):
             # refine with sampling
             values_list = []
             array_length = array.size
@@ -99,21 +127,24 @@ class DataHistogramBalancer:
         batch_min_value = max(full_min_value, batch_min_value)
         batch_max_value = min(full_max_value, batch_max_value)
 
-        lprint(
+        aprint(
             f"Balancer: full data min and max: [{full_min_value}, {full_max_value}] "
         )
-        lprint(f"Balancer: batch min and max: [{batch_min_value}, {batch_max_value}] ")
-        lprint(
+        aprint(f"Balancer: batch min and max: [{batch_min_value}, {batch_max_value}] ")
+        aprint(
             f"Balancer: effective min and max: [{self.min_value}, {self.max_value}] "
         )
 
     def initialise(self, total_entries):
-        """Initialises the histogram balancer
+        """Initialize the histogram counters for a new sampling session.
+
+        Must be called before `add_entry`. Sets up histogram bins and
+        computes per-bin entry limits based on the keep ratio.
 
         Parameters
         ----------
-        total_entries
-
+        total_entries : int
+            Total number of entries that will be offered to the balancer.
         """
         self.histogram_kept = numpy.zeros(self.number_of_bins)
         self.histogram_all = numpy.zeros(self.number_of_bins)
@@ -138,16 +169,20 @@ class DataHistogramBalancer:
         self.total_kept_counter = 0
 
     def add_entry(self, array):
-        """Adds an entry
+        """Offer a data entry to the balancer and determine if it should be kept.
+
+        The balancer decides whether to keep the entry based on the
+        histogram bin occupancy and keep ratio.
 
         Parameters
         ----------
-        array
+        array : numpy.ndarray
+            Data entry array (will be raveled for intensity computation).
 
         Returns
         -------
         bool
-
+            True if the entry should be kept, False if it should be dropped.
         """
 
         array = array.ravel()
@@ -189,12 +224,14 @@ class DataHistogramBalancer:
             return False
 
     def get_histogram_kept_as_string(self):
-        """Returns the kept part of histogram as a string
+        """Return a Unicode bar-chart string of the kept entries histogram.
 
         Returns
         -------
         str
-
+            A single-line string representing the histogram of kept entries
+            using Unicode fill characters. Returns a placeholder message
+            when balancing is disabled.
         """
 
         if not self.balance:
@@ -212,12 +249,14 @@ class DataHistogramBalancer:
             )
 
     def get_histogram_all_as_string(self):
-        """Returns the whole histogram as a string
+        """Return a Unicode bar-chart string of the full entries histogram.
 
         Returns
         -------
         str
-
+            A single-line string representing the histogram of all offered
+            entries using Unicode fill characters. Returns a placeholder
+            message when balancing is disabled.
         """
 
         if not self.balance:
@@ -232,12 +271,14 @@ class DataHistogramBalancer:
             )
 
     def get_histogram_dropped_as_string(self):
-        """Returns the dropped part of histogram as a string
+        """Return a Unicode bar-chart string of the dropped entries histogram.
 
         Returns
         -------
         str
-
+            A single-line string representing the histogram of dropped
+            entries (all minus kept) using Unicode fill characters. Returns
+            a placeholder message when balancing is disabled.
         """
 
         if not self.balance:
@@ -256,13 +297,25 @@ class DataHistogramBalancer:
             )
 
     def total_kept(self):
-        """Total kept"""
+        """Return the total number of entries kept so far.
+
+        Returns
+        -------
+        int
+            Number of kept entries.
+        """
         return (
             int(self.histogram_kept.sum()) if self.balance else self.total_kept_counter
         )
 
     def percentage_kept(self):
-        """Percentage kept"""
+        """Return the fraction of entries kept relative to total offered.
+
+        Returns
+        -------
+        float
+            Fraction of entries kept (0 to 1).
+        """
         if self.balance:
             return min(1, self.histogram_kept.sum() / self.total_entries)
         else:
@@ -270,6 +323,18 @@ class DataHistogramBalancer:
 
 
 def _value_to_fill_char(x):
+    """Convert a normalized value to a Unicode fill character for histogram display.
+
+    Parameters
+    ----------
+    x : float
+        Normalized value between 0 and 1.
+
+    Returns
+    -------
+    str
+        A single Unicode character representing the fill level.
+    """
     if x <= 0.00:
         return ' '
     elif x <= 0.01:

@@ -1,26 +1,43 @@
+"""Demo of representative crop extraction from n-dimensional images.
+
+Demonstrates the ``representative_crop`` function by extracting
+informative crops of specified sizes from various 2D, 3D, and 4D
+test images and verifying the crop size constraints.
+"""
+
 # flake8: noqa
 import numpy
 from numpy.random import normal
 from skimage.data import camera
 
 from aydin.io.datasets import (
-    dots,
-    lizard,
-    pollen,
-    newyork,
     characters,
+    dots,
     examples_single,
+    lizard,
+    newyork,
     normalise,
+    pollen,
 )
 from aydin.util.crop.rep_crop import representative_crop
-from aydin.util.log.log import Log, lsection, lprint
+from aydin.util.log.log import Log, aprint, asection
 
 
 def demo_representative_crop(
     image, crop_size=64000, search_mode: str = 'random', display: bool = False
 ):
-    """
-    Demo for self-supervised denoising using camera image with synthetic noise
+    """Extract a representative crop from an image and verify its size.
+
+    Parameters
+    ----------
+    image : numpy.ndarray
+        Input image.
+    crop_size : int, optional
+        Target crop size in number of elements, by default 64000.
+    search_mode : str, optional
+        Crop search strategy, by default ``'random'``.
+    display : bool, optional
+        Whether to display results in napari, by default False.
     """
     Log.enable_output = True
     Log.set_log_max_depth(5)
@@ -29,6 +46,7 @@ def demo_representative_crop(
     image += 0.1 * normal(size=image.shape, scale=0.1)
 
     def _crop_fun():
+        """Compute representative crop with current settings."""
         return representative_crop(
             image, crop_size=crop_size, search_mode=search_mode, display_crop=False
         )
@@ -36,7 +54,7 @@ def demo_representative_crop(
     # Warmup (numba compilation)
     _crop_fun()
 
-    with lsection(f"Computing crop for image of shape: {image.shape}"):
+    with asection(f"Computing crop for image of shape: {image.shape}"):
         # for _ in range(10):
         crop = _crop_fun()
 
@@ -48,7 +66,7 @@ def demo_representative_crop(
         viewer.add_image(crop, name='crop')
         napari.run()
 
-    lprint(f"Crop size requested: {crop_size} obtained: {crop.size}")
+    aprint(f"Crop size requested: {crop_size} obtained: {crop.size}")
 
     assert crop.size >= int(crop_size * 0.75) and crop.size <= int(crop_size * 1.25)
 

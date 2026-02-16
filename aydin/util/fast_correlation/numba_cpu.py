@@ -1,3 +1,10 @@
+"""Numba-accelerated CPU implementations of n-dimensional correlation.
+
+Provides JIT-compiled, parallel correlation functions for arrays from
+1D to 6D, with boundary handling via nearest-neighbor clamping. Falls
+back to SciPy for unsupported dimensionalities.
+"""
+
 import numpy
 from numba import jit, prange
 from numpy.typing import ArrayLike
@@ -8,7 +15,32 @@ __error_model = 'numpy'
 
 
 def numba_cpu_correlate(image: ArrayLike, kernel: ArrayLike, output=None):
-    # Kernel must have odd dimenions:
+    """Correlate an image with a kernel using Numba-accelerated CPU code.
+
+    Supports arrays from 1D to 6D. The kernel must have odd lengths
+    along all axes. Falls back to SciPy for 7D+ arrays.
+
+    Parameters
+    ----------
+    image : ArrayLike
+        Input image. Will be cast to float32.
+    kernel : ArrayLike
+        Correlation kernel with odd dimensions. Must have the same
+        number of dimensions as ``image``.
+    output : ArrayLike, optional
+        Pre-allocated output array. If None, a zeros array is created.
+
+    Returns
+    -------
+    numpy.ndarray
+        Correlated output array.
+
+    Raises
+    ------
+    ValueError
+        If any kernel dimension has even length.
+    """
+    # Kernel must have odd dimensions:
     if any((s % 2) == 0 for s in kernel.shape):
         raise ValueError(
             "This convolution function only supports kernels with odd lengths."
@@ -22,7 +54,7 @@ def numba_cpu_correlate(image: ArrayLike, kernel: ArrayLike, output=None):
     # Ensure contiguity:
     if not image.flags['C_CONTIGUOUS']:
         image = numpy.ascontiguousarray(image)
-    if not image.flags['C_CONTIGUOUS']:
+    if not kernel.flags['C_CONTIGUOUS']:
         kernel = numpy.ascontiguousarray(kernel)
 
     if output is None:
@@ -51,12 +83,14 @@ def numba_cpu_correlate(image: ArrayLike, kernel: ArrayLike, output=None):
 def _numba_cpu_correlation_1d(
     image: ArrayLike, kernel: ArrayLike, output: ArrayLike = None
 ):
+    """Numba JIT-compiled 1D correlation with nearest-neighbor boundary."""
 
     (il0,) = image.shape
     (kl0,) = kernel.shape
     khl0 = kl0 // 2
 
     def image_get(u):
+        """Get image value at index ``u`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         return image[u]
@@ -76,12 +110,14 @@ def _numba_cpu_correlation_1d(
 def _numba_cpu_correlation_2d(
     image: ArrayLike, kernel: ArrayLike, output: ArrayLike = None
 ):
+    """Numba JIT-compiled 2D correlation with nearest-neighbor boundary."""
 
     il0, il1 = image.shape
     kl0, kl1 = kernel.shape
     khl0, khl1 = kl0 // 2, kl1 // 2
 
     def image_get(u, v):
+        """Get image value at ``(u, v)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v
@@ -105,12 +141,14 @@ def _numba_cpu_correlation_2d(
 def _numba_cpu_correlation_3d(
     image: ArrayLike, kernel: ArrayLike, output: ArrayLike = None
 ):
+    """Numba JIT-compiled 3D correlation with nearest-neighbor boundary."""
 
     il0, il1, il2 = image.shape
     kl0, kl1, kl2 = kernel.shape
     khl0, khl1, khl2 = kl0 // 2, kl1 // 2, kl2 // 2
 
     def image_get(u, v, w):
+        """Get image value at ``(u, v, w)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v
@@ -138,12 +176,14 @@ def _numba_cpu_correlation_3d(
 def _numba_cpu_correlation_4d(
     image: ArrayLike, kernel: ArrayLike, output: ArrayLike = None, parallelism: int = 8
 ):
+    """Numba JIT-compiled 4D correlation with nearest-neighbor boundary."""
 
     il0, il1, il2, il3 = image.shape
     kl0, kl1, kl2, kl3 = kernel.shape
     khl0, khl1, khl2, khl3 = kl0 // 2, kl1 // 2, kl2 // 2, kl3 // 2
 
     def image_get(u, v, w, x):
+        """Get image value at ``(u, v, w, x)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v
@@ -179,12 +219,14 @@ def _numba_cpu_correlation_4d(
 def _numba_cpu_correlation_5d(
     image: ArrayLike, kernel: ArrayLike, output: ArrayLike = None, parallelism: int = 8
 ):
+    """Numba JIT-compiled 5D correlation with nearest-neighbor boundary."""
 
     il0, il1, il2, il3, il4 = image.shape
     kl0, kl1, kl2, kl3, kl4 = kernel.shape
     khl0, khl1, khl2, khl3, khl4 = kl0 // 2, kl1 // 2, kl2 // 2, kl3 // 2, kl4 // 2
 
     def image_get(u, v, w, x, y):
+        """Get image value at ``(u, v, w, x, y)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v
@@ -232,6 +274,7 @@ def _numba_cpu_correlation_5d(
 def _numba_cpu_correlation_6d(
     image: ArrayLike, kernel: ArrayLike, output: ArrayLike = None, parallelism: int = 8
 ):
+    """Numba JIT-compiled 6D correlation with nearest-neighbor boundary."""
 
     il0, il1, il2, il3, il4, il5 = image.shape
     kl0, kl1, kl2, kl3, kl4, kl5 = kernel.shape
@@ -245,6 +288,7 @@ def _numba_cpu_correlation_6d(
     )
 
     def image_get(u, v, w, x, y, z):
+        """Get image value at ``(u, v, w, x, y, z)`` with nearest-neighbor clamping."""
         u = 0 if u < 0 else u
         u = il0 - 1 if u >= il0 else u
         v = 0 if v < 0 else v
