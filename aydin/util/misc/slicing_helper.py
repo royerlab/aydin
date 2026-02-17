@@ -36,7 +36,8 @@ def apply_slicing(data, slicing_string: str):
         for _ in range(len(slice_strings)):  # Iterate over number of dimensions
             slice_string = slice_strings[_]
 
-            # If it is not sliced on a dimension we build slice object to get entire dimension
+            # If it is not sliced on a dimension we build
+            # slice object to get entire dimension
             if slice_string == ":":
                 slices_for_dims.append(slice(data.shape[_]))
             else:
@@ -45,7 +46,8 @@ def apply_slicing(data, slicing_string: str):
                     slice(int(slice_values[0]), int(slice_values[1]))
                 )
 
-        # Create slice objects for each dimension and form the composite slice object from them
+        # Create slice objects for each dimension and form
+        # the composite slice object from them
         slicer = [slice(None)] * len(slices_for_dims)
         for axis in range(len(slices_for_dims)):
             slicer[axis] = slices_for_dims[axis]

@@ -17,7 +17,6 @@ from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.it.balancing.data_histogram_balancer import DataHistogramBalancer
 from aydin.it.base import ImageTranslatorBase
 from aydin.regression.base import RegressorBase
-from aydin.regression.cb import CBRegressor
 from aydin.util.array.nd import nd_split_slices
 from aydin.util.log.log import aprint, asection
 from aydin.util.offcore.offcore import offcore_array
@@ -164,7 +163,23 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             if feature_generator is None
             else feature_generator
         )
-        self.regressor = CBRegressor() if regressor is None else regressor
+        if regressor is None:
+            try:
+                from aydin.regression.cb import CBRegressor
+
+                self.regressor = CBRegressor()
+            except ImportError:
+                aprint(
+                    "Warning: CatBoost is not installed — "
+                    "falling back to LightGBM regressor. "
+                    "For best results, install CatBoost "
+                    "with: pip install catboost"
+                )
+                from aydin.regression.lgbm import LGBMRegressor
+
+                self.regressor = LGBMRegressor()
+        else:
+            self.regressor = regressor
 
         self.max_voxels_for_training = (
             self.regressor.recommended_max_num_datapoints()
@@ -172,16 +187,20 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             else max_voxels_for_training
         )
 
-        # It seems empirically that excluding the central feature incurs no cost in quality,
-        # simply because for every scale the next scale already partly covers these pixels.
+        # It seems empirically that excluding the central
+        # feature incurs no cost in quality, simply because
+        # for every scale the next scale already partly
+        # covers these pixels.
         self.exclude_center_feature = True
 
-        # Option to exclude the center value during translation. Set to True by default.
+        # Option to exclude the center value during translation.
+        # Set to True by default.
         self.exclude_center_value_when_translating = False
 
         # Advanced private functionality:
-        # This field gives the opportunity to specify which channels must be 'passed-through'
-        # directly as features. This is not intended to be used directly by users.
+        # This field gives the opportunity to specify which
+        # channels must be 'passed-through' directly as
+        # features. This is not intended to be used by users.
         self._passthrough_channels = None
 
         with asection("FGR image translator"):
@@ -189,7 +208,13 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
     def __repr__(self):
         """Return a string representation of the FGR translator."""
-        return f"<{self.__class__.__name__}, feature_generator={self.feature_generator}, regressor={self.regressor}, balance_training_data={self.balance_training_data}"
+        return (
+            f"<{self.__class__.__name__}, "
+            f"feature_generator={self.feature_generator}, "
+            f"regressor={self.regressor}, "
+            f"balance_training_data="
+            f"{self.balance_training_data}"
+        )
 
     def save(self, path: str):
         """Save the FGR translator model, feature generator, and regressor to disk.
@@ -283,9 +308,11 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                 memory_available,
             ) = super()._estimate_memory_needed_and_available(image)
 
-            """Here, 1.3 correction factor is chosen to have a bigger safety margin as we use
-            more memory while generating features(namely uniform features) than the amount
-            of memory we need after feature computations."""
+            # Here, 1.3 correction factor is chosen to have a
+            # bigger safety margin as we use more memory while
+            # generating features (namely uniform features) than
+            # the amount of memory we need after feature
+            # computations.
             memory_needed = max(
                 memory_needed, 1.3 * num_features * image.size * feature_dtype.itemsize
             )
@@ -345,7 +372,9 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             aprint(f"exclude_center_value   = {exclude_center_value}")
             aprint(f"excluded_voxels        = {excluded_voxels}")
 
-            # If this is a part of a larger image, we can figure out what are the offsets and scales for the spatial features:
+            # If this is a part of a larger image, we can
+            # figure out what are the offsets and scales for
+            # the spatial features:
             spatial_feature_scale = (
                 None
                 if whole_image_shape is None
@@ -399,7 +428,9 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             Controls J-invariance behavior for feature computation.
         """
         with asection(
-            f"Training image translator from image of shape {input_image.shape} to image of shape {target_image.shape}:"
+            f"Training image translator from image of shape "
+            f"{input_image.shape} to image of shape "
+            f"{target_image.shape}:"
         ):
 
             self.prepare_monitoring_images()
@@ -416,7 +447,8 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             else:
                 exclude_center_value = jinv
 
-            # Prepare the splitting of train from valid data as well as balancing and decimation...
+            # Prepare the splitting of train from valid data
+            # as well as balancing and decimation...
             self._prepare_split_train_val(input_image, target_image)
 
             # Tilling strategy is determined here:
@@ -445,7 +477,8 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
             for idx, slice_margin_tuple in enumerate(tile_slices_margins):
                 with asection(
-                    f"Current tile: {idx}/{number_of_tiles}, slice: {slice_margin_tuple} "
+                    f"Current tile: {idx}/{number_of_tiles}"
+                    f", slice: {slice_margin_tuple} "
                 ):
 
                     # We first extract the tile image:
@@ -467,7 +500,11 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                     num_entries_tile = y_tile.shape[1]
 
                     aprint(
-                        f"Number of entries: {num_entries_tile}, features: {num_features_tile}, input channels: {num_input_channels}, target channels: {num_target_channels}"
+                        f"Number of entries: {num_entries_tile}, "
+                        f"features: {num_features_tile}, "
+                        f"input channels: {num_input_channels}, "
+                        f"target channels: "
+                        f"{num_target_channels}"
                     )
 
                     # We split this tile's data into train and valid sets:
@@ -644,13 +681,18 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             # the number of voxels:
             num_of_voxels = input_image.size
             aprint(
-                f"Image has: {num_of_voxels} voxels, at most: {self.max_voxels_for_training} voxels will be used for training or validation."
+                f"Image has: {num_of_voxels} voxels, at most: "
+                f"{self.max_voxels_for_training} voxels will be "
+                f"used for training or validation."
             )
             # This is the ratio of pixels to keep:
             max_voxels_keep_ratio = float(self.max_voxels_for_training) / num_of_voxels
             effective_keep_ratio = min(self.voxel_keep_ratio, max_voxels_keep_ratio)
             aprint(
-                f"Given train ratio is: {self.voxel_keep_ratio}, max_voxels induced keep-ratio is: {max_voxels_keep_ratio}"
+                f"Given train ratio is: "
+                f"{self.voxel_keep_ratio}, max_voxels "
+                f"induced keep-ratio is: "
+                f"{max_voxels_keep_ratio}"
             )
 
             # For small images it is not worth having any limit or balance anything:
@@ -666,19 +708,19 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                 else self.balance_training_data
             )
 
-            aprint(
-                f"Data histogram balancer is: {'active' if balance_training_data else 'inactive'}"
-            )
+            balancer_status = "active" if balance_training_data else "inactive"
+            aprint(f"Data histogram balancer is: {balancer_status}")
             aprint(f"Effective keep-ratio is: {effective_keep_ratio}")
-            aprint(
-                f"Favouring bright pixels: {'yes' if self.favour_bright_pixels > 0 else 'no'}"
-            )
+            favour_status = "yes" if self.favour_bright_pixels > 0 else "no"
+            aprint(f"Favouring bright pixels: {favour_status}")
             if self.favour_bright_pixels != 0:
                 aprint(
-                    f"Favouring bright pixels by a linear slope of: {self.favour_bright_pixels}"
+                    "Favouring bright pixels by a linear "
+                    f"slope of: {self.favour_bright_pixels}"
                 )
 
-            # We decide on a 'batch' length that will be used to shuffle, select and then copy the training data...
+            # We decide on a 'batch' length that will be used
+            # to shuffle, select and then copy the training data
             num_of_voxels_per_stack = input_image[2:].size
             batch_length = (
                 16
@@ -743,7 +785,8 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
             nb_split_batches = max(nb_entries // batch_length, 64)
             aprint(
-                f"Creating random indices for train/val split (nb_split_batches={nb_split_batches})"
+                "Creating random indices for train/val split "
+                f"(nb_split_batches={nb_split_batches})"
             )
 
             nb_split_batches_valid = int(train_valid_ratio * nb_split_batches)
@@ -761,7 +804,13 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             nb_entries_valid = nb_split_batches_valid * nb_entries_per_split_batch
 
             aprint(
-                f"Number of entries for training: {nb_entries_train} = {nb_split_batches_train}*{nb_entries_per_split_batch}, validation: {nb_entries_valid} = {nb_split_batches_valid} * {nb_entries_per_split_batch}"
+                f"Number of entries for training: "
+                f"{nb_entries_train} = "
+                f"{nb_split_batches_train}*"
+                f"{nb_entries_per_split_batch}, "
+                f"validation: {nb_entries_valid} = "
+                f"{nb_split_batches_valid} * "
+                f"{nb_entries_per_split_batch}"
             )
 
             aprint("Allocating arrays...")
@@ -788,7 +837,9 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
             with asection("Copying data for training and validation sets..."):
 
-                # We use a random permutation to avoid having the balancer drop only from the 'end' of the image
+                # We use a random permutation to avoid having
+                # the balancer drop only from the 'end' of
+                # the image
                 permutation = numpy.random.permutation(nb_split_batches)
 
                 i, jt, jv = 0, 0, 0
@@ -799,9 +850,11 @@ class ImageTranslatorFGR(ImageTranslatorBase):
 
                 for is_train in numpy.nditer(is_train_array):
                     if i % (nb_split_batches // 64) == 0:
-                        aprint(
-                            f"Copying section [{i},{min(nb_split_batches, i + nb_split_batches // 64)}]"
+                        end = min(
+                            nb_split_batches,
+                            i + nb_split_batches // 64,
                         )
+                        aprint(f"Copying section [{i},{end}]")
 
                     permutated_i = permutation[i]
                     src_start = permutated_i * nb_entries_per_split_batch
@@ -848,14 +901,21 @@ class ImageTranslatorFGR(ImageTranslatorBase):
                     f"Histogram dropped: {balancer.get_histogram_dropped_as_string()}"
                 )
                 aprint(
-                    f"Number of entries kept: {balancer.total_kept()} out of {balancer.total_entries} total"
+                    f"Number of entries kept: "
+                    f"{balancer.total_kept()} out of "
+                    f"{balancer.total_entries} total"
                 )
+                pct = 100 * balancer.percentage_kept()
                 aprint(
-                    f"Percentage of data kept: {100 * balancer.percentage_kept():.3f}% (train_data_ratio={balancer.keep_ratio}) "
+                    f"Percentage of data kept: {pct:.3f}% "
+                    f"(train_data_ratio="
+                    f"{balancer.keep_ratio}) "
                 )
                 if balancer.keep_ratio >= 1 and balancer.percentage_kept() < 1:
                     aprint(
-                        "Note: balancer has dropped entries that fell on over-represented histogram bins"
+                        "Note: balancer has dropped entries "
+                        "that fell on over-represented "
+                        "histogram bins"
                     )
         return x_train, x_valid, y_train, y_valid
 
@@ -896,7 +956,8 @@ class ImageTranslatorFGR(ImageTranslatorBase):
             # Predict using regressor:
             yp = self.regressor.predict(x)
 
-            # We make sure that we have the result in float type, but make _sure_ to avoid copying data:
+            # We make sure that we have the result in float
+            # type, but make _sure_ to avoid copying data:
             if yp.dtype != numpy.float32 and yp.dtype != numpy.float64:
                 yp = yp.astype(numpy.float32, copy=False)
 

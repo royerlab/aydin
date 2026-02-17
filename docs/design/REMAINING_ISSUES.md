@@ -79,7 +79,6 @@ All items resolved:
 | Module | Tests Added | Coverage |
 |--------|------------|----------|
 | `aydin/util/dictionary/dictionary.py` | `test_dictionary.py` (9 tests) | Basic + edge cases |
-| `aydin/util/bm3d/experiment_funcs.py` | `test_experiment_funcs.py` (12 tests) | Full function coverage |
 | `aydin/regression/cb_utils/callbacks.py` | `test_callbacks.py` (4 tests) | Callback lifecycle |
 | `aydin/regression/gbm_utils/callbacks.py` | `test_callbacks.py` (7 tests) | Format + early stopping |
 

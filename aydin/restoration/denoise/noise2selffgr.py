@@ -19,14 +19,8 @@ from aydin.it.fgr import ImageTranslatorFGR
 from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
-from aydin.regression.cb import CBRegressor
-from aydin.regression.lgbm import LGBMRegressor
-from aydin.regression.linear import LinearRegressor
-from aydin.regression.perceptron import PerceptronRegressor
-from aydin.regression.random_forest import RandomForestRegressor
-from aydin.regression.support_vector import SupportVectorRegressor
 from aydin.restoration.denoise.base import DenoiseRestorationBase
-from aydin.util.log.log import asection
+from aydin.util.log.log import aprint, asection
 from aydin.util.string.break_text import strip_notgui
 
 
@@ -139,15 +133,18 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         )
 
         for module in regression_modules:
-            regressor_args = self.get_class_implementation_kwargs(
-                regression, module, module.name.replace("_", "") + "Regressor"
-            )
+            try:
+                regressor_args = self.get_class_implementation_kwargs(
+                    regression, module, module.name.replace("_", "") + "Regressor"
+                )
 
-            arguments["Noise2SelfFGR-" + module.name] = {
-                "feature_generator": feature_generator_args,
-                "regressor": regressor_args,
-                "it": it_args,
-            }
+                arguments["Noise2SelfFGR-" + module.name] = {
+                    "feature_generator": feature_generator_args,
+                    "regressor": regressor_args,
+                    "it": it_args,
+                }
+            except Exception:
+                continue
 
         return arguments
 
@@ -164,10 +161,14 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             Implementation variant names (e.g. ``['Noise2SelfFGR-cb',
             'Noise2SelfFGR-lgbm', ...]``).
         """
-        return [
-            "Noise2SelfFGR-" + x.name
-            for x in self.get_implementations_in_a_module(regression)
-        ]
+        result = []
+        for x in self.get_implementations_in_a_module(regression):
+            try:
+                importlib.import_module(regression.__name__ + '.' + x.name)
+                result.append("Noise2SelfFGR-" + x.name)
+            except Exception:
+                continue
+        return result
 
     @property
     def implementations_description(self):
@@ -195,27 +196,35 @@ class Noise2SelfFGR(DenoiseRestorationBase):
         descriptions = []
 
         for module in self.get_implementations_in_a_module(regression):
-            response = importlib.import_module(regression.__name__ + '.' + module.name)
-            elem = [
-                x
-                for x in dir(response)
-                if (module.name.replace("_", "") + "Regressor").lower() in x.lower()
-            ][
-                0
-            ]  # class name
+            try:
+                response = importlib.import_module(
+                    regression.__name__ + '.' + module.name
+                )
+                elem = [
+                    x
+                    for x in dir(response)
+                    if (module.name.replace("_", "") + "Regressor").lower() in x.lower()
+                ][
+                    0
+                ]  # class name
 
-            elem_class = response.__getattribute__(elem)
-            regressor_name = elem_class.__name__.replace("Regressor", "")
-            regressor_description = strip_notgui(elem_class.__doc__).replace(
-                "\n\n", "<br><br>"
-            )
+                elem_class = response.__getattribute__(elem)
+                regressor_name = elem_class.__name__.replace("Regressor", "")
+                regressor_description = strip_notgui(elem_class.__doc__).replace(
+                    "\n\n", "<br><br>"
+                )
 
-            descriptions.append(
-                fgr_description
-                + f" Uses the {feature_generator_name} feature generator and {regressor_name} regressor. "
-                + f"<br><br>About the feature generator: {feature_generator_description}"
-                + f"<br><br>About the regressor: {regressor_description}"
-            )
+                descriptions.append(
+                    fgr_description
+                    + f" Uses the {feature_generator_name}"
+                    + " feature generator and"
+                    + f" {regressor_name} regressor. "
+                    + f"<br><br>About the feature generator: {feature_generator_description}"  # noqa: E501
+                    + "<br><br>About the regressor: "
+                    + regressor_description
+                )
+            except Exception:
+                continue
 
         return descriptions
 
@@ -263,18 +272,40 @@ class Noise2SelfFGR(DenoiseRestorationBase):
             Configured regressor instance.
         """
         if self.variant:
-            regressors = {
-                "cb": CBRegressor,
-                "lgbm": LGBMRegressor,
-                "linear": LinearRegressor,
-                "perceptron": PerceptronRegressor,
-                "random_forest": RandomForestRegressor,
-                "support_vector": SupportVectorRegressor,
+            regressor_modules = {
+                "cb": ("aydin.regression.cb", "CBRegressor"),
+                "lgbm": ("aydin.regression.lgbm", "LGBMRegressor"),
+                "linear": ("aydin.regression.linear", "LinearRegressor"),
+                "perceptron": ("aydin.regression.perceptron", "PerceptronRegressor"),
+                "random_forest": (
+                    "aydin.regression.random_forest",
+                    "RandomForestRegressor",
+                ),
+                "support_vector": (
+                    "aydin.regression.support_vector",
+                    "SupportVectorRegressor",
+                ),
             }
-            return regressors[self.variant]()
+            module_path, class_name = regressor_modules[self.variant]
+            mod = importlib.import_module(module_path)
+            return getattr(mod, class_name)()
 
         if self.lower_level_args is None:
-            regressor = CBRegressor()
+            try:
+                from aydin.regression.cb import CBRegressor
+
+                regressor = CBRegressor()
+            except ImportError:
+                aprint(
+                    "Warning: CatBoost is not installed"
+                    " — falling back to LightGBM"
+                    " regressor. For best results,"
+                    " install CatBoost with:"
+                    " pip install catboost"
+                )
+                from aydin.regression.lgbm import LGBMRegressor
+
+                regressor = LGBMRegressor()
         else:
             regressor = self.lower_level_args["regressor"]["class"](
                 **self.lower_level_args["regressor"]["kwargs"]

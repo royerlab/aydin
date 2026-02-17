@@ -1,0 +1,54 @@
+name: Auto-tag Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  create-tag:
+    name: Create release tag
+    if: >
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Create and push tag
+        id: tag
+        run: |
+          TAG=$(echo "${{ github.event.pull_request.head.ref }}" | sed 's|release/||')
+          echo "Creating tag: $TAG"
+          git tag "$TAG"
+          git push origin "$TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Clean up release branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          echo "Deleting branch: $BRANCH"
+          git push origin --delete "$BRANCH" || echo "Branch already deleted"
+
+  # Call publish.yml directly via workflow_call.
+  # Note: We cannot rely on the tag push above triggering publish.yml,
+  # because events created by GITHUB_TOKEN do not trigger other workflows.
+  publish:
+    name: Publish
+    needs: create-tag
+    uses: ./.github/workflows/publish.yml
+    with:
+      ref: ${{ needs.create-tag.outputs.tag }}
+    permissions:
+      id-token: write  # Required for PyPI OIDC
+      contents: write  # Required for GitHub Release
+    secrets: inherit

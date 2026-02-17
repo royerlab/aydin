@@ -8,7 +8,6 @@ Gaussian, NLM, Total Variation, etc.) behind a unified train-then-denoise API.
 import importlib
 import inspect
 import os
-import platform
 import shutil
 
 from aydin.it import classic_denoisers
@@ -193,13 +192,6 @@ class Classic(DenoiseRestorationBase):
             if module.name not in self.disabled_modules
         ]
 
-        if platform.system() == "Darwin":
-            method_modules = [
-                module
-                for module in method_modules
-                if module.name not in ["spectral", "dictionary_learned"]
-            ]
-
         for module in method_modules:
             calibration_args = self.get_function_implementation_kwargs(
                 classic_denoisers, module, "calibrate_denoise_" + module.name
@@ -244,13 +236,6 @@ class Classic(DenoiseRestorationBase):
             if module.name not in self.disabled_modules
         ]
 
-        if platform.system() == "Darwin":
-            method_modules = [
-                module
-                for module in method_modules
-                if module.name not in ["spectral", "dictionary_learned"]
-            ]
-
         return ["Classic-" + x.name for x in method_modules]
 
     @property
@@ -279,13 +264,6 @@ class Classic(DenoiseRestorationBase):
             for module in method_modules
             if module.name not in self.disabled_modules
         ]
-
-        if platform.system() == "Darwin":
-            method_modules = [
-                module
-                for module in method_modules
-                if module.name not in ["spectral", "dictionary_learned"]
-            ]
 
         for module in method_modules:
             response = importlib.import_module(

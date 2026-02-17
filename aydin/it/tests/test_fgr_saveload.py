@@ -15,11 +15,17 @@ from aydin.io.folders import get_temp_folder
 from aydin.it.base import ImageTranslatorBase
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.cb import CBRegressor
-from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.linear import LinearRegressor
 from aydin.regression.perceptron import PerceptronRegressor
-from aydin.regression.random_forest import RandomForestRegressor
 from aydin.regression.support_vector import SupportVectorRegressor
+
+try:
+    from aydin.regression.lgbm import LGBMRegressor
+    from aydin.regression.random_forest import RandomForestRegressor
+
+    _lgbm_available = True
+except (ImportError, OSError):
+    _lgbm_available = False
 
 
 @pytest.mark.heavy
@@ -27,10 +33,24 @@ from aydin.regression.support_vector import SupportVectorRegressor
     "regressor, min_psnr, min_ssim",
     [
         (LinearRegressor(), 19, 0.73),
-        (RandomForestRegressor(), 22, 0.75),
+        pytest.param(
+            RandomForestRegressor() if _lgbm_available else None,
+            22,
+            0.75,
+            marks=pytest.mark.skipif(
+                not _lgbm_available, reason="LightGBM unavailable (RF depends on it)"
+            ),
+        ),
         (SupportVectorRegressor(), 22, 0.71),
         (PerceptronRegressor(max_epochs=12), 21, 0.73),
-        (LGBMRegressor(max_num_estimators=256), 22, 0.79),
+        pytest.param(
+            LGBMRegressor(max_num_estimators=256) if _lgbm_available else None,
+            22,
+            0.79,
+            marks=pytest.mark.skipif(
+                not _lgbm_available, reason="LightGBM unavailable (libomp?)"
+            ),
+        ),
     ],
 )
 def test_saveload_heavy(regressor, min_psnr, min_ssim):
@@ -93,7 +113,9 @@ def saveload(generator, regressor, min_psnr=22, min_ssim=0.75):
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
 
-    # if the line below fails, then the parameters of the image the lgbm regressor have been broken.
-    # do not change the number below, but instead, fix the problem -- most likely a parameter.
+    # if the line below fails, then the parameters of the
+    # image the lgbm regressor have been broken. do not change
+    # the number below, but instead, fix the problem --
+    # most likely a parameter.
 
     assert psnr_denoised > min_psnr and ssim_denoised > min_ssim

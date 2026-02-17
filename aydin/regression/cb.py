@@ -87,9 +87,11 @@ class CBRegressor(RegressorBase):
 
         loss : str
             Type of loss to be used. Can be 'l1' for L1 loss (MAE), and 'l2' for
-            L2 loss (RMSE), 'Lq:q=1.5' with q>=1 real number as power coefficient (here q=1.5),
-            'Poisson' for Poisson loss, 'Huber:delta=0.1' for Huber loss with delta=0.1,
-            'Expectile:alpha=0.5' for expectile loss with alpha parameter set to 0.5,
+            L2 loss (RMSE), 'Lq:q=1.5' with q>=1 real number as
+            power coefficient (here q=1.5), 'Poisson' for Poisson
+            loss, 'Huber:delta=0.1' for Huber loss with delta=0.1,
+            'Expectile:alpha=0.5' for expectile loss with alpha
+            parameter set to 0.5,
             or 'expectile' as a shortcut for 'Expectile:alpha=0.5'.
             We recommend using: 'l1', 'l2', and 'Poisson'.
             (advanced)
@@ -172,7 +174,12 @@ class CBRegressor(RegressorBase):
 
     def __repr__(self):
         """Return a concise string representation of the regressor."""
-        return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}, gpu={self.gpu}>"
+        return (
+            f"<{self.__class__.__name__},"
+            f" max_num_estimators={self.max_num_estimators},"
+            f" lr={self.learning_rate},"
+            f" gpu={self.gpu}>"
+        )
 
     def recommended_max_num_datapoints(self) -> int:
         """Return the recommended maximum number of data points.
@@ -268,8 +275,9 @@ class CBRegressor(RegressorBase):
             "learning_rate": learning_rate,
         }
 
-        # Note: we could add optional automatic meta-parameter tuning by using cross val:
-        # https://effectiveml.com/using-grid-search-to-optimise-catboost-parameters.html
+        # Note: we could add optional automatic meta-parameter
+        # tuning by using cross val:
+        # https://effectiveml.com/using-grid-search-to-optimise-catboost-parameters.html  # noqa: E501
 
         return params
 
@@ -306,6 +314,20 @@ class CBRegressor(RegressorBase):
         """
         with asection("CatBoost regressor fitting:"):
 
+            # CatBoost GPU mode requires CUDA — force CPU on non-CUDA systems
+            # (e.g. Apple Silicon) to avoid a wasted training attempt.
+            if self.gpu:
+                try:
+                    import torch
+
+                    if not torch.cuda.is_available():
+                        aprint(
+                            "No CUDA GPU detected — using CPU for CatBoost training."
+                        )
+                        self.gpu = False
+                except ImportError:
+                    pass  # Let CatBoost try its own CUDA detection
+
             nb_data_points = y_train.shape[0]
             self.num_features = x_train.shape[-1]
             has_valid_dataset = x_valid is not None and y_valid is not None
@@ -322,9 +344,8 @@ class CBRegressor(RegressorBase):
 
             model = None
 
-            with asection(
-                f"CatBoost regressor fitting now using {f'GPU({self.gpu_devices})' if self.gpu else 'CPU'} "
-            ):
+            device_str = f'GPU({self.gpu_devices})' if self.gpu else 'CPU'
+            with asection(f"CatBoost regressor fitting now using {device_str} "):
                 # CatBoost prefers float32 arrays:
                 x_train = x_train.astype(numpy.float32, copy=False)
                 y_train = y_train.astype(numpy.float32, copy=False)
@@ -351,7 +372,8 @@ class CBRegressor(RegressorBase):
                         f"Trying learning rate of '{learning_rate}' (None -> automatic)"
                     )
 
-                    # The purpose of this try block is to protect against failure to use GPU.
+                    # The purpose of this try block is to protect
+                    # against failure to use GPU.
                     try:
                         params = self._get_params(
                             num_samples=nb_data_points,
@@ -364,7 +386,7 @@ class CBRegressor(RegressorBase):
 
                         # Logging callback:
                         class MetricsCheckerCallback:
-                            """CatBoost callback that logs metrics after each iteration."""
+                            """CatBoost callback that logs metrics."""
 
                             def after_iteration(self, info):
                                 """Log training metrics after a CatBoost iteration.
@@ -380,19 +402,41 @@ class CBRegressor(RegressorBase):
                                 bool
                                     Always returns ``True`` to continue training.
                                 """
-                                iteration = info.iteration
-                                metrics = info.metrics
-                                aprint(f"Iteration: {iteration} metrics: {metrics}")
+                                parts = []
+                                for split, split_metrics in (
+                                    info.metrics or {}
+                                ).items():
+                                    label = 'train' if split == 'learn' else split
+                                    for name, vals in (split_metrics or {}).items():
+                                        v = (
+                                            vals[-1]
+                                            if isinstance(vals, (list, tuple)) and vals
+                                            else vals
+                                        )
+                                        parts.append(
+                                            f"{label} {name}={v:.6f}"
+                                            if isinstance(v, float)
+                                            else f"{label} {name}={v}"
+                                        )
+                                msg = (
+                                    f"Iteration {info.iteration:>5d}:"
+                                    f" {', '.join(parts)}"
+                                    if parts
+                                    else f"Iteration {info.iteration:>5d}"
+                                )
+                                aprint(msg)
                                 return True
 
                         # Callbacks:
-                        callbacks = None if self.gpu else [MetricsCheckerCallback()]  #
+                        callbacks = None if self.gpu else [MetricsCheckerCallback()]
 
                         # When to be silent? when we actually can printout the logs.
                         silent = not self.gpu
 
                         aprint(
-                            f"Fitting CatBoost model for: X{x_train_shape} -> y{y_train_shape}"
+                            f"Fitting CatBoost model for:"
+                            f" X{x_train_shape} ->"
+                            f" y{y_train_shape}"
                         )
                         model.fit(
                             X=xy_train_pool,
@@ -409,26 +453,37 @@ class CBRegressor(RegressorBase):
                         # next attempt next...
                         continue
 
-                    # Training succeeds when the best iteration is not the zeroth's iteration.
-                    # best_iteration_ might be None if there is no validation data provided...
+                    # Training succeeds when the best iteration is
+                    # not the zeroth's iteration.
+                    # best_iteration_ might be None if there is no
+                    # validation data provided...
                     if (
                         model.best_iteration_ is None
                         or model.best_iteration_ > self.min_num_estimators
                     ):
                         self.learning_rate = learning_rate
                         aprint(
-                            f"CatBoost fitting succeeded! new learning rate for regressor: {learning_rate}"
+                            f"CatBoost fitting succeeded!"
+                            f" new learning rate for"
+                            f" regressor: {learning_rate}"
                         )
                         break
                     else:
                         # Reduce learning rate:
                         if learning_rate is None:
-                            # If None we were using an automatic value, we set the learning rate so we can start
-                            # with the (relatively high) default value of 0.1
+                            # If None we were using an automatic
+                            # value, we set the learning rate so
+                            # we can start with the (relatively
+                            # high) default value of 0.1
                             learning_rate = 2 * 0.1
                         learning_rate *= 0.5
                         aprint(
-                            f"CatBoost fitting failed! best_iteration=={model.best_iteration_} < {self.min_num_estimators} reducing learning rate to: {learning_rate}"
+                            f"CatBoost fitting failed!"
+                            f" best_iteration=="
+                            f"{model.best_iteration_}"
+                            f" < {self.min_num_estimators}"
+                            f" reducing learning rate"
+                            f" to: {learning_rate}"
                         )
                         gc.collect()
 
@@ -586,7 +641,8 @@ class _CBModel:
             with asection("CatBoost prediction now"):
                 prediction = _predict('CPU')
 
-                # Unfortunately this does not work yet, please keep code for when it does...
+                # Unfortunately this does not work yet,
+                # please keep code for when it does...
                 # try:
                 #     aprint("Trying GPU inference...")
                 #     prediction = _predict('GPU')

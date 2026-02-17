@@ -13,8 +13,12 @@ from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import add_noise
 from aydin.it.fgr import ImageTranslatorFGR
 from aydin.regression.cb import CBRegressor
-from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.perceptron import PerceptronRegressor
+
+try:
+    from aydin.regression.lgbm import LGBMRegressor
+except (ImportError, OSError):
+    LGBMRegressor = None
 from aydin.util.log.log import Log
 
 display_for_debug = False
@@ -173,8 +177,10 @@ def it_fgr_nD(
     ssim_denoised = ssim(denoised, image)
     print("denoised", psnr_denoised, ssim_denoised)
 
-    # if the line below fails, then the parameters of the image the lgbm regressor have been broken.
-    # do not change the number below, but instead, fix the problem -- most likely a parameter.
+    # if the line below fails, then the parameters of the
+    # image the lgbm regressor have been broken. do not change
+    # the number below, but instead, fix the problem --
+    # most likely a parameter.
 
     assert ssim_denoised > min_ssim
 

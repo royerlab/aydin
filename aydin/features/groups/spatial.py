@@ -124,7 +124,10 @@ class SpatialFeatures(FeatureGroupBase):
             Pre-allocated array for storing the computed feature.
         """
         aprint(
-            f"Spatial feature {index}, offset={self.offset}, scale={self.scale}, coarsening={self.coarsening}, period={self.period} "
+            f"Spatial feature {index}, "
+            f"offset={self.offset}, scale={self.scale}, "
+            f"coarsening={self.coarsening}, "
+            f"period={self.period} "
         )
 
         # Axis and dimensions:
@@ -155,16 +158,19 @@ class SpatialFeatures(FeatureGroupBase):
             slicing[axis] = slice(index, index + 1, 1)
 
             # Compute value and adds offset,
-            # and we coarsen the resolution by a factor of two so that individual pixels cannot be identified:
+            # and we coarsen the resolution by a factor of two
+            # so that individual pixels cannot be identified:
             value = scale * float(coarsening * ((offset + index) // coarsening))
 
             if period != 0:
                 value = sin((2 * pi * value) / period)
 
-            # Put the normalized position value across dimensions we are NOT iterating over
+            # Put the normalized position value across dimensions
+            # we are NOT iterating over
             feature[tuple(slicing)] = value
 
     def finish(self):
         """Clean up references from the last feature computation."""
-        # Here we cleanup any resource allocated for the last feature computation:
+        # Here we cleanup any resource allocated for the last
+        # feature computation:
         self.image = None

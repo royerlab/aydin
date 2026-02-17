@@ -135,7 +135,16 @@ class FileMetadata:
         str
             Formatted string showing all metadata fields.
         """
-        return f" is_folder={self.is_folder}, ext={self.extension}, axes={self.axes}, shape={self.shape}, batch_axes={self.batch_axes}, channel_axes={self.channel_axes}, dtype={self.dtype}, format={self.format} "
+        return (
+            f" is_folder={self.is_folder},"
+            f" ext={self.extension},"
+            f" axes={self.axes},"
+            f" shape={self.shape},"
+            f" batch_axes={self.batch_axes},"
+            f" channel_axes={self.channel_axes},"
+            f" dtype={self.dtype},"
+            f" format={self.format} "
+        )
 
     def __eq__(self, other):
         """Check equality between two FileMetadata instances.
@@ -281,8 +290,10 @@ def imread(input_path):
                     metadata.axes = "ZYXC"
                 else:
                     metadata.axes = "ZYXC"
+                    fmt = 'png' if is_png else 'jpg'
                     aprint(
-                        f"Warning: Can't interpret {'png' if is_png else 'jpg'} structure, might be incorrect!"
+                        f"Warning: Can't interpret {fmt}"
+                        " structure, might be incorrect!"
                     )
             elif is_npy:
                 aprint(f"Reading file {input_path} as NPY file")
@@ -299,7 +310,8 @@ def imread(input_path):
                 data = numpy.load(input_path)
                 aprint(data.files)
 
-                # this could contain several arrays, we read the one with the most voxels (good heuristic):
+                # this could contain several arrays, we read
+                # the one with the most voxels (good heuristic):
                 # We read the largest array:
                 biggest_size = 0
                 file = None
@@ -307,7 +319,10 @@ def imread(input_path):
                     _array = data[_file]
                     size = numpy.size(_array)
                     aprint(
-                        f"Reading array of name: {_file}, shape: {_array.shape}, and dtype: {_array.dtype}, size: {size}"
+                        f"Reading array of name: {_file},"
+                        f" shape: {_array.shape},"
+                        f" and dtype: {_array.dtype},"
+                        f" size: {size}"
                     )
 
                     if biggest_size < size:
@@ -319,7 +334,9 @@ def imread(input_path):
                 # makse sure the array is 'clean':
                 array = numpy.asarray(array)
                 aprint(
-                    f"Selected array: name: {file}, shape: {array.shape}, and dtype: {array.dtype}"
+                    f"Selected array: name: {file},"
+                    f" shape: {array.shape},"
+                    f" and dtype: {array.dtype}"
                 )
                 metadata.format = 'npz'
                 metadata.shape = array.shape
@@ -401,7 +418,9 @@ def imread(input_path):
                     aprint(error)
                     aprint(traceback.format_exc())
                     aprint(
-                        f"Tried to open file {input_path} with skimage io but failed to obtain image."
+                        f"Tried to open file {input_path}"
+                        " with skimage io but failed to"
+                        " obtain image."
                     )
                     return None, None
 
@@ -440,7 +459,8 @@ def _sync_array_with_metadata(array, metadata):
     metadata : FileMetadata or None
         Metadata to update in place.
     """
-    # We need to check if the metadata matches what we actually get, otherwise we need to update it.
+    # We need to check if the metadata matches what we actually get,
+    # otherwise we need to update it.
     # This can happen for tiff files that are multi-part.
     if metadata is not None and array is not None:
         if metadata.shape != array.shape:
@@ -475,7 +495,9 @@ def imwrite(array, output_path, metadata=None, overwrite=True):
         or (len(array.shape) == 3 and array.shape[-1] not in [3, 4])
     ):
         aprint(
-            "png images with more than 2 dimensions are not supported, will be writing the result as a tif"
+            "png images with more than 2 dimensions are"
+            " not supported, will be writing the"
+            " result as a tif"
         )
         output_path = f"{output_path[:output_path.rfind('.')]}.tif"
 
@@ -539,5 +561,7 @@ def mapped_tiff(output_path, shape, dtype):
     finally:
         del array
         aprint(
-            f"Flushing and writing all bytes to TIFF file {output_path}  (shape={shape}, dtype={dtype})"
+            f"Flushing and writing all bytes to TIFF file"
+            f" {output_path}  (shape={shape},"
+            f" dtype={dtype})"
         )

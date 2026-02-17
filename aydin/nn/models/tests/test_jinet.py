@@ -115,12 +115,16 @@ def test_dense_layer_channel_dimensions(spacetime_ndim):
     model = JINetModel(spacetime_ndim=spacetime_ndim)
 
     for i, conv in enumerate(model.kernel_one_conv_functions):
-        assert (
-            conv.in_channels == model.nb_channels
-        ), f"kernel_one_conv[{i}] in_channels={conv.in_channels} != nb_channels={model.nb_channels}"
-        assert (
-            conv.out_channels == model.nb_channels
-        ), f"kernel_one_conv[{i}] out_channels={conv.out_channels} != nb_channels={model.nb_channels}"
+        assert conv.in_channels == model.nb_channels, (
+            f"kernel_one_conv[{i}] "
+            f"in_channels={conv.in_channels} "
+            f"!= nb_channels={model.nb_channels}"
+        )
+        assert conv.out_channels == model.nb_channels, (
+            f"kernel_one_conv[{i}] "
+            f"out_channels={conv.out_channels} "
+            f"!= nb_channels={model.nb_channels}"
+        )
 
 
 def test_gradient_flow():

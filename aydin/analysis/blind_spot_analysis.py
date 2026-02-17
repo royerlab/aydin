@@ -83,7 +83,8 @@ def auto_detect_blindspots(
         channel_axes = (False,) * image.ndim
 
     # Ensure there is at least one batch or channel dimensions:
-    if batch_axes == (False,) * image.ndim and channel_axes == (False,) * image.ndim:
+    all_false = (False,) * image.ndim
+    if batch_axes == all_false and channel_axes == all_false:
         image = image[numpy.newaxis, ...]
         batch_axes = (True,) + batch_axes
         channel_axes = (False,) + channel_axes
@@ -106,11 +107,13 @@ def auto_detect_blindspots(
             chosen_image_variance = variance
             chosen_image = one_image
 
-    # chosen_image should not be None, but if does happen (happened once!) then let's play safe:
+    # chosen_image should not be None, but if does happen
+    # (happened once!) then let's play safe:
     if chosen_image is not None:
         image = chosen_image
 
-    # First we need to remove the borders of the image, as sometimes the borders have artefacts:
+    # First we need to remove the borders of the image,
+    # as sometimes the borders have artefacts:
     if crop_border > 0 and all(s > 2 * crop_border for s in image.shape):
         crop_slice = tuple(
             slice(max(s // 16, crop_border), -max(s // 16, crop_border))
@@ -133,7 +136,8 @@ def auto_detect_blindspots(
     max_blind_spots = min(len(noise_auto_flat), max_blind_spots)
     nth_strongest_correlation = noise_auto_flat[-max_blind_spots]
 
-    # We adjust the threshold to take into account the max number of blindspots requested:
+    # We adjust the threshold to take into account the max number
+    # of blindspots requested:
     threshold = max(threshold, nth_strongest_correlation)
 
     # We list the blind spots:
@@ -145,9 +149,10 @@ def auto_detect_blindspots(
 
     # Remove any constant offset per dimension:
     blind_spots = numpy.array(blind_spots)
-    blind_spots = blind_spots - numpy.mean(blind_spots, axis=0, keepdims=True).astype(
+    mean_offset = numpy.mean(blind_spots, axis=0, keepdims=True).astype(
         dtype=numpy.int32
     )
+    blind_spots = blind_spots - mean_offset
 
     # Convert back to list of tuples:
     blind_spots = list(tuple(a) for a in blind_spots)
@@ -189,7 +194,8 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
     # blurred_image = median_filter(blurred_image, size=2)
     blurred_auto_corr = _autocorrelation(blurred_image, window=window)
 
-    # We 'remove' by division the autocorrelogram fixed_pattern that is common to both:
+    # We 'remove' by division the autocorrelogram fixed_pattern
+    # that is common to both:
     analysis = auto_corr / blurred_auto_corr
 
     # Now we compute the maximum intensity outside of the central region:
@@ -197,8 +203,9 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
     # center = tuple((min(s, window) - 1) // 2 for s in analysis.shape)
     center = unravel_index(argmax(analysis), analysis.shape)
 
-    # Max range might be too much for very shallow dimensions, and for non odd dimensions the center
-    # is not at the cente so we need to reduce the range accordingly:
+    # Max range might be too much for very shallow dimensions,
+    # and for non odd dimensions the center is not at the center
+    # so we need to reduce the range accordingly:
     effective_range = tuple(
         min(c, s - c, max_range) for c, s in zip(center, analysis.shape)
     )
@@ -218,14 +225,17 @@ def noise_autocorrelation(image, max_range: int = 3, window: int = 31) -> numpy.
     if analysis.max() > 0:
         analysis /= analysis.max()
 
-    # Now we have the noise autocorelogram, we can crop that to the expected max range:
+    # Now we have the noise autocorelogram, we can crop that
+    # to the expected max range:
     analysis = analysis[center_slice]
 
     return analysis
 
 
 def _autocorrelation(image, window: int = 31) -> numpy.ndarray:
-    """Compute the autocorrelation of an image over a cropped window around the origin.
+    """Compute the autocorrelation of an image over a cropped window.
+
+    The window is centered around the origin.
 
     Parameters
     ----------

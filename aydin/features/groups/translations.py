@@ -109,7 +109,9 @@ class TranslationFeatures(FeatureGroupBase):
         """
         translation = self.translations[index]
         aprint(
-            f"translation feature: {index}, translation={translation}, exclude_center={self.excluded_voxels}"
+            f"translation feature: {index}, "
+            f"translation={translation}, "
+            f"exclude_center={self.excluded_voxels}"
         )
 
         for excluded_voxel in self.excluded_voxels:

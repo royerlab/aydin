@@ -134,7 +134,11 @@ class HighpassTransform(ImageTransformBase):
         """
 
         with asection(
-            f"Applies high-pass filter of sigma {self.sigma} {'and median filtering' if self.median_filtering else ''} to array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Applies high-pass filter of sigma "
+            f"{self.sigma} "
+            f"{'and median filtering' if self.median_filtering else ''}"
+            f" to array of shape: {array.shape} and "
+            f"dtype: {array.dtype}"
         ):
             # Remember min and max:
             self._min = array.min()
@@ -172,7 +176,9 @@ class HighpassTransform(ImageTransformBase):
             return array
 
         with asection(
-            f"Adds back low-pass frequencies to array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Adds back low-pass frequencies to array "
+            f"of shape: {array.shape} and "
+            f"dtype: {array.dtype}"
         ):
             array = array.astype(numpy.float32, copy=False)
 

@@ -94,7 +94,7 @@ def test_blind_spot_analysis_tribolium_3D_very_shallow():
 
 
 def test_blind_spot_analysis_tribolium_3D_super_shallow():
-    """Test blind spot detection on a single slice extracted from the 3D Tribolium volume."""
+    """Test blind spot detection on a single slice from 3D Tribolium."""
     image = _get_tribolium()
     if image is None:
         pytest.skip("myers_tribolium example could not be loaded")

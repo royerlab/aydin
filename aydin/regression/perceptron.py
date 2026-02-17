@@ -85,7 +85,12 @@ class PerceptronRegressor(RegressorBase):
 
     def __repr__(self):
         """Return a concise string representation of the regressor."""
-        return f"<{self.__class__.__name__}, max_epochs={self.max_epochs}, lr={self.learning_rate}, depth={self.depth}>"
+        return (
+            f"<{self.__class__.__name__},"
+            f" max_epochs={self.max_epochs},"
+            f" lr={self.learning_rate},"
+            f" depth={self.depth}>"
+        )
 
     def _fit(
         self, x_train, y_train, x_valid=None, y_valid=None, regressor_callback=None

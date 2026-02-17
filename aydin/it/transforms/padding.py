@@ -18,18 +18,21 @@ class PaddingTransform(ImageTransformBase):
 
     Adds a border to the image before denoising and then removes that border
     from the denoised image. This reduces border artifacts when denoising
-    certain images. In the case of self-supervised blind-spot based denoisers
-    (e.g. N2S) padding must be carefully chosen because the added pixels
-    should not 'give away' the value of their neighbors. Thus, not all
-    padding modes are recommended. 'symmetric' is the recommended default.
+    certain images. In the case of self-supervised blind-spot
+    based denoisers (e.g.
+    <a href='https://arxiv.org/abs/1901.11365'>Noise2Self</a>)
+    padding must be carefully chosen because the added pixels should not
+    'give away' the value of their neighbors. Thus, not all padding modes
+    are recommended. 'symmetric' is the recommended default.
 
-    Other supported modes: 'constant': Pads with a constant value of 0,
+    Other supported modes (see
+    <a href='https://numpy.org/doc/stable/reference/generated/numpy.pad.html'>numpy.pad</a>):
+    'constant': Pads with a constant value of 0,
     'linear_ramp': Pads with the linear ramp between end_value and the array
-    edge value, 'maximum': Pads with the maximum value of all or part of the
-    vector along each axis, 'mean': Pads with the mean value of all or part
-    of the vector along each axis, 'median': Pads with the median value of
-    all or part of the vector along each axis, 'minimum': Pads with the
-    minimum value of all or part of the vector along each axis.
+    edge value, 'maximum': Pads with the maximum value along each axis,
+    'mean': Pads with the mean value along each axis,
+    'median': Pads with the median value along each axis,
+    'minimum': Pads with the minimum value along each axis.
     <notgui>
     """
 
@@ -125,7 +128,8 @@ class PaddingTransform(ImageTransformBase):
             Padded image array.
         """
         with asection(
-            f"Padding array of shape: {array.shape} with {self.pad_width} voxels and mode: {self.mode}:"
+            f"Padding array of shape: {array.shape} with "
+            f"{self.pad_width} voxels and mode: {self.mode}:"
         ):
             padded_array, self._pad_width = _pad(
                 array, self.mode, self.pad_width, self.min_length_to_pad
@@ -149,7 +153,8 @@ class PaddingTransform(ImageTransformBase):
             return array
 
         with asection(
-            f"Cropping array of shape: {array.shape} by removing padding of {self.pad_width} voxels:"
+            f"Cropping array of shape: {array.shape} by "
+            f"removing padding of {self.pad_width} voxels:"
         ):
             new_array = _unpad(array, pad_width=self._pad_width)
             return new_array

@@ -77,11 +77,14 @@ def extend_nd(available_dims: Sequence[int] = (2,)):
                 return function(*args, **kwargs)
             else:
 
-                # What are the smallest available image dimensions that we can denoise?
+                # What are the smallest available image
+                # dimensions that we can denoise?
                 smallest_dim = min(available_dims)
 
                 if ndim < smallest_dim:
-                    # In this case we are trying to denoise an image with less dimensions that what the function can do,
+                    # In this case we are trying to denoise
+                    # an image with less dimensions that what
+                    # the function can do,
                     # So we need to add extra dimensions:
 
                     extended_image = image
@@ -92,10 +95,14 @@ def extend_nd(available_dims: Sequence[int] = (2,)):
                     denoised = function(extended_image, *args[1:], **kwargs)
 
                 else:
-                    # In this case we try to denoise an image with more dimensions that what the function can do,
-                    # so we have to denoise hyperplane by hyperplane.
+                    # In this case we try to denoise an
+                    # image with more dimensions that what
+                    # the function can do, so we have to
+                    # denoise hyperplane by hyperplane.
 
-                    # In this case, this is the largest available dimension below the image dimension:
+                    # In this case, this is the largest
+                    # available dimension below the image
+                    # dimension:
                     largest_dim = max((n for n in available_dims if n < ndim))
 
                     # Let's use order the image by increasing dimension length,

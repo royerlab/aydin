@@ -1,4 +1,5 @@
-"""Standard feature generator combining uniform, spatial, median, DCT, random, and lowpass features."""
+"""Standard feature generator combining uniform, spatial, median,
+DCT, random, and lowpass features."""
 
 import numpy
 

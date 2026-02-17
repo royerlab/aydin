@@ -76,6 +76,7 @@ class JINetModel(nn.Module):
         super(JINetModel, self).__init__()
 
         self.spacetime_ndim = spacetime_ndim
+        self.nb_unet_levels = 0  # No pooling, so no alignment padding needed
         self.nb_in_channels = nb_in_channels
         self.nb_out_channels = nb_out_channels
         self._kernel_sizes = kernel_sizes

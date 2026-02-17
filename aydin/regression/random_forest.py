@@ -72,7 +72,11 @@ class RandomForestRegressor(LGBMRegressor):
 
     def __repr__(self):
         """Return a concise string representation of the regressor."""
-        return f"<{self.__class__.__name__}, max_num_estimators={self.max_num_estimators}, lr={self.learning_rate}>"
+        return (
+            f"<{self.__class__.__name__},"
+            f" max_num_estimators={self.max_num_estimators},"
+            f" lr={self.learning_rate}>"
+        )
 
     def _get_params(self, num_samples, dtype=numpy.float32):
         """Build LightGBM parameters with random forest boosting type.

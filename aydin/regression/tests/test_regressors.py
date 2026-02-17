@@ -14,11 +14,17 @@ from aydin.io.datasets import add_noise, normalise
 from aydin.io.folders import get_temp_folder
 from aydin.regression.base import RegressorBase
 from aydin.regression.cb import CBRegressor
-from aydin.regression.lgbm import LGBMRegressor
 from aydin.regression.linear import LinearRegressor
 from aydin.regression.perceptron import PerceptronRegressor
-from aydin.regression.random_forest import RandomForestRegressor
 from aydin.regression.support_vector import SupportVectorRegressor
+
+try:
+    from aydin.regression.lgbm import LGBMRegressor
+    from aydin.regression.random_forest import RandomForestRegressor
+
+    _lgbm_available = True
+except (ImportError, OSError):
+    _lgbm_available = False
 
 
 @pytest.fixture(scope="session")
@@ -41,13 +47,44 @@ def regressor_test_data():
     return image, noisy, x, y
 
 
+_lgbm_param = (
+    pytest.param(
+        LGBMRegressor(max_num_estimators=600),
+        0.60,
+        marks=pytest.mark.skipif(not _lgbm_available, reason="LightGBM unavailable"),
+    )
+    if _lgbm_available
+    else pytest.param(
+        None,
+        0.60,
+        marks=pytest.mark.skip(reason="LightGBM unavailable (libomp missing?)"),
+    )
+)
+
+_rf_param = (
+    pytest.param(
+        RandomForestRegressor(),
+        0.55,
+        marks=pytest.mark.skipif(
+            not _lgbm_available, reason="LightGBM unavailable (RF depends on it)"
+        ),
+    )
+    if _lgbm_available
+    else pytest.param(
+        None,
+        0.55,
+        marks=pytest.mark.skip(reason="LightGBM unavailable (RF depends on it)"),
+    )
+)
+
+
 @pytest.mark.parametrize(
     "regressor, min_ssim",
     [
         (LinearRegressor(), 0.55),
-        (RandomForestRegressor(), 0.55),
+        _rf_param,
         (SupportVectorRegressor(), 0.50),
-        (LGBMRegressor(max_num_estimators=600), 0.60),
+        _lgbm_param,
         (CBRegressor(max_num_estimators=600), 0.60),
         (PerceptronRegressor(max_epochs=50, depth=6), 0.55),
     ],
@@ -97,7 +134,10 @@ def test_regressor(regressor, min_ssim, regressor_test_data):
 
 def test_regressor_repr():
     """Regressors should have reasonable string representations."""
-    for reg in [CBRegressor(), LGBMRegressor(), LinearRegressor()]:
+    regressors = [CBRegressor(), LinearRegressor()]
+    if _lgbm_available:
+        regressors.append(LGBMRegressor())
+    for reg in regressors:
         r = repr(reg)
         assert isinstance(r, str)
         assert len(r) > 0

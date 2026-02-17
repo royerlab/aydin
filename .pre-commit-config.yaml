@@ -22,4 +22,3 @@ repos:
     rev: 7.0.0
     hooks:
     - id: flake8
-      args: ['--ignore=E501,E203,E741,W503,E402,F401,E721,E275,E731,E226,F821']

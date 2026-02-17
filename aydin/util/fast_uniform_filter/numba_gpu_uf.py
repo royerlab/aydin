@@ -73,7 +73,8 @@ def numba_gpu_uniform_filter(
             # set the parallelism:
             parallelism = get_num_threads()
 
-            # Currently using conditional implementation, can switch to reshape or slicing
+            # Currently using conditional implementation,
+            # can switch to reshape or slicing
             uniform_filter1d_with_conditionals_gpu(
                 image_a, image_b, filter_size, axis, parallelism=parallelism
             )
@@ -133,7 +134,8 @@ def uniform_filter1d_with_conditionals_gpu(
         threadsperblock = 32 * 32
         blockspergrid = int(math.ceil(image.shape[first_axis_index] / threadsperblock))
 
-        # In some cases if the image is too small, better have more blocks and less threads per block:
+        # In some cases if the image is too small, better
+        # have more blocks and less threads per block:
         if blockspergrid < 256:
             threadsperblock = 1
             blockspergrid = int(
@@ -166,7 +168,8 @@ def uniform_filter1d_with_conditionals_gpu(
         )
         blockspergrid = (blockspergrid_x, blockspergrid_y)
 
-        # In some cases if the image is too small, better have more blocks and less threads per block:
+        # In some cases if the image is too small, better
+        # have more blocks and less threads per block:
         if blockspergrid_x < 256 or blockspergrid_y < 256:
             threadsperblock = (
                 1 if blockspergrid_x < 256 else 32,

@@ -155,7 +155,8 @@ def denoise_lipschitz(
     wrapped_compute_error = jit(nopython=True, parallel=multi_core)(_compute_error)
 
     with asection(
-        f"Lipschitz denoising (lipschitz={lipschitz}, max_iterations={max_num_iterations})"
+        f"Lipschitz denoising (lipschitz={lipschitz}, "
+        f"max_iterations={max_num_iterations})"
     ):
         for i in range(max_num_iterations):
 

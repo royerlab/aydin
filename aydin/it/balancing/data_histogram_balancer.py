@@ -119,11 +119,13 @@ class DataHistogramBalancer:
         # Range:
         minmax_range = batch_max_value - batch_min_value
 
-        # We extend the range by 5% on both sides to account for possible errors of the range estimate:
+        # We extend the range by 5% on both sides to account
+        # for possible errors of the range estimate:
         self.min_value = batch_min_value - 0.05 * minmax_range
         self.max_value = batch_max_value + 0.05 * minmax_range
 
-        # Keep the batch min and max within the full min and max (can happen because of percentile...)
+        # Keep the batch min and max within the full min and
+        # max (can happen because of percentile...)
         batch_min_value = max(full_min_value, batch_min_value)
         batch_max_value = min(full_max_value, batch_max_value)
 
@@ -216,7 +218,8 @@ class DataHistogramBalancer:
             return False
 
         else:
-            # we just decimate uniformly according to the keep-ratio without histogram balancing:
+            # we just decimate uniformly according to the
+            # keep-ratio without histogram balancing:
             if random.random() < self.keep_ratio:
                 self.total_kept_counter += 1
                 return True

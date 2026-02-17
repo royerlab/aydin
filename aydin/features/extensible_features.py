@@ -170,15 +170,18 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
             num_channels = image.shape[1]
             num_features = self.get_num_features(num_spatiotemp_dim)
 
-            # exclude_center_value can be a tuple, in that case each entry corresponds to a channel:
+            # exclude_center_value can be a tuple, in that case
+            # each entry corresponds to a channel:
             if type(exclude_center_value) is not tuple:
                 exclude_center_value = (exclude_center_value,) * num_channels
 
-            # Fills in the default values for passthrough channels: False ==> by default channels are not passthrough.
+            # Fills in the default values for passthrough channels:
+            # False ==> by default channels are not passthrough.
             if passthrough_channels is None:
                 passthrough_channels = (False,) * num_channels
 
-            # Computes the number of features, taking into account: passthrough_channels, channels, and reserved_features:
+            # Computes the number of features, taking into account:
+            # passthrough_channels, channels, and reserved_features:
             num_passthrough_channels = sum(1 if p else 0 for p in passthrough_channels)
             num_normal_features = num_features * (
                 num_channels - num_passthrough_channels
@@ -202,15 +205,18 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                     for channel_index in range(num_channels):
 
                         with asection(
-                            f'Computing features for channel: {channel_index + 1}/{num_channels}'
+                            f'Computing features for channel: '
+                            f'{channel_index + 1}/{num_channels}'
                         ):
-                            # We collect the 'exclude_center_value' for the current channel:
+                            # We collect the 'exclude_center_value'
+                            # for the current channel:
                             exclude_center_value_for_channel = exclude_center_value[
                                 channel_index
                             ]
 
                             aprint(
-                                f'Excluding center value for channel: {exclude_center_value_for_channel}'
+                                f'Excluding center value for '
+                                f'channel: {exclude_center_value_for_channel}'
                             )
 
                             # Image batch slice:
@@ -223,9 +229,12 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                             aprint(f'Image slice: {image_slice}')
 
                             if passthrough_channels[channel_index]:
-                                # A passthrough channel is simply fed directly as a feature:
+                                # A passthrough channel is simply
+                                # fed directly as a feature:
                                 aprint(
-                                    f'Adding passthrough channel feature for channel index: {channel_index}'
+                                    f'Adding passthrough channel '
+                                    f'feature for channel '
+                                    f'index: {channel_index}'
                                 )
                                 batch_feature_slice = (
                                     slice(feature_pointer, feature_pointer + 1, 1),
@@ -243,8 +252,8 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                                 # Useful code snippet for debugging features:
                                 # with napari.gui_qt():
                                 #      viewer = Viewer()
-                                #      viewer.add_image(image_batch_gpu.get(), name='image')
-                                #      viewer.add_image(rescale_intensity(image_integral_gpu.get(), in_range='image', out_range=(0, 1)), name='integral')
+                                #      viewer.add_image(image_batch_gpu.get(), name='image')  # noqa: E501
+                                #      viewer.add_image(rescale_intensity(image_integral_gpu.get(), in_range='image', out_range=(0, 1)), name='integral')  # noqa: E501
 
                                 # Feature batch slice:
                                 batch_feature_slice = (
@@ -253,14 +262,16 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                                     *(slice(None),) * num_spatiotemp_dim,
                                 )
                                 aprint(
-                                    f'Feature slice for batch and channel: {batch_feature_slice}'
+                                    f'Feature slice for batch and '
+                                    f'channel: {batch_feature_slice}'
                                 )
 
                                 batch_channel_features = features[batch_feature_slice]
 
                                 for feature_group in self.features_group_list:
                                     aprint(
-                                        f'Computing feature {feature_group}, '  # , and kwargs={kwargs}'
+                                        f'Computing feature '
+                                        f'{feature_group}, '  # , and kwargs={kwargs}'
                                     )
 
                                     # number of features in group:
@@ -287,11 +298,15 @@ class ExtensibleFeatureGenerator(FeatureGeneratorBase):
                                                 (0,) * num_spatiotemp_dim
                                             )
 
-                                    # We prepare feature generation for the group by setting the image,
-                                    # any computation that can be factored should happen now:
+                                    # We prepare feature generation for
+                                    # the group by setting the image,
+                                    # any computation that can be
+                                    # factored should happen now:
                                     feature_group.prepare(
                                         single_image,
-                                        excluded_voxels=excluded_voxels_for_feature_group,
+                                        excluded_voxels=(
+                                            excluded_voxels_for_feature_group
+                                        ),
                                         offset=spatial_feature_offset,
                                         scale=spatial_feature_scale,
                                     )

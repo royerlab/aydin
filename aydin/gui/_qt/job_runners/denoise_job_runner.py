@@ -54,10 +54,10 @@ class DenoiseJobRunner(QWidget):
         self.threadpool = threadpool
         self.start_button = start_button
 
-        stdout = OutputWrapper(self, True)
-        stdout.outputWritten.connect(self.progress_fn)
-        stderr = OutputWrapper(self, False)
-        stderr.outputWritten.connect(self.progress_fn)
+        self._stdout_wrapper = OutputWrapper(self, True)
+        self._stdout_wrapper.outputWritten.connect(self.progress_fn)
+        self._stderr_wrapper = OutputWrapper(self, False)
+        self._stderr_wrapper.outputWritten.connect(self.progress_fn)
 
         self._mutex = QMutex()
         self._result_images = []
@@ -303,14 +303,14 @@ class DenoiseJobRunner(QWidget):
         self.parent.overlay.show()
 
         # Pass the function to execute
-        worker = Worker(
+        self._worker = Worker(
             self.start_func
         )  # Any other args, kwargs are passed to the run function
 
-        worker.signals.result.connect(self.result_callback)
-        worker.signals.finished.connect(self.thread_complete)
-        worker.signals.progress.connect(self.progress_fn)
-        worker.signals.error.connect(self.error_fn)
+        self._worker.signals.result.connect(self.result_callback)
+        self._worker.signals.finished.connect(self.thread_complete)
+        self._worker.signals.progress.connect(self.progress_fn)
+        self._worker.signals.error.connect(self.error_fn)
 
         self.parent.activity_widget.clear_activity()
 
@@ -319,7 +319,7 @@ class DenoiseJobRunner(QWidget):
         self.start_button.setEnabled(False)
 
         # Execute
-        self.threadpool.start(worker)
+        self.threadpool.start(self._worker)
 
     def result_image_arrays(self):
         """Return the list of denoised result image arrays (thread-safe).

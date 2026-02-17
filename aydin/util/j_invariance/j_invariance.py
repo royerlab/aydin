@@ -121,8 +121,10 @@ def calibrate_denoiser(
         # Masked input image (fixed during optimisation!):
         masked_input_image = interpolation.copy()
 
-        # We backup the masked input image to make sure that it is unchanged after optimisation,
-        # which would indicate a 'non-behaving' denoiser that operates 'in-place'...
+        # We backup the masked input image to make sure that
+        # it is unchanged after optimisation, which would
+        # indicate a 'non-behaving' denoiser that operates
+        # 'in-place'...
         masked_input_image_backup = masked_input_image.copy()
 
         # first we separate the categorical from numerical parameters;
@@ -213,9 +215,12 @@ def calibrate_denoiser(
                         # our optimizer is a maximiser!
                         return -loss
 
-                    # First we check if there is no numerical parameters to optimise:
+                    # First we check if there is no numerical
+                    # parameters to optimise:
                     if len(numerical_parameters_bounds) == 0:
-                        # If there is no numerical parameters to optimise, we just get the value for that categorical combination:
+                        # If there is no numerical parameters
+                        # to optimise, we just get the value
+                        # for that categorical combination:
                         new_parameters = {}
                         new_loss_value = opt_function(new_parameters)
                         aprint(f"Loss: {new_loss_value}")
@@ -223,7 +228,10 @@ def calibrate_denoiser(
 
                         if mode == "smart":
                             with asection(
-                                f"Searching by 'smart optimiser' the best denoising parameters among: {numerical_parameters}"
+                                "Searching by 'smart optimiser'"
+                                " the best denoising"
+                                " parameters among:"
+                                f" {numerical_parameters}"
                             ):
 
                                 # initialise optimiser:
@@ -241,38 +249,35 @@ def calibrate_denoiser(
 
                         elif mode == "fast":
                             with asection(
-                                f"Searching by SHGO followed by L-BFGS-B the best denoising parameters among: {numerical_parameters}"
+                                "Searching by SHGO followed"
+                                " by L-BFGS-B the best"
+                                " denoising parameters"
+                                f" among: {numerical_parameters}"
                             ):
 
                                 def callback(x):
-                                    """Log the current parameter vector during optimization.
-
-                                    Parameters
-                                    ----------
-                                    x : numpy.ndarray
-                                        Current parameter vector from the optimizer.
-                                    """
+                                    """Log current params."""
                                     aprint(x)
 
-                                # x0 = numpy.asarray(tuple((0.5 * (v[1] - v[0]) for (n, v) in
-                                #            numerical_parameters.items())))
+                                # x0 = numpy.asarray(
+                                #   tuple((0.5 * (v[1] - v[0])
+                                #   for (n, v) in
+                                #   numerical_parameters.items()
+                                #   )))
                                 bounds = list(
                                     [v[0:2] for (n, v) in numerical_parameters.items()]
                                 )
 
                                 # Impedance mismatch:
-                                def __function(_denoiser_args):
-                                    """Adapter that negates ``opt_function`` for scipy minimizers.
-
-                                    Converts from ``scipy.optimize`` array-input convention
-                                    to the ``opt_function`` starred-args convention and
-                                    negates the result (since scipy minimizes while
-                                    ``opt_function`` returns negated loss for maximization).
+                                def __function(
+                                    _denoiser_args,
+                                ):
+                                    """Negate opt_function for scipy.
 
                                     Parameters
                                     ----------
-                                    _denoiser_args : numpy.ndarray
-                                        Parameter vector from the scipy optimizer.
+                                    _denoiser_args : ndarray
+                                        Parameter vector.
 
                                     Returns
                                     -------
@@ -294,16 +299,24 @@ def calibrate_denoiser(
                                 )
                                 aprint(f"Global optimisation success: {result.success}")
                                 aprint(
-                                    f"Global optimisation convergence message: {result.message}"
+                                    "Global optimisation"
+                                    " convergence message:"
+                                    f" {result.message}"
                                 )
                                 aprint(
-                                    f"Global optimisation number of function evaluations: {result.nfev}"
+                                    "Global optimisation number"
+                                    " of function evaluations:"
+                                    f" {result.nfev}"
                                 )
                                 aprint(
-                                    f"Best parameters until now: {result.x} for loss: {result.fun}"
+                                    "Best parameters until"
+                                    f" now: {result.x}"
+                                    f" for loss: {result.fun}"
                                 )
 
-                                # starting point for next optimisation round is result of previous step:
+                                # starting point for next
+                                # optimisation round is result
+                                # of previous step:
                                 x0 = result.x
 
                                 # local optimisation using L-BFGS-B:
@@ -333,13 +346,19 @@ def calibrate_denoiser(
 
                                 aprint(f"Local optimisation success: {result.success}")
                                 aprint(
-                                    f"Local optimisation convergence message: {result.message}"
+                                    "Local optimisation"
+                                    " convergence message:"
+                                    f" {result.message}"
                                 )
                                 aprint(
-                                    f"Local optimisation number of function evaluations: {result.nfev}"
+                                    "Local optimisation number"
+                                    " of function evaluations:"
+                                    f" {result.nfev}"
                                 )
                                 aprint(
-                                    f"Best parameters until now: {result.x} for loss: {result.fun}"
+                                    "Best parameters until"
+                                    f" now: {result.x}"
+                                    f" for loss: {result.fun}"
                                 )
 
                                 # We optimise here:
@@ -358,7 +377,9 @@ def calibrate_denoiser(
                         best_loss_value = new_loss_value
 
                     aprint(
-                        f"Best numerical parameters: {best_numerical_parameters} for combination: {combination}"
+                        "Best numerical parameters:"
+                        f" {best_numerical_parameters}"
+                        f" for combination: {combination}"
                     )
 
             # Let convert back the parameters into a dictionary:
@@ -374,7 +395,9 @@ def calibrate_denoiser(
         # We check that the masked input image is unchanged:
         if not numpy.array_equal(masked_input_image_backup, masked_input_image):
             raise RuntimeError(
-                "The denoiser being calibrated is modifying the input image! Calibration will not be accurate!"
+                "The denoiser being calibrated is modifying"
+                " the input image! Calibration will not be"
+                " accurate!"
             )
 
     # Display if needed:

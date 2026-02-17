@@ -24,13 +24,13 @@ class RangeTransform(ImageTransformBase):
     16, 32 bit integers as well as 16, 32, 64 bit floats. More crucially,
     the actual range of values can vary potentially causing difficulties for
     denoising algorithms. For these reasons and more, it is almost always
-    recommended to normalise images to a range within [0, 1] and represented
-    as 32 bit floats (sufficient for most cases and ideal for aydin).
-    Finally, there are two different normalisation modes. The first 'minmax'
-    simply finds the min and max values in the image and uses that to rescale
-    to [0, 1]. However, there are sometimes outlier values that are isolated
-    and completely out of context which would skew the normalisation.
-    Therefore, we also have a 'percentile' mode that uses percentiles to
+    recommended to apply
+    <a href='https://en.wikipedia.org/wiki/Feature_scaling'>feature scaling</a>
+    to normalise images to a range within [0, 1] and represent them as 32
+    bit floats (sufficient for most cases and ideal for aydin). Two modes
+    are available: 'minmax' simply finds the min and max values and rescales
+    to [0, 1]. However, there are sometimes outlier values that would skew
+    the normalisation. Therefore, the 'percentile' mode uses percentiles to
     determine the range -- typically 1% for min value and 99% for max value.
     Optionally, the image can be left as float after denormalisation,
     and values can be clipped to the range during both normalisation and
@@ -147,7 +147,9 @@ class RangeTransform(ImageTransformBase):
         """
 
         with asection(
-            f"Normalizing value range ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Normalizing value range ({self.mode}) for "
+            f"array of shape: {array.shape} and "
+            f"dtype: {array.dtype}"
         ):
 
             self._original_dtype = array.dtype
@@ -186,7 +188,9 @@ class RangeTransform(ImageTransformBase):
             return array
 
         with asection(
-            f"Denormalizing value range ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Denormalizing value range ({self.mode}) for "
+            f"array of shape: {array.shape} and "
+            f"dtype: {array.dtype}"
         ):
             force_float_datatype = self.force_float_datatype
 

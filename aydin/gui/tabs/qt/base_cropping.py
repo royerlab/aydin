@@ -255,7 +255,7 @@ class BaseCroppingTab(QWidget):
         slider_widget.upper_limit_label.setText(str(dim_size))
 
     def update_sliders(self):
-        """Configure slider ranges and visibility based on the current image dimensions."""
+        """Configure slider ranges based on image dimensions."""
         self._configure_axis_slider(self.x_crop_slider, "X")
         self._configure_axis_slider(self.y_crop_slider, "Y")
         self._configure_axis_slider(self.z_crop_slider, "Z", optional=True)
@@ -304,9 +304,8 @@ class BaseCroppingTab(QWidget):
         self.summary_nbvoxels_label.setText(
             f"Total number of voxels: {numpy.prod(self.cropped_image[0].shape)}"
         )
-        self.summary_nbytes_label.setText(
-            f"Total size in bytes: {human_readable_byte_size(self.cropped_image[0].nbytes)}"
-        )
+        size_str = human_readable_byte_size(self.cropped_image[0].nbytes)
+        self.summary_nbytes_label.setText(f"Total size in bytes: {size_str}")
 
     def clear_cropping_tab(self):
         """Clear the viewer layers and reset summary labels to N/A."""

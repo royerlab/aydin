@@ -51,6 +51,7 @@ def _load_example_imread(example):
             [],
             [],
             id="cognet",
+            marks=pytest.mark.heavy,
         ),
         pytest.param(
             examples_single.leonetti_snca,
@@ -58,6 +59,7 @@ def _load_example_imread(example):
             [],
             [1],
             id="leonetti",
+            marks=pytest.mark.heavy,
         ),
     ],
 )
@@ -118,6 +120,7 @@ def test_dimension_analysis_hela(display: bool = False):
     assert len(batch_axes) == 0
 
 
+@pytest.mark.heavy
 def test_dimension_analysis_flybrain(display: bool = False):
     """Test dimension analysis on fly brain image detects one channel axis."""
 

@@ -186,7 +186,9 @@ class DenoiseRestorationBase(ABC):
         ]
         if not matching:
             raise ValueError(
-                f"No class matching '{implementation_class_name}' found in {module.name}"
+                f"No class matching"
+                f" '{implementation_class_name}'"
+                f" found in {module.name}"
             )
         elem = matching[0]  # class name
 
@@ -258,7 +260,7 @@ class DenoiseRestorationBase(ABC):
 
     @staticmethod
     def archive(source, destination):
-        """Archive a model folder as a zip file and move it to a destination.
+        """Archive a model folder as a zip file in a destination directory.
 
         Parameters
         ----------
@@ -267,6 +269,8 @@ class DenoiseRestorationBase(ABC):
         destination : str
             Directory where the zip archive will be placed.
         """
+        source = os.path.abspath(source)
+        destination = os.path.abspath(destination)
         name = Path(source).name
         archive_format = "zip"
         archive_from = os.path.dirname(source)
@@ -278,12 +282,8 @@ class DenoiseRestorationBase(ABC):
             )
             os.remove(os.path.join(destination, f"{name}.{archive_format}"))
 
-        shutil.make_archive(name, archive_format, archive_from, archive_to)
-
-        try:
-            shutil.move(f"{name}.{archive_format}", destination)
-        except shutil.Error as e:
-            aprint(e)
+        archive_base = os.path.join(destination, name)
+        shutil.make_archive(archive_base, archive_format, archive_from, archive_to)
 
     def save(self, model_path):
         """Save the trained model as a zip archive.

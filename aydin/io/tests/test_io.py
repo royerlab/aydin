@@ -20,6 +20,7 @@ from aydin.io.io import (
 )
 
 
+@pytest.mark.heavy
 def test_analysis():
     """Test that imread returns valid metadata for all example images.
 
@@ -99,6 +100,7 @@ def test_opening_examples():
     assert successful_reads > 0, "No example images could be loaded"
 
 
+@pytest.mark.heavy
 def test_imwrite():
     """Test writing and re-reading images in TIFF and PNG formats."""
     input_path = examples_single.janelia_flybrain.get_path()
@@ -141,6 +143,7 @@ def test_imread_nonexistent_file():
     assert array is None
 
 
+@pytest.mark.heavy
 def test_mapped_tiff():
     """Test writing and re-reading an image via memory-mapped TIFF."""
 

@@ -20,7 +20,11 @@ class FixedPatternTransform(ImageTransformBase):
     """Fixed axis-aligned pattern suppression.
 
     Suppresses fixed, axis-aligned, offset patterns along any combination of
-    axes. Given a list of lists of axes that defines axis-aligned volumes,
+    axes. This addresses
+    <a href='https://en.wikipedia.org/wiki/Fixed-pattern_noise'>fixed-pattern noise</a>
+    common in detector arrays, such as row/column offsets from readout
+    electronics or temporal intensity drift from illumination instabilities.
+    Given a list of lists of axes that defines axis-aligned volumes,
     intensity fluctuations of these volumes are stabilised. You can suppress
     intensity fluctuation over time, suppress fixed offsets per pixel over
     time, suppress intensity fluctuations per row, per column, and more.
@@ -148,7 +152,9 @@ class FixedPatternTransform(ImageTransformBase):
         """
 
         with asection(
-            f"Removing axis-aligned fixed patterns for array of shape: {array.shape} and dtype: {array.dtype}:"
+            f"Removing axis-aligned fixed patterns for "
+            f"array of shape: {array.shape} and "
+            f"dtype: {array.dtype}:"
         ):
             self._original_dtype = array.dtype
             new_array = array.astype(dtype=numpy.float32, copy=True)
@@ -204,7 +210,9 @@ class FixedPatternTransform(ImageTransformBase):
             return array
 
         with asection(
-            f"Adding back axis-aligned fixed pattern to array of shape: {array.shape} and dtype: {array.dtype}:"
+            f"Adding back axis-aligned fixed pattern to "
+            f"array of shape: {array.shape} and "
+            f"dtype: {array.dtype}:"
         ):
 
             # Allocate new array to store result:

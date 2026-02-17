@@ -1,6 +1,6 @@
 # Utilities (`aydin/util/`)
 
-This package contains 22 utility subpackages providing image processing, performance optimization, and infrastructure support used throughout Aydin.
+This package contains 21 utility subpackages providing image processing, performance optimization, and infrastructure support used throughout Aydin.
 
 ## Subpackages by Category
 
@@ -38,7 +38,6 @@ This package contains 22 utility subpackages providing image processing, perform
 | Subpackage | Purpose |
 |------------|---------|
 | `blindspot/` | Blind-spot utilities for self-supervised denoising |
-| `bm3d/` | BM3D denoiser wrapper |
 | `dictionary/` | Dictionary learning for sparse coding denoisers |
 | `j_invariance/` | J-invariance (Noise2Self) loss computation |
 | `nsi/` | Noise scale independence utilities |
@@ -73,7 +72,7 @@ Contains `strip_notgui(text)` — strips everything after `<notgui>` from docstr
 
 ### `torch/device.py`
 
-Handles PyTorch device selection (CPU vs CUDA GPU), used by CNN-based denoising.
+Handles PyTorch device selection (CUDA GPU, Apple Silicon MPS, or CPU), used by CNN-based denoising.
 
 ## For Contributors
 

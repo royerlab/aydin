@@ -11,9 +11,7 @@ import os
 import shutil
 from typing import Optional
 
-import aydin.nn.models as models
 from aydin.it.base import ImageTranslatorBase
-from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 from aydin.it.transforms.padding import PaddingTransform
 from aydin.it.transforms.range import RangeTransform
 from aydin.it.transforms.variance_stabilisation import VarianceStabilisationTransform
@@ -94,6 +92,20 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             annotations, and reference class.
         """
 
+        try:
+            from aydin.it.cnn_torch import ImageTranslatorCNNTorch
+        except ImportError:
+            raise ImportError(
+                "CNN denoising requires PyTorch. Install it with: pip install torch"
+            )
+
+        try:
+            import aydin.nn.models as models
+        except ImportError:
+            raise ImportError(
+                "CNN denoising requires PyTorch. Install it with: pip install torch"
+            )
+
         # IT CNN
         it = ImageTranslatorCNNTorch
 
@@ -143,10 +155,15 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             Implementation variant names (e.g. ``['Noise2SelfCNN-unet',
             'Noise2SelfCNN-jinet']``).
         """
-        return [
-            "Noise2SelfCNN-" + x.name
-            for x in self.get_implementations_in_a_module(models)
-        ]
+        try:
+            import aydin.nn.models as models
+
+            return [
+                "Noise2SelfCNN-" + x.name
+                for x in self.get_implementations_in_a_module(models)
+            ]
+        except ImportError:
+            return []
 
     @property
     def implementations_description(self):
@@ -162,6 +179,11 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             HTML-formatted description strings, one per implementation,
             in the same order as :attr:`implementations`.
         """
+        try:
+            import aydin.nn.models as models
+        except ImportError:
+            return []
+
         cnn_description = strip_notgui(Noise2SelfCNN.__doc__.strip())
 
         descriptions = []
@@ -183,8 +205,6 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             )
 
             descriptions.append(cnn_description + f"<br><br>{model_description}")
-
-            # elem_class = response.__getattribute__(elem)
 
         return descriptions
 
@@ -210,6 +230,13 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             Configured image translator instance ready for training or
             inference.
         """
+        try:
+            from aydin.it.cnn_torch import ImageTranslatorCNNTorch
+        except ImportError:
+            raise ImportError(
+                "CNN denoising requires PyTorch. Install it with: pip install torch"
+            )
+
         if self.variant:
             return ImageTranslatorCNNTorch(model=self.variant)
 
@@ -261,9 +288,6 @@ class Noise2SelfCNN(DenoiseRestorationBase):
             ``'callback_period'``, and ``'jinv'``.
         """
         with asection("Noise2Self train is starting..."):
-            if channel_axes is not None and len(channel_axes) > 0 and any(channel_axes):
-                pass  # Channel axes provided, continue with training
-
             self.it = self.get_translator()
 
             self.add_transforms()

@@ -487,6 +487,35 @@ def test_denoise_use_saved_model(tmp_path):
         numpy.testing.assert_array_almost_equal(denoised1, denoised2, decimal=2)
 
 
+# --- Benchmark command tests ---
+
+
+@pytest.mark.heavy
+def test_benchmark_algos(single_image_file):
+    """Test the 'benchmark-algos' CLI command runs and writes CSV files."""
+    with Log.test_context():
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            result = runner.invoke(
+                cli, ['benchmark-algos', '-nr', '1', single_image_file]
+            )
+
+            assert result.exit_code == 0, f"benchmark-algos failed:\n{result.output}"
+
+            # All three CSV files should exist
+            for csv_name in [
+                'self_supervised_loss.csv',
+                'estimated_snr.csv',
+                'res_estimate.csv',
+            ]:
+                assert os.path.exists(csv_name), f"Missing {csv_name}"
+                with open(csv_name) as f:
+                    lines = f.readlines()
+                    assert len(lines) >= 2, f"{csv_name} should have header + data rows"
+                    # First column should be 'filename'
+                    assert lines[0].startswith('filename')
+
+
 # --- Startup performance regression test ---
 
 

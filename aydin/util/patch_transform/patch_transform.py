@@ -67,7 +67,9 @@ def extract_patches_nd(
     # Check patch size versus image size:
     if any(s < ps for s, ps in zip(image.shape, patch_size)):
         raise ValueError(
-            f"Patch size ({patch_size}) must be less than image size ({image.shape}) for all dimensions: "
+            f"Patch size ({patch_size}) must be less than"
+            f" image size ({image.shape}) for all"
+            " dimensions: "
         )
 
     # The next line requires contiguous arrays:

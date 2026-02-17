@@ -20,10 +20,16 @@ from aydin.util.log.log import aprint, asection
 class PeriodicNoiseSuppressionTransform(ImageTransformBase):
     """Periodic noise suppression transform.
 
-    Some images have a form of periodic noise that can be seen as strong
-    peaks in their power spectral density. Suppressing these peaks before and
-    after denoising is often a good idea. This is tricky to use, use with
-    care. Works with non-axis-aligned periodic patterns. (advanced)
+    Some images have a form of
+    <a href='https://en.wikipedia.org/wiki/Image_noise#Periodic_noise'>periodic noise</a>
+    that can be seen as strong peaks in their
+    <a href='https://en.wikipedia.org/wiki/Spectral_density'>power spectral density</a>.
+    Common sources include electronic interference, scanning artifacts,
+    and sensor readout patterns. Suppressing these peaks before and after
+    denoising is often a good idea. The algorithm detects peaks in the
+    Fourier domain and attenuates them with a configurable mask radius.
+    Works with non-axis-aligned periodic patterns. This is tricky to use,
+    use with care. (advanced)
     <notgui>
     """
 
@@ -129,7 +135,9 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         """
 
         with asection(
-            f"Applies periodic noise suppression to array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Applies periodic noise suppression to array "
+            f"of shape: {array.shape} and "
+            f"dtype: {array.dtype}"
         ):
             new_array = self._suppress_periodic_patterns(array)
             return new_array
@@ -156,7 +164,8 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
             return array
 
         with asection(
-            f"Reapplies periodic noise to array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Reapplies periodic noise to array of shape: "
+            f"{array.shape} and dtype: {array.dtype}"
         ):
             # turns out it is better to suppress the periodic patterns before and after:
             if self.post_processing_is_inverse:
@@ -252,7 +261,10 @@ class PeriodicNoiseSuppressionTransform(ImageTransformBase):
         #     viewer.add_image(numpy.log1p(filtered_spectrum), name='filtered_spectrum')
         #     viewer.add_image(numpy.log1p(correction), name='correction')
         #     ft = scipy.fft.fftshift(ft)
-        #     viewer.add_image(numpy.log1p(numpy.abs(ft).astype(numpy.float32)), name='spectrum_after')
+        #     viewer.add_image(
+        #         numpy.log1p(numpy.abs(ft).astype(numpy.float32)),
+        #         name='spectrum_after'
+        #     )
         #     viewer.add_image(new_array, name='new_array')
 
         return new_array
@@ -303,7 +315,8 @@ def _sphere(shape, radius, position):
     numpy.ndarray
         Boolean mask where True indicates voxels inside the sphere.
     """
-    # From : https://stackoverflow.com/questions/46626267/how-to-generate-a-sphere-in-3d-numpy-array/46626448
+    # From: https://stackoverflow.com/questions/46626267/
+    # how-to-generate-a-sphere-in-3d-numpy-array/46626448
 
     # assume shape and position are both a 3-tuple of int or float
     # the units are pixels / voxels (px for short)

@@ -47,7 +47,10 @@ class MicroscopePSF:
     """
 
     def __init__(self):
-        """Initialize with default microscope parameters for a 100x/1.4NA oil objective."""
+        """Initialize with default microscope parameters.
+
+        Configures a 100x/1.4NA oil objective.
+        """
 
         # Internal constants.
         self.num_basis = (
@@ -65,7 +68,7 @@ class MicroscopePSF:
             "ni0": 1.515,  # immersion medium RI design value
             "ni": 1.515,  # immersion medium RI experimental value
             "ns": 1.33,  # specimen refractive index (RI)
-            "ti0": 150,  # microns, working distance (immersion medium thickness) design value
+            "ti0": 150,  # microns, working distance design value
             "tg": 170,  # microns, coverslip thickness experimental value
             "tg0": 170,  # microns, coverslip thickness design value
             "zd0": 200.0 * 1.0e3,
@@ -313,8 +316,10 @@ class MicroscopePSF:
         # Shape is (number of basis functions by number of rho samples)
         J = scipy.special.jv(0, scaling_factor.reshape(-1, 1) * rho)
 
-        # Compute the approximation to the sampled pupil phase by finding the least squares
-        # solution to the complex coefficients of the Fourier-Bessel expansion.
+        # Compute the approximation to the sampled pupil
+        # phase by finding the least squares solution to
+        # the complex coefficients of the Fourier-Bessel
+        # expansion.
         # Shape of C is (number of basis functions by number of z samples).
         # Note the matrix transposes to get the dimensions correct.
         C, residuals, _, _ = numpy.linalg.lstsq(J.T, phase.T, rcond=None)
@@ -334,7 +339,8 @@ class MicroscopePSF:
         )
         R /= denom
 
-        # The transpose places the axial direction along the first dimension of the array, i.e. rows
+        # The transpose places the axial direction along
+        # the first dimension of the array, i.e. rows
         # This is only for convenience.
         PSF_rz = (numpy.abs(R.dot(C)) ** 2).T
 

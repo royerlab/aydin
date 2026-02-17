@@ -71,7 +71,11 @@ class LinearRegressor(RegressorBase):
 
     def __repr__(self):
         """Return a concise string representation of the regressor."""
-        return f"<{self.__class__.__name__}, mode={self.mode}, max_num_iterations={self.max_num_iterations}>"
+        return (
+            f"<{self.__class__.__name__},"
+            f" mode={self.mode},"
+            f" max_num_iterations={self.max_num_iterations}>"
+        )
 
     def _fit(
         self, x_train, y_train, x_valid=None, y_valid=None, regressor_callback=None
