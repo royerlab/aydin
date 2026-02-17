@@ -85,7 +85,18 @@ def saveload(method, min_psnr=22, min_ssim=0.75):
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
     assert psnr_denoised > psnr_noisy and ssim_denoised > ssim_noisy
 
-    # if the line below fails, then the parameters of the image the lgbm regressohave   been broken.
-    # do not change the number below, but instead, fix the problem -- most likely a parameter.
+    # if the line below fails, then the parameters of the
+    # image the lgbm regressor have been broken.
+    # do not change the number below, but instead, fix the
+    # problem -- most likely a parameter.
 
     assert psnr_denoised > min_psnr and ssim_denoised > min_ssim
+
+
+def test_classic_denoiser_repr():
+    """Test that __repr__ is well-formed."""
+    it = ImageDenoiserClassic(method='butterworth')
+    r = repr(it)
+    assert r.startswith('<')
+    assert r.endswith('>')
+    assert 'butterworth' in r

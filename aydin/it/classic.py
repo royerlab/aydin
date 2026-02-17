@@ -117,7 +117,12 @@ class ImageDenoiserClassic(ImageTranslatorBase):
 
     def __repr__(self):
         """Return a string representation of the classic denoiser."""
-        return f"<{self.__class__.__name__}, method={self.method}, max_voxels_for_training={self.max_voxels_for_training}"
+        return (
+            f"<{self.__class__.__name__}, "
+            f"method={self.method}, "
+            f"max_voxels_for_training="
+            f"{self.max_voxels_for_training}>"
+        )
 
     def save(self, path: str):
         """Save the classic denoiser model to disk.
@@ -265,7 +270,9 @@ class ImageDenoiserClassic(ImageTranslatorBase):
         for batch_index in range(num_batches):
             for channel_index in range(num_channels):
                 aprint(
-                    f'Denoising image for batch: {batch_index} and channel: {channel_index}'
+                    f'Denoising image for batch: '
+                    f'{batch_index} and channel: '
+                    f'{channel_index}'
                 )
                 best_parameters = self.best_parameters[channel_index]
                 denoising_function = self.denoising_functions[channel_index]

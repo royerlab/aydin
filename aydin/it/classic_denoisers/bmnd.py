@@ -137,7 +137,8 @@ def denoise_bmnd(
             block_depth = max(patch_size)
 
     with asection(
-        f"Denoise image of shape {image.shape} with BMnD (patch_size={patch_size}, block_depth={block_depth})"
+        f"Denoise image of shape {image.shape} with BMnD "
+        f"(patch_size={patch_size}, block_depth={block_depth})"
     ):
         with asection("Extract patches and DCT"):
             patches = extract_patches_nd(image, patch_size=patch_size)

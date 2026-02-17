@@ -6,7 +6,8 @@ from aydin.features.standard_features import StandardFeatureGenerator
 
 
 def demo_collect_feature_2d():
-    """Generate and visualize 2D features with excluded voxels for blind-spot denoising."""
+    """Generate and visualize 2D features with excluded voxels
+    for blind-spot denoising."""
     generator = StandardFeatureGenerator(
         include_corner_features=True,
         include_scale_one=True,

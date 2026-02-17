@@ -148,7 +148,9 @@ class Optimizer:
 
         # This is the main loop that evaluates the function:
         with asection(
-            f"Optimizing function with at most {max_num_evaluations} function evaluations within: {bounds}"
+            f"Optimizing function with at most"
+            f" {max_num_evaluations} function"
+            f" evaluations within: {bounds}"
         ):
             for i in range(max_num_evaluations):
                 # aprint(f"Evaluation #{i}")
@@ -176,14 +178,20 @@ class Optimizer:
                     has_new_best = self._add_points([new_point])
 
                     aprint(
-                        f"{i}{'!' if has_new_best else ' '}: {' Exploring' if do_explore else 'Optimizing'}, Best point: {self.best_point}, best value: {self.best_value}, new point: {new_point})"
+                        f"{i}{'!' if has_new_best else ' '}:"
+                        f" {' Exploring' if do_explore else 'Optimizing'},"
+                        f" Best point: {self.best_point},"
+                        f" best value: {self.best_value},"
+                        f" new point: {new_point})"
                     )
 
                     # Are we running out of patience?
                     if self.since_last_best > patience:
                         # If yes we stop searching:
                         aprint(
-                            f"Run out of patience: {self.since_last_best} > {patience} !"
+                            "Run out of patience:"
+                            f" {self.since_last_best}"
+                            f" > {patience} !"
                         )
                         break
 
@@ -284,7 +292,8 @@ class Optimizer:
         numpy.ndarray
             The next candidate point to evaluate.
         """
-        # If we ran out of evaluations (recursive call!), then let's return immediately with None:
+        # If we ran out of evaluations (recursive call!),
+        # then let's return immediately with None:
         if num_evaluations <= 0:
             return None
 
@@ -320,7 +329,8 @@ class Optimizer:
                     value += self.interpolator(point.reshape(n, -1).T)
                 except Exception as e:
                     aprint(f"Exception: {e}")
-                    # If there is an issue with interpolation, we fallback on exploration:
+                    # If there is an issue with interpolation,
+                    # we fallback on exploration:
                     fallback_exploration = True
 
             if do_explore or fallback_exploration:
@@ -348,8 +358,9 @@ class Optimizer:
             # Random optimizer is great to avoid getting stuck:
             point = self._random_optimizer(function)
         else:
-            # Fast minimisation with Neadler-Mead helps get closer to the optimum,
-            # here we don't need randomness as much:
+            # Fast minimisation with Neadler-Mead helps get
+            # closer to the optimum, here we don't need
+            # randomness as much:
             result = minimize(
                 lambda x_: -function(x_),  # this is a minimiser
                 x0=self.best_point,
@@ -363,9 +374,12 @@ class Optimizer:
         # we clean up:
         while True:
             if _is_in(point, self.x) or point is None:
-                # If we get a point we already have, lets pick a point at random:
+                # If we get a point we already have,
+                # lets pick a point at random:
                 # aprint(
-                #     f"Point {point} already suggested (or None), trying something else..."
+                #     f"Point {point} already suggested"
+                #     " (or None), trying something"
+                #     " else..."
                 # )
                 try:
                     if point is None:
@@ -489,11 +503,17 @@ class Optimizer:
             min_r, max_r = self.bounds[i]
 
             # int coodinates:
-            if type(min_r) is int or type(min_r) in [numpy.int32, numpy.int64]:
+            if type(min_r) is int or type(min_r) in [
+                numpy.int32,
+                numpy.int64,
+            ]:
                 coord = numpy.random.randint(min_r, max_r)
 
             # float coordinates:
-            elif type(min_r) is float or type(min_r) in [numpy.float32, numpy.float64]:
+            elif type(min_r) is float or type(min_r) in [
+                numpy.float32,
+                numpy.float64,
+            ]:
                 coord = numpy.random.uniform(min_r, max_r)
 
             point.append(coord)
@@ -548,7 +568,8 @@ def _is_in(array, array_list):
         True if any existing point shares a coordinate value with ``array``.
     """
     for a in array_list:
-        # RBF interpolator hates it when two coordinates of two points have the same values...
+        # RBF interpolator hates it when two coordinates of
+        # two points have the same values...
         if (a == array).any():
             return True
 

@@ -193,9 +193,15 @@ def correlation(
                     corr_avg[1:] = scipy.signal.medfilt(corr_avg, kernel_size=3)[1:]
                     corr_avg[1:] = scipy.signal.medfilt(corr_avg, kernel_size=5)[1:]
                     corr_avg[1:] = scipy.signal.medfilt(corr_avg, kernel_size=7)[1:]
-                    # corr_avg[1:] = numpy.convolve(corr_avg, numpy.ones(3) / 3.0, mode='same')[1:]
-                    # corr_avg[1:] = numpy.convolve(corr_avg, numpy.ones(3) / 3.0, mode='same')[1:]
-                    # corr_avg = numpy.convolve(corr_avg, numpy.ones(3) / 3.0, mode='same')
+                    # corr_avg[1:] = numpy.convolve(
+                    #     corr_avg, numpy.ones(3) / 3.0, mode='same'
+                    # )[1:]
+                    # corr_avg[1:] = numpy.convolve(
+                    #     corr_avg, numpy.ones(3) / 3.0, mode='same'
+                    # )[1:]
+                    # corr_avg = numpy.convolve(
+                    #     corr_avg, numpy.ones(3) / 3.0, mode='same'
+                    # )
 
                 corr_avg = corr_avg / corr_avg[0]
             else:

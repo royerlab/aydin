@@ -105,7 +105,7 @@ def test_parse_param_descriptions_none_preserved():
 
 
 def test_parse_param_descriptions_hidden_param_present():
-    """Test that hidden parameters are still in the parsed dict (filtering happens elsewhere)."""
+    """Test hidden params are in parsed dict (filtering elsewhere)."""
     result = ConstructorArgumentsWidget._parse_param_descriptions(_ClassWithHiddenParam)
     assert 'alpha' in result
     assert '_internal' in result

@@ -136,7 +136,8 @@ class ActivityWidget(QWidget):
 
         path = None
         if images_to_denoise:
-            # images_to_denoise items: [filename, array, metadata, denoise, filepath, output_folder]
+            # images_to_denoise items:
+            # [filename, array, metadata, denoise, filepath, output_folder]
             path = images_to_denoise[0].filepath
 
         if not path:

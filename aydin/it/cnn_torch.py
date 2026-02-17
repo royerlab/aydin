@@ -5,6 +5,7 @@ based image translator using PyTorch. Supports pluggable model architectures
 and training methods.
 """
 
+import gc
 import importlib
 import inspect
 import json
@@ -119,7 +120,11 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
 
     def __repr__(self):
         """Return a string representation of the PyTorch CNN translator."""
-        return f"<{self.__class__.__name__}, model={self.model}, training_method={self.training_method}>"
+        return (
+            f"<{self.__class__.__name__}, "
+            f"model={self.model}, "
+            f"training_method={self.training_method}>"
+        )
 
     def save(self, path: str):
         """Save the PyTorch CNN translator model to disk.
@@ -242,6 +247,106 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         self.stop_fitting = True
         if self._stop_flag is not None:
             self._stop_flag['stop'] = True
+
+    def _estimate_memory_needed_and_available(self, image):
+        """Estimate memory requirements for CNN inference.
+
+        Computes peak memory from the model's intermediate feature map
+        sizes and reports device-aware available memory.  Since
+        ``_translate`` now processes one batch item at a time, the
+        estimate reflects a single-sample forward pass.
+
+        Parameters
+        ----------
+        image : numpy.ndarray
+            The shape-normalized image to estimate memory for.
+
+        Returns
+        -------
+        tuple of (float, float)
+            ``(memory_needed, memory_available)`` in bytes.
+        """
+        from aydin.util.torch.device import available_device_memory
+
+        # Available memory: use device-aware query
+        memory_available = available_device_memory()
+
+        # Peak channel amplification for a single sample forward pass
+        amplification = self._estimate_memory_amplification_factor()
+
+        # Single-sample spatial size (skip batch dim, keep channel + spatial)
+        single_sample_size = 1
+        for s in image.shape[1:]:
+            single_sample_size *= s
+        bytes_per_voxel = 4  # float32
+
+        # Safety factor accounts for PyTorch allocator overhead and padding.
+        # MPS has higher fragmentation overhead than CUDA.
+        if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+            safety_factor = 3.0
+        else:
+            safety_factor = 1.5
+        memory_needed = (
+            safety_factor * amplification * single_sample_size * bytes_per_voxel
+        )
+
+        return memory_needed, memory_available
+
+    def _estimate_memory_amplification_factor(self):
+        """Estimate peak intermediate-tensor channels during a forward pass.
+
+        Returns a multiplier relative to a single-channel input.  The
+        value depends on the model architecture: JINet stores all
+        dilated-conv outputs for concatenation plus dense-layer
+        intermediates; UNet stores encoder skip connections; DnCNN is
+        purely sequential.
+
+        Returns
+        -------
+        float
+            Estimated peak channel count during the forward pass.
+        """
+        if self.model is None:
+            # Before training — use a conservative default
+            return 100.0
+
+        base = getattr(self.model, 'base_model', self.model)
+
+        # JINet: dilated conv list + concat + dense layers with residuals
+        if hasattr(base, 'num_features') and hasattr(base, 'nb_channels'):
+            num_features = base.num_features
+            nb_channels = base.nb_channels
+            dilated_total = (
+                sum(num_features) if isinstance(num_features, list) else nb_channels
+            )
+            # Peak: list kept alive + concat result + dense x + dense y
+            return float(2 * dilated_total + 2 * nb_channels)
+
+        # UNet variants: skip connections at each level
+        if hasattr(base, 'nb_unet_levels') and base.nb_unet_levels > 0:
+            nb_levels = base.nb_unet_levels
+            if hasattr(base, 'nb_filters'):
+                nb_filters = base.nb_filters
+            elif hasattr(base, 'wf'):
+                # RonnebergerUNet: filters = 2^(wf+i) at each level
+                nb_filters = 2**base.wf
+            else:
+                nb_filters = 64  # conservative default
+            # encoder features + decoder features + bottleneck
+            total = sum(nb_filters * (2**i) for i in range(nb_levels)) * 2
+            total += nb_filters * (2 ** max(0, nb_levels - 1)) * 2
+            return float(total)
+
+        # DnCNN / other sequential models
+        if hasattr(base, 'dncnn'):
+            max_features = 64
+            for module in base.dncnn.modules():
+                if hasattr(module, 'out_channels'):
+                    max_features = max(max_features, module.out_channels)
+            return float(max_features * 2)
+
+        # Conservative fallback
+        return 100.0
 
     @staticmethod
     def _get_model_class_from_string(model_name):
@@ -415,6 +520,10 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
     def _translate(self, input_image, image_slice=None, whole_image_shape=None):
         """Translate (denoise) an input image using the trained PyTorch CNN.
 
+        Processes batch items one at a time to limit peak GPU memory.
+        Each item is transferred to the device, run through the model,
+        and moved back to CPU before the next item is processed.
+
         Parameters
         ----------
         input_image : numpy.ndarray
@@ -435,15 +544,19 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
             If no trained model is available.
         """
         if self.model:
+            from aydin.util.torch.device import clear_device_cache
+
             device = next(self.model.parameters()).device
-            x = torch.as_tensor(input_image, dtype=torch.float32).to(device)
+
+            # Build full tensor on CPU (not GPU) to compute padding
+            x_full = torch.as_tensor(input_image, dtype=torch.float32)
 
             # Determine required spatial alignment from model.
             # If model is a ShiftConvWrapper, look at the base_model.
             base = getattr(self.model, 'base_model', self.model)
-            nb_unet_levels = getattr(base, 'nb_unet_levels', 3)
+            nb_unet_levels = getattr(base, 'nb_unet_levels', 0)
             divisor = 2**nb_unet_levels
-            spatial_dims = x.shape[2:]  # skip B, C
+            spatial_dims = x_full.shape[2:]  # skip B, C
 
             # Compute padding needed for each spatial dim
             pad_amounts = []
@@ -453,20 +566,42 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
                 pad_amounts.extend([0, pad])  # (before, after) for this dim
 
             needs_padding = any(p > 0 for p in pad_amounts)
+
+            # Crop slices for removing padding from output
             if needs_padding:
-                x = torch.nn.functional.pad(x, pad_amounts, mode='replicate')
+                crop_slices = [slice(None), slice(None)]  # B, C
+                for s in spatial_dims:
+                    crop_slices.append(slice(0, s))
+                crop_slices = tuple(crop_slices)
 
             self.model.eval()
-            with torch.no_grad():
-                result = self.model(x)
 
-            # Crop back to original spatial shape
-            if needs_padding:
-                slices = [slice(None), slice(None)]  # B, C
-                for i, s in enumerate(spatial_dims):
-                    slices.append(slice(0, s))
-                result = result[tuple(slices)]
+            # Mini-batch inference: process one batch item at a time
+            # to keep peak GPU memory bounded
+            batch_size = x_full.shape[0]
+            result_list = []
 
-            return result.cpu().numpy()
+            for i in range(batch_size):
+                xi = x_full[i : i + 1].to(device)
+
+                if needs_padding:
+                    xi = torch.nn.functional.pad(xi, pad_amounts, mode='replicate')
+
+                with torch.no_grad():
+                    ri = self.model(xi)
+
+                if needs_padding:
+                    ri = ri[crop_slices]
+
+                result_list.append(ri.cpu())
+                del xi, ri
+                gc.collect()
+                clear_device_cache()
+
+            result = torch.cat(result_list, dim=0)
+            del result_list
+            clear_device_cache()
+
+            return result.numpy()
         else:
             raise ValueError("A model is needed to infer on...")

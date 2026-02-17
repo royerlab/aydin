@@ -151,7 +151,8 @@ class TimelapseDenoiser:
             The denoised image array.
         """
         with asection(
-            f"Denoising image with dimensions {input_image_array.shape} along first dimension"
+            f"Denoising image with dimensions "
+            f"{input_image_array.shape} along first dimension"
         ):
             num_time_points = input_image_array.shape[0]
 

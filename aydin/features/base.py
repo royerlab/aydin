@@ -41,7 +41,8 @@ class FeatureGeneratorBase(ABC):
         self.check_nans = False
         self.debug_force_memmap = False
 
-        # Implementations must initialise the dtype so that feature arrays can be created with correct type:
+        # Implementations must initialise the dtype so that feature
+        # arrays can be created with correct type:
         self.dtype = None
 
     def save(self, path: str):

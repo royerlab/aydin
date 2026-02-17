@@ -17,3 +17,13 @@ def test_spectral():
 def test_spectral_nd():
     """Test spectral denoiser on 1D through 4D inputs."""
     check_nd(denoise_spectral)
+
+
+def test_spectral_with_explicit_params():
+    """Test spectral denoiser accepts freq_bias_strength parameter."""
+    import numpy
+
+    image = numpy.random.rand(32, 32).astype(numpy.float32)
+    result = denoise_spectral(image, freq_bias_strength=0.5)
+    assert result.shape == image.shape
+    assert result.dtype == numpy.float32

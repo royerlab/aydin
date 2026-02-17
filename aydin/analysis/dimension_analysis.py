@@ -69,7 +69,8 @@ def dimension_analysis_on_image(
         Indices of axes identified as channel dimensions.
     """
     with asection(
-        "Analysing dimensions to determine which should be spatio-temporal, batch, or channel"
+        "Analysing dimensions to determine which should be"
+        " spatio-temporal, batch, or channel"
     ):
 
         # pre-crop so we can control the time it takes:
@@ -118,7 +119,8 @@ def dimension_analysis_on_image(
         # We sort the values:
         sorted_values.sort()
 
-        # This is the index for the top n (n=min_spatio_temporal) most correlated dimensions:
+        # This is the index for the top n (n=min_spatio_temporal)
+        # most correlated dimensions:
 
         threshold = 1 - epsilon
         for _ in range(len(sorted_values) - 1):
@@ -128,22 +130,26 @@ def dimension_analysis_on_image(
                 break
 
         aprint(
-            f"Correlation values per axis: {values} (lower values means more correlation)"
+            f"Correlation values per axis: {values}"
+            " (lower values means more correlation)"
         )
 
         aprint(
-            f"Threshold for identifying spatio-temporal dimension is ...<={threshold}"
+            "Threshold for identifying spatio-temporal"
+            f" dimension is ...<={threshold}"
         )
 
         # spatio-temporal axes:
         st_axes = tuple(axis for axis in range(nb_dim) if values[axis] <= threshold)
 
-        # We ensure that there is enough spatio-temporal dimensions by adding dimensions from the 'end':
+        # We ensure that there is enough spatio-temporal dimensions
+        # by adding dimensions from the 'end':
         for axis in reversed(range(nb_dim)):
             if len(st_axes) < min_spatio_temporal:
                 st_axes = tuple(set(st_axes + (axis,)))
 
-        # We ensure that there is not too many spatio-temporal dimensions by removing dimensions from the 'front':
+        # We ensure that there is not too many spatio-temporal
+        # dimensions by removing dimensions from the 'front':
         for axis in reversed(range(nb_dim)):
             if len(st_axes) > max_spatio_temporal:
                 st_axes = tuple(a for a in st_axes if a != axis)
@@ -163,7 +169,9 @@ def dimension_analysis_on_image(
         )
 
         aprint(
-            f"Inferred batch axes: {batch_axes} and channel axes: {channel_axes} for image of shape {image.shape}"
+            f"Inferred batch axes: {batch_axes} and channel"
+            f" axes: {channel_axes} for image of"
+            f" shape {image.shape}"
         )
 
         return batch_axes, channel_axes

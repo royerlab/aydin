@@ -59,8 +59,9 @@ def representative_crop(
         Crop axis lengths cannot be smaller than this number.
 
     smoothing_sigma : float
-        Sigma value for Gaussian filter smoothing to achieve some crude denoising and thus
-        make it a bit easier to estimate the score per crop.
+        Sigma value for Gaussian filter smoothing to achieve
+        some crude denoising and thus make it a bit easier to
+        estimate the score per crop.
 
     equal_sides : bool
         When True the crop will have all its sides of equal size (square, cube, ...)
@@ -74,7 +75,8 @@ def representative_crop(
         possible strided crop.
 
     granularity_factor : int
-        Granularity of search. Higher values correspond to more overlap between candidate crops.
+        Granularity of search. Higher values correspond to more
+        overlap between candidate crops.
 
     random_search_mode_num_crops : int
         Number of crops to check in 'random' search mode.
@@ -118,7 +120,8 @@ def representative_crop(
     start_time = time.time()
 
     with asection(
-        f"Cropping image of size: {image.shape} with at most {crop_size} voxels and mode {mode}"
+        f"Cropping image of size: {image.shape} "
+        f"with at most {crop_size} voxels and mode {mode}"
     ):
 
         # save reference to original image:
@@ -158,7 +161,8 @@ def representative_crop(
         #     viewer.add_image(image, name='image')
         #     viewer.add_image(filtered_image, name='filtered_image')
 
-        # To speed up cropping we apply a divide and conquer to 'pre-crop' the image recusively:
+        # To speed up cropping we apply a divide and conquer
+        # to 'pre-crop' the image recusively:
         # if precropping:
         #     image = _precrop(image,
         #                      crop_size=crop_size,
@@ -279,7 +283,9 @@ def representative_crop(
 
                 if i >= min_num_crops and time.time() > start_time + timeout_in_seconds:
                     aprint(
-                        f"Interrupting crop search because of timeout after {i} crops examined!"
+                        "Interrupting crop search because"
+                        f" of timeout after {i} crops"
+                        " examined!"
                     )
                     break
 
@@ -323,7 +329,9 @@ def representative_crop(
 
                 if i >= min_num_crops and time.time() > start_time + timeout_in_seconds:
                     aprint(
-                        f"Interrupting crop search because of timeout after {i} crops examined!"
+                        "Interrupting crop search because"
+                        f" of timeout after {i} crops"
+                        " examined!"
                     )
                     break
         else:

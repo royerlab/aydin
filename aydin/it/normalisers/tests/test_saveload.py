@@ -59,13 +59,15 @@ def test_normalisers_saveload(normalizer):
     new_array = array.copy()
     normalised_array = loaded_normaliser.normalise(new_array)
     print(
-        f"After normalisation: min,max = {(normalised_array.min(), normalised_array.max())}"
+        "After normalisation: min,max = "
+        f"{(normalised_array.min(), normalised_array.max())}"
     )
     assert normalised_array.dtype == numpy.float32
 
     denormalised_array = loaded_normaliser.denormalise(normalised_array)
     print(
-        f"After denormalisation: min,max = {(denormalised_array.min(), denormalised_array.max())}"
+        "After denormalisation: min,max = "
+        f"{(denormalised_array.min(), denormalised_array.max())}"
     )
     assert denormalised_array.dtype == numpy.uint8
 

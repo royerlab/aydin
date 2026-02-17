@@ -105,7 +105,8 @@ class MedianFeatures(FeatureGroupBase):
         """
         radius = self.radii[index]
         aprint(
-            f"Median feature: {index}, radius: {radius}, excluded_voxels={self.excluded_voxels}"
+            f"Median feature: {index}, radius: {radius}, "
+            f"excluded_voxels={self.excluded_voxels}"
         )
         footprint_shape = (2 * radius + 1,) * self.image.ndim
         footprint = numpy.ones(footprint_shape)
@@ -113,7 +114,8 @@ class MedianFeatures(FeatureGroupBase):
         # We need to modify the footprint to take into account the excluded voxels:
         for excluded_voxel in self.excluded_voxels:
 
-            # First we check if the excluded voxel falls within the footprint of the feature:
+            # First we check if the excluded voxel falls
+            # within the footprint of the feature:
             if all(
                 (
                     -s // 2 <= v <= s // 2

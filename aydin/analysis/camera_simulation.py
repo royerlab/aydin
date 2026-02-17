@@ -127,7 +127,8 @@ def simulate_camera_image(
             camera_rnd, scale=gain_sigma, size=photons_per_second.shape
         )
 
-    # And often each column of the detector has its own electronics that induce another source of column-dependent noise:
+    # And often each column of the detector has its own electronics
+    # that induce another source of column-dependent noise:
     if gain_column_sigma > 0:
         gain_image += _normal(
             camera_rnd, scale=gain_column_sigma, size=photons_per_second.shape[1:]
@@ -152,7 +153,8 @@ def simulate_camera_image(
             camera_rnd, scale=dark_current_sigma, size=photons_per_second.shape
         )
 
-    # And often each column of the detector has its own electronics that induce another source of column-dependent noise:
+    # And often each column of the detector has its own electronics
+    # that induce another source of column-dependent noise:
     if dark_current_column_sigma > 0:
         dark_current_image += _normal(
             camera_rnd,

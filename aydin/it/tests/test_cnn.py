@@ -234,3 +234,76 @@ def test_batch_axes():
     psnr_denoised = psnr(image_2d, denoised_2d)
     print("noisy psnr:", psnr_noisy, "denoised psnr:", psnr_denoised)
     assert psnr_denoised > psnr_noisy
+
+
+# ---------------------------------------------------------------------------
+#  Multi-batch mini-batch inference
+# ---------------------------------------------------------------------------
+
+
+def test_multi_batch_inference():
+    """Multiple batch items should be handled via mini-batch inference."""
+    image_width = 64
+    image = normalise(camera())
+    H0, W0 = (numpy.array(image.shape) - image_width) // 2
+    image = image[H0 : H0 + image_width, W0 : W0 + image_width]
+    noisy = add_noise(image)
+
+    # Stack 4 copies as batch dimension
+    batched = numpy.stack([noisy] * 4, axis=0)  # (4, 64, 64)
+    batch_axes = [True, False, False]
+
+    it = ImageTranslatorCNNTorch(model="jinet")
+    it.train(batched, batched, batch_axes=batch_axes)
+    denoised = it.translate(batched, batch_axes=batch_axes)
+
+    assert denoised.shape == batched.shape
+    # Each batch item should be finite and non-trivial
+    assert numpy.all(numpy.isfinite(denoised))
+    assert not numpy.allclose(denoised, 0)
+
+
+# ---------------------------------------------------------------------------
+#  Memory estimation
+# ---------------------------------------------------------------------------
+
+
+def test_cnn_memory_estimation():
+    """CNN translator memory estimation should return meaningful values."""
+    image_width = 64
+    image = normalise(camera())[:image_width, :image_width]
+    noisy = add_noise(image)
+
+    it = ImageTranslatorCNNTorch(model="jinet")
+    it.train(noisy, noisy)
+
+    # Shape-normalized image (B, C, H, W)
+    test_image = noisy[numpy.newaxis, numpy.newaxis, ...]
+    needed, available = it._estimate_memory_needed_and_available(test_image)
+
+    assert needed > 0, "Memory needed should be positive after training"
+    assert available > 0, "Available memory should be positive"
+    assert (
+        needed > test_image.nbytes
+    ), "CNN memory estimate should exceed raw image size"
+
+
+def test_cnn_amplification_factor_before_training():
+    """Amplification factor should return conservative default before training."""
+    it = ImageTranslatorCNNTorch(model="jinet")
+    factor = it._estimate_memory_amplification_factor()
+    assert factor == 100.0
+
+
+def test_cnn_amplification_factor_jinet():
+    """Amplification factor for trained JINet should reflect feature counts."""
+    image = normalise(camera())[:64, :64]
+    noisy = add_noise(image)
+
+    it = ImageTranslatorCNNTorch(model="jinet")
+    it.train(noisy, noisy)
+
+    factor = it._estimate_memory_amplification_factor()
+    # 2D JINet: 2*128 + 2*128 = 512
+    assert factor > 1.0
+    assert factor == 512.0

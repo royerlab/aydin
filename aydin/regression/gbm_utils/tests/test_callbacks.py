@@ -3,9 +3,13 @@
 from unittest.mock import Mock
 
 import pytest
-from lightgbm.callback import EarlyStopException
 
-from aydin.regression.gbm_utils.callbacks import _format_eval_result, early_stopping
+try:
+    from lightgbm.callback import EarlyStopException
+
+    from aydin.regression.gbm_utils.callbacks import _format_eval_result, early_stopping
+except (ImportError, OSError) as _err:
+    pytest.skip(f"LightGBM not available: {_err}", allow_module_level=True)
 
 
 class TestFormatEvalResult:

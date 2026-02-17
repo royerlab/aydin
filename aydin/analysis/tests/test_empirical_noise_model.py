@@ -11,7 +11,7 @@ from aydin.io.datasets import camera
 
 
 def test_noise_model():
-    """Test that a distilled noise model produces samples close to the original noise."""
+    """Test that a distilled noise model produces samples close to original."""
     clean_image = camera()
 
     noise = randint(0, 60, size=clean_image.size).reshape(*clean_image.shape)

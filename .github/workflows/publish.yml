@@ -4,19 +4,89 @@ on:
   push:
     tags:
       - 'v*'
+  # Called by release.yml after auto-tagging a merged release PR.
+  # Direct tag push via GITHUB_TOKEN does NOT trigger 'push' events
+  # (GitHub security restriction), so we use workflow_call instead.
+  workflow_call:
+    inputs:
+      ref:
+        description: 'Git ref to publish (tag name, e.g., v2025.2.16)'
+        required: true
+        type: string
+  # Manual trigger for retries from the GitHub UI
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Git ref to publish (tag name, e.g., v2025.2.16)'
+        required: true
+        type: string
 
 jobs:
-  build:
-    name: Build distribution
+  verify:
+    name: Verify tag matches package
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Verify tag matches package version
+        run: |
+          TAG="${{ inputs.ref || github.ref_name }}"
+          TAG_VERSION="${TAG#v}"
+          PKG_VERSION=$(python3 -c "
+          import re
+          match = re.search(r'__version__ = \"([^\"]+)\"', open('aydin/__init__.py').read())
+          print(match.group(1))
+          ")
+          echo "Tag version: $TAG_VERSION"
+          echo "Package version: $PKG_VERSION"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match package version ($PKG_VERSION)"
+            exit 1
+          fi
+
+  test:
+    name: Pre-publish tests
+    needs: verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run fast tests
+        run: |
+          pytest aydin/ --disable-pytest-warnings -x -q --durations=10
+
+  build:
+    name: Build distribution
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
 
       - name: Install build dependencies
         run: |
@@ -70,8 +140,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          gh release create '${{ github.ref_name }}' \
+          TAG="${{ inputs.ref || github.ref_name }}"
+          gh release create "$TAG" \
             --repo '${{ github.repository }}' \
-            --title '${{ github.ref_name }}' \
+            --title "$TAG" \
             --generate-notes \
             dist/*

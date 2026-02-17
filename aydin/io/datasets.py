@@ -522,7 +522,7 @@ def download_from_gdrive(
 
 
 def download_all_examples():
-    """Download all example images defined in :class:`examples_single` to the local cache.
+    """Download all example images from :class:`examples_single`.
 
     Files are saved to the ``datasets_folder`` directory inside the
     platform-specific cache folder. Already-downloaded files are skipped.

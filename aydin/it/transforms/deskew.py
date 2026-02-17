@@ -17,16 +17,18 @@ class DeskewTransform(ImageTransformBase):
 
     Denoising is more effective if voxels carrying correlated signal are
     close to each other. When a stack is skewed -- as resulting in some
-    imaging modalities -- correlated voxels that should be close in space
-    are far from each other. Thus, deskewing the image before denoising is
-    highly recommended. Importantly, the deskewing must be 'integral',
-    meaning that it must not interpolate voxel values, which is an
-    inadvisable lossy operation. Integral stack deskewing consists of
-    applying an integral shear transformation to a stack. Two axes need to
-    be specified: the 'z'-axis and the 'skew'-axis along which shifting
-    happens. The delta parameter controls the amount of shift per plane and
-    must be an integer. We automatically snap the delta value to the closest
-    integer. Padding is supported.
+    imaging modalities such as
+    <a href='https://en.wikipedia.org/wiki/Light_sheet_fluorescence_microscopy'>light-sheet microscopy</a>
+    -- correlated voxels that should be close in space are far from each
+    other. Thus, deskewing the image before denoising is highly recommended.
+    Importantly, the deskewing must be 'integral', meaning that it must not
+    interpolate voxel values, which is an inadvisable lossy operation.
+    Integral stack deskewing consists of applying an integral
+    <a href='https://en.wikipedia.org/wiki/Shear_mapping'>shear transformation</a>
+    to a stack. Two axes need to be specified: the 'z'-axis and the
+    'skew'-axis along which shifting happens. The delta parameter controls
+    the amount of shift per plane and must be an integer. We automatically
+    snap the delta value to the closest integer. Padding is supported.
 
     Note: this only works for images with at least 3 dimensions. Does
     nothing on images with less than 3 dimensions. (advanced)
@@ -129,7 +131,11 @@ class DeskewTransform(ImageTransformBase):
             Deskewed image array.
         """
         with asection(
-            f"Deskewing (delta={self.delta}, z_axis={self.z_axis}, skew_axis={self.skew_axis}, pad={self.pad}) array of shape: {array.shape} and dtype: {array.dtype}:"
+            f"Deskewing (delta={self.delta}, "
+            f"z_axis={self.z_axis}, "
+            f"skew_axis={self.skew_axis}, "
+            f"pad={self.pad}) array of shape: "
+            f"{array.shape} and dtype: {array.dtype}:"
         ):
             if array.ndim >= 3:
                 return self.deskew(array)
@@ -154,7 +160,8 @@ class DeskewTransform(ImageTransformBase):
         if not self.do_postprocess:
             return array
         with asection(
-            f"Undoing deskew for array of shape: {array.shape} and dtype: {array.dtype}:"
+            f"Undoing deskew for array of shape: "
+            f"{array.shape} and dtype: {array.dtype}:"
         ):
             if array.ndim >= 3:
                 return self.reskew(array)

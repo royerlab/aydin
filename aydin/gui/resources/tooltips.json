@@ -1,8 +1,18 @@
 {
   "main_page": {
-    "open_file_button": "Open or add new file(s)",
-    "napari_button": "View images in napari",
-    "activity_button": "Activity logs"
+    "open_file_button": "Open or add new file(s) for denoising",
+    "load_example_button": "Load an example image to try Aydin",
+    "files_button": "View and manage loaded files",
+    "images_button": "Preview loaded images and select which ones to denoise",
+    "dimensions_button": "Specify how to interpret image dimensions (batch, channel, spatial)",
+    "training_crop_button": "Crop images for training the denoising model",
+    "denoising_crop_button": "Crop images for applying denoising",
+    "preprocess_button": "Apply pre-processing transforms before denoising",
+    "denoise_button": "Choose the denoising algorithm and its settings",
+    "postprocess_button": "Apply post-processing transforms after denoising",
+    "start_button": "Start the denoising process with current settings",
+    "napari_button": "Open napari to view input and denoised images side by side",
+    "activity_button": "Show or hide the activity log panel"
   },
   "summary": {},
   "files": {},

@@ -42,7 +42,7 @@ class CatBoostStopTrainingCallback:
         bool
             ``True`` to continue training, ``False`` to stop.
         """
-        aprint(
-            f"{info.iteration}: learn: {info.metrics['learn']['MAE'][-1]}  test: {info.metrics['test']['MAE'][-1]}"
-        )
+        learn_mae = info.metrics['learn']['MAE'][-1]
+        test_mae = info.metrics['test']['MAE'][-1]
+        aprint(f"{info.iteration}: learn: {learn_mae}" f"  test: {test_mae}")
         return self.continue_training

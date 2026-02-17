@@ -1,4 +1,5 @@
-"""Utility functions for extracting representative kernels from images via clustering."""
+"""Utility functions for extracting representative kernels from
+images via clustering."""
 
 from math import prod, sqrt
 from typing import Optional, Sequence, Tuple, Union
@@ -54,7 +55,8 @@ def extract_kernels(
     # Learn the dictionary of images
 
     with asection(
-        f'Learning a dictionary of {num_kernels} kernels of size {size} from {num_patches} patches'
+        f'Learning a dictionary of {num_kernels} kernels '
+        f'of size {size} from {num_patches} patches'
     ):
         rng = np.random.RandomState(0)
         kmeans = MiniBatchKMeans(n_clusters=num_kernels, random_state=rng, verbose=True)

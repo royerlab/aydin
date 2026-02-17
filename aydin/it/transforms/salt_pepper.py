@@ -21,18 +21,21 @@ class SaltPepperTransform(ImageTransformBase):
 
     Detectors such as cameras have 'broken' pixels that blink, are very dim,
     or very bright. Other phenomena cause voxels to have very different
-    values from their neighbors, this is often called 'impulse' or
-    'salt-and-pepper' noise. While self-supervised denoising can solve many of
-    these issues, there is no reason not to alleviate the task, especially
-    when there are simple and fast approaches that can tackle this kind of
-    noise. This preprocessing replaces voxels with the median of their
-    neighbors if the voxel value is too different from its neighbors. This
-    difference is proportional to the local second-derivative of the image.
+    values from their neighbors, this is often called
+    <a href='https://en.wikipedia.org/wiki/Salt-and-pepper_noise'>impulse or 'salt-and-pepper' noise</a>.
+    While self-supervised denoising can solve many of these issues, there is
+    no reason not to alleviate the task, especially when there are simple and
+    fast approaches that can tackle this kind of noise. This preprocessing
+    uses two complementary methods: it identifies over-represented pixel
+    values (stuck pixels) and enforces
+    <a href='https://en.wikipedia.org/wiki/Lipschitz_continuity'>Lipschitz continuity</a>
+    to detect outliers based on the local second-derivative of the image.
+    Offending voxels are replaced with the median of their neighbors.
     Increase the threshold parameter to tolerate more variation, decrease it
-    to be more aggressive in removing salt-and-pepper noise. The algorithm is
-    iterative, starting with the most offending pixels, until no pixels are
-    corrected. You can set the max proportion of pixels that are allowed to
-    be corrected if you can give a good estimate for that.
+    to be more aggressive. The algorithm is iterative, starting with the most
+    offending pixels, until no pixels are corrected. You can set the max
+    proportion of pixels that are allowed to be corrected if you can give a
+    good estimate for that.
     <notgui>
     """
 
@@ -158,7 +161,8 @@ class SaltPepperTransform(ImageTransformBase):
         """
 
         with asection(
-            f"Broken Pixels Correction for array of shape: {array.shape} and dtype: {array.dtype}:"
+            f"Broken Pixels Correction for array of shape: "
+            f"{array.shape} and dtype: {array.dtype}:"
         ):
             # We save the original dtype:
             self._original_dtype = array.dtype
@@ -166,7 +170,8 @@ class SaltPepperTransform(ImageTransformBase):
             # If needed, we convert to float32:
             array = array.astype(dtype=numpy.float32, copy=True)
 
-            # First we look at over represented voxel values -- a sign of problematic voxels,
+            # First we look at over represented voxel
+            # values -- a sign of problematic voxels,
             # and try to fix them:
             if self.fix_repeated:
                 array = self._repeated_value_method(array)
@@ -228,13 +233,18 @@ class SaltPepperTransform(ImageTransformBase):
             most_occuring_value = unique[numpy.argmax(counts)]
             highest_count = numpy.max(counts)
             aprint(
-                f"Most occurring value in array: {most_occuring_value}, {highest_count} times."
+                f"Most occurring value in array: "
+                f"{most_occuring_value}, "
+                f"{highest_count} times."
             )
 
-            # Assuming a uniform distribution we would expect each value to be used at most:
+            # Assuming a uniform distribution we would expect
+            # each value to be used at most:
             average_count = array.size // num_unique_values
             aprint(
-                f"Average number of occurences of a value assuming uniform distribution: {average_count}"
+                f"Average number of occurences of a value "
+                f"assuming uniform distribution: "
+                f"{average_count}"
             )
 
             # We fix at most n over-represented values:
@@ -253,7 +263,8 @@ class SaltPepperTransform(ImageTransformBase):
             max_tolerated_count = selected_counts[-n]
             aprint(f"Maximum tolerated count per value: {max_tolerated_count}.")
 
-            # If a voxel value appears over more than 0.1% of voxels, then it is a problematic value:
+            # If a voxel value appears over more than 0.1%
+            # of voxels, then it is a problematic value:
             problematic_counts_mask = counts > max_tolerated_count
             problematic_counts = counts[problematic_counts_mask]
             problematic_values = unique[problematic_counts_mask]
@@ -357,7 +368,10 @@ class SaltPepperTransform(ImageTransformBase):
             #         num_corrections + total_number_of_corrections
             #     ) / array.size
             #     aprint(
-            #         f"Proportion of corrected pixels: {int(proportion * 100)}% (up to now), versus maximum: {int(self.max_proportion_corrected * 100)}%) "
+            #         f"Proportion of corrected pixels: "
+            #         f"{int(proportion * 100)}% (up to now), "
+            #         f"versus maximum: "
+            #         f"{int(self.max_proportion_corrected * 100)}%) "
             #     )
             #
             #     # If too many voxels have been corrected we stop:

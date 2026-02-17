@@ -63,9 +63,12 @@ def calibrate_denoise_butterworth(
         different for the z axis, 't-z-yx' (or 'xy-z-t') for 3D+t
         timelapse where the cut-off frequency for the x and y axes is the same but
         different for the z and t axis, and 'full' for which all frequency cut-offs are
-        different. Use 'z-yx' or 't-z-yx' for axes are ordered as: t, z, y and then x which is the default.
-        If for some reason the axis order is reversed you can use 'xy-z' or 'xy-z-t'.
-        Note: for 2D+t timelapses where the resolution over x and y are expected to be the same,
+        different. Use 'z-yx' or 't-z-yx' for axes ordered
+        as: t, z, y and then x which is the default. If for
+        some reason the axis order is reversed you can use
+        'xy-z' or 'xy-z-t'. Note: for 2D+t timelapses where
+        the resolution over x and y are expected to be the
+        same,
         simply use: 'z-yx' (or 'xy-z').
 
     axes: Optional[Tuple[int,...]]
@@ -307,7 +310,8 @@ def calibrate_denoise_butterworth(
 
     # # First optimisation pass:
 
-    # If we only have a single parameter to optimise, we can go for a brute-force approach:
+    # If we only have a single parameter to optimise,
+    # we can go for a brute-force approach:
     if len(parameter_ranges) == 1:
         parameter_ranges |= {
             'freq_cutoff': numpy.linspace(
@@ -369,14 +373,16 @@ def calibrate_denoise_butterworth(
         )
         aprint(f"Best parameters (pass 2, order): {best_parameters}")
 
-    # Below we adjust the parameters because denoise_butterworth function (without underscore)
+    # Below we adjust the parameters because
+    # denoise_butterworth function (without underscore)
     # uses a different set of parameters...
 
     if mode == 'isotropic' or len(axes) == 1:
         pass
 
     elif (mode == 'xy-z' or mode == 'z-yx') and image.ndim == 3:
-        # We need to adjust a bit the type of parameters passed to the denoising function:
+        # We need to adjust a bit the type of parameters
+        # passed to the denoising function:
         freq_cutoff_xy = best_parameters.pop('freq_cutoff_xy')
         freq_cutoff_z = best_parameters.pop('freq_cutoff_z')
 
@@ -388,20 +394,32 @@ def calibrate_denoise_butterworth(
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
     elif (mode == 'xy-z-t' or mode == 't-z-yx') and image.ndim == 4:
-        # We need to adjust a bit the type of parameters passed to the denoising function:
+        # We need to adjust a bit the type of parameters
+        # passed to the denoising function:
         freq_cutoff_xy = best_parameters.pop('freq_cutoff_xy')
         freq_cutoff_z = best_parameters.pop('freq_cutoff_z')
         freq_cutoff_t = best_parameters.pop('freq_cutoff_t')
 
         if mode == 't-z-yx':
-            freq_cutoff = (freq_cutoff_t, freq_cutoff_z, freq_cutoff_xy, freq_cutoff_xy)
+            freq_cutoff = (
+                freq_cutoff_t,
+                freq_cutoff_z,
+                freq_cutoff_xy,
+                freq_cutoff_xy,
+            )
         elif mode == 'xy-z-t':
-            freq_cutoff = (freq_cutoff_xy, freq_cutoff_xy, freq_cutoff_z, freq_cutoff_t)
+            freq_cutoff = (
+                freq_cutoff_xy,
+                freq_cutoff_xy,
+                freq_cutoff_z,
+                freq_cutoff_t,
+            )
 
         best_parameters |= {'freq_cutoff': freq_cutoff}
 
     elif mode == 'full':
-        # We need to adjust a bit the type of parameters passed to the denoising function:
+        # We need to adjust a bit the type of parameters
+        # passed to the denoising function:
         freq_cutoff = tuple(
             best_parameters.pop(f'freq_cutoff_{i}') for i in range(image.ndim)
         )
@@ -507,7 +525,9 @@ def denoise_butterworth(
     workers = -1 if multi_core else 1
 
     with asection(
-        f"Denoise image of shape {image.shape} with Butterworth filter (cutoff={freq_cutoff}, order={order})"
+        f"Denoise image of shape {image.shape} with "
+        f"Butterworth filter (cutoff={freq_cutoff}, "
+        f"order={order})"
     ):
         # First we need to pad the image.
         # By how much? this depends on how much low filtering we need to do:

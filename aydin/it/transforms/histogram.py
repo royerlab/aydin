@@ -17,10 +17,16 @@ from aydin.util.log.log import aprint, asection
 class HistogramEqualisationTransform(ImageTransformBase):
     """Histogram equalisation transform.
 
-    For some images with extremely unbalanced histograms, applying histogram
-    equalisation will improve results. Two modes are supported: 'equalize'
-    (standard histogram equalisation) and 'clahe' (Contrast Limited Adaptive
-    Histogram Equalisation).
+    For some images with extremely unbalanced histograms, applying
+    <a href='https://en.wikipedia.org/wiki/Histogram_equalization'>histogram equalisation</a>
+    will improve results. Two modes are supported: 'equalize'
+    (standard histogram equalisation) and
+    <a href='https://en.wikipedia.org/wiki/Adaptive_histogram_equalization#Contrast_Limited_AHE'>'clahe'</a>
+    (Contrast Limited Adaptive Histogram Equalisation).
+    The 'equalize' mode spreads the intensity values uniformly across the
+    full range, which is fully reversible during post-processing. The
+    'clahe' mode operates locally and is better suited for images with
+    spatially varying contrast but is not reversible.
     <notgui>
     """
 
@@ -114,7 +120,8 @@ class HistogramEqualisationTransform(ImageTransformBase):
         """
 
         with asection(
-            f"Equalises histogram for array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Equalises histogram for array of shape: "
+            f"{array.shape} and dtype: {array.dtype}"
         ):
 
             self._original_dtype = array.dtype
@@ -155,7 +162,8 @@ class HistogramEqualisationTransform(ImageTransformBase):
             return array
 
         with asection(
-            f"Undoing histogram equalisation for array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Undoing histogram equalisation for array of "
+            f"shape: {array.shape} and dtype: {array.dtype}"
         ):
             array = array.astype(numpy.float32, copy=False)
 

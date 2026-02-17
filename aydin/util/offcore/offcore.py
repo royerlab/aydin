@@ -9,7 +9,6 @@ import tempfile
 from typing import Generator, Tuple, Union
 
 import numpy
-import psutil
 
 from aydin.util.log.log import aprint, asection
 
@@ -70,39 +69,63 @@ def offcore_array(
         size_in_bytes = numpy.prod(shape) * numpy.dtype(dtype).itemsize
         aprint(f'Array requested will be {(size_in_bytes / 1E6)} MB.')
 
-        total_physical_memory_in_bytes = psutil.virtual_memory().total
-        total_swap_memory_in_bytes = psutil.swap_memory().total
+        try:
+            import psutil
 
-        total_mem_in_bytes = total_physical_memory_in_bytes + total_swap_memory_in_bytes
-        aprint(
-            f'There is {int(psutil.virtual_memory().total / 1E6)} MB of physical memory'
-        )
-        aprint(f'There is {int(psutil.swap_memory().total / 1E6)} MB of swap memory')
-        aprint(f'There is {int(total_mem_in_bytes / 1E6)} MB of total memory')
+            total_physical_memory_in_bytes = psutil.virtual_memory().total
+            total_swap_memory_in_bytes = psutil.swap_memory().total
 
-        is_enough_total_memory = (
-            size_in_bytes < max_memory_usage_ratio * total_mem_in_bytes
-        )
+            total_mem_in_bytes = (
+                total_physical_memory_in_bytes + total_swap_memory_in_bytes
+            )
+            aprint(
+                "There is"
+                f" {int(total_physical_memory_in_bytes / 1E6)}"
+                " MB of physical memory"
+            )
+            aprint(
+                "There is"
+                f" {int(total_swap_memory_in_bytes / 1E6)}"
+                " MB of swap memory"
+            )
+            aprint(f'There is {int(total_mem_in_bytes / 1E6)} MB of total memory')
+
+            is_enough_total_memory = (
+                size_in_bytes < max_memory_usage_ratio * total_mem_in_bytes
+            )
+        except ImportError:
+            aprint(
+                "Warning: psutil is not installed — cannot determine available memory. "
+                "Assuming sufficient memory is available. "
+                "Install it with: pip install psutil"
+            )
+            is_enough_total_memory = True
 
         if not force_memmap and is_enough_total_memory:
             aprint(
-                'There is enough physical+swap memory -- we do not need to use a mem mapped array or zarr-backed array.'
+                "There is enough physical+swap memory --"
+                " we do not need to use a mem mapped"
+                " array or zarr-backed array."
             )
             array = numpy.zeros(shape, dtype=dtype)
 
         elif no_memmap_limit:
             aprint(
-                'There is not enough physical+swap memory -- we will use a mem mapped array.'
+                "There is not enough physical+swap memory"
+                " -- we will use a mem mapped array."
             )
             temp_file = tempfile.NamedTemporaryFile(dir=OffCore.memmap_directory)
             aprint(
-                f'The temporary memory mapped file is at: {temp_file.name} (but you might not be able to see it!)'
+                "The temporary memory mapped file is at:"
+                f" {temp_file.name}"
+                " (but you might not be able to see it!)"
             )
             array = numpy.memmap(temp_file, dtype=dtype, mode='w+', shape=shape)
 
         elif zarr_allowed:
             aprint(
-                'There is not enough physical+swap memory -- we will use a zarr-backed array.'
+                "There is not enough physical+swap memory"
+                " -- we will use a zarr-backed array."
             )
             import zarr
 
@@ -110,7 +133,12 @@ def offcore_array(
                 shape=shape, dtype=dtype, store=zarr.TempStore("output.zarr")
             )
             # from numcodecs import Blosc
-            # compressor = Blosc(cname = 'zstd', clevel = 3, shuffle = Blosc.BITSHUFFLE)
-            # array = zarr.zeros((102_0, 200, 210), chunks = (100, 200, 210), compressor = compressor
+            # compressor = Blosc(
+            #     cname='zstd', clevel=3,
+            #     shuffle=Blosc.BITSHUFFLE)
+            # array = zarr.zeros(
+            #     (102_0, 200, 210),
+            #     chunks=(100, 200, 210),
+            #     compressor=compressor)
 
         return array

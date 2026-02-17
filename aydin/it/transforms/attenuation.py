@@ -19,9 +19,16 @@ class AttenuationTransform(ImageTransformBase):
     """Axis-aligned attenuation correction.
 
     Corrects intensity attenuation of an image along a given list of axes.
-    This is useful to correct for signal attenuation over time or along
-    space. Currently only linear attenuation is supported. More modes on the
-    way.
+    This is useful to correct for signal attenuation over time (e.g.
+    <a href='https://en.wikipedia.org/wiki/Photobleaching'>photobleaching</a>)
+    or along space (e.g. depth-dependent signal loss in
+    <a href='https://en.wikipedia.org/wiki/Light_sheet_fluorescence_microscopy'>light-sheet</a>
+    or <a href='https://en.wikipedia.org/wiki/Confocal_microscopy'>confocal</a>
+    microscopy). The correction uses robust
+    <a href='https://en.wikipedia.org/wiki/Theil%E2%80%93Sen_estimator'>Theil-Sen regression</a>
+    to estimate a linear trend along each specified axis and divides
+    it out. It is generally not recommended to reapply the attenuation
+    after denoising, unless the attenuation profile itself is meaningful.
     <notgui>
     """
 
@@ -122,7 +129,8 @@ class AttenuationTransform(ImageTransformBase):
         """
 
         with asection(
-            f"Correcting attenuation for array of shape: {array.shape} and dtype: {array.dtype}:"
+            f"Correcting attenuation for array of shape: "
+            f"{array.shape} and dtype: {array.dtype}:"
         ):
 
             self._axis = self.axis
@@ -226,7 +234,8 @@ class AttenuationTransform(ImageTransformBase):
             return array
 
         with asection(
-            f"Reapplying attenuation for array of shape: {array.shape} and dtype: {array.dtype}:"
+            f"Reapplying attenuation for array of shape: "
+            f"{array.shape} and dtype: {array.dtype}:"
         ):
 
             # Allocate new array to store result:

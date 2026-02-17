@@ -82,7 +82,7 @@ class ConstructorArgumentsWidget(QWidget):
             description = param_descriptions.get(name, "")
 
             if description is not None:
-                # Parameters that are marked with (hidden) in their docstrings are 'hidden:
+                # Parameters marked with (hidden) are hidden:
                 if '(hidden)' in description:
                     # Skip this parameter
                     continue

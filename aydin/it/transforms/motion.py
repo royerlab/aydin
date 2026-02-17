@@ -28,11 +28,15 @@ class MotionStabilisationTransform(ImageTransformBase):
     are now further away from each other. Worse, this relative placement
     often varies over time. This complicates denoising and typically leads to
     more blurry denoised images. Thus, stabilizing a timelapse before
-    denoising is recommended to improve denoising performance. Currently,
-    we assume that all frames can be registered to a common reference frame,
-    and thus that all images have a common background that can be used for
-    registration. For completeness, multiple axes can be specified and the
-    correction is applied along each in sequence. (advanced)
+    denoising is recommended to improve denoising performance. Registration
+    is performed using
+    <a href='https://en.wikipedia.org/wiki/Phase_correlation'>phase correlation</a>
+    to estimate integer shifts between frames without interpolation.
+    Currently, we assume that all frames can be registered to a common
+    reference frame, and thus that all images have a common background
+    that can be used for registration. For completeness, multiple axes can
+    be specified and the correction is applied along each in sequence.
+    (advanced)
     <notgui>
     """
 
@@ -563,13 +567,15 @@ def _find_shift(a, b, max_pixel_shift: int = 64, mode: str = 'com', sigma: float
             signed_com_shift = numpy.zeros_like(signed_rough_shift)
         else:
             # We compute the center of mass:
-            # We take the square to squash small values far from the maximum that are likely noisy...
+            # We take the square to squash small values far
+            # from the maximum that are likely noisy...
             signed_com_shift = (
                 numpy.array(scipy.ndimage.center_of_mass(cropped_correlation**2))
                 - fine_window_radius
             )
 
-        # The final shift is the sum of the rough sight plus the fine center of mass shift:
+        # The final shift is the sum of the rough sight
+        # plus the fine center of mass shift:
         shift = signed_rough_shift + signed_com_shift
 
     #

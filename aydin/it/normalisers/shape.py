@@ -113,7 +113,8 @@ class ShapeNormaliser(ABC):
         if channel_axes is None:
             channel_axes = (False,) * len(image.shape)
 
-        # Singleton dimensions are automatically batch dimension, unless it is a channel dimension, trivially.
+        # Singleton dimensions are automatically batch
+        # dimension, unless it is a channel dimension.
         batch_axes = tuple(
             True if s == 1 and not c else b
             for b, c, s in zip(batch_axes, channel_axes, image.shape)
@@ -179,7 +180,8 @@ class ShapeNormaliser(ABC):
         # Number of spatio-temp dimensions:
         num_spatiotemp_dims = len(spatiotemp_shape)
 
-        # If the input image has a different lengths along the spatio-temporal dimensions,
+        # If the input image has different lengths along the
+        # spatio-temporal dimensions,
         # that's fine, we accommodate for it:
         # Note: that's only fine for spatio-temp dim, not batch or channels!
         adapted_permutated_image_shape = list(permutated_image_shape)

@@ -34,7 +34,12 @@ class DenoiseTabPretrainedMethodWidget(QWidget):
         self.parent = parent
         self.loaded_it = loaded_it
         self.name = loaded_it.__class__.__name__
-        self.description = f"This is a pretrained model, namely uses the image translator: {loaded_it.__class__.__name__}, will not train anything new but will quickly infer on the images of your choice."
+        self.description = (
+            f"This is a pretrained model, namely uses the"
+            f" image translator: {loaded_it.__class__.__name__},"
+            f" will not train anything new but will quickly"
+            f" infer on the images of your choice."
+        )
 
         (
             self.main_layout,

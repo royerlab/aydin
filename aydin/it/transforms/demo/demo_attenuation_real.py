@@ -15,7 +15,8 @@ from aydin.util.log.log import Log
 
 
 def demo_attenuation_correction_real():
-    """Apply attenuation correction to a real HCR image and compare denoising results."""
+    """Apply attenuation correction to a real HCR image
+    and compare denoising results."""
 
     Log.override_test_exclusion = True
     Log.enable_output = True

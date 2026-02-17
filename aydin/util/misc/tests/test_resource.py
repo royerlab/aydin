@@ -36,7 +36,8 @@ def test_download_and_extract_zipresource():
         np.float32, copy=False
     )
 
-    # Check if dimensions of images match from different files, we know they should be same
+    # Check if dimensions of images match from different
+    # files, we know they should be same
     assert y.shape == x.shape
     assert z.shape == t.shape
 

@@ -139,7 +139,9 @@ class CorrelationFeatures(FeatureGroupBase):
         """
         kernel = self.kernels[index]
         aprint(
-            f"Correlative feature: {index} of shape={kernel.shape}, excluded_voxels={self.excluded_voxels}"
+            f"Correlative feature: {index} of "
+            f"shape={kernel.shape}, "
+            f"excluded_voxels={self.excluded_voxels}"
         )
 
         if len(self.excluded_voxels) > 0:
@@ -154,7 +156,8 @@ class CorrelationFeatures(FeatureGroupBase):
             # We need to modify the kernel to take into account the excluded voxels:
             for excluded_voxel in self.excluded_voxels:
 
-                # First we check if the excluded voxel falls within the footprint of the feature:
+                # First we check if the excluded voxel falls
+                # within the footprint of the feature:
                 if all(
                     (
                         -s // 2 <= v <= s // 2
@@ -169,7 +172,7 @@ class CorrelationFeatures(FeatureGroupBase):
                     # slice to address the kernel array:
                     aslice = tuple((slice(c, c + 1, None) for c in coord))
                     slices.append(aslice)
-                    center_weights.append(float(kernel[aslice]))
+                    center_weights.append(kernel[aslice].item())
                     kernel[aslice] = 0
 
             # We use a holed-gaussian estimate of the missing value,
@@ -178,7 +181,8 @@ class CorrelationFeatures(FeatureGroupBase):
             for aslice, weight in zip(slices, center_weights):
                 missing[aslice] = weight
 
-            # We apply a Gaussian filter to find neighboring voxels from which we can estimate the missing values:
+            # We apply a Gaussian filter to find neighboring voxels
+            # from which we can estimate the missing values:
             missing = gaussian_filter(missing, sigma=0.5)
 
             # Save the sum so:

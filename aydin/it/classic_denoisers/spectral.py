@@ -56,7 +56,8 @@ def calibrate_denoise_spectral(
         Image to calibrate spectral denoiser for.
 
     axes: Optional[Tuple[int,...]]
-        Axes over which to apply the spectral transform (dct, dst, fft) for denoising each patch.
+        Axes over which to apply the spectral transform
+        (dct, dst, fft) for denoising each patch.
 
     patch_size: int
         Patch size for the 'image-to-patch' transform.
@@ -162,7 +163,7 @@ def calibrate_denoise_spectral(
     # Parameters to test when calibrating the denoising algorithm
     parameter_ranges = {
         'threshold': threshold_range,
-        'freq_bias_stength': freq_bias_range,
+        'freq_bias_strength': freq_bias_range,
         # 'reconstruction_gamma': [0.0001, 0.1, 1.0],
         'freq_cutoff': freq_cutoff_range,
         'order': order_range,
@@ -208,7 +209,7 @@ def denoise_spectral(
     patch_size: Optional[Union[int, Tuple[int], str]] = None,
     mode: str = 'dct',
     threshold: float = 0.5,
-    freq_bias_stength: float = 1,
+    freq_bias_strength: float = 1,
     freq_cutoff: Union[float, Sequence[float]] = 0.5,
     order: float = 1,
     reconstruction_gamma: float = 0,
@@ -232,7 +233,8 @@ def denoise_spectral(
         Image to denoise
 
     axes: Optional[Tuple[int,...]]
-        Axes over which to apply the spectral transform (dct, dst, fft) for denoising each patch.
+        Axes over which to apply the spectral transform
+        (dct, dst, fft) for denoising each patch.
 
     patch_size: int
         Patch size for the 'image-to-patch' transform.
@@ -247,7 +249,7 @@ def denoise_spectral(
     threshold: float
         Threshold between 0 and 1
 
-    freq_bias_stength: float
+    freq_bias_strength: float
         Frequency bias: closer to zero: no bias against high frequencies,
         closer to one and above: stronger bias towards high-frequencies.
 
@@ -348,7 +350,7 @@ def denoise_spectral(
             patches = filter_wrapped(patches, f, order)
 
             # Window for frequency bias:
-            freq_bias = _freq_bias_window(patch_size, freq_bias_stength)
+            freq_bias = _freq_bias_window(patch_size, freq_bias_strength)
 
             # We use this value to estimate power per coefficient:
             power = numpy.absolute(patches)

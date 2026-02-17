@@ -21,7 +21,9 @@ def demo_denoise_nd():
             raise RuntimeError("Function only supports arrays of dimensions 2")
         return gaussian_filter(image, sigma)
 
-    # extended function that supports all dimension (with all caveats associated to how we actually do this extension...)
+    # extended function that supports all dimension
+    # (with all caveats associated to how we actually
+    # do this extension...)
     @extend_nd(available_dims=[2])
     def extended_function(image, sigma):
         """Gaussian filter extended to n-D via the extend_nd decorator."""

@@ -9,8 +9,7 @@ import importlib
 from aydin import Classic
 from aydin.restoration import denoise
 from aydin.restoration.denoise.base import DenoiseRestorationBase
-from aydin.restoration.denoise.noise2selfcnn import Noise2SelfCNN
-from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
+from aydin.util.log.log import aprint
 
 
 def get_pretrained_denoiser_class_instance(loaded_model_it):
@@ -37,8 +36,12 @@ def get_pretrained_denoiser_class_instance(loaded_model_it):
     if "Classic" in loaded_model_it.__class__.__name__:
         denoiser_class = Classic
     elif "FGR" in loaded_model_it.__class__.__name__:
+        from aydin.restoration.denoise.noise2selffgr import Noise2SelfFGR
+
         denoiser_class = Noise2SelfFGR
     elif "CNN" in loaded_model_it.__class__.__name__:
+        from aydin.restoration.denoise.noise2selfcnn import Noise2SelfCNN
+
         denoiser_class = Noise2SelfCNN
     else:
         raise ValueError(
@@ -120,17 +123,24 @@ def get_list_of_denoiser_implementations():
     descriptions = []
 
     for module in DenoiseRestorationBase.get_implementations_in_a_module(denoise):
-        response = importlib.import_module(denoise.__name__ + '.' + module.name)
+        try:
+            response = importlib.import_module(denoise.__name__ + '.' + module.name)
 
-        candidates = [
-            x for x in dir(response) if module.name.replace('_', '') in x.lower()
-        ]
-        if not candidates:
+            candidates = [
+                x for x in dir(response) if module.name.replace('_', '') in x.lower()
+            ]
+            if not candidates:
+                continue
+            elem = candidates[0]  # class name
+
+            denoiser_class = response.__getattribute__(elem)
+            denoiser_implementations += denoiser_class().implementations
+            descriptions += denoiser_class().implementations_description
+        except Exception as e:
+            aprint(
+                f"Warning: Denoiser '{module.name}' failed to load: {e}. "
+                "Check that its dependencies are installed."
+            )
             continue
-        elem = candidates[0]  # class name
-
-        denoiser_class = response.__getattribute__(elem)
-        denoiser_implementations += denoiser_class().implementations
-        descriptions += denoiser_class().implementations_description
 
     return denoiser_implementations, descriptions

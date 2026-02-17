@@ -43,7 +43,9 @@ class QProgramFlowDiagramWidget(QWidget):
         self.main_layout = QHBoxLayout()
         self.main_layout.setSpacing(5)
 
+        group_box_style = "QGroupBox {font-weight: normal;}"
         self.load_data_group_box = QGroupBox("Load data")
+        self.load_data_group_box.setStyleSheet(group_box_style)
         self.load_data_group_box_layout = QHBoxLayout()
         self.load_data_group_box_layout.setSpacing(0)
         self.load_data_group_box_layout.setContentsMargins(3, -1, 3, -1)
@@ -53,8 +55,8 @@ class QProgramFlowDiagramWidget(QWidget):
 
         self.load_data_group_box_layout.addWidget(QLabel("or"))
 
-        self.load_sample_image_button = QPushButton("Load example")
-        menu = QMenu()
+        self.load_sample_image_button = QPushButton("Examples")
+        self._examples_menu = QMenu()
         menu_items = {
             "New York (Royer)": examples_single.noisy_newyork,
             "Fountain": examples_single.noisy_fountain,
@@ -66,16 +68,18 @@ class QProgramFlowDiagramWidget(QWidget):
             "Blastocyst Fracking (Maitre)": examples_single.maitre_mouse,
             "OpenCell ARHGAP21 (Leonetti)": examples_single.leonetti_arhgap21,
             "OpenCell ANKRD11  (Leonetti)": examples_single.leonetti_ankrd11,
-            "Drosophila Egg Chamber (Machado et al.)": examples_single.machado_drosophile_egg_chamber,
+            "Drosophila Egg Chamber (Machado et al.)": (
+                examples_single.machado_drosophile_egg_chamber
+            ),
         }
         for item in menu_items.keys():
-            action = menu.addAction(item)
+            action = self._examples_menu.addAction(item)
             action.setIconVisibleInMenu(False)
-        menu.triggered.connect(
+        self._examples_menu.triggered.connect(
             lambda x: self.parent.load_sample_image(menu_items[x.text()])
         )
 
-        self.load_sample_image_button.setMenu(menu)
+        self.load_sample_image_button.setMenu(self._examples_menu)
         self.load_data_group_box_layout.addWidget(self.load_sample_image_button)
 
         self.load_data_group_box.setLayout(self.load_data_group_box_layout)
@@ -85,6 +89,7 @@ class QProgramFlowDiagramWidget(QWidget):
 
         # choose image options
         self.choose_image_options_group_box = QGroupBox("Choose image options")
+        self.choose_image_options_group_box.setStyleSheet(group_box_style)
         self.choose_image_options_group_box_layout = QHBoxLayout()
         self.choose_image_options_group_box_layout.setSpacing(5)
         self.choose_image_options_group_box_layout.setContentsMargins(3, -1, 3, -1)
@@ -118,6 +123,7 @@ class QProgramFlowDiagramWidget(QWidget):
         self.main_layout.addWidget(self.forward_button())
 
         self.processing_group_box = QGroupBox("Process")
+        self.processing_group_box.setStyleSheet(group_box_style)
         self.processing_group_box_layout = QHBoxLayout()
         self.processing_group_box_layout.setSpacing(5)
         self.processing_group_box_layout.setContentsMargins(3, -1, 3, -1)
@@ -158,16 +164,19 @@ class QProgramFlowDiagramWidget(QWidget):
         for button in self.highlightable_buttons:
             if current_tab_name.lower() in button.text().lower():
                 button.setStyleSheet(
-                    "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
+                    "background-color: qlineargradient("
+                    " x1:0 y1:0, x2:1 y2:0,"
+                    " stop:0 #0897c7, stop:1 #586727)"
                 )
 
         if "processing" in current_tab_name.lower():
-            self.preprocess_button.setStyleSheet(
-                "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
+            _gradient = (
+                "background-color: qlineargradient("
+                " x1:0 y1:0, x2:1 y2:0,"
+                " stop:0 #0897c7, stop:1 #586727)"
             )
-            self.postprocess_button.setStyleSheet(
-                "background-color: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 #0897c7, stop:1 #586727)"
-            )
+            self.preprocess_button.setStyleSheet(_gradient)
+            self.postprocess_button.setStyleSheet(_gradient)
 
     def reset_buttons(self):
         """Remove highlighting from all flow diagram buttons."""

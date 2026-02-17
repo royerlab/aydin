@@ -204,7 +204,8 @@ def n2t_train(
 
             # No improvement:
             aprint(
-                f"No improvement of training loss, patience = {patience_counter}/{patience} "
+                "No improvement of training loss, "
+                f"patience = {patience_counter}/{patience} "
             )
             patience_counter += 1
 

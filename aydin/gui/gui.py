@@ -1,5 +1,6 @@
 """Aydin Studio main application window and entry point."""
 
+import os
 import platform
 import sys
 
@@ -63,7 +64,112 @@ https://royerlab.github.io/aydin/
     sys.exit(1)
 
 
-# Check dependencies before importing Qt
+def _maybe_relaunch_as_macos_app():
+    """On macOS, relaunch through a .app bundle for proper dock/menu identity.
+
+    Without a .app bundle, macOS shows 'python3.x' in the dock tooltip and
+    'python' in the menu bar because the window server identifies the app by
+    its executable path.  This function creates a minimal .app bundle in
+    ``~/Library/Application Support/Aydin/`` and relaunches through the macOS
+    ``open`` command, which registers the app properly with the window server.
+
+    The .app contains an ``Info.plist`` (with CFBundleName, icon, etc.) and a
+    tiny launcher shell script that ``exec``'s back into the same ``aydin``
+    entry point with ``AYDIN_APP_BUNDLE=1`` to prevent infinite re-launch.
+
+    On non-macOS platforms this is a no-op.  On macOS, if the relaunch succeeds
+    this function **does not return** (it waits for the child via ``open -W``
+    and calls ``sys.exit``).  If anything fails it returns silently and the app
+    launches the normal way.
+    """
+    if sys.platform != 'darwin':
+        return
+
+    # Already running inside the .app wrapper — continue normally.
+    if os.environ.get('AYDIN_APP_BUNDLE'):
+        return
+
+    # Running as a PyInstaller bundle — it already has proper dock identity.
+    if getattr(sys, 'frozen', False):
+        return
+
+    try:
+        import shutil
+        import subprocess
+
+        from aydin.gui.resources.json_resource_loader import abs_path
+
+        # Stable location so we don't recreate every launch
+        app_support = os.path.join(
+            os.path.expanduser('~'),
+            'Library',
+            'Application Support',
+            'Aydin',
+        )
+        app_dir = os.path.join(app_support, 'Aydin Studio.app')
+        contents = os.path.join(app_dir, 'Contents')
+        macos = os.path.join(contents, 'MacOS')
+        resources = os.path.join(contents, 'Resources')
+
+        os.makedirs(macos, exist_ok=True)
+        os.makedirs(resources, exist_ok=True)
+
+        # Copy icon (PNG — modern macOS accepts PNG via CFBundleIconFile)
+        icon_src = abs_path('aydin_icon.png')
+        if os.path.exists(icon_src):
+            shutil.copy2(icon_src, os.path.join(resources, 'aydin_icon.png'))
+
+        # Write Info.plist
+        with open(os.path.join(contents, 'Info.plist'), 'w') as f:
+            f.write(
+                '<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"'
+                ' "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n'
+                '<plist version="1.0">\n'
+                '<dict>\n'
+                '  <key>CFBundleExecutable</key>\n'
+                '  <string>launcher</string>\n'
+                '  <key>CFBundleName</key>\n'
+                '  <string>Aydin Studio</string>\n'
+                '  <key>CFBundleDisplayName</key>\n'
+                '  <string>Aydin Studio</string>\n'
+                '  <key>CFBundleIdentifier</key>\n'
+                '  <string>org.royerlab.aydin</string>\n'
+                '  <key>CFBundleIconFile</key>\n'
+                '  <string>aydin_icon</string>\n'
+                '  <key>CFBundlePackageType</key>\n'
+                '  <string>APPL</string>\n'
+                '  <key>CFBundleInfoDictionaryVersion</key>\n'
+                '  <string>6.0</string>\n'
+                '  <key>NSHighResolutionCapable</key>\n'
+                '  <true/>\n'
+                '</dict>\n'
+                '</plist>\n'
+            )
+
+        # Write launcher script — execs back into the same aydin entry point.
+        # The AYDIN_APP_BUNDLE env var prevents infinite re-launch.
+        entry_point = os.path.abspath(sys.argv[0])
+        launcher_path = os.path.join(macos, 'launcher')
+        with open(launcher_path, 'w') as f:
+            f.write(
+                '#!/bin/bash\n'
+                'export AYDIN_APP_BUNDLE=1\n'
+                f'exec "{sys.executable}" "{entry_point}" "$@"\n'
+            )
+        os.chmod(launcher_path, 0o755)
+
+        # Launch the .app and wait for it to quit, then exit with same code.
+        # If `open` fails (non-zero return), fall through to normal launch.
+        ret = subprocess.call(['open', '-W', '-a', app_dir])
+        if ret == 0:
+            sys.exit(0)
+
+    except Exception:
+        pass  # Fall through to normal (non-bundled) launch
+
+
+# --- Pre-Qt platform setup (must run before any Qt/Cocoa imports) ----------
 _check_linux_qt_dependencies()
 
 import qdarkstyle
@@ -110,19 +216,26 @@ class App(QMainWindow):
         screen_rect = screen.availableGeometry()
         screen_height, screen_width = screen_rect.height(), screen_rect.width()
 
-        win_width = screen_width // 3
-        win_height = screen_height // 2
+        win_width = min(screen_width * 2 // 3, 1200)
+        win_height = min(screen_height * 2 // 3, 800)
         left = (screen_width - win_width) // 2
         top = (screen_height - win_height) // 2
 
         self.setWindowTitle(self.title)
+        self.setMinimumSize(640, 480)
         self.setGeometry(left, top, win_width, win_height)
 
-        # Restore saved geometry if available
+        # Restore saved geometry if available, but validate against screen
         settings = QSettings("Aydin", "AydinStudio")
         saved_geometry = settings.value("geometry")
         if saved_geometry is not None:
             self.restoreGeometry(saved_geometry)
+            # Reset if saved geometry doesn't fit the current screen
+            if (
+                self.width() > screen_rect.width()
+                or self.height() > screen_rect.height()
+            ):
+                self.setGeometry(left, top, win_width, win_height)
 
         # Status bar
         self.status_bar = QStatusBar(self)
@@ -165,40 +278,40 @@ class App(QMainWindow):
         helpMenu = mainMenu.addMenu(' &Help')
 
         # File Menu
-        startPageButton = QAction('Add File(s)', self)
-        startPageButton.setStatusTip('Add new files')
-        startPageButton.triggered.connect(
+        self._add_files_action = QAction('Add File(s)', self)
+        self._add_files_action.setStatusTip('Add new files')
+        self._add_files_action.triggered.connect(
             self.main_widget.tabs["File(s)"].open_file_names_dialog
         )
-        fileMenu.addAction(startPageButton)
+        fileMenu.addAction(self._add_files_action)
 
-        exitButton = QAction(QIcon('exit24.png'), 'Exit', self)
-        exitButton.setShortcut('Ctrl+Q')
-        exitButton.setStatusTip('Exit application')
-        exitButton.triggered.connect(self.close)
-        fileMenu.addAction(exitButton)
+        self._exit_action = QAction(QIcon('exit24.png'), 'Exit', self)
+        self._exit_action.setShortcut('Ctrl+Q')
+        self._exit_action.setStatusTip('Exit application')
+        self._exit_action.triggered.connect(self.close)
+        fileMenu.addAction(self._exit_action)
 
         # Run Menu
-        startButton = QAction('Start', self)
-        startButton.setStatusTip('Start denoising')
-        startButton.triggered.connect(
+        self._start_action = QAction('Start', self)
+        self._start_action.setStatusTip('Start denoising')
+        self._start_action.triggered.connect(
             self.main_widget.processing_job_runner.prep_and_run
         )
-        runMenu.addAction(startButton)
+        runMenu.addAction(self._start_action)
 
-        saveOptionsJSONButton = QAction('Save Options JSON', self)
-        saveOptionsJSONButton.setStatusTip('Save options JSON')
-        saveOptionsJSONButton.triggered.connect(
+        self._save_options_action = QAction('Save Options JSON', self)
+        self._save_options_action.setStatusTip('Save options JSON')
+        self._save_options_action.triggered.connect(
             lambda: self.main_widget.save_options_json()
         )
-        runMenu.addAction(saveOptionsJSONButton)
+        runMenu.addAction(self._save_options_action)
 
-        loadPretrainedModelButton = QAction('Load Pretrained Model', self)
-        loadPretrainedModelButton.setStatusTip('Load Pretrained Model')
-        loadPretrainedModelButton.triggered.connect(
+        self._load_model_action = QAction('Load Pretrained Model', self)
+        self._load_model_action.setStatusTip('Load Pretrained Model')
+        self._load_model_action.triggered.connect(
             lambda: self.main_widget.load_pretrained_model()
         )
-        runMenu.addAction(loadPretrainedModelButton)
+        runMenu.addAction(self._load_model_action)
 
         # Preferences Menu
         self.basicModeButton = QAction('Basic mode', self)
@@ -217,8 +330,8 @@ class App(QMainWindow):
         preferencesMenu.addAction(self.advancedModeButton)
 
         # Help Menu
-        versionButton = QAction("ver" + self.version, self)
-        helpMenu.addAction(versionButton)
+        self._version_action = QAction("ver" + self.version, self)
+        helpMenu.addAction(self._version_action)
 
     def set_aydin_window_icon(self):
         """Set the Aydin icon for the application window."""
@@ -236,7 +349,15 @@ def run(ver):
     ver : str
         Aydin version string displayed in the window title and status bar.
     """
+    # On macOS, relaunch inside a .app bundle so the dock and menu bar
+    # show "Aydin Studio" instead of "python3.x".  If it succeeds this
+    # call does not return.  On other platforms it is a no-op.
+    _maybe_relaunch_as_macos_app()
+
     app = QApplication(sys.argv)
+    app.setApplicationName('Aydin Studio')
+    app.setApplicationDisplayName('Aydin Studio')
+    app.setWindowIcon(QIcon(abs_path("aydin_icon.png")))
     app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
     ex = App(ver)
     ex.show()

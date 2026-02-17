@@ -14,7 +14,6 @@ from typing import List, Optional, Tuple, Union
 
 import jsonpickle
 import numpy
-import psutil
 from numpy import array2string
 
 from aydin.analysis.blind_spot_analysis import auto_detect_blindspots
@@ -297,7 +296,16 @@ class ImageTranslatorBase(ABC):
         """
         # TODO: make sure if this makes sense with GPU too
         # By default there is no memory needed and all memory is available
-        return 0, psutil.virtual_memory().total
+        try:
+            import psutil
+
+            return 0, psutil.virtual_memory().total
+        except ImportError:
+            aprint(
+                "Warning: psutil is not installed — assuming 16 GB total memory. "
+                "Install it with: pip install psutil"
+            )
+            return 0, 16e9
 
     def train(
         self,
@@ -343,13 +351,17 @@ class ImageTranslatorBase(ABC):
             target_image = input_image
 
         with asection(
-            f"Learning to translate from image of dimensions {str(input_image.shape)} to {str(target_image.shape)}, batch_axes={batch_axes}, channel_axes={channel_axes}, jinv={jinv}."
+            f"Learning to translate from image of dimensions "
+            f"{str(input_image.shape)} to {str(target_image.shape)}, "
+            f"batch_axes={batch_axes}, channel_axes={channel_axes}, "
+            f"jinv={jinv}."
         ):
 
             aprint('Running garbage collector...')
             gc.collect()
 
-            # If we use the same image for input and output then we are in a self-supervised setting:
+            # If we use the same image for input and output
+            # then we are in a self-supervised setting:
             self.self_supervised = input_image is target_image
 
             if self.self_supervised:
@@ -384,6 +396,7 @@ class ImageTranslatorBase(ABC):
             shape_normaliser = ShapeNormaliser(
                 batch_axes=batch_axes, channel_axes=channel_axes
             )
+            self.shape_normaliser = shape_normaliser
 
             # Axis normalisation:
             shape_normalised_input_image = shape_normaliser.normalise(input_image)
@@ -392,11 +405,13 @@ class ImageTranslatorBase(ABC):
                 if self.self_supervised
                 else shape_normaliser.normalise(target_image)
             )
+            self.target_shape_normaliser = shape_normaliser
 
             # Automatic blind-spot discovery:
             if self.blind_spots is None:
                 aprint(
-                    "Automatic discovery of noise autocorrelation and specification of N2S blind-spots activated!"
+                    "Automatic discovery of noise autocorrelation "
+                    "and specification of N2S blind-spots activated!"
                 )
                 self.blind_spots, autocorrelogram = auto_detect_blindspots(
                     shape_normalised_input_image[0, 0]
@@ -480,7 +495,10 @@ class ImageTranslatorBase(ABC):
         """
 
         with asection(
-            f"Predicting output image from input image of dimension {input_image.shape}, batch_axes={batch_axes}, channel_axes={channel_axes}"
+            f"Predicting output image from input image of "
+            f"dimension {input_image.shape}, "
+            f"batch_axes={batch_axes}, "
+            f"channel_axes={channel_axes}"
         ):
 
             # Let's apply the transforms:
@@ -501,7 +519,8 @@ class ImageTranslatorBase(ABC):
                 input_image.shape
             ):  # Sanity check when using not-default batch dims:
                 raise ArrayShapeDoesNotMatchError(
-                    'batch_dims does not have same number of dimensions with input_image!'
+                    "batch_dims does not have same number of "
+                    "dimensions with input_image!"
                 )
 
             # Number of spatio-temporal dimensions:
@@ -570,7 +589,8 @@ class ImageTranslatorBase(ABC):
                 counter = 1
                 for slice_margin_tuple, slice_tuple in slicezip:
                     with asection(
-                        f"Current tile: {counter}/{number_of_tiles}, slice: {slice_tuple} "
+                        f"Current tile: {counter}/{number_of_tiles}"
+                        f", slice: {slice_tuple} "
                     ):
 
                         # We first extract the tile image:
@@ -592,8 +612,9 @@ class ImageTranslatorBase(ABC):
                             normalised_input_shape, slice_margin_tuple, slice_tuple
                         )
 
-                        # We allocate -just in time- the translated array if needed:
-                        # if the array is already provided, it must of course have the right dimensions...
+                        # We allocate -just in time- the translated
+                        # array if needed: if the array is already
+                        # provided, it must have the right dimensions.
                         if shape_normalised_translated_image is None:
                             translated_image_shape = (
                                 shape_normalised_input_image.shape[:2]
@@ -605,7 +626,8 @@ class ImageTranslatorBase(ABC):
                                 max_memory_usage_ratio=self.max_memory_usage_ratio,
                             )
 
-                        # We plug in the batch without margins into the destination image:
+                        # We plug in the batch without margins
+                        # into the destination image:
                         aprint("Inserting translated batch into result image...")
                         shape_normalised_translated_image[slice_tuple] = (
                             translated_image_tile[remove_margin_slice_tuple]
@@ -664,7 +686,8 @@ class ImageTranslatorBase(ABC):
             specifies the overlap per dimension.
         """
 
-        # We will store the batch strategy as a list of integers representing the number of chunks per dimension:
+        # We will store the batch strategy as a list of integers
+        # representing the number of chunks per dimension:
         with asection("Determine tilling strategy:"):
 
             suggested_tile_size = (
@@ -689,27 +712,35 @@ class ImageTranslatorBase(ABC):
             total_memory_available *= self.max_memory_usage_ratio
 
             aprint(
-                f"Available memory (we reserve 10% for 'comfort'): {total_memory_available}"
+                f"Available memory (we reserve 10% for 'comfort'): "
+                f"{total_memory_available}"
             )
 
             # How much do we need to tile because of memory, if at all?
             split_factor_mem = estimated_memory_needed / total_memory_available
             aprint(
-                f"How much do we need to tile because of memory? : {split_factor_mem} times."
+                f"How much do we need to tile because of memory? "
+                f": {split_factor_mem} times."
             )
 
-            # how much do we have to tile because of the limit on the number of voxels per tile?
+            # how much do we have to tile because of the limit
+            # on the number of voxels per tile?
             split_factor_max_voxels = image.size / max_voxels_per_tile
             aprint(
-                f"How much do we need to tile because of the limit on the number of voxels per tile? : {split_factor_max_voxels} times."
+                "How much do we need to tile because of the "
+                "limit on the number of voxels per tile? "
+                f": {split_factor_max_voxels} times."
             )
 
-            # how much do we have to tile because of the suggested tile size?
+            # how much do we have to tile because of the
+            # suggested tile size?
             split_factor_suggested_tile_size = image.size / (
                 suggested_tile_size**num_spatio_temp_dim
             )
             aprint(
-                f"How much do we need to tile because of the suggested tile size? : {split_factor_suggested_tile_size} times."
+                "How much do we need to tile because of the "
+                "suggested tile size? "
+                f": {split_factor_suggested_tile_size} times."
             )
 
             # we keep the max:
@@ -727,11 +758,13 @@ class ImageTranslatorBase(ABC):
 
             # Does the number of batches split the data enough?
             if num_batches < desired_split_factor:
-                # Not enough splitting happening along the batch dimension, we need to split further:
-                # how much?
+                # Not enough splitting happening along the batch
+                # dimension, we need to split further. How much?
                 rest_split_factor = desired_split_factor / num_batches
                 aprint(
-                    f"Not enough splitting happening along the batch dimension, we need to split spatio-temp dims by: {rest_split_factor}"
+                    "Not enough splitting happening along the "
+                    "batch dimension, we need to split "
+                    f"spatio-temp dims by: {rest_split_factor}"
                 )
 
                 # let's split the dimensions in a way proportional to their lengths:
@@ -740,16 +773,24 @@ class ImageTranslatorBase(ABC):
                 )
                 aprint(f"Splitting per dimension: {split_per_dim}")
 
-                # We split proportionally to each axis but do not exceed the rest_split_factor per axis:
+                # We split proportionally to each axis but do not
+                # exceed the rest_split_factor per axis:
                 spatiotemp_tilling_strategy = tuple(
-                    max(1, min(rest_split_factor, int(math.ceil(split_per_dim * s))))
+                    max(
+                        1,
+                        min(
+                            rest_split_factor,
+                            int(math.ceil(split_per_dim * s)),
+                        ),
+                    )
                     for s in shape[2:]
                 )
 
                 tilling_strategy = (num_batches, 1) + spatiotemp_tilling_strategy
                 aprint(f"Preliminary tilling strategy is: {tilling_strategy}")
 
-                # We correct for eventual oversplitting by favouring splitting over the front dimensions:
+                # We correct for eventual oversplitting by favouring
+                # splitting over the front dimensions:
                 current_splitting_factor = 1
                 corrected_tilling_strategy = []
                 split_factor_reached = False
@@ -788,13 +829,15 @@ class ImageTranslatorBase(ABC):
 
             # Limit margins:
             # We automatically set the margin of the tile size:
-            # the max-margin factor guarantees that tilling will incur no more than a given max tiling overhead:
+            # the max-margin factor guarantees that tilling will
+            # incur no more than a given max tiling overhead:
             margin_factor = 0.5 * (
                 ((1 + self.max_tiling_overhead) ** (1 / num_spatiotemp_dim)) - 1
             )
             margins = tuple(int(s * margin_factor) for s in estimated_tile_shape)
 
-            # Limit the margin to something reasonable (provided or automatically computed):
+            # Limit the margin to something reasonable
+            # (provided or automatically computed):
             margins = tuple(min(max_margin, m) for m in margins)
             margins = tuple(max(min_margin, m) for m in margins)
 
@@ -872,6 +915,8 @@ class ImageTranslatorBase(ABC):
             del state['input_normaliser']
         if 'target_normaliser' in state:
             del state['target_normaliser']
+        state.pop('shape_normaliser', None)
+        state.pop('target_shape_normaliser', None)
         return state
 
     @staticmethod
@@ -915,7 +960,8 @@ class ImageTranslatorBase(ABC):
             or channel_axes is None
             or all(isinstance(x, bool) for x in channel_axes)
         ):
-            # check if it is all boolean values then check if it is correct size then return
+            # check if it is all boolean values then check
+            # if it is correct size then return
             batch_result, chan_result = batch_axes, channel_axes
         elif (
             batch_axes == []
@@ -926,7 +972,8 @@ class ImageTranslatorBase(ABC):
             or channel_axes is None
             or all(isinstance(x, int) for x in channel_axes)
         ):
-            # check if it is list of indices and can make meaningful boolean arrays, if so return
+            # check if it is list of indices and can make
+            # meaningful boolean arrays, if so return
             if any(i < 0 or i >= ndim for i in batch_axes) or any(
                 i < 0 or i >= ndim for i in channel_axes
             ):
@@ -949,7 +996,8 @@ class ImageTranslatorBase(ABC):
                 ndim, batch_result.count(True), chan_result.count(True), ndim_spacetime
             )
             raise Exception(
-                "Number of spacetime axes cannot be more than 4 and cannot be less than 1!"
+                "Number of spacetime axes cannot be more "
+                "than 4 and cannot be less than 1!"
             )
 
         if any(

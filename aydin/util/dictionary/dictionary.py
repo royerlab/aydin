@@ -93,7 +93,8 @@ def learn_dictionary(
     # Normalise patch size:
     patch_size = default_patch_size(image, patch_size, odd=False)
 
-    # Dictionary size can be computed automatically, by default we have an overcomplete factor of 4:
+    # Dictionary size can be computed automatically, by default
+    # we have an overcomplete factor of 4:
     dictionary_size = (
         int(over_completeness * prod(patch_size))
         if dictionary_size is None
@@ -113,7 +114,9 @@ def learn_dictionary(
     )
 
     with asection(
-        f"Learning dictionary of {dictionary_size} atoms from {len(patches)} patches using algorithm '{algorithm}'."
+        f"Learning dictionary of {dictionary_size} atoms "
+        f"from {len(patches)} patches using "
+        f"algorithm '{algorithm}'."
     ):
 
         if algorithm == 'sdl':

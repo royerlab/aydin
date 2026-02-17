@@ -55,7 +55,8 @@ def random_patches(
 
     nb_possible_patches_per_image = numpy.prod(possible_positions)
 
-    # Validate nb_patches_per_image, adoption_rate combination is valid, if not generate all possible patches
+    # Validate nb_patches_per_image, adoption_rate combination
+    # is valid, if not generate all possible patches
     nb_patches_per_image = min(
         int(nb_patches_per_image / adoption_rate), nb_possible_patches_per_image
     )
@@ -105,7 +106,8 @@ def random_patches(
             len(sorted_indices) - 1 - max(int(len(sorted_indices) * adoption_rate), 1) :
         ]
 
-        # Have to convert each element to a tuple again so they can be passed directly for slicing
+        # Have to convert each element to a tuple again so they
+        # can be passed directly for slicing
         sorted_slice_objects = [tuple(elem) for elem in sorted_slice_objects]
 
         # Append the new patch slices to list_of_slice_objects

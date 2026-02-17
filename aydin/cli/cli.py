@@ -741,6 +741,74 @@ def fsc(files, slicing, output):
     click.echo(success_message(f"Wrote {output}"))
 
 
+def _snr_from_frequency(frequency, crop):
+    """Estimate SNR in dB from pre-computed resolution frequency and crop.
+
+    This mirrors the logic in ``aydin.analysis.snr_estimate.snr_estimate``
+    but accepts the resolution frequency and crop directly so that
+    ``resolution_estimate`` is not called a second time.
+
+    Parameters
+    ----------
+    frequency : float
+        Normalised cutoff frequency from ``resolution_estimate``.
+    crop : numpy.ndarray
+        Representative crop returned by ``resolution_estimate``.
+
+    Returns
+    -------
+    float
+        Estimated signal-to-noise ratio in dB.  Returns ``math.inf`` when
+        no noise energy is detected above the frequency cutoff (e.g. the
+        crop is constant or the denoiser removed all high-frequency content).
+        Callers should interpret ``inf`` as "no measurable noise".
+    """
+    import math
+
+    import numpy
+    from numpy.linalg import norm
+    from scipy.fft import dctn
+
+    img = crop.astype(numpy.float32)
+    img -= img.mean()
+    variance = img.var()
+    if variance == 0:
+        # Constant crop — no signal or noise structure to measure.
+        return math.inf
+    img /= variance
+
+    img_dct = dctn(img, workers=-1)
+
+    # Frequency map
+    f = numpy.zeros_like(img)
+    axis_grid = tuple(numpy.linspace(0, 1, s) for s in img.shape)
+    for x in numpy.meshgrid(*axis_grid, indexing='ij'):
+        f += x**2
+    f = numpy.sqrt(f)
+
+    signal_domain = f <= frequency
+    noise_domain = f > frequency
+
+    signal_energy = norm(img_dct[signal_domain]) ** 2
+    noise_energy = norm(img_dct[noise_domain]) ** 2
+
+    signal_domain_volume = numpy.sum(signal_domain) / img_dct.size
+    noise_domain_volume = 1 - signal_domain_volume
+
+    corrected_noise_energy = noise_energy / max(noise_domain_volume, 1e-16)
+
+    if corrected_noise_energy == 0:
+        # No energy above the frequency cutoff — noise is unmeasurable.
+        return math.inf
+
+    corrected_signal_energy = (
+        signal_energy - signal_domain_volume * corrected_noise_energy
+    )
+    corrected_signal_energy = max(1e-16, corrected_signal_energy)
+
+    return 10 * math.log10(corrected_signal_energy / corrected_noise_energy)
+
+
 @cli.command()
 @click.argument('files', nargs=-1)
 @click.option(
@@ -793,95 +861,105 @@ def benchmark_algos(files, slicing, nbruns, save_denoised_images):
     import csv
 
     import numpy
-    from skimage.metrics import mean_squared_error
-    from torch.utils.data import DataLoader
 
     from aydin.analysis.resolution_estimate import resolution_estimate
-    from aydin.analysis.snr_estimate import snr_estimate
     from aydin.io.datasets import normalise
     from aydin.io.io import imwrite
     from aydin.io.utils import get_output_image_path
-    from aydin.nn.datasets.random_masked_dataset import RandomMaskedDataset
     from aydin.restoration.denoise.util.denoise_utils import (
         get_denoiser_class_instance,
         get_list_of_denoiser_implementations,
     )
+    from aydin.util.j_invariance.losses import mean_squared_error
+    from aydin.util.j_invariance.util import _generate_mask, _interpolate_image
     from aydin.util.log.log import aprint
 
     filenames, image_arrays, metadatas = handle_files(files, slicing)
 
-    denoiser_names = get_list_of_denoiser_implementations()[
-        0
-    ]  # Get a list of available denoisers
+    denoiser_names, _ = get_list_of_denoiser_implementations()
 
-    loss_function = mean_squared_error  # Define the loss function
+    loss_function = mean_squared_error
     self_supervised_loss_results = {}
     estimated_snr_results = {}
     estimated_res_results = {}
 
     # Iterate over the input images
-    for filename, image_array, metadata in zip(filenames, image_arrays, metadatas):
+    for filename, image_array, _metadata in zip(filenames, image_arrays, metadatas):
         self_supervised_loss_results[filename] = {}
         estimated_snr_results[filename] = {}
         estimated_res_results[filename] = {}
 
-        # Create a Dataset object to get random masks
-        array = normalise(image_array.reshape((1, 1) + image_array.shape))
-        dataset = RandomMaskedDataset(array, patch_size=min(image_array.shape))
-        aprint(f"dataset length: {len(dataset)}, patch_size:{dataset.patch_size}")
-        data_loader = DataLoader(dataset, batch_size=16, num_workers=0, shuffle=False)
-        _, input_image, mask = next(iter(data_loader))
-
-        mask = mask.to("cpu").detach().numpy()
-        input_image = input_image.to("cpu").detach().numpy()[0, 0, :, :]
-        aprint(input_image.shape)
+        # Normalise and generate J-invariance mask
+        input_image = normalise(image_array)
+        mask = _generate_mask(input_image, stride=4, blind_spots=[])
+        masked_input = _interpolate_image(
+            input_image, mask, mode='gaussian', num_iterations=8
+        )
+        aprint(f"Image shape: {input_image.shape}, mask fraction: {mask.mean():.4f}")
 
         # Iterate over the available denoisers
         for denoiser_name in denoiser_names:
             ss_losses, snrs, res_estimates = [], [], []
-            for _ in range(nbruns):
-                # Get the specific restoration instance with given denoiser variant
-                denoiser_instance = get_denoiser_class_instance(variant=denoiser_name)
-
-                # Train the created denoiser
-                denoiser_instance.train(
-                    input_image,
-                    batch_axes=metadata.batch_axes,
-                    channel_axes=metadata.channel_axes,
-                )
-
-                # Infer on the trained denoiser
-                denoised = denoiser_instance.denoise(
-                    input_image,
-                    batch_axes=metadata.batch_axes,
-                    channel_axes=metadata.channel_axes,
-                )
-
-                if save_denoised_images:
-                    output_path, _index_counter = get_output_image_path(
-                        filename,
-                        operation_type="denoised",
+            for run_idx in range(nbruns):
+                try:
+                    denoiser_instance = get_denoiser_class_instance(
+                        variant=denoiser_name
                     )
-                    output_path = f"{output_path[:output_path.rfind('.')]}_b_{denoiser_name}{output_path[output_path.rfind('.'):]}"
 
-                    imwrite(denoised, output_path)
+                    # Train on original image (denoiser learns the signal)
+                    denoiser_instance.train(
+                        input_image,
+                        batch_axes=None,
+                        channel_axes=None,
+                    )
 
-                # Self-supervised loss
-                ss_losses.append(loss_function(denoised * mask, image_array * mask))
+                    # Denoise the masked input (J-invariance protocol)
+                    denoised = denoiser_instance.denoise(
+                        masked_input,
+                        batch_axes=None,
+                        channel_axes=None,
+                    )
 
-                # SNR estimate
-                snrs.append(snr_estimate(denoised))
+                    if save_denoised_images:
+                        output_path, _index_counter = get_output_image_path(
+                            filename,
+                            operation_type="denoised",
+                        )
+                        base = output_path[: output_path.rfind('.')]
+                        ext = output_path[output_path.rfind('.') :]
+                        output_path = f"{base}_b_{denoiser_name}{ext}"
+                        imwrite(denoised, output_path)
 
-                # Res estimate
-                res_estimates.append(resolution_estimate(denoised)[0])
+                    # Compute all metrics before appending, so a partial
+                    # failure doesn't leave the lists with mismatched lengths.
+                    ss_loss = float(loss_function(input_image[mask], denoised[mask]))
+                    freq, crop = resolution_estimate(denoised)
+                    snr = _snr_from_frequency(freq, crop)
 
-            self_supervised_loss_results[filename] |= {
-                denoiser_name: numpy.average(ss_losses)
-            }
-            estimated_snr_results[filename] |= {denoiser_name: numpy.average(snrs)}
-            estimated_res_results[filename] |= {
-                denoiser_name: numpy.average(res_estimates)
-            }
+                    ss_losses.append(ss_loss)
+                    res_estimates.append(freq)
+                    snrs.append(snr)
+
+                except Exception:
+                    aprint(
+                        f"Denoiser '{denoiser_name}' failed on "
+                        f"'{filename}' (run {run_idx + 1}/{nbruns}), skipping."
+                    )
+                    continue
+
+            if ss_losses:
+                self_supervised_loss_results[filename][denoiser_name] = numpy.average(
+                    ss_losses
+                )
+                estimated_snr_results[filename][denoiser_name] = numpy.average(snrs)
+                estimated_res_results[filename][denoiser_name] = numpy.average(
+                    res_estimates
+                )
+            else:
+                aprint(
+                    f"All {nbruns} run(s) of '{denoiser_name}' failed "
+                    f"on '{filename}'."
+                )
 
     result_pairs = [
         ("self_supervised_loss.csv", self_supervised_loss_results),
@@ -889,18 +967,26 @@ def benchmark_algos(files, slicing, nbruns, save_denoised_images):
         ("res_estimate.csv", estimated_res_results),
     ]
 
+    # Collect all denoiser names across all images for consistent CSV columns
+    all_denoisers = sorted(
+        set().union(*(d.keys() for d in self_supervised_loss_results.values()))
+    )
+
+    if not all_denoisers:
+        aprint("No denoisers completed successfully; no CSV files written.")
+        return
+
     # Write the results into csv files
-    for pair in result_pairs:
-        output_file, result_dict = pair
-        with open(output_file, 'w') as file:
-            w = csv.DictWriter(
-                file,
-                ["filename"] + list(result_dict[list(result_dict.keys())[0]].keys()),
-            )
+    for output_file, result_dict in result_pairs:
+        with open(output_file, 'w', newline='') as file:
+            w = csv.DictWriter(file, ["filename"] + all_denoisers)
             w.writeheader()
 
             for key, elem in result_dict.items():
-                w.writerow({"filename": key} | elem)
+                row = {"filename": key}
+                for d in all_denoisers:
+                    row[d] = elem.get(d, '')
+                w.writerow(row)
 
 
 def handle_files(files, slicing):

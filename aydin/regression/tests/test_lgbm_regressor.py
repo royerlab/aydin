@@ -8,9 +8,13 @@ import numpy
 import pytest
 from skimage.data import camera
 
+try:
+    from aydin.regression.lgbm import LGBMRegressor
+except (ImportError, OSError) as _err:
+    pytest.skip(f"LightGBM not available: {_err}", allow_module_level=True)
+
 from aydin.features.standard_features import StandardFeatureGenerator
 from aydin.io.datasets import add_noise, normalise
-from aydin.regression.lgbm import LGBMRegressor
 
 
 @pytest.fixture(scope='module')

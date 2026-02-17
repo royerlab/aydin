@@ -64,7 +64,8 @@ class SimpleMicroscopePSF(MicroscopePSF):
         z_offset = -(lz - 2 * dz) / 2
         pz = numpy.arange(0, lz, dz)
 
-        # gLXYZParticleScan(self, dxy, xy_size, pz, normalize = True, wvl = 0.6, zd = None, zv = 0.0):
+        # gLXYZParticleScan(self, dxy, xy_size, pz,
+        #   normalize=True, wvl=0.6, zd=None, zv=0.0):
         psf_xyz_array = self.gLXYZParticleScan(
             dxy=dxy, xy_size=xy_size, pz=pz, zv=z_offset
         )

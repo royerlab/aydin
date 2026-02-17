@@ -59,7 +59,9 @@ class PreviewJobRunner(BasePreviewJobRunner):
             except Exception as e:
                 error_message = str(e).replace('\n', ', ')
                 aprint(
-                    f"Preprocessing failed for {transform_instance} with: {error_message} "
+                    f"Preprocessing failed for"
+                    f" {transform_instance}"
+                    f" with: {error_message} "
                 )
 
         Log.gui_callback = None
@@ -75,7 +77,8 @@ class PreviewJobRunner(BasePreviewJobRunner):
 
         self.transform_class = self.parent.transform_class
 
-        # We trick parent.preprocess_checkbox to get params_dict whether related processing is enabled or not
+        # We trick parent.preprocess_checkbox to get params_dict
+        # whether related processing is enabled or not
         preprocess_checkbox_value = self.parent.preprocess_checkbox.isChecked()
         self.parent.preprocess_checkbox.setChecked(True)
         self._prepare_params_dict = self.parent.params_dict

@@ -1,5 +1,7 @@
 """Individual transform configuration widget with preview capability."""
 
+import re
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
     QCheckBox,
@@ -20,7 +22,7 @@ from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
     QVerticalLineBreakWidget,
 )
 from aydin.gui._qt.job_runners.preview_job_runner import PreviewJobRunner
-from aydin.util.string.break_text import break_text, strip_notgui
+from aydin.util.string.break_text import strip_notgui
 
 
 class TransformsTabItem(QWidget):
@@ -88,10 +90,13 @@ class TransformsTabItem(QWidget):
         self.main_layout = QHBoxLayout()
 
         explanation_text_string = strip_notgui(self.transform_class.__doc__)
-        explanation_text_string = break_text(explanation_text_string)
-        explanation_text_string = explanation_text_string.replace('\n', '<br>')
+        # Normalize line breaks: join single \n into spaces, convert \n\n to <br><br>
+        explanation_text_string = explanation_text_string.replace('\n\n', '<br><br>')
+        explanation_text_string = explanation_text_string.replace('\n', ' ')
+        explanation_text_string = re.sub(' +', ' ', explanation_text_string)
         self.explanation_text = QLabel(explanation_text_string, self)
         self.explanation_text.setTextFormat(Qt.RichText)
+        self.explanation_text.setWordWrap(True)
         self.explanation_text.setOpenExternalLinks(True)
         self.explanation_text.setAlignment(Qt.AlignTop)
         self.main_layout.addWidget(self.explanation_text, 45)

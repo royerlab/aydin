@@ -114,7 +114,9 @@ class TrainingCroppingTab(BaseCroppingTab):
 
         if math.prod(self.cropped_image[0].shape) > 50_000_000:
             self.size_warning_label.setText(
-                "Training might take a long time, please consider to reduce the size of crop as much as possible"
+                "Training might take a long time, please"
+                " consider to reduce the size of crop"
+                " as much as possible"
             )
             self.size_warning_label.setStyleSheet(
                 "QLabel {font-weight: bold; color: red;}"

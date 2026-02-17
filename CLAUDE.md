@@ -90,12 +90,14 @@ make docs-publish           # Build and deploy to GitHub Pages
 ### Build System
 
 - **Build backend**: hatchling (configured in `pyproject.toml`)
+- **Version**: Single source of truth is `aydin/__init__.py` (`__version__`). `pyproject.toml` reads it dynamically via `[tool.hatch.version]`.
 - **Makefile**: Orchestrates common commands (`make help` for full list)
   - `make setup` / `make install-dev` - Install for development
   - `make test` / `make test-heavy` / `make test-gpu` - Run tests
   - `make format` / `make check` - Code formatting and linting
+  - `make validate` - Pre-publish checks (format + lint + clean tree)
   - `make build` / `make clean` - Build and clean artifacts
-  - `make publish` / `make publish-patch` - Version bump and publish
+  - `make publish` / `make publish-patch` - Create release PR (see Release Process below)
 
 ### Test Markers
 
@@ -108,11 +110,66 @@ Tests use pytest markers defined in `pyproject.toml`:
 
 Use the internal logging API at `aydin/util/log/log.py` instead of print statements.
 
+### Versioning
+
+The project uses **calendar versioning**: `YYYY.M.D` (e.g., `2025.2.4`), with an optional `.patch` suffix for same-day releases (e.g., `2025.2.4.1`).
+
+- **Single source of truth**: `aydin/__init__.py` → `__version__ = "YYYY.M.D"`
+- `pyproject.toml` reads it dynamically via `[tool.hatch.version]` — never edit the version there
+- `docs/source/conf.py` also reads from `__init__.py` at build time
+
+### Release Process
+
+Releases go through a PR-based flow. Requires the GitHub CLI (`gh`).
+
+```bash
+# Regular release (bumps to today's date, e.g., 2025.2.16)
+make publish
+
+# Patch release (e.g., 2025.2.16.1 → 2025.2.16.2)
+make publish-patch
+```
+
+**What `make publish` does:**
+1. Runs `make validate` (checks: on main, clean tree, formatting, lint)
+2. Creates a `release/vYYYY.M.D` branch
+3. Bumps `__version__` in `aydin/__init__.py`
+4. Pushes and creates a PR via `gh pr create`
+5. Switches back to `main`
+
+**After that, you merge the PR on GitHub.** Then the automated pipeline takes over:
+
+```
+PR merged → release.yml creates git tag → publish.yml: verify → test → build → PyPI → GitHub Release
+```
+
+### CI/CD Pipeline
+
+**Workflows** (`.github/workflows/`):
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `test_pull_requests.yml` | PR to `main` | Style, lint, tests across Python 3.9–3.13, Linux/macOS/Windows |
+| `release.yml` | Release PR merged | Auto-creates git tag, calls `publish.yml` |
+| `publish.yml` | Tag push / workflow_call / manual | Verify tag, test, build, publish to PyPI, create GitHub Release |
+| `labeler.yml` | PR opened | Auto-labels PRs by changed paths |
+| `link_check.yml` | PR to `main` | Checks Markdown links |
+
+**Why `release.yml` calls `publish.yml` directly**: Git tags pushed by `GITHUB_TOKEN` don't trigger other workflows (GitHub security restriction). So `release.yml` uses `workflow_call` to invoke `publish.yml` directly instead of relying on the tag push event. The `push: tags` trigger on `publish.yml` remains as a fallback for manual tag pushes. A `workflow_dispatch` trigger is also available for manual retries from the GitHub UI.
+
+**PyPI authentication**: Uses OIDC trusted publishing (no API tokens). The `publish-to-pypi` job runs in the `pypi` environment with `id-token: write` permission.
+
+### Linting Configuration
+
+- **Config file**: `.flake8` (repo root) — single source of truth for flake8 settings
+- Used by: Makefile (`make lint`), CI lint job, and pre-commit hook
+- Per-file `E501` ignores are set for GUI files with HTML-containing docstrings
+
 ## Code Style Guidelines
 
 - Follow PEP8 + Black formatter (config in pyproject.toml, single quotes preserved)
 - Use NumPy-style docstrings
-- Flake8 ignores: E501 (line length), E203, E741, W503
+- Flake8 config in `.flake8` (ignores E203, E741, W503, and others; per-file E501 for GUI docstrings)
 
 ## GUI Docstring Conventions (CRITICAL)
 

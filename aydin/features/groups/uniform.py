@@ -18,7 +18,8 @@ from aydin.util.log.log import aprint
 # Minimum image size (in voxels) to consider CUDA acceleration
 _CUDA_MIN_IMAGE_SIZE = 1024
 
-# Maximum ratio of excluded voxels to footprint volume before excluding a feature entirely
+# Maximum ratio of excluded voxels to footprint volume before
+# excluding a feature entirely
 _MAX_FOOTPRINT_EXCLUSION_RATIO = 0.1
 
 
@@ -266,7 +267,8 @@ class UniformFeatures(FeatureGroupBase):
             self.kernel_widths, self.kernel_scales, self.kernel_shapes
         ):
             # Check if we have passed the max number of features already:
-            # Important: We might overshoot a bit, but that's ok to make sure we get all features at a given scale...
+            # Important: We might overshoot a bit, but that's ok
+            # to make sure we get all features at a given scale...
             if level >= self.max_level:
                 break
             elif level < self.min_level:
@@ -367,20 +369,22 @@ class UniformFeatures(FeatureGroupBase):
 
                 # Now we check if the feature overlaps with any excluded voxels:
                 # if check_for_excluded_voxels(
-                #         effective_shift, negative_extent, positive_extent, excluded_voxels
+                #         effective_shift, negative_extent, positive_extent, excluded_voxels  # noqa: E501
                 # ):
                 #     continue
 
                 #  We append the feature description:
                 feature_description_list.append(feature_description)
 
-        # Some features might be identical due to the aspect ratio, we eliminate duplicates:
+        # Some features might be identical due to the aspect ratio,
+        # we eliminate duplicates:
         no_duplicate_feature_description_list = _remove_duplicates(
             feature_description_list
         )
         # We save the last computed feature description list for debug purposes:
         self.debug_feature_description_list = feature_description_list
-        # We check and report how many duplicates were eliminated:
+        # We check and report how many duplicates were
+        # eliminated:
         number_of_duplicates = len(feature_description_list) - len(
             no_duplicate_feature_description_list
         )
@@ -498,7 +502,9 @@ class UniformFeatures(FeatureGroupBase):
 
         feature_description = self._feature_descriptions_list[index]
         aprint(
-            f"Uniform feature: {index}, description: {feature_description}, excluded_voxels={self.excluded_voxels}"
+            f"Uniform feature: {index}, "
+            f"description: {feature_description}, "
+            f"excluded_voxels={self.excluded_voxels}"
         )
 
         # Unpacking the description:
@@ -539,7 +545,8 @@ class UniformFeatures(FeatureGroupBase):
             Voxels to exclude from the feature computation.
         """
 
-        # This function exists to facilitate the implementation of optimised versions of it.
+        # This function exists to facilitate the implementation
+        # of optimised versions of it.
 
         # Unpacking the description:
         translation, negative_extent, positive_extent, shape = feature_description
@@ -559,7 +566,8 @@ class UniformFeatures(FeatureGroupBase):
         if any(abs(t) > 0 for t in translation_adjusted):
             self._translate_image(feature_in, feature_out, translation_adjusted)
         else:
-            # If the translation does not translated anything then let's just not translate, right?
+            # If the translation does not translated anything
+            # then let's just not translate, right?
             feature_out[...] = feature_in
 
         # We store here the sum of excluded values to be able to subtract:
@@ -602,20 +610,27 @@ class UniformFeatures(FeatureGroupBase):
             # we compute the volume of the footprint in voxels:
             footprint_volume = prod(size)
 
-            # If we have more than one excluded voxel, we need to be careful: if the proportion of excluded voxels
-            # in a feature becomes too large (> 10%), we need  to exclude that feature entirely, otherwise it will be
-            # too much difference between the feature with or without excluded voxels, and thus too confusing for the regressor.
-            # Some of this comes from empirical evidence.
+            # If we have more than one excluded voxel, we need
+            # to be careful: if the proportion of excluded voxels
+            # in a feature becomes too large (> 10%), we need to
+            # exclude that feature entirely, otherwise it will be
+            # too much difference between the feature with or
+            # without excluded voxels, and thus too confusing for
+            # the regressor. Some of this comes from empirical
+            # evidence.
             num_of_excluded_voxels = len(excluded_voxels)
             exclude_feature_entirely = num_of_excluded_voxels > 1 and (
                 excluded_count / footprint_volume > _MAX_FOOTPRINT_EXCLUSION_RATIO
             )
 
             if exclude_feature_entirely:
-                # If all voxels of the footprint are excluded then the whole feature must be zeroed out:
+                # If all voxels of the footprint are excluded
+                # then the whole feature must be zeroed out:
                 feature_out[...] = 0
             else:
-                # Then we compute the correction factor so that the feature is the average of the remaining voxels:
+                # Then we compute the correction factor so that
+                # the feature is the average of the remaining
+                # voxels:
                 _apply_correction(
                     feature_out, excluded_values_sum, footprint_volume, excluded_count
                 )
@@ -694,7 +709,8 @@ class UniformFeatures(FeatureGroupBase):
             except Exception as e:
                 if isinstance(e, CudaSupportError):
                     aprint(
-                        "CUDA not supported on this machine, falling back to numba and scipy."
+                        "CUDA not supported on this machine, "
+                        "falling back to numba and scipy."
                     )
                 else:
                     import sys
@@ -703,7 +719,9 @@ class UniformFeatures(FeatureGroupBase):
                         '\n', ', '
                     )
                     aprint(
-                        f"Cannot use CUDA for computing uniform filter because of: {error_str}"
+                        f"Cannot use CUDA for computing "
+                        f"uniform filter because of: "
+                        f"{error_str}"
                     )
                 output = no_cuda_cpu_mode()
 
@@ -786,7 +804,7 @@ def _apply_correction(
         or feature.dtype == numpy.uint8
     ):
         # feature_float = feature.astype(dtype=numpy.float32, copy=False)
-        # _apply_correction_numba(feature_float, excluded_values_sum, footprint_volume, excluded_count)
+        # _apply_correction_numba(feature_float, excluded_values_sum, footprint_volume, excluded_count)  # noqa: E501
         # feature[...] = feature_float.astype(dtype=feature.dtype, copy=False)
         alpha = footprint_volume / (footprint_volume - excluded_count)
         beta = -alpha / footprint_volume  # noqa: F841

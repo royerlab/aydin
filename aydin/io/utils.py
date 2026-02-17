@@ -40,7 +40,8 @@ def is_zarr_storage(input_path):
             aprint(f"This path is a ZARR storage: {input_path}")
         else:
             raise Exception
-        # IF we reach this point, then we could open the file and therefore it is a Zarr file...
+        # IF we reach this point, then we could open the file
+        # and therefore it is a Zarr file...
         return True
     except Exception:
         return False
@@ -174,7 +175,8 @@ def get_output_image_path(
     response_counter = None
     while exists(output_path):
         response_counter = counter
-        output_path = f"{output_path.split('_denoised')[0]}_{operation_type}{counter}{output_image_format}"
+        base = output_path.split('_denoised')[0]
+        output_path = f"{base}_{operation_type}" f"{counter}{output_image_format}"
         counter += 1
 
     return output_path, response_counter

@@ -105,11 +105,11 @@ class BasePreviewJobRunner(QWidget):
         # Show activity widget
         self.main_page.activity_dock.setHidden(False)
 
-        worker = Worker(self.start_func)
+        self._worker = Worker(self.start_func)
 
-        worker.signals.finished.connect(self.thread_complete)
-        worker.signals.progress.connect(self.progress_fn)
-        worker.signals.error.connect(self.error_fn)
+        self._worker.signals.finished.connect(self.thread_complete)
+        self._worker.signals.progress.connect(self.progress_fn)
+        self._worker.signals.error.connect(self.error_fn)
 
         self.main_page.activity_widget.clear_activity()
 
@@ -117,7 +117,7 @@ class BasePreviewJobRunner(QWidget):
 
         self.start_button.setEnabled(False)
 
-        self.threadpool.start(worker)
+        self.threadpool.start(self._worker)
 
     def prep_and_run(self):
         """Gather settings and launch the worker. Must be overridden."""

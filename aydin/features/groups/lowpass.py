@@ -102,7 +102,8 @@ class LowPassFeatures(CorrelationFeatures):
         self.exclude_center: bool = False
 
     def _ensure_random_kernels_available(self, ndim: int):
-        """Ensure Butterworth low-pass kernels are computed for the given dimensionality.
+        """Ensure Butterworth low-pass kernels are computed
+        for the given dimensionality.
 
         Constructs the kernels lazily on first call or when the dimensionality
         changes. Each kernel is a Butterworth impulse response at a different

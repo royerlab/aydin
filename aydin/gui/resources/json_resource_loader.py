@@ -71,7 +71,8 @@ class JSONResourceLoader:
         """
         if resource_file_name is None or resource_file_name == "":
             raise ValueError(
-                "JSONResourceLoader has to be initiated with a resource file name argument."
+                "JSONResourceLoader has to be initiated"
+                " with a resource file name argument."
             )
 
         with open(abs_path(resource_file_name)) as json_file:

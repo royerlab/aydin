@@ -1,4 +1,4 @@
-.PHONY: help setup install install-dev test test-cov test-cov-check test-heavy test-gpu test-unstable test-gui check format format-check lint clean build publish publish-patch docs docs-build docs-publish
+.PHONY: help setup install install-dev test test-cov test-cov-check test-heavy test-gpu test-unstable test-gui check format format-check lint validate clean build publish publish-patch docs docs-build docs-publish
 
 help:
 	@echo "Available commands:"
@@ -16,10 +16,11 @@ help:
 	@echo "  make format        - Format code (isort + black)"
 	@echo "  make format-check  - Check formatting without modifying"
 	@echo "  make lint          - Run linter (flake8)"
+	@echo "  make validate      - Run pre-publish checks (format + lint + clean tree)"
 	@echo "  make build         - Build package"
 	@echo "  make clean         - Clean artifacts"
-	@echo "  make publish       - Bump version and publish"
-	@echo "  make publish-patch - Bump patch version and publish"
+	@echo "  make publish       - Bump version and create release PR"
+	@echo "  make publish-patch - Bump patch version and create release PR"
 	@echo ""
 	@echo "Documentation:"
 	@echo "  make docs          - Build HTML docs (current version only)"
@@ -69,7 +70,7 @@ format-check:
 	isort --check-only aydin/
 
 lint:
-	flake8 --ignore=E501,E203,E741,W503,E402,F401,E721,E275,E731,E226,F821 aydin/
+	flake8 aydin/
 
 build: clean
 	hatch build
@@ -91,26 +92,51 @@ docs-publish: docs-build
 	ghp-import -n -p -b docs-prod -r upstream -m "docs updated" docs/build/html
 	@echo "Docs deployed to https://royerlab.github.io/aydin/"
 
+# Pre-publish validation
+validate:
+	@echo "==> Checking on main branch..."
+	@[ "$$(git branch --show-current)" = "main" ] || { echo "Error: Must be on main branch."; exit 1; }
+	@echo "==> Checking working tree is clean..."
+	@git diff --quiet && git diff --cached --quiet || { echo "Error: Working tree has uncommitted changes."; exit 1; }
+	@echo "==> Checking code formatting..."
+	@black --check aydin/ --quiet || { echo "Error: Code not formatted. Run 'make format'."; exit 1; }
+	@isort --check-only aydin/ --quiet || { echo "Error: Imports not sorted. Run 'make format'."; exit 1; }
+	@echo "==> Checking lint..."
+	@flake8 aydin/ || { echo "Error: Lint errors found."; exit 1; }
+	@echo "==> All pre-publish checks passed."
+
 # Version format: YYYY.M.D or YYYY.M.D.patch
+# Single source of truth: aydin/__init__.py (pyproject.toml reads it dynamically)
 CURRENT_VERSION := $(shell grep -o '__version__ = "[^"]*"' aydin/__init__.py | cut -d'"' -f2)
 TODAY := $(shell date +%Y.%-m.%-d)
 
-publish:
+publish: validate
 	@echo "Current version: $(CURRENT_VERSION)"
 	@if echo "$(CURRENT_VERSION)" | grep -q "^$(TODAY)"; then \
 		echo "Error: Already at today's date. Use publish-patch."; \
 		exit 1; \
 	fi
-	@sed -i.bak 's/__version__ = "[^"]*"/__version__ = "$(TODAY)"/' aydin/__init__.py && rm -f aydin/__init__.py.bak
-	@sed -i.bak 's/^version = "[^"]*"/version = "$(TODAY)"/' pyproject.toml && rm -f pyproject.toml.bak
-	git add aydin/__init__.py pyproject.toml
-	git commit -m "chore: bump version to $(TODAY)"
-	git tag "v$(TODAY)"
-	git push origin main --tags
-	@echo "Done! GitHub Actions will publish to PyPI."
+	@command -v gh >/dev/null 2>&1 || { echo "Error: GitHub CLI (gh) is required. Install from https://cli.github.com"; exit 1; }
+	@NEW_VERSION="$(TODAY)"; \
+	BRANCH="release/v$$NEW_VERSION"; \
+	echo "Creating release branch $$BRANCH..."; \
+	git checkout -b "$$BRANCH"; \
+	sed -i.bak "s/__version__ = \"[^\"]*\"/__version__ = \"$$NEW_VERSION\"/" aydin/__init__.py && rm -f aydin/__init__.py.bak; \
+	git add aydin/__init__.py; \
+	git commit -m "chore: bump version to $$NEW_VERSION"; \
+	git push -u origin "$$BRANCH"; \
+	gh pr create \
+		--title "Release v$$NEW_VERSION" \
+		--body "Automated version bump to $$NEW_VERSION. Tag will be created automatically after merge." \
+		--base main; \
+	git checkout main; \
+	echo ""; \
+	echo "Done! Release PR created."; \
+	echo "Merge it on GitHub, then release.yml will auto-tag and publish to PyPI."
 
-publish-patch:
+publish-patch: validate
 	@echo "Current version: $(CURRENT_VERSION)"
+	@command -v gh >/dev/null 2>&1 || { echo "Error: GitHub CLI (gh) is required. Install from https://cli.github.com"; exit 1; }
 	@if echo "$(CURRENT_VERSION)" | grep -q "^$(TODAY)\."; then \
 		PATCH=$$(echo "$(CURRENT_VERSION)" | sed 's/.*\.//'); \
 		NEW_PATCH=$$((PATCH + 1)); \
@@ -118,13 +144,21 @@ publish-patch:
 	elif echo "$(CURRENT_VERSION)" | grep -q "^$(TODAY)$$"; then \
 		NEW_VERSION="$(TODAY).1"; \
 	else \
-		echo "Error: Current version is not today's date. Use publish first."; \
+		echo "Error: Current version is not today's date. Use 'make publish' first."; \
 		exit 1; \
 	fi; \
+	BRANCH="release/v$$NEW_VERSION"; \
+	echo "Creating release branch $$BRANCH..."; \
+	git checkout -b "$$BRANCH"; \
 	sed -i.bak "s/__version__ = \"[^\"]*\"/__version__ = \"$$NEW_VERSION\"/" aydin/__init__.py && rm -f aydin/__init__.py.bak; \
-	sed -i.bak "s/^version = \"[^\"]*\"/version = \"$$NEW_VERSION\"/" pyproject.toml && rm -f pyproject.toml.bak; \
-	git add aydin/__init__.py pyproject.toml; \
+	git add aydin/__init__.py; \
 	git commit -m "chore: bump version to $$NEW_VERSION"; \
-	git tag "v$$NEW_VERSION"; \
-	git push origin main --tags; \
-	echo "Done! GitHub Actions will publish to PyPI."
+	git push -u origin "$$BRANCH"; \
+	gh pr create \
+		--title "Release v$$NEW_VERSION" \
+		--body "Automated version bump to $$NEW_VERSION. Tag will be created automatically after merge." \
+		--base main; \
+	git checkout main; \
+	echo ""; \
+	echo "Done! Release PR created."; \
+	echo "Merge it on GitHub, then release.yml will auto-tag and publish to PyPI."

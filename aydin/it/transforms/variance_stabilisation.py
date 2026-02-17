@@ -19,13 +19,23 @@ from aydin.util.log.log import aprint, asection
 class VarianceStabilisationTransform(ImageTransformBase):
     """Variance Stabilization Transform (VST) and range compression.
 
-    Applies either the Yeo-Johnson, Box-Cox, Anscombe, or another VST
-    transform to the image. Variance stabilization turns an image with
-    Poisson or in general non-Gaussian noise into an image with approximately
-    Gaussian noise, which often facilitates denoising. Also, in general for
-    images with very skewed histograms with for example dark regions of large
-    extent and only a few very bright regions, it is often beneficial to
-    apply a sqrt or log transformation before denoising.
+    Applies a
+    <a href='https://en.wikipedia.org/wiki/Variance-stabilizing_transformation'>variance-stabilizing transformation</a>
+    to the image. Most microscopy detectors produce
+    <a href='https://en.wikipedia.org/wiki/Poisson_distribution'>Poisson</a>-distributed
+    noise whose variance depends on the signal intensity. A VST converts
+    such signal-dependent noise into approximately
+    <a href='https://en.wikipedia.org/wiki/Gaussian_noise'>Gaussian</a> noise
+    with uniform variance, which most denoising algorithms handle better.
+    Supported modes include the
+    <a href='https://en.wikipedia.org/wiki/Anscombe_transform'>Anscombe</a> transform
+    (recommended default for photon-counting data),
+    <a href='https://en.wikipedia.org/wiki/Power_transform#Yeo%E2%80%93Johnson_transformation'>Yeo-Johnson</a>,
+    <a href='https://en.wikipedia.org/wiki/Power_transform#Box%E2%80%93Cox_transformation'>Box-Cox</a>,
+    quantile, log, sqrt, and identity. For images with very skewed histograms
+    -- for example dark regions of large extent and only a few very bright
+    regions -- it is often beneficial to apply a sqrt or log transformation
+    before denoising.
     <notgui>
     """
 
@@ -134,7 +144,9 @@ class VarianceStabilisationTransform(ImageTransformBase):
         """
 
         with asection(
-            f"Stabilising variance ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Stabilising variance ({self.mode}) for array "
+            f"of shape: {array.shape} and "
+            f"dtype: {array.dtype}"
         ):
             # Let's ensure we are working with floats:
             self._original_dtype = array.dtype
@@ -159,7 +171,8 @@ class VarianceStabilisationTransform(ImageTransformBase):
                 self._min_value = min_value
             elif self.mode == 'yeo-johnson' or self.mode == 'box-cox':
 
-                # If the image has negative values, or too small variance, we fallback to yeo-johnson:
+                # If the image has negative values, or too
+                # small variance, we fallback to yeo-johnson:
                 mode = (
                     'yeo-johnson'
                     if array.min() < 0 or numpy.var(numpy.log1p(array.ravel())) < 1e-6
@@ -175,19 +188,23 @@ class VarianceStabilisationTransform(ImageTransformBase):
                     # Instantiate sklearn power transform:
                     power_transform = PowerTransformer(method=mode, standardize=True)
 
-                    numpy.seterr(all='raise')
-                    # Fit tranform:
-                    power_transform.fit(array)
+                    # Use errstate context manager to temporarily raise on FP
+                    # errors without permanently changing global numpy state:
+                    with numpy.errstate(all='raise'):
+                        # Fit transform:
+                        power_transform.fit(array)
                 except (Warning, FloatingPointError):
                     aprint(
-                        f"VST {mode} failed for some numerical reasons, falling back to yeo-johnson."
+                        f"VST {mode} failed for some "
+                        f"numerical reasons, falling back "
+                        f"to yeo-johnson."
                     )
                     mode = 'yeo-johnson'
 
                     # Instantiate sklearn power transform:
                     power_transform = PowerTransformer(method=mode, standardize=True)
 
-                    # Fit tranform:
+                    # Fit transform:
                     power_transform.fit(array)
 
                 # Apply transform:
@@ -261,7 +278,9 @@ class VarianceStabilisationTransform(ImageTransformBase):
             return array
 
         with asection(
-            f"Applying inverse variance stabilisation transform ({self.mode}) for array of shape: {array.shape} and dtype: {array.dtype}"
+            f"Applying inverse variance stabilisation "
+            f"transform ({self.mode}) for array of shape: "
+            f"{array.shape} and dtype: {array.dtype}"
         ):
 
             if self.mode == 'identity':
@@ -298,8 +317,10 @@ class VarianceStabilisationTransform(ImageTransformBase):
                 # The inverse transform can produce out-of-range values that would
                 # cause FloatingPointError when casting to integer types
                 if not numpy.issubdtype(self._original_dtype, numpy.floating):
-                    # For integer dtypes, clip to the ORIGINAL data range (not just dtype range)
-                    # This produces much better results since we preserve semantic meaning
+                    # For integer dtypes, clip to the ORIGINAL
+                    # data range (not just dtype range).
+                    # This produces much better results since
+                    # we preserve semantic meaning
                     # of the values instead of clipping to arbitrary dtype limits
                     clip_min = self._min if self._min is not None else 0.0
                     clip_max = self._max if self._max is not None else 1.0

@@ -10,6 +10,7 @@ from qtpy.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
     QPushButton,
+    QSizePolicy,
     QStyle,
     QTabWidget,
     QVBoxLayout,
@@ -92,20 +93,25 @@ class MainPage(QWidget):
 
         # MainPage layout
         self.main_layout = QVBoxLayout()
-        self.main_layout.setAlignment(Qt.AlignTop)
-
-        # navbar
-        self.navbar_layout = QHBoxLayout()
-        self.navbar_layout.setAlignment(Qt.AlignCenter)
-        self.navbar_layout.setContentsMargins(0, 0, 0, 0)
-        self.navbar_layout.setSpacing(5)
+        self.main_layout.setContentsMargins(4, 4, 4, 4)
+        self.main_layout.setSpacing(4)
 
         self.add_activity_dockable()
 
-        self.navbar_layout_center = QHBoxLayout()
+        # Navbar: flow diagram on the left, action buttons on the right
+        self.navbar_layout = QHBoxLayout()
+        self.navbar_layout.setContentsMargins(0, 0, 9, 0)
+        self.navbar_layout.setSpacing(5)
 
+        # Flow diagram (auto-hides when window is narrow)
         self.flow_diagram_widget = QProgramFlowDiagramWidget(self)
-        self.navbar_layout_center.addWidget(self.flow_diagram_widget)
+        # Use Ignored horizontal policy so the flow diagram does not
+        # force the window to be wider than necessary.  The diagram
+        # auto-hides via resizeEvent when there isn't enough room.
+        sp = self.flow_diagram_widget.sizePolicy()
+        sp.setHorizontalPolicy(QSizePolicy.Ignored)
+        self.flow_diagram_widget.setSizePolicy(sp)
+        self.navbar_layout.addWidget(self.flow_diagram_widget, 1)
 
         self.flow_diagram_widget.add_files_button.clicked.connect(
             self.tabs["File(s)"].open_file_names_dialog
@@ -115,6 +121,9 @@ class MainPage(QWidget):
         )
         self.flow_diagram_widget.add_files_button.setToolTip(
             self.tooltips.json["main_page"]["open_file_button"]
+        )
+        self.flow_diagram_widget.load_sample_image_button.setToolTip(
+            self.tooltips.json["main_page"]["load_example_button"]
         )
 
         self.flow_diagram_widget.files_button.clicked.connect(
@@ -158,36 +167,49 @@ class MainPage(QWidget):
             )
         )
 
+        # Tooltips for flow diagram stage buttons
+        tips = self.tooltips.json["main_page"]
+        self.flow_diagram_widget.files_button.setToolTip(tips["files_button"])
+        self.flow_diagram_widget.images_button.setToolTip(tips["images_button"])
+        self.flow_diagram_widget.dimensions_button.setToolTip(tips["dimensions_button"])
+        self.flow_diagram_widget.training_crop_button.setToolTip(
+            tips["training_crop_button"]
+        )
+        self.flow_diagram_widget.inference_crop_button.setToolTip(
+            tips["denoising_crop_button"]
+        )
+        self.flow_diagram_widget.preprocess_button.setToolTip(tips["preprocess_button"])
+        self.flow_diagram_widget.denoise_button.setToolTip(tips["denoise_button"])
+        self.flow_diagram_widget.postprocess_button.setToolTip(
+            tips["postprocess_button"]
+        )
+
+        # Action buttons on the right side of the navbar
         self.start_button = QPushButton(
             "Start", icon=QApplication.style().standardIcon(QStyle.SP_MediaPlay)
         )
         self.start_button.setIconSize(QSize(30, 30))
         self.start_button.setMinimumHeight(30)
         self.start_button.setMinimumWidth(70)
-        self.start_button.setStyleSheet("QPushButton {font-weight: bold;}")
-        self.navbar_layout_center.addWidget(self.start_button)
+        self.start_button.setToolTip(tips["start_button"])
+        self.navbar_layout.addWidget(self.start_button)
 
         self.processing_job_runner = DenoiseJobRunner(
             self, self.threadpool, self.start_button
         )
 
         self.napari_button = QPushButton("View images")
-        self.napari_button.setStyleSheet("QPushButton {font-weight: bold;}")
         self.napari_button.setMinimumHeight(30)
-        self.napari_button.clicked.connect(self.open_images_with_napari)
-        self.napari_button.setIcon(
-            QApplication.style().standardIcon(QStyle.SP_CommandLink)
-        )
         self.napari_button.setIconSize(QSize(30, 30))
+        self.napari_button.clicked.connect(self.open_images_with_napari)
+        if sys.platform != 'darwin':
+            self.napari_button.setIcon(
+                QApplication.style().standardIcon(QStyle.SP_CommandLink)
+            )
         self.napari_button.setToolTip(self.tooltips.json["main_page"]["napari_button"])
-        self.navbar_layout_center.addWidget(self.napari_button)
+        self.navbar_layout.addWidget(self.napari_button)
 
-        self.navbar_layout_center.setAlignment(Qt.AlignCenter)
-        self.navbar_layout.addLayout(self.navbar_layout_center)
-
-        self.navbar_layout_right = QHBoxLayout()
         self.activity_button = QPushButton("Activity")
-        self.activity_button.setStyleSheet("QPushButton {font-weight: bold;}")
         self.activity_button.setMinimumHeight(30)
         self.activity_button.clicked.connect(
             lambda: self.activity_dock.setHidden(not self.activity_dock.isHidden())
@@ -199,21 +221,27 @@ class MainPage(QWidget):
         self.activity_button.setToolTip(
             self.tooltips.json["main_page"]["activity_button"]
         )
-        self.navbar_layout_center.addWidget(self.activity_button)
+        self.navbar_layout.addWidget(self.activity_button)
 
-        self.navbar_layout_right.setAlignment(Qt.AlignRight)
-        self.navbar_layout.addLayout(self.navbar_layout_right)
+        # Force all action buttons to the same fixed height so that
+        # text-only buttons (e.g. View images on macOS) match icon buttons,
+        # without stretching to the full flow-diagram row height.
+        btn_height = self.start_button.sizeHint().height()
+        for btn in (self.start_button, self.napari_button, self.activity_button):
+            btn.setFixedHeight(btn_height)
 
-        self.navbar_layout.setAlignment(Qt.AlignTop)
-        self.main_layout.addLayout(self.navbar_layout)
+        self.main_layout.addLayout(self.navbar_layout, 0)
 
-        # TabWidget
+        # TabWidget (fills remaining space)
         self.tabwidget = QTabWidget(self)
         self.tabwidget.currentChanged.connect(self.on_tab_change)
         for key, value in self.tabs.items():
             self.tabwidget.addTab(value, key)
 
-        self.main_layout.addWidget(self.tabwidget)
+        self.main_layout.addWidget(self.tabwidget, 1)
+
+        # Width threshold below which the flow diagram auto-hides
+        self._flow_diagram_min_width = 0
 
         self.overlay = Overlay(self)
         self.overlay.hide()
@@ -253,7 +281,11 @@ class MainPage(QWidget):
                 return
 
     def resizeEvent(self, event):
-        """Resize the overlay to match the widget size.
+        """Resize the overlay and toggle flow diagram visibility.
+
+        The flow diagram auto-hides when the window is too narrow for it
+        to display properly. The tab widget always provides equivalent
+        navigation.
 
         Parameters
         ----------
@@ -261,6 +293,20 @@ class MainPage(QWidget):
             The resize event.
         """
         self.overlay.resize(event.size())
+
+        # Compute the flow diagram's natural width on first resize
+        if self._flow_diagram_min_width == 0:
+            self._flow_diagram_min_width = (
+                self.flow_diagram_widget.sizeHint().width() + 20
+            )
+
+        # Auto-hide the flow diagram when the window is too narrow
+        # Only toggle when visibility actually changes to avoid expensive
+        # layout recalculations on every resize event.
+        should_show = event.size().width() >= self._flow_diagram_min_width
+        if self.flow_diagram_widget.isVisible() != should_show:
+            self.flow_diagram_widget.setVisible(should_show)
+
         event.accept()
 
     # The following three methods set up dragging and dropping for the app
@@ -374,8 +420,9 @@ class MainPage(QWidget):
         disable_spatial_features = self.tabs["Training Crop"].disable_spatial_features()
         if disable_spatial_features != self.disable_spatial_features:
             self.tabs["Denoise"].disable_spatial_features = disable_spatial_features
+            # `not` is needed to just refresh Denoise tab
             self.tabs["Denoise"].set_advanced_enabled(
-                not self.parent.advancedModeButton.isEnabled()  # `not` is needed to just refresh Denoise tab
+                not self.parent.advancedModeButton.isEnabled()
             )
             self.disable_spatial_features = disable_spatial_features
 
@@ -476,6 +523,6 @@ class MainPage(QWidget):
         self.tabs["Dimensions"].on_data_model_update()
 
     def croppingtabs_changed(self):
-        """Notify the Training Crop and Denoising Crop tabs that the data model has changed."""
+        """Notify the cropping tabs that the data model changed."""
         self.tabs["Training Crop"].on_data_model_update()
         self.tabs["Denoising Crop"].on_data_model_update()

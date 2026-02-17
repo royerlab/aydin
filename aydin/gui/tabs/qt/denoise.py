@@ -76,17 +76,25 @@ class DenoiseTab(QWidget):
         self.disable_spatial_features = False
         self.loaded_backends = []
 
-        (
-            backend_options,
-            backend_options_descriptions,
-        ) = get_list_of_denoiser_implementations()
+        try:
+            (
+                backend_options,
+                backend_options_descriptions,
+            ) = get_list_of_denoiser_implementations()
+        except Exception:
+            backend_options, backend_options_descriptions = [], []
 
-        self.backend_options, self.backend_options_descriptions = (
-            list(t)
-            for t in zip(*sorted(zip(backend_options, backend_options_descriptions)))
-        )
+        if backend_options:
+            self.backend_options, self.backend_options_descriptions = (
+                list(t)
+                for t in zip(
+                    *sorted(zip(backend_options, backend_options_descriptions))
+                )
+            )
+        else:
+            self.backend_options, self.backend_options_descriptions = [], []
 
-        self.basic_backend_options = [
+        basic_backend_candidates = [
             'Classic-butterworth',
             'Classic-gaussian',
             'Classic-gm',
@@ -96,6 +104,11 @@ class DenoiseTab(QWidget):
             'Noise2SelfFGR-cb',
             'Noise2SelfFGR-lgbm',
             'Noise2SelfFGR-random_forest',
+        ]
+
+        # Filter to only include backends that are actually available
+        self.basic_backend_options = [
+            opt for opt in basic_backend_candidates if opt in self.backend_options
         ]
 
         self.basic_backend_options_descriptions = [
@@ -113,8 +126,9 @@ class DenoiseTab(QWidget):
             self.backend_options, self.backend_options_descriptions
         )
 
-        self.leftlist.item(default_option_index).setSelected(True)
-        self.change_current_method(default_option_index)
+        if self.leftlist.count() > 0:
+            self.leftlist.item(default_option_index).setSelected(True)
+            self.change_current_method(default_option_index)
         self.leftlist.currentRowChanged.connect(self.change_current_method)
 
         hbox = QHBoxLayout()
