@@ -6,13 +6,17 @@ from unittest.mock import patch
 import numpy
 
 from aydin.io.datasets import (
+    CHECKSUMS,
+    ZENODO_RECORD_ID,
+    _verify_file,
     add_blur_2d,
     add_blur_3d,
     add_noise,
     camera,
     cropped_newyork,
     dots,
-    download_from_gdrive,
+    download_from_url,
+    download_from_zenodo,
     examples_single,
     lizard,
     newyork,
@@ -216,6 +220,15 @@ def test_examples_single_enum():
     assert hasattr(examples_single, 'noisy_fountain')
 
 
+def test_examples_single_value_format():
+    """Test that examples_single values are (source, filename) tuples."""
+    for member in examples_single:
+        source, filename = member.value
+        assert isinstance(source, str)
+        assert isinstance(filename, str)
+        assert source == "zenodo" or source.startswith("http")
+
+
 def test_examples_single_get_path():
     """Test examples_single.get_path() returns valid path."""
     path = examples_single.generic_lizard.get_path()
@@ -234,37 +247,90 @@ def test_examples_single_get_array():
     assert isinstance(array, numpy.ndarray)
 
 
-@patch('aydin.io.datasets.gdown.download')
-@patch('aydin.io.datasets.exists')
-def test_download_from_gdrive_already_exists(mock_exists, mock_download):
-    """Test download_from_gdrive skips when file exists."""
-    mock_exists.return_value = True
+def test_zenodo_record_id():
+    """Test that the Zenodo record ID is set."""
+    assert ZENODO_RECORD_ID is not None
+    assert len(ZENODO_RECORD_ID) > 0
 
-    result = download_from_gdrive('fake_id', 'test.tif', '/tmp', overwrite=False)
+
+def test_checksums_loaded():
+    """Test that checksums are loaded from JSON."""
+    assert isinstance(CHECKSUMS, dict)
+    assert len(CHECKSUMS) > 0
+    # Check a known file
+    assert "newyork.png" in CHECKSUMS
+    assert "sha256" in CHECKSUMS["newyork.png"]
+    assert "size" in CHECKSUMS["newyork.png"]
+
+
+@patch('aydin.io.datasets.requests.get')
+def test_download_from_zenodo_already_exists(mock_get):
+    """Test download_from_zenodo skips when file exists."""
+    # Use a file we know exists
+    result = download_from_zenodo("newyork.png", overwrite=False)
 
     assert result is None
-    mock_download.assert_not_called()
+    mock_get.assert_not_called()
 
 
-@patch('aydin.io.datasets.gdown.download')
-@patch('aydin.io.datasets.exists')
-def test_download_from_gdrive_downloads_when_missing(mock_exists, mock_download):
-    """Test download_from_gdrive downloads when file doesn't exist."""
-    mock_exists.return_value = False
+@patch('aydin.io.datasets.requests.get')
+def test_download_from_url_already_exists(mock_get):
+    """Test download_from_url skips when file exists."""
+    result = download_from_url(
+        "https://example.com/test.png",
+        "newyork.png",
+        overwrite=False,
+    )
 
-    result = download_from_gdrive('fake_id', 'test.tif', '/tmp', overwrite=False)
-
-    assert result == '/tmp/test.tif'
-    mock_download.assert_called_once()
+    assert result is None
+    mock_get.assert_not_called()
 
 
-@patch('aydin.io.datasets.gdown.download')
-@patch('aydin.io.datasets.exists')
-def test_download_from_gdrive_overwrite(mock_exists, mock_download):
-    """Test download_from_gdrive re-downloads when overwrite=True."""
-    mock_exists.return_value = True
+def test_verify_file_correct(tmp_path):
+    """Test _verify_file passes for correct file."""
+    # Create a test file and compute its hash
+    import hashlib
 
-    result = download_from_gdrive('fake_id', 'test.tif', '/tmp', overwrite=True)
+    content = b"test content for verification"
+    path = tmp_path / "test.bin"
+    path.write_bytes(content)
 
-    assert result == '/tmp/test.tif'
-    mock_download.assert_called_once()
+    h = hashlib.sha256(content).hexdigest()
+    # Temporarily add to CHECKSUMS
+    CHECKSUMS["test.bin"] = {"sha256": h, "size": len(content)}
+    try:
+        _verify_file(str(path), "test.bin")  # Should not raise
+    finally:
+        del CHECKSUMS["test.bin"]
+
+
+def test_verify_file_wrong_size(tmp_path):
+    """Test _verify_file raises on wrong size."""
+    content = b"test content"
+    path = tmp_path / "test.bin"
+    path.write_bytes(content)
+
+    CHECKSUMS["test.bin"] = {"sha256": "abc", "size": 999}
+    try:
+        import pytest
+
+        with pytest.raises(IOError, match="Size mismatch"):
+            _verify_file(str(path), "test.bin")
+    finally:
+        del CHECKSUMS["test.bin"]
+
+
+def test_verify_file_wrong_hash(tmp_path):
+    """Test _verify_file raises on wrong hash."""
+    content = b"test content"
+    path = tmp_path / "test.bin"
+    path.write_bytes(content)
+
+    CHECKSUMS["test.bin"] = {"sha256": "0" * 64, "size": len(content)}
+    try:
+        import pytest
+
+        with pytest.raises(IOError, match="SHA-256 mismatch"):
+            _verify_file(str(path), "test.bin")
+    finally:
+        del CHECKSUMS["test.bin"]

@@ -1,0 +1,130 @@
+{
+  "Brown_SIDD_chessboard_gray.png": {
+    "sha256": "fd46d3d3f5a3f3e00d0354be9b04053eb8f376bf9a86257569d0be56ade4afcd",
+    "size": 1390736
+  },
+  "C2-DrosophilaEggChamber-small.tif": {
+    "sha256": "a84fc29a1811cd46c884e05fdddb9c5b6e3595208e695927d0b428c87dba39b7",
+    "size": 3680564
+  },
+  "Cognet_1-100fps.tif": {
+    "sha256": "b132c39e332f36e50abae8cc1f99b0c09c8422973bbdd7c681cd41f1944741e0",
+    "size": 854462040
+  },
+  "Cognet_1-200fps.tif": {
+    "sha256": "e67e032b07a95f316d778efb99f9ec447302f6ea411908b99f03331a9698a857",
+    "size": 844427059
+  },
+  "Cognet_1-400fps.tif": {
+    "sha256": "3652068fae5f5e074f82ae0a51034d9e9a2b132c4a071e1d1bdb16031a649ca9",
+    "size": 835495245
+  },
+  "Cognet_r03-s01-100mW-20ms-175 50xplpeg-173.tif": {
+    "sha256": "923e6f6eba6af02844b8f4feda680e512b316595244b8b91e592ecd561fd12d3",
+    "size": 190900982
+  },
+  "Flybrain_3ch_mediumSize.tif": {
+    "sha256": "3d4950666d0e9651e8852788fd25d2a217340764834cb04a7cd8cad7135b0df6",
+    "size": 525470452
+  },
+  "Gauss_noisy.png": {
+    "sha256": "de5f31eadc609e47bdaf89c759ce5d9d18f89ed9d9403bde8a2b454c63a58b0f",
+    "size": 3397578
+  },
+  "Hyman_HeLa.tif": {
+    "sha256": "278fc6b2b0bc684548ce7d4bc4fbd01e2c2ba8c2c567a392a0c8e7601a67c62a",
+    "size": 125454236
+  },
+  "Leonetti_OC-FOV_ANKRD11_ENSG00000167522_CID001385_FID00033338_stack.tif": {
+    "sha256": "eb41922dc1bb5291c60b74a22d553dbd56260714ebe990904a86d2689696f793",
+    "size": 56392430
+  },
+  "Leonetti_OC-FOV_ARHGAP21_ENSG00000107863_CID000556_FID00030711_stack.tif": {
+    "sha256": "8381e69118208a8170677ef487363857c822f2ebb1f49855261b5da6f368020d",
+    "size": 56738426
+  },
+  "Leonetti_p1H10_2_SPTSSA_PyProcessed_IJClean.tif": {
+    "sha256": "92cc14a9c31670fdbb5444a405fa5000913349b0e4d71777a036d504bfa77a86",
+    "size": 113438856
+  },
+  "Leonetti_p1H8_2_SNCA_PyProcessed_IJClean.tif": {
+    "sha256": "42d004a047b2af265edf382eb41509cb2ef95068f6df7701573611290655b13f",
+    "size": 146173298
+  },
+  "Leonetti_p4B3_1_TM7SF2_PyProcessed_IJClean.tif": {
+    "sha256": "16977dd8683b6604209c74720606eca7088c36b1297b61e01b35a4ffb2335585",
+    "size": 110668925
+  },
+  "Maitre_mouse blastocyst_fracking_180124_e3_crop.tif": {
+    "sha256": "4f73b660b3c55949f4ea203c04a1c58e96fe73b7e868181b42925edb366d4200",
+    "size": 57472732
+  },
+  "Myers_Tribolium_nGFP_0.1_0.2_0.5_20_13_late.tif": {
+    "sha256": "5702b5765d165c29e6a960a9b61aa34d4476a3ece238d89c61ee67297b4f5f69",
+    "size": 19215040
+  },
+  "Royer_confocal_dragonfly_hcr_drerio_30somite_crop.tif": {
+    "sha256": "18da400de147b8245cb797b637a6e51d9ffa63569bd29b1f913cda595fd0d02e",
+    "size": 47312950
+  },
+  "SPC0_TM0132_CM0_CM1_CHN00_CHN01.fusedStack.tif": {
+    "sha256": "73c48086f425ef05dc6d334496617e4f73fae60a9036457006d279e4a4dfbeb2",
+    "size": 42168664
+  },
+  "camera.png": {
+    "sha256": "361a6d56d22ee52289cd308d5461d090e06a56cb36007d8dfc3226cbe8aaa5db",
+    "size": 114228
+  },
+  "andromeda.png": {
+    "sha256": "67a0f1451defbebc439319297c17e14cefd049a976d521548f6b48230a3d7467",
+    "size": 548255
+  },
+  "characters.jpg": {
+    "sha256": "0d0071a902d46dd251abb95ca3663a3c97fca6486c7a4a7cbb87de0090075aff",
+    "size": 342770
+  },
+  "fixed_pattern_noise.tif": {
+    "sha256": "7d154e3be0384164cd42a722a629f25d085984ea77b95b6c51947f5feb3b7eb3",
+    "size": 4373105
+  },
+  "lizard.png": {
+    "sha256": "65491fcad3452a7822f2d6c78ab08311826d1fef51227aab49bc043fd415a401",
+    "size": 134264
+  },
+  "mandrill.tif": {
+    "sha256": "2b2326eb1bb5f240dbb745531983e90595d2190ebf2c704e236344455cf08309",
+    "size": 262912
+  },
+  "fountain.png": {
+    "sha256": "f024882998530b5b6cb8dbf761c7d9f5ff4dfd65663079a1cd9951912111254e",
+    "size": 267705
+  },
+  "monalisa.png": {
+    "sha256": "34eccc0082931acf11883347f5a80c9c0ae63e9f805fec80f4758b8d94b9ea98",
+    "size": 179483
+  },
+  "newyork.png": {
+    "sha256": "029b8bc2f6fe8e24f52752810589a71b10b9bc2c18e21d79bd6d24acac4c1ff0",
+    "size": 747767
+  },
+  "newyork_noisy.tif": {
+    "sha256": "1c485ee9bca1cab4a2adbe012932f09ef0b841e401074d024d582c444b684a7d",
+    "size": 3265774
+  },
+  "periodic_noise.png": {
+    "sha256": "a9f0e75d841c0f474518832d8b64923498898d376561e2b4fd90cc7b4c4ad200",
+    "size": 439743
+  },
+  "pollen.png": {
+    "sha256": "fc1caf528bff9b50279b3d533dbfa1b53403dde16ddba8e20b8adc4fb989ac61",
+    "size": 310209
+  },
+  "rgbtest.png": {
+    "sha256": "c1bcf8ee1ae4b4b0d271164d1c783eaeaa7b8279de8b0f7deb773d0cea71e04e",
+    "size": 8518
+  },
+  "scafoldings.png": {
+    "sha256": "ce9f7686b624956ee6eb51e76e56efa1d4a78610d112b1b66354f8332955f7b1",
+    "size": 1035826
+  }
+}

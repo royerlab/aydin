@@ -1,18 +1,23 @@
 """Example datasets for testing and demonstration.
 
 This module provides convenience functions to download, cache, and load
-example images from Google Drive for testing Aydin denoising algorithms.
-It also includes utility functions for adding synthetic noise and blur.
+example images from Zenodo and original source URLs for testing Aydin
+denoising algorithms. It also includes utility functions for adding
+synthetic noise and blur.
+
+Datasets are hosted on Zenodo (DOI: 10.5281/zenodo.18686988).
 """
 
+import hashlib
+import json
 import os
-import zipfile
 from enum import Enum
 from os.path import exists, join
+from pathlib import Path
 from typing import Optional
 
-import gdown
 import numpy
+import requests
 from scipy.ndimage import binary_dilation, zoom
 from scipy.signal import convolve, convolve2d
 from skimage.exposure import rescale_intensity
@@ -25,10 +30,149 @@ from aydin.util.psf.simple_microscope_psf import SimpleMicroscopePSF
 
 datasets_folder = join(get_cache_folder(), 'data')
 
+os.makedirs(datasets_folder, exist_ok=True)
+
+# Zenodo record ID for the Aydin example datasets (v1.1.0)
+ZENODO_RECORD_ID = "18686988"
+
+# Load checksums from the JSON file shipped with the package
+_checksums_path = Path(__file__).parent / 'dataset_checksums.json'
 try:
-    os.makedirs(datasets_folder)
-except Exception:
-    pass
+    with open(_checksums_path) as _f:
+        CHECKSUMS = json.load(_f)
+except FileNotFoundError:
+    import warnings
+
+    warnings.warn(
+        f"Checksum file not found at {_checksums_path}. "
+        "Downloads will proceed without integrity verification.",
+        stacklevel=1,
+    )
+    CHECKSUMS = {}
+
+
+def _verify_file(path, filename):
+    """Verify a downloaded file against known checksums.
+
+    Parameters
+    ----------
+    path : str
+        Path to the downloaded file.
+    filename : str
+        Filename key in the CHECKSUMS dict.
+
+    Raises
+    ------
+    IOError
+        If the file size or SHA-256 hash does not match.
+    """
+    if filename not in CHECKSUMS:
+        return  # No checksum available, skip verification
+
+    expected = CHECKSUMS[filename]
+    actual_size = os.path.getsize(path)
+    if actual_size != expected["size"]:
+        os.remove(path)
+        raise IOError(
+            f"Size mismatch for {filename}: "
+            f"expected {expected['size']}, got {actual_size}"
+        )
+
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        while True:
+            chunk = f.read(1024 * 1024)
+            if not chunk:
+                break
+            h.update(chunk)
+    actual_hash = h.hexdigest()
+    if actual_hash != expected["sha256"]:
+        os.remove(path)
+        raise IOError(
+            f"SHA-256 mismatch for {filename}: "
+            f"expected {expected['sha256'][:16]}..., "
+            f"got {actual_hash[:16]}..."
+        )
+
+
+def _download_file(url, filename, dest_folder=datasets_folder, overwrite=False):
+    """Download a file from a URL with streaming and checksum verification.
+
+    Parameters
+    ----------
+    url : str
+        URL to download from.
+    filename : str
+        Filename to save as.
+    dest_folder : str
+        Destination folder.
+    overwrite : bool
+        If True, re-downloads even if the file already exists.
+
+    Returns
+    -------
+    output_path : str or None
+        Path to the downloaded file, or None if it already existed.
+    """
+    output_path = join(dest_folder, filename)
+    if not overwrite and exists(output_path):
+        aprint(f"Not downloading {filename} as it already exists.")
+        return None
+    os.makedirs(dest_folder, exist_ok=True)
+    aprint(f"Downloading {filename} from {url[:80]}...")
+    resp = requests.get(url, stream=True, timeout=(30, 300))
+    resp.raise_for_status()
+    with open(output_path, 'wb') as f:
+        for chunk in resp.iter_content(chunk_size=1024 * 1024):
+            f.write(chunk)
+    _verify_file(output_path, filename)
+    return output_path
+
+
+def download_from_zenodo(filename, dest_folder=datasets_folder, overwrite=False):
+    """Download a single file from the Aydin Zenodo dataset record.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file on Zenodo.
+    dest_folder : str
+        Destination folder for the downloaded file.
+    overwrite : bool
+        If True, re-downloads even if the file already exists.
+
+    Returns
+    -------
+    output_path : str or None
+        Path to the downloaded file, or None if it already existed.
+    """
+    url = (
+        f"https://zenodo.org/api/records/{ZENODO_RECORD_ID}"
+        f"/files/{filename}/content"
+    )
+    return _download_file(url, filename, dest_folder, overwrite)
+
+
+def download_from_url(url, filename, dest_folder=datasets_folder, overwrite=False):
+    """Download a file from a direct URL.
+
+    Parameters
+    ----------
+    url : str
+        Direct download URL.
+    filename : str
+        Filename to save as.
+    dest_folder : str
+        Destination folder for the downloaded file.
+    overwrite : bool
+        If True, re-downloads even if the file already exists.
+
+    Returns
+    -------
+    output_path : str or None
+        Path to the downloaded file, or None if it already existed.
+    """
+    return _download_file(url, filename, dest_folder, overwrite)
 
 
 def normalise(image):
@@ -319,7 +463,8 @@ def dmel():
 class examples_single(Enum):
     """Enumeration of single example images available for download.
 
-    Each member is a tuple of (Google Drive file ID, filename).
+    Each member is a tuple of (source, filename) where source is either
+    ``"zenodo"`` for Zenodo-hosted files or a URL for source-URL files.
     Use ``get_path()`` to download and get the local path, or
     ``get_array()`` to directly get the image as a numpy array.
     """
@@ -332,8 +477,12 @@ class examples_single(Enum):
         path : str
             Absolute path to the downloaded example image file.
         """
-        download_from_gdrive(*self.value, datasets_folder)
-        return join(datasets_folder, self.value[1])
+        source, filename = self.value
+        if source == "zenodo":
+            download_from_zenodo(filename, datasets_folder)
+        elif source.startswith("http"):
+            download_from_url(source, filename, datasets_folder)
+        return join(datasets_folder, filename)
 
     def get_array(self):
         """Download (if needed), read, and return the image as a numpy array.
@@ -346,179 +495,102 @@ class examples_single(Enum):
         array, _ = io.imread(self.get_path())
         return array
 
+    # --- Zenodo-hosted ---
+
     # XY natural images (2D monochrome):
-    generic_camera = ('1S205p0oI-dEQIFbBuFu3QSlMqWA2xk6B', 'camera.png')
-    generic_crowd = ('13UHK8MjhBviv31mAW2isdG4G-aGaNJIj', 'crowd.tif')
-    generic_mandrill = ('1B33ELiFuCV0OJ6IHh7Ix9lvImwI_QkR-', 'mandrill.tif')
-    generic_newyork = ('15Nuu_NU3iNuoPRmpFbrGIY0VT0iCmuKu', 'newyork.png')
-    generic_lizard = ('1GUc6jy5QH5DaiUskCrPrf64YBOLzT6j1', 'lizard.png')
-    generic_pollen = ('1S0o2NWtD1shB5DfGRIqOFxTLOi8cHQD-', 'pollen.png')
-    generic_scafoldings = ('1ZiWhHnkuaQH-BS8B71y00wkN1Ylo38nY', 'scafoldings.png')
-    generic_andromeda = ('1Zl3DtkwUlZSbvpxGILexiIoLW1JOdJh8', 'andromeda.png')
+    generic_camera = ("zenodo", "camera.png")  # CC BY-NC (MIT)
+    generic_mandrill = ("zenodo", "mandrill.tif")  # Copyright unknown (USC-SIPI)
+    generic_newyork = ("zenodo", "newyork.png")
+    generic_lizard = ("zenodo", "lizard.png")  # Non-commercial (Berkeley BSDS300)
+    generic_pollen = ("zenodo", "pollen.png")
+    generic_scafoldings = ("zenodo", "scafoldings.png")
+    generic_andromeda = ("zenodo", "andromeda.png")
 
     # XY noisy (2D monochrome):
-    noisy_fountain = ('1JP-_j-6U7J1gNc9IZCZ_GsgXTcybmZgS', 'fountain.png')
-    noisy_newyork = ('13ompUqT7Ti64fStqx76I9j9voWMZWnfA', 'newyork_noisy.tif')
-    noisy_monalisa = ('15T3oTCyz7ugnPLTsKc0a9NT17g9GJsO_', 'monalisa.png')
-    noisy_gauss = ('17e_ECJA7DUQGu9JELbTkAKbOVVE9olHN', 'Gauss_noisy.png')
-    noisy_brown_chessboard = (
-        '1gnqwhZ7HrRaScj6QF_P2Pl_6WAcLzCgR',
-        'Brown_SIDD_chessboard_gray.png',
-    )
+    noisy_fountain = ("zenodo", "fountain.png")
+    noisy_newyork = ("zenodo", "newyork_noisy.tif")
+    noisy_monalisa = ("zenodo", "monalisa.png")
+    noisy_gauss = ("zenodo", "Gauss_noisy.png")
+    noisy_brown_chessboard = ("zenodo", "Brown_SIDD_chessboard_gray.png")
 
     # Patterned noise (2D monochrome)
-    periodic_noise = ('1HfwF6gnzHFFdJ-tozllU_h14vNk9GZOG', 'periodic_noise.png')
+    periodic_noise = ("zenodo", "periodic_noise.png")
 
     # Characters (2D monochrome, inverted):
-    generic_characters = ('1ZWkHFI2iddKa9qv6tft4QZlCoDS5fLMK', 'characters.jpg')
+    generic_characters = ("zenodo", "characters.jpg")
 
     # XYC (RGB)
-    rgbtest = ('1KvhcGBqEQ5N9mwxHwy14NVp8OJ-9GCsH', 'rgbtest.png')
+    rgbtest = ("zenodo", "rgbtest.png")
 
     # Leonetti datasets:
     leonetti_tm7sf2 = (
-        '1HHsbZ6jyuJkIj6c7kGtsPKOgpUxo0ihw',
-        'Leonetti_p4B3_1_TM7SF2_PyProcessed_IJClean.tif',
+        "zenodo",
+        "Leonetti_p4B3_1_TM7SF2_PyProcessed_IJClean.tif",
     )
     leonetti_sptssa = (
-        '10kR7FSIyi7417XYTLrMJaGe3MfvMmSYA',
-        'Leonetti_p1H10_2_SPTSSA_PyProcessed_IJClean.tif',
+        "zenodo",
+        "Leonetti_p1H10_2_SPTSSA_PyProcessed_IJClean.tif",
     )
     leonetti_snca = (
-        '1UyF5HkZLwTaoiBf1sLHkTdw09yyCJyKO',
-        'Leonetti_p1H8_2_SNCA_PyProcessed_IJClean.tif',
+        "zenodo",
+        "Leonetti_p1H8_2_SNCA_PyProcessed_IJClean.tif",
     )
     leonetti_arhgap21 = (
-        '1arq6nj4oiJaxG7dPHjhYVTSYXM2Czpgx',
-        'Leonetti_OC-FOV_ARHGAP21_ENSG00000107863_CID000556_FID00030711_stack.tif',
+        "zenodo",
+        "Leonetti_OC-FOV_ARHGAP21_ENSG00000107863_CID000556_FID00030711_stack.tif",
     )
     leonetti_ankrd11 = (
-        '1Bl0WlEPeDe8MmlWy8_KaZS9QKthvSDHM',
-        'Leonetti_OC-FOV_ANKRD11_ENSG00000167522_CID001385_FID00033338_stack.tif',
+        "zenodo",
+        "Leonetti_OC-FOV_ANKRD11_ENSG00000167522_CID001385_FID00033338_stack.tif",
     )
 
     # XYZ
-    huang_fixed_pattern_noise = (
-        '1fiVopWwUSZJhsWUfoo7YaU3qQ-j4g5hB',
-        'fixed_pattern_noise.tif',
-    )
-
-    keller_dmel = (
-        '12DCAlDRSiTyGDSD7p06nk17GO3ztHg-Q',
-        'SPC0_TM0132_CM0_CM1_CHN00_CHN01.fusedStack.tif',
-    )
-
-    janelia_flybrain = (
-        '12Z6W_f3TqCsl_okKmaLcVUBgS6xEvdjj',
-        'Flybrain_3ch_mediumSize.tif',
-    )
-
+    huang_fixed_pattern_noise = ("zenodo", "fixed_pattern_noise.tif")
+    keller_dmel = ("zenodo", "SPC0_TM0132_CM0_CM1_CHN00_CHN01.fusedStack.tif")
+    janelia_flybrain = ("zenodo", "Flybrain_3ch_mediumSize.tif")
     myers_tribolium = (
-        '1GGULAF8IoPi4P614Wi-njmeQxND4Xttj',
-        'Myers_Tribolium_nGFP_0.1_0.2_0.5_20_13_late.tif',
+        "zenodo",
+        "Myers_Tribolium_nGFP_0.1_0.2_0.5_20_13_late.tif",
     )
-
     royerlab_hcr = (
-        '1nkgqs8VkmPKBtBHqUXKrVgIvOqD8B84h',
-        'Royer_confocal_dragonfly_hcr_drerio_30somite_crop.tif',
+        "zenodo",
+        "Royer_confocal_dragonfly_hcr_drerio_30somite_crop.tif",
     )
-
-    machado_drosophile_egg_chamber = (
-        '1msjf1pVAGsy61QMtxvVoxxk5WZCofdN2',
-        'C2-DrosophilaEggChamber-small.tif',
-    )
+    machado_drosophile_egg_chamber = ("zenodo", "C2-DrosophilaEggChamber-small.tif")
 
     # 2D+t
     cognet_nanotube1 = (
-        '1SmrBheUc6p5qTgtIEzedCwbN87HOW_O_',
-        'Cognet_r03-s01-100mW-20ms-175 50xplpeg-173.tif',
+        "zenodo",
+        "Cognet_r03-s01-100mW-20ms-175 50xplpeg-173.tif",
     )
-    cognet_nanotube_400fps = (
-        '1ap4YNxa0RA6MBKiXZ2ZRL1USZtzPqFs3',
-        'Cognet_1-400fps.tif',
-    )
-    cognet_nanotube_200fps = (
-        '1Z501FlQOBQmPaeBMCOGy6chBDh1bDjEf',
-        'Cognet_1-200fps.tif',
-    )
-    cognet_nanotube_100fps = (
-        '1T4UvbF3MRgT4jO4ExIHprvTqUXLiMjyA',
-        'Cognet_1-100fps.tif',
-    )
+    cognet_nanotube_400fps = ("zenodo", "Cognet_1-400fps.tif")
+    cognet_nanotube_200fps = ("zenodo", "Cognet_1-200fps.tif")
+    cognet_nanotube_100fps = ("zenodo", "Cognet_1-100fps.tif")
 
     # 3D+t
     maitre_mouse = (
-        '13b0-6PUo2YEWG8Z3M1pVfBQBWE0PtILK',
-        'Maitre_mouse blastocyst_fracking_180124_e3_crop.tif',
+        "zenodo",
+        "Maitre_mouse blastocyst_fracking_180124_e3_crop.tif",
     )
 
     # XYZT
-    hyman_hela = ('12qOGxfBrnzrufgbizyTkhHipgRwjSIz-', 'Hyman_HeLa.tif')
+    hyman_hela = ("zenodo", "Hyman_HeLa.tif")
 
-    # XYZCT 1344 × 1024 × 1 × 1 × 93
-    ome_mitocheck = ('1B9d8Yw_lidZg43U3VZAoalVHf9eHbCS7', '00001_01.ome.tiff')
+    # --- Source-URL-hosted (externally-hosted OME-TIFF) ---
 
-    # XYZCT 160 × 220 × 8 × 2 × 12
-    ome_spim = ('1BG6jCZGLEs1LDxKXjMqF0aV-iiqlushk', 'SPIM-ModuloAlongZ.ome.tiff')
+    # XYZCT 1344 x 1024 x 1 x 1 x 93
+    ome_mitocheck = (
+        "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/"
+        "MitoCheck/00001_01.ome.tiff",
+        "00001_01.ome.tiff",
+    )
 
-
-def download_from_gdrive(
-    id, name, dest_folder=datasets_folder, overwrite=False, unzip=False
-):
-    """Download a file from Google Drive by its file ID.
-
-    Parameters
-    ----------
-    id : str
-        Google Drive file ID.
-    name : str
-        Filename to save the downloaded file as.
-    dest_folder : str
-        Destination folder for the downloaded file.
-    overwrite : bool
-        If True, re-downloads even if the file already exists.
-    unzip : bool
-        If True, unzips the downloaded file into ``dest_folder``.
-
-    Returns
-    -------
-    output_path : str or None
-        Path to the downloaded file, or None if the file already existed.
-
-    Raises
-    ------
-    ValueError
-        If ``unzip`` is True and the zip archive contains paths that would
-        escape the destination folder (Zip Slip vulnerability protection).
-    """
-    try:
-        os.makedirs(dest_folder)
-    except Exception:
-        pass
-
-    url = f'https://drive.google.com/uc?id={id}'
-    output_path = join(dest_folder, name)
-    if overwrite or not exists(output_path):
-        aprint(f"Downloading file {output_path} as it does not exist yet.")
-        gdown.download(url, output_path, quiet=False)
-
-        if unzip:
-            aprint(f"Unzipping file {output_path}...")
-            zip_ref = zipfile.ZipFile(output_path, 'r')
-            # Validate paths to prevent Zip Slip vulnerability
-            dest_folder_real = os.path.realpath(dest_folder)
-            for member in zip_ref.namelist():
-                member_path = os.path.realpath(os.path.join(dest_folder, member))
-                if not member_path.startswith(dest_folder_real + os.sep):
-                    raise ValueError(f"Attempted path traversal in zip file: {member}")
-            zip_ref.extractall(dest_folder)
-            zip_ref.close()
-            # os.remove(output_path)
-
-        return output_path
-    else:
-        aprint(f"Not downloading file {output_path} as it already exists.")
-        return None
+    # XYZCT 160 x 220 x 8 x 2 x 12
+    ome_spim = (
+        "https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/"
+        "modulo/SPIM-ModuloAlongZ.ome.tiff",
+        "SPIM-ModuloAlongZ.ome.tiff",
+    )
 
 
 def download_all_examples():
@@ -528,7 +600,11 @@ def download_all_examples():
     platform-specific cache folder. Already-downloaded files are skipped.
     """
     for example in examples_single:
-        aprint(download_from_gdrive(*example.value))
+        source, filename = example.value
+        if source == "zenodo":
+            download_from_zenodo(filename, datasets_folder)
+        elif source.startswith("http"):
+            download_from_url(source, filename, datasets_folder)
 
 
 def downloaded_example(substring):
@@ -544,5 +620,9 @@ def downloaded_example(substring):
         Substring to match against example filenames (case-sensitive).
     """
     for example in examples_single:
-        if substring in example.value[1]:
-            aprint(download_from_gdrive(*example.value))
+        source, filename = example.value
+        if substring in filename:
+            if source == "zenodo":
+                download_from_zenodo(filename, datasets_folder)
+            elif source.startswith("http"):
+                download_from_url(source, filename, datasets_folder)
