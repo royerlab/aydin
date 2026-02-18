@@ -10,7 +10,7 @@ Submodules
 io
     Core ``imread`` and ``imwrite`` functions with format auto-detection.
 datasets
-    Example images for testing and demonstration, downloaded from Google Drive.
+    Example images for testing and demonstration, downloaded from Zenodo.
 folders
     Platform-specific directory paths (home, temp, cache).
 utils

@@ -50,7 +50,7 @@ dependencies = [
     "qtpy>=2.4.0,<3.0.0",
     # CLI & Utilities
     "Click>=8.1.0,<9.0.0",
-    "gdown>=5.0.0,<6.0.0",
+    "requests>=2.28.0,<3.0.0",
     "jsonpickle>=3.0.0,<4.0.0",
     "memoization>=0.4.0,<1.0.0",
     "Deprecated>=1.2.13,<2.0.0",
@@ -103,7 +103,7 @@ bundle = [
     "distributed>=2024.1.0",
     # CLI & Utilities
     "Click==8.1.7",
-    "gdown==5.2.0",
+    "requests==2.32.3",
     "jsonpickle==3.3.0",
     "memoization==0.4.0",
     "Deprecated==1.2.14",

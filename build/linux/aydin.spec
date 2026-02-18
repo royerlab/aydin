@@ -15,7 +15,6 @@ print(f"Building with Python {sys.version}")
 # Dynamic path resolution - import modules to get their paths
 import dask
 import distributed
-import gdown
 import napari
 import numba
 import vispy.glsl
@@ -107,8 +106,6 @@ a = Analysis(
         "imageio.plugins.tifffile",
         "imageio.plugins.pillow",
         "imageio.plugins.ffmpeg",
-        # gdown
-        "gdown.download",
     ],
     hookspath=["hooks", "../common"],
     runtime_hooks=[

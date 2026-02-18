@@ -6,7 +6,7 @@ from aydin.io import io
 from aydin.io.datasets import (
     datasets_folder,
     download_all_examples,
-    download_from_gdrive,
+    download_from_zenodo,
     examples_single,
 )
 
@@ -18,10 +18,9 @@ def demo_examples_single():
 
 
 def demo_download():
-    """Download a single example dataset (mandrill) from Google Drive."""
-    print(
-        download_from_gdrive(*examples_single.generic_mandrill.value, datasets_folder)
-    )
+    """Download a single example dataset (mandrill) from Zenodo."""
+    _, filename = examples_single.generic_mandrill.value
+    print(download_from_zenodo(filename, datasets_folder))
 
 
 def demo_all_download():

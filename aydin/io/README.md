@@ -8,7 +8,7 @@ This package handles multi-format image reading and writing for Aydin, with auto
 aydin/io/
 ├── __init__.py     # Exports imread
 ├── io.py           # Core imread/imwrite functions, FileMetadata class
-├── datasets.py     # Example image downloading (from Google Drive)
+├── datasets.py     # Example image downloading (from Zenodo)
 ├── folders.py      # Platform-specific paths (cache, config, data)
 └── utils.py        # I/O helper utilities
 ```
@@ -48,7 +48,7 @@ Creates a memory-mapped TIFF for out-of-core writing of large images.
 
 ## Additional Modules
 
-- **`datasets.py`** — Downloads example images (e.g., noisy, ground-truth pairs) from Google Drive for testing and demos
+- **`datasets.py`** — Downloads example images (e.g., noisy, ground-truth pairs) from Zenodo for testing and demos
 - **`folders.py`** — Returns platform-specific directories for cache, config, and data storage
 
 ## For Contributors
