@@ -4,7 +4,7 @@
   :width: 400
   :alt: Logo text
 
-*Image denoising, but chill...*
+*Self-supervised image denoising*
 
 Aydin is a user-friendly, feature-rich, and fast image denoising tool that provides
 a number of self-supervised, auto-tuned, and unsupervised image denoising algorithms.

@@ -3,21 +3,16 @@
 import pytest
 
 from aydin.gui._qt.custom_widgets.activity_widget import ActivityWidget
-from aydin.util.log.log import Log
 
 pytestmark = pytest.mark.gui
 
 
 @pytest.fixture
 def activity_widget(qtbot, mock_main_page):
-    """Create an ActivityWidget with saved/restored Log.gui_print."""
-    original_gui_print = getattr(Log, 'gui_print', None)
-    try:
-        widget = ActivityWidget(mock_main_page)
-        qtbot.addWidget(widget)
-        yield widget
-    finally:
-        Log.gui_print = original_gui_print
+    """Create an ActivityWidget."""
+    widget = ActivityWidget(mock_main_page)
+    qtbot.addWidget(widget)
+    yield widget
 
 
 class TestActivityWidgetInit:
@@ -33,8 +28,11 @@ class TestActivityWidgetInit:
     def test_autoscroll_checked_by_default(self, activity_widget):
         assert activity_widget.autoscroll_checkbox.isChecked()
 
-    def test_gui_print_set(self, activity_widget):
-        assert Log.gui_print == activity_widget.activity_print
+    def test_monospace_font(self, activity_widget):
+        from qtpy.QtGui import QFont
+
+        font = activity_widget.infoTextBox.font()
+        assert font.styleHint() == QFont.StyleHint.Monospace
 
 
 class TestActivityPrint:

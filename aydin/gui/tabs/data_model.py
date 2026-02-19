@@ -369,6 +369,30 @@ class DataModel:
             self.clear_filepaths()  # Clear all the files and images
             self.add_filepaths(filepaths)  # Add the original file list back
 
+    def add_arrays(self, arrays_dict):
+        """Add in-memory arrays (e.g. from napari layers) to the data model.
+
+        Unlike :meth:`add_filepaths`, this does not read from disk.
+        Each entry uses a ``napari://<name>`` synthetic path so the
+        File(s) tab can display and manage it consistently.
+
+        Parameters
+        ----------
+        arrays_dict : dict
+            Mapping of ``{name: (ndarray, FileMetadata)}`` pairs.
+        """
+        new_images = {}
+        for name, (array, metadata) in arrays_dict.items():
+            synthetic_path = f'napari://{name}'
+            if synthetic_path in self._filepaths:
+                continue
+            self._filepaths[synthetic_path] = (array, metadata)
+            new_images[synthetic_path] = (array, metadata)
+
+        if new_images:
+            self.update_files_tabview()
+            self.add_images(new_images)
+
     def update_files_tabview(self):
         """Trigger a refresh of the File(s) tab view."""
         self.parent.filestab_changed()

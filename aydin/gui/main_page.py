@@ -53,7 +53,7 @@ class MainPage(QWidget):
         The application status bar for displaying messages.
     """
 
-    def __init__(self, parent, threadpool, status_bar):
+    def __init__(self, parent, threadpool, status_bar, napari_viewer=None):
         """Initialize the main page with tabs, navigation, and job runners.
 
         Parameters
@@ -64,11 +64,14 @@ class MainPage(QWidget):
             Thread pool used for running denoising jobs in background threads.
         status_bar : QStatusBar
             The application status bar for displaying messages.
+        napari_viewer : napari.viewer.Viewer, optional
+            When launched from napari, the existing viewer instance.
         """
         super(MainPage, self).__init__(parent)
         self.parent = parent
         self.threadpool = threadpool
         self.status_bar = status_bar
+        self.napari_viewer = napari_viewer
 
         self.disable_spatial_features = False
 
@@ -90,6 +93,7 @@ class MainPage(QWidget):
         self.data_model = DataModel(self)
 
         self.activity_dock = QDockWidget("Activity", self)
+        self.activity_dock.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 
         # MainPage layout
         self.main_layout = QVBoxLayout()
@@ -125,6 +129,16 @@ class MainPage(QWidget):
         self.flow_diagram_widget.load_sample_image_button.setToolTip(
             self.tooltips.json["main_page"]["load_example_button"]
         )
+
+        # In napari mode, replace "Examples" with "Add Layer(s)"
+        if self.napari_viewer is not None:
+            self.flow_diagram_widget.set_napari_mode(True)
+            self.flow_diagram_widget.add_layers_button.clicked.connect(
+                self._add_napari_layers
+            )
+            self.flow_diagram_widget.add_layers_button.setToolTip(
+                'Import selected napari image layers (or all if none selected)'
+            )
 
         self.flow_diagram_widget.files_button.clicked.connect(
             lambda: self.tabwidget.setCurrentIndex(
@@ -207,6 +221,8 @@ class MainPage(QWidget):
                 QApplication.style().standardIcon(QStyle.SP_CommandLink)
             )
         self.napari_button.setToolTip(self.tooltips.json["main_page"]["napari_button"])
+        if self.napari_viewer is not None:
+            self.napari_button.setVisible(False)
         self.navbar_layout.addWidget(self.napari_button)
 
         self.activity_button = QPushButton("Activity")
@@ -232,11 +248,18 @@ class MainPage(QWidget):
 
         self.main_layout.addLayout(self.navbar_layout, 0)
 
-        # TabWidget (fills remaining space)
+        # TabWidget (fills remaining space).  Cap minimum height so the
+        # Activity dock can grow — tab content is in scroll areas and
+        # handles smaller sizes gracefully.
         self.tabwidget = QTabWidget(self)
+        self.tabwidget.setMinimumHeight(200)
         self.tabwidget.currentChanged.connect(self.on_tab_change)
         for key, value in self.tabs.items():
             self.tabwidget.addTab(value, key)
+
+        if self.napari_viewer is not None:
+            files_idx = self.tabwidget.indexOf(self.tabs["File(s)"])
+            self.tabwidget.setTabText(files_idx, "Sources")
 
         self.main_layout.addWidget(self.tabwidget, 1)
 
@@ -377,6 +400,45 @@ class MainPage(QWidget):
             aprint("Failed to download or open file!")
             traceback.print_exception(*sys.exc_info())
 
+    def _add_napari_layers(self):
+        """Import selected napari image layers (or all if none selected)."""
+        if self.napari_viewer is None:
+            return
+
+        import napari
+
+        from aydin.napari_plugin._axes_utils import detect_axes_from_napari_layer
+
+        # Prefer selected layers, fall back to all
+        selected = [
+            layer
+            for layer in self.napari_viewer.layers.selection
+            if isinstance(layer, napari.layers.Image)
+        ]
+        image_layers = selected or [
+            layer
+            for layer in self.napari_viewer.layers
+            if isinstance(layer, napari.layers.Image)
+        ]
+
+        if not image_layers:
+            self.status_bar.showMessage('No image layers in napari viewer')
+            return
+
+        arrays_dict = {}
+        for layer in image_layers:
+            if layer.name not in [img.filename for img in self.data_model.images]:
+                metadata = detect_axes_from_napari_layer(layer, self.napari_viewer)
+                arrays_dict[layer.name] = (layer.data.copy(), metadata)
+
+        if arrays_dict:
+            self.data_model.add_arrays(arrays_dict)
+            self.tabwidget.setCurrentIndex(
+                self.tabwidget.indexOf(self.tabs["Image(s)"])
+            )
+        else:
+            self.status_bar.showMessage('All napari layers already loaded')
+
     def handle_use_same_crop_state_changed(self):
         """Toggle the Denoising Crop tab based on the Training Crop checkbox.
 
@@ -436,9 +498,29 @@ class MainPage(QWidget):
     def open_images_with_napari(self):
         """Open a napari viewer to display input and denoised images.
 
-        Shows training images, inference images (if separate from training),
-        and any denoised result images in a grid layout.
+        When launched from napari (``self.napari_viewer`` is set), only adds
+        denoised results to the existing viewer.  Otherwise, creates a new
+        napari viewer showing training images, inference images, and results
+        in a grid layout.
         """
+        if self.napari_viewer is not None:
+            # Only send denoised results to the existing napari viewer
+            try:
+                image_names = self.processing_job_runner.image_names
+                for ind, image_array in enumerate(
+                    self.processing_job_runner.result_image_arrays()
+                ):
+                    src_name = image_names[ind] if ind < len(image_names) else str(ind)
+                    self.napari_viewer.add_image(
+                        image_array, name=f"{src_name}_denoised"
+                    )
+            except RuntimeError:
+                # Viewer was closed — fall through to create a new one
+                self.napari_viewer = None
+                self.napari_button.setVisible(True)
+            else:
+                return
+
         training_images = self.tabs["Training Crop"].images
         inference_images = (
             self.tabs["Denoising Crop"].images
@@ -469,10 +551,12 @@ class MainPage(QWidget):
                 viewer.add_image(image_array, name=f"{ind}-inference_input")
 
         # Result images
+        image_names = self.processing_job_runner.image_names
         for ind, image_array in enumerate(
             self.processing_job_runner.result_image_arrays()
         ):
-            viewer.add_image(image_array, name=f"{ind}-denoised_output")
+            src_name = image_names[ind] if ind < len(image_names) else str(ind)
+            viewer.add_image(image_array, name=f"{src_name}_denoised")
 
         viewer.grid.enabled = True
 

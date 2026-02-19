@@ -5,6 +5,7 @@ import traceback
 from qtpy.QtCore import QMutex
 from qtpy.QtWidgets import QHBoxLayout, QWidget
 
+from aydin.gui._qt.custom_widgets.activity_widget import insert_ansi_text
 from aydin.gui._qt.custom_widgets.denoise_tab_pretrained_method import (
     DenoiseTabPretrainedMethodWidget,
 )
@@ -144,30 +145,36 @@ class DenoiseJobRunner(QWidget):
                 )
                 results.append(denoised)
 
-                output_path, file_counter = get_output_image_path(
-                    image_path, operation_type="denoised", output_folder=output_folder
-                )
-
-                imwrite(denoised, output_path)
-                if self.save_options_json:
-                    json_path = get_options_json_path(
+                # Skip disk save for napari-layer images (synthetic path)
+                if image_path and not image_path.startswith('napari://'):
+                    output_path, file_counter = get_output_image_path(
                         image_path,
-                        passed_counter=file_counter,
+                        operation_type="denoised",
                         output_folder=output_folder,
                     )
-                    self.parent.save_options_json(json_path)
-                    aprint(f"DONE, options json written in {json_path}")
 
-                if self.save_model:
-                    model_path = get_save_model_path(
-                        image_path,
-                        passed_counter=file_counter,
-                        output_folder=output_folder,
-                    )
-                    self.denoiser.save(model_path)
-                    aprint(f"DONE, trained model written in {model_path}")
+                    imwrite(denoised, output_path)
+                    if self.save_options_json:
+                        json_path = get_options_json_path(
+                            image_path,
+                            passed_counter=file_counter,
+                            output_folder=output_folder,
+                        )
+                        self.parent.save_options_json(json_path)
+                        aprint(f"DONE, options json written in {json_path}")
 
-                aprint(f"DONE, results written in {output_path}")
+                    if self.save_model:
+                        model_path = get_save_model_path(
+                            image_path,
+                            passed_counter=file_counter,
+                            output_folder=output_folder,
+                        )
+                        self.denoiser.save(model_path)
+                        aprint(f"DONE, trained model written in {model_path}")
+
+                    aprint(f"DONE, results written in {output_path}")
+                else:
+                    aprint("DONE, denoised result ready (not saved to disk)")
             else:
                 self._set_early_stopped(True)
                 aprint("DONE, failed to run...")
@@ -183,7 +190,7 @@ class DenoiseJobRunner(QWidget):
         log_str : str
             Text to append.
         """
-        self.parent.activity_widget.infoTextBox.insertPlainText(log_str)
+        insert_ansi_text(self.parent.activity_widget.infoTextBox, log_str)
 
     def error_fn(self, error_tuple):
         """Handle worker thread errors by logging and re-enabling the UI.
@@ -196,8 +203,9 @@ class DenoiseJobRunner(QWidget):
         exctype, value, tb_str = error_tuple
         self._set_early_stopped(True)
         aprint(f"Denoising failed: {value}\n{tb_str}")
-        self.parent.activity_widget.infoTextBox.insertPlainText(
-            f"ERROR: {value}\n{tb_str}"
+        insert_ansi_text(
+            self.parent.activity_widget.infoTextBox,
+            f"ERROR: {value}\n{tb_str}",
         )
 
     def result_callback(self, results):
@@ -226,12 +234,10 @@ class DenoiseJobRunner(QWidget):
         self._set_early_stopped(False)
 
         # Get images and their related data
-        self.image_paths = [
-            i.filepath for i in self.parent.data_model.images_to_denoise
-        ]
-        self.output_folders = [
-            i.output_folder for i in self.parent.data_model.images_to_denoise
-        ]
+        images_to_denoise = self.parent.data_model.images_to_denoise
+        self.image_paths = [i.filepath for i in images_to_denoise]
+        self.image_names = [i.filename for i in images_to_denoise]
+        self.output_folders = [i.output_folder for i in images_to_denoise]
         if len(self.image_paths) == 0:
             aprint("Aydin cannot be started with no image")
             return

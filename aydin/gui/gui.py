@@ -36,8 +36,7 @@ def _check_linux_qt_dependencies():
             continue
 
     # Library not found - print helpful message and exit
-    print(
-        """
+    print("""
 ================================================================================
 ERROR: Missing required system library for Qt GUI
 
@@ -59,8 +58,7 @@ After installing, run 'aydin' again.
 For more information, see the Aydin installation documentation:
 https://royerlab.github.io/aydin/
 ================================================================================
-"""
-    )
+""")
     sys.exit(1)
 
 
@@ -194,23 +192,27 @@ class App(QMainWindow):
         Aydin version string displayed in the status bar and help menu.
     """
 
-    def __init__(self, ver):
+    def __init__(self, ver, napari_viewer=None):
         """Initialize the main application window with menu bar and central widget.
 
         Parameters
         ----------
         ver : str
             Aydin version string displayed in the status bar and help menu.
+        napari_viewer : napari.viewer.Viewer, optional
+            When launched from napari, the existing viewer instance.
+            Prevents ``app.quit()`` on close and adjusts napari integration.
         """
         super(App, self).__init__()
 
         self.version = ver
+        self.napari_viewer = napari_viewer
 
         self.set_aydin_window_icon()
 
         self.threadpool = QThreadPool(self)
 
-        self.title = "Aydin Studio - image denoising, but chill..."
+        self.title = "Aydin Studio — Self-supervised image denoising"
 
         screen = QApplication.primaryScreen()
         screen_rect = screen.availableGeometry()
@@ -242,7 +244,9 @@ class App(QMainWindow):
         self.status_bar.showMessage(f"aydin, version: {ver}")
         self.setStatusBar(self.status_bar)
 
-        self.main_widget = MainPage(self, self.threadpool, self.status_bar)
+        self.main_widget = MainPage(
+            self, self.threadpool, self.status_bar, napari_viewer=napari_viewer
+        )
         self.setCentralWidget(self.main_widget)
 
         # Menu bar
@@ -263,8 +267,9 @@ class App(QMainWindow):
         settings.setValue("geometry", self.saveGeometry())
 
         self.threadpool.waitForDone(5000)
-        app = QApplication.instance()
-        app.quit()
+        if self.napari_viewer is None:
+            app = QApplication.instance()
+            app.quit()
         event.accept()
 
     def setup_menubar(self):
@@ -284,6 +289,14 @@ class App(QMainWindow):
             self.main_widget.tabs["File(s)"].open_file_names_dialog
         )
         fileMenu.addAction(self._add_files_action)
+
+        if self.napari_viewer is not None:
+            self._add_layers_action = QAction('Add Layer(s)', self)
+            self._add_layers_action.setStatusTip('Import image layers from napari')
+            self._add_layers_action.triggered.connect(
+                self.main_widget._add_napari_layers
+            )
+            fileMenu.addAction(self._add_layers_action)
 
         self._exit_action = QAction(QIcon('exit24.png'), 'Exit', self)
         self._exit_action.setShortcut('Ctrl+Q')
@@ -362,3 +375,29 @@ def run(ver):
     ex = App(ver)
     ex.show()
     sys.exit(app.exec())
+
+
+def run_from_napari(ver, napari_viewer):
+    """Launch Aydin Studio as a window within an existing napari session.
+
+    Does NOT create a ``QApplication`` (napari owns it) and does NOT call
+    ``_maybe_relaunch_as_macos_app()``.  Applies the dark stylesheet to the
+    window only so it doesn't override napari's own theme.
+
+    Parameters
+    ----------
+    ver : str
+        Aydin version string.
+    napari_viewer : napari.viewer.Viewer
+        The napari viewer instance for bidirectional integration.
+
+    Returns
+    -------
+    App
+        The Aydin Studio ``App`` window.  The caller must keep a reference
+        to prevent garbage collection.
+    """
+    ex = App(ver, napari_viewer=napari_viewer)
+    ex.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt6'))
+    ex.show()
+    return ex

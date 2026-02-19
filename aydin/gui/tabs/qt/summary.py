@@ -13,7 +13,7 @@ from aydin.gui._qt.custom_widgets.vertical_line_break_widget import (
 
 # Left column: what Aydin is and how to use it
 _LEFT_COLUMN_HTML = (
-    "<b>Aydin -- Image denoising, but chill.</b>"
+    "<b>Aydin — Self-supervised image denoising.</b>"
     "<br><br>"
     "Aydin is a user-friendly, feature-rich, and fast image denoising tool "
     "that provides a number of self-supervised, auto-tuned, and unsupervised "

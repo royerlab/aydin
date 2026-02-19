@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "aydin"
 dynamic = ["version"]
-description = "Aydin - Denoising but chill"
+description = "Aydin — Self-supervised image denoising"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.9"
@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Framework :: napari",
     "Topic :: Scientific/Engineering :: Image Processing",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
@@ -45,7 +46,7 @@ dependencies = [
     "nd2reader>=3.3.0,<4.0.0",
     "zarr>=2.17.0,<3.0.0",
     # GUI
-    "napari[pyqt6]>=0.5.0,<0.7.0",
+    "napari[pyqt6]>=0.5.0,<0.8.0",
     "QDarkStyle>=3.2.0,<4.0.0",
     "qtpy>=2.4.0,<3.0.0",
     # CLI & Utilities
@@ -56,6 +57,8 @@ dependencies = [
     "Deprecated>=1.2.13,<2.0.0",
     "docstring-parser>=0.15,<1.0.0",
     "arbol>=2023.1.0,<2026.0.0",
+    "ansicolors>=1.1.8,<2.0.0",
+    "colorama>=0.4.6,<1.0.0",
     "pynndescent>=0.5.10,<1.0.0",
     "importlib-metadata>=6.0.0,<8.0.0",
 ]
@@ -110,6 +113,8 @@ bundle = [
     "docstring-parser==0.16",
     "pynndescent==0.5.13",
     "importlib-metadata==8.5.0",
+    "ansicolors==1.1.8",
+    "colorama==0.4.6",
 ]
 docs = [
     "numpydoc>=1.6.0",
@@ -123,9 +128,14 @@ docs = [
 [project.scripts]
 aydin = "aydin.cli.cli:cli"
 
+[project.entry-points."napari.manifest"]
+aydin = "aydin.napari_plugin:napari.yaml"
+
 [project.urls]
 Homepage = "https://royerlab.github.io/aydin/"
-Repository = "https://github.com/royerlab/aydin"
+"Source Code" = "https://github.com/royerlab/aydin"
+"Bug Tracker" = "https://github.com/royerlab/aydin/issues"
+Documentation = "https://royerlab.github.io/aydin/"
 
 [tool.hatch.version]
 path = "aydin/__init__.py"

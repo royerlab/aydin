@@ -118,6 +118,11 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         self.stop_fitting = False
         self._stop_flag = None
 
+    @property
+    def max_spacetime_ndim(self):
+        """CNN models support 2D and 3D spatial data only."""
+        return 3
+
     def __repr__(self):
         """Return a string representation of the PyTorch CNN translator."""
         return (
@@ -166,6 +171,7 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
                 'class_name': self.model_class.__name__,
                 'module_name': self.model_class.__module__,
                 'spacetime_ndim': getattr(self, 'spacetime_ndim', None),
+                'nb_in_channels': getattr(base_model, 'nb_in_channels', 1),
                 'model_kwargs': self.model_kwargs,
                 'shiftconv': is_shiftconv,
             }
@@ -216,8 +222,16 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
 
             # Build model kwargs
             model_args = {'spacetime_ndim': metadata['spacetime_ndim']}
+            nb_ch = metadata.get('nb_in_channels', 1)
+            if nb_ch != 1:
+                model_args['nb_in_channels'] = nb_ch
+                model_args['nb_out_channels'] = nb_ch
             if metadata.get('model_kwargs'):
                 model_args.update(metadata['model_kwargs'])
+
+            # Filter to only include args accepted by the model constructor
+            accepted = self._get_function_args(model_class.__init__)
+            model_args = {k: v for k, v in model_args.items() if k in accepted}
 
             # Instantiate model and load weights
             base_model = model_class(**model_args)
@@ -425,13 +439,28 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         """
         self.spacetime_ndim = input_image.ndim - 2
         if self.spacetime_ndim not in [2, 3]:
-            raise ValueError("Number of spacetime dimensions have to be either 2 or 3.")
+            raise ValueError(
+                f"CNN models require 2 or 3 spacetime dimensions, "
+                f"but got {self.spacetime_ndim} "
+                f"(image shape after normalization: {input_image.shape}). "
+                f"Mark extra leading dimensions as batch axes so that "
+                f"only 2 or 3 spatial dimensions remain."
+            )
 
-        args = {"spacetime_ndim": self.spacetime_ndim}
+        nb_channels = input_image.shape[1]  # channel dim after normalization
+
+        args = {
+            "spacetime_ndim": self.spacetime_ndim,
+            "nb_in_channels": nb_channels,
+            "nb_out_channels": nb_channels,
+        }
         if self.model_kwargs:
             args |= self.model_kwargs
 
-        return args
+        # Filter to only include args accepted by the model constructor,
+        # since not all model classes accept nb_in_channels/nb_out_channels.
+        accepted = self._get_function_args(self.model_class.__init__)
+        return {k: v for k, v in args.items() if k in accepted}
 
     def _train(
         self,

@@ -18,7 +18,15 @@ import click
 from arbol import Arbol as _ArbolBase
 from arbol import asection as _arbol_asection
 
-# ANSI escape code pattern for stripping colors before GUI emission
+try:
+    from colors import color as _color_fn
+except ImportError:
+
+    def _color_fn(text, fg=None):
+        return text
+
+
+# ANSI escape code pattern for stripping colors (used for status bar)
 _ANSI_ESCAPE = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
 
@@ -90,11 +98,12 @@ class Log(metaclass=_LogMeta):
 
         This method handles three output channels:
         1. Console output (via print or click.echo)
-        2. GUI callback emission (Qt signal)
-        3. GUI status bar update
+        2. GUI callback emission with ANSI colors preserved
+        3. GUI status bar update (ANSI stripped)
 
-        ANSI escape codes are stripped before GUI emission since
-        QTextEdit does not render them.
+        When a GUI callback is active, console output uses ``sys.__stdout__``
+        to bypass any OutputWrapper that may have replaced ``sys.stdout``,
+        preventing double-printing in the activity widget.
 
         Parameters
         ----------
@@ -116,17 +125,24 @@ class Log(metaclass=_LogMeta):
                 # click.echo adds its own newline, strip ours
                 click.echo(text.rstrip('\n'))
             else:
-                # Use sys.stdout if no file specified (allows pytest capture)
-                output_file = file if file is not None else sys.stdout
+                if file is not None:
+                    output_file = file
+                elif Log.gui_callback is not None:
+                    # Use the real stdout to bypass OutputWrapper and avoid
+                    # double-printing (OutputWrapper also feeds progress_fn)
+                    output_file = sys.__stdout__
+                else:
+                    # CLI / test mode: use sys.stdout (allows pytest capture)
+                    output_file = sys.stdout
                 print(text, end='', file=output_file)
 
-        # GUI callback emission
+        # GUI callback emission (ANSI codes preserved for colored rendering)
         if Log.guiEnabled and Log.gui_callback is not None:
-            # Strip ANSI codes for GUI display
-            clean_text = _ANSI_ESCAPE.sub('', text)
-            Log.gui_callback.emit(clean_text)
+            Log.gui_callback.emit(text)
 
             if Log.gui_statusbar is not None:
+                # Strip ANSI codes for the plain-text status bar
+                clean_text = _ANSI_ESCAPE.sub('', text)
                 Log.gui_statusbar.showMessage(clean_text.rstrip('\n'))
 
     @staticmethod
@@ -199,9 +215,14 @@ def aprint(*args, sep=' ', end='\n'):
 
     if _ArbolBase._depth <= Log.max_depth:
         level = min(Log.max_depth, _ArbolBase._depth)
-        # Build prefix with tree scaffold
-        prefix = _ArbolBase._vl_ * int(level) + _ArbolBase._br_ + ' '
+        # Build prefix with tree scaffold, colorized to match arbol's scheme
+        scaffold = _ArbolBase._vl_ * int(level) + _ArbolBase._br_
         text = sep.join(str(arg) for arg in args)
+        if _ArbolBase.colorful:
+            prefix = _color_fn(scaffold, fg=_ArbolBase.c_scafold) + ' '
+            text = _color_fn(text, fg=_ArbolBase.c_text)
+        else:
+            prefix = scaffold + ' '
         Log.native_print(prefix + text, end=end)
 
 
@@ -231,8 +252,8 @@ def asection(section_header: str):
     _ArbolBase.enable_output = True
     _ArbolBase.elapsed_time = Log.log_elapsed_time
     _ArbolBase.max_depth = Log.max_depth
-    # Disable colors for cleaner output (ANSI stripping handles GUI anyway)
-    _ArbolBase.colorful = False
+    # Enable colors for terminal and GUI output
+    _ArbolBase.colorful = True
 
     # Store original native_print and replace with ours
     original_native_print = _ArbolBase.native_print

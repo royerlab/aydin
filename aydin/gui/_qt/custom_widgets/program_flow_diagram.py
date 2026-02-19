@@ -53,7 +53,8 @@ class QProgramFlowDiagramWidget(QWidget):
         self.add_files_button = QPushButton("Add File(s)")
         self.load_data_group_box_layout.addWidget(self.add_files_button)
 
-        self.load_data_group_box_layout.addWidget(QLabel("or"))
+        self._or_label = QLabel("or")
+        self.load_data_group_box_layout.addWidget(self._or_label)
 
         self.load_sample_image_button = QPushButton("Examples")
         self._examples_menu = QMenu()
@@ -81,6 +82,11 @@ class QProgramFlowDiagramWidget(QWidget):
 
         self.load_sample_image_button.setMenu(self._examples_menu)
         self.load_data_group_box_layout.addWidget(self.load_sample_image_button)
+
+        # "Add Layer(s)" button — hidden by default, shown in napari mode
+        self.add_layers_button = QPushButton("Add Layer(s)")
+        self.add_layers_button.setVisible(False)
+        self.load_data_group_box_layout.addWidget(self.add_layers_button)
 
         self.load_data_group_box.setLayout(self.load_data_group_box_layout)
         self.main_layout.addWidget(self.load_data_group_box)
@@ -151,6 +157,22 @@ class QProgramFlowDiagramWidget(QWidget):
         self.main_layout.setAlignment(Qt.AlignHCenter)
 
         self.setLayout(self.main_layout)
+
+    def set_napari_mode(self, enabled):
+        """Switch to napari-layer-based loading alongside file loading.
+
+        When enabled, replaces "Examples" with "Add Layer(s)" and renames
+        the "File(s)" navigation button to "Sources" so that
+        the flow diagram highlight matches the renamed tab text.
+
+        Parameters
+        ----------
+        enabled : bool
+            True to show napari layer button, False for examples menu.
+        """
+        self.load_sample_image_button.setVisible(not enabled)
+        self.add_layers_button.setVisible(enabled)
+        self.files_button.setText("Sources" if enabled else "File(s)")
 
     def highlight_button(self, current_tab_name):
         """Highlight the flow diagram button(s) matching the active tab.

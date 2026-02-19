@@ -82,6 +82,10 @@ def cli(ctx):
 
     sys.excepthook = exception_hook
 
+    from aydin.util.log.log import Log
+
+    Log.enable_output = True
+
     if ctx.invoked_subcommand is None:
         click.echo(styled_banner())
         click.echo()
@@ -92,11 +96,6 @@ def cli(ctx):
         click.echo(success_message('Aydin Studio ready'))
         click.echo()
         run(VERSION)
-    else:
-        from aydin.util.log.log import Log
-
-        Log.enable_output = True
-        pass
 
 
 def _list_denoisers_callback(ctx, param, value):

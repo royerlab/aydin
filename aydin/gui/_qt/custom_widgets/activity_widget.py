@@ -1,20 +1,75 @@
 """Activity log widget for displaying and managing console output."""
 
+import re
 from pathlib import Path
 
 from qtpy import QtGui
 from qtpy.QtCore import Qt
+from qtpy.QtGui import QColor, QFont, QTextCharFormat, QTextCursor
 from qtpy.QtWidgets import (
     QCheckBox,
     QFileDialog,
     QHBoxLayout,
     QPushButton,
+    QSizePolicy,
     QTextEdit,
     QVBoxLayout,
     QWidget,
 )
 
 from aydin.util.log.log import Log, aprint
+
+# Pattern matching any ANSI escape sequence (SGR parameters)
+_ANSI_SEQ = re.compile(r'\x1b\[[0-9;]*m')
+# Pattern to extract 24-bit foreground color: ESC[38;2;R;G;Bm
+_ANSI_FG_24BIT = re.compile(r'\x1b\[38;2;(\d+);(\d+);(\d+)m')
+
+
+def insert_ansi_text(text_edit, text):
+    """Insert text with ANSI color codes into a QTextEdit.
+
+    Parses 24-bit ANSI foreground color codes (``ESC[38;2;R;G;Bm``) and
+    reset codes (``ESC[0m``) and renders them as colored text using
+    QTextCharFormat. Plain text (without ANSI codes) is inserted as-is.
+
+    Parameters
+    ----------
+    text_edit : QTextEdit
+        The text edit widget to insert into.
+    text : str
+        Text potentially containing ANSI escape sequences.
+    """
+    cursor = text_edit.textCursor()
+    cursor.movePosition(QTextCursor.MoveOperation.End)
+
+    default_fmt = QTextCharFormat()
+    current_fmt = QTextCharFormat()
+
+    pos = 0
+    for match in _ANSI_SEQ.finditer(text):
+        # Insert plain text before this escape sequence
+        if match.start() > pos:
+            cursor.insertText(text[pos : match.start()], current_fmt)
+
+        seq = match.group()
+        color_match = _ANSI_FG_24BIT.fullmatch(seq)
+        if color_match:
+            r, g, b = (
+                int(color_match.group(1)),
+                int(color_match.group(2)),
+                int(color_match.group(3)),
+            )
+            current_fmt = QTextCharFormat()
+            current_fmt.setForeground(QColor(r, g, b))
+        else:
+            # Reset or any other sequence -> revert to default
+            current_fmt = QTextCharFormat(default_fmt)
+
+        pos = match.end()
+
+    # Insert remaining text after the last escape sequence
+    if pos < len(text):
+        cursor.insertText(text[pos:], current_fmt)
 
 
 class ActivityWidget(QWidget):
@@ -53,15 +108,19 @@ class ActivityWidget(QWidget):
 
         self.widget_layout = QVBoxLayout()
         self.setMinimumHeight(120)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 
         # Add information
         self.infoTextBox = QTextEdit(lineWrapMode=QTextEdit.NoWrap)
+        # Use monospace font so arbol's box-drawing characters align properly
+        monospace_font = QFont()
+        monospace_font.setStyleHint(QFont.StyleHint.Monospace)
+        monospace_font.setFamilies(["Menlo", "Consolas", "Courier New", "monospace"])
+        self.infoTextBox.setFont(monospace_font)
 
         # We are using an empty press event otherwise cursor jumps to the point clicked
         self.infoTextBox.mousePressEvent = self.qtextedit_mousepressevent
         self.set_auto_scroll()
-
-        Log.gui_print = self.activity_print
 
         # Add text copy and clear buttons
         self.info_copy_button = QPushButton("Copy")
@@ -85,7 +144,6 @@ class ActivityWidget(QWidget):
         self.info_buttons_layout.addWidget(self.info_save_button, 0, Qt.AlignTop)
         self.info_buttons_layout.addWidget(self.autoscroll_checkbox, 0, Qt.AlignTop)
         self.info_layout.addLayout(self.info_buttons_layout)
-        self.info_layout.setAlignment(Qt.AlignTop)
         self.widget_layout.addLayout(self.info_layout)
 
         self.setLayout(self.widget_layout)
@@ -96,14 +154,14 @@ class ActivityWidget(QWidget):
         cb.setText(str(self.infoTextBox.toPlainText()))
 
     def activity_print(self, string2print):
-        """Append text to the activity log text box.
+        """Append text to the activity log, rendering ANSI colors.
 
         Parameters
         ----------
         string2print : str
-            Text to append to the log.
+            Text to append, may contain ANSI color escape sequences.
         """
-        self.infoTextBox.insertPlainText(string2print)
+        insert_ansi_text(self.infoTextBox, string2print)
 
     def clear_activity(self):
         """Clear all text from the activity log."""

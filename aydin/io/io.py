@@ -270,10 +270,16 @@ def imread(input_path):
 
                 # We check if this is a gray level image:
                 if len(array.shape) == 3:
-                    if array_equal(array[..., 0], array[..., 1]) and array_equal(
-                        array[..., 0], array[..., 2]
+                    nch = array.shape[-1]
+                    if (
+                        nch >= 3
+                        and array_equal(array[..., 0], array[..., 1])
+                        and array_equal(array[..., 0], array[..., 2])
                     ):
-                        # We keep the first channel only:
+                        # RGB/RGBA with identical channels — keep first only:
+                        array = array[..., 0]
+                    elif nch == 2 and array_equal(array[..., 0], array[..., 1]):
+                        # Grayscale + alpha with identical channels:
                         array = array[..., 0]
 
                 metadata.format = 'png' if is_png else 'jpg'
@@ -282,7 +288,7 @@ def imread(input_path):
 
                 if len(array.shape) == 2:
                     metadata.axes = "YX"
-                elif len(array.shape) == 3 and array.shape[-1] in (3, 4):
+                elif len(array.shape) == 3 and array.shape[-1] in (2, 3, 4):
                     metadata.axes = "YXC"
                 elif len(array.shape) == 3:
                     metadata.axes = "ZYX"

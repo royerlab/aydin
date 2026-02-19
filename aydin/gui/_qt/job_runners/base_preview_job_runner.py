@@ -2,6 +2,7 @@
 
 from qtpy.QtWidgets import QApplication, QHBoxLayout, QPushButton, QStyle, QWidget
 
+from aydin.gui._qt.custom_widgets.activity_widget import insert_ansi_text
 from aydin.gui._qt.job_runners.worker import Worker
 from aydin.util.log.log import Log, aprint
 
@@ -59,7 +60,7 @@ class BasePreviewJobRunner(QWidget):
         log_str : str
             Text to append.
         """
-        self.main_page.activity_widget.infoTextBox.insertPlainText(log_str)
+        insert_ansi_text(self.main_page.activity_widget.infoTextBox, log_str)
 
     def error_fn(self, error_tuple):
         """Handle worker thread errors by logging and re-enabling the UI.
@@ -71,8 +72,9 @@ class BasePreviewJobRunner(QWidget):
         """
         exctype, value, tb_str = error_tuple
         aprint(f"Preview failed: {value}\n{tb_str}")
-        self.main_page.activity_widget.infoTextBox.insertPlainText(
-            f"ERROR: {value}\n{tb_str}"
+        insert_ansi_text(
+            self.main_page.activity_widget.infoTextBox,
+            f"ERROR: {value}\n{tb_str}",
         )
         self.start_button.setEnabled(True)
 
@@ -81,9 +83,14 @@ class BasePreviewJobRunner(QWidget):
         self.start_button.setEnabled(True)
 
         if self.preprocessed != [] and self.postprocessed != []:
-            import napari
+            napari_viewer = getattr(self.main_page, 'napari_viewer', None)
+            if napari_viewer is not None:
+                viewer = napari_viewer
+            else:
+                import napari
 
-            viewer = napari.Viewer()
+                viewer = napari.Viewer()
+
             for image, preprocessed, postprocessed in zip(
                 self.images, self.preprocessed, self.postprocessed
             ):
@@ -91,9 +98,10 @@ class BasePreviewJobRunner(QWidget):
                 viewer.add_image(preprocessed, name="preprocessed")
                 viewer.add_image(postprocessed, name="postprocessed")
 
-            viewer.grid.enabled = True
-            viewer.grid.shape = (len(self.images), 3)
-            viewer.show()
+            if napari_viewer is None:
+                viewer.grid.enabled = True
+                viewer.grid.shape = (len(self.images), 3)
+                viewer.show()
 
         self.preprocessed = []
         self.postprocessed = []

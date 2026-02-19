@@ -3,8 +3,6 @@
 import json
 import os
 
-from aydin.util.log.log import aprint
-
 
 def abs_path(myPath):
     """Get the absolute path to a GUI resource file.
@@ -27,12 +25,8 @@ def abs_path(myPath):
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
-        aprint("found MEIPASS: %s " % os.path.join(base_path, os.path.basename(myPath)))
-
         return os.path.join(base_path, os.path.basename(myPath))
-    except Exception as e:
-        aprint("did not find MEIPASS: %s " % e)
-
+    except AttributeError:
         base_path = os.path.abspath(os.path.dirname(__file__))
         return os.path.join(base_path, myPath)
 

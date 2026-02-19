@@ -134,6 +134,15 @@ class ImageTranslatorBase(ABC):
 
         self.loss_history = None
 
+    @property
+    def max_spacetime_ndim(self) -> Optional[int]:
+        """Maximum supported number of spatio-temporal dimensions.
+
+        Subclasses may override this to impose a limit (e.g. CNN translators
+        support only 2D and 3D).  Return ``None`` for no limit.
+        """
+        return None
+
     def add_transform(self, transform: ImageTransformBase, sort: bool = True):
         """Add a transform to the preprocessing/postprocessing pipeline.
 
@@ -407,6 +416,26 @@ class ImageTranslatorBase(ABC):
             )
             self.target_shape_normaliser = shape_normaliser
 
+            # Validate spacetime dimensions against translator limits:
+            num_spacetime = shape_normalised_input_image.ndim - 2
+            if (
+                self.max_spacetime_ndim is not None
+                and num_spacetime > self.max_spacetime_ndim
+            ):
+                spacetime_shape = shape_normalised_input_image.shape[2:]
+                raise ValueError(
+                    f"This translator supports at most "
+                    f"{self.max_spacetime_ndim}D spatial data, but the image "
+                    f"has {num_spacetime} spacetime dimensions "
+                    f"{spacetime_shape} after shape normalization "
+                    f"(original shape: {input_image.shape}, "
+                    f"batch_axes={list(batch_axes)}, "
+                    f"channel_axes={list(channel_axes)}). "
+                    f"Mark one or more leading dimensions as batch axes "
+                    f"(e.g. in the Dimensions tab) so that at most "
+                    f"{self.max_spacetime_ndim} spatial dimensions remain."
+                )
+
             # Automatic blind-spot discovery:
             if self.blind_spots is None:
                 aprint(
@@ -535,6 +564,26 @@ class ImageTranslatorBase(ABC):
 
             # First we normalise the input values:
             shape_normalised_input_image = shape_normaliser.normalise(input_image)
+
+            # Validate spacetime dimensions against translator limits:
+            num_spacetime = shape_normalised_input_image.ndim - 2
+            if (
+                self.max_spacetime_ndim is not None
+                and num_spacetime > self.max_spacetime_ndim
+            ):
+                spacetime_shape = shape_normalised_input_image.shape[2:]
+                raise ValueError(
+                    f"This translator supports at most "
+                    f"{self.max_spacetime_ndim}D spatial data, but the image "
+                    f"has {num_spacetime} spacetime dimensions "
+                    f"{spacetime_shape} after shape normalization "
+                    f"(original shape: {input_image.shape}, "
+                    f"batch_axes={list(batch_axes)}, "
+                    f"channel_axes={list(channel_axes)}). "
+                    f"Mark one or more leading dimensions as batch axes "
+                    f"(e.g. in the Dimensions tab) so that at most "
+                    f"{self.max_spacetime_ndim} spatial dimensions remain."
+                )
 
             # Spatio-temporal shape:
             spatiotemp_shape = shape_normalised_input_image.shape[-num_spatiotemp_dim:]

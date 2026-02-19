@@ -4,8 +4,8 @@ Tests cover:
 - Basic aprint/asection functionality
 - Depth tracking
 - Test suppression behavior
-- GUI callback emission
-- ANSI stripping for GUI
+- GUI callback emission (ANSI preserved for colored rendering)
+- Status bar ANSI stripping
 - Configuration options (max_depth, elapsed_time)
 """
 
@@ -149,8 +149,8 @@ class TestGUICallback:
         Log.gui_callback = None
         Log.override_test_exclusion = False
 
-    def test_gui_callback_strips_ansi(self):
-        """Test that ANSI codes are stripped before GUI emission."""
+    def test_gui_callback_preserves_ansi(self):
+        """Test that ANSI codes are preserved in GUI callback for color rendering."""
         Log.override_test_exclusion = True
         Log.enable_output = False
         Log.guiEnabled = True
@@ -162,12 +162,34 @@ class TestGUICallback:
         Log.native_print('\x1b[31mRed Text\x1b[0m')
 
         call_args = mock_callback.emit.call_args[0][0]
-        # Should not contain ANSI escape sequences
-        assert '\x1b[' not in call_args
+        # ANSI codes should be preserved for the activity widget to render
         assert 'Red Text' in call_args
 
         # Cleanup
         Log.gui_callback = None
+        Log.override_test_exclusion = False
+
+    def test_gui_statusbar_strips_ansi(self):
+        """Test that ANSI codes are stripped for the status bar."""
+        Log.override_test_exclusion = True
+        Log.enable_output = False
+        Log.guiEnabled = True
+
+        mock_callback = MagicMock()
+        mock_statusbar = MagicMock()
+        Log.gui_callback = mock_callback
+        Log.gui_statusbar = mock_statusbar
+
+        Log.native_print('\x1b[31mRed Text\x1b[0m')
+
+        status_text = mock_statusbar.showMessage.call_args[0][0]
+        # Status bar should NOT contain ANSI escape sequences
+        assert '\x1b[' not in status_text
+        assert 'Red Text' in status_text
+
+        # Cleanup
+        Log.gui_callback = None
+        Log.gui_statusbar = None
         Log.override_test_exclusion = False
 
     def test_gui_statusbar_update(self):
