@@ -4,7 +4,7 @@ Provides classical, patch-based, and machine-learning denoisers accessible
 through a Python API, CLI, or the Aydin Studio GUI.
 """
 
-__version__ = "2025.2.4"
+__version__ = "2026.2.18"
 
 _LAZY_IMPORTS = {
     'Classic': 'aydin.restoration.denoise.classic',
