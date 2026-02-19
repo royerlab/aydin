@@ -284,6 +284,8 @@ class TestCNNTranslatorChannels:
         denoised = it.translate(noisy, channel_axes=[False, False, True])
 
         assert denoised.shape == noisy.shape
+        # Verify channels are independently denoised (not all copies of one)
+        assert not numpy.allclose(denoised[:, :, 0], denoised[:, :, 2], atol=1e-3)
 
     def test_jinet_multichannel_model_args(self):
         """_get_model_args should include nb_in_channels from channel dim."""

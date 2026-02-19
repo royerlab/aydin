@@ -31,12 +31,16 @@ _BANNER = r"""
 
 
 def styled_banner():
-    """Return the Aydin banner with version, styled with colors."""
+    """Return the Aydin banner with version and authors, styled with colors."""
     lines = _BANNER.strip('\n').splitlines()
     styled = [click.style(line, fg='cyan', bold=True) for line in lines]
     version = click.style(f'  v{__version__}', fg='cyan')
     tagline = click.style('  Self-supervised image denoising', dim=True)
     styled.append(version + tagline)
+    authors = click.style(
+        '  By Loïc A. Royer & Ahmet Can Solak — Royer Lab @ Biohub SF', dim=True
+    )
+    styled.append(authors)
     return '\n'.join(styled)
 
 

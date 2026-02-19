@@ -145,7 +145,7 @@ class JINetModel(nn.Module):
 
         self.final_kernel_one_conv = self.conv(
             in_channels=self.nb_channels,
-            out_channels=1,
+            out_channels=self.nb_out_channels,
             kernel_size=(1,) * spacetime_ndim,
         )
 
