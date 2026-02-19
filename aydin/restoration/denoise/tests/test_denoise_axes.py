@@ -310,17 +310,37 @@ class TestCNNTranslatorChannels:
         assert args['nb_in_channels'] == 1
         assert args['nb_out_channels'] == 1
 
-    def test_dncnn_multichannel_filtered(self):
-        """DnCNN doesn't accept nb_in_channels — args should be filtered out."""
+    def test_dncnn_single_channel_ok(self):
+        """DnCNN should work fine with single-channel data."""
+        from aydin.it.cnn_torch import ImageTranslatorCNNTorch
+
+        it = ImageTranslatorCNNTorch(model="dncnn")
+        fake_input = numpy.zeros((1, 1, 64, 64), dtype=numpy.float32)
+        args = it._get_model_args(fake_input)
+
+        assert args['spacetime_ndim'] == 2
+        # nb_in_channels should be filtered out (DnCNN doesn't accept it)
+        assert 'nb_in_channels' not in args
+
+    def test_dncnn_multichannel_rejected(self):
+        """DnCNN should raise ValueError for multi-channel input."""
         from aydin.it.cnn_torch import ImageTranslatorCNNTorch
 
         it = ImageTranslatorCNNTorch(model="dncnn")
         fake_input = numpy.zeros((1, 3, 64, 64), dtype=numpy.float32)
-        args = it._get_model_args(fake_input)
 
-        # DnCNN constructor doesn't accept nb_in_channels
-        assert 'nb_in_channels' not in args
-        assert args['spacetime_ndim'] == 2
+        with pytest.raises(ValueError, match="does not support multi-channel"):
+            it._get_model_args(fake_input)
+
+    def test_unet_multichannel_rejected(self):
+        """UNet should raise ValueError for multi-channel input."""
+        from aydin.it.cnn_torch import ImageTranslatorCNNTorch
+
+        it = ImageTranslatorCNNTorch(model="unet")
+        fake_input = numpy.zeros((1, 3, 64, 64), dtype=numpy.float32)
+
+        with pytest.raises(ValueError, match="does not support multi-channel"):
+            it._get_model_args(fake_input)
 
     def test_jinet_multichannel_save_load(self):
         """Save/load roundtrip should preserve channel count."""

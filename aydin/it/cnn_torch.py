@@ -460,7 +460,20 @@ class ImageTranslatorCNNTorch(ImageTranslatorBase):
         # Filter to only include args accepted by the model constructor,
         # since not all model classes accept nb_in_channels/nb_out_channels.
         accepted = self._get_function_args(self.model_class.__init__)
-        return {k: v for k, v in args.items() if k in accepted}
+        filtered = {k: v for k, v in args.items() if k in accepted}
+
+        # If the model doesn't support multi-channel but the image has
+        # multiple channels, raise a clear error instead of letting PyTorch
+        # fail with a confusing channel mismatch deep in the forward pass.
+        if nb_channels > 1 and 'nb_in_channels' not in filtered:
+            raise ValueError(
+                f"The model '{self.model_class.__name__}' does not support "
+                f"multi-channel input, but the image has {nb_channels} "
+                f"channels. Use a model that supports multi-channel data "
+                f"(e.g. 'jinet'), or denoise each channel separately."
+            )
+
+        return filtered
 
     def _train(
         self,
