@@ -41,7 +41,7 @@ dependencies = [
     "PyWavelets>=1.6.0,<2.0.0",
     # Image I/O
     "imageio>=2.34.0,<3.0.0",
-    "imagecodecs>=2024.1.1,<2026.0.0",
+    "imagecodecs>=2024.1.1,<2027.0.0",
     "czifile>=2019.7.2,<2025.0.0",
     "nd2reader>=3.3.0,<4.0.0",
     "zarr>=2.17.0,<3.0.0",
@@ -56,7 +56,7 @@ dependencies = [
     "memoization>=0.4.0,<1.0.0",
     "Deprecated>=1.2.13,<2.0.0",
     "docstring-parser>=0.15,<1.0.0",
-    "arbol>=2023.1.0,<2026.0.0",
+    "arbol>=2023.1.0,<2027.0.0",
     "ansicolors>=1.1.8,<2.0.0",
     "colorama>=0.4.6,<1.0.0",
     "pynndescent>=0.5.10,<1.0.0",
