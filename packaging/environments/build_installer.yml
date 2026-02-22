@@ -1,0 +1,12 @@
+name: aydin-build-installer
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11.*
+  - constructor>=3.11.0
+  - conda-build>=3.28
+  - conda-standalone>=24.7.1
+  - conda>=24.7.1
+  - conda-libmamba-solver
+  - ruamel.yaml
+  - pillow

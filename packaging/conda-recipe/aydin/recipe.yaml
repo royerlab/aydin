@@ -1,0 +1,78 @@
+context:
+  name: aydin
+  python_min: "3.9"
+
+package:
+  name: ${{ name }}
+  version: ${{ env.get("AYDIN_VERSION", "0.0.0") }}
+
+source:
+  path: ../../../
+
+build:
+  noarch: python
+  number: 0
+  script: python -m pip install . --no-deps --no-build-isolation -vv
+  entry_points:
+    - aydin = aydin.cli.cli:cli
+
+requirements:
+  host:
+    - python >=${{ python_min }}
+    - pip
+    - hatchling
+  run:
+    - python >=${{ python_min }}
+    # ML Libraries
+    - catboost >=1.2.5,<2
+    - lightgbm >=4.0.0,<5
+    - pytorch >=2.4.0,<3
+    # Scientific Computing
+    - numpy >=2.0.0,<3
+    - scipy >=1.12.0,<2
+    - scikit-image >=0.22.0,<0.25
+    - numba >=0.59.0,<0.62
+    - pywavelets >=1.6.0,<2
+    # Image I/O
+    - imageio >=2.34.0,<3
+    - imagecodecs >=2024.1.1
+    - czifile >=2019.7.2
+    - nd2reader >=3.3.0,<4
+    - zarr >=2.17.0,<3
+    # GUI
+    - napari >=0.5.0,<0.8
+    - pyqt6 >=6.5
+    - qdarkstyle >=3.2.0,<4
+    - qtpy >=2.4.0,<3
+    # CLI & Utilities
+    - click >=8.1.0,<9
+    - requests >=2.28.0,<3
+    - jsonpickle >=3.0.0,<4
+    - memoization >=0.4.0,<1
+    - deprecated >=1.2.13,<2
+    - docstring-parser >=0.15,<1
+    - arbol >=2023.1.0
+    - ansicolors >=1.1.8,<2
+    - colorama >=0.4.6,<1
+    - pynndescent >=0.5.10,<1
+    - importlib-metadata >=6.0.0,<8
+
+tests:
+  - python:
+      imports:
+        - aydin
+        - aydin.restoration.denoise.classic
+        - aydin.cli.cli
+  - script:
+      - aydin --help
+
+about:
+  homepage: https://royerlab.github.io/aydin/
+  license: BSD-3-Clause
+  license_file: LICENSE.txt
+  summary: Self-supervised, auto-tuned image denoising for n-dimensional images
+  description: |
+    Aydin provides four interfaces (GUI, napari plugin, CLI, Python API)
+    for image denoising using classical, patch-based, and ML approaches.
+  dev_url: https://github.com/royerlab/aydin
+  doc_url: https://royerlab.github.io/aydin/

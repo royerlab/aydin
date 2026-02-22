@@ -1,0 +1,116 @@
+name: Build Installers
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to build from (tag or branch, e.g., v2026.2.18)"
+        required: false
+        type: string
+      channels:
+        description: "Conda channels (space-separated, e.g., 'conda-forge royerlab')"
+        required: false
+        default: "conda-forge"
+        type: string
+  pull_request:
+    branches: [main]
+    paths:
+      - "packaging/**"
+      - ".github/workflows/build_installers.yml"
+
+jobs:
+  build:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-64
+          - os: macos-14
+            platform: osx-arm64
+          - os: windows-latest
+            platform: win-64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          activate-environment: aydin-build-installer
+          environment-file: packaging/environments/build_installer.yml
+          auto-activate-base: false
+
+      - name: Generate icons
+        shell: bash -l {0}
+        run: python packaging/scripts/generate_icons.py
+
+      - name: Build installer (dry run on PR)
+        if: github.event_name == 'pull_request'
+        shell: bash -l {0}
+        run: |
+          python packaging/build_installer.py \
+            --output-dir _work \
+            --dry-run
+
+      - name: Build installer
+        if: github.event_name != 'pull_request'
+        shell: bash -l {0}
+        run: |
+          CHANNELS="${{ inputs.channels || 'conda-forge' }}"
+          python packaging/build_installer.py \
+            --output-dir _work \
+            --channels $CHANNELS
+
+      - name: Smoke test installer (Linux)
+        if: matrix.platform == 'linux-64' && github.event_name != 'pull_request'
+        shell: bash -l {0}
+        run: |
+          INSTALLER=$(ls _work/AydinStudio-*.sh 2>/dev/null | head -1)
+          if [ -n "$INSTALLER" ]; then
+            echo "Testing installer: $INSTALLER"
+            bash "$INSTALLER" -b -p /tmp/aydin-test
+            /tmp/aydin-test/bin/aydin --version
+            echo "Smoke test passed!"
+          fi
+
+      - name: Upload installer artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.platform }}
+          path: |
+            _work/AydinStudio-*
+          if-no-files-found: warn
+          retention-days: 30
+
+  attach-to-release:
+    name: Attach to GitHub Release
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && startsWith(inputs.ref, 'v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: installers/
+          merge-multiple: true
+
+      - name: Upload installers to release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ inputs.ref }}"
+          echo "Uploading installers to release $TAG"
+          ls -la installers/
+          gh release upload "$TAG" installers/AydinStudio-* --clobber \
+            --repo "${{ github.repository }}" || echo "Warning: upload failed (release may not exist yet)"
