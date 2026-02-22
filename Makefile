@@ -1,4 +1,4 @@
-.PHONY: help setup install install-dev test test-cov test-cov-check test-heavy test-gpu test-unstable test-gui check format format-check lint validate clean build publish publish-patch docs docs-screenshots docs-build docs-publish docker-build docker-build-cli docker-build-gpu docker-build-studio docker-run-studio docker-test docker-test-all
+.PHONY: help setup install install-dev test test-cov test-cov-check test-heavy test-gpu test-unstable test-gui check format format-check lint validate clean build publish publish-patch docs docs-screenshots docs-build docs-publish docker-build docker-build-cli docker-build-gpu docker-build-studio docker-run-studio docker-test docker-test-all installer installer-icons installer-env installer-clean
 
 help:
 	@echo "Available commands:"
@@ -30,6 +30,12 @@ help:
 	@echo "  make docker-run-studio   - Run Aydin Studio at http://localhost:9876"
 	@echo "  make docker-test         - Build + smoke test CLI image"
 	@echo "  make docker-test-all     - Build + smoke test CLI + Studio images"
+	@echo ""
+	@echo "Conda Packaging:"
+	@echo "  make installer       - Build native installer for current platform"
+	@echo "  make installer-icons - Generate .ico and .icns from source PNG"
+	@echo "  make installer-env   - Create conda env with build tools"
+	@echo "  make installer-clean - Clean installer build artifacts"
 	@echo ""
 	@echo "Documentation:"
 	@echo "  make docs          - Build HTML docs (regenerates screenshots first)"
@@ -176,6 +182,19 @@ docker-test:
 docker-test-all:
 	@command -v docker >/dev/null 2>&1 || { echo "Error: Docker is not installed."; exit 1; }
 	./docker/test-smoke.sh --all
+
+# Conda packaging (native installers via conda-constructor)
+installer: installer-icons
+	python packaging/build_installer.py --output-dir _work
+
+installer-icons:
+	python packaging/scripts/generate_icons.py
+
+installer-env:
+	conda env create -f packaging/environments/build_installer.yml --force
+
+installer-clean:
+	rm -rf _work/
 
 publish-patch: validate
 	@echo "Current version: $(CURRENT_VERSION)"

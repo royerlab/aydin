@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schemas.conda.io/menuinst/menuinst-1-1-0.schema.json",
+  "$id": "https://github.com/royerlab/aydin",
+  "menu_name": "Aydin Studio",
+  "menu_items": [
+    {
+      "name": "Aydin Studio",
+      "description": "Self-supervised image denoising for n-dimensional images",
+      "icon": "{{ MENU_DIR }}/aydin_icon.{{ ICON_EXT }}",
+      "command": [
+        "{{ PYTHON }}",
+        "-c",
+        "from aydin.gui.gui import run; from aydin import __version__; run(__version__)"
+      ],
+      "activate": true,
+      "terminal": false,
+      "platforms": {
+        "linux": {
+          "Categories": [
+            "Science",
+            "Education",
+            "Graphics",
+            "2DGraphics"
+          ],
+          "MimeType": [
+            "image/tiff"
+          ]
+        },
+        "osx": {
+          "CFBundleIdentifier": "org.royerlab.aydin",
+          "CFBundleDisplayName": "Aydin Studio",
+          "CFBundleName": "Aydin Studio",
+          "LSEnvironment": {
+            "LANG": "en_US.UTF-8"
+          }
+        },
+        "win": {
+          "desktop": true,
+          "app_user_model_id": "org.royerlab.aydin",
+          "file_extensions": [
+            ".tif",
+            ".tiff",
+            ".czi",
+            ".nd2"
+          ],
+          "command": [
+            "{{ PYTHONW }}",
+            "-c",
+            "from aydin.gui.gui import run; from aydin import __version__; run(__version__)"
+          ]
+        }
+      }
+    }
+  ]
+}

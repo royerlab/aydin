@@ -112,8 +112,14 @@ demo_results/
 .zgroup
 *.png
 !docs/source/resources/**/*.png
+!packaging/icons/*.png
+!packaging/icons/*.ico
+!packaging/icons/*.icns
 
 src/aydin/_version.py
 
 # Temporary working directories
 delme/
+
+# Conda-constructor build artifacts
+_work/
