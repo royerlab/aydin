@@ -78,13 +78,18 @@ def generate_icns_iconutil(src: Path, out_dir: Path) -> bool:
 
 
 def generate_icns_pillow(src: Path, out_dir: Path) -> None:
-    """Generate .icns using Pillow (fallback for non-macOS)."""
+    """Generate .icns using Pillow (fallback for non-macOS).
+
+    Pillow's ICNS writer saves the image at its current size.
+    We resize to 256x256 which is the standard macOS app icon size.
+    For full multi-resolution .icns, use iconutil on macOS instead.
+    """
     img = Image.open(src).convert("RGBA")
+    # Resize to 256x256 — the primary icon size for macOS
+    img = img.resize((256, 256), Image.LANCZOS)
     out_path = out_dir / "aydin_icon.icns"
-    # Pillow's ICNS writer accepts sizes as a list
-    sizes = [(s, s) for s in [16, 32, 48, 64, 128, 256]]
-    img.save(str(out_path), format="ICNS", sizes=sizes)
-    print(f"  Generated {out_path} (via Pillow)")
+    img.save(str(out_path), format="ICNS")
+    print(f"  Generated {out_path} (via Pillow, 256x256 only)")
 
 
 def copy_png(src: Path, out_dir: Path) -> None:

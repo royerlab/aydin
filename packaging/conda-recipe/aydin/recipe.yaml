@@ -1,10 +1,11 @@
 context:
   name: aydin
   python_min: "3.9"
+  version: ${{ env.get("AYDIN_VERSION", default="0.0.0") }}
 
 package:
   name: ${{ name }}
-  version: ${{ env.get("AYDIN_VERSION", "0.0.0") }}
+  version: ${{ version }}
 
 source:
   path: ../../../
@@ -34,9 +35,10 @@ requirements:
     - numba >=0.59.0,<0.62
     - pywavelets >=1.6.0,<2
     # Image I/O
+    - tifffile
     - imageio >=2.34.0,<3
-    - imagecodecs >=2024.1.1
-    - czifile >=2019.7.2
+    - imagecodecs >=2024.1.1,<2026
+    - czifile >=2019.7.2,<2025
     - nd2reader >=3.3.0,<4
     - zarr >=2.17.0,<3
     # GUI
@@ -51,7 +53,7 @@ requirements:
     - memoization >=0.4.0,<1
     - deprecated >=1.2.13,<2
     - docstring-parser >=0.15,<1
-    - arbol >=2023.1.0
+    - arbol >=2023.1.0,<2026
     - ansicolors >=1.1.8,<2
     - colorama >=0.4.6,<1
     - pynndescent >=0.5.10,<1

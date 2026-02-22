@@ -1,9 +1,10 @@
 context:
   name: aydin-menu
+  version: ${{ env.get("AYDIN_VERSION", default="0.0.0") }}
 
 package:
   name: ${{ name }}
-  version: ${{ env.get("AYDIN_VERSION", "0.0.0") }}
+  version: ${{ version }}
 
 source:
   path: ../../../
@@ -11,28 +12,26 @@ source:
 build:
   noarch: generic
   number: 0
+  script:
+    - mkdir -p "${PREFIX}/Menu"                                                    # [unix]
+    - cp packaging/menuinst/aydin-studio.json "${PREFIX}/Menu/aydin-studio.json"   # [unix]
+    - cp packaging/icons/aydin_icon.png "${PREFIX}/Menu/aydin_icon.png"            # [unix]
+    - cp packaging/icons/aydin_icon.ico "${PREFIX}/Menu/aydin_icon.ico"            # [unix]
+    - cp packaging/icons/aydin_icon.icns "${PREFIX}/Menu/aydin_icon.icns"          # [unix]
+    - if not exist "%PREFIX%\Menu" mkdir "%PREFIX%\Menu"                           # [win]
+    - copy packaging\menuinst\aydin-studio.json "%PREFIX%\Menu\aydin-studio.json"  # [win]
+    - copy packaging\icons\aydin_icon.png "%PREFIX%\Menu\aydin_icon.png"           # [win]
+    - copy packaging\icons\aydin_icon.ico "%PREFIX%\Menu\aydin_icon.ico"           # [win]
+    - copy packaging\icons\aydin_icon.icns "%PREFIX%\Menu\aydin_icon.icns"         # [win]
 
-outputs:
-  - package:
-      name: aydin-menu
-    build:
-      noarch: generic
-    files:
-      - Menu/*
-    script:
-      content:
-        - mkdir -p "${PREFIX}/Menu"
-        - cp packaging/menuinst/aydin-studio.json "${PREFIX}/Menu/aydin-studio.json"
-        - cp packaging/icons/aydin_icon.png "${PREFIX}/Menu/aydin_icon.png"
-        - cp packaging/icons/aydin_icon.ico "${PREFIX}/Menu/aydin_icon.ico"
-        - cp packaging/icons/aydin_icon.icns "${PREFIX}/Menu/aydin_icon.icns"
-    requirements:
-      run:
-        - aydin
+requirements:
+  run:
+    - aydin
 
 tests:
   - files:
-      - Menu/aydin-studio.json
+      source:
+        - packaging/menuinst/aydin-studio.json
 
 about:
   homepage: https://royerlab.github.io/aydin/

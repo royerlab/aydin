@@ -21,6 +21,6 @@ echo.
 echo   Launch from your Start Menu or Desktop shortcut.
 echo.
 echo   For GPU support (NVIDIA), open Anaconda Prompt and run:
-echo     conda install pytorch-cuda=12.6 -c conda-forge
+echo     conda install pytorch-cuda -c conda-forge
 echo ================================================================
 echo.

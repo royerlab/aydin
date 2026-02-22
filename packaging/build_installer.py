@@ -137,6 +137,7 @@ def _build_definitions(
         definitions["license_file"] = "LICENSE.txt"
 
     # Platform-specific settings
+    post_install = None
     if os_key == "linux":
         definitions["installer_type"] = "sh"
         definitions["default_prefix"] = "$HOME/.local/aydin"
@@ -155,7 +156,7 @@ def _build_definitions(
             definitions["notarization_identity_name"] = notarization_id
     elif os_key == "win":
         definitions["installer_type"] = "exe"
-        definitions["default_prefix"] = "%LOCALAPPDATA%\\\\aydin"
+        definitions["default_prefix"] = "%LOCALAPPDATA%\\aydin"
         icon_path = PACKAGING_DIR / "icons" / "aydin_icon.ico"
         if icon_path.exists():
             definitions["_icon_src"] = icon_path
@@ -166,7 +167,7 @@ def _build_definitions(
         if cert:
             definitions["signing_certificate"] = cert
 
-    if post_install.exists():
+    if post_install and post_install.exists():
         definitions["_post_install_src"] = post_install
         definitions["post_install"] = post_install.name
 
