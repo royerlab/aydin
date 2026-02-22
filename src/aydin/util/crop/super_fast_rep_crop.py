@@ -4,15 +4,15 @@ Uses image downscaling to accelerate the representative crop search,
 then maps the result back to the original image resolution.
 """
 
-from memoization.memoization import cached
 from numpy.typing import ArrayLike
 from scipy.ndimage import zoom
 
+from aydin.util.cache import ttl_cache
 from aydin.util.crop.rep_crop import representative_crop
 from aydin.util.log.log import aprint, asection
 
 
-@cached(ttl=10, max_size=5)
+@ttl_cache(maxsize=5, ttl=10)
 def super_fast_representative_crop(
     image: ArrayLike,
     crop_size: int,
@@ -28,7 +28,7 @@ def super_fast_representative_crop(
 
     Downscales the image first for faster crop search, then maps the
     best crop location back to the original resolution. Results are
-    cached with a 10-second TTL.
+    cached with a 10-second TTL via ``aydin.util.cache.ttl_cache``.
 
     Parameters
     ----------

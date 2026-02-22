@@ -21,8 +21,6 @@ from pathlib import Path
 import numpy
 import skimage
 import zarr
-from czifile import CziFile, czifile
-from nd2reader import ND2Reader
 from numpy import array_equal
 from tifffile import TiffFile, memmap, tifffile
 
@@ -255,6 +253,14 @@ def imread(input_path):
 
             elif is_czi:
                 aprint(f"Reading file {input_path} as CZI file")
+                try:
+                    from czifile import CziFile
+                    from czifile import czifile as _czifile_mod
+                except ImportError:
+                    raise ImportError(
+                        "Reading CZI files requires the 'czifile' package. "
+                        "Install it with: pip install czifile"
+                    )
                 with CziFile(input_path) as czi:
                     metadata.format = 'czi'
                     metadata.axes = czi.axes
@@ -262,7 +268,7 @@ def imread(input_path):
                     metadata.shape = czi.shape
                     metadata.dtype = czi.dtype
 
-                array = czifile.imread(input_path)
+                array = _czifile_mod.imread(input_path)
 
             elif is_png or is_jpg:
                 aprint(f"Reading file {input_path} as PNG file")
@@ -353,6 +359,13 @@ def imread(input_path):
 
             elif is_nd2:
                 aprint(f"Reading file {input_path} as ND2 file")
+                try:
+                    from nd2reader import ND2Reader
+                except ImportError:
+                    raise ImportError(
+                        "Reading ND2 files requires the 'nd2reader' package. "
+                        "Install it with: pip install nd2reader"
+                    )
                 import pims
 
                 n2image = ND2Reader(input_path)
