@@ -1,4 +1,4 @@
-.PHONY: help setup install install-dev test test-cov test-cov-check test-heavy test-gpu test-unstable test-gui check format format-check lint validate clean build publish publish-patch docs docs-screenshots docs-build docs-publish
+.PHONY: help setup install install-dev test test-cov test-cov-check test-heavy test-gpu test-unstable test-gui check format format-check lint validate clean build publish publish-patch docs docs-screenshots docs-build docs-publish docker-build docker-build-cli docker-build-gpu docker-build-studio docker-run-studio docker-test docker-test-all
 
 help:
 	@echo "Available commands:"
@@ -21,6 +21,15 @@ help:
 	@echo "  make clean         - Clean artifacts"
 	@echo "  make publish       - Bump version and create release PR"
 	@echo "  make publish-patch - Bump patch version and create release PR"
+	@echo ""
+	@echo "Docker:"
+	@echo "  make docker-build        - Build all Docker images"
+	@echo "  make docker-build-cli    - Build CLI image (CPU)"
+	@echo "  make docker-build-gpu    - Build GPU image"
+	@echo "  make docker-build-studio - Build Studio GUI image"
+	@echo "  make docker-run-studio   - Run Aydin Studio at http://localhost:9876"
+	@echo "  make docker-test         - Build + smoke test CLI image"
+	@echo "  make docker-test-all     - Build + smoke test CLI + Studio images"
 	@echo ""
 	@echo "Documentation:"
 	@echo "  make docs          - Build HTML docs (regenerates screenshots first)"
@@ -138,6 +147,35 @@ publish: validate
 	echo ""; \
 	echo "Done! Release PR created."; \
 	echo "Merge it on GitHub, then release.yml will auto-tag and publish to PyPI."
+
+# Docker
+# PyQt6 only has wheels for linux/amd64, so we target that platform.
+# On Apple Silicon, Docker uses QEMU emulation transparently.
+DOCKER_REPO ?= ghcr.io/royerlab
+DOCKER_PLATFORM ?= linux/amd64
+
+docker-build: docker-build-cli docker-build-gpu docker-build-studio
+
+docker-build-cli:
+	docker build --platform $(DOCKER_PLATFORM) --target aydin -t $(DOCKER_REPO)/aydin:latest -t $(DOCKER_REPO)/aydin:$(CURRENT_VERSION) .
+
+docker-build-gpu:
+	docker build --platform $(DOCKER_PLATFORM) --target aydin-gpu -t $(DOCKER_REPO)/aydin:gpu -t $(DOCKER_REPO)/aydin:$(CURRENT_VERSION)-gpu .
+
+docker-build-studio:
+	docker build --platform $(DOCKER_PLATFORM) --target aydin-studio -t $(DOCKER_REPO)/aydin-studio:latest -t $(DOCKER_REPO)/aydin-studio:$(CURRENT_VERSION) .
+
+docker-run-studio:
+	@echo "Starting Aydin Studio at http://localhost:9876"
+	docker run --rm -p 9876:9876 --shm-size=256m -v $$(pwd)/data:/data $(DOCKER_REPO)/aydin-studio:latest
+
+docker-test:
+	@command -v docker >/dev/null 2>&1 || { echo "Error: Docker is not installed."; exit 1; }
+	./docker/test-smoke.sh
+
+docker-test-all:
+	@command -v docker >/dev/null 2>&1 || { echo "Error: Docker is not installed."; exit 1; }
+	./docker/test-smoke.sh --all
 
 publish-patch: validate
 	@echo "Current version: $(CURRENT_VERSION)"

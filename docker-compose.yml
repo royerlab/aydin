@@ -1,0 +1,53 @@
+# Docker Compose for Aydin
+#
+# Usage:
+#   docker compose run --rm aydin denoise /data/image.tif       # CLI (CPU)
+#   docker compose run --rm aydin-gpu denoise /data/image.tif   # CLI (GPU)
+#   docker compose up aydin-studio                              # GUI at http://localhost:9876
+#
+# Place your images in ./data/ — they are mounted at /data inside the container.
+
+services:
+
+  # CLI — CPU-only (for classical denoisers, FGR, batch processing)
+  aydin:
+    platform: linux/amd64
+    build:
+      context: .
+      target: aydin
+    image: ghcr.io/royerlab/aydin:latest
+    volumes:
+      - ./data:/data
+
+  # CLI — NVIDIA GPU (for CNN-based denoising)
+  aydin-gpu:
+    platform: linux/amd64
+    build:
+      context: .
+      target: aydin-gpu
+    image: ghcr.io/royerlab/aydin:gpu
+    volumes:
+      - ./data:/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # GUI — Aydin Studio accessible via web browser
+  aydin-studio:
+    platform: linux/amd64
+    build:
+      context: .
+      target: aydin-studio
+    image: ghcr.io/royerlab/aydin-studio:latest
+    ports:
+      - "9876:9876"
+    volumes:
+      - ./data:/data
+    shm_size: '256m'
+    environment:
+      - XPRA_PORT=9876
+      - XPRA_SCREEN=1920x1080x24+32

@@ -168,20 +168,32 @@ The core denoising engine, transforms, regression, features -- none of that chan
 
 ## Docker Distribution Details
 
+**Status: Implemented.** See [`docker/README.md`](../../docker/README.md) for full user documentation.
+
+Three Docker image variants are provided via a multi-target `Dockerfile`:
+
+| Target | Image | Use case |
+|--------|-------|----------|
+| `aydin` | `ghcr.io/royerlab/aydin:latest` | CLI batch processing (CPU) |
+| `aydin-gpu` | `ghcr.io/royerlab/aydin:gpu` | CLI with NVIDIA CUDA GPU |
+| `aydin-studio` | `ghcr.io/royerlab/aydin-studio:latest` | Full GUI via browser (Xpra) |
+
 ### CLI Image
 
 ```bash
 # Basic usage
-docker run --rm -v /data:/data aydin denoise /data/image.tif
+docker run --rm -v $(pwd):/data ghcr.io/royerlab/aydin denoise /data/image.tif
 
 # With GPU
-docker run --rm --gpus all -v /data:/data aydin denoise /data/image.tif
+docker run --rm --gpus all -v $(pwd):/data ghcr.io/royerlab/aydin:gpu denoise /data/image.tif
 ```
 
-### GUI Image (optional, via Xpra)
+### GUI Image (via Xpra)
+
+The GUI approach follows napari's proven pattern: Xpra runs a virtual X11 display inside the container and streams individual application windows to an HTML5 client in the user's browser.
 
 ```bash
-docker run --rm -p 9876:9876 aydin-studio
+docker run --rm -p 9876:9876 --shm-size=256m ghcr.io/royerlab/aydin-studio
 # Open http://localhost:9876 in browser
 ```
 
@@ -189,8 +201,18 @@ docker run --rm -p 9876:9876 aydin-studio
 
 ```bash
 # Convert Docker image to Singularity/Apptainer
-singularity pull docker://aydin:latest
+singularity pull docker://ghcr.io/royerlab/aydin:latest
 singularity run --nv aydin_latest.sif denoise image.tif
+```
+
+### Build Targets
+
+```bash
+make docker-build          # Build all variants
+make docker-build-cli      # CLI only
+make docker-build-gpu      # GPU only
+make docker-build-studio   # Studio GUI only
+make docker-run-studio     # Run Studio at http://localhost:9876
 ```
 
 ---
