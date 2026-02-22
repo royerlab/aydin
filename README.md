@@ -143,6 +143,26 @@ Aydin uses PyTorch for CNN-based denoising. To enable GPU acceleration, ensure y
 PyTorch installation supports CUDA. See the [PyTorch installation guide](https://pytorch.org/get-started/locally/)
 for platform-specific instructions.
 
+### Docker (no installation required)
+
+Run Aydin without installing Python or any dependencies. Requires a container runtime:
+on macOS we recommend [OrbStack](https://orbstack.dev/) (`brew install orbstack`);
+on Linux use Docker Engine (`apt install docker.io`).
+
+```bash
+# Denoise an image (CLI)
+docker run --rm -v $(pwd):/data ghcr.io/royerlab/aydin denoise /data/image.tif
+
+# Launch Aydin Studio GUI in your browser
+docker run --rm -p 9876:9876 --shm-size=256m -v $(pwd):/data ghcr.io/royerlab/aydin-studio
+# Open http://localhost:9876
+
+# With GPU acceleration
+docker run --rm --gpus all -v $(pwd):/data ghcr.io/royerlab/aydin:gpu denoise /data/image.tif
+```
+
+See [docker/README.md](docker/README.md) for full Docker documentation including runtime setup, GPU configuration, Docker Compose, HPC/Singularity usage, and troubleshooting.
+
 ## How to run
 
 Assuming that you have installed *Aydin* in an environment, you can:

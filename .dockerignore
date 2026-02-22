@@ -1,0 +1,51 @@
+# Version control
+.git
+.gitignore
+.github
+
+# Python caches and build artifacts
+__pycache__
+*.py[cod]
+*.egg-info
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# Testing and CI
+.tox
+.pytest_cache
+.coverage
+reports/
+htmlcov/
+
+# Documentation (not needed in image)
+docs/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Docker files (prevent recursive copy)
+docker-compose.yml
+Dockerfile
+docker/test-smoke.sh
+
+# Miscellaneous
+*.md
+!README.md
+!src/**/*.md
+LICENSE
+CLAUDE.md
+conftest.py
+codecov.yml
+.flake8
+.pre-commit-config.yaml
