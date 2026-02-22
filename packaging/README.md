@@ -80,7 +80,7 @@ The installer ships **CPU-only PyTorch** to keep the download size reasonable. U
 conda activate /path/to/aydin
 
 # Add CUDA support
-conda install pytorch-cuda=12.6 -c conda-forge
+conda install pytorch-cuda -c conda-forge
 ```
 
 ## Icon Generation
