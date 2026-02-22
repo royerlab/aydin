@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Aydin is a self-supervised, auto-tuned image denoising tool for n-dimensional images. It provides three interfaces: GUI (Aydin Studio), CLI, and Python API. Supports classical denoisers, patch-based methods, and machine learning approaches (CNN, Gradient Boosting).
+Aydin is a self-supervised, auto-tuned image denoising tool for n-dimensional images. It provides four interfaces: GUI (Aydin Studio), napari plugin, CLI, and Python API. Supports classical denoisers, patch-based methods, and machine learning approaches (CNN, Gradient Boosting).
 
 ## Common Commands
 
@@ -20,11 +20,11 @@ make setup
 # Run all tests (excludes heavy, gpu, unstable by default)
 make test
 
-# Run a single test file (use hatch run to ensure correct environment)
-hatch run pytest aydin/path/to/test_file.py --disable-pytest-warnings
+# Run a single test file
+pytest src/aydin/path/to/test_file.py --disable-pytest-warnings
 
 # Run a single test function
-hatch run pytest aydin/path/to/test_file.py::test_function_name --disable-pytest-warnings
+pytest src/aydin/path/to/test_file.py::test_function_name --disable-pytest-warnings
 
 # Run heavy tests only (marked @pytest.mark.heavy)
 make test-heavy
@@ -58,39 +58,43 @@ make docs-publish           # Build and deploy to GitHub Pages
 
 ## Architecture
 
+### Project Layout
+
+Uses a **`src/` layout**: source code lives in `src/aydin/`. This prevents accidental imports of the uninstalled package from the repo root.
+
 ### Core Components
 
-**Image Translator Framework** (`aydin/it/`):
+**Image Translator Framework** (`src/aydin/it/`):
 - `base.py` - Core `ImageTranslatorBase` class that handles multi-dimensional arrays with batch/channel/spatial dimensions, training/inference slicing, transforms, and normalization
 - `classic.py`, `cnn_torch.py`, `fgr.py` - Implementations wrapping different denoising approaches
 
-**Denoising Algorithms** (`aydin/restoration/denoise/`):
+**Denoising Algorithms** (`src/aydin/restoration/denoise/`):
 - `classic.py` - Classical denoisers (Butterworth, Gaussian, NLM, Total Variation)
 - `noise2selffgr.py` - Self-supervised Feature Generation & Regression (recommended approach)
 - `noise2selfcnn.py` - Self-supervised CNN approach
 
-**Regression Methods** (`aydin/regression/`):
+**Regression Methods** (`src/aydin/regression/`):
 - `cb.py` - CatBoost (default for FGR)
 - `lgbm.py` - LightGBM
 - Other: linear, perceptron, random forest, SVM
 
-**Feature Engineering** (`aydin/features/`):
+**Feature Engineering** (`src/aydin/features/`):
 - `standard_features.py`, `extensible_features.py` - Feature generation for ML denoisers
 
-**Transforms** (`aydin/it/transforms/`):
+**Transforms** (`src/aydin/it/transforms/`):
 - Image preprocessing/postprocessing: deskew, motion correction, high-pass, range normalization, histogram stretching, VST, padding
 
-**I/O** (`aydin/io/`):
+**I/O** (`src/aydin/io/`):
 - `io.py` - Image reading/writing supporting TIFF, CZI, ND2, Zarr formats
 
 **Interfaces**:
-- `aydin/gui/` - PyQt6-based GUI (Aydin Studio)
-- `aydin/cli/cli.py` - Click-based CLI
+- `src/aydin/gui/` - PyQt6-based GUI (Aydin Studio)
+- `src/aydin/cli/cli.py` - Click-based CLI
 
 ### Build System
 
 - **Build backend**: hatchling (configured in `pyproject.toml`)
-- **Version**: Single source of truth is `aydin/__init__.py` (`__version__`). `pyproject.toml` reads it dynamically via `[tool.hatch.version]`.
+- **Version**: Single source of truth is `src/aydin/__init__.py` (`__version__`). `pyproject.toml` reads it dynamically via `[tool.hatch.version]`.
 - **Makefile**: Orchestrates common commands (`make help` for full list)
   - `make setup` / `make install-dev` - Install for development
   - `make test` / `make test-heavy` / `make test-gpu` - Run tests
@@ -108,13 +112,13 @@ Tests use pytest markers defined in `pyproject.toml`:
 
 ### Logging
 
-Use the internal logging API at `aydin/util/log/log.py` instead of print statements.
+Use the internal logging API at `src/aydin/util/log/log.py` instead of print statements.
 
 ### Versioning
 
 The project uses **calendar versioning**: `YYYY.M.D` (e.g., `2025.2.4`), with an optional `.patch` suffix for same-day releases (e.g., `2025.2.4.1`).
 
-- **Single source of truth**: `aydin/__init__.py` → `__version__ = "YYYY.M.D"`
+- **Single source of truth**: `src/aydin/__init__.py` → `__version__ = "YYYY.M.D"`
 - `pyproject.toml` reads it dynamically via `[tool.hatch.version]` — never edit the version there
 - `docs/source/conf.py` also reads from `__init__.py` at build time
 
@@ -133,7 +137,7 @@ make publish-patch
 **What `make publish` does:**
 1. Runs `make validate` (checks: on main, clean tree, formatting, lint)
 2. Creates a `release/vYYYY.M.D` branch
-3. Bumps `__version__` in `aydin/__init__.py`
+3. Bumps `__version__` in `src/aydin/__init__.py`
 4. Pushes and creates a PR via `gh pr create`
 5. Switches back to `main`
 
@@ -178,18 +182,18 @@ PR merged → release.yml creates git tag → publish.yml: verify → test → b
 ### HTML Tags Used in Docstrings
 
 1. **`<a href="...">text</a>`** - Clickable hyperlinks rendered in the GUI. Found in:
-   - `aydin/it/classic_denoisers/*.py` - Wikipedia links for algorithm names (Butterworth, NLM, Wavelet, Lipschitz, Bilateral, BM3D/ND, Harmonic, TV)
-   - `aydin/it/transforms/highpass.py` - Wikipedia link for 'blue' noise
-   - `aydin/restoration/denoise/noise2self*.py` - arXiv link to Noise2Self paper
-   - `aydin/regression/cb.py`, `lgbm.py`, `random_forest.py` - GitHub links to libraries
-   - `aydin/gui/tabs/qt/summary.py` - DOI, GitHub, and forum links
+   - `src/aydin/it/classic_denoisers/*.py` - Wikipedia links for algorithm names (Butterworth, NLM, Wavelet, Lipschitz, Bilateral, BM3D/ND, Harmonic, TV)
+   - `src/aydin/it/transforms/highpass.py` - Wikipedia link for 'blue' noise
+   - `src/aydin/restoration/denoise/noise2self*.py` - arXiv link to Noise2Self paper
+   - `src/aydin/regression/cb.py`, `lgbm.py`, `random_forest.py` - GitHub links to libraries
+   - `src/aydin/gui/tabs/qt/summary.py` - DOI, GitHub, and forum links
 
 2. **`<moreless>`** - Custom tag that creates an expandable "Read more/Read less" UI section. Used in GUI tab class docstrings:
-   - `aydin/gui/tabs/qt/denoise.py`
-   - `aydin/gui/tabs/qt/processing.py`
-   - `aydin/gui/tabs/qt/dimensions.py`
-   - `aydin/gui/tabs/qt/summary.py`
-   - `aydin/gui/tabs/qt/base_cropping.py`
+   - `src/aydin/gui/tabs/qt/denoise.py`
+   - `src/aydin/gui/tabs/qt/processing.py`
+   - `src/aydin/gui/tabs/qt/dimensions.py`
+   - `src/aydin/gui/tabs/qt/summary.py`
+   - `src/aydin/gui/tabs/qt/base_cropping.py`
 
 3. **`<split>`** - Used with `<moreless>` to create a two-column layout in the expanded section.
 
@@ -197,20 +201,20 @@ PR merged → release.yml creates git tag → publish.yml: verify → test → b
 
 5. **`\n\n`** (literal backslash-n) - Used as explicit paragraph break markers in classic denoiser docstrings. The GUI code converts these to `<br><br>` via `.replace("\n\n", "<br><br>")`.
 
-6. **`<notgui>`** - Marks the boundary between GUI-visible content and API-only content. Everything before this tag is shown in the GUI; everything after (Parameters, Attributes, etc.) is only visible via `help()`, Sphinx, and IDEs. Stripped at runtime by `strip_notgui()` in `aydin/util/string/break_text.py`. Used in:
-   - `aydin/it/classic_denoisers/*.py` - In `denoise_*` function docstrings, before `Parameters`
-   - `aydin/it/transforms/*.py` - In transform class docstrings
-   - `aydin/regression/*.py` - In regressor class docstrings
-   - `aydin/nn/models/*.py` - In model class docstrings
-   - `aydin/features/standard_features.py`, `extensible_features.py` - In feature generator class docstrings
-   - `aydin/it/classic.py`, `aydin/restoration/denoise/noise2self*.py` - In denoiser class docstrings
+6. **`<notgui>`** - Marks the boundary between GUI-visible content and API-only content. Everything before this tag is shown in the GUI; everything after (Parameters, Attributes, etc.) is only visible via `help()`, Sphinx, and IDEs. Stripped at runtime by `strip_notgui()` in `src/aydin/util/string/break_text.py`. Used in:
+   - `src/aydin/it/classic_denoisers/*.py` - In `denoise_*` function docstrings, before `Parameters`
+   - `src/aydin/it/transforms/*.py` - In transform class docstrings
+   - `src/aydin/regression/*.py` - In regressor class docstrings
+   - `src/aydin/nn/models/*.py` - In model class docstrings
+   - `src/aydin/features/standard_features.py`, `extensible_features.py` - In feature generator class docstrings
+   - `src/aydin/it/classic.py`, `src/aydin/restoration/denoise/noise2self*.py` - In denoiser class docstrings
 
 ### How Docstrings Flow to the GUI
 
-- **Classic denoisers**: `aydin/restoration/denoise/classic.py` reads `denoise_*.__doc__`, applies `strip_notgui()`, and converts `\n\n` to `<br><br>`
-- **FGR regressors**: `aydin/restoration/denoise/noise2selffgr.py` reads regressor class `__doc__`, applies `strip_notgui()`, and converts `\n\n` to `<br><br>`
-- **CNN models**: `aydin/restoration/denoise/noise2selfcnn.py` reads model class `__doc__`, applies `strip_notgui()`, and converts `\n\n` to `<br><br>`
-- **Transforms**: `aydin/gui/_qt/transforms_tab_item.py` reads transform class `__doc__`, applies `strip_notgui()`, and converts `\n` to `<br>`
+- **Classic denoisers**: `src/aydin/restoration/denoise/classic.py` reads `denoise_*.__doc__`, applies `strip_notgui()`, and converts `\n\n` to `<br><br>`
+- **FGR regressors**: `src/aydin/restoration/denoise/noise2selffgr.py` reads regressor class `__doc__`, applies `strip_notgui()`, and converts `\n\n` to `<br><br>`
+- **CNN models**: `src/aydin/restoration/denoise/noise2selfcnn.py` reads model class `__doc__`, applies `strip_notgui()`, and converts `\n\n` to `<br><br>`
+- **Transforms**: `src/aydin/gui/_qt/transforms_tab_item.py` reads transform class `__doc__`, applies `strip_notgui()`, and converts `\n` to `<br>`
 - **Tab descriptions**: `QReadMoreLessLabel` widget parses `<moreless>` and `<split>` markers
 
 ### Rules When Editing Docstrings

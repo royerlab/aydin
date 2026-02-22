@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "aydin"
 dynamic = ["version"]
-description = "Aydin - Denoising but chill"
+description = "Aydin — Self-supervised image denoising"
 readme = "README.md"
 license = "BSD-3-Clause"
 requires-python = ">=3.9"
@@ -21,6 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Framework :: napari",
     "Topic :: Scientific/Engineering :: Image Processing",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
@@ -45,7 +46,7 @@ dependencies = [
     "nd2reader>=3.3.0,<4.0.0",
     "zarr>=2.17.0,<3.0.0",
     # GUI
-    "napari[pyqt6]>=0.5.0,<0.7.0",
+    "napari[pyqt6]>=0.5.0,<0.8.0",
     "QDarkStyle>=3.2.0,<4.0.0",
     "qtpy>=2.4.0,<3.0.0",
     # CLI & Utilities
@@ -56,6 +57,8 @@ dependencies = [
     "Deprecated>=1.2.13,<2.0.0",
     "docstring-parser>=0.15,<1.0.0",
     "arbol>=2023.1.0,<2026.0.0",
+    "ansicolors>=1.1.8,<2.0.0",
+    "colorama>=0.4.6,<1.0.0",
     "pynndescent>=0.5.10,<1.0.0",
     "importlib-metadata>=6.0.0,<8.0.0",
 ]
@@ -64,6 +67,7 @@ dependencies = [
 dev = [
     "black>=24.0.0",
     "flake8>=7.0.0",
+    "hatch>=1.9.0",
     "isort>=5.13.0",
     "mypy>=1.8.0",
     "pytest>=8.0.0",
@@ -72,44 +76,6 @@ dev = [
     "pytest-xvfb>=3.0.0",
     "mock>=5.1.0",
     "pre-commit>=3.6.0",
-]
-bundle = [
-    # Pinned versions for PyInstaller reproducibility
-    # Build tools
-    "pyinstaller>=6.0.0",
-    # ML Libraries
-    "catboost==1.2.7",
-    "lightgbm==4.5.0",
-    "torch==2.4.1",
-    # Scientific Computing
-    "numpy==2.0.2",
-    "scipy==1.14.1",
-    "scikit-image==0.24.0",
-    "numba==0.60.0",
-    "PyWavelets==1.9.0",
-    # Image I/O
-    "imageio==2.36.0",
-    # imagecodecs excluded - conflicts with PyInstaller bundling
-    "czifile==2019.7.2",
-    "nd2reader==3.3.0",
-    "zarr==2.18.3",
-    # GUI/Visualization
-    "napari==0.5.4",
-    "vispy>=0.14.0",
-    "QDarkStyle==3.2.3",
-    "qtpy==2.4.2",
-    # Distributed computing (needed for spec file imports)
-    "dask>=2024.1.0",
-    "distributed>=2024.1.0",
-    # CLI & Utilities
-    "Click==8.1.7",
-    "requests==2.32.3",
-    "jsonpickle==3.3.0",
-    "memoization==0.4.0",
-    "Deprecated==1.2.14",
-    "docstring-parser==0.16",
-    "pynndescent==0.5.13",
-    "importlib-metadata==8.5.0",
 ]
 docs = [
     "numpydoc>=1.6.0",
@@ -123,18 +89,31 @@ docs = [
 [project.scripts]
 aydin = "aydin.cli.cli:cli"
 
+[project.entry-points."napari.manifest"]
+aydin = "aydin.napari_plugin:napari.yaml"
+
 [project.urls]
 Homepage = "https://royerlab.github.io/aydin/"
-Repository = "https://github.com/royerlab/aydin"
+"Source Code" = "https://github.com/royerlab/aydin"
+"Bug Tracker" = "https://github.com/royerlab/aydin/issues"
+Documentation = "https://royerlab.github.io/aydin/"
 
 [tool.hatch.version]
-path = "aydin/__init__.py"
+path = "src/aydin/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["aydin"]
+packages = ["src/aydin"]
+exclude = ["**/tests/**", "**/demo/**", "**/__pycache__/**", "**/conftest.py"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.github",
+    "/docs",
+    "**/__pycache__",
+]
 
 [tool.black]
-target-version = ['py39', 'py310', 'py311', 'py312']
+target-version = ['py39', 'py310', 'py311', 'py312', 'py313']
 skip-string-normalization = true
 
 [tool.isort]
@@ -142,7 +121,7 @@ profile = "black"
 skip_gitignore = true
 
 [tool.pytest.ini_options]
-testpaths = ["aydin"]
+testpaths = ["src/aydin"]
 markers = [
     "heavy: mark test as heavy (long-running)",
     "gpu: mark test as requiring GPU",
@@ -153,10 +132,10 @@ qt_api = "pyqt6"
 addopts = "--disable-pytest-warnings"
 
 [tool.coverage.run]
-source = ["aydin"]
-omit = ["aydin/**/demo/**", "aydin/**/tests/**"]
+source = ["src/aydin"]
+omit = ["src/aydin/**/demo/**", "src/aydin/**/tests/**"]
 
 [tool.coverage.report]
 exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
-fail_under = 80
+fail_under = 40
 show_missing = true

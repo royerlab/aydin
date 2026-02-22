@@ -19,5 +19,22 @@ items that might be problematic.
 .. image:: ../resources/system_summary_ss.png
 
 
+Apple Silicon (macOS)
+~~~~~~~~~~~~~~~~~~~~~~
+
+On Apple Silicon Macs (M1/M2/M3/M4), Aydin automatically uses the Metal Performance
+Shaders (MPS) backend for PyTorch-based CNN denoisers. No additional setup is required
+beyond installing PyTorch (included with Aydin).
+
+Aydin conservatively uses up to 40% of available system memory for MPS operations, since
+Metal's unified memory is shared between the GPU, the OS, and CPU-side arrays.
+
+The FGR-based denoisers (CatBoost, LightGBM) run on CPU and benefit from Apple Silicon's
+high core counts.
+
+
+Modest hardware
+~~~~~~~~~~~~~~~~~
+
 Having said that, some algorithms in Aydin such as the 'Butterworth' denoiser  can be quite fast,
 can run on modest machines, and may be sufficient for your needs.

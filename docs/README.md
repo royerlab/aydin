@@ -13,6 +13,6 @@ Or using the Makefile from the project root:
 make setup  # installs dev + docs dependencies
 ```
 
-After running ``make publish`` the generated HTML documentation can be found in
-the ``build/html`` directory. Open ``build/html/index.html`` to view the home
-page for the documentation.
+After running ``make docs`` from the project root (or ``make build`` from the ``docs/`` directory),
+the generated HTML documentation can be found in the ``docs/build/html`` directory.
+Open ``docs/build/html/index.html`` to view the home page for the documentation.

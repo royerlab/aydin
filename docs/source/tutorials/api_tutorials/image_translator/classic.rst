@@ -8,7 +8,7 @@ options using our Object-Oriented denoising API.
 
    from aydin.it.classic import ImageDenoiserClassic
 
-   it = ImageDenoiserClassic(method='lowpass')
+   it = ImageDenoiserClassic(method='butterworth')
 
    it.train(noisy, noisy)
    denoised = it.translate(noisy)
@@ -21,8 +21,10 @@ denoising. One can do the following:
 .. code-block:: python
 
    from aydin.it.classic import ImageDenoiserClassic
+   from aydin.it.transforms.range import RangeTransform
+   from aydin.it.transforms.padding import PaddingTransform
 
-   it = ImageDenoiserClassic(method='lowpass')
+   it = ImageDenoiserClassic(method='butterworth')
    it.add_transform(RangeTransform())
    it.add_transform(PaddingTransform())
 

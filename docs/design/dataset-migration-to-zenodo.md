@@ -666,7 +666,7 @@ hatch run python -c "from aydin.io.datasets import camera; print(camera().shape)
 hatch run python -c "from aydin.io.datasets import lizard; print(lizard().shape)"
 
 # Run the full dataset test suite
-hatch run pytest aydin/io/tests/test_datasets.py -v --disable-pytest-warnings
+hatch run pytest src/aydin/io/tests/test_datasets.py -v --disable-pytest-warnings
 ```
 
 ---

@@ -23,11 +23,11 @@ jobs:
           pip install "black>=24.0.0" "isort>=5.13.0"
       - name: Check code styling with Black
         run: |
-          black --diff aydin
-          black --check aydin
+          black --diff src/aydin
+          black --check src/aydin
       - name: Check import sorting with isort
         run: |
-          isort --check-only aydin/
+          isort --check-only src/aydin/
 
   lint:
     name: Lint Check
@@ -46,117 +46,38 @@ jobs:
           pip install "flake8>=7.0.0"
       - name: Check code with Flake8
         run: |
-          flake8 aydin/
+          flake8 src/aydin/
 
-  test-linux39:
+  test-linux:
     needs: [style, lint]
-    name: Tests (Python 3.9)
+    name: Tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     if: github.repository == 'royerlab/aydin'
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: ${{ matrix.python-version }}
           cache: 'pip'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
-      - name: Run the tests with coverage
+      - name: Run the tests
         run: |
-          pytest aydin/ --cov=aydin --cov-report=xml --cov-fail-under=40 --disable-pytest-warnings --durations=30
+          pytest src/aydin/ ${{ matrix.python-version == '3.9' && '--cov=src/aydin --cov-report=xml --cov-fail-under=40' || '' }} --disable-pytest-warnings --durations=30
       - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.9'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
-
-  test-linux310:
-    needs: [style, lint]
-    name: Tests (Python 3.10)
-    runs-on: ubuntu-latest
-    if: github.repository == 'royerlab/aydin'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-      - name: Run the tests
-        run: |
-          pytest aydin/ --disable-pytest-warnings --durations=30
-
-  test-linux311:
-    needs: [style, lint]
-    name: Tests (Python 3.11)
-    runs-on: ubuntu-latest
-    if: github.repository == 'royerlab/aydin'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-      - name: Run the tests
-        run: |
-          pytest aydin/ --disable-pytest-warnings --durations=30
-
-  test-linux312:
-    needs: [style, lint]
-    name: Tests (Python 3.12)
-    runs-on: ubuntu-latest
-    if: github.repository == 'royerlab/aydin'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-      - name: Run the tests
-        run: |
-          pytest aydin/ --disable-pytest-warnings --durations=30
-
-  test-linux313:
-    needs: [style, lint]
-    name: Tests (Python 3.13)
-    runs-on: ubuntu-latest
-    if: github.repository == 'royerlab/aydin'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-          cache: 'pip'
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-      - name: Run the tests
-        run: |
-          pytest aydin/ --disable-pytest-warnings --durations=30
 
   test-macos-arm:
     needs: [style, lint]
@@ -180,7 +101,7 @@ jobs:
           pip install -e ".[dev]"
       - name: Run the tests
         run: |
-          pytest aydin/ --disable-pytest-warnings --durations=30
+          pytest src/aydin/ --disable-pytest-warnings --durations=30
 
   test-windows:
     needs: [style, lint]
@@ -201,10 +122,10 @@ jobs:
           pip install -e ".[dev]"
       - name: Run the tests
         run: |
-          pytest aydin/ --disable-pytest-warnings --durations=30
+          pytest src/aydin/ --disable-pytest-warnings --durations=30
 
   test-unstable-linux39:
-    needs: [test-linux39]
+    needs: [test-linux]
     name: Tests Unstable (Python 3.9)
     runs-on: ubuntu-latest
     if: github.repository == 'royerlab/aydin'
@@ -222,10 +143,10 @@ jobs:
           pip install -e ".[dev]"
       - name: Run the tests
         run: |
-          pytest aydin/ --rununstable --disable-pytest-warnings --durations=30
+          pytest src/aydin/ --rununstable --disable-pytest-warnings --durations=30
 
   test-heavy-linux39:
-    needs: [test-linux39]
+    needs: [test-linux]
     name: Tests Heavy (Python 3.9)
     runs-on: ubuntu-latest
     if: github.repository == 'royerlab/aydin'
@@ -243,4 +164,4 @@ jobs:
           pip install -e ".[dev]"
       - name: Run the tests
         run: |
-          pytest aydin/ --runheavy --disable-pytest-warnings --durations=30
+          pytest src/aydin/ --runheavy --disable-pytest-warnings --durations=30

@@ -1,0 +1,135 @@
+name: aydin
+display_name: Aydin
+schema_version: "0.2.1"
+categories:
+  - Image Processing
+on_activate: aydin.napari_plugin._context_actions:register_context_actions
+contributions:
+  commands:
+    # Widgets
+    - id: aydin.denoise_widget
+      title: Denoise with Aydin
+      python_name: aydin.napari_plugin._widget:AydinDenoiseWidget
+    - id: aydin.studio_widget
+      title: Open Aydin Studio
+      python_name: aydin.napari_plugin._studio_bridge:AydinStudioWidget
+    # Sample data — synthetic (no download)
+    - id: aydin.sample_noisy_camera
+      title: Noisy Camera (2D)
+      python_name: aydin.napari_plugin._sample_data:noisy_camera_sample
+    - id: aydin.sample_noisy_blobs_3d
+      title: Noisy Blobs (3D)
+      python_name: aydin.napari_plugin._sample_data:noisy_blobs_3d_sample
+    # Sample data — Zenodo-hosted (downloaded on first use)
+    - id: aydin.sample_noisy_newyork
+      title: New York (noisy)
+      python_name: aydin.napari_plugin._sample_data:noisy_newyork_sample
+    - id: aydin.sample_noisy_fountain
+      title: Fountain (noisy)
+      python_name: aydin.napari_plugin._sample_data:noisy_fountain_sample
+    - id: aydin.sample_noisy_monalisa
+      title: Mona Lisa (noisy)
+      python_name: aydin.napari_plugin._sample_data:noisy_monalisa_sample
+    - id: aydin.sample_noisy_gauss
+      title: Gauss (noisy)
+      python_name: aydin.napari_plugin._sample_data:noisy_gauss_sample
+    - id: aydin.sample_periodic_noise
+      title: Periodic Noise
+      python_name: aydin.napari_plugin._sample_data:periodic_noise_sample
+    - id: aydin.sample_noisy_chessboard
+      title: Chessboard (noisy)
+      python_name: aydin.napari_plugin._sample_data:noisy_chessboard_sample
+    - id: aydin.sample_hcr
+      title: HCR (Royer)
+      python_name: aydin.napari_plugin._sample_data:hcr_sample
+    - id: aydin.sample_maitre_mouse
+      title: Blastocyst (Maitre)
+      python_name: aydin.napari_plugin._sample_data:maitre_mouse_sample
+    - id: aydin.sample_leonetti_arhgap21
+      title: OpenCell ARHGAP21 (Leonetti)
+      python_name: aydin.napari_plugin._sample_data:leonetti_arhgap21_sample
+    - id: aydin.sample_leonetti_ankrd11
+      title: OpenCell ANKRD11 (Leonetti)
+      python_name: aydin.napari_plugin._sample_data:leonetti_ankrd11_sample
+    - id: aydin.sample_machado_egg_chamber
+      title: Drosophila Egg Chamber (Machado)
+      python_name: aydin.napari_plugin._sample_data:machado_egg_chamber_sample
+    # Additional microscopy datasets
+    - id: aydin.sample_fixed_pattern_noise
+      title: Fixed Pattern Noise (Huang)
+      python_name: aydin.napari_plugin._sample_data:fixed_pattern_noise_sample
+    - id: aydin.sample_drosophila_3d
+      title: Drosophila 3D (Keller)
+      python_name: aydin.napari_plugin._sample_data:drosophila_3d_sample
+    - id: aydin.sample_flybrain
+      title: Fly Brain 3ch (Janelia)
+      python_name: aydin.napari_plugin._sample_data:flybrain_sample
+    - id: aydin.sample_tribolium
+      title: Tribolium nGFP (Myers)
+      python_name: aydin.napari_plugin._sample_data:tribolium_sample
+    - id: aydin.sample_hela
+      title: HeLa XYZT (Hyman)
+      python_name: aydin.napari_plugin._sample_data:hela_sample
+  widgets:
+    - command: aydin.denoise_widget
+      display_name: Aydin Denoising Widget
+    - command: aydin.studio_widget
+      display_name: Aydin Studio
+  sample_data:
+    # Synthetic (instant, no download)
+    - key: noisy_camera
+      display_name: Noisy Camera (2D, synthetic)
+      command: aydin.sample_noisy_camera
+    - key: noisy_blobs_3d
+      display_name: Noisy Blobs (3D, synthetic)
+      command: aydin.sample_noisy_blobs_3d
+    # Zenodo-hosted (downloaded + cached on first use)
+    - key: noisy_newyork
+      display_name: New York (noisy)
+      command: aydin.sample_noisy_newyork
+    - key: noisy_fountain
+      display_name: Fountain (noisy)
+      command: aydin.sample_noisy_fountain
+    - key: noisy_monalisa
+      display_name: Mona Lisa (noisy)
+      command: aydin.sample_noisy_monalisa
+    - key: noisy_gauss
+      display_name: Gauss (noisy)
+      command: aydin.sample_noisy_gauss
+    - key: periodic_noise
+      display_name: Periodic Noise
+      command: aydin.sample_periodic_noise
+    - key: noisy_chessboard
+      display_name: Chessboard (noisy, SIDD)
+      command: aydin.sample_noisy_chessboard
+    - key: hcr
+      display_name: HCR light-sheet 3D (Royer)
+      command: aydin.sample_hcr
+    - key: maitre_mouse
+      display_name: Mouse Blastocyst 3D+t (Maitre)
+      command: aydin.sample_maitre_mouse
+    - key: leonetti_arhgap21
+      display_name: OpenCell ARHGAP21 (Leonetti)
+      command: aydin.sample_leonetti_arhgap21
+    - key: leonetti_ankrd11
+      display_name: OpenCell ANKRD11 (Leonetti)
+      command: aydin.sample_leonetti_ankrd11
+    - key: machado_egg_chamber
+      display_name: Drosophila Egg Chamber (Machado)
+      command: aydin.sample_machado_egg_chamber
+    # Additional microscopy datasets
+    - key: fixed_pattern_noise
+      display_name: Fixed Pattern Noise 3D (Huang)
+      command: aydin.sample_fixed_pattern_noise
+    - key: drosophila_3d
+      display_name: Drosophila 3D light-sheet (Keller)
+      command: aydin.sample_drosophila_3d
+    - key: flybrain
+      display_name: Fly Brain 3ch 3D (Janelia)
+      command: aydin.sample_flybrain
+    - key: tribolium
+      display_name: Tribolium nGFP 3D (Myers)
+      command: aydin.sample_tribolium
+    - key: hela
+      display_name: HeLa XYZT (Hyman)
+      command: aydin.sample_hela

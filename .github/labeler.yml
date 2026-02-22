@@ -4,11 +4,11 @@ documentation:
 
 cli:
   - changed-files:
-      - any-glob-to-any-file: 'aydin/cli/**'
+      - any-glob-to-any-file: 'src/aydin/cli/**'
 
 gui:
   - changed-files:
-      - any-glob-to-any-file: 'aydin/gui/**'
+      - any-glob-to-any-file: 'src/aydin/gui/**'
 
 tests:
   - changed-files:

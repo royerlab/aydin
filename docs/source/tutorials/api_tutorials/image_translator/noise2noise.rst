@@ -7,6 +7,8 @@ in Aydin API. You can see an example below using ImageTranslatorFGR:
 .. code-block:: python
 
    from aydin.it.fgr import ImageTranslatorFGR
+   from aydin.it.transforms.range import RangeTransform
+   from aydin.it.transforms.padding import PaddingTransform
 
    it = ImageTranslatorFGR()
    it.add_transform(RangeTransform())
