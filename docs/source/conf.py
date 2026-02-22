@@ -26,7 +26,7 @@ import sys
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath("../../"))
+sys.path.insert(0, os.path.abspath("../../src"))
 
 source_dir = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(source_dir, "ext"))
@@ -70,10 +70,10 @@ master_doc = "index"
 
 # General information about the project.
 project = "Aydin"
-copyright = "2022-2025. Chan Zuckerberg Biohub. All rights reserved"
+copyright = "2022-2026. Chan Zuckerberg Biohub. All rights reserved"
 
-# Read version from aydin/__init__.py
-_init_path = os.path.join(os.path.abspath("../../"), "aydin", "__init__.py")
+# Read version from src/aydin/__init__.py
+_init_path = os.path.join(os.path.abspath("../../"), "src", "aydin", "__init__.py")
 with open(_init_path) as _f:
     _match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', _f.read())
     version = _match.group(1) if _match else "unknown"

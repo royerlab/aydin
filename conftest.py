@@ -68,7 +68,7 @@ def pytest_collection_modifyitems(config, items):
     # With --rungui: run ONLY gui-marked tests
     # NOTE: use get_closest_marker() instead of `"gui" in item.keywords`
     # because keywords includes parent package names (e.g. "gui" from
-    # aydin/gui/), which would incorrectly match non-Qt tests.
+    # src/aydin/gui/), which would incorrectly match non-Qt tests.
     if not config.getoption("--rungui"):
         skip_gui = pytest.mark.skip(reason="need --rungui option to run")
         for item in items:

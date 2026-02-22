@@ -21,6 +21,8 @@ denoising. One can do the following:
 .. code-block:: python
 
    from aydin.it.cnn_torch import ImageTranslatorCNNTorch
+   from aydin.it.transforms.range import RangeTransform
+   from aydin.it.transforms.padding import PaddingTransform
 
    it = ImageTranslatorCNNTorch()
    it.add_transform(RangeTransform())

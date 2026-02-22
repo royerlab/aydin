@@ -13,6 +13,8 @@ of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal d
 
 It comes with `Aydin Studio` a `graphical user interface <tutorials/gui_tutorials.html>`_
 to easily experiment with all the different algorithms and parameters available,
+a `napari plugin <tutorials/napari_tutorials.html>`_ for denoising directly inside
+the napari viewer,
 a `command line interface <tutorials/cli_tutorials.html>`_
 to run large jobs offline, and an
 `API <api/introduction.html>`_ for
@@ -62,7 +64,7 @@ for an exhaustive tour of features and parameters for both
 the graphical interface (Aydin Studio), command line interface (CLI), and
 Python programming interface (API). To better understand how to tune parameters
 for a given image, please check our `use cases <use_cases/introduction.html>`_
-where we go through.
+where we go through real-world examples.
 
 How to cite?
 ~~~~~~~~~~~~~
@@ -103,6 +105,7 @@ If you find Aydin useful and use it in your work, please kindly consider to cite
 
    Tutorials Home <tutorials/tutorials_home.rst>
    Aydin Studio (GUI) Tutorials <tutorials/gui_tutorials.rst>
+   Aydin Napari Plugin <tutorials/napari_tutorials.rst>
    Aydin CLI Tutorials <tutorials/cli_tutorials.rst>
    Aydin API Tutorials <tutorials/api_tutorials.rst>
 

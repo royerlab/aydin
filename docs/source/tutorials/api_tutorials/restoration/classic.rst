@@ -19,6 +19,8 @@ denoising. One can do the following:
 .. code-block:: python
 
    from aydin.restoration.denoise.classic import Classic
+   from aydin.it.transforms.range import RangeTransform
+   from aydin.it.transforms.padding import PaddingTransform
 
    transforms = [
         {"class": RangeTransform, "kwargs": {}},

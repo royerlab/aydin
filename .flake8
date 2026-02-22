@@ -4,20 +4,20 @@ extend-ignore = E203,E741,W503,E402,F401,E721,E275,E731,E226,F821
 # Docstrings with HTML tags (<a href>, <moreless>, <split>, <br>, <notgui>)
 # rendered by Qt RichText in the GUI. These lines cannot be wrapped.
 per-file-ignores =
-    aydin/gui/tabs/qt/denoise.py:E501
-    aydin/gui/tabs/qt/denoising_cropping.py:E501
-    aydin/gui/tabs/qt/dimensions.py:E501
-    aydin/gui/tabs/qt/files.py:E501
-    aydin/gui/tabs/qt/images.py:E501
-    aydin/gui/tabs/qt/processing.py:E501
-    aydin/gui/tabs/qt/summary.py:E501
-    aydin/it/classic_denoisers/nlm.py:E501
-    aydin/it/classic_denoisers/wavelet.py:E501
-    aydin/it/transforms/attenuation.py:E501
-    aydin/it/transforms/deskew.py:E501
-    aydin/it/transforms/highpass.py:E501
-    aydin/it/transforms/histogram.py:E501
-    aydin/it/transforms/padding.py:E501
-    aydin/it/transforms/periodic.py:E501
-    aydin/it/transforms/salt_pepper.py:E501
-    aydin/it/transforms/variance_stabilisation.py:E501
+    src/aydin/gui/tabs/qt/denoise.py:E501
+    src/aydin/gui/tabs/qt/denoising_cropping.py:E501
+    src/aydin/gui/tabs/qt/dimensions.py:E501
+    src/aydin/gui/tabs/qt/files.py:E501
+    src/aydin/gui/tabs/qt/images.py:E501
+    src/aydin/gui/tabs/qt/processing.py:E501
+    src/aydin/gui/tabs/qt/summary.py:E501
+    src/aydin/it/classic_denoisers/nlm.py:E501
+    src/aydin/it/classic_denoisers/wavelet.py:E501
+    src/aydin/it/transforms/attenuation.py:E501
+    src/aydin/it/transforms/deskew.py:E501
+    src/aydin/it/transforms/highpass.py:E501
+    src/aydin/it/transforms/histogram.py:E501
+    src/aydin/it/transforms/padding.py:E501
+    src/aydin/it/transforms/periodic.py:E501
+    src/aydin/it/transforms/salt_pepper.py:E501
+    src/aydin/it/transforms/variance_stabilisation.py:E501

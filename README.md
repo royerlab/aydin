@@ -4,14 +4,14 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![codecov](https://codecov.io/gh/royerlab/aydin/branch/main/graph/badge.svg?token=gV3UqFAg5U)](https://codecov.io/gh/royerlab/aydin)
 [![DOI](https://zenodo.org/badge/188953977.svg)](https://zenodo.org/badge/latestdoi/188953977)
-[![Downloads](https://pepy.tech/badge/aydin)](https://pepy.tech/project/aydin)
+[![Downloads](https://static.pepy.tech/badge/aydin)](https://pepy.tech/project/aydin)
 
 
-[graphical user interface]: https://royerlab.github.io/aydin/v0.1.15/tutorials/gui_tutorials.html
-[command line interface]: https://royerlab.github.io/aydin/v0.1.15/tutorials/cli_tutorials.html
-[API]: https://royerlab.github.io/aydin/v0.1.15/tutorials/api_tutorials.html
-[use cases]: https://royerlab.github.io/aydin/v0.1.15/use_cases/introduction.html
-[install]: https://royerlab.github.io/aydin/v0.1.15/getting_started/install.html
+[graphical user interface]: https://royerlab.github.io/aydin/tutorials/gui_tutorials.html
+[command line interface]: https://royerlab.github.io/aydin/tutorials/cli_tutorials.html
+[API]: https://royerlab.github.io/aydin/tutorials/api_tutorials.html
+[use cases]: https://royerlab.github.io/aydin/use_cases/introduction.html
+[install]: https://royerlab.github.io/aydin/getting_started/install.html
 
 *Aydin* is a user-friendly, feature-rich, and fast **image denoising tool** that provides
 a number of **self-supervised, auto-tuned, and unsupervised** image denoising algorithms.
@@ -21,7 +21,8 @@ of batch dimensions, channel dimensions, and typically up to 4 spatio-temporal d
 It comes with *Aydin Studio* a [graphical user interface][graphical user interface]
 to easily experiment with all the different algorithms and parameters available,
 a [command line interface] to run large jobs on the terminal possibly on powerful remote machines,
-and an [API] for custom coding and integration into your scripts and applications.
+an [API] for custom coding and integration into your scripts and applications,
+and a **napari plugin** for denoising directly within the [napari](https://napari.org) image viewer.
 More details and exhaustive explanations can be found in Aydin's [documentation](https://royerlab.github.io/aydin/).
 
 ## Supported algorithms:
@@ -31,7 +32,7 @@ of 'classical' denoising algorithms that leverage among other: frequency domain 
 smoothness priors, low-rank representations, self-similarity, and more.
 The second family consists of algorithms that leverage machine learning approaches
 such as convolutional neural networks (CNN) or gradient boosting (GB).
-In the [Noise2Self paper](https://deepai.org/publication/noise2self-blind-denoising-by-self-supervision)
+In the [Noise2Self paper](https://arxiv.org/abs/1901.11365)
 we show that it is possible to calibrate any parameterised denoising algorithm,
 from the few parameters of a classical algorithm to the millions of weights of a deep neural
 network. We leverage and extend these ideas in *Aydin* to provide a variety of auto-tuned
@@ -78,8 +79,8 @@ Here is the list of currently available methods:
 
 Some methods actually do combine multiple ideas and so the classification above is not strict.
 We recommend trying first a good baseline denoiser such as the *Butterworth denoiser*.
-If unsatisfied with the result, and you have a powerful computer with a recent NVIDIA
-graphics card, then we recommend you try the Noise2Self-FGR-cb denoiser.
+If unsatisfied with the result, and you have a powerful computer with many CPU cores,
+then we recommend you try the Noise2Self-FGR-cb denoiser.
 For detailed use-cases check [here][use cases].
 
 We regularly come up with new approaches and ideas, there is just not enough time to write papers about all these ideas.
@@ -94,7 +95,7 @@ We have a long todo list of existing, modified, as well as original algorithms t
 ## Installation of *Aydin Studio*
 
 We recommend that users that are not familiar with python start with our user-friendly UI.
-The latest releases and standalone executables can be found on the
+The latest releases can be found on the
 [releases page](https://github.com/royerlab/aydin/releases).
 Detailed installation instructions of *Aydin Studio* for all three operating systems can be found
 [here][install].
@@ -142,7 +143,7 @@ Aydin uses PyTorch for CNN-based denoising. To enable GPU acceleration, ensure y
 PyTorch installation supports CUDA. See the [PyTorch installation guide](https://pytorch.org/get-started/locally/)
 for platform-specific instructions.
 
-## How to run ?
+## How to run
 
 Assuming that you have installed *Aydin* in an environment, you can:
 

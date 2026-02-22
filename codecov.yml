@@ -1,6 +1,6 @@
 ignore:
-  - "aydin/**/demo/**"
-  - "aydin/**/test/**"
+  - "src/aydin/**/demo/**"
+  - "src/aydin/**/tests/**"
 coverage:
   status:
     project:

@@ -50,7 +50,7 @@ Once you're ready to share your contribution with us you should submit it as a P
 
 #### Do
 
-* Use our own internal logging [API](https://github.com/royerlab/aydin/blob/main/aydin/util/log/log.py)
+* Use our own internal logging [API](https://github.com/royerlab/aydin/blob/main/src/aydin/util/log/log.py)
 * Use pep8 style guidelines + our preferences with `black` formatter
 * Use only NumPy style docstrings
 * Comment your code where necessary
@@ -111,7 +111,7 @@ make publish-patch
 **What happens:**
 
 1. `make publish` runs pre-publish checks (`make validate`), creates a
-   `release/vYYYY.M.D` branch, bumps the version in `aydin/__init__.py`,
+   `release/vYYYY.M.D` branch, bumps the version in `src/aydin/__init__.py`,
    pushes the branch, and opens a PR.
 2. CI runs the full test suite on the PR.
 3. You **merge the PR on GitHub**.
@@ -119,7 +119,7 @@ make publish-patch
    triggers the publish pipeline (`publish.yml`): verify → test → build →
    PyPI → GitHub Release.
 
-**Version source of truth:** `aydin/__init__.py` (`__version__`).
+**Version source of truth:** `src/aydin/__init__.py` (`__version__`).
 `pyproject.toml` reads it dynamically — never edit the version there.
 
 ### Licensing

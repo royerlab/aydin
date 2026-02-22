@@ -37,7 +37,7 @@ jobs:
           TAG_VERSION="${TAG#v}"
           PKG_VERSION=$(python3 -c "
           import re
-          match = re.search(r'__version__ = \"([^\"]+)\"', open('aydin/__init__.py').read())
+          match = re.search(r'__version__ = \"([^\"]+)\"', open('src/aydin/__init__.py').read())
           print(match.group(1))
           ")
           echo "Tag version: $TAG_VERSION"
@@ -70,7 +70,7 @@ jobs:
 
       - name: Run fast tests
         run: |
-          pytest aydin/ --disable-pytest-warnings -x -q --durations=10
+          pytest src/aydin/ --disable-pytest-warnings -x -q --durations=10
 
   build:
     name: Build distribution

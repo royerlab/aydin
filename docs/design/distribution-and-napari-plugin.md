@@ -213,7 +213,7 @@ The napari plugin calls into `aydin.restoration.denoise` directly. Full Aydin St
 ## Alternatives Considered
 
 - **conda-constructor**: Produces native OS installers (.exe/.pkg/.sh). Used by napari, Spyder, MNE-Python. Good for standalone distribution but not pursued as primary approach since the napari plugin strategy eliminates most bundling needs.
-- **PyInstaller**: Current approach. Brittle, complex spec files, hard to maintain. Being replaced.
+- **PyInstaller**: Was the previous approach. Removed due to brittleness and complex spec files.
 - **Nuitka**: Python-to-C compiler. Does not support PyQt6 (recommends PySide6). Ruled out.
 - **PyOxidizer**: Abandoned (dead since Jan 2023). Ruled out.
 - **Gradio/Hugging Face Spaces**: Could complement the strategy as a zero-install web demo for small images.
