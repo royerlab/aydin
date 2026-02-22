@@ -6,9 +6,9 @@
     {
       "name": "Aydin Studio",
       "description": "Self-supervised image denoising for n-dimensional images",
-      "icon": "{{ MENU_ITEM_LOCATION }}/aydin_icon.{{ ICON_EXT }}",
+      "icon": "{{ MENU_DIR }}/aydin_icon.{{ ICON_EXT }}",
       "command": [
-        "{{ PYTHONW }}",
+        "{{ PYTHON }}",
         "-c",
         "from aydin.gui.gui import run; from aydin import __version__; run(__version__)"
       ],
@@ -42,6 +42,11 @@
             ".tiff",
             ".czi",
             ".nd2"
+          ],
+          "command": [
+            "{{ PYTHONW }}",
+            "-c",
+            "from aydin.gui.gui import run; from aydin import __version__; run(__version__)"
           ]
         }
       }

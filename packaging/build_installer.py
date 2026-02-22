@@ -23,6 +23,7 @@ Usage:
 """
 
 import argparse
+import os
 import platform
 import re
 import shutil
@@ -98,7 +99,6 @@ def _build_definitions(
         "reverse_domain_identifier": "org.royerlab.aydin",
         "installer_filename": _installer_filename(version, platform_str),
         "channels": channels,
-        "conda_default_channels": ["conda-forge"],
         "specs": [
             f"python={python_version}.*",
             "aydin",
@@ -108,8 +108,7 @@ def _build_definitions(
             "scipy",
             "scikit-image",
             "numba",
-            "pytorch",
-            "cpuonly",  # CPU-only PyTorch (smaller installer)
+            "pytorch-cpu",  # CPU-only PyTorch from conda-forge
             "catboost",
             "lightgbm",
             "napari",
@@ -121,20 +120,21 @@ def _build_definitions(
         "initialize_by_default": False,
         "register_python_default": False,
         "register_envs": False,
-        "write_condarc": True,
         "condarc": {
             "channels": channels,
             "channel_priority": "strict",
         },
     }
 
-    # License file
+    # License file (will be copied to output_dir by _write_construct_yaml)
     rtf_license = PACKAGING_DIR / "LICENSE.rtf"
     txt_license = REPO_ROOT / "LICENSE.txt"
     if os_key in ("osx", "win") and rtf_license.exists():
-        definitions["license_file"] = str(rtf_license)
+        definitions["_license_src"] = rtf_license
+        definitions["license_file"] = "LICENSE.rtf"
     else:
-        definitions["license_file"] = str(txt_license)
+        definitions["_license_src"] = txt_license
+        definitions["license_file"] = "LICENSE.txt"
 
     # Platform-specific settings
     if os_key == "linux":
@@ -144,11 +144,9 @@ def _build_definitions(
     elif os_key == "osx":
         definitions["installer_type"] = "pkg"
         definitions["pkg_name"] = "org.royerlab.aydin"
-        definitions["default_location_pkg"] = "Library"
+        definitions["default_location_pkg"] = "/Library"
         post_install = PACKAGING_DIR / "post_install" / "post_install.sh"
         # Signing (enabled via env vars when certificates are available)
-        import os
-
         signing_id = os.environ.get("CONSTRUCTOR_SIGNING_IDENTITY")
         if signing_id:
             definitions["signing_identity_name"] = signing_id
@@ -160,24 +158,36 @@ def _build_definitions(
         definitions["default_prefix"] = "%LOCALAPPDATA%\\\\aydin"
         icon_path = PACKAGING_DIR / "icons" / "aydin_icon.ico"
         if icon_path.exists():
-            definitions["icon_image"] = str(icon_path)
+            definitions["_icon_src"] = icon_path
+            definitions["icon_image"] = "aydin_icon.ico"
         post_install = PACKAGING_DIR / "post_install" / "post_install.bat"
         # Signing (enabled via env var when certificate is available)
-        import os
-
         cert = os.environ.get("CONSTRUCTOR_SIGNING_CERTIFICATE")
         if cert:
             definitions["signing_certificate"] = cert
 
     if post_install.exists():
-        definitions["post_install"] = str(post_install)
+        definitions["_post_install_src"] = post_install
+        definitions["post_install"] = post_install.name
 
     return definitions
 
 
 def _write_construct_yaml(definitions: dict, output_dir: Path) -> Path:
-    """Write construct.yaml to the output directory."""
+    """Write construct.yaml to the output directory.
+
+    Copies referenced files (license, post_install, icon) into the output
+    directory so that construct.yaml can use relative paths. Internal keys
+    prefixed with ``_`` are stripped before writing.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Copy referenced files into the output directory
+    for key in ("_license_src", "_post_install_src", "_icon_src"):
+        src = definitions.pop(key, None)
+        if src and Path(src).exists():
+            shutil.copy2(str(src), str(output_dir / Path(src).name))
+
     construct_path = output_dir / "construct.yaml"
 
     if YAML is not None:
