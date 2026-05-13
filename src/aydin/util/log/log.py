@@ -219,7 +219,7 @@ def aprint(*args, sep=' ', end='\n'):
         scaffold = _ArbolBase._vl_ * int(level) + _ArbolBase._br_
         text = sep.join(str(arg) for arg in args)
         if _ArbolBase.colorful:
-            prefix = _color_fn(scaffold, fg=_ArbolBase.c_scafold) + ' '
+            prefix = _color_fn(scaffold, fg=_ArbolBase.c_scaffold) + ' '
             text = _color_fn(text, fg=_ArbolBase.c_text)
         else:
             prefix = scaffold + ' '
